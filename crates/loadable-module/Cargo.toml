@@ -1,0 +1,22 @@
+[package]
+name = "loadable-module"
+version = "0.1.0"
+description = "The code taught by Book 2 of the ikigai tutorial: a module, a host, and the callback between them."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "loadable_module"
+path = "src/lib.rs"
+
+[[bin]]
+name = "module-demo"
+path = "src/bin/module-demo.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-module.workspace = true
+futures.workspace = true

@@ -1,4 +1,4 @@
-# fmt · clippy · test for the code, and a separate job that builds and TESTS the book.
+# fmt · clippy · test for the code, and a separate job that builds and TESTS the books.
 name: ci
 
 on:
@@ -28,20 +28,16 @@ jobs:
       - name: test
         run: cargo test --all-targets
 
-  # ── The book is a gate, not an artifact ──────────────────────────────────────
+  # ── The books are a gate, not an artifact ────────────────────────────────────
   #
-  # `mdbook test` compiles and runs every Rust block in the book against the real
-  # crate, which is the whole reason the tutorial is trustworthy: an example that
+  # `mdbook test` compiles and runs every Rust block in every book against the real
+  # crates, which is the whole reason the tutorial is trustworthy: an example that
   # stops matching the API fails the build instead of misleading a reader.
   #
-  # ⚠ This is a SEPARATE job from `check` on purpose, and the reason is not tidiness.
-  # `mdbook test` needs `-L target/debug/deps` to find the dependencies, and rustc
-  # refuses (E0464) when that directory holds more than one candidate for a crate.
-  # `cargo clippy` emits `.rmeta` beside `cargo build`'s `.rlib`, so running them in
-  # one job leaves two candidates for `ikigai_core` and every example fails to compile
-  # with an error that says nothing about the book. A job that only builds keeps
-  # `deps/` unambiguous.
-  book:
+  # This runs the same script a contributor runs (`./scripts/test-books.sh`), so the
+  # local and CI incantations cannot drift — including the isolated target directory
+  # the script uses to dodge E0464. See the comment at the top of that script.
+  books:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,11 +47,5 @@ jobs:
         with:
           tool: mdbook
 
-      - name: build the crate the book includes from
-        run: cargo build
-
-      - name: build the book
-        run: mdbook build books/getting-started
-
-      - name: test the book (every example is compiled and run)
-        run: mdbook test books/getting-started -L target/debug/deps
+      - name: build and test every book
+        run: ./scripts/test-books.sh
