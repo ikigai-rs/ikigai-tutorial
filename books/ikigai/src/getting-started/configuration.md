@@ -13,7 +13,7 @@ deployment, is inherited silently by child processes, and cannot be diffed. A sy
 whole thesis is that behaviour should be *nameable and inspectable* cannot then take its
 instructions from an invisible channel.
 
-(You will find `IKIGAI_FILES` in [chapter 7](ch07-file-workspace.md) and think you have
+(You will find `IKIGAI_FILES` in [chapter 7](file-workspace.md) and think you have
 caught a contradiction. It is a *path root* for a sandbox, set once by the operator, not a
 behaviour switch — but it is the honest edge of the rule and worth knowing it exists.)
 

@@ -7,7 +7,7 @@ compiles it*, so it cannot drift from what actually runs.
 ## The implementation
 
 ```rust,ignore
-{{#include ../../../crates/hello-camel/src/lib.rs:impl}}
+{{#include ../../../../crates/hello-camel/src/lib.rs:impl}}
 ```
 
 Four things in there are worth slowing down for.

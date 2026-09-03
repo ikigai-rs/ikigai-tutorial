@@ -27,7 +27,7 @@ same five for every resource in the system:
 `Meta` is the one that surprises people. Every endpoint can be asked what it is, what
 arguments it takes, what it returns, and what authority it requires — and it answers in a
 machine-readable form. That is what makes the system legible to an agent rather than
-merely usable by a programmer, and [chapter 4](ch04-self-description.md) is about it.
+merely usable by a programmer, and [chapter 4](self-description.md) is about it.
 
 ## Representations
 

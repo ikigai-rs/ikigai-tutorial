@@ -23,7 +23,7 @@ So a module is simply handed *the host* as its issuer. From inside the endpoint,
 is the same one you would write in a linked-in endpoint:
 
 ```rust,ignore
-{{#include ../../../crates/loadable-module/src/lib.rs:module_endpoint}}
+{{#include ../../../../crates/loadable-module/src/lib.rs:module_endpoint}}
 ```
 
 `inv.source(&iri)` is the callback. The module is in the middle of its own invocation, and
@@ -45,4 +45,4 @@ knowing any of them exist.
 
 It is also what makes a module harder to isolate than a peer, since the callback is a hole
 in whatever boundary you put around it. That tension is the subject of
-[chapter 6](ch06-status.md).
+[chapter 6](status.md).

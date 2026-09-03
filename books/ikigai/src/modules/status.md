@@ -44,7 +44,7 @@ travel.
 ## What is genuinely usable now
 
 - The dual-mode pattern, as a way to keep a heavy dependency out of hosts that do not need
-  it ([chapter 5](ch05-dual-mode.md)).
+  it ([chapter 5](dual-mode.md)).
 - The browser case, which is real and running.
 - The `InProcessTransport`, as a way to develop and test a module's *semantics* long before
   its transport exists — which is what this book's demo does.
