@@ -1,0 +1,43 @@
+# fmt · clippy · test, on every push and PR.
+#
+# `test` is the load-bearing one here in a way it is not in most repos: the books ARE
+# doctests, so this job is what stops the tutorial from teaching an API that no longer
+# exists. `cargo doc` runs too, because a book that does not render is a broken book even
+# when it compiles.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+
+      - name: fmt
+        run: cargo fmt --all -- --check
+
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: test (compiles and runs every example in every book)
+        run: cargo test --all-targets
+
+      - name: doctests
+        run: cargo test --doc
+
+      - name: doc (the books must render)
+        run: cargo doc --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings

@@ -1,0 +1,22 @@
+[package]
+name = "ikigai-book-getting-started"
+version = "0.1.0"
+description = "Book 1 of the ikigai tutorial: the resolution model, and your first endpoint."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "getting_started"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tutorial"
+path = "src/bin/tutorial.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-fn.workspace = true
+futures.workspace = true
