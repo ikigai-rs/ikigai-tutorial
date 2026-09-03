@@ -23,4 +23,5 @@ repository = "https://github.com/ikigai-rs/ikigai-tutorial"
 # require them to have the whole ecosystem laid out beside it.
 ikigai-core = "0.1.62"
 ikigai-fn = "0.1.2"
+ikigai-module = "0.1.8"
 futures = "0.3"

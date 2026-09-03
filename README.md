@@ -8,6 +8,7 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 | book | covers |
 |---|---|
 | [`books/getting-started`](books/getting-started) | The resolution model, running a kernel, your first endpoint (`toCamel`), self-description, binding, configuration, the file workspace |
+| [`books/loadable-modules`](books/loadable-modules) | Modules vs. linked-in spaces, the host callback, the wire session, dual-mode crates, and an honest account of what is actually finished |
 
 Read one:
 
@@ -20,11 +21,16 @@ Run the worked example:
 
 ```bash
 cargo run -p hello-camel -- "resource oriented computing"
+cargo run -p loadable-module
 ```
 
 ```
 in  resource oriented computing
 out resourceOrientedComputing
+
+host    resolves urn:greet:hello name=urn:host:name
+module  asks the host for urn:host:name
+out     Hello, Peter!
 ```
 
 ## The books are tested
@@ -32,7 +38,7 @@ out resourceOrientedComputing
 There is no separate "keep the docs up to date" chore, because there is a gate:
 
 ```bash
-cargo build && mdbook test books/getting-started -L target/debug/deps
+./scripts/test-books.sh
 ```
 
 `mdbook test` compiles and runs **every Rust block in the book** against the real crate,
@@ -53,10 +59,12 @@ Two claims in the first draft of book 1 were wrong about the API — `Descriptio
 field rather than a method, and `config_home` lives in `ikigai_core::config` rather than
 the crate root — and the tests caught both before anyone read them.
 
-> ⚠ `mdbook test` needs `-L target/debug/deps`, and rustc refuses (E0464) if that
-> directory holds two candidates for a crate. `cargo clippy` leaves `.rmeta` beside
-> `cargo build`'s `.rlib`, so run the book's test after a plain `cargo build` — which is
-> why CI gives the book its own job.
+> ⚠ Use the script rather than calling `mdbook test` by hand. It needs `-L <deps>`, and
+> rustc refuses (E0464) when that directory holds more than one candidate for a crate — a
+> shared `target/` collects them, because `cargo clippy` leaves `.rmeta` beside `cargo
+> build`'s `.rlib` and a restored CI cache can carry stale ones. The script builds into a
+> target directory of its own, wiped first. The error rustc gives says nothing about
+> books, so this is worth not rediscovering.
 
 ## Layout
 
@@ -80,9 +88,6 @@ than pasting it — paraphrase is how a tutorial starts lying.
 
 Planned:
 
-- **Loadable modules** — the module ABI, and why a module calls *back* into the host
-  mid-invocation where a remote kernel does not. (`ikigai-module` is currently
-  "Phase 1: in-process proof", so this book should say what is proven and what is not.)
 - **Transports** — embedded, IPC, QUIC, and capability-on-the-wire.
 - **Graphs** — RDF, SPARQL, transreption, and the vocabulary.
 
