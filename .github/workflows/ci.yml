@@ -1,9 +1,4 @@
-# fmt · clippy · test, on every push and PR.
-#
-# `test` is the load-bearing one here in a way it is not in most repos: the books ARE
-# doctests, so this job is what stops the tutorial from teaching an API that no longer
-# exists. `cargo doc` runs too, because a book that does not render is a broken book even
-# when it compiles.
+# fmt · clippy · test for the code, and a separate job that builds and TESTS the book.
 name: ci
 
 on:
@@ -13,7 +8,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: -D warnings
 
 jobs:
   check:
@@ -31,13 +25,37 @@ jobs:
       - name: clippy
         run: cargo clippy --all-targets -- -D warnings
 
-      - name: test (compiles and runs every example in every book)
+      - name: test
         run: cargo test --all-targets
 
-      - name: doctests
-        run: cargo test --doc
+  # ── The book is a gate, not an artifact ──────────────────────────────────────
+  #
+  # `mdbook test` compiles and runs every Rust block in the book against the real
+  # crate, which is the whole reason the tutorial is trustworthy: an example that
+  # stops matching the API fails the build instead of misleading a reader.
+  #
+  # ⚠ This is a SEPARATE job from `check` on purpose, and the reason is not tidiness.
+  # `mdbook test` needs `-L target/debug/deps` to find the dependencies, and rustc
+  # refuses (E0464) when that directory holds more than one candidate for a crate.
+  # `cargo clippy` emits `.rmeta` beside `cargo build`'s `.rlib`, so running them in
+  # one job leaves two candidates for `ikigai_core` and every example fails to compile
+  # with an error that says nothing about the book. A job that only builds keeps
+  # `deps/` unambiguous.
+  book:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: mdbook
 
-      - name: doc (the books must render)
-        run: cargo doc --no-deps
-        env:
-          RUSTDOCFLAGS: -D warnings
+      - name: build the crate the book includes from
+        run: cargo build
+
+      - name: build the book
+        run: mdbook build books/getting-started
+
+      - name: test the book (every example is compiled and run)
+        run: mdbook test books/getting-started -L target/debug/deps

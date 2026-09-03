@@ -1,14 +1,15 @@
 # The ikigai tutorial workspace.
 #
-# Each book is a member crate under `books/`, and a book IS its rustdoc: the prose
-# lives in `//!` module docs, the examples are doctests, and `cargo doc` renders the
-# result. That is a deliberate choice rather than a convenience — a tutorial whose
-# examples are doctests cannot silently rot, because `cargo test` compiles and runs
-# every one of them. The field guide's rule ("a doctest is the only comment the
-# compiler reads") applied to teaching material.
+# Books are mdbook projects under `books/`. The code each book teaches is a real crate
+# under `crates/`, and the book pulls its snippets in by ANCHOR rather than copying
+# them — so there is one `toCamel`, and it is the one that compiles.
+#
+# `mdbook test` then runs every runnable block in the book as a doctest, which is the
+# property worth protecting: a tutorial's examples rot silently, and the first reader
+# to hit a stale one assumes they are the problem.
 [workspace]
 resolver = "2"
-members = ["books/*"]
+members = ["crates/*"]
 
 [workspace.package]
 edition = "2021"

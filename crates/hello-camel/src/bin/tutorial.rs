@@ -3,7 +3,7 @@
 //! Run it:
 //!
 //! ```text
-//! cargo run -p ikigai-book-getting-started -- "resource oriented computing"
+//! cargo run -p hello-camel -- "resource oriented computing"
 //! ```
 
 use std::sync::Arc;
@@ -21,7 +21,7 @@ fn main() {
 
     // A kernel is a root space plus the machinery around it. `space()` here is the
     // library's own bindings chained onto ikigai-fn's — see chapter 5.
-    let kernel = Kernel::new(Arc::new(getting_started::space()));
+    let kernel = Kernel::new(Arc::new(hello_camel::space()));
 
     let request = Request::new(
         Verb::Source,

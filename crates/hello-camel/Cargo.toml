@@ -1,7 +1,7 @@
 [package]
-name = "ikigai-book-getting-started"
+name = "hello-camel"
 version = "0.1.0"
-description = "Book 1 of the ikigai tutorial: the resolution model, and your first endpoint."
+description = "The code taught by Book 1 of the ikigai tutorial: the toCamel endpoint and a minimal host."
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 publish = false
 
 [lib]
-name = "getting_started"
+name = "hello_camel"
 path = "src/lib.rs"
 
 [[bin]]
