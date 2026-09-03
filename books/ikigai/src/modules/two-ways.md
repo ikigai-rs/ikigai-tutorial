@@ -23,7 +23,7 @@ know what they are; it routes a *prefix* of the name space to a transport and le
 module answer:
 
 ```rust,ignore
-{{#include ../../../crates/loadable-module/src/lib.rs:host}}
+{{#include ../../../../crates/loadable-module/src/lib.rs:host}}
 ```
 
 Two things to notice, because they are the reason this composes at all.
@@ -48,4 +48,4 @@ Reach for a module when one of these is true:
 - **The host cannot link it.** A kernel running as WebAssembly in a browser page cannot
   grow a new statically linked space; it can fetch one.
 - **The code arrives after the host was built.** Which is the whole point, and also the
-  part that is not finished — see [chapter 6](ch06-status.md).
+  part that is not finished — see [chapter 6](status.md).

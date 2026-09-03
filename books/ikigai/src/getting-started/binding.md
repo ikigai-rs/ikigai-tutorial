@@ -2,12 +2,12 @@
 
 An endpoint is inert. Until something **binds** it to a name, nothing can resolve it —
 defining and naming are separate acts, which is the whole point of
-[chapter 1](ch01-resolution.md) showing up in the code.
+[chapter 1](resolution.md) showing up in the code.
 
 ## Binding
 
 ```rust,ignore
-{{#include ../../../crates/hello-camel/src/lib.rs:space}}
+{{#include ../../../../crates/hello-camel/src/lib.rs:space}}
 ```
 
 Two things are happening.
@@ -54,7 +54,7 @@ assert_eq!(String::from_utf8_lossy(&repr.bytes), "resourceOrientedComputing");
 ```
 
 `Capability::root()` is unrestricted authority, which is fine for a local tutorial and is
-*not* what a real host hands out — [chapter 7](ch07-file-workspace.md) shows the scoped
+*not* what a real host hands out — [chapter 7](file-workspace.md) shows the scoped
 kind.
 
 ## Finding your crate from another project

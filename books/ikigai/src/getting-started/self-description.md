@@ -22,7 +22,7 @@ An endpoint with a thin description still runs. It is simply invisible to everyt
 Here is `toCamel`'s, included from the crate:
 
 ```rust,ignore
-{{#include ../../../crates/hello-camel/src/lib.rs:endpoint}}
+{{#include ../../../../crates/hello-camel/src/lib.rs:endpoint}}
 ```
 
 ## ArgSpecs, from day one

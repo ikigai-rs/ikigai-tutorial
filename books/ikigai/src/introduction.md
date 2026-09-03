@@ -28,21 +28,36 @@ this matters most now that programs are being assembled by agents, which need ex
 what resolution gives you: a machine-readable catalog of what can be done, an enforceable
 boundary on what may be done, and provenance for what was done.
 
+## What is in here
+
+**Part I — Getting started** builds an endpoint and links it into a kernel you compose
+yourself. It is the 95% case, and everything else assumes it.
+
+**Part II — Loadable modules** covers the other shape: a `space()` compiled separately
+and routed to at runtime, and the callback that makes a module something quite different
+from a remote peer.
+
+Read Part I first, or at least [Resolution](getting-started/resolution.md) and
+[Binding](getting-started/binding.md). Part II assumes you know what a `space()` is and
+why binding is separate from defining.
+
 ## How to read this book
 
 Every Rust block in these pages is compiled and run by `mdbook test`, and the longer code
-listings are **included from the crate that compiles them** rather than copied. A book
+listings are **included from the crates that compile them** rather than copied. A book
 that paraphrases its own examples is a book that will eventually be wrong about them.
 
 ```bash
 # read it
-mdbook serve books/getting-started --open
+mdbook serve books/ikigai --open
 
 # check that it still tells the truth
-cargo build && mdbook test books/getting-started -L target/debug/deps
+./scripts/test-books.sh
 ```
 
-The code lives in [`crates/hello-camel`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates/hello-camel).
+The code lives in
+[`crates/`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates) — one crate per
+part.
 
 ## Conventions
 
