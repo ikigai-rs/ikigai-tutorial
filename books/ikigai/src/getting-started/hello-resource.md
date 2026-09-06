@@ -36,7 +36,7 @@ a golden thread.
 
 Get this wrong in the optimistic direction and you have a bug that is very hard to see:
 stale answers that look plausible. The rule of thumb is the honest one — *when in doubt,
-do not cache*. `toCamel` is genuinely pure, so it says so.
+do not cache*. `camel-case` is genuinely pure, so it says so.
 
 ## `char::to_uppercase` returns an iterator
 
@@ -49,9 +49,9 @@ form; `push` would not compile, which is the type system doing you a favour.
 ```rust
 # extern crate hello_camel;
 # extern crate ikigai_core;
-use hello_camel::to_camel;
+use hello_camel::camel_case;
 use ikigai_core::Endpoint;
 
 // Every endpoint knows its own name.
-assert_eq!(to_camel().describe().id, "toCamel");
+assert_eq!(camel_case().describe().id, "camel-case");
 ```

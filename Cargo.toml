@@ -2,7 +2,7 @@
 #
 # Books are mdbook projects under `books/`. The code each book teaches is a real crate
 # under `crates/`, and the book pulls its snippets in by ANCHOR rather than copying
-# them — so there is one `toCamel`, and it is the one that compiles.
+# them — so there is one `camel-case`, and it is the one that compiles.
 #
 # `mdbook test` then runs every runnable block in the book as a doctest, which is the
 # property worth protecting: a tutorial's examples rot silently, and the first reader

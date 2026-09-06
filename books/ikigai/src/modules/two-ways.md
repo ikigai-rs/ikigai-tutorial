@@ -6,7 +6,7 @@ The default, and the right default. Your crate exposes a `space()`; the host tak
 dependency on it and chains its bindings onto its own:
 
 ```rust,ignore
-ikigai_fn::space().bind(Exact::new("urn:fn:toCamel"), to_camel())
+ikigai_fn::space().bind(Exact::new("urn:iki:tutorial:camel-case"), camel_case())
 ```
 
 The endpoints are in the binary. Resolution is a function call away. There is no

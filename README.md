@@ -9,7 +9,7 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 
 | part | covers |
 |---|---|
-| **Getting started** | The resolution model, running a kernel, your first endpoint (`toCamel`), self-description, binding, configuration, the file workspace |
+| **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), self-description, binding, configuration, the file workspace |
 | **Loadable modules** | Modules vs. linked-in spaces, the host callback, the wire session, dual-mode crates, and an honest account of what is actually finished |
 
 Read it:
@@ -58,7 +58,7 @@ they are pulled in from the crate by anchor:
 ```
 ````
 
-So there is exactly one `toCamel` and it is the one that compiles.
+So there is exactly one `camel-case` and it is the one that compiles.
 
 This matters more than it sounds. A tutorial's examples rot silently: the API moves, the
 snippet still *looks* right, and the first person to hit it assumes they are the problem.

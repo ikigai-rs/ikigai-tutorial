@@ -4,9 +4,9 @@ Four ways to make sure the last seven chapters landed. None needs anything beyon
 this repository.
 
 
-1. **Strict lowerCamelCase.** `toCamel` never lower-cases anything. Write `toLowerCamel`
-   and decide what it should do with `"XMLHttpRequest"` — there is no obviously right
-   answer, which is the point.
+1. **Strict lowerCamelCase.** `camel-case` never lower-cases anything. Write
+   `lower-camel-case` and decide what it should do with `"XMLHttpRequest"` — there is no
+   obviously right answer, which is the point.
 2. **A second argument.** Add an optional `separator` so the caller can split on something
    other than whitespace. Declare it `optional()` with a `default_value`, then look at
    `urn:kernel:actions` and watch your own change appear in the catalog.
