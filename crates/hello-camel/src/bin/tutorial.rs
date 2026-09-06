@@ -25,7 +25,7 @@ fn main() {
 
     let request = Request::new(
         Verb::Source,
-        Iri::parse("urn:fn:toCamel").expect("valid IRI"),
+        Iri::parse("urn:iki:tutorial:camel-case").expect("valid IRI"),
     )
     .with_arg("in", ArgRef::Inline(text.clone().into_bytes()));
 
@@ -35,7 +35,7 @@ fn main() {
             println!("out {}", String::from_utf8_lossy(&repr.bytes));
         }
         Err(e) => {
-            eprintln!("could not resolve urn:fn:toCamel: {e}");
+            eprintln!("could not resolve urn:iki:tutorial:camel-case: {e}");
             std::process::exit(1);
         }
     }

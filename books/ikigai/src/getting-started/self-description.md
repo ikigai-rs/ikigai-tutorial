@@ -19,7 +19,7 @@ a person who already knows*.
 An endpoint with a thin description still runs. It is simply invisible to everything above
 — like a library function with no signature.
 
-Here is `toCamel`'s, included from the crate:
+Here is `camel-case`'s, included from the crate:
 
 ```rust,ignore
 {{#include ../../../../crates/hello-camel/src/lib.rs:endpoint}}

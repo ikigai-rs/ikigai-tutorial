@@ -1,8 +1,8 @@
 //! The code taught by **Book 1 — Getting Started**.
 //!
 //! The book is the prose; this crate is the code, and the book pulls these snippets in
-//! by anchor rather than copying them. That way there is exactly one `toCamel` and it is
-//! the one that compiles — a book that paraphrases its own example is a book that will
+//! by anchor rather than copying them. That way there is exactly one `camel-case`, and it
+//! is the one that compiles — a book that paraphrases its own example is a book that will
 //! eventually be wrong about it.
 //!
 //! Read the book: `mdbook serve books/getting-started --open`
@@ -33,7 +33,7 @@ const TEXT_PLAIN_UTF8: &str = "text/plain;charset=utf-8";
 /// ⚠ Note what it deliberately does *not* do: it never lower-cases anything. `"Hello
 /// WORLD"` becomes `"HelloWORLD"`, because the input's own casing is treated as
 /// meaningful rather than as noise to normalize away.
-pub fn to_camel_impl(inv: &Invocation<'_>) -> Result<Representation> {
+pub fn camel_case_impl(inv: &Invocation<'_>) -> Result<Representation> {
     let input = inv.inline_str("in")?;
     let mut words = input.split_whitespace();
     let mut output = words.next().unwrap_or_default().to_string();
@@ -51,10 +51,10 @@ pub fn to_camel_impl(inv: &Invocation<'_>) -> Result<Representation> {
 // ANCHOR_END: impl
 
 // ANCHOR: endpoint
-/// `toCamel`: camel-cases the UTF-8 string in the `in` argument.
-pub fn to_camel() -> FnEndpoint {
-    FnEndpoint::new("toCamel", to_camel_impl).with_description(
-        Description::new("toCamel")
+/// `camel-case`: camel-cases the UTF-8 string in the `in` argument.
+pub fn camel_case() -> FnEndpoint {
+    FnEndpoint::new("camel-case", camel_case_impl).with_description(
+        Description::new("camel-case")
             .title("Camel-case")
             .summary("Camel-cases the UTF-8 text supplied in the `in` argument.")
             .verb(Verb::Source)
@@ -70,9 +70,9 @@ pub fn to_camel() -> FnEndpoint {
 // ANCHOR_END: endpoint
 
 // ANCHOR: space
-/// This book's space: the built-in function library, plus `urn:fn:toCamel`.
+/// This book's space: the built-in function library, plus `urn:iki:tutorial:camel-case`.
 pub fn space() -> EndpointSpace {
-    ikigai_fn::space().bind(Exact::new("urn:fn:toCamel"), to_camel())
+    ikigai_fn::space().bind(Exact::new("urn:iki:tutorial:camel-case"), camel_case())
 }
 // ANCHOR_END: space
 
@@ -85,8 +85,11 @@ mod tests {
 
     fn camel(input: &str) -> String {
         let kernel = Kernel::new(Arc::new(space()));
-        let request = Request::new(Verb::Source, Iri::parse("urn:fn:toCamel").expect("iri"))
-            .with_arg("in", ArgRef::Inline(input.as_bytes().to_vec()));
+        let request = Request::new(
+            Verb::Source,
+            Iri::parse("urn:iki:tutorial:camel-case").expect("iri"),
+        )
+        .with_arg("in", ArgRef::Inline(input.as_bytes().to_vec()));
         let repr = block_on(kernel.issue(request, &Capability::root())).expect("resolves");
         String::from_utf8(repr.bytes).expect("utf-8")
     }
@@ -113,6 +116,6 @@ mod tests {
     #[test]
     fn the_endpoint_describes_itself_under_the_name_it_is_bound_at() {
         use ikigai_core::Endpoint;
-        assert_eq!(to_camel().describe().id, "toCamel");
+        assert_eq!(camel_case().describe().id, "camel-case");
     }
 }
