@@ -20,7 +20,8 @@ fn main() {
     };
 
     // A kernel is a root space plus the machinery around it. `space()` here is the
-    // library's own bindings chained onto ikigai-fn's — see chapter 5.
+    // library's own bindings chained onto ikigai-fn's — see the book's "Binding, and a
+    // host of your own".
     let kernel = Kernel::new(Arc::new(hello_camel::space()));
 
     let request = Request::new(

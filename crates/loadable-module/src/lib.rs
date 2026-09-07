@@ -1,9 +1,9 @@
-//! The code taught by **Book 2 — Loadable Modules**.
+//! The code taught by **Part II — Loadable modules**.
 //!
 //! A module and a host, and the callback that distinguishes a module from a remote peer.
 //! The book pulls these snippets in by anchor; this is the code that compiles.
 //!
-//! Read the book: `mdbook serve books/loadable-modules --open`
+//! Read the book: `mdbook serve books/ikigai --open`
 
 use std::sync::Arc;
 

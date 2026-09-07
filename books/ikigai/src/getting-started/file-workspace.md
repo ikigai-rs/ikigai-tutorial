@@ -30,13 +30,20 @@ reachable, not a bug about whether your SSH keys were.
 ## Segments
 
 Capabilities are usually scoped to a **segment** of the workspace rather than the whole
-thing — `ws/{id}`, where the id is derived from an identity. Sign in with a passkey in the
-browser demo and you get exactly this: the credential yields a stable client id, and the
-id scopes a private workspace segment.
+thing — `ws/{id}`, where the id is derived from an identity.
 
-The demonstration to run in the demo's Identity tab is the third step, where you try to
-write to *somebody else's* segment and the resolver refuses. The boundary is the
-capability model, doing the one job it exists for.
+There is a running demonstration of that, and it is **not in this repository**: it is
+[`ikigai-web-demo`](https://github.com/ikigai-rs/ikigai-web-demo), the kernel-as-WebAssembly
+page from [Running it](running-it.md), at
+<https://ikigai-rs.github.io/ikigai-web-demo/>. Neither `hello-camel` nor
+`loadable-module` has an identity of any kind, so nothing you have built so far can show
+you this.
+
+Open that page's **Identity** tab and sign in with a passkey: the credential yields a
+stable client id, and the id scopes a private workspace segment. The tab then offers three
+steps, and the third is the one to run — you try to write to *somebody else's* segment and
+the resolver refuses. The boundary is the capability model, doing the one job it exists
+for.
 
 ## Reading files through the kernel, not `std::fs`
 

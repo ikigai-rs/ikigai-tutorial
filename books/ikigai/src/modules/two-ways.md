@@ -48,4 +48,4 @@ Reach for a module when one of these is true:
 - **The host cannot link it.** A kernel running as WebAssembly in a browser page cannot
   grow a new statically linked space; it can fetch one.
 - **The code arrives after the host was built.** Which is the whole point, and also the
-  part that is not finished — see [chapter 6](status.md).
+  part that is not finished — see [Where this actually stands](status.md).

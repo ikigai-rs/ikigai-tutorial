@@ -31,8 +31,9 @@ would otherwise be tangled:
 - `InProcessTransport` — does the *re-entrancy* work? (no encoding involved)
 - `LoopbackTransport` — does the *encoding* round-trip? (no transport involved)
 
-When a real transport is added, a bug is in the transport, because the other two layers
-have their own proofs.
+`UdsTransport` — the same session over a Unix socket, the module in its own process — is
+the third layer on top of those two, and it is why a bug there is a bug in the *transport*:
+the other two have their own proofs.
 
 ## The browser host
 

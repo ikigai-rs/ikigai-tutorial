@@ -33,7 +33,7 @@ surface that lets a host instantiate the artifact and drive a session against it
 
 Because *linked or loaded* should be the **host's** decision, not the library's.
 
-The same argument as binding authority in Book 1: a library that can only be a module has
+The same argument as binding authority in Part I: a library that can only be a module has
 decided something on its consumer's behalf. A CLI that wants XSLT compiled in should be
 able to have it; a browser page that cannot link anything should be able to fetch it. One
 crate, two deployments, one set of endpoints.
@@ -52,7 +52,7 @@ It is `publish = false` — it is a build product, not a library anyone should d
 
 ## What this means for your own crate
 
-Write it as an ordinary space, the way Book 1 did. Add the `module` feature only when
+Write it as an ordinary space, the way Part I did. Add the `module` feature only when
 somebody actually needs the loadable shape.
 
 Nothing about the endpoint changes; the module feature is packaging.

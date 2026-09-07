@@ -29,7 +29,8 @@
 
 # The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
-#  teaches in chapter 5; they are named here as they are, not as they should be.)
+#  teaches in "Binding, and a host of your own"; they are named here as they are, not as
+#  they should be.)
 urn:iki:fn:toUpper
 urn:iki:fn:reverseList
 urn:iki:fn:compose
@@ -39,6 +40,10 @@ urn:iki:fn:conditional
 # than bound in a space, so `list` does not show them; `source` does.
 urn:kernel:catalog
 urn:kernel:actions
+
+# What the CLI's scheduler is, and — the reason the configuration chapter prints it — which
+# of flag / config / env / default decided.
+urn:kernel:scheduler
 
 # The file workspace, a URI template over the CLI's jail. The tail is a path the caller
 # chooses, so this has to be a prefix entry.
