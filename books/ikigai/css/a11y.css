@@ -48,10 +48,16 @@
     outline-offset: 2px;
 }
 
-/* The target takes focus programmatically (`tabindex="-1"`), so it must not then draw a
- * focus ring around the entire page — but a real keyboard focus on it still should. */
-#mdbook-content:focus {
-    outline: none;
+/* Where the jump landed.
+ *
+ * `tabindex="-1"` makes the content take focus, and a sighted keyboard user needs to see
+ * that it did — a skip link that moves focus invisibly is a link that appears to do
+ * nothing. `:focus-visible` rather than `:focus` is what keeps the ring for the keyboard
+ * and away from a mouse click, and it is deliberately drawn *inside* the box so it reads
+ * as "you are here" rather than as a border on the page. */
+#mdbook-content:focus-visible {
+    outline: 2px solid var(--links);
+    outline-offset: -4px;
 }
 
 /* ── Contrast repairs ─────────────────────────────────────────────────────────
