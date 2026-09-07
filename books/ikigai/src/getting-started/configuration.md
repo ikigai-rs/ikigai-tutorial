@@ -1,21 +1,49 @@
 # Configuration
 
-## Two channels, and a third that is banned
+## Two channels, and a boundary still being drawn
 
 Configuration reaches an ikigai host two ways: a **config file**, and **command-line
-flags** that override it. That is the complete list.
+flags** that override it. Those are the channels this book uses, and the ones to reach for
+when you configure something you built.
 
-**Environment variables are deliberately not a configuration channel.** Not "discouraged"
-— excluded. The reasoning is worth understanding because it will look like an
-inconvenience before it looks like a decision: an env var is ambient authority over a
-process's behaviour that leaves no trace in any file, is invisible to anyone reading the
-deployment, is inherited silently by child processes, and cannot be diffed. A system whose
-whole thesis is that behaviour should be *nameable and inspectable* cannot then take its
-instructions from an invisible channel.
+Environment variables are the awkward third, and it is worth knowing why they are awkward
+before you meet one. An env var is ambient influence over a process's behaviour: it leaves
+no trace in any file, is invisible to anyone reading the deployment, is inherited silently
+by child processes, and cannot be diffed. A system whose thesis is that behaviour should be
+*nameable and inspectable* is not comfortable taking instructions through a channel with
+none of those properties.
 
-(You will find `IKIGAI_FILES` in [chapter 7](file-workspace.md) and think you have
-caught a contradiction. It is a *path root* for a sandbox, set once by the operator, not a
-behaviour switch — but it is the honest edge of the rule and worth knowing it exists.)
+They are not absent, though, and a book that told you they were would be lying to you on
+your first day. A host reads a set of `IKIGAI_*` variables today — `IKIGAI_FILES`,
+`IKIGAI_GRANTS`, `IKIGAI_SMTP_HOST`, `IKIGAI_PASSKEY_ORIGIN` and others — and they have a
+shape: most carry a *deployment* fact (where this process's mail relay is, which origin its
+passkeys are scoped to, where its grants file lives) rather than a behaviour switch for a
+resource. `IKIGAI_FILES` is the one you meet first, in
+[The file workspace](file-workspace.md).
+
+And one of them is deliberate rather than residual. The CLI picks its scheduler through
+`decide(flag, config, env)` — a precedence function with three arguments, written that way
+on purpose — and then *says which one won*:
+
+```bash
+ikigai --plain -c 'source urn:kernel:scheduler'
+```
+
+```text
+scheduler
+  backend    single
+  threads    1
+  source     default
+```
+
+That `source` row is the interesting part, and it is the shape of the argument rather than
+a settlement of it: what makes an invisible channel expensive is that nothing afterwards
+can tell you it was used, and a host that reports which channel decided has bought back
+the property the objection is about.
+
+So: the boundary is being tidied, not settled, and this book is not where it gets settled.
+Configure what you build through the config file and flags. If you find yourself wanting an
+env var instead, treat that as a question worth raising rather than a pattern worth copying.
 
 ## Where files live
 

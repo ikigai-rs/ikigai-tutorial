@@ -8,7 +8,11 @@ src = "src"
 default-theme = "rust"
 git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
 edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/ikigai/{path}"
-additional-css = []
+# Loaded after mdbook's own palette, which is what lets the contrast repairs in that file
+# win by cascade order rather than by forking the theme. `crates/book-a11y` measures the
+# result and CI runs it — see scripts/test-books.sh.
+additional-css = ["css/a11y.css"]
+additional-js = ["js/a11y.js"]
 
 [output.html.fold]
 enable = true

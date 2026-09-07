@@ -1,11 +1,11 @@
-//! The code taught by **Book 1 — Getting Started**.
+//! The code taught by **Part I — Getting started**.
 //!
 //! The book is the prose; this crate is the code, and the book pulls these snippets in
 //! by anchor rather than copying them. That way there is exactly one `camel-case`, and it
 //! is the one that compiles — a book that paraphrases its own example is a book that will
 //! eventually be wrong about it.
 //!
-//! Read the book: `mdbook serve books/getting-started --open`
+//! Read the book: `mdbook serve books/ikigai --open`
 
 use ikigai_core::{
     ArgSpec, Description, EndpointSpace, Exact, FnEndpoint, Invocation, ReprType, Representation,

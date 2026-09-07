@@ -2,7 +2,7 @@
 
 An endpoint is inert. Until something **binds** it to a name, nothing can resolve it —
 defining and naming are separate acts, which is the whole point of
-[chapter 1](resolution.md) showing up in the code.
+[Resolution](resolution.md) showing up in the code.
 
 ## Binding
 
@@ -54,7 +54,7 @@ The endpoint did not merely leave `ikigai-fn`'s prefix: it also stopped being `t
 and became `camel-case`.
 
 `toCamel` is a verb phrase. It reads as something you *call*, and that is exactly the
-reflex [chapter 1](resolution.md) is trying to break. A resource is a thing you name and
+reflex [Resolution](resolution.md) is trying to break. A resource is a thing you name and
 ask a kernel to resolve; whether the answer is computed now, served from an hour-old
 cache, or fetched from another machine is not yours to decide, and a name shaped like a
 function call quietly implies otherwise. So the convention is: **resource names are nouns,
@@ -99,7 +99,7 @@ assert_eq!(String::from_utf8_lossy(&repr.bytes), "resourceOrientedComputing");
 ```
 
 `Capability::root()` is unrestricted authority, which is fine for a local tutorial and is
-*not* what a real host hands out — [chapter 7](file-workspace.md) shows the scoped
+*not* what a real host hands out — [The file workspace](file-workspace.md) shows the scoped
 kind.
 
 ## Finding your crate from another project

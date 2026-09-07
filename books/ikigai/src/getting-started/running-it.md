@@ -15,7 +15,7 @@ out resourceOrientedComputing
 
 That is a complete ikigai host: a root space, a kernel around it, one resolution. It is
 about thirty lines and you will have read all of them by the end of
-[chapter 5](binding.md).
+[Binding, and a host of your own](binding.md).
 
 ## The CLI
 
@@ -61,4 +61,4 @@ The **Control** tab shows the scheduler, the cache and its golden threads updati
 the **Demo** tab is a set of runnable walkthroughs.
 
 It is also the only host that loads **modules** rather than linking everything in — see
-[chapter 8](../modules/index.md).
+[What a module is](../modules/index.md).

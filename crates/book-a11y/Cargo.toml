@@ -1,0 +1,23 @@
+[package]
+name = "book-a11y"
+version = "0.1.0"
+description = "The book's contrast gate. Not a lesson: a test. Reads the palette mdbook actually generated, plus the book's own overrides, and measures it against the WCAG floor with ikigai-a11y."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "book_a11y"
+path = "src/lib.rs"
+
+[[bin]]
+name = "book-a11y"
+path = "src/main.rs"
+
+[dependencies]
+# The contrast floor lives in the ecosystem's own crate rather than in six lines of
+# luminance arithmetic copied into this one. `ikigai-browse` was its first consumer; the
+# onboarding material is the second, which is the point.
+ikigai-a11y = "0.2.1"

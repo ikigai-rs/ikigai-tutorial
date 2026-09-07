@@ -1,0 +1,121 @@
+/* The book's accessibility overrides.
+ *
+ * Two things live here, and both are additions to mdbook's own theme rather than a fork of
+ * it: a skip link, and the colour repairs that bring every theme to the WCAG AA contrast
+ * floor. `book.toml` loads this after mdbook's palette, so these declarations win by
+ * cascade order — which is also why `crates/book-a11y` reads the files in that order when
+ * it measures the result.
+ *
+ * ⚠ Do not adjust a colour here by eye. Every value below was chosen by
+ * `cargo run -p book-a11y -- books/ikigai`, which reports the ratio it measured and the
+ * nearest colour that clears the floor, and the same command is a gate in CI.
+ */
+
+/* ── Skip to content ──────────────────────────────────────────────────────────
+ *
+ * With a full-book sidebar, a keyboard or screen-reader user traverses every chapter link
+ * on every page before reaching the words. WCAG 2.2 SC 2.4.1 (Bypass Blocks) is the rule;
+ * the reason it matters here is that this book's sidebar is longer than most of its pages.
+ *
+ * The link is off-screen until focused rather than hidden, because `display: none` and
+ * `visibility: hidden` take an element out of the focus order entirely — a skip link that
+ * cannot be reached by Tab is not a skip link. `js/a11y.js` puts it in the DOM; this
+ * styles it.
+ */
+.skip-link {
+    /* Fixed rather than absolute: a reader who tabs into the page while scrolled down
+     * should see the link where their eyes are, not be thrown to the top of the document
+     * to find it. */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 0.6rem 1rem;
+    background: var(--bg);
+    color: var(--fg);
+    border: 2px solid var(--links);
+    border-radius: 0 0 4px 0;
+    font-weight: 600;
+    text-decoration: none;
+    /* Off-screen, still focusable, still announced. */
+    transform: translateY(-120%);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+/* Where the jump landed.
+ *
+ * `tabindex="-1"` makes the content take focus, and a sighted keyboard user needs to see
+ * that it did — a skip link that moves focus invisibly is a link that appears to do
+ * nothing. `:focus-visible` rather than `:focus` is what keeps the ring for the keyboard
+ * and away from a mouse click, and it is deliberately drawn *inside* the box so it reads
+ * as "you are here" rather than as a border on the page. */
+#mdbook-content:focus-visible {
+    outline: 2px solid var(--links);
+    outline-offset: -4px;
+}
+
+/* ── Contrast repairs ─────────────────────────────────────────────────────────
+ *
+ * Measured with `ikigai-a11y`, the ecosystem's own WCAG crate. Body text is held to 4.5:1
+ * (SC 1.4.3) and a non-text UI component to 3:1 (SC 1.4.11). Each comment records what the
+ * theme shipped and what it measured, because the next person to look at one of these
+ * values deserves to know it was not arbitrary.
+ */
+
+.light {
+    /* draft chapter in the sidebar: #aaaaaa on #fafafa was 2.23:1 */
+    --sidebar-non-existant: #6f6f6f;
+}
+
+.rust {
+    /* link: #2b79a2 was 3.67:1 on the page and 2.69:1 in a blockquote */
+    --links: #1e5571;
+    /* inline code: #6e6b5e was 4.07:1 on the page and 2.99:1 in a blockquote */
+    --inline-code-color: #4f4c44;
+    /* search results header: #666666 was 4.37:1 — a miss no eye would catch */
+    --searchresults-header-fg: #5c5c5c;
+    /* draft chapter in the sidebar: #505254 on #3b2e2a was 1.66:1 */
+    --sidebar-non-existant: #9d9e9f;
+}
+
+.coal {
+    /* link: #2b79a2 was 3.80:1 on the page and 3.09:1 in a blockquote */
+    --links: #5f9abb;
+    /* table header: #98a3ad on #42494c was 3.57:1 — the ground moved, not the text,
+     * because that foreground is the theme's body colour and clears everywhere else */
+    --table-header-bg: #31373a;
+    /* current chapter in the sidebar: #3473ad was 2.81:1 */
+    --sidebar-active: #6f9dc7;
+    /* draft chapter in the sidebar: #505254 was 1.79:1 */
+    --sidebar-non-existant: #97989a;
+    /* search results header: #666666 was 3.19:1 */
+    --searchresults-header-fg: #848484;
+    /* theme and search buttons: #43484d was 1.98:1 against a 3:1 floor */
+    --icons: #767b80;
+}
+
+.navy {
+    /* link: #2b79a2 was 3.64:1 on the page and 3.05:1 in a blockquote */
+    --links: #609bbb;
+    /* current chapter in the sidebar: #2b79a2 was 2.84:1 */
+    --sidebar-active: #68a1bf;
+    /* draft chapter in the sidebar: #505274 was 1.82:1 */
+    --sidebar-non-existant: #9899ad;
+    /* search results header: #5f5f71 was 2.81:1 */
+    --searchresults-header-fg: #878795;
+}
+
+.ayu {
+    /* link: #0096cf cleared the page at 5.52:1 and missed a blockquote at 4.39:1 */
+    --links: #21a4dc;
+    /* draft chapter in the sidebar: #5c6773 was 3.06:1 */
+    --sidebar-non-existant: #7e8791;
+    /* search results header: #666666 was 3.22:1 */
+    --searchresults-header-fg: #838383;
+}

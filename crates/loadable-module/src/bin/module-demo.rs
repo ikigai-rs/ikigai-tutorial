@@ -1,4 +1,4 @@
-//! Book 2's worked example: a host resolving into a module, and the module resolving
+//! Part II's worked example: a host resolving into a module, and the module resolving
 //! back into the host.
 //!
 //! ```text

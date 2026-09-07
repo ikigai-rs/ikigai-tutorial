@@ -1,4 +1,4 @@
-# Loadable modules
+# What a module is
 
 Part I built an endpoint and **linked it in**: your crate exposed a `space()`, the host
 depended on it at compile time, and the endpoints ended up in the binary. That is how
@@ -46,6 +46,6 @@ The code is in
 [`crates/loadable-module`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates/loadable-module),
 and as in Part I the listings are pulled from it by anchor rather than copied.
 
-> ⚠ **Read [chapter 6](status.md) before you plan around any of this.**
+> ⚠ **Read [Where this actually stands](status.md) before you plan around any of this.**
 > `ikigai-module` describes itself as "Phase 1: in-process proof". The callback machinery
 > is real and exercised; the isolation is not there yet.

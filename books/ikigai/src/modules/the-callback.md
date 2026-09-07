@@ -45,4 +45,4 @@ knowing any of them exist.
 
 It is also what makes a module harder to isolate than a peer, since the callback is a hole
 in whatever boundary you put around it. That tension is the subject of
-[chapter 6](status.md).
+[Where this actually stands](status.md).
