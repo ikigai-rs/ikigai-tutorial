@@ -93,6 +93,11 @@ expensive, non-deterministic, unauditable component is asked the smallest questi
 remains after the deterministic machinery has done what it can, and its answer is validated
 before it has any effect.
 
+Step 3 is not optional advice, either. The MCP server re-checks the capability on every
+`tools/call` and pre-flights the arguments through `urn:kernel:validate` before it invokes
+anything — so a model that hallucinates an argument gets a contract violation back rather
+than a half-executed action.
+
 ## What not to assume
 
 Part II ended with a list like this and this part should too, for the same reason: a

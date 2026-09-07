@@ -23,10 +23,11 @@ serves `urn:*` like everyone else — recognizes the name, and its catalog comes
 re-prefixed and tagged with where it came from, so a federated listing shows which machine
 each resource lives on.
 
-The failure mode is worth naming because it is silent: point an alias at a prefix the
-local kernel already serves and the local binding wins every time, so the mount is never
-used and nothing says so. The host warns about exactly this at startup, and the fix is
-either an alias prefix the kernel does not serve or one of the next two kinds.
+The failure mode is worth naming, because everything about it looks fine: point an alias at
+a prefix the local kernel already serves, and the local binding wins every time — requests
+under the mount resolve, answers come back, and the peer is never asked. The composition
+warns about exactly that at startup, and the fix is either an alias prefix this kernel does
+not serve or one of the next two kinds.
 
 ## Override — the same namespace, served elsewhere
 
@@ -197,7 +198,8 @@ let kernel = Kernel::new(Arc::new(root));
 `no_run`, because it dials a socket nothing has bound — but it *compiles*, every time this
 book is built, which is the part that catches an API moving underneath the prose. The
 listings above it are `ignore`d for a different reason and lose nothing by it: each one is
-included from `crates/two-hosts`, which the same CI job compiles and runs the tests of.
+included from `crates/two-hosts`, which CI compiles and runs the tests of in the job next
+door.
 
 ## Two cautions
 
