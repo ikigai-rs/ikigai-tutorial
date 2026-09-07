@@ -19,6 +19,12 @@ cargo install mdbook
 mdbook serve books/ikigai --open
 ```
 
+Each part ends in exercises, and each exercise names the file to open, the command to run,
+what "right" looks like, and the section to re-read — with a worked hint behind a
+disclosure triangle. Hints rather than solutions, deliberately: a full answer becomes the
+thing people read *instead of* the exercise, and an exercise whose hint cannot be written
+without giving the answer away is an exercise that needed rewriting.
+
 Parts rather than separate books, deliberately: one navigation tree, one search index, and
 cross-references between them that actually resolve. Two mdbook projects cannot link to
 each other without hand-built relative paths into each other's output directories — which

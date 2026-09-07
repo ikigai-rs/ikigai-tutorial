@@ -14,17 +14,20 @@ Four things in there are worth slowing down for.
 
 ## `inv.inline_str("in")`
 
-Arguments arrive on the `Invocation`, by name, and they may be *inline bytes* or *a
-reference to another resource*. `inline_str` says "give me this argument as a UTF-8
-string, and fail cleanly if it is not there or is not text."
+Arguments arrive on the `Invocation`, by name, and an argument may be *inline bytes* or *a
+reference to another resource* — `ArgRef::Inline` and `ArgRef::Reference`. `inline_str`
+says "give me this argument as a UTF-8 string, and fail cleanly if it is not there, is not
+text, or is a reference rather than a value."
 
-The reference case is the interesting one, and you get it for free: a caller can pass
-`in=urn:something:else` and the kernel resolves that first. Your endpoint does not change.
-This is why pipes work — `|` is not a shell feature bolted on, it is one resolution's
-output becoming another's argument.
+That last clause is the one to notice. An endpoint written this way accepts **values**, and
+taking a resource is an opt-in: you match `ArgRef::Reference(iri)` yourself and resolve it
+with `inv.source(&iri).await`, which makes the endpoint async and threads your answer to
+theirs. It is a real change to your code, and it is
+[exercise 3](exercises.md#3-take-a-resource-not-a-string).
 
-<!-- urn-gate: illustration urn:something:else — a stand-in for "any other resource",
-     deliberately not a real name. -->
+Pipes do not need it, which is worth separating out: `|` is not a shell feature bolted on,
+but what it passes along is the previous resolution's *output*, inline — one resolution's
+answer becoming the next one's argument, by value.
 
 ## `Representation::new(text_plain_utf8(), …)`
 
