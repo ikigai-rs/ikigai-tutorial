@@ -23,5 +23,9 @@ repository = "https://github.com/ikigai-rs/ikigai-tutorial"
 # require them to have the whole ecosystem laid out beside it.
 ikigai-core = "0.1.62"
 ikigai-fn = "0.2.0"
-ikigai-module = "0.1.8"
+# 0.1.9 is the floor and it is not a preference: `Resolved` grew a public `canonical`
+# field in ikigai-core 0.1.64, and ikigai-module 0.1.8 constructs one — so that pair no
+# longer compiles together. This workspace only found out when Part III's dependencies
+# raised the resolved core past 0.1.63; the lockfile had been holding 0.1.62 and hiding it.
+ikigai-module = "0.1.10"
 futures = "0.3"

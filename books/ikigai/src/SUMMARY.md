@@ -23,6 +23,14 @@
 - [Dual-mode crates](modules/dual-mode.md)
 - [Where this actually stands](modules/status.md)
 
+# Beyond one host
+
+- [A kernel behind a socket](beyond/socket.md)
+- [Who is asking](beyond/identity.md)
+- [Preferential resolution](beyond/preference.md)
+- [The editor as a client](beyond/emacs.md)
+- [The machine client](beyond/agent.md)
+
 ---
 
 [Where to go next](next.md)

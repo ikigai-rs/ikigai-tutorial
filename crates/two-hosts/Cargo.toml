@@ -1,0 +1,34 @@
+[package]
+name = "two-hosts"
+version = "0.1.0"
+description = "The code taught by Part III of the ikigai tutorial: a kernel behind a socket, the authority a certificate mints, and the three ways a mount can relate to the local namespace."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "two_hosts"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+# The transports themselves, so the book's examples are compiled against the real
+# signatures rather than a paraphrase of them. Both are cheap in dependency terms
+# except `ikigai-quic`, which brings quinn/rustls/tokio — paid deliberately, because
+# the `Minter` signature IS the lesson of "Who is asking" and a prose copy of it
+# would rot silently.
+ikigai-ipc = "0.1.18"
+ikigai-quic = "0.1.18"
+# `MountedRemote` (the alias/override composition) and the `Resolver` surface a
+# connected peer presents.
+ikigai-resolve = "0.1.18"
+# `Failover` — what `--prefer` is made of.
+ikigai-throttle = "0.1.9"
+async-trait = "0.1"
+futures.workspace = true
+
+[dev-dependencies]
+# A local space to fail over TO, and the name Part I already taught.
+hello-camel = { path = "../hello-camel" }
