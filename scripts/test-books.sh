@@ -26,6 +26,14 @@ for book in books/*/; do
         echo "FAILED: $name"
         status=1
     fi
+    # The contrast gate reads the palette mdbook JUST generated, plus the book's own
+    # additional-css, in cascade order — so it has to run here, after the build, rather
+    # than as a `cargo test`. A table of hex values in a test file would go stale the
+    # first time mdbook changed a theme, and stay green while doing it.
+    if ! CARGO_TARGET_DIR="$TARGET" cargo run --quiet -p book-a11y -- "$book"; then
+        echo "FAILED: $name (contrast)"
+        status=1
+    fi
 done
 
 exit "$status"

@@ -128,12 +128,61 @@ target there is nothing to check it against. Both are fixed the same way, which 
 neither is a nuisance: name the chapter. `[Where this actually
 stands](../modules/status.md)` says both halves and a reorder cannot falsify either.
 
+### And the colours
+
+`mdbook` is sound by default in the ways a generator can be — `<html lang>`, a `<main>`, a
+labelled `<nav>`, labelled theme buttons, no image without `alt`. Colour is the exception,
+because a theme is a palette somebody chose by eye and **nothing measures one**.
+
+So `./scripts/test-books.sh` also runs `crates/book-a11y`, which reads the palette mdbook
+just generated plus this book's `additional-css` — in `book.toml`'s order, because that is
+the cascade — and measures every pair a reader actually meets with
+[`ikigai-a11y`](https://crates.io/crates/ikigai-a11y), the ecosystem's own WCAG crate.
+Body text against 4.5:1 (SC 1.4.3), a non-text UI component against 3:1 (SC 1.4.11).
+
+It found **22 pairs below the floor across the five themes**, including the ones that hurt
+most in a book like this: on `rust`, the default, a link was 3.67:1 on the page and 2.69:1
+inside a blockquote, and inline code — which this book uses in nearly every sentence — was
+4.07:1 and 2.99:1. The repairs are in
+[`books/ikigai/css/a11y.css`](books/ikigai/css/a11y.css), each with the ratio it started
+from in a comment, and the gate is what says they worked. The tool prints the nearest
+passing colour along with the fault, so a repair starts from a number rather than a guess:
+
+```bash
+cargo run -p book-a11y -- books/ikigai --survey   # every pair, pass or fail
+```
+
+That crate reads generated CSS rather than holding a table of hex values on purpose. A
+table would be a gate that goes stale the first time mdbook changes a theme, and stays
+green while it does.
+
+The other half is a **skip link**, added by `additional-js` rather than by forking the
+theme: with a full-book sidebar, a keyboard or screen-reader user otherwise traverses every
+chapter link on every page before reaching the words (SC 2.4.1). The same command checks
+that the element it aims at is still in the built HTML — mdbook renamed that id once
+already (`#content` became `#mdbook-content`), and a skip link pointing at nothing looks
+exactly like one that works.
+
+> ⚠ **Left alone, deliberately: two `<h1>`s per page** — the book title in the menu bar and
+> the chapter title — which is mdbook's own template, not ours. It is a best practice
+> rather than an AA failure, and the two ways to fix it both cost more than it: overriding
+> `theme/index.hbs` pins the whole page template, so future mdbook chrome changes stop
+> reaching this book silently (which is exactly how the id above moved); or `a11y.js` could
+> `aria-hidden` the menu title, which is three lines and no fork but hides a visible
+> heading from assistive technology. A decision, not an oversight.
+>
+> The audit also flagged an `<h2>` ("Keyboard shortcuts") before the first `<h1>`. Measured
+> against the accessibility *tree* rather than the HTML, it is not there: mdbook's help
+> popup is `display: none` until you press `?`, so it is out of the tree entirely — worth
+> recording, because a static scan of the markup will keep reporting it.
+
 ## Layout
 
 ```
 books/            mdbook sources — prose
 crates/           the code each book teaches — compiled, linted, tested
 crates/book-urns  the exception: not a lesson, the two prose gates above
+crates/book-a11y  likewise: the contrast gate and the skip link's target
 ```
 
 ## Dependencies are published crates, deliberately
