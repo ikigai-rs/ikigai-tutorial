@@ -19,17 +19,22 @@ about thirty lines and you will have read all of them by the end of
 
 ## The CLI
 
-The full host lives in the [`ikigai-cli`](https://github.com/ikigai-rs/ikigai-cli)
-repository and installs a binary called `ikigai`:
+The full host is the [`ikigai-cli`](https://crates.io/crates/ikigai-cli) crate, which
+installs a binary called `ikigai`:
 
 ```bash
-cargo install --path crates/ikigai-cli
+cargo install ikigai-cli --locked
 ```
+
+> ⚠ The crate is `ikigai-cli`. Only the **binary** is called `ikigai` — and `cargo install
+> ikigai` does not fail, it fetches an unrelated crate by another author and leaves you
+> with something that is not this. `--locked` builds against the dependency versions the
+> release was tested with rather than whatever the registry resolves today.
 
 One-shot resolutions take `-c`, and `--plain` drops the decoration so output is pipeable:
 
 ```bash
-ikigai --plain -c 'source urn:fn:toUpper in="hello"'
+ikigai --plain -c 'source urn:iki:fn:toUpper in="hello"'
 ```
 
 Run it with no arguments and you get a REPL with the same grammar: pipes (`|`), map

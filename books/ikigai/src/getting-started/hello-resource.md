@@ -23,6 +23,9 @@ The reference case is the interesting one, and you get it for free: a caller can
 This is why pipes work — `|` is not a shell feature bolted on, it is one resolution's
 output becoming another's argument.
 
+<!-- urn-gate: illustration urn:something:else — a stand-in for "any other resource",
+     deliberately not a real name. -->
+
 ## `Representation::new(text_plain_utf8(), …)`
 
 You return bytes *and their type*. Always. The type is not decoration: it is what lets a

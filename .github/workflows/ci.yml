@@ -1,4 +1,9 @@
 # fmt · clippy · test for the code, and a separate job that builds and TESTS the books.
+#
+# Note which job holds which gate. `mdbook test` (the `books` job) covers the book's Rust
+# blocks. The URN gate — every resource name the prose prints has to resolve somewhere
+# real — is an ordinary integration test in `crates/book-urns`, so it rides in `test`
+# below, not in `books`. See that crate's docs for what it does and does not cover.
 name: ci
 
 on:
