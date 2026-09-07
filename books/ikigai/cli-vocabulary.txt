@@ -1,0 +1,45 @@
+# Resource names the `ikigai` CLI resolves — the book's claim about somebody else's host.
+#
+# The book prints two kinds of resource name, and they answer to different authorities:
+#
+#   * names in Rust examples resolve in a host THIS REPOSITORY builds, so the URN gate
+#     (`crates/book-urns`) checks them against `hello_camel::space()` and
+#     `loadable_module::host_space()` — real spaces, checked by construction;
+#
+#   * names in `ikigai …` shell examples resolve in the CLI, which is a different
+#     repository on a different release schedule. Nothing this workspace compiles can
+#     confirm one. This file is where the book states what it believes, so that the
+#     belief is at least written down in one place and checkable by one command.
+#
+# Format: one entry per line, `#` starts a comment. A trailing `*` makes the entry a
+# prefix — `urn:file:*` covers `urn:file:{path}`, `urn:file:notes.txt` and the rest of a
+# templated family whose tail is caller-supplied.
+#
+# ⚠ HOW TO VERIFY, and why the gate cannot do it for you. CI has no `ikigai` binary and
+# no way to get a trustworthy one, so the always-on test only checks that every shell
+# name in the book appears below. That catches a typo and an invented name; it CANNOT
+# catch this file having gone stale against a newer CLI. The check that can is a probe,
+# and it is a test in this workspace marked `#[ignore]` because it needs a binary:
+#
+#     cargo install ikigai-cli --locked          # or have one on PATH already
+#     cargo test -p book-urns -- --ignored --nocapture
+#
+# Run it when you change this file, and when the CLI releases. Verified against
+# ikigai-cli 0.1.18 on 2026-09-07.
+
+# The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
+# (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
+#  teaches in chapter 5; they are named here as they are, not as they should be.)
+urn:iki:fn:toUpper
+urn:iki:fn:reverseList
+urn:iki:fn:compose
+urn:iki:fn:conditional
+
+# The kernel's own self-description resources. These are intercepted by the kernel rather
+# than bound in a space, so `list` does not show them; `source` does.
+urn:kernel:catalog
+urn:kernel:actions
+
+# The file workspace, a URI template over the CLI's jail. The tail is a path the caller
+# chooses, so this has to be a prefix entry.
+urn:file:*

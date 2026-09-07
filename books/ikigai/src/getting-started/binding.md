@@ -13,10 +13,10 @@ defining and naming are separate acts, which is the whole point of
 Two things are happening.
 
 `ikigai_fn::space()` is the built-in function library as a mountable space —
-`urn:fn:toUpper`, `urn:fn:compose`, `urn:fn:conditional` and friends. `bind` is a builder,
-so a host **starts from somebody else's space and chains its own bindings on top**. That
-is the normal shape of a host: mostly other people's endpoints, plus the few that are
-yours.
+`urn:iki:fn:toUpper`, `urn:iki:fn:compose`, `urn:iki:fn:conditional` and friends. `bind`
+is a builder, so a host **starts from somebody else's space and chains its own bindings
+on top**. That is the normal shape of a host: mostly other people's endpoints, plus the
+few that are yours.
 
 `Exact::new("urn:iki:tutorial:camel-case")` matches one exact IRI. Bindings can also be URI
 templates, which is how `urn:file:{path}` covers a whole tree with one binding.
@@ -42,6 +42,35 @@ That discipline is what was missing here. This endpoint used to be bound at
 was caught in a migration it had no stake in — a name in somebody else's prefix moves on
 their schedule, not on yours. Rebinding it under `urn:iki:tutorial:` is the entire fix,
 and it is one line.
+
+<!-- urn-gate: unbound urn:fn:toCamel — the name this endpoint used to be bound at.
+     Naming it is the point of the paragraph above, and the gate asserts it really is
+     gone: if some host starts binding it again, this claim stops being true. -->
+
+## Name resources as nouns
+
+That one line changed in two ways at once, and the section above covered only the first.
+The endpoint did not merely leave `ikigai-fn`'s prefix: it also stopped being `toCamel`
+and became `camel-case`.
+
+`toCamel` is a verb phrase. It reads as something you *call*, and that is exactly the
+reflex [chapter 1](resolution.md) is trying to break. A resource is a thing you name and
+ask a kernel to resolve; whether the answer is computed now, served from an hour-old
+cache, or fetched from another machine is not yours to decide, and a name shaped like a
+function call quietly implies otherwise. So the convention is: **resource names are nouns,
+and kebab-case** — `camel-case`, not `toCamel`.
+
+Kebab-case is the smaller half of the rule. It matters because these names do not stay in
+Rust — they are projected into an agent's tool list, into generated editor commands, into
+shell one-liners — and a hyphen is a word separator every one of those already reads as
+one.
+
+> ⚠ Now look back at the top of this chapter. `urn:iki:fn:toUpper` breaks the rule, and so
+> does its sibling `urn:iki:fn:reverseList` — in the library this book depends on. You have
+> not caught an oversight. The convention was settled after those names were already in use
+> across a dozen repositories, so fixing them is a second migration with a schedule of its
+> own, which is the previous section's point arriving from the other direction: a name you
+> use out of somebody else's prefix is correct when *they* say it is.
 
 ## Why this book does *not* patch the CLI
 

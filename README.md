@@ -73,11 +73,47 @@ the crate root — and the tests caught both before anyone read them.
 > target directory of its own, wiped first. The error rustc gives says nothing about
 > books, so this is worth not rediscovering.
 
+### The names in the prose are tested too
+
+`mdbook test` compiles Rust blocks, which covers less of a tutorial than it sounds. Of the
+resource names this book prints, exactly **one** sits in a block it compiles. The rest are
+prose, `ignore` blocks, program output, and — the first command a new reader types — a
+shell line in a fenced `bash` block, which nothing runs. The book's correctness gate was
+thinnest exactly where a beginner's experience is most fragile.
+
+So `cargo test` also runs a URN gate (`crates/book-urns`). It pulls every `urn:` literal
+out of the markdown and checks it against the authority that can actually answer for it:
+
+| where the name appears | who confirms it |
+|---|---|
+| a Rust example | `hello_camel::space()` / `loadable_module::host_space()` — hosts built right here |
+| an `ikigai …` shell example | `books/ikigai/cli-vocabulary.txt` — the book's written-down claim about the CLI, which is another crate on another release schedule |
+| prose | either |
+
+A name that is *supposed* not to resolve declares itself next to the claim it qualifies:
+
+```markdown
+<!-- urn-gate: unbound urn:fn:toCamel — the name this endpoint used to be bound at. -->
+```
+
+`unbound` is checked in the other direction, so a paragraph saying "this used to be called
+X" goes red if somebody binds X again.
+
+> ⚠ What it cannot do is confirm that `cli-vocabulary.txt` is still true of a newer CLI —
+> CI has no `ikigai` binary. The test that can is in the same file and marked `#[ignore]`,
+> so it announces itself in the test output rather than skipping quietly:
+>
+> ```bash
+> cargo install ikigai-cli --locked
+> cargo test -p book-urns -- --ignored --nocapture
+> ```
+
 ## Layout
 
 ```
-books/          mdbook sources — prose
-crates/         the code each book teaches — compiled, linted, tested
+books/            mdbook sources — prose
+crates/           the code each book teaches — compiled, linted, tested
+crates/book-urns  the exception: not a lesson, the URN gate above
 ```
 
 ## Dependencies are published crates, deliberately

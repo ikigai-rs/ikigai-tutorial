@@ -2,8 +2,8 @@
 
 ## A name, not a call
 
-`urn:fn:toUpper` is a name. Nothing about it says where the code lives, what language it
-is in, whether the answer is computed now or was computed an hour ago and cached, or
+`urn:iki:fn:toUpper` is a name. Nothing about it says where the code lives, what language
+it is in, whether the answer is computed now or was computed an hour ago and cached, or
 whether it runs in this process. Those are all decisions the **kernel** makes when it
 *resolves* the name.
 
