@@ -25,7 +25,7 @@
 #     cargo test -p book-urns -- --ignored --nocapture
 #
 # Run it when you change this file, and when the CLI releases. Verified against
-# ikigai-cli 0.1.18 on 2026-09-07.
+# ikigai-cli 0.1.18 on 2026-09-07, Part III's entries included.
 
 # The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
@@ -48,3 +48,32 @@ urn:kernel:scheduler
 # The file workspace, a URI template over the CLI's jail. The tail is a path the caller
 # chooses, so this has to be a prefix entry.
 urn:file:*
+
+# ── Part III — Beyond one host ────────────────────────────────────────────────
+#
+# ⚠ These are all names the CLI's OWN host binds, which is what this file may claim.
+# Two of them are also served by other processes the book names — `urn:repo:status` by
+# ikigai-dev over a socket, `urn:llm:*` by whatever a peer is mounted at — and that is
+# precisely the point of those chapters. It is not what makes the entry true here: an
+# entry earns its place by resolving in a plain `ikigai`, with no mount and no server.
+
+# The dev seam. `ikigai-dev` serves this too, over a socket; the omnibus binary also
+# links `ikigai-repo`, which is why the book's `--connect` example can be probed
+# against a plain CLI.
+urn:repo:status
+
+# The manifold projected as callable Lisp — what `ikigai-refresh-aliases` resolves,
+# and what makes an editor's command surface unable to drift.
+urn:lisp:aliases
+
+# The LLM face: one front grammar over pluggable backends. `urn:llm:{provider}:ask`
+# is deliberately NOT listed — which providers exist is the reader's own llm.json,
+# so the book declares that name an illustration rather than claiming it.
+urn:llm:ask
+urn:llm:models
+urn:llm:config
+
+# The selection funnel: deterministic narrowing, then a model only for the residual,
+# then a pre-flight validation of the arguments against the declared contract.
+urn:agent:select
+urn:kernel:validate

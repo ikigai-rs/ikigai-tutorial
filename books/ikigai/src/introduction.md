@@ -37,9 +37,16 @@ yourself. It is the 95% case, and everything else assumes it.
 and routed to at runtime, and the callback that makes a module something quite different
 from a remote peer.
 
+**Part III — Beyond one host** takes the step Part II stops at. A kernel behind a socket,
+the authority a certificate mints when the socket becomes a network, the three honest
+things a mount can mean by "resolve this over there" — and then two clients, one human and
+one machine, that build their command surface by reading the catalog rather than being
+told.
+
 Read Part I first, or at least [Resolution](getting-started/resolution.md) and
 [Binding](getting-started/binding.md). Part II assumes you know what a `space()` is and
-why binding is separate from defining.
+why binding is separate from defining; Part III assumes both, and leans hardest on
+capabilities.
 
 ## How to read this book
 
@@ -57,7 +64,7 @@ mdbook serve books/ikigai --open
 
 The code lives in
 [`crates/`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates) — one crate per
-part.
+part, plus the two that gate the book itself.
 
 ## Conventions
 

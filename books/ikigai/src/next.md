@@ -10,6 +10,12 @@
   engine grammar, MCP projection
 - [`ikigai-xslt`](https://github.com/ikigai-rs/ikigai-xslt) — one crate showing both the
   linked and the loadable shape side by side
+- [`ikigai-dev-server`](https://github.com/ikigai-rs/ikigai-dev-server) — the linkage-gated
+  server from Part III, whose `Cargo.toml` is its manifest
+- [`ikigai-emacs`](https://github.com/ikigai-rs/ikigai-emacs) — the client whose command
+  surface is generated from the manifold
+- [`ikigai-llm`](https://github.com/ikigai-rs/ikigai-llm) — one front grammar over
+  pluggable backends, each still addressable on its own
 
 ## A closing note on style
 
