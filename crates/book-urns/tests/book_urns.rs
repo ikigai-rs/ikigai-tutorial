@@ -236,6 +236,75 @@ fn the_book_still_teaches_the_name_this_workspace_binds() {
     );
 }
 
+/// A cross-reference must be checkable, and a chapter number is not.
+///
+/// The book's five stale numbers all pointed at the right file — merging two books
+/// renumbered the second one, and the prose kept the old numbers — so every link resolved
+/// and nothing complained. This is the check that would have complained.
+///
+/// Two rules, and they differ because only one of the two forms can be verified:
+///
+/// * `[chapter N](target)` is checked against `SUMMARY.md`. A number that disagrees with
+///   the real one fails; so does one pointing at a chapter mdbook does not number.
+/// * a bare `chapter N` is refused outright — there is no target, so there is nothing to
+///   check it against, and it will be wrong after some future reorder with no way to know.
+///
+/// The fix for both is the same and it is why neither rule is a nuisance: name the
+/// chapter. `[Where this actually stands](../modules/status.md)` says where to go and what
+/// it is called, and a reorder cannot make either half false.
+#[test]
+fn a_cross_reference_names_a_chapter_rather_than_numbering_it() {
+    let (linked, bare) = book_urns::chapter_numbers_in_tree(&book_src()).expect("the book scans");
+    let summary = std::fs::read_to_string(book_src().join("SUMMARY.md")).expect("SUMMARY.md");
+    let chapters = book_urns::summary_chapters(&summary);
+
+    assert!(
+        chapters.len() > 5,
+        "SUMMARY.md parsed to {} numbered chapters — the parser is not reading it",
+        chapters.len()
+    );
+
+    let mut failures: Vec<String> = Vec::new();
+    for link in &linked {
+        match book_urns::chapter_for(link, &chapters) {
+            Some(chapter) if chapter.number == link.number => failures.push(format!(
+                "{}:{}: `[chapter {}]` is right today and wrong after the next reorder. \
+                 Write `[{}]({})`.",
+                link.file, link.line, link.number, chapter.title, link.target
+            )),
+            Some(chapter) => failures.push(format!(
+                "{}:{}: the prose says chapter {}, but {} is chapter {} — \"{}\". Write \
+                 `[{}]({})`.",
+                link.file,
+                link.line,
+                link.number,
+                link.target,
+                chapter.number,
+                chapter.title,
+                chapter.title,
+                link.target
+            )),
+            None => failures.push(format!(
+                "{}:{}: `[chapter {}]({})` points at something SUMMARY.md does not number \
+                 (a prefix chapter, or a file it does not list).",
+                link.file, link.line, link.number, link.target
+            )),
+        }
+    }
+    for number in &bare {
+        failures.push(format!(
+            "{}:{}: `{}` has no link, so nothing can check it. Name the chapter instead.",
+            number.file, number.line, number.text
+        ));
+    }
+
+    assert!(
+        failures.is_empty(),
+        "the book numbers a chapter where it could name one:\n  {}",
+        failures.join("\n  ")
+    );
+}
+
 /// The instrument, not the gate: probe a real `ikigai` for every exact manifest entry.
 ///
 /// This cannot be a gate. CI has no `ikigai` binary, and a check that silently does not

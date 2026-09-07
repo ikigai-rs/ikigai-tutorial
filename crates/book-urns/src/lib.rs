@@ -40,6 +40,20 @@
 //! saying "this used to be called X" stops being true out loud if somebody binds X again.
 //! `illustration` has none — it means "not a name, a placeholder" — so it costs a
 //! sentence of reason, in the file, where the next editor will read it.
+//!
+//! ## The other unchecked claim: a chapter number
+//!
+//! A resource name is not the only thing the prose asserts about a world outside itself.
+//! `[chapter 6](status.md)` asserts two things — where to go, and what it is called there
+//! — and only the first is checked by anything. Merging two books renumbered every chapter
+//! in the second one; five cross-references went on naming the old numbers, pointing all
+//! the while at exactly the right files, so no link checker had anything to say.
+//!
+//! [`chapter_numbers`] finds them and [`summary_chapters`] numbers `SUMMARY.md` the way
+//! mdbook does, so a surviving number can be checked against the real one. A *bare*
+//! `chapter 6` — no link — is refused outright rather than checked, because there is
+//! nothing to check it against: the fix for both is to name the chapter, which is a claim
+//! that cannot go stale in a reorder.
 
 use std::fs;
 use std::path::Path;
@@ -454,6 +468,96 @@ mod tests {
         assert!(scan_markdown("x.md", text).is_err());
     }
 
+    const SUMMARY: &str = "\
+# Summary
+
+[Introduction](introduction.md)
+
+# Getting started
+
+- [Resolution](getting-started/resolution.md)
+- [Binding](getting-started/binding.md)
+
+# Loadable modules
+
+- [What a module is](modules/index.md)
+  - [A nested one](modules/nested.md)
+- [Where this actually stands](modules/status.md)
+
+---
+
+[Where to go next](next.md)
+";
+
+    #[test]
+    fn a_part_heading_does_not_reset_the_numbering() {
+        let chapters = summary_chapters(SUMMARY);
+        let number = |path: &str| {
+            chapters
+                .iter()
+                .find(|c| c.path == path)
+                .map(|c| c.number.clone())
+                .unwrap_or_default()
+        };
+        assert_eq!(number("getting-started/resolution.md"), "1");
+        assert_eq!(number("getting-started/binding.md"), "2");
+        // The second part continues the count; it does not start again at 1.
+        assert_eq!(number("modules/index.md"), "3");
+        assert_eq!(number("modules/nested.md"), "3.1");
+        assert_eq!(number("modules/status.md"), "4");
+    }
+
+    #[test]
+    fn a_prefix_chapter_has_no_number_to_be_wrong_about() {
+        // `[Introduction](introduction.md)` is outside the list, so mdbook gives it no
+        // number. It is absent here rather than present with a made-up one: a link that
+        // claims a number for it is wrong in a way the caller has to report differently
+        // from a number that merely disagrees.
+        let chapters = summary_chapters(SUMMARY);
+        assert!(!chapters.iter().any(|c| c.path == "introduction.md"));
+        assert!(!chapters.iter().any(|c| c.path == "next.md"));
+    }
+
+    #[test]
+    fn a_numbered_link_is_resolved_relative_to_the_file_it_is_in() {
+        let (linked, bare) = chapter_numbers(
+            "getting-started/running-it.md",
+            "see [chapter 3](../modules/index.md) for the rest\n",
+        );
+        assert!(bare.is_empty());
+        assert_eq!(linked.len(), 1);
+        let chapters = summary_chapters(SUMMARY);
+        let target = chapter_for(&linked[0], &chapters).expect("the link resolves");
+        assert_eq!(target.path, "modules/index.md");
+        assert_eq!(target.number, linked[0].number);
+    }
+
+    #[test]
+    fn a_stale_number_does_not_match_its_own_target() {
+        let (linked, _) = chapter_numbers("modules/two-ways.md", "see [chapter 6](status.md)\n");
+        let chapters = summary_chapters(SUMMARY);
+        let target = chapter_for(&linked[0], &chapters).expect("the link resolves");
+        assert_ne!(
+            target.number, linked[0].number,
+            "this is the shape of the bug: the link is right and the number is wrong"
+        );
+    }
+
+    #[test]
+    fn a_bare_number_has_nothing_to_check_it_against() {
+        let (linked, bare) = chapter_numbers("x.md", "as chapter 4 explained, resolution is\n");
+        assert!(linked.is_empty());
+        assert_eq!(bare.len(), 1);
+        assert_eq!(bare[0].text, "chapter 4");
+    }
+
+    #[test]
+    fn a_chapter_number_inside_a_fence_is_program_text_not_a_claim() {
+        let text = "```text\nINFO Testing chapter 4\n```\nprose\n";
+        let (linked, bare) = chapter_numbers("x.md", text);
+        assert!(linked.is_empty() && bare.is_empty());
+    }
+
     #[test]
     fn the_manifest_understands_exact_and_prefix_entries() {
         let vocabulary = Vocabulary::parse("# a comment\nurn:kernel:catalog\nurn:file:*\n");
@@ -464,4 +568,219 @@ mod tests {
         assert!(vocabulary.covers_family("urn:kernel:"));
         assert!(!vocabulary.covers_family("urn:greet:"));
     }
+}
+
+// ---------------------------------------------------------------------------
+// Cross-references: a number nobody can check
+// ---------------------------------------------------------------------------
+
+/// One `[chapter N](target)` link found in the prose.
+#[derive(Debug, Clone)]
+pub struct NumberedLink {
+    /// Path relative to the scanned root.
+    pub file: String,
+    /// 1-based line number.
+    pub line: usize,
+    /// The number the prose asserts.
+    pub number: String,
+    /// The link target, as written.
+    pub target: String,
+}
+
+/// A bare `chapter N` in the prose, with no link to check it against.
+#[derive(Debug, Clone)]
+pub struct BareNumber {
+    /// Path relative to the scanned root.
+    pub file: String,
+    /// 1-based line number.
+    pub line: usize,
+    /// The text as written, e.g. `chapter 6`.
+    pub text: String,
+}
+
+/// One entry in `SUMMARY.md`, with the number mdbook will give it.
+#[derive(Debug, Clone)]
+pub struct SummaryChapter {
+    /// Path relative to the book's `src`, normalized.
+    pub path: String,
+    /// The rendered number — `9`, or `2.1` for a nested entry.
+    pub number: String,
+    /// The title as `SUMMARY.md` writes it, which is what the sidebar shows.
+    pub title: String,
+}
+
+/// Number the chapters of a `SUMMARY.md` exactly as mdbook does.
+///
+/// Numbered chapters are the list items (`- [Title](path)`); part headings (`# Part`) do
+/// **not** reset the count, and a prefix or suffix chapter — a link on its own line,
+/// outside any list — gets no number at all. A draft chapter (`- [Title]()`) still
+/// consumes one, which is why the counter advances on an entry with no path.
+pub fn summary_chapters(summary: &str) -> Vec<SummaryChapter> {
+    let mut out = Vec::new();
+    let mut counters: Vec<usize> = Vec::new();
+    for line in summary.lines() {
+        let indent = line.len() - line.trim_start().len();
+        let trimmed = line.trim_start();
+        let Some(item) = trimmed
+            .strip_prefix("- ")
+            .or_else(|| trimmed.strip_prefix("* "))
+        else {
+            continue;
+        };
+        let Some((title, target)) = link_parts(item.trim()) else {
+            continue;
+        };
+
+        // Two spaces per level is mdbook's own convention for a nested entry.
+        let depth = indent / 2;
+        if counters.len() > depth + 1 {
+            counters.truncate(depth + 1);
+        }
+        while counters.len() < depth + 1 {
+            counters.push(0);
+        }
+        counters[depth] += 1;
+        let number = counters
+            .iter()
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(".");
+
+        if target.is_empty() {
+            continue; // A draft chapter: it took a number, but nothing links to it.
+        }
+        out.push(SummaryChapter {
+            path: normalize_path(target),
+            number,
+            title: title.to_string(),
+        });
+    }
+    out
+}
+
+/// Split `[title](target)` into its two halves, if the text is exactly that.
+fn link_parts(text: &str) -> Option<(&str, &str)> {
+    let rest = text.strip_prefix('[')?;
+    let close = rest.find("](")?;
+    let (title, rest) = rest.split_at(close);
+    let target = rest.strip_prefix("](")?.strip_suffix(')')?;
+    Some((title, target))
+}
+
+/// Collapse `a/../b` and `./b`, so a link and a `SUMMARY.md` entry compare as written.
+fn normalize_path(path: &str) -> String {
+    let mut parts: Vec<&str> = Vec::new();
+    for segment in path.split('/') {
+        match segment {
+            "" | "." => {}
+            ".." => {
+                parts.pop();
+            }
+            other => parts.push(other),
+        }
+    }
+    parts.join("/")
+}
+
+/// Resolve `target` as written in `file` against the book's `src` root.
+fn resolve_link(file: &str, target: &str) -> String {
+    let target = target.split('#').next().unwrap_or(target);
+    let dir = match file.rsplit_once('/') {
+        Some((dir, _)) => dir,
+        None => "",
+    };
+    if dir.is_empty() {
+        normalize_path(target)
+    } else {
+        normalize_path(&format!("{dir}/{target}"))
+    }
+}
+
+/// Find every `chapter N` the prose writes, linked or not, outside code fences.
+///
+/// Returns the linked ones and the bare ones separately, because only the first kind can
+/// be checked against anything.
+pub fn chapter_numbers(file: &str, text: &str) -> (Vec<NumberedLink>, Vec<BareNumber>) {
+    let (visible, _) = split_comments(text);
+    let mut linked = Vec::new();
+    let mut bare = Vec::new();
+    let mut in_fence = false;
+
+    for (index, line) in visible.lines().enumerate() {
+        if line.trim_start().starts_with("```") {
+            in_fence = !in_fence;
+            continue;
+        }
+        if in_fence {
+            continue;
+        }
+        let lower = line.to_ascii_lowercase();
+        let mut from = 0usize;
+        while let Some(found) = lower[from..].find("chapter ") {
+            let start = from + found;
+            let after = start + "chapter ".len();
+            let digits: String = lower[after..]
+                .chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect();
+            from = after.max(start + 1);
+            if digits.is_empty() {
+                continue;
+            }
+            let end = after + digits.len();
+            from = end;
+
+            // `[chapter 6](status.md)`: the bracket before and the target after.
+            let linked_form =
+                start > 0 && lower.as_bytes()[start - 1] == b'[' && lower[end..].starts_with("](");
+            if linked_form {
+                let target_end = lower[end + 2..].find(')').map(|i| end + 2 + i);
+                if let Some(target_end) = target_end {
+                    linked.push(NumberedLink {
+                        file: file.to_string(),
+                        line: index + 1,
+                        number: digits,
+                        target: line[end + 2..target_end].to_string(),
+                    });
+                    from = target_end;
+                    continue;
+                }
+            }
+            bare.push(BareNumber {
+                file: file.to_string(),
+                line: index + 1,
+                text: line[start..end].to_string(),
+            });
+        }
+    }
+    (linked, bare)
+}
+
+/// Run [`chapter_numbers`] over every `.md` file under `root`.
+pub fn chapter_numbers_in_tree(
+    root: &Path,
+) -> Result<(Vec<NumberedLink>, Vec<BareNumber>), String> {
+    let mut files = Vec::new();
+    collect_markdown(root, root, &mut files)?;
+    files.sort();
+
+    let mut linked = Vec::new();
+    let mut bare = Vec::new();
+    for relative in files {
+        let text = fs::read_to_string(root.join(&relative))
+            .map_err(|e| format!("reading {relative}: {e}"))?;
+        let (l, b) = chapter_numbers(&relative, &text);
+        linked.extend(l);
+        bare.extend(b);
+    }
+    Ok((linked, bare))
+}
+
+/// The chapter a `[chapter N](target)` link actually points at, if `SUMMARY.md` has one.
+pub fn chapter_for<'a>(
+    link: &NumberedLink,
+    chapters: &'a [SummaryChapter],
+) -> Option<&'a SummaryChapter> {
+    let resolved = resolve_link(&link.file, &link.target);
+    chapters.iter().find(|c| c.path == resolved)
 }

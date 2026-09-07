@@ -108,12 +108,26 @@ X" goes red if somebody binds X again.
 > cargo test -p book-urns -- --ignored --nocapture
 > ```
 
+### And the cross-references
+
+A resource name is not the only thing prose asserts about a world outside itself.
+`[chapter 6](status.md)` asserts *where to go* and *what it is called there*, and only the
+first half is checked by anything. Merging two books into one renumbered every chapter in
+the second part; five cross-references went on naming the old numbers while pointing at
+exactly the right files, so every link resolved and no link checker had a word to say.
+
+The same test file now numbers `SUMMARY.md` the way mdbook does and checks any surviving
+`[chapter N]` against it — and refuses a *bare* `chapter N` outright, because with no
+target there is nothing to check it against. Both are fixed the same way, which is why
+neither is a nuisance: name the chapter. `[Where this actually
+stands](../modules/status.md)` says both halves and a reorder cannot falsify either.
+
 ## Layout
 
 ```
 books/            mdbook sources — prose
 crates/           the code each book teaches — compiled, linted, tested
-crates/book-urns  the exception: not a lesson, the URN gate above
+crates/book-urns  the exception: not a lesson, the two prose gates above
 ```
 
 ## Dependencies are published crates, deliberately
