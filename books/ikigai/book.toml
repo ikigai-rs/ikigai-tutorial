@@ -6,6 +6,14 @@ src = "src"
 
 [output.html]
 default-theme = "rust"
+# The book is published as a PROJECT Pages site (https://ikigai-rs.github.io/ikigai-tutorial/),
+# so it lives under this prefix rather than at the domain root. Chapter-to-chapter links
+# are relative and never needed it. The 404 page does: Pages serves it for ANY missing
+# path under the site, at whatever depth the bad URL had, so its assets can only be found
+# from an absolute base — this value becomes its `<base href>`. Nothing else in the
+# output changes, which is why `mdbook serve` still serves at http://localhost:3000/
+# (measured on mdbook 0.5.4: it ignores site-url; the prefixed path 404s locally).
+site-url = "/ikigai-tutorial/"
 git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
 edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/ikigai/{path}"
 # Loaded after mdbook's own palette, which is what lets the contrast repairs in that file

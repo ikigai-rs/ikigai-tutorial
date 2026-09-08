@@ -1,0 +1,76 @@
+name: Build, test and deploy the book
+
+# The book's gate and its deploy, in one workflow, so that the tree which reaches
+# https://ikigai-rs.github.io/ikigai-tutorial/ is the tree that just passed `mdbook test`
+# and the contrast gate — not a second `mdbook build` that could drift from the first.
+#
+# It ALSO runs on pull requests, without deploying: `books` is a gate every PR needs
+# whether or not a deploy follows it (it used to live in ci.yml; it moved here so the
+# deploy could `needs:` it structurally rather than by convention). Same shape as
+# ikigai-web-demo's pages.yml: build + test on every event, publish only from main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Let Pages read the deployment token. `contents: read` is all the build needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ── The books are a gate, not an artifact ────────────────────────────────────
+  #
+  # `mdbook test` compiles and runs every Rust block in every book against the real
+  # crates, which is the whole reason the tutorial is trustworthy: an example that
+  # stops matching the API fails the build instead of misleading a reader.
+  #
+  # This runs the same script a contributor runs (`./scripts/test-books.sh`), so the
+  # local and CI incantations cannot drift — including the isolated target directory
+  # the script uses to dodge E0464. See the comment at the top of that script. The
+  # script builds `books/ikigai/book` on the way, and that directory — the same bytes
+  # the tests just ran against — is what the deploy below publishes.
+  books:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # Prebuilt mdbook, the same way ci.yml installed it: unpinned on purpose, so a new
+      # mdbook release that moves a theme color or renames an element id turns the
+      # contrast gate red here instead of going quietly stale behind a pin.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: mdbook
+
+      - name: build and test every book
+        run: ./scripts/test-books.sh
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: books/ikigai/book
+
+  deploy:
+    # A pull request builds and tests; only main (and a manual dispatch) publishes.
+    needs: books
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # One deploy at a time, and a deploy in flight is never cancelled: Pages would be
+    # left with whichever half-finished state the cancellation interrupted. A fixed group
+    # rather than one keyed by ref because only main ever reaches this job. (The PR-side
+    # `books` runs above are not in the group, so concurrent PRs do not queue on each
+    # other.)
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,9 +1,12 @@
-# fmt · clippy · test for the code, and a separate job that builds and TESTS the books.
+# fmt · clippy · test for the code. The books have their own workflow, pages.yml, which
+# builds and TESTS them (`./scripts/test-books.sh`) on every PR and push, and deploys
+# the result from main — the `books` job lives there so the deploy can `needs:` it.
 #
-# Note which job holds which gate. `mdbook test` (the `books` job) covers the book's Rust
-# blocks. The URN gate — every resource name the prose prints has to resolve somewhere
-# real — is an ordinary integration test in `crates/book-urns`, so it rides in `test`
-# below, not in `books`. See that crate's docs for what it does and does not cover.
+# Note which job holds which gate. `mdbook test` (the `books` job in pages.yml) covers
+# the book's Rust blocks. The URN gate — every resource name the prose prints has to
+# resolve somewhere real — is an ordinary integration test in `crates/book-urns`, so it
+# rides in `test` below, not in `books`. See that crate's docs for what it does and does
+# not cover.
 name: ci
 
 on:
@@ -32,25 +35,3 @@ jobs:
 
       - name: test
         run: cargo test --all-targets
-
-  # ── The books are a gate, not an artifact ────────────────────────────────────
-  #
-  # `mdbook test` compiles and runs every Rust block in every book against the real
-  # crates, which is the whole reason the tutorial is trustworthy: an example that
-  # stops matching the API fails the build instead of misleading a reader.
-  #
-  # This runs the same script a contributor runs (`./scripts/test-books.sh`), so the
-  # local and CI incantations cannot drift — including the isolated target directory
-  # the script uses to dodge E0464. See the comment at the top of that script.
-  books:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: mdbook
-
-      - name: build and test every book
-        run: ./scripts/test-books.sh
