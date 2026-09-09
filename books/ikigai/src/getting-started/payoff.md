@@ -289,6 +289,10 @@ ikigai> source urn:iki:fn:toUpper in="a b"
 A B
 [cached]
 ikigai> trace urn:iki:fn:toUpper in="a b"
+trace  urn:iki:fn:toUpper
+  client      ikigai repl  ·  capability: root (full authority)
+  transport   embedded · in-process
+
 urn:iki:fn:toUpper   toUpper · cached · main · 0ms   → 3b  A B
 ikigai> describe urn:iki:fn:toUpper text/turtle
 @prefix ik: <https://ikigai-rs.dev/ns#> .
@@ -296,20 +300,35 @@ ikigai> describe urn:iki:fn:toUpper text/turtle
 <urn:ikigai:endpoint:toUpper> a ik:Endpoint ;
     ik:id "toUpper" ;
     …
-ikigai> sink urn:kernel:cut urn:iki:fn:toUpper
-cut urn:iki:fn:toUpper
+ikigai> sink urn:file:notes.txt remember the milk
+wrote 17 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+remember the milk
+[computed]
+ikigai> cache urn:file:notes.txt
+cached
+ikigai> sink urn:kernel:cut urn:file:notes.txt
+cut urn:file:notes.txt
+[uncacheable]
+ikigai> cache urn:file:notes.txt
+not cached
 ikigai> source urn:kernel:threads
 threads (cut generations)
-  urn:iki:fn:toUpper  gen 1
+  urn:file:notes.txt  gen 2
 ```
 
 Line by line: `|` pipes one resolution's output into the next one's unnamed argument, and
 the `[2 computed]` tally is the kernel counting invocations. `cache` is `is_cached` from a
 shell. `trace` is `issue_traced` with the CLI's own tracer rendering the tree. `describe
-… text/turtle` is `Meta` with `as=text/turtle`. `sink urn:kernel:cut` cuts a thread by
-hand — a Sink to a resource cuts its own thread, and this is the resource for cutting
-somebody else's — and `urn:kernel:threads` shows every thread that has ever been cut, with
-its generation.
+… text/turtle` is `Meta` with `as=text/turtle`. The file is the `title` of this chapter,
+one level up: its endpoint declared a thread named after the file, so the `sink` that wrote
+it cut that thread, and `sink urn:kernel:cut` cuts it again by hand — the resource for
+doing what a write does, on somebody else's behalf — and the cached read is gone. Note
+what a cut does *not* do: `urn:iki:fn:toUpper` declared no thread (a pure function has
+nothing to hang one on), so cutting a thread by that name would leave its entry exactly as
+cached as before. `urn:kernel:threads` shows every thread that has ever been cut, with its
+generation — the file's twice.
 
 > ⚠ The Turtle the CLI prints may differ in shape from the tutorial host's: which
 > `ikigai-vocab` renders it is the CLI's choice, made on the CLI's release schedule, and

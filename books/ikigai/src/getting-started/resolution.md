@@ -53,8 +53,10 @@ for one as Turtle in [What resolution buys you](payoff.md).
 ## Golden threads
 
 When a resolution is derived from other resolutions, the kernel records the dependency.
-Write to something upstream and everything derived from it is invalidated — precisely,
-not by guesswork and not by expiry guessing.
+Write to something upstream and everything that declared a dependency on it — directly,
+or by having resolved it — is invalidated: precisely, not by guesswork and not by expiry
+guessing. (A pure function of its arguments declares no dependency, and no cut touches
+it; that is what `.cacheable()` on such a function is claiming.)
 
 This is why caching here is not a bolt-on. A cache that cannot tell you *why* an entry is
 still valid has to fall back on timeouts; one that tracks derivation can keep an answer
