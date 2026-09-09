@@ -50,6 +50,9 @@ capabilities.
 
 ## How to read this book
 
+The published copy is at <https://ikigai-rs.github.io/ikigai-tutorial/>, rebuilt from `main`
+on every merge.
+
 Every Rust block in these pages is compiled and run by `mdbook test`, and the longer code
 listings are **included from the crates that compile them** rather than copied. A book
 that paraphrases its own examples is a book that will eventually be wrong about them.

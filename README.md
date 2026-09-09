@@ -14,6 +14,11 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 
 Read it:
 
+**<https://ikigai-rs.github.io/ikigai-tutorial/>** — published from `main` on every merge,
+by the same run that tests it (below), so what is at that URL is a book that passed.
+
+Or clone it and serve it locally:
+
 ```bash
 cargo install mdbook
 mdbook serve books/ikigai --open
@@ -55,8 +60,9 @@ There is no separate "keep the docs up to date" chore, because there is a gate:
 ```
 
 `mdbook test` compiles and runs **every Rust block in the book** against the real crates,
-and CI runs it on every push. The longer listings are not copied into the prose at all —
-they are pulled in from the crate by anchor:
+and CI runs it on every push — the deploy to the URL above is downstream of that same job
+(`.github/workflows/pages.yml`), so a red book never publishes. The longer listings are not
+copied into the prose at all — they are pulled in from the crate by anchor:
 
 ````markdown
 ```rust,ignore
