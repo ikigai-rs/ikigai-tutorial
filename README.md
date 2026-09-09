@@ -9,10 +9,12 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 
 | part | covers |
 |---|---|
+| **The front door** | Twenty minutes with the CLI, nothing compiled — catalog, manifold, pipe, `as=`, cache hit, cut thread, trace — then the REPL grammar with a Run button wherever the in-page kernel can answer |
 | **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), what resolution buys you (a cache hit, a golden thread cut, a trace, a catalog — each one run), self-description, binding, configuration (a config file the host reads, layered), the file workspace |
 | **Building endpoints** | A transreptor of your own and the kernel selecting it, a three-verb endpoint whose declared capability is enforced per verb, SPARQL over the catalog, and a clock-reading endpoint tested under a fixed clock |
 | **Loadable modules** | Modules vs. linked-in spaces, the host callback, the wire session, dual-mode crates, and an honest account of what is actually finished |
 | **Beyond one host** | A kernel behind a socket, the authority a certificate mints, the three things a mount can mean, an editor and a machine as clients — and three exercises against all of it |
+| *end matter* | A glossary, a map of every repository in the organization (derived from the org's list, not from memory), and how to contribute a module |
 
 Read it:
 

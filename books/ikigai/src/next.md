@@ -1,5 +1,11 @@
 # Where to go next
 
+Three reference pages close the book: a [glossary](glossary.md) of the nine terms
+[Resolution](getting-started/resolution.md) introduced, a [map of every
+repository](repositories.md) in the organization, and [how to contribute a
+module](contribute.md) of your own. The short list below is the handful this book leaned
+on.
+
 ## The repositories
 
 - [`ikigai-core`](https://github.com/ikigai-rs/ikigai-core) — the kernel,

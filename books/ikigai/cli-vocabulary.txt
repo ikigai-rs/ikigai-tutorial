@@ -25,7 +25,7 @@
 #     cargo test -p book-urns -- --ignored --nocapture
 #
 # Run it when you change this file, and when the CLI releases. Verified against
-# ikigai-cli 0.1.18 on 2026-09-08, the golden-thread and linked-data entries included.
+# ikigai-cli 0.1.18 on 2026-09-08, the front-door entries included.
 
 # The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
@@ -35,6 +35,17 @@ urn:iki:fn:toUpper
 urn:iki:fn:reverseList
 urn:iki:fn:compose
 urn:iki:fn:conditional
+# The same library's demo endpoints, which the grammar chapter's map and fork lines use,
+# and the compose shape the CLI's host binds for its own demo.
+urn:demo:split
+urn:data:page
+
+# The Lisp engine the grammar chapter names in passing: a line starting with `(`.
+urn:lisp:eval
+
+# The coreutils-analog text endpoints (`ikigai-text`), named as a family by the
+# repository map. Probed as `urn:text:wc`, `urn:text:head`, `urn:text:sort`.
+urn:text:*
 
 # The kernel's own self-description resources. These are intercepted by the kernel rather
 # than bound in a space, so `list` does not show them; `source` does.

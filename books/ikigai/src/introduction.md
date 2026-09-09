@@ -31,6 +31,11 @@ boundary on what may be done, and provenance for what was done.
 
 ## What is in here
 
+**The front door** needs no Rust: twenty minutes with the `ikigai` CLI that show the
+whole model — a catalog, a manifold, a pipe, a format change, a cache hit, a cut thread,
+a trace — and then the REPL grammar those commands are written in, with a Run button
+wherever this page's own kernel can answer.
+
 **Part I — Getting started** builds an endpoint and links it into a kernel you compose
 yourself. It is the 95% case, and everything else assumes it.
 
@@ -49,8 +54,9 @@ things a mount can mean by "resolve this over there" — and then two clients, o
 one machine, that build their command surface by reading the catalog rather than being
 told.
 
-Read Part I first, or at least [Resolution](getting-started/resolution.md) and
-[Binding](getting-started/binding.md). Building endpoints assumes Part I and nothing else;
+Read the front door if you have not run ikigai before, then Part I — or at least
+[Resolution](getting-started/resolution.md) and [Binding](getting-started/binding.md).
+Building endpoints assumes Part I and nothing else;
 Part II assumes you know what a `space()` is and why binding is separate from defining;
 Part III assumes both, and leans hardest on capabilities.
 
