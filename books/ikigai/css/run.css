@@ -207,3 +207,10 @@
         transition: none;
     }
 }
+
+/* The listing's expected output, behind a disclosure so the page does not answer the
+   question before the reader runs the cell. */
+.ikigai-run-expected-wrap { margin-top: .5rem; font-size: .85em; }
+.ikigai-run-expected-summary { cursor: pointer; color: var(--fg); opacity: .8; }
+.ikigai-run-expected-summary:focus-visible { outline: 2px solid var(--links); outline-offset: 2px; }
+.ikigai-run-expected-wrap[open] .ikigai-run-expected { margin-top: .35rem; }
