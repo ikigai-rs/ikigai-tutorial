@@ -45,6 +45,13 @@
 - [The machine client](beyond/agent.md)
 - [Exercises: beyond one host](beyond/exercises.md)
 
+# Polyglot tracks
+
+- [One wire, three languages](polyglot/index.md)
+- [The Python track](polyglot/python.md)
+- [The TypeScript track](polyglot/typescript.md)
+- [The notebook: the catalog as a graph](polyglot/notebook.md)
+
 ---
 
 [Where to go next](next.md)

@@ -54,6 +54,12 @@ things a mount can mean by "resolve this over there" — and then two clients, o
 one machine, that build their command surface by reading the catalog rather than being
 told.
 
+**Polyglot tracks** mirror Part I chapter for chapter from Python and from TypeScript —
+a decorated function served on a socket, the signature as the contract, a mount as a
+binding, the kernel's cache and trace seen from outside, a scoped connect refused — and
+close with a notebook that queries the catalog as a graph. They say plainly what an L0
+peer cannot do: compose.
+
 Read the front door if you have not run ikigai before, then Part I — or at least
 [Resolution](getting-started/resolution.md) and [Binding](getting-started/binding.md).
 Building endpoints assumes Part I and nothing else;
