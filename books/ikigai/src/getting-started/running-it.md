@@ -14,10 +14,12 @@ and the answer is a real resolution, in your browser, with nothing installed:
 [computed]</pre>
 </div>
 
-One kernel serves the whole page and keeps its cache between runs, so a second press
-answers `[cached]`. It binds Part I's names and nothing else — the other parts' hosts, and
-your own crate, are not in the page — and if it fails to load, a cell shows what the
-listing produces and says so.
+Nothing runs until you press Run; until then a cell shows the output its listing
+produces, marked as expected. One kernel serves the whole page and keeps its cache
+between runs, so a second press answers `[cached]`, and every run is kept under the cell.
+The command is yours to edit — Reset brings the chapter's back. The kernel binds Part I's
+names and nothing else — the other parts' hosts, and your own crate, are not in the page
+— and if it fails to load, a cell keeps the expected output and says so.
 
 ## The tutorial binary (this repo, nothing else)
 

@@ -24,9 +24,13 @@ by the same run that tests it (below), so what is at that URL is a book that pas
 The published book runs **its own kernel in the page**: `crates/book-wasm` is a
 wasm-bindgen face over `hello_camel::kernel()` and the CLI's engine, built by `pages.yml`
 into `wasm/` beside the book, and `books/ikigai/js/run.js` turns a
-`<div class="ikigai-run" data-cmd='…'>` in a chapter into a Run button. The four runs in
-"What resolution buys you" resolve in your browser, against the same space the chapter's
-tests run against; with the wasm absent a cell shows the listing's output and says so.
+`<div class="ikigai-run" data-cmd='…'>` in a chapter into a cell: an editable command,
+Run (or Enter), Reset, and a history of every run with its cache verdict and elapsed
+time. Nothing runs until the reader does; until then the cell shows the listing's output,
+marked as expected. The four runs in "What resolution buys you" resolve in your browser,
+against the same space the chapter's tests run against; with the wasm absent a cell
+keeps the expected output and says so. The URN gate checks the chapter's original
+command; what the reader types is theirs.
 
 Or clone it and serve it locally:
 
