@@ -78,6 +78,11 @@
     color: var(--inline-code-color);
 }
 
+/* Caption and output pane together are the cell's one live region — see run.js. */
+.ikigai-run-result {
+    display: block;
+}
+
 .ikigai-run-out {
     margin: 0.3rem 0 0;
     padding: 0.6rem 0.8rem;

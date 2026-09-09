@@ -60,6 +60,30 @@
     outline-offset: -4px;
 }
 
+/* ── Focus you can see ────────────────────────────────────────────────────────
+ *
+ * The exercises' hints are `<details><summary>`; a summary is focusable and mdbook
+ * styles no focus state for it, so the ring is whatever the browser draws — usually
+ * fine, and here made explicit and consistent with the skip link and the Run buttons,
+ * so a keyboard reader gets the same ring everywhere in the book (WCAG 2.2 SC 2.4.7
+ * Focus Visible). `:focus-visible` keeps it for the keyboard and away from a click. */
+summary:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────────────
+ *
+ * mdbook already guards its footnote highlight with `prefers-reduced-motion`; the
+ * search box's loading spinner (`#fa-spin`, a 2s infinite rotation) it does not. Beyond
+ * what AA asks — SC 2.3.3 Animation from Interactions is AAA — but a spinner that keeps
+ * turning for a reader who asked for less motion is a cheap thing to get right. */
+@media (prefers-reduced-motion: reduce) {
+    #fa-spin {
+        animation: none;
+    }
+}
+
 /* ── Contrast repairs ─────────────────────────────────────────────────────────
  *
  * Measured with `ikigai-a11y`, the ecosystem's own WCAG crate. Body text is held to 4.5:1

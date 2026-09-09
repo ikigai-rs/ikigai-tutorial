@@ -196,6 +196,30 @@ that the element it aims at is still in the built HTML — mdbook renamed that i
 already (`#content` became `#mdbook-content`), and a skip link pointing at nothing looks
 exactly like one that works.
 
+### And the structure
+
+Since the accessibility pass (2026-09-09), the same `book-a11y` run also checks the
+**structure** of every built page against WCAG 2.2 AA — the part a parser can decide:
+`lang` on the root, exactly one `h1` in the content, heading levels that never skip,
+`alt` on every image, no empty or generic link text, no duplicate `id`, every ARIA
+reference pointing at an `id` that exists, a `th` in every table, a name on every button
+and input, and every runnable cell in the shape `js/run.js` expects. Every fault is
+reported by success criterion number. Two faults in mdbook's own search markup (an input
+named only by its placeholder, and an `aria-describedby` pointing at nothing) are repaired
+at load by `js/a11y.js`; the gate credits those repairs only while the script still
+contains them.
+
+A second instrument runs in CI: [`a11y/axe.mjs`](a11y/axe.mjs) drives axe-core over a
+jsdom of every page with the book's scripts run, which is the only way to see what
+JavaScript adds — the copy buttons, the Run cells, the search repairs. The two catch
+different things and both gate the deploy. What neither can judge — reading order, plain
+language, whether a link's purpose is clear beyond the generic phrases the gate refuses —
+is a reviewer's job, and [`docs/a11y.md`](docs/a11y.md) is the assessment that says so.
+
+**The book's constitution, one line:** every chapter goes through `./scripts/test-books.sh`,
+which is now `mdbook test` + contrast + structure, and `pages.yml` adds axe — so an
+accessibility regression is a red build, not a review comment.
+
 > ⚠ **Left alone, deliberately: two `<h1>`s per page** — the book title in the menu bar and
 > the chapter title — which is mdbook's own template, not ours. It is a best practice
 > rather than an AA failure, and the two ways to fix it both cost more than it: overriding

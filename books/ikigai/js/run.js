@@ -99,19 +99,33 @@
         });
         head.appendChild(cmdPane);
 
+        // The visible text IS the accessible name — no `aria-label`. One that said "Run in
+        // this page" stopped containing the visible label the moment the button read "Run
+        // again" (WCAG 2.2 SC 2.5.3 Label in Name), and a speech-input user saying what
+        // they see would have missed it. What the button acts on is the command pane, and
+        // that relationship is a description, not a name.
+        cellCount += 1;
+        cmdPane.id = "ikigai-run-cmd-" + cellCount;
         var button = el("button", "ikigai-run-button", "Run");
         button.type = "button";
-        button.setAttribute("aria-label", "Run in this page");
+        button.setAttribute("aria-describedby", cmdPane.id);
         head.appendChild(button);
         cell.appendChild(head);
 
+        // Caption and output are ONE status region (SC 4.1.3 Status Messages): "running…",
+        // "from the kernel in this page" and "the in-page kernel did not load" are the
+        // status of an action the reader took without moving focus, so they have to be
+        // announced — and a caption outside the region would be the message that never
+        // reaches a screen reader. `aria-atomic` so a change to either half re-reads both.
+        var result = el("div", "ikigai-run-result");
+        result.setAttribute("role", "status");
+        result.setAttribute("aria-live", "polite");
+        result.setAttribute("aria-atomic", "true");
         var caption = el("div", "ikigai-run-caption", "expected output — what the listing produces");
-        cell.appendChild(caption);
-
+        result.appendChild(caption);
         var pane = el("pre", "ikigai-run-out", expectedText);
-        pane.setAttribute("aria-live", "polite");
-        pane.setAttribute("role", "status");
-        cell.appendChild(pane);
+        result.appendChild(pane);
+        cell.appendChild(result);
 
         var runs = 0;
         button.addEventListener("click", function () {
@@ -148,6 +162,8 @@
             });
         });
     }
+
+    var cellCount = 0;
 
     function installAll() {
         var cells = document.querySelectorAll("div.ikigai-run[data-cmd]");

@@ -12,7 +12,7 @@ one-line self-description is the thing least likely to be updated when the crate
 
 What is actually there:
 
-| | |
+| piece | state |
 |---|---|
 | the callback machinery | **proven** — `InProcessTransport`, exercised end to end |
 | the wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |

@@ -83,6 +83,27 @@ jobs:
           grep -q '^export function boundNames' books/ikigai/book/wasm/book_wasm.js
           grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
 
+      # ── The second accessibility instrument ───────────────────────────────
+      #
+      # `book-a11y` (inside test-books.sh) measures contrast and checks the STATIC
+      # structure of every page. What it cannot see is anything JavaScript adds after
+      # load — mdbook's copy buttons, the Run cells `js/run.js` builds, the repairs
+      # `js/a11y.js` makes to the search box. axe-core over a jsdom of each built page,
+      # with the book's scripts run, sees exactly that. No browser: jsdom has no layout,
+      # so axe's color-contrast rule is skipped here — that is book-a11y's job — and the
+      # dynamic `import()` of the wasm fails in jsdom, which exercises the cells' static
+      # fallback path rather than the kernel. Both instruments gate the deploy.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: a11y/package-lock.json
+      - name: axe-core over the built book (a11y/axe.mjs)
+        working-directory: a11y
+        run: |
+          npm ci
+          node axe.mjs ../books/ikigai/book
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: books/ikigai/book

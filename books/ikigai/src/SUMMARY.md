@@ -17,7 +17,7 @@
 - [Binding, and a host of your own](getting-started/binding.md)
 - [Configuration](getting-started/configuration.md)
 - [The file workspace](getting-started/file-workspace.md)
-- [Exercises](getting-started/exercises.md)
+- [Exercises: getting started](getting-started/exercises.md)
 
 # Building endpoints
 
@@ -43,7 +43,7 @@
 - [Preferential resolution](beyond/preference.md)
 - [The editor as a client](beyond/emacs.md)
 - [The machine client](beyond/agent.md)
-- [Exercises](beyond/exercises.md)
+- [Exercises: beyond one host](beyond/exercises.md)
 
 ---
 

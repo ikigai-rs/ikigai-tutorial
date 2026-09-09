@@ -1,11 +1,14 @@
-//! Measure the built book's palette against the WCAG contrast floor.
+//! Measure the built book against the WCAG 2.2 AA floor — colour and structure.
 //!
 //!     cargo run -p book-a11y -- books/ikigai            # gate: exits non-zero on a fault
-//!     cargo run -p book-a11y -- books/ikigai --survey   # every pair, pass or fail
+//!     cargo run -p book-a11y -- books/ikigai --survey   # every pair and every page
 //!
-//! Run after `mdbook build`, because what it reads is what mdbook wrote:
-//! `<book>/book/css/variables-*.css`, then the `additional-css` files `book.toml` names,
-//! in that order. `scripts/test-books.sh` does both, so CI does too.
+//! Run after `mdbook build`, because what it reads is what mdbook wrote: the palette
+//! (`<book>/book/css/variables-*.css`, then the `additional-css` files `book.toml` names,
+//! in that order) and every built page under `<book>/book/`. `scripts/test-books.sh` does
+//! both, so CI does too. The structural half is `book_a11y::structure`; what it cannot
+//! see — anything JavaScript adds after load — is the second instrument's job,
+//! `a11y/axe.mjs`.
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -60,6 +63,31 @@ fn main() -> ExitCode {
         return ExitCode::FAILURE;
     }
 
+    // Structure: every built page, against the checks a parser can decide.
+    let structural = match check_structure(&book, survey) {
+        Ok(faults) => faults,
+        Err(e) => {
+            eprintln!("book-a11y: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    if !structural.is_empty() {
+        eprintln!(
+            "book-a11y: {} structural fault{} (WCAG 2.2):",
+            structural.len(),
+            if structural.len() == 1 { "" } else { "s" }
+        );
+        for fault in &structural {
+            eprintln!("  {}", fault.report());
+        }
+        eprintln!(
+            "\nA fault in mdbook's own markup is repaired at load by js/a11y.js (see \
+             book_a11y::structure::A11Y_JS_REPAIRS); one in a chapter is fixed in the \
+             chapter. Neither is fixed by forking the theme."
+        );
+        return ExitCode::FAILURE;
+    }
+
     let findings = book_a11y::check(&palette);
     if findings.is_empty() {
         println!(
@@ -100,6 +128,82 @@ fn main() -> ExitCode {
          mdbook's palette — never by editing the theme, which is not ours."
     );
     ExitCode::FAILURE
+}
+
+/// Every built page, checked; the faults `js/a11y.js` repairs at load are credited only
+/// while the script still contains the repair.
+///
+/// Two files are skipped. `print.html` is every chapter concatenated, so it carries one
+/// `<h1>` per chapter by design; `toc.html` is the sidebar as a fragment mdbook loads
+/// into the page, not a document — no `<html>`, no `<main>`, no title. `404.html` is
+/// checked like any page: a reader lands on it.
+fn check_structure(book: &Path, survey: bool) -> Result<Vec<book_a11y::structure::Fault>, String> {
+    let root = book.join("book");
+    let mut pages = Vec::new();
+    collect_html(&root, &root, &mut pages)?;
+    pages.sort();
+    if pages.len() < 5 {
+        return Err(format!(
+            "only {} pages under {} — run `mdbook build` first",
+            pages.len(),
+            root.display()
+        ));
+    }
+    let a11y_js = read(&book.join("js/a11y.js"))?;
+
+    let mut faults = Vec::new();
+    let mut titles = Vec::new();
+    let mut checked = 0usize;
+    for relative in &pages {
+        if relative == "print.html" || relative == "toc.html" {
+            continue;
+        }
+        let html = read(&root.join(relative))?;
+        let page_faults = book_a11y::structure::check_page(relative, &html);
+        let page_faults = book_a11y::structure::without_scripted_repairs(page_faults, &a11y_js);
+        if survey {
+            println!(
+                "{:<48} {}",
+                relative,
+                if page_faults.is_empty() {
+                    "ok"
+                } else {
+                    "FAULT"
+                }
+            );
+        }
+        // `index.html` is the first chapter served again at the book's root — the same
+        // document at two URLs, so the same title is right, not a collision.
+        if relative != "index.html" {
+            titles.push((relative.clone(), book_a11y::structure::page_title(&html)));
+        }
+        faults.extend(page_faults);
+        checked += 1;
+    }
+    faults.extend(book_a11y::structure::check_titles(&titles));
+    if faults.is_empty() {
+        println!("book-a11y: {checked} pages pass the structural checks");
+    }
+    Ok(faults)
+}
+
+fn collect_html(root: &Path, dir: &Path, out: &mut Vec<String>) -> Result<(), String> {
+    for entry in std::fs::read_dir(dir).map_err(|e| format!("reading {}: {e}", dir.display()))? {
+        let path = entry
+            .map_err(|e| format!("reading {}: {e}", dir.display()))?
+            .path();
+        if path.is_dir() {
+            collect_html(root, &path, out)?;
+        } else if path.extension().and_then(|e| e.to_str()) == Some("html") {
+            out.push(
+                path.strip_prefix(root)
+                    .map_err(|e| format!("{}: {e}", path.display()))?
+                    .to_string_lossy()
+                    .into_owned(),
+            );
+        }
+    }
+    Ok(())
 }
 
 /// Confirm the built pages still carry the skip link and the element it targets.
