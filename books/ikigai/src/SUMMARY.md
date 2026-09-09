@@ -2,6 +2,11 @@
 
 [Introduction](introduction.md)
 
+# The front door
+
+- [Twenty minutes, nothing compiled](front-door/cli.md)
+- [The REPL grammar](front-door/grammar.md)
+
 # Getting started
 
 - [Resolution](getting-started/resolution.md)
@@ -43,3 +48,6 @@
 ---
 
 [Where to go next](next.md)
+[Glossary](glossary.md)
+[The repositories](repositories.md)
+[Contribute a module](contribute.md)
