@@ -15,10 +15,12 @@
 //
 // Three things are deliberate about how it behaves.
 //
-// NOTHING RUNS ON LOAD except loading the kernel. A cell shows its command and the
-// EXPECTED output — the listing's, labelled as expected — until the reader presses Run.
-// "Cached the second time" is a thing the reader does, twice, and watches change; a page
-// that had already run it for them would have taken the payoff away.
+// NOTHING RUNS ON LOAD except loading the kernel, and NOTHING IS ANSWERED IN ADVANCE: a
+// cell shows its command and an empty result until the reader presses Run. The listing's
+// own output sits behind a disclosure ("Expected output") for whoever wants to check, and
+// stands in for the result only when the kernel cannot load. "Cached the second time" is
+// a thing the reader does, twice, and watches change; a page that had already shown the
+// answer would have taken the payoff away (Brian, on the first version, which did).
 //
 // THE COMMAND IS EDITABLE. It is a real textarea (one row per line, monospace): Enter
 // runs it, Shift+Enter adds a line, Run runs it, Reset restores the chapter's original.
@@ -179,11 +181,26 @@
         result.setAttribute("aria-live", "polite");
         result.setAttribute("aria-atomic", "true");
         var caption = el("div", "ikigai-run-caption",
-            "expected output — what the listing produces; press Run to resolve it here");
-        var pane = el("pre", "ikigai-run-out", expectedText);
+            "press Run to resolve it in this page");
+        var pane = el("pre", "ikigai-run-out", "");
         result.appendChild(caption);
         result.appendChild(pane);
         cell.appendChild(result);
+
+        // The listing's own output stays available — behind a disclosure, so the
+        // answer is not on the page before the reader has asked the question. It is
+        // also what the pane shows when the kernel cannot load (the static fallback).
+        var expectedWrap = el("details", "ikigai-run-expected-wrap");
+        var expectedSummary = el("summary", "ikigai-run-expected-summary",
+            "Expected output (what the listing produces)");
+        expectedWrap.appendChild(expectedSummary);
+        expectedWrap.appendChild(el("pre", "ikigai-run-expected", expectedText));
+        cell.appendChild(expectedWrap);
+        load().catch(function () {
+            // Static fallback: no kernel, so the listing's output stands in, labelled.
+            pane.textContent = expectedText;
+            caption.textContent = "the in-page kernel did not load — this is the output the listing produces";
+        });
 
         // ── the history ──────────────────────────────────────────────────────
         var history = el("ol", "ikigai-run-history");
@@ -260,9 +277,18 @@
                 execute();
             }
         });
+        // Reset puts the WHOLE cell back the way the chapter shipped it: the command,
+        // the result pane, and the history — not just the text, which read as "nothing
+        // happened" when the last run's output stayed on screen.
         reset.addEventListener("click", function () {
             field.value = original;
             field.rows = Math.max(1, linesOf(original).length);
+            history.textContent = "";
+            history.hidden = true;
+            clear.hidden = true;
+            runs = 0;
+            pane.textContent = "";
+            caption.textContent = "reset — the chapter's command is back; press Run to resolve it in this page";
             field.focus();
         });
         clear.addEventListener("click", function () {
@@ -270,8 +296,8 @@
             history.hidden = true;
             clear.hidden = true;
             runs = 0;
-            pane.textContent = expectedText;
-            caption.textContent = "history cleared — expected output; press Run to resolve it here";
+            pane.textContent = "";
+            caption.textContent = "history cleared — press Run to resolve it in this page";
         });
     }
 

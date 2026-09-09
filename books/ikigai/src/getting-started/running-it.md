@@ -14,12 +14,12 @@ and the answer is a real resolution, in your browser, with nothing installed:
 [computed]</pre>
 </div>
 
-Nothing runs until you press Run; until then a cell shows the output its listing
-produces, marked as expected. One kernel serves the whole page and keeps its cache
+Nothing runs until you press Run, and nothing is answered in advance — the listing's
+expected output sits behind a disclosure under the cell. One kernel serves the whole page and keeps its cache
 between runs, so a second press answers `[cached]`, and every run is kept under the cell.
-The command is yours to edit — Reset brings the chapter's back. The kernel binds Part I's
+The command is yours to edit — Reset puts the chapter's command back and empties the cell. The kernel binds Part I's
 names and nothing else — the other parts' hosts, and your own crate, are not in the page
-— and if it fails to load, a cell keeps the expected output and says so.
+— and if it fails to load, the expected output stands in for the result and the cell says so.
 
 ## The tutorial binary (this repo, nothing else)
 

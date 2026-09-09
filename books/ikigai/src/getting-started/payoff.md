@@ -50,8 +50,10 @@ serves every cell on the page and keeps its cache and its golden threads between
 that is the point, so the order you run them in shows, running a cell twice answers
 differently the second time, and every run stays under the cell so the two can be
 compared. Edit a command and see what changes — a name the kernel does not bind answers
-`error: no endpoint resolved`, which is the CLI's answer too. If the kernel did not
-load, a cell keeps the expected output and says so.
+`error: no endpoint resolved`, which is the CLI's answer too. Nothing is answered in
+advance: the listing's expected output sits behind a disclosure under each cell, and
+stands in for the result only if the kernel did not load — the cell says so. Reset puts
+the whole cell back the way the chapter shipped it.
 
 ## 1. Cached once
 
