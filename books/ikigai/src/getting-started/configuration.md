@@ -121,9 +121,10 @@ over a process, leaving no trace in any file, invisible to anyone reading the de
 inherited silently by children, undiffable. A system whose thesis is that behavior should
 be nameable and inspectable is not comfortable taking instructions that way.
 
-They are not absent, and a book that said so would be lying on your first day. A host
-reads a set of `IKIGAI_*` variables today — `IKIGAI_FILES`, the one you meet first, in
-[The file workspace](file-workspace.md), and others carrying *deployment* facts. The CLI
+They are not absent, and a book that said so would be lying on your first day. The CLI
+(`ikigai-cli` 0.1.18) reads a set of `IKIGAI_*` variables — `IKIGAI_FILES`, the one you
+meet first, in [The file workspace](file-workspace.md), and `IKIGAI_GRANTS`,
+`IKIGAI_SMTP_HOST`, `IKIGAI_PASSKEY_ORIGIN` and others carrying *deployment* facts. It
 picks its scheduler through a three-way precedence, `decide(flag, config, env)`, and then
 *says which one won*:
 

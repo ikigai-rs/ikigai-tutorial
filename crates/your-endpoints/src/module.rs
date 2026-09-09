@@ -12,7 +12,7 @@ use ikigai_core::{
     AsyncFnEndpoint, Description, EndpointSpace, Error, Exact, Fallback, Invocation, InvokeFuture,
     Iri, Representation, Space, Verb,
 };
-use ikigai_module::{InProcessTransport, ModuleSpace};
+use ikigai_module::{InProcessTransport, ModuleFloor, ModuleSpace};
 
 use crate::text_plain_utf8;
 
@@ -79,7 +79,13 @@ pub fn host_space() -> Fallback {
         Arc::new(crate::space()) as Arc<dyn Space>,
         Arc::new(EndpointSpace::new().bind(Exact::new("urn:iki:tutorial:yours:name"), name()))
             as Arc<dyn Space>,
-        Arc::new(ModuleSpace::new([MODULE_PREFIX], Arc::new(module))) as Arc<dyn Space>,
+        // `ModuleFloor::public()`: no mount-wide floor. Your endpoints' own `requires`
+        // are still enforced across the boundary — Part II's exercise 3 shows both.
+        Arc::new(ModuleSpace::new(
+            [MODULE_PREFIX],
+            Arc::new(module),
+            ModuleFloor::public(),
+        )) as Arc<dyn Space>,
     ])
 }
 

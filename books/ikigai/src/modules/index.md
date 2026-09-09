@@ -47,5 +47,5 @@ The code is in
 and as in Part I the listings are pulled from it by anchor rather than copied.
 
 > ⚠ **Read [Where this actually stands](status.md) before you plan around any of this.**
-> `ikigai-module` describes itself as "Phase 1: in-process proof". The callback machinery
+> `ikigai-module` (0.2.0) still describes itself as "Phase 1: in-process proof". The callback machinery
 > is real and exercised; the isolation is not there yet.

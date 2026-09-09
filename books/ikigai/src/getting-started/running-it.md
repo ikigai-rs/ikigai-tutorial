@@ -84,5 +84,5 @@ page, with no server: the whole page is one resource that the in-browser kernel 
 The **Control** tab shows the scheduler, the cache and its golden threads updating live;
 the **Demo** tab is a set of runnable walkthroughs.
 
-It is also the only host that loads **modules** rather than linking everything in — see
-[What a module is](../modules/index.md).
+It is also the only host that loads **modules** rather than linking everything in (as of
+2026-09-08) — see [What a module is](../modules/index.md).

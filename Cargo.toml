@@ -34,11 +34,16 @@ ikigai-core = "0.1.66"
 # kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host.
 ikigai-vocab = "0.1.66"
 ikigai-fn = "0.2.0"
-# 0.1.9 is the floor and it is not a preference: `Resolved` grew a public `canonical`
-# field in ikigai-core 0.1.64, and ikigai-module 0.1.8 constructs one — so that pair no
-# longer compiles together. This workspace only found out when Part III's dependencies
-# raised the resolved core past 0.1.63; the lockfile had been holding 0.1.62 and hiding it.
-ikigai-module = "0.1.10"
+# 0.2.0 is the version where a module endpoint's declared `requires` is ENFORCED across
+# the module boundary — `ModuleSpace::new` grew a third argument, the mount's
+# `ModuleFloor`, which is the source break that made it a minor bump. The status chapter
+# said "the host does not enforce what a module declares" while this workspace pinned
+# 0.1.10, and that was true at 0.1.10; it is false at 0.2.0, which is what a stranger's
+# `cargo add` resolves today. So the book moves to 0.2.0 and says so, with the crate's own
+# test named as the evidence (`crates/book-urns/tests/book_claims.rs`).
+# (Older history: 0.1.9 was the floor because `Resolved` grew a public `canonical` field in
+# ikigai-core 0.1.64 and ikigai-module 0.1.8 built one literally.)
+ikigai-module = "0.2.0"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
 ikigai-sparql = "0.1.7"
