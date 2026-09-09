@@ -1,0 +1,36 @@
+[package]
+name = "book-wasm"
+version = "0.1.0"
+description = "The book's own kernel, in the page: a wasm-bindgen face over hello_camel::kernel() and the CLI's engine, so a chapter's runnable cells resolve for real."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "book_wasm"
+path = "src/lib.rs"
+# `cdylib` is the wasm; `rlib` keeps the crate buildable, lintable and testable natively,
+# so the workspace gates see it like any other crate.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ikigai-core.workspace = true
+# Part I's space and host — the same `kernel()` the chapter's tests run against, so a
+# cell in the page and a listing in the crate answer the same question the same way.
+hello-camel = { path = "../hello-camel" }
+# The CLI's renderer-agnostic engine: the REPL grammar (`source a | b`, `cache`, `trace`,
+# `describe … text/turtle`) over any `Resolver`. Wasm-clean — ikigai-web-demo has driven
+# it in the browser since 0.1.4 — and `eval_async` is what lets a cell run on the JS event
+# loop rather than block the page. 0.1.18 is the version that compiles against the core
+# this workspace pins (it re-exports ikigai-resolve 0.1.18's `Resolver` seam).
+ikigai-engine = "0.1.18"
+serde_json = "1"
+# Pinned exactly, and the SAME version is pinned for wasm-bindgen-cli in pages.yml: the
+# generated JS and the compiled wasm must agree on their ABI, and a mismatch is a runtime
+# failure in the page, not a build error anywhere a gate would see it.
+wasm-bindgen = "=0.2.108"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+console_error_panic_hook = "0.1"

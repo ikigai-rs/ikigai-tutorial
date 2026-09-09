@@ -27,6 +27,10 @@ pub fn space() -> EndpointSpace {
 The prefix `urn:iki:tutorial:yours:` is a stand-in for one you own. Rename it the day this
 stops being a tutorial, and notice nothing else has to change.
 
+One thing your crate cannot do is run in this page. The kernel the published book carries
+is Part I's space compiled once, when the book was built; your code is compiled on your
+machine, so the loop for it is `cargo test` and the binary, not a Run button.
+
 **The fastest loop is a test**, because a test needs no wiring at all:
 
 ```bash

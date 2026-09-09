@@ -1,6 +1,23 @@
 # Running it
 
-Read a chapter, then have a kernel in front of you. Three ways, cheapest first.
+Read a chapter, then have a kernel in front of you. Four ways, cheapest first.
+
+## In this page
+
+The published book carries its own kernel: Part I's space — `camel-case` and the endpoints
+[What resolution buys you](payoff.md) adds — compiled to WebAssembly, under the same engine
+the CLI uses. Where a chapter has a **Run** button, the lines beside it are real REPL lines
+and the answer is a real resolution, in your browser, with nothing installed:
+
+<div class="ikigai-run" data-cmd='source urn:iki:tutorial:camel-case in="resource oriented computing"'>
+<pre class="ikigai-run-expected">resourceOrientedComputing
+[computed]</pre>
+</div>
+
+One kernel serves the whole page and keeps its cache between runs, so a second press
+answers `[cached]`. It binds Part I's names and nothing else — the other parts' hosts, and
+your own crate, are not in the page — and if it fails to load, a cell shows what the
+listing produces and says so.
 
 ## The tutorial binary (this repo, nothing else)
 

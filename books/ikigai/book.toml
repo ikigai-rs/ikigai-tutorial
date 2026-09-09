@@ -19,8 +19,11 @@ edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/book
 # Loaded after mdbook's own palette, which is what lets the contrast repairs in that file
 # win by cascade order rather than by forking the theme. `crates/book-a11y` measures the
 # result and CI runs it — see scripts/test-books.sh.
-additional-css = ["css/a11y.css"]
-additional-js = ["js/a11y.js"]
+additional-css = ["css/a11y.css", "css/run.css"]
+# run.js turns `<div class="ikigai-run" data-cmd='…'>` into a runnable cell backed by the
+# book's own kernel (`crates/book-wasm`, built by pages.yml into `wasm/` beside this
+# book's output). With the wasm absent the cell shows the listing's output instead.
+additional-js = ["js/a11y.js", "js/run.js"]
 
 [output.html.fold]
 enable = true

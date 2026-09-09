@@ -40,16 +40,48 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
       # Prebuilt mdbook, the same way ci.yml installed it: unpinned on purpose, so a new
       # mdbook release that moves a theme color or renames an element id turns the
       # contrast gate red here instead of going quietly stale behind a pin.
+      #
+      # wasm-bindgen-cli is the opposite case and is PINNED, to the exact version
+      # `crates/book-wasm/Cargo.toml` pins for the `wasm-bindgen` crate. The generated
+      # JS and the compiled wasm must agree on their ABI; a mismatch is not a build
+      # error anywhere a gate would see it — it is a page whose cells silently fail
+      # to load. Bump both or neither.
       - uses: taiki-e/install-action@v2
         with:
-          tool: mdbook
+          tool: mdbook,wasm-bindgen-cli@0.2.108
 
       - name: build and test every book
         run: ./scripts/test-books.sh
+
+      # ── The book's own kernel, in the page ───────────────────────────────────
+      #
+      # After the gate, never before it: `test-books.sh` wipes and rebuilds
+      # `books/ikigai/book`, so anything copied in earlier would be gone. The wasm is a
+      # face over `hello_camel::kernel()` — the crate the book's listings are included
+      # from — bound with `wasm-bindgen --target web` into `wasm/` beside the book, same
+      # origin as the pages that load it. Generated output; never committed.
+      - name: build the in-page kernel (crates/book-wasm) into the book
+        run: |
+          cargo build --release -p book-wasm --lib --target wasm32-unknown-unknown
+          wasm-bindgen --target web --out-dir books/ikigai/book/wasm \
+            target/wasm32-unknown-unknown/release/book_wasm.wasm
+
+      # A silent load failure is the failure: `run.js` falls back to the listing's
+      # output when the module is absent, so a deploy with a broken or renamed export
+      # would look fine and teach nothing. Assert the names the page imports are in
+      # the generated JS, by name, before anything is uploaded.
+      - name: smoke — the exports run.js imports are present
+        run: |
+          test -s books/ikigai/book/wasm/book_wasm_bg.wasm
+          grep -q '^export function evalLineAsync' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function boundNames' books/ikigai/book/wasm/book_wasm.js
+          grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
 
       - uses: actions/upload-pages-artifact@v3
         with:
