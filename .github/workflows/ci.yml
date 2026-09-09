@@ -1,53 +1,15 @@
-# fmt · clippy · test for the code. The books have their own workflow, pages.yml, which
-# builds and TESTS them (`./scripts/test-books.sh`) on every PR and push, and deploys
-# the result from main — the `books` job lives there so the deploy can `needs:` it.
-#
-# Note which job holds which gate. `mdbook test` (the `books` job in pages.yml) covers
-# the book's Rust blocks. The URN gate — every resource name the prose prints has to
-# resolve somewhere real — is an ordinary integration test in `crates/book-urns`, so it
-# rides in `test` below, not in `books`. See that crate's docs for what it does and does
-# not cover.
 name: ci
-
 on:
-  push:
-    branches: [main]
+  push: { branches: [main] }
   pull_request:
-
-env:
-  CARGO_TERM_COLOR: always
-
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}   # never cancel main
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2
+  ci:
+    uses: ikigai-rs/.github/.github/workflows/rust.yml@main
+    with:
+      test-args: "--all-targets"
+      wasm-lib: true
 
-      - name: fmt
-        run: cargo fmt --all -- --check
-
-      - name: clippy
-        run: cargo clippy --all-targets -- -D warnings
-
-      - name: test
-        run: cargo test --all-targets
-
-  # `crates/book-wasm` has a wasm face, and the native gates above cannot see a target
-  # that only breaks on wasm32 (a dependency reaching for std::time, say). Clippy on the
-  # wasm target is the check; pages.yml then builds the real artifact.
-  wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
-
-      - name: clippy (wasm32)
-        run: cargo clippy -p book-wasm --lib --target wasm32-unknown-unknown -- -D warnings
+      wasm-packages: book-wasm   # the one wasm face; two-hosts (quinn/mio) cannot build on wasm32
