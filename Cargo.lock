@@ -78,6 +78,7 @@ dependencies = [
 name = "book-urns"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "hello-camel",
  "ikigai-core",
  "loadable-module",
@@ -410,6 +411,7 @@ dependencies = [
  "futures",
  "ikigai-core",
  "ikigai-fn",
+ "ikigai-vocab",
 ]
 
 [[package]]
@@ -517,6 +519,16 @@ dependencies = [
  "futures",
  "futures-timer",
  "ikigai-core",
+]
+
+[[package]]
+name = "ikigai-vocab"
+version = "0.1.66"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8ae5176b1af597607bb97e5a2e8c721c3c2ca5fd72171fb9283af251d24215f"
+dependencies = [
+ "ikigai-core",
+ "serde_json",
 ]
 
 [[package]]

@@ -18,5 +18,6 @@ path = "src/lib.rs"
 
 [dev-dependencies]
 ikigai-core.workspace = true
+futures.workspace = true
 hello-camel = { path = "../hello-camel" }
 loadable-module = { path = "../loadable-module" }

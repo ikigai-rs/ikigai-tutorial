@@ -21,7 +21,12 @@ repository = "https://github.com/ikigai-rs/ikigai-tutorial"
 # Published crates, deliberately — NOT path refs to sibling checkouts. A reader who
 # clones only this repo must be able to `cargo run` immediately; path refs would
 # require them to have the whole ecosystem laid out beside it.
-ikigai-core = "0.1.62"
+# 0.1.66 is the floor because `ikigai-vocab` 0.1.66 — the Meta renderer the tutorial
+# host is built with — requires exactly that core. Nothing here asks for a newer API.
+ikigai-core = "0.1.66"
+# `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
+# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host.
+ikigai-vocab = "0.1.66"
 ikigai-fn = "0.2.0"
 # 0.1.9 is the floor and it is not a preference: `Resolved` grew a public `canonical`
 # field in ikigai-core 0.1.64, and ikigai-module 0.1.8 constructs one — so that pair no

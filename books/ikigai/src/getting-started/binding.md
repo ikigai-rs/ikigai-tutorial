@@ -10,13 +10,26 @@ defining and naming are separate acts, which is the whole point of
 {{#include ../../../../crates/hello-camel/src/lib.rs:space}}
 ```
 
+`space()` is one call to `space_over`, which is where the bindings are:
+
+```rust,ignore
+pub fn space_over(state: Arc<TitleState>) -> EndpointSpace {
+    ikigai_fn::space()
+        .bind(Exact::new("urn:iki:tutorial:camel-case"), camel_case())
+        .bind(Exact::new(TITLE), title(state))
+        .bind(Exact::new("urn:iki:tutorial:camel-title"), camel_title())
+}
+```
+
 Two things are happening.
 
 `ikigai_fn::space()` is the built-in function library as a mountable space —
 `urn:iki:fn:toUpper`, `urn:iki:fn:compose`, `urn:iki:fn:conditional` and friends. `bind`
 is a builder, so a host **starts from somebody else's space and chains its own bindings
 on top**. That is the normal shape of a host: mostly other people's endpoints, plus the
-few that are yours.
+few that are yours — here, the three from [Hello, resource](hello-resource.md) and [What
+resolution buys you](payoff.md). (The `state` handle is `title`'s memory, passed in so a
+test can watch it; `space()` makes a fresh one.)
 
 `Exact::new("urn:iki:tutorial:camel-case")` matches one exact IRI. Bindings can also be URI
 templates, which is how `urn:file:{path}` covers a whole tree with one binding.
@@ -79,17 +92,31 @@ on the `ikigai` binary. Don't — not because it fails, but because it teaches t
 reflex. **You do not extend ikigai by editing ikigai.** You compose a kernel with the
 spaces you want, which is what the CLI itself is doing.
 
-So this book ships its own host instead, and it is short enough to read in full:
+So this book ships its own host instead. The kernel is one line:
 
-```rust,no_run
+```rust,ignore
+{{#include ../../../../crates/hello-camel/src/lib.rs:kernel}}
+```
+
+`Kernel::new(Arc::new(space()))` would resolve every `Source` in this book just as well.
+What it could not do is answer `Meta`, or `urn:kernel:catalog`, which is `Meta` over
+every binding: turning a `Description` into bytes is a *projection*, and `ikigai-core`
+owns no projection — there is no RDF in the kernel, by design. `ikigai-vocab`'s
+`TurtleRenderer` is the projection to Turtle (and to `text/plain` and JSON), and
+injecting it is the entire difference between a host that can describe itself and one
+that answers `no Meta renderer configured`. The CLI does the same thing with the same
+renderer.
+
+And a resolution through it, short enough to read in full:
+
+```rust
 # extern crate hello_camel;
 # extern crate ikigai_core;
 # extern crate futures;
-use std::sync::Arc;
 use futures::executor::block_on;
-use ikigai_core::{ArgRef, Capability, Iri, Kernel, Request, Verb};
+use ikigai_core::{ArgRef, Capability, Iri, Request, Verb};
 
-let kernel = Kernel::new(Arc::new(hello_camel::space()));
+let kernel = hello_camel::kernel();
 
 let request = Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:camel-case").unwrap())
     .with_arg("in", ArgRef::Inline(b"resource oriented computing".to_vec()));

@@ -18,5 +18,6 @@ path = "src/bin/tutorial.rs"
 
 [dependencies]
 ikigai-core.workspace = true
+ikigai-vocab.workspace = true
 ikigai-fn.workspace = true
 futures.workspace = true

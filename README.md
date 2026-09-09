@@ -9,7 +9,7 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 
 | part | covers |
 |---|---|
-| **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), self-description, binding, configuration, the file workspace |
+| **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), what resolution buys you (a cache hit, a golden thread cut, a trace, a catalog — each one run), self-description, binding, configuration, the file workspace |
 | **Loadable modules** | Modules vs. linked-in spaces, the host callback, the wire session, dual-mode crates, and an honest account of what is actually finished |
 
 Read it:
@@ -39,6 +39,7 @@ Run the worked example:
 
 ```bash
 cargo run -p hello-camel -- "resource oriented computing"
+cargo run -p hello-camel -- --catalog
 cargo run -p loadable-module
 ```
 
@@ -46,10 +47,20 @@ cargo run -p loadable-module
 in  resource oriented computing
 out resourceOrientedComputing
 
+@prefix ik: <https://ikigai-rs.dev/ns#> .
+<urn:ikigai:endpoint:toUpper> a ik:Endpoint ;
+    …
+
 host    resolves urn:greet:hello name=urn:host:name
 module  asks the host for urn:host:name
 out     Hello, Peter!
 ```
+
+The tutorial host is built with `ikigai-vocab`'s `TurtleRenderer`, which is what lets it
+print that catalog — and answer `Meta` — rather than `no Meta renderer configured`. The
+four things Part I promises (a cache hit, a golden thread cut, a traced sub-resolution, a
+description that is a graph) are tests in `crates/hello-camel/tests/payoff.rs`, included
+into the chapter that makes the promise.
 
 ## The book is tested
 
@@ -98,7 +109,7 @@ out of the markdown and checks it against the authority that can actually answer
 
 | where the name appears | who confirms it |
 |---|---|
-| a Rust example | `hello_camel::space()` / `loadable_module::host_space()` — hosts built right here |
+| a Rust example | `hello_camel::space()` / `loadable_module::host_space()` — hosts built right here — or, for `urn:kernel:*`, the kernel built over the first of them, since those names are intercepted rather than bound |
 | an `ikigai …` shell example | `books/ikigai/cli-vocabulary.txt` — the book's written-down claim about the CLI, which is another crate on another release schedule |
 | prose | either |
 
