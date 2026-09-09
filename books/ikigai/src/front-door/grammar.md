@@ -25,8 +25,9 @@ RESOURCE ORIENTED COMPUTING
 [cached]</pre>
 </div>
 
-Two spellings of the same request — and the second answered `[cached]`, because the
-kernel keys the cache on the request, not the text you typed.
+Two spellings of the same request — and the second answers `[cached]`, because the
+kernel keys the cache on the request, not the text you typed. Edit the input and run
+again: a different request, computed afresh.
 
 ## Quoting
 

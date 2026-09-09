@@ -41,14 +41,17 @@ below from the file that runs it. To see their output rather than take the book'
 cargo test -p hello-camel --test payoff -- --nocapture --test-threads 1
 ```
 
-Or press **Run**. Each section below ends in a cell, and the cell runs its lines against
-**this book's own kernel, in this page** — `hello_camel::kernel()` compiled to
-WebAssembly, under the same engine the `ikigai` CLI uses, so the lines are the CLI's
-grammar and the answers are real resolutions. One kernel serves every cell on the page,
-and it keeps its cache and its golden threads between runs; that is the point, so the
-order you run them in shows, and running a cell twice answers differently the second
-time. If the kernel did not load, a cell shows the output the listing produces and says
-so.
+Or press **Run**. Each section below ends in a cell: a command you can edit, and the
+output the listing produces, shown as *expected* until you run it against **this book's
+own kernel, in this page** — `hello_camel::kernel()` compiled to WebAssembly, under the
+same engine the `ikigai` CLI uses, so the lines are the CLI's grammar and the answers are
+real resolutions. Nothing runs until you press Run (or Enter in the command). One kernel
+serves every cell on the page and keeps its cache and its golden threads between runs;
+that is the point, so the order you run them in shows, running a cell twice answers
+differently the second time, and every run stays under the cell so the two can be
+compared. Edit a command and see what changes — a name the kernel does not bind answers
+`error: no endpoint resolved`, which is the CLI's answer too. If the kernel did not
+load, a cell keeps the expected output and says so.
 
 ## 1. Cached once
 
@@ -76,8 +79,10 @@ resource oriented computing
 [cached]</pre>
 </div>
 
-The bracketed word is the engine's verdict on each line: the first resolution was
-computed, the second served. Run it again and both say `[cached]`.
+The bracketed word is the engine's verdict on each line: on your first run the first
+resolution is computed and the second served. Press Run again and both say `[cached]` —
+the history under the cell keeps both runs so you can see the change. Then edit the
+name to one that is not bound and run that.
 
 The cache is keyed on the request *and the capability* — a result computed under one
 authority is never handed to a caller holding another. You will not feel that here, where

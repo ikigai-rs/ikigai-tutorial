@@ -14,34 +14,136 @@
     color: var(--fg);
 }
 
+/* The command: a labelled, editable textarea, one row per line, and the buttons. */
 .ikigai-run-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+        "label cmd buttons"
+        ".     help buttons";
+    align-items: start;
+    gap: 0.3rem 0.6rem;
     padding: 0.6rem 0.8rem 0.4rem;
 }
 
-/* The command, rendered like a transcript. `pre` inside the cell keeps mdbook's code
- * styling out of it: this is not a code block, it is what you are about to run. */
+.ikigai-run-label {
+    grid-area: label;
+    font-size: 0.8em;
+    font-weight: 600;
+    padding-top: 0.45rem;
+    color: var(--inline-code-color);
+}
+
 .ikigai-run-cmd {
-    flex: 1 1 auto;
+    grid-area: cmd;
+    width: 100%;
+    box-sizing: border-box;
     margin: 0;
-    padding: 0;
-    background: transparent;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--mono-font, "Source Code Pro", monospace);
     font-size: 0.9em;
     line-height: 1.5;
+    resize: vertical;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.ikigai-run-cmd:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 1px;
+}
+
+.ikigai-run-help {
+    grid-area: help;
+    font-size: 0.75em;
+    color: var(--inline-code-color);
+}
+
+.ikigai-run-buttons {
+    grid-area: buttons;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.ikigai-run-secondary {
+    font: inherit;
+    font-size: 0.85em;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--links);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+}
+
+.ikigai-run-secondary:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+/* One status line per page, above the first cell. */
+.ikigai-run-kernel {
+    font-size: 0.85em;
+    color: var(--inline-code-color);
+}
+
+/* The history: every run so far, oldest first, under the latest result. */
+.ikigai-run-history {
+    margin: 0;
+    padding: 0.4rem 0.8rem 0.6rem 2rem;
+    border-top: 1px solid var(--table-header-bg);
+    font-size: 0.85em;
+}
+
+.ikigai-run-entry {
+    margin: 0.3rem 0;
+}
+
+.ikigai-run-entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: baseline;
+}
+
+.ikigai-run-entry-n {
+    font-weight: 600;
+}
+
+.ikigai-run-entry-cmd {
+    background: transparent;
+    padding: 0;
+    color: var(--fg);
+    overflow-wrap: anywhere;
+}
+
+.ikigai-run-entry-meta {
+    color: var(--inline-code-color);
+}
+
+.ikigai-run-entry-out {
+    margin: 0.2rem 0 0;
+    padding: 0.3rem 0.5rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.95em;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
-.ikigai-run-line {
-    background: transparent;
-    padding: 0;
-    color: var(--fg);
-}
-
-.ikigai-run-prompt {
-    color: var(--inline-code-color);
+@media (max-width: 40rem) {
+    .ikigai-run-head {
+        grid-template-columns: 1fr;
+        grid-template-areas: "label" "cmd" "help" "buttons";
+    }
+    .ikigai-run-buttons {
+        flex-direction: row;
+    }
 }
 
 .ikigai-run-button {
