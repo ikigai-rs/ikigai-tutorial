@@ -5,42 +5,49 @@ repository.
 
 ## First: where your code goes, and how to run it
 
-This book has shown you how to run *its* code three times and never once how to run yours.
+This book has shown you how to run *its* code four times and never once how to run yours.
 So, before the exercises:
 
-**Your endpoints go in `crates/hello-camel/src/lib.rs`**, beside `camel_case_impl` — the
-same file the chapters have been quoting from. An endpoint is a function plus a
-description, and it reaches a name through one more line in `space()`:
+**Your endpoints go in `crates/your-endpoints/src/lib.rs`.** Not in `hello-camel` — that
+is the file the chapters quote, and editing it would change what the book says. Nothing
+quotes `your-endpoints`, and a test makes sure nothing starts to; it exists to be broken.
+It starts with one worked endpoint, `word-count`, in the shape the book teaches, and a
+`space()` that chains onto Part I's, so `camel-case` and `title` answer from your host
+too. An endpoint is a function plus a description, and it reaches a name through one more
+line there:
 
 ```rust,ignore
 pub fn space() -> EndpointSpace {
-    ikigai_fn::space()
-        .bind(Exact::new("urn:iki:tutorial:camel-case"), camel_case())
-        .bind(Exact::new("urn:iki:tutorial:your-thing"), your_thing()) // ← yours
+    hello_camel::space()
+        .bind(Exact::new("urn:iki:tutorial:yours:word-count"), word_count())
+        .bind(Exact::new("urn:iki:tutorial:yours:your-thing"), your_thing()) // ← yours
 }
 ```
+
+The prefix `urn:iki:tutorial:yours:` is a stand-in for one you own. Rename it the day this
+stops being a tutorial, and notice nothing else has to change.
 
 **The fastest loop is a test**, because a test needs no wiring at all:
 
 ```bash
-cargo test -p hello-camel
+cargo test -p your-endpoints
 ```
 
 The test module at the bottom of that file already contains the four lines that build a
-kernel, resolve a name and hand back a `String` — the `camel` helper. Copy it, change the
-IRI, and you have a way to ask your endpoint a question and assert the answer.
+kernel, resolve a name and hand back a `String` — the `text_of` helper. Copy it, change
+the IRI, and you have a way to ask your endpoint a question and assert the answer.
 
-**To see it from a shell**, `crates/hello-camel/src/bin/tutorial.rs` resolves one fixed
-name and prints the result. Point it at yours and run:
+**To see it from a shell**, `crates/your-endpoints/src/bin/yours.rs` resolves one name
+and prints the result. Point its `NAME` at yours and run:
 
 ```bash
-cargo run -p hello-camel -- "resource oriented computing"
+cargo run -p your-endpoints -- "a few words here"
 ```
 
 **To watch the host describe itself**, ask for the catalog:
 
 ```bash
-cargo run -p hello-camel -- --catalog
+cargo run -p your-endpoints -- --catalog
 ```
 
 Your endpoint appears in it the moment it is bound, described exactly as its `Description`
@@ -55,12 +62,12 @@ own](binding.md) shows the one line that makes the difference.
 > `cargo test` — [Hello, resource](hello-resource.md) does exactly that with
 > `camel_case().describe().id`.
 
-<!-- urn-gate: illustration urn:iki:tutorial:your-thing — a stand-in for whatever the
-     reader binds; the point of the line is the shape, not the name. -->
-<!-- urn-gate: illustration urn:iki:tutorial:lower-camel-case — exercise 1 asks the reader
-     to write this one; nothing in the repository binds it. -->
-<!-- urn-gate: illustration urn:iki:tutorial:now — exercise 4's deliberately wrong clock,
-     written by the reader. -->
+<!-- urn-gate: illustration urn:iki:tutorial:yours:your-thing — a stand-in for whatever
+     the reader binds; the point of the line is the shape, not the name. -->
+<!-- urn-gate: illustration urn:iki:tutorial:yours:lower-camel-case — exercise 1 asks the
+     reader to write this one; nothing in the repository binds it. -->
+<!-- urn-gate: illustration urn:iki:tutorial:yours:now — exercise 4's deliberately wrong
+     clock, written by the reader. -->
 
 ---
 
@@ -71,12 +78,13 @@ treats the input's own casing as meaningful. Write `lower-camel-case`, which doe
 decide what it should do with `"XMLHttpRequest"`. There is no obviously right answer, which
 is the point of the exercise.
 
-- **File** — `crates/hello-camel/src/lib.rs`; bind it at
-  `urn:iki:tutorial:lower-camel-case`.
-- **Run** — `cargo test -p hello-camel`
+- **File** — `crates/your-endpoints/src/lib.rs`; bind it at
+  `urn:iki:tutorial:yours:lower-camel-case`. `hello_camel::camel` is the pure function
+  under `camel-case`, if you want to start from it rather than from scratch.
+- **Run** — `cargo test -p your-endpoints`
 - **Right when** — your own test asserts the answer you chose for `"XMLHttpRequest"`, *and*
-  the four existing tests still pass. If `camel-case`'s behaviour changed, you edited the
-  wrong function.
+  `cargo test -p hello-camel` still passes untouched. If `camel-case`'s behavior changed,
+  you edited the wrong crate.
 - **Read again** — [Hello, resource](hello-resource.md) for the shape of an
   implementation, [Binding, and a host of your own](binding.md) for the bind line.
 
@@ -114,12 +122,13 @@ whatever your rule says, and `"   "` → `""` rather than an error.
 Add an optional `separator`, so a caller can split on something other than whitespace.
 Declare it in the description with `optional()` and a `default_value`.
 
-- **File** — `crates/hello-camel/src/lib.rs`, in both halves of the endpoint: the
-  `ArgSpec` list in `camel_case()` *and* the implementation.
-- **Run** — `cargo test -p hello-camel`
+- **File** — `crates/your-endpoints/src/lib.rs`, in both halves of your `lower-camel-case`
+  from exercise 1 (or of `word-count`, if you skipped it — a `separator` makes sense
+  there too): the `ArgSpec` list in the description *and* the implementation.
+- **Run** — `cargo test -p your-endpoints`
 - **Right when** — resolving with no `separator` gives the same answers as before, and
   resolving with `separator=","` camel-cases `"a,b,c"` into `"aBC"`. A test asserting your
-  `ArgSpec` is present is worth writing too — `camel_case().describe().inputs` is a list
+  `ArgSpec` is present is worth writing too — `your_thing().describe().inputs` is a list
   you can look at.
 - **Read again** — [Why an endpoint describes itself](self-description.md), the ArgSpecs
   section.
@@ -159,10 +168,11 @@ Make your endpoint accept `in` as **a reference to another resource** as well as
 value: given `ArgRef::Reference(urn:iki:tutorial:title)`, resolve that name through the
 kernel and camel-case whatever it returns.
 
-- **File** — `crates/hello-camel/src/lib.rs`. `urn:iki:tutorial:title` is already bound
-  there — it is the resource [What resolution buys you](payoff.md) writes to — so the
-  only new thing is a version of `camel-case` that can take a reference to it.
-- **Run** — `cargo test -p hello-camel`
+- **File** — `crates/your-endpoints/src/lib.rs`. `urn:iki:tutorial:title` already
+  answers from your host — it is the resource [What resolution buys you](payoff.md) writes
+  to, and your `space()` chains onto the one that binds it — so the only new thing is a
+  version of `camel-case` that can take a reference to it.
+- **Run** — `cargo test -p your-endpoints`
 - **Right when** — one test passes the text inline and gets the answer it always got, and
   a second passes `ArgRef::Reference` and gets the camel-cased contents of `title`. Then
   `Sink` a new title and resolve again: the by-reference answer follows the write, the
@@ -215,8 +225,8 @@ thread: write to `title` and it recomputes, exactly as `camel-title` did.
 Write an endpoint that returns the current time, mark the representation `.cacheable()`,
 and watch how convincing a wrong answer looks.
 
-- **File** — `crates/hello-camel/src/lib.rs`; bind it at `urn:iki:tutorial:now`.
-- **Run** — `cargo test -p hello-camel`
+- **File** — `crates/your-endpoints/src/lib.rs`; bind it at `urn:iki:tutorial:yours:now`.
+- **Run** — `cargo test -p your-endpoints`
 - **Right when** — a test resolves it twice through **one** kernel, with a sleep in
   between, and the two answers are byte-identical. Remove `.cacheable()`, run again, and
   they differ. The test that proves the bug is the one that passes.
@@ -231,10 +241,10 @@ kernel **once** and issue twice against it. Two `Kernel::new` calls give you two
 caches and a test that passes for the wrong reason.
 
 ```rust,ignore
-let kernel = Kernel::new(Arc::new(space()));
-let first = resolve(&kernel, "urn:iki:tutorial:now");
+let kernel = kernel();
+let first = resolve(&kernel, "urn:iki:tutorial:yours:now");
 std::thread::sleep(Duration::from_millis(50));
-let second = resolve(&kernel, "urn:iki:tutorial:now");
+let second = resolve(&kernel, "urn:iki:tutorial:yours:now");
 assert_eq!(first, second); // ← the bug, asserted
 ```
 

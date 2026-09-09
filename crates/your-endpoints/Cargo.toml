@@ -1,0 +1,38 @@
+[package]
+name = "your-endpoints"
+version = "0.1.0"
+description = "The reader's crate: where the book's exercises are done. No chapter includes a listing from it, so editing it changes nothing the book says."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "your_endpoints"
+path = "src/lib.rs"
+
+[[bin]]
+name = "yours"
+path = "src/bin/yours.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-module.workspace = true
+futures.workspace = true
+# Part I's space, to chain onto — so `urn:iki:tutorial:title` and `camel-case` are
+# reachable from your host, and so exercise 3 has a resource to take by reference.
+hello-camel = { path = "../hello-camel" }
+
+[dev-dependencies]
+# Part III's code, for the exercises in `tests/beyond.rs`: a kernel behind a socket, and
+# the three kinds of mount. Read-only from here — the book includes its listings from
+# `crates/two-hosts`, and that is the file you do NOT edit.
+two-hosts = { path = "../two-hosts" }
+# The `Resolver` trait a connected peer implements, and the `async_trait` its methods
+# are declared with — both needed to hand-write a peer that is always down.
+ikigai-resolve = "0.1.18"
+# The concrete resolver `two_hosts::socket::connect` returns, so a helper can name it.
+ikigai-ipc = "0.1.18"
+async-trait = "0.1"

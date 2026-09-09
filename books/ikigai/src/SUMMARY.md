@@ -31,6 +31,7 @@
 - [Preferential resolution](beyond/preference.md)
 - [The editor as a client](beyond/emacs.md)
 - [The machine client](beyond/agent.md)
+- [Exercises](beyond/exercises.md)
 
 ---
 
