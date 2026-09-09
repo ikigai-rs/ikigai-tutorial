@@ -3,23 +3,33 @@
 This chapter exists because a tutorial that leaves you to discover the maturity of a
 feature by hitting its edges has wasted your afternoon.
 
+Every claim below about a repository other than this one carries **the version it was
+true at**, because those repositories move on their own schedules and a sentence about
+them is a claim, not a fact. This book builds against `ikigai-module` **0.2.0** and its
+shell examples were probed against `ikigai-cli` **0.1.18**, both on 2026-09-08; a test
+(`crates/book-urns/tests/book_claims.rs`) can re-check each stamped claim against the
+published crate it names, so that when one of them stops being true the fix is a diff,
+not a discovery.
+
 ## Phase 1
 
-`ikigai-module`'s own first line calls it **"the dynamically-loadable module format
-(Phase 1: in-process proof)"**. That line undersells the crate a little — it has grown a
-socket transport since somebody wrote it — which is worth knowing as a habit: a crate's
-one-line self-description is the thing least likely to be updated when the crate changes.
+`ikigai-module` 0.2.0's own first line still calls it **"the dynamically-loadable module
+format (Phase 1: in-process proof)"**. That line undersells the crate — it has grown a
+socket transport and, at 0.2.0, capability enforcement across the boundary since somebody
+wrote it — which is worth knowing as a habit: a crate's one-line self-description is the
+thing least likely to be updated when the crate changes.
 
-What is actually there:
+What is actually there, at `ikigai-module` 0.2.0:
 
 | piece | state |
 |---|---|
 | the callback machinery | **proven** — `InProcessTransport`, exercised end to end |
 | the wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |
 | an out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
-| an embedded wasm runtime | **not built** — a host embedding wasmtime is Phase 2 |
+| a module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`) |
+| an embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
 | isolation | **not there** — a process boundary is not a resource budget |
-| hosts that load modules | **one**, the browser demo |
+| hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-09-08) |
 
 ## Read that table the right way
 
@@ -42,18 +52,25 @@ the callback is a deliberate hole in whatever isolation you would put around it,
 transport this book demonstrates (`InProcessTransport`) runs the module inside your own
 process anyway. A module today is a *packaging* and *lazy-loading* mechanism.
 
-**Do not assume the host enforces what a module declares.** An endpoint reached through
-`ModuleSpace` can declare `requires("urn:cap:…")` and be invoked by a caller who does not
-hold it — try it, it takes one line. Authority still *attenuates* correctly across the
-boundary (the module's callbacks run under the caller's capability, narrowed, and are
-refused when it is too narrow — exercise 3 below), but the module's own declaration is not
-a gate today. For a linked-in endpoint it is.
+**Do assume the host enforces what a module declares — since `ikigai-module` 0.2.0, and
+not before.** At 0.1.10 an endpoint reached through `ModuleSpace` could declare
+`requires("urn:cap:…")` and be invoked by a caller who did not hold it; this book said so,
+in this paragraph. 0.2.0 closed that: `ModuleSpace::new` takes a third argument, the
+mount's `ModuleFloor` (every request through the mount must satisfy it), and an endpoint's
+own declaration is enforced across the boundary exactly as it is for a linked-in one.
+Authority *attenuates* correctly across the boundary as it always did (the module's
+callbacks run under the caller's capability, narrowed — exercise 3 below), and now the
+module's own card is a gate too. The test that keeps this sentence true:
+
+```rust,ignore
+{{#include ../../../../crates/loadable-module/src/lib.rs:enforced}}
+```
 
 **Do not assume you can ship a module to a running host.** Nothing loads one at runtime
-outside the browser demo.
+outside the browser demo (as of 2026-09-08).
 
 **Do not assume the ABI is stable.** Phase 2 exists precisely to change how these messages
-travel.
+travel — and 0.2.0 already changed `ModuleSpace::new`'s signature once.
 
 ## What is genuinely usable now
 
@@ -78,9 +95,11 @@ execution budget and a closed syscall surface as well as a capability. Part of t
 exists for an unrelated reason — the browser demo runs modules as wasm, `ikigai-xslt-module`
 builds one, and a wasm module has no ambient filesystem or network to begin with. What does
 *not* exist is any of the native half: no host in the ecosystem embeds wasmtime, and no
-crate sets an execution or memory budget — the word "fuel" appears in none of them. Treat
-this section as the direction and the table above as the state, and do not plan a deployment
-on the difference.
+crate sets an execution or memory budget — the word "fuel" appears in none of them
+(checked across the organization's public repositories on 2026-09-08; the probe re-checks
+`ikigai-module` 0.2.0 and `ikigai-cli` 0.1.18 by manifest). Treat this section as the
+direction and the table above as the state, and do not plan a deployment on the
+difference.
 
 ## Exercises
 
@@ -164,9 +183,11 @@ That is the property this part has been claiming: a module does not get authorit
 a module, it borrows the caller's, and the borrowing can only narrow. Here it is failing
 closed in front of you.
 
-> ⚠ Try the mirror image too, because the answer is not the one you would guess: put
-> `.requires(…)` on the module's own `greeting` endpoint instead, and it is **not**
-> enforced. See "Do not assume the host enforces what a module declares", above.
+> ⚠ Try the mirror image too: put `.requires(…)` on the module's own `greeting` endpoint
+> instead. Since `ikigai-module` 0.2.0 that **is** enforced — the caller is refused before
+> the module runs, with the same message shape. It was not at 0.1.10, and the first
+> edition of this exercise said so; see "Do assume the host enforces what a module
+> declares", above, for the version and the test.
 
 </details>
 

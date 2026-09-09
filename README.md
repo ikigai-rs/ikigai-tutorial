@@ -151,6 +151,24 @@ X" goes red if somebody binds X again.
 > cargo test -p book-urns -- --ignored --nocapture
 > ```
 
+### And the claims about other repositories
+
+The status chapters say things about `ikigai-module`, `ikigai-cli` and the browser demo
+that no test in this workspace can prove — they are claims about code on another release
+schedule. So every such claim carries **the version it was true at** in the prose, and
+`crates/book-urns/tests/book_claims.rs` holds the same claims as data: crate, version, file,
+the symbol that must be present (or absent). An always-on test checks the prose still
+carries each stamp; a `#[ignore]`d probe downloads each named crate from crates.io at
+that exact version and greps for the symbol, so a claim that stopped being true is a
+diff against a version, not a lie. The day `ikigai-module` 0.2.0 enforced a module's
+declared capability, the chapter that said "the host does not enforce it" was true at
+0.1.10 and false at 0.2.0 — this is what makes that a sentence to update rather than a
+sentence to distrust.
+
+```bash
+cargo test -p book-urns --test book_claims -- --ignored --nocapture
+```
+
 ### And the cross-references
 
 A resource name is not the only thing prose asserts about a world outside itself.

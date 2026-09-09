@@ -107,8 +107,8 @@ tutorial that leaves you to discover a limit by hitting it has wasted your after
   inputs, so `urn:llm:ask` does not claim to be one. The caching that Part I taught applies
   to the deterministic parts of a pipeline, which is most of it, and deliberately not to
   this part.
-- **An MCP session with no grant runs as root, loudly.** `ikigai mcp` with no `--grant` or
-  `--scope` prints that it is running unrestricted and then does. A named grant that
+- **An MCP session with no grant runs as root, loudly** (`ikigai-cli` 0.1.18). `ikigai mcp`
+  with no `--grant` or `--scope` prints `running UNRESTRICTED (root)` and then does. A named grant that
   resolves to no scopes lands in the same branch. That is the opposite of the served
   kernel's rule from [Who is asking](identity.md), where an unrecognized certificate is
   refused — the difference being that an MCP server is spawned by the human whose authority

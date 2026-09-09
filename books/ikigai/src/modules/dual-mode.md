@@ -1,8 +1,9 @@
 # Dual-mode crates
 
-Three crates in the ecosystem support being modules — `ikigai-xslt`, `ikigai-jsonld` and
-`ikigai-shacl` — and **none of them is module-only**. All three are ordinary linked
-libraries by default, and become loadable WebAssembly when you ask:
+Three crates in the ecosystem support being modules — `ikigai-xslt` 0.1.1, `ikigai-jsonld`
+0.1.1 and `ikigai-shacl` 0.1.1, the versions published as this was written — and **none of
+them is module-only**. All three are ordinary linked libraries by default (each has a
+`module` Cargo feature), and become loadable WebAssembly when you ask:
 
 ```bash
 cargo build --release --lib --features module --target wasm32-unknown-unknown

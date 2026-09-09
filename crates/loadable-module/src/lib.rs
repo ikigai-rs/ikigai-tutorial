@@ -11,7 +11,7 @@ use ikigai_core::{
     AsyncFnEndpoint, Description, Endpoint, EndpointSpace, Error, Exact, Fallback, Invocation,
     InvokeFuture, Iri, ReprType, Representation, Space, Verb,
 };
-use ikigai_module::{InProcessTransport, ModuleSpace};
+use ikigai_module::{InProcessTransport, ModuleFloor, ModuleSpace};
 
 fn text_plain_utf8() -> ReprType {
     ReprType::new("text/plain").with_param("charset", "utf-8")
@@ -80,13 +80,23 @@ pub fn host_name() -> AsyncFnEndpoint {
 /// `ModuleSpace` implements `Space`, so it sits in the `Fallback` exactly where a
 /// statically linked `space()` would — the host does not have a special case for
 /// "modules", it has one more space.
+///
+/// The third argument is the mount's **floor**: the capability every request through
+/// this mount must satisfy before the module is even consulted. `ModuleFloor::public()`
+/// is no floor at all, which is right for a demo — and since ikigai-module 0.2.0 it is
+/// not the only gate: an endpoint's own declared `requires` is enforced across the
+/// boundary too, exactly as it is for a linked-in one. The test below proves that.
 pub fn host_space() -> Fallback {
     let module = InProcessTransport::new(module_space());
 
     Fallback::new(vec![
         Arc::new(EndpointSpace::new().bind(Exact::new("urn:host:name"), host_name()))
             as Arc<dyn Space>,
-        Arc::new(ModuleSpace::new(["urn:greet:"], Arc::new(module))) as Arc<dyn Space>,
+        Arc::new(ModuleSpace::new(
+            ["urn:greet:"],
+            Arc::new(module),
+            ModuleFloor::public(),
+        )) as Arc<dyn Space>,
     ])
 }
 // ANCHOR_END: host
@@ -125,6 +135,46 @@ mod tests {
         let repr = block_on(kernel.issue(request, &Capability::root())).expect("resolves");
         assert_eq!(String::from_utf8_lossy(&repr.bytes), "Peter");
     }
+
+    // ANCHOR: enforced
+    /// A module endpoint's declared `requires` is enforced across the boundary — since
+    /// ikigai-module 0.2.0. Before it, this declaration was ignored by the host, and the
+    /// book said so; the claim flipped when the crate did, and this test is what keeps
+    /// the chapter's sentence true.
+    #[test]
+    fn the_host_enforces_what_the_module_declares() {
+        let gated = AsyncFnEndpoint::new("gated", |_inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            Box::pin(async move { Ok(Representation::new(text_plain_utf8(), b"in".to_vec())) })
+        })
+        .with_description(
+            Description::new("gated")
+                .verb(Verb::Source)
+                .requires("urn:cap:demo:module"),
+        );
+        let module = EndpointSpace::new().bind(Exact::new("urn:greet:gated"), gated);
+        let host = ModuleSpace::new(
+            ["urn:greet:"],
+            Arc::new(InProcessTransport::new(module)),
+            ModuleFloor::public(),
+        );
+        let kernel = Kernel::new(Arc::new(host));
+        let request = || Request::new(Verb::Source, Iri::parse("urn:greet:gated").expect("iri"));
+
+        let denied = block_on(kernel.issue(
+            request(),
+            &Capability::root().attenuate(["urn:cap:demo:other"]),
+        ))
+        .expect_err("the module's own declaration gates the call");
+        assert!(matches!(denied, Error::Denied(_)), "{denied:?}");
+
+        let allowed = block_on(kernel.issue(
+            request(),
+            &Capability::root().attenuate(["urn:cap:demo:module"]),
+        ))
+        .expect("the right scope reaches the module");
+        assert_eq!(String::from_utf8_lossy(&allowed.bytes), "in");
+    }
+    // ANCHOR_END: enforced
 
     #[test]
     fn a_name_outside_the_module_prefix_does_not_reach_it() {
