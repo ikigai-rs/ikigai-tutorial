@@ -71,4 +71,4 @@ ikigai in the process of doing so.)
 Proceed with an open mind. Cool things are coming.
 
 Regards,  
-[Brian Sletten](https://w3id.org/people/bsletten)
+[Brian Sletten](https://www.bosatsu.net/about.html)
