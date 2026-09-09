@@ -158,10 +158,17 @@ fn the_catalog_contains(node: &str) -> bool {
     catalog.contains(&format!("<{node}>"))
 }
 
+/// The kernel the page runs: `hello_camel::kernel()` compiled to wasm. A cell may name
+/// only what it binds — Part I's space, plus the kernel's own `urn:kernel:*`.
+fn the_in_page_kernel_answers(iri: &str) -> bool {
+    binds(&hello_camel::space(), iri) || the_kernel_answers(iri)
+}
+
 fn describe(mention: &Mention) -> String {
     let where_from = match mention.context {
         Context::Cli => "an `ikigai …` shell example",
         Context::Rust => "a Rust example",
+        Context::Cell => "a runnable cell",
         Context::Prose => "prose",
     };
     format!("{} ({where_from}) names {}", mention.site(), mention.urn)
@@ -241,6 +248,18 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
                     ));
                 }
             }
+            // A runnable cell runs in the page, against hello_camel::kernel() and nothing
+            // else — not the CLI, not the other parts' hosts.
+            Context::Cell => {
+                if !the_in_page_kernel_answers(&mention.urn) {
+                    failures.push(format!(
+                        "{}: the in-page kernel (hello_camel::kernel(), via \
+                         crates/book-wasm) does not bind it, so Run would fail. Cells may \
+                         name only what Part I's space binds.",
+                        describe(mention)
+                    ));
+                }
+            }
             // A Rust example runs in a host built right here.
             Context::Rust => {
                 if a_book_host_binds(&mention.urn).is_none() {
@@ -312,6 +331,11 @@ fn the_book_still_teaches_the_name_this_workspace_binds() {
         scan.mentions.iter().any(|m| m.context == Context::Cli),
         "no `ikigai …` shell example was classified as CLI — the thinnest part of the \
          book's gate is unguarded again"
+    );
+    assert!(
+        scan.mentions.iter().any(|m| m.context == Context::Cell),
+        "no runnable cell was found — either the payoff chapter lost its cells or the \
+         scanner stopped reading data-cmd"
     );
 }
 

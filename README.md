@@ -19,6 +19,13 @@ Read it:
 **<https://ikigai-rs.github.io/ikigai-tutorial/>** — published from `main` on every merge,
 by the same run that tests it (below), so what is at that URL is a book that passed.
 
+The published book runs **its own kernel in the page**: `crates/book-wasm` is a
+wasm-bindgen face over `hello_camel::kernel()` and the CLI's engine, built by `pages.yml`
+into `wasm/` beside the book, and `books/ikigai/js/run.js` turns a
+`<div class="ikigai-run" data-cmd='…'>` in a chapter into a Run button. The four runs in
+"What resolution buys you" resolve in your browser, against the same space the chapter's
+tests run against; with the wasm absent a cell shows the listing's output and says so.
+
 Or clone it and serve it locally:
 
 ```bash
@@ -116,6 +123,7 @@ out of the markdown and checks it against the authority that can actually answer
 | where the name appears | who confirms it |
 |---|---|
 | a Rust example | `hello_camel::space()` / `building_endpoints::space()` / `loadable_module::host_space()` / `your_endpoints::module::host_space()` — hosts built right here — or, for `urn:kernel:*`, the kernel built over the first of them, since those names are intercepted rather than bound |
+| a runnable cell's `data-cmd` | `hello_camel::space()` alone — the kernel the page runs — plus `urn:kernel:*` |
 | an `ikigai …` shell example | `books/ikigai/cli-vocabulary.txt` — the book's written-down claim about the CLI, which is another crate on another release schedule |
 | prose | either |
 

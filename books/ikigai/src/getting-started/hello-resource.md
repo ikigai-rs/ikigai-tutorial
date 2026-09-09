@@ -63,5 +63,12 @@ use ikigai_core::Endpoint;
 assert_eq!(camel_case().describe().id, "camel-case");
 ```
 
+And the endpoint itself, resolved by the kernel in this page:
+
+<div class="ikigai-run" data-cmd='source urn:iki:tutorial:camel-case in="Hello WORLD"'>
+<pre class="ikigai-run-expected">HelloWORLD
+[computed]</pre>
+</div>
+
 That is an endpoint. What you get for having resolved a name rather than called a function
 is the next chapter, [What resolution buys you](payoff.md).

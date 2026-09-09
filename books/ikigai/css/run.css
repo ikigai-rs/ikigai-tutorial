@@ -1,0 +1,102 @@
+/* Runnable cells — `js/run.js` builds them from `<div class="ikigai-run" data-cmd='…'>`.
+ *
+ * Every colour here is one of mdbook's own theme variables, and only in pairs the
+ * contrast gate (`crates/book-a11y`) already measures: text on `--bg` and on
+ * `--quote-bg`, links on both, inline code on both. No new colour is introduced, so no
+ * theme can pass the gate while a cell fails it.
+ */
+
+.ikigai-run {
+    margin: 1.2em 0;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    background: var(--quote-bg);
+    color: var(--fg);
+}
+
+.ikigai-run-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem 0.4rem;
+}
+
+/* The command, rendered like a transcript. `pre` inside the cell keeps mdbook's code
+ * styling out of it: this is not a code block, it is what you are about to run. */
+.ikigai-run-cmd {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 0.9em;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.ikigai-run-line {
+    background: transparent;
+    padding: 0;
+    color: var(--fg);
+}
+
+.ikigai-run-prompt {
+    color: var(--inline-code-color);
+}
+
+.ikigai-run-button {
+    flex: 0 0 auto;
+    font: inherit;
+    font-weight: 600;
+    padding: 0.3rem 0.9rem;
+    border: 2px solid var(--links);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+}
+
+.ikigai-run-button:hover:not(:disabled) {
+    background: var(--links);
+    color: var(--bg);
+}
+
+/* A visible focus ring for the keyboard — the button is the whole interaction. */
+.ikigai-run-button:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+.ikigai-run-button:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.ikigai-run-caption {
+    padding: 0 0.8rem;
+    font-size: 0.8em;
+    color: var(--inline-code-color);
+}
+
+.ikigai-run-out {
+    margin: 0.3rem 0 0;
+    padding: 0.6rem 0.8rem;
+    border-top: 1px solid var(--table-header-bg);
+    border-radius: 0 0 4px 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.9em;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    min-height: 1.5em;
+}
+
+/* No motion is used, so there is nothing to reduce — stated so the next person does not
+ * add a spinner without reading this. */
+@media (prefers-reduced-motion: reduce) {
+    .ikigai-run-button,
+    .ikigai-run-out {
+        transition: none;
+    }
+}

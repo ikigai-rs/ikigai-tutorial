@@ -35,3 +35,19 @@ jobs:
 
       - name: test
         run: cargo test --all-targets
+
+  # `crates/book-wasm` has a wasm face, and the native gates above cannot see a target
+  # that only breaks on wasm32 (a dependency reaching for std::time, say). Clippy on the
+  # wasm target is the check; pages.yml then builds the real artifact.
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+
+      - name: clippy (wasm32)
+        run: cargo clippy -p book-wasm --lib --target wasm32-unknown-unknown -- -D warnings

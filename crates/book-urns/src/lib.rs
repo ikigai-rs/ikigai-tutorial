@@ -65,6 +65,10 @@ pub enum Context {
     Cli,
     /// Inside a Rust fence. A host this workspace builds answers.
     Rust,
+    /// Inside a runnable cell's `data-cmd` — a line the **in-page kernel** runs when the
+    /// reader presses Run. Only that kernel answers: `hello_camel::kernel()`, compiled to
+    /// wasm by `crates/book-wasm`. A name the CLI resolves is no use here.
+    Cell,
     /// Prose, program output, a config fence — anything else. Either may answer.
     Prose,
 }
@@ -251,6 +255,36 @@ fn parse_directives(file: &str, comments: &[(usize, String)]) -> Result<Vec<Dire
     Ok(out)
 }
 
+/// The `data-cmd='…'` attributes of runnable cells, with the line each starts on.
+///
+/// Single-quoted only, by rule: a REPL line can carry double quotes (`in="a b"`), and
+/// `js/run.js` reads the attribute the same way. A double-quoted `data-cmd` is not
+/// silently skipped — it is reported, because a cell the gate cannot read is a cell it
+/// cannot vouch for.
+fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String)>, String> {
+    let mut out = Vec::new();
+    let mut rest = text;
+    let mut line = 1usize;
+    while let Some(at) = rest.find("data-cmd=") {
+        let (before, from) = rest.split_at(at);
+        line += before.matches('\n').count();
+        let after = &from["data-cmd=".len()..];
+        let Some(body) = after.strip_prefix('\'') else {
+            return Err(format!(
+                "{file}:{line}: data-cmd must be single-quoted (data-cmd='…'), so a \
+                 command may contain double quotes"
+            ));
+        };
+        let Some(end) = body.find('\'') else {
+            return Err(format!("{file}:{line}: unterminated data-cmd='…'"));
+        };
+        out.push((line, body[..end].to_string()));
+        line += body[..end].matches('\n').count();
+        rest = &body[end + 1..];
+    }
+    Ok(out)
+}
+
 /// Scan one markdown document.
 ///
 /// `file` is the label used in failure messages; it is not opened.
@@ -259,6 +293,23 @@ pub fn scan_markdown(file: &str, text: &str) -> Result<Scan, String> {
     let directives = parse_directives(file, &comments)?;
 
     let mut mentions = Vec::new();
+    // Runnable cells first: their lines run in the page, and the prose scan below will
+    // see the same tokens again as prose, which is fine — the cell check is the stricter
+    // of the two and both must hold.
+    for (start, command) in cell_commands(file, &visible)? {
+        for (offset, cmd_line) in command.lines().enumerate() {
+            for token in urns_in_line(cmd_line) {
+                let head = token.split(['?', '#']).next().unwrap_or(&token).to_string();
+                mentions.push(Mention {
+                    file: file.to_string(),
+                    line: start + offset,
+                    is_prefix: head.ends_with(':'),
+                    urn: head,
+                    context: Context::Cell,
+                });
+            }
+        }
+    }
     let mut fence: Option<String> = None;
     for (index, line) in visible.lines().enumerate() {
         let trimmed = line.trim_start();
@@ -412,6 +463,28 @@ mod tests {
         let text = "```bash\ncargo run -p hello-camel -- urn:iki:tutorial:camel-case\n```\n";
         let scan = scan_markdown("x.md", text).expect("scans");
         assert_eq!(scan.mentions[0].context, Context::Prose);
+    }
+
+    #[test]
+    fn a_runnable_cell_answers_to_the_in_page_kernel() {
+        let text = "<div class=\"ikigai-run\" data-cmd='source urn:iki:fn:toUpper in=\"a b\"\nsource urn:iki:tutorial:title'>\n<pre>x</pre>\n</div>\n";
+        let scan = scan_markdown("x.md", text).expect("scans");
+        let cells: Vec<&Mention> = scan
+            .mentions
+            .iter()
+            .filter(|m| m.context == Context::Cell)
+            .collect();
+        assert_eq!(cells.len(), 2);
+        assert_eq!(cells[0].urn, "urn:iki:fn:toUpper");
+        assert_eq!(cells[0].line, 1);
+        assert_eq!(cells[1].urn, "urn:iki:tutorial:title");
+        assert_eq!(cells[1].line, 2, "the second command is on the second line");
+    }
+
+    #[test]
+    fn a_double_quoted_cell_is_refused_rather_than_skipped() {
+        let text = "<div class=\"ikigai-run\" data-cmd=\"source urn:x:y\"></div>\n";
+        assert!(scan_markdown("x.md", text).is_err());
     }
 
     #[test]

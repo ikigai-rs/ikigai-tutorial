@@ -41,6 +41,15 @@ below from the file that runs it. To see their output rather than take the book'
 cargo test -p hello-camel --test payoff -- --nocapture --test-threads 1
 ```
 
+Or press **Run**. Each section below ends in a cell, and the cell runs its lines against
+**this book's own kernel, in this page** — `hello_camel::kernel()` compiled to
+WebAssembly, under the same engine the `ikigai` CLI uses, so the lines are the CLI's
+grammar and the answers are real resolutions. One kernel serves every cell on the page,
+and it keeps its cache and its golden threads between runs; that is the point, so the
+order you run them in shows, and running a cell twice answers differently the second
+time. If the kernel did not load, a cell shows the output the listing produces and says
+so.
+
 ## 1. Cached once
 
 Resolve `title` twice through one kernel. The second answer is served without the
@@ -58,6 +67,17 @@ cached once: "resource oriented computing" served twice, endpoint ran 1 time
 `kernel.is_cached(..)` is a probe, not a resolution: it answers "would this be served from
 cache right now" without resolving anything, which is what lets a test ask the question
 without changing the answer.
+
+<div class="ikigai-run" data-cmd='source urn:iki:tutorial:title
+source urn:iki:tutorial:title'>
+<pre class="ikigai-run-expected">resource oriented computing
+[computed]
+resource oriented computing
+[cached]</pre>
+</div>
+
+The bracketed word is the engine's verdict on each line: the first resolution was
+computed, the second served. Run it again and both say `[cached]`.
 
 The cache is keyed on the request *and the capability* — a result computed under one
 authority is never handed to a caller holding another. You will not feel that here, where
@@ -95,6 +115,25 @@ the way down, reading `title` again rather than reusing a stale copy of it.
 > unless something explicitly does — [The file workspace](file-workspace.md) has a
 > watcher doing exactly that for files that change out from under the kernel.
 
+<div class="ikigai-run" data-cmd='source urn:iki:tutorial:camel-title
+cache urn:iki:tutorial:camel-title
+sink urn:iki:tutorial:title golden threads cut
+cache urn:iki:tutorial:camel-title
+source urn:iki:tutorial:camel-title'>
+<pre class="ikigai-run-expected">resourceOrientedComputing
+[computed]
+cached
+ok
+[uncacheable]
+not cached
+goldenThreadsCut
+[computed]</pre>
+</div>
+
+`cache` is `is_cached` from the REPL — a probe. Between the two probes is one `Sink`, and
+the composite went from `cached` to `not cached` without anyone naming it. (The Sink's own
+verdict is `[uncacheable]`: a write is never served from a cache, by definition.)
+
 ## 3. Traced
 
 A resolution is a tree — the request you issued, and every sub-request made on its behalf
@@ -124,6 +163,26 @@ report `cache_hit=true`.
 The events are plain, serializable data. That matters in [Part
 III](../beyond/socket.md), where a remote kernel records its own events and ships them back
 to be stitched into the caller's tree.
+
+<div class="ikigai-run" data-cmd='sink urn:kernel:cut urn:iki:tutorial:title
+trace urn:iki:tutorial:camel-title'>
+<pre class="ikigai-run-expected">cut urn:iki:tutorial:title
+[uncacheable]
+trace  urn:iki:tutorial:camel-title
+  client      ikigai repl  ·  capability: root (full authority)
+  transport   embedded · in-process
+&#32;
+urn:iki:tutorial:camel-title   camel-title · computed · ThreadId(1) · —   → 25b  resourceOrientedComputing
+└─ urn:iki:tutorial:title   title · computed · ThreadId(1) · —</pre>
+</div>
+
+The first line cuts `title`'s thread by hand — `urn:kernel:cut` is the resource for
+cutting somebody else's thread — so the trace shows a real resolution rather than a cache
+hit with no children. `trace` is `issue_traced` with the engine's own tree renderer: the
+child is indented under its parent, and each node says whether it was computed or served.
+(The `—` is the duration: this kernel has no clock, and it says so rather than guessing;
+`ThreadId(1)` is the browser's one thread. Run it after the cell above and the byte count
+and the text change, because the title did — same kernel.)
 
 ## 4. Described
 
@@ -173,6 +232,34 @@ And the whole host at once — `urn:kernel:catalog`, one graph over every bindin
 that per-verb view, not the endpoint, is the unit an agent's tool list is built from.
 [Why an endpoint describes itself](self-description.md) is about why this is
 load-bearing rather than decorative.
+
+<div class="ikigai-run" data-cmd='describe urn:iki:tutorial:camel-case text/turtle'>
+<pre class="ikigai-run-expected">@prefix ik: &lt;https://ikigai-rs.dev/ns#&gt; .
+&#32;
+&lt;urn:ikigai:endpoint:camel-case&gt; a ik:Endpoint ;
+    ik:id "camel-case" ;
+    ik:title "Camel-case" ;
+    ik:summary "Camel-cases the UTF-8 text supplied in the `in` argument." ;
+    ik:verb "Source", "Meta" ;
+    ik:output "text/plain;charset=utf-8" ;
+    ik:input &lt;urn:ikigai:endpoint:camel-case:input:in&gt; ;
+    ik:action &lt;urn:ikigai:endpoint:camel-case:action:source&gt; .
+&#32;
+&lt;urn:ikigai:endpoint:camel-case:input:in&gt; ik:inputName "in" ;
+    ik:source "argument" ;
+    ik:required true ;
+    ik:summary "the text to camel-case" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; .
+&#32;
+&lt;urn:ikigai:endpoint:camel-case:action:source&gt; a ik:Action ;
+    ik:verb "Source" ;
+    ik:output "text/plain;charset=utf-8" ;
+    ik:input &lt;urn:ikigai:endpoint:camel-case:input:in&gt; .
+[computed]</pre>
+</div>
+
+`describe … text/turtle` is `Meta` with `as=text/turtle`, and the graph it prints is the
+one the test above asserts three triples of.
 
 ```bash
 cargo run -p hello-camel -- --catalog
