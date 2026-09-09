@@ -47,6 +47,15 @@ urn:lisp:eval
 # repository map. Probed as `urn:text:wc`, `urn:text:head`, `urn:text:sort`.
 urn:text:*
 
+# ── Polyglot tracks ───────────────────────────────────────────────────────────
+#
+# The notebook chapter pastes the first three entries of the CLI's catalog as the
+# `entries()` call returned them; two are names no other chapter prints. They are the
+# CLI host's own (`urn:client:issue`) and the semantic-CMS module it links natively
+# (`urn:cms:bookmarks`) — listed so the pasted output is a claim this file can vouch for.
+urn:client:issue
+urn:cms:bookmarks
+
 # The kernel's own self-description resources. These are intercepted by the kernel rather
 # than bound in a space, so `list` does not show them; `source` does.
 urn:kernel:catalog
