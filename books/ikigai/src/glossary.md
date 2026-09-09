@@ -28,10 +28,12 @@ it when a request asks for a type the resource does not produce itself. A resour
 not have a format; it has whatever the kernel can reach. You write one in
 [Transreption](building/transreption.md).
 
-**Golden thread.** The dependency a cached answer hangs from. A resolution derived from
-other resolutions inherits their threads; a write to a resource cuts the thread named
-after it, and everything derived from it — directly or transitively — stops being valid
-at that instant. Precise invalidation, not timeouts. You cut one in [What resolution buys
+**Golden thread.** The dependency a cached answer hangs from — declared by the endpoint
+(`.depends_on(..)`), conventionally named after the resource whose state it tracks. A
+resolution derived from other resolutions inherits their threads; a write to a resource
+cuts the thread named after it, and every cached entry whose threads include that one —
+directly or transitively — stops being valid at that instant. An entry that declared no
+thread, a pure function's, is untouched by any cut. Precise invalidation, not timeouts. You cut one in [What resolution buys
 you](getting-started/payoff.md) and again, on a file, in
 [Configuration](getting-started/configuration.md).
 

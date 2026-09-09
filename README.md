@@ -151,6 +151,25 @@ X" goes red if somebody binds X again.
 > cargo test -p book-urns -- --ignored --nocapture
 > ```
 
+### And the transcripts
+
+A ```` ```text ```` block whose lines start with `ikigai> ` is the book saying "type this,
+see that", and nothing compiles one — so one was written to fit its prose. The front
+door's "Cut a thread" showed a cut of `urn:iki:fn:toUpper` followed by `not cached`; the
+real CLI says `cached`, because a pure function declares no golden thread and a cut has
+nothing of its own to invalidate. `crates/book-urns/tests/book_transcripts.rs` replays
+every transcript through one `ikigai --plain -c … -c …` process and diffs the output
+(cache verdicts and durations normalized; `…` matches any run of lines). A block that is
+the next part of the same sitting says `<!-- transcript: continues -->` and is replayed
+with everything before it — replayed alone, "cut, then probe" says `not cached` in a
+fresh process, which is exactly what the wrong block claimed. A block that cannot be
+replayed says `<!-- transcript: manual — why -->`. Like the vocabulary probe it needs a
+binary, so it is `#[ignore]`d:
+
+```bash
+cargo test -p book-urns --test book_transcripts -- --ignored --nocapture
+```
+
 ### And the claims about other repositories
 
 The status chapters say things about `ikigai-module`, `ikigai-cli` and the browser demo

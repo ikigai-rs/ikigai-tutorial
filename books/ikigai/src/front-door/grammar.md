@@ -127,8 +127,10 @@ source a | sink <iri>
 ```
 
 Leading `key=value` pairs name declared arguments; the rest of the line is the content.
-The pipe form stores the upstream value. A successful `sink` cuts the target's golden
-thread, which is how a write invalidates every cached read of it.
+The pipe form stores the upstream value. A successful `sink` cuts the golden thread named
+after the target, which is how a write invalidates every cached read that declared that
+thread — the file endpoint's reads do; a pure function's do not, having nothing to hang
+one on.
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:title a title from the grammar chapter
 source urn:iki:tutorial:camel-title'>
@@ -195,6 +197,8 @@ cap reset            back to the session's identity
 
 The session starts as root. Narrow it and every resolution after runs under the narrower
 authority — enforced by the kernel, per verb, against what each endpoint declared:
+
+<!-- transcript: manual — the narrowed capability prints this machine's home directory -->
 
 ```text
 ikigai> cap read-only

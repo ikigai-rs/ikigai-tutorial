@@ -72,50 +72,106 @@ resource does not have *a* format; it has whatever the kernel can reach.
 ## 5. A cache hit
 
 This one needs the REPL, because the cache lives in the process and a `-c` run exits.
-Start `ikigai`, then:
+Start `ikigai`, then write a file into the workspace and read it back twice:
+
+```text
+ikigai> sink urn:file:notes.txt remember the milk
+wrote 17 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+remember the milk
+[computed]
+ikigai> source urn:file:notes.txt
+remember the milk
+[cached]
+ikigai> cache urn:file:notes.txt
+cached
+```
+
+The second read came from the cache; the file was not opened. `cache` asks without
+resolving — a probe, not a call. A write is never served from a cache, so the `sink`
+says so.
+
+## 6. Cut a thread
+
+Still in the REPL. A **golden thread** is what a cached answer hangs from: the file
+endpoint declared that its answer depends on a thread named after the file, and
+`urn:kernel:cut` is the resource for cutting a thread by hand:
+
+<!-- transcript: continues -->
+
+```text
+ikigai> sink urn:kernel:cut urn:file:notes.txt
+cut urn:file:notes.txt
+[uncacheable]
+ikigai> cache urn:file:notes.txt
+not cached
+```
+
+The cached read stopped being valid at that instant, and so would anything derived from
+it — a composite that had read the file inherits its thread. Writing to the file does the
+same cut without your help; this is the resource for doing it on somebody else's behalf,
+which is what a filesystem watcher does when a file changes out from under the kernel.
+
+Now the part the first draft of this page got wrong. Try the same cut on a pure function:
+
+<!-- transcript: continues -->
 
 ```text
 ikigai> source urn:iki:fn:toUpper in="a b"
 A B
 [computed]
-ikigai> source urn:iki:fn:toUpper in="a b"
-A B
-[cached]
+ikigai> sink urn:kernel:cut urn:iki:fn:toUpper
+cut urn:iki:fn:toUpper
+[uncacheable]
 ikigai> cache urn:iki:fn:toUpper in="a b"
 cached
 ```
 
-The second answer came from the cache; the endpoint did not run. `cache` asks without
-resolving — a probe, not a call.
+Still cached. A cut invalidates the entries whose **declared threads** include the one
+you cut, and `toUpper` — a pure function of its arguments — declared none: same input,
+same answer, forever, and no thread to hang that on. The entry is valid until the kernel
+forgets it. Nothing was named wrongly here; there was simply nothing to invalidate, and
+`urn:kernel:cache` shows exactly that:
 
-## 6. Cut a thread
-
-Still in the REPL:
+<!-- transcript: continues -->
 
 ```text
-ikigai> sink urn:kernel:cut urn:iki:fn:toUpper
-cut urn:iki:fn:toUpper
-ikigai> cache urn:iki:fn:toUpper in="a b"
-not cached
+ikigai> source urn:kernel:cache
+cache
+  entries  3
+  urn:file:notes.txt  text/plain                     17 B  1 thread
+  urn:iki:fn:toUpper  application/json              268 B  0 threads
+  urn:iki:fn:toUpper  text/plain                      3 B  0 threads
 ```
 
-A **golden thread** is what a cached answer hangs from. Writing to a resource cuts its own
-thread; `urn:kernel:cut` is the resource for cutting somebody else's, and everything
-derived from `toUpper` — directly or through composition — stopped being valid at that
-instant, without anyone naming it.
+Two entries for `toUpper` — its description, fetched once to route the arguments, and the
+answer — each with **0 threads**. The file's entry has **1 thread**, and it is still
+listed even though section 6 cut it and the probe said `not cached`: a cut bumps a
+generation and nothing more, and a stale entry is evicted lazily, the next time
+something *resolves* the name. `cache` only looks. Read the file again and the entry is
+replaced.
 
 ## 7. Which threads have been cut
+
+<!-- transcript: continues -->
 
 ```text
 ikigai> source urn:kernel:threads
 threads (cut generations)
+  urn:file:notes.txt  gen 2
   urn:iki:fn:toUpper  gen 1
 ```
 
-Every thread ever cut in this kernel, with its generation. A cached entry remembers the
-generation it was made at; a higher number now means it is stale.
+Every thread ever cut in this kernel, with its generation — the file's twice (once by the
+`sink` that wrote it, once by hand), `toUpper`'s once. A generation bumps whether or not
+anything depended on the thread: cutting is cheap and blind, and validity is decided
+lazily, when an entry is next looked up, by comparing the generation it was made at with
+the one now.
 
 ## 8. A trace
+
+<!-- transcript: continues -->
 
 ```text
 ikigai> trace urn:iki:fn:toUpper in="a b"
@@ -123,24 +179,27 @@ trace  urn:iki:fn:toUpper
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 
-urn:iki:fn:toUpper   toUpper · computed · main · 0ms   → 3b  A B
+urn:iki:fn:toUpper   toUpper · cached · main · 0ms   → 3b  A B
 ```
 
 One real resolution, recorded: who asked, under what authority, over what transport, and
-then the tree — each node saying whether it was computed or served, on which thread, how
-long it took. A composite shows its sub-resolutions as children. This is the same
+then the tree — each node saying whether it was computed or served (served, here: the
+cut in section 6 did not touch it), on which thread, how long it took. A composite shows its sub-resolutions as children. This is the same
 `issue_traced` the book's tests call, rendered.
 
 ## What you have seen
 
 A system that can list what exists and what you may do, resolve names into other names'
 arguments, change a representation's format on request, serve an answer without
-recomputing it, invalidate precisely rather than by timeout, and show you its own
-execution. None of it needed a line of Rust. All of it is what [Resolution](../getting-started/resolution.md)
+recomputing it, invalidate precisely — what declared the thread, nothing else, and never by
+timeout — and show you its own execution. None of it needed a line of Rust. All of it is what [Resolution](../getting-started/resolution.md)
 describes, and Part I is where you build an endpoint that gets every one of these
 properties for free.
 
 Every name printed on this page is checked, on every commit, against a written-down
 claim about the CLI (`books/ikigai/cli-vocabulary.txt`) — and that file is checked against
-a real binary by a test that has to be run by hand, because CI has no `ikigai`. If a
-command here fails on a newer CLI, that is where to look first.
+a real binary by a test that has to be run by hand, because CI has no `ikigai`. Every
+transcript on this page is replayed against a real binary by another
+(`cargo test -p book-urns --test book_transcripts -- --ignored`), which is how the first
+draft's section 6 was caught claiming a cut had invalidated something it had not. If a
+command here fails on a newer CLI, those two are where to look first.
