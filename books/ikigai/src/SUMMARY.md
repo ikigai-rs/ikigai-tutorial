@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](introduction.md)
+[A note from a human](human.md)
 
 # The front door
 
