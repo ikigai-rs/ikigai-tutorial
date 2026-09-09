@@ -1,4 +1,4 @@
-# Exercises
+# Exercises: beyond one host
 
 Three, and all three are written in **your** crate — `crates/your-endpoints/tests/beyond.rs`
 — against the code this part quotes, `crates/two-hosts`, which you use and do not edit.

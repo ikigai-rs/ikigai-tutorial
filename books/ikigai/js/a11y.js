@@ -14,7 +14,79 @@
 
     var TARGET = "mdbook-content";
 
+    // Two repairs to markup this repository does not own, the search box's — both
+    // upstream mdbook 0.5.4, both reported by `crates/book-a11y` on the static page, and
+    // both applied here at load because the alternative is forking the page template.
+    //
+    // 1. `<input type="search" id="mdbook-searchbar">` has a placeholder and no label.
+    //    A placeholder is not an accessible name (WCAG 2.2 SC 4.1.2 Name, Role, Value;
+    //    SC 3.3.2 Labels or Instructions), so a screen reader announces an unnamed edit
+    //    field. The placeholder text becomes the name, so what is heard is what is seen.
+    // 2. Its `aria-describedby="searchresults-header"` names an id that does not exist —
+    //    the element is `mdbook-searchresults-header` — so the description is silently
+    //    lost (SC 1.3.1 Info and Relationships). Re-point it at the element that is there.
+    function repairSearch() {
+        var input = document.getElementById("mdbook-searchbar");
+        if (!input) {
+            return;
+        }
+        if (!input.hasAttribute("aria-label") && !input.hasAttribute("aria-labelledby")) {
+            input.setAttribute("aria-label", input.getAttribute("placeholder") || "Search this book");
+        }
+        var described = input.getAttribute("aria-describedby");
+        if (described && !document.getElementById(described)) {
+            var actual = document.getElementById("mdbook-" + described);
+            if (actual) {
+                input.setAttribute("aria-describedby", actual.id);
+            } else {
+                input.removeAttribute("aria-describedby");
+            }
+        }
+    }
+
+    // The sidebar toggle is a `<label for=checkbox>` styled as a button, and the checkbox
+    // it drives is `display: none` — so nothing in the pair can take focus, and a keyboard
+    // user cannot open or close the table of contents (SC 2.1.1 Keyboard). mdbook's own
+    // script also writes `aria-expanded` onto the label, which is not an attribute a label
+    // may carry (SC 4.1.2 Name, Role, Value; axe: aria-allowed-attr). Both are one repair:
+    // make the label the button it looks like — a role, a tab stop, Enter and Space — and
+    // keep `aria-expanded` true to the checkbox it controls.
+    function repairSidebarToggle() {
+        var label = document.getElementById("mdbook-sidebar-toggle");
+        var anchor = document.getElementById("mdbook-sidebar-toggle-anchor");
+        if (!label || !anchor) {
+            return;
+        }
+        label.setAttribute("role", "button");
+        label.setAttribute("tabindex", "0");
+        var sync = function () {
+            label.setAttribute("aria-expanded", anchor.checked ? "true" : "false");
+        };
+        sync();
+        anchor.addEventListener("change", sync);
+        label.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                anchor.click();
+            }
+        });
+    }
+
+    // mdbook renders the previous/next chapter links twice — once inline, once for wide
+    // screens — as two `<nav aria-label="Page navigation">`. Same role, same name: a
+    // screen reader's landmark list shows two entries it cannot tell apart (axe:
+    // landmark-unique, a best practice under SC 1.3.1). Name the second for what it is.
+    function repairDuplicateNavLabels() {
+        var navs = document.querySelectorAll('nav[aria-label="Page navigation"]');
+        if (navs.length > 1) {
+            navs[navs.length - 1].setAttribute("aria-label", "Page navigation (wide screens)");
+        }
+    }
+
     function install() {
+        repairSearch();
+        repairSidebarToggle();
+        repairDuplicateNavLabels();
         if (document.querySelector(".skip-link")) {
             return;
         }

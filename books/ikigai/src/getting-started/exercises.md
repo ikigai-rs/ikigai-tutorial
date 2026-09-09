@@ -1,4 +1,4 @@
-# Exercises
+# Exercises: getting started
 
 Four ways to find out whether Part I landed. None of them needs anything beyond this
 repository.

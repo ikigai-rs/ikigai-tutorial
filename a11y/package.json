@@ -1,0 +1,13 @@
+{
+  "name": "ikigai-book-a11y-axe",
+  "private": true,
+  "description": "The book's second accessibility instrument: axe-core over a jsdom of every built page, with the book's scripts run. See a11y/axe.mjs.",
+  "type": "module",
+  "scripts": {
+    "check": "node axe.mjs ../books/ikigai/book"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.3",
+    "jsdom": "26.1.0"
+  }
+}
