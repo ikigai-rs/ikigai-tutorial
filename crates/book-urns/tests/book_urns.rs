@@ -8,7 +8,8 @@ use std::process::Command;
 use std::sync::Arc;
 
 use book_urns::{Context, Exemption, Mention, Scan, Vocabulary};
-use ikigai_core::{Iri, Request, Resolution, Scope, Space, Verb};
+use futures::executor::block_on;
+use ikigai_core::{ArgRef, Capability, Error, Iri, Request, Resolution, Scope, Space, Verb};
 
 /// The repository root, from this crate's manifest directory.
 fn repo_root() -> PathBuf {
@@ -63,6 +64,38 @@ fn a_book_host_binds(iri: &str) -> Option<&'static str> {
         .into_iter()
         .find(|(_, space)| binds(space.as_ref(), iri))
         .map(|(name, _)| name)
+        .or_else(|| the_kernel_answers(iri).then_some("hello_camel::kernel()"))
+}
+
+/// The third authority: names the **kernel** answers itself. `urn:kernel:*` is intercepted
+/// before any space is consulted, so no `Space` binds it and [`binds`] cannot see it — a
+/// Rust example naming `urn:kernel:catalog` would fail the gate while working perfectly.
+/// So ask a real kernel: the tutorial host, which carries the renderer the catalog needs.
+///
+/// "Answers" means the kernel recognized the operation. An unknown `urn:kernel:` suffix
+/// comes back `Unresolved`; anything else — a representation, a missing argument, a
+/// denial — is the kernel saying the name is one of its own. `Source` is tried first, then
+/// `Sink` for the write-only ones (`urn:kernel:cut`), which need a thread to name.
+fn the_kernel_answers(iri: &str) -> bool {
+    if !iri.starts_with("urn:kernel:") {
+        return false;
+    }
+    let Ok(parsed) = Iri::parse(iri) else {
+        return false;
+    };
+    let kernel = hello_camel::kernel();
+    let root = Capability::root();
+    let recognized = |request: Request| {
+        !matches!(
+            block_on(kernel.issue(request, &root)),
+            Err(Error::Unresolved(_))
+        )
+    };
+    recognized(Request::new(Verb::Source, parsed.clone()))
+        || recognized(
+            Request::new(Verb::Sink, parsed)
+                .with_arg("thread", ArgRef::Inline(b"urn-gate-probe".to_vec())),
+        )
 }
 
 /// A family is reachable if the book, the manifest, or a prefix-routed space can show
@@ -89,6 +122,33 @@ fn is_capability_scope(urn: &str) -> bool {
     urn.starts_with("urn:cap:")
 }
 
+/// A node in the description graph — `<urn:ikigai:endpoint:camel-case:input:in>` — is a
+/// name too, and the prose quotes several. Nothing *resolves* one: it is the skolem IRI
+/// `ikigai-vocab` mints for an endpoint, an input or an action so the catalog has no
+/// blank nodes. The authority for such a name is the catalog itself, so the check is
+/// that the tutorial host's catalog really contains it, verbatim, in angle brackets.
+/// A renamed skolem prefix or a renamed endpoint then fails here rather than leaving
+/// the book quoting a graph that no longer exists.
+fn is_graph_node(urn: &str) -> bool {
+    urn.starts_with("urn:ikigai:endpoint:")
+}
+
+fn the_catalog_contains(node: &str) -> bool {
+    use std::sync::OnceLock;
+    static CATALOG: OnceLock<String> = OnceLock::new();
+    let catalog = CATALOG.get_or_init(|| {
+        let kernel = hello_camel::kernel();
+        let request = Request::new(
+            Verb::Source,
+            Iri::parse("urn:kernel:catalog").expect("a constant IRI"),
+        );
+        let repr = block_on(kernel.issue(request, &Capability::root()))
+            .expect("the tutorial host renders its catalog");
+        String::from_utf8(repr.bytes).expect("Turtle is UTF-8")
+    });
+    catalog.contains(&format!("<{node}>"))
+}
+
 fn describe(mention: &Mention) -> String {
     let where_from = match mention.context {
         Context::Cli => "an `ikigai …` shell example",
@@ -113,6 +173,16 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
 
     for mention in &scan.mentions {
         if is_capability_scope(&mention.urn) {
+            continue;
+        }
+        if is_graph_node(&mention.urn) {
+            if !the_catalog_contains(&mention.urn) {
+                failures.push(format!(
+                    "{}: quotes a catalog node the tutorial host's catalog does not \
+                     contain.",
+                    describe(mention)
+                ));
+            }
             continue;
         }
 
@@ -335,12 +405,20 @@ fn the_cli_vocabulary_matches_an_installed_binary() {
     let mut missing = Vec::new();
     for entry in vocabulary.exact_entries() {
         // `describe` answers for anything bound in a space; the kernel's own resources
-        // are intercepted before space resolution, so they answer to `source` instead.
-        let reachable = ["describe", "source"].iter().any(|verb| {
+        // are intercepted before space resolution, so they answer to `source` instead —
+        // and one of them, `urn:kernel:cut`, answers only to `sink`. A sink is a write,
+        // so it is tried for the kernel's own family alone: cutting a thread in a
+        // one-shot process that exits on the next line changes nothing, whereas a
+        // probe that sank into `urn:file:` or `urn:llm:config` would.
+        let mut commands = vec![format!("describe {entry}"), format!("source {entry}")];
+        if entry.starts_with("urn:kernel:") {
+            commands.push(format!("sink {entry} urn-gate-probe"));
+        }
+        let reachable = commands.iter().any(|command| {
             Command::new("ikigai")
                 .arg("--plain")
                 .arg("-c")
-                .arg(format!("{verb} {entry}"))
+                .arg(command)
                 .output()
                 .map(|o| o.status.success())
                 .unwrap_or(false)

@@ -6,6 +6,7 @@ Read a chapter, then have a kernel in front of you. Three ways, cheapest first.
 
 ```bash
 cargo run -p hello-camel -- "resource oriented computing"
+cargo run -p hello-camel -- --catalog
 ```
 
 ```text
@@ -15,7 +16,9 @@ out resourceOrientedComputing
 
 That is a complete ikigai host: a root space, a kernel around it, one resolution. It is
 about thirty lines and you will have read all of them by the end of
-[Binding, and a host of your own](binding.md).
+[Binding, and a host of your own](binding.md). The second form prints the host's catalog
+— every endpoint it binds, describing itself — which [What resolution buys you](payoff.md)
+reads through the same kernel.
 
 ## The CLI
 
@@ -38,9 +41,11 @@ ikigai --plain -c 'source urn:iki:fn:toUpper in="hello"'
 ```
 
 Run it with no arguments and you get a REPL with the same grammar: pipes (`|`), map
-(`..`), named arguments, `compose`, `cache`, `cap`, and `list`. The REPL, the one-shot
-flag and the page-assembling browser demo all drive *the same engine* — worth knowing
-early, because anything you learn in one place transfers.
+(`..`), named arguments, `compose`, `cache`, `cap`, `trace`, and `list`. The REPL, the
+one-shot flag and the page-assembling browser demo all drive *the same engine* — worth
+knowing early, because anything you learn in one place transfers. One difference that
+matters: the cache lives in the process, so a cache hit is something you see in a REPL
+session and never across two `-c` runs.
 
 Two commands worth running on your first day, because they show the system describing
 itself rather than doing work:

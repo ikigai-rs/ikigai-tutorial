@@ -7,6 +7,7 @@
 - [Resolution](getting-started/resolution.md)
 - [Running it](getting-started/running-it.md)
 - [Hello, resource](getting-started/hello-resource.md)
+- [What resolution buys you](getting-started/payoff.md)
 - [Why an endpoint describes itself](getting-started/self-description.md)
 - [Binding, and a host of your own](getting-started/binding.md)
 - [Configuration](getting-started/configuration.md)

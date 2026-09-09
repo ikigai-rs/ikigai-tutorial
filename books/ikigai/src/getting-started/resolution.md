@@ -11,6 +11,9 @@ This is the one idea to take seriously before any of the code makes sense. In a 
 call, the caller has already decided almost everything by the time it calls. In a
 resolution, the caller has decided only *what it wants*.
 
+Nine terms follow. Each is a paragraph here and a thing you *do* somewhere in Part I, and
+every one of them says where — this chapter is the map, not the territory.
+
 ## The five verbs
 
 There is no method vocabulary to learn, because there are five verbs and they are the
@@ -23,6 +26,9 @@ same five for every resource in the system:
 | `Exists` | is there anything at this name? |
 | `Delete` | remove it |
 | `Meta` | describe yourself |
+
+You issue a `Source` in [Hello, resource](hello-resource.md) and a `Sink` in [What
+resolution buys you](payoff.md), where the write is what cuts a thread.
 
 `Meta` is the one that surprises people. Every endpoint can be asked what it is, what
 arguments it takes, what it returns, and what authority it requires — and it answers in a
@@ -41,6 +47,9 @@ The consequence worth internalizing: a resource does not have *a* format. It has
 formats the kernel can reach from what it has, and asking for `as=text/turtle` is a
 routing question, not a serialization call.
 
+You return one in [Hello, resource](hello-resource.md) — bytes *and* their type — and ask
+for one as Turtle in [What resolution buys you](payoff.md).
+
 ## Golden threads
 
 When a resolution is derived from other resolutions, the kernel records the dependency.
@@ -56,6 +65,9 @@ until the thing it came from actually changes.
 > a correctness no-op that is a large performance change. Nothing warns you; the types are
 > identical either way.
 
+You will cut one in [What resolution buys you](payoff.md), and watch a derived result
+recompute that never named the thread it depended on.
+
 ## Capabilities
 
 Authority travels with the invocation, not with the process. An endpoint runs under a
@@ -67,9 +79,17 @@ An action that enforces authority it does not declare makes the catalog lie by p
 more than it can do; one that declares authority it does not enforce is worse. Both are
 treated as defects.
 
+Part I runs everything as root, on purpose; [The file workspace](file-workspace.md) is
+where a scoped capability first refuses something, and Part III leans on them hardest.
+
 ## Where this is going
 
 Put those together and you get a system that can describe itself completely: a catalog of
 every resolvable name (`urn:kernel:catalog`), and a capability-scoped list of what the
 *current* caller may actually invoke (`urn:kernel:actions`). An agent's tool list is not
 something you write down for it — it is that second thing, computed.
+
+You read the catalog of this book's own host in [What resolution buys you](payoff.md),
+learn why the descriptions it is built from are load-bearing in [Why an endpoint describes
+itself](self-description.md), and meet the tool list as a client would in [The machine
+client](../beyond/agent.md).

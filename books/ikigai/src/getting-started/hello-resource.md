@@ -10,7 +10,8 @@ compiles it*, so it cannot drift from what actually runs.
 {{#include ../../../../crates/hello-camel/src/lib.rs:impl}}
 ```
 
-Four things in there are worth slowing down for.
+The endpoint is the first function; the second is the pure string function under it, split
+out so a later chapter can reuse it. Four things in there are worth slowing down for.
 
 ## `inv.inline_str("in")`
 
@@ -61,3 +62,6 @@ use ikigai_core::Endpoint;
 // Every endpoint knows its own name.
 assert_eq!(camel_case().describe().id, "camel-case");
 ```
+
+That is an endpoint. What you get for having resolved a name rather than called a function
+is the next chapter, [What resolution buys you](payoff.md).

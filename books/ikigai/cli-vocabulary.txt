@@ -25,7 +25,7 @@
 #     cargo test -p book-urns -- --ignored --nocapture
 #
 # Run it when you change this file, and when the CLI releases. Verified against
-# ikigai-cli 0.1.18 on 2026-09-07, Part III's entries included.
+# ikigai-cli 0.1.18 on 2026-09-08, the golden-thread entries included.
 
 # The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
@@ -40,6 +40,15 @@ urn:iki:fn:conditional
 # than bound in a space, so `list` does not show them; `source` does.
 urn:kernel:catalog
 urn:kernel:actions
+
+# The golden-thread and cache resources "What resolution buys you" drives from a REPL:
+# `sink urn:kernel:cut <thread>` cuts a thread by hand, `urn:kernel:threads` lists every
+# thread ever cut with its generation, `urn:kernel:cache` lists what is cached. All three
+# are kernel-intrinsic like the two above, and `source`/`sink` reach them while `list`
+# does not.
+urn:kernel:cut
+urn:kernel:threads
+urn:kernel:cache
 
 # What the CLI's scheduler is, and — the reason the configuration chapter prints it — which
 # of flag / config / env / default decided.

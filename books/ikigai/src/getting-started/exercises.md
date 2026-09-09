@@ -37,24 +37,28 @@ name and prints the result. Point it at yours and run:
 cargo run -p hello-camel -- "resource oriented computing"
 ```
 
-**To watch the host describe itself**, one of the two self-description resources works
-here and one does not. `urn:kernel:actions` resolves, and lists every name bound in the
-space — your new one will appear in it. `urn:kernel:catalog` does *not*: it renders every
-endpoint's `Description`, which needs a Meta renderer, and `Kernel::new` has none, so you
-get `no Meta renderer configured`. The `ikigai` CLI supplies a renderer of its own, which
-is why the catalog answers there and not here.
+**To watch the host describe itself**, ask for the catalog:
 
-> ⚠ So in *this* host, the place to check what your endpoint says about itself is
-> `your_thing().describe()`, asserted in a test — exactly as
-> [Hello, resource](hello-resource.md) does with `camel_case().describe().id`. That is a
-> smaller instrument than the catalog, and it is the one that exists here.
+```bash
+cargo run -p hello-camel -- --catalog
+```
+
+Your endpoint appears in it the moment it is bound, described exactly as its `Description`
+says — because the catalog is assembled from those descriptions rather than maintained
+beside them. `urn:kernel:actions` lists the names alone. Both answer here because the
+tutorial host was built with a Meta renderer; a bare `Kernel::new` has none, and would
+answer `no Meta renderer configured` to either. [Binding, and a host of your
+own](binding.md) shows the one line that makes the difference.
+
+> ⚠ The catalog shows what you *declared*. A test that asserts `your_thing().describe()`
+> is the same instrument pointed at one endpoint, and it is the one that runs on every
+> `cargo test` — [Hello, resource](hello-resource.md) does exactly that with
+> `camel_case().describe().id`.
 
 <!-- urn-gate: illustration urn:iki:tutorial:your-thing — a stand-in for whatever the
      reader binds; the point of the line is the shape, not the name. -->
 <!-- urn-gate: illustration urn:iki:tutorial:lower-camel-case — exercise 1 asks the reader
      to write this one; nothing in the repository binds it. -->
-<!-- urn-gate: illustration urn:iki:tutorial:title — exercise 3's target resource, written
-     by the reader. -->
 <!-- urn-gate: illustration urn:iki:tutorial:now — exercise 4's deliberately wrong clock,
      written by the reader. -->
 
@@ -155,15 +159,18 @@ Make your endpoint accept `in` as **a reference to another resource** as well as
 value: given `ArgRef::Reference(urn:iki:tutorial:title)`, resolve that name through the
 kernel and camel-case whatever it returns.
 
-- **File** — `crates/hello-camel/src/lib.rs`. You will need two things: a second endpoint
-  bound at `urn:iki:tutorial:title` that returns a constant string, and a version of
-  `camel-case` that can take a reference.
+- **File** — `crates/hello-camel/src/lib.rs`. `urn:iki:tutorial:title` is already bound
+  there — it is the resource [What resolution buys you](payoff.md) writes to — so the
+  only new thing is a version of `camel-case` that can take a reference to it.
 - **Run** — `cargo test -p hello-camel`
 - **Right when** — one test passes the text inline and gets the answer it always got, and
-  a second passes `ArgRef::Reference` and gets the camel-cased contents of the *other*
-  resource. Neither test mentions the other endpoint's implementation.
-- **Read again** — [Hello, resource](hello-resource.md) on `inline_str`, and
-  [The callback](../modules/the-callback.md), which is the same move seen from a module.
+  a second passes `ArgRef::Reference` and gets the camel-cased contents of `title`. Then
+  `Sink` a new title and resolve again: the by-reference answer follows the write, the
+  inline one cannot.
+- **Read again** — [Hello, resource](hello-resource.md) on `inline_str`,
+  [What resolution buys you](payoff.md) for `camel-title`, which is this exercise with the
+  reference hard-wired, and [The callback](../modules/the-callback.md), which is the same
+  move seen from a module.
 
 <details>
 <summary>Hint</summary>
@@ -193,10 +200,11 @@ works. `urn:iki:fn:toUpper` does not: it needs an `in` argument, and there is no
 reference to put one. (`urn:iki:fn:toUpper?in=hello` does not resolve either; that binding
 matches the name exactly, query string included.)
 
-Correct output looks like this: with `title` returning `"resource oriented computing"`,
-resolving your endpoint with `in` as a reference to it returns
-`"resourceOrientedComputing"` — the same bytes the inline call gives, produced without the
-caller ever holding the text.
+Correct output looks like this: with `title` still at its starting text, resolving your
+endpoint with `in` as a reference to it returns `"resourceOrientedComputing"` — the same
+bytes the inline call gives, produced without the caller ever holding the text. And
+because `inv.source` recorded the dependency, the answer is cached under `title`'s golden
+thread: write to `title` and it recomputes, exactly as `camel-title` did.
 
 </details>
 

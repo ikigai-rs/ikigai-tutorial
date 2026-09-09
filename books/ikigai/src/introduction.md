@@ -13,7 +13,8 @@ can arrive as text, as Turtle, or as HTML. **Golden threads** track what a resul
 derived from, so a write invalidates exactly what it should. **Capabilities** gate
 authority and attenuate as they pass down a call chain.
 
-That is the whole model. The rest is consequences.
+That is the whole model. The rest is consequences — and the first four of them, run
+rather than described, are [What resolution buys you](getting-started/payoff.md).
 
 ## Why bother
 
