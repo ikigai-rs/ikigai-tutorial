@@ -3,3 +3,5 @@
 .DS_Store
 books/*/book
 a11y/node_modules/
+# Emacs undo-tree history files
+*.~undo-tree~
