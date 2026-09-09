@@ -1,29 +1,131 @@
 # Configuration
 
-## Two channels, and a boundary still being drawn
+A host reads a config file. This chapter is about *where* it looks, *how* two files
+combine, and — because the point of a book with tests is that the tests are the claim —
+how an endpoint that reads configuration is tested against a directory the test owns.
 
-Configuration reaches an ikigai host two ways: a **config file**, and **command-line
-flags** that override it. Those are the channels this book uses, and the ones to reach for
-when you configure something you built.
+The code is in `crates/building-endpoints`, one part ahead, because it is the first
+endpoint in the book whose answer comes from a file. It is bound in that part's host at
+`urn:iki:tutorial:banner`.
 
-Environment variables are the awkward third, and it is worth knowing why they are awkward
-before you meet one. An env var is ambient influence over a process's behaviour: it leaves
-no trace in any file, is invisible to anyone reading the deployment, is inherited silently
-by child processes, and cannot be diffed. A system whose thesis is that behaviour should be
-*nameable and inspectable* is not comfortable taking instructions through a channel with
-none of those properties.
+## Where files live
 
-They are not absent, though, and a book that told you they were would be lying to you on
-your first day. A host reads a set of `IKIGAI_*` variables today — `IKIGAI_FILES`,
-`IKIGAI_GRANTS`, `IKIGAI_SMTP_HOST`, `IKIGAI_PASSKEY_ORIGIN` and others — and they have a
-shape: most carry a *deployment* fact (where this process's mail relay is, which origin its
-passkeys are scoped to, where its grants file lives) rather than a behaviour switch for a
-resource. `IKIGAI_FILES` is the one you meet first, in
-[The file workspace](file-workspace.md).
+`ikigai-core` owns the answer, so every host agrees:
 
-And one of them is deliberate rather than residual. The CLI picks its scheduler through
-`decide(flag, config, env)` — a precedence function with three arguments, written that way
-on purpose — and then *says which one won*:
+```rust
+# extern crate ikigai_core;
+use std::path::{Path, PathBuf};
+
+// This machine's config home: `$XDG_CONFIG_HOME/ikigai`, else `~/.config/ikigai`.
+let home: Option<PathBuf> = ikigai_core::config::config_home();
+
+// The files that make up one logical configuration, in the order they are read.
+let layers: Vec<PathBuf> = ikigai_core::config::layered_paths_in(
+    Path::new("/tmp/example-home"), "tutorial.toml", Some("yours"),
+);
+assert_eq!(layers, vec![
+    PathBuf::from("/tmp/example-home/tutorial.toml"),
+    PathBuf::from("/tmp/example-home/yours.tutorial.toml"),
+]);
+# let _ = home;
+```
+
+`config_home()` is `None` when the machine has no home to offer. That is a legal state —
+the process is under-configured, not broken — and it is `None` rather than a guess on
+purpose: a guessed home reads as success.
+
+`layered_paths_in(home, stem, app)` is the layering rule, and it is the same for every
+crate in the ecosystem: the shared file, then an app-scoped **sibling** named
+`<app>.<stem>` that overrides it key-wise. The stem is the whole file name, extension
+included. A flat listing of `~/.config/ikigai/` then reads as what it is — `a11y.toml`
+states what every front end shares, `cms-web.a11y.toml` the handful of keys one of them
+differs on. The `_in` form takes the home as an argument; `layered_paths(stem, app)` is
+the same rule over `config_home()`.
+
+## A host that reads one
+
+`[banner] text = "…"` is the whole schema. Small on purpose, so the layering is visible:
+
+```rust,ignore
+{{#include ../../../../crates/building-endpoints/src/config.rs:settings}}
+```
+
+Two rules in that loader. A **missing** file is a missing *layer* — skipped, silently,
+because "no override here" is ordinary. A file that is **present and broken** stops the
+read, because a config that is silently ignored is an operator believing one thing while
+the process does another, and nothing anywhere disagreeing until an outage.
+
+And the endpoint that serves it:
+
+```rust,ignore
+{{#include ../../../../crates/building-endpoints/src/config.rs:endpoint}}
+```
+
+## The home is taken at construction
+
+`banner(home, app)` takes the home as an argument. It does not call `config_home()` in
+its body, and this is the rule the chapter exists to state: **the injected form is the
+real one, and the ambient read is sugar over it, done once, in the host.**
+
+Three reasons, from `ikigai-core`'s design note on the subject. `config_home()` reads the
+environment, which is process-global, so an endpoint calling it under `cargo test` reads
+the *developer's* real `~/.config/ikigai` — and the tests that result assert only that a
+value has a type, because they do not own the file it came from. A test cannot hand such
+an endpoint a different home without `set_var`, which races the test beside it. And one
+process legitimately has two answers: a test binary mounting a fixture home beside a
+mount with none is the ordinary case.
+
+So the host resolves the home once and hands it down, and a test hands down a directory
+of its own:
+
+```rust,ignore
+{{#include ../../../../crates/building-endpoints/src/config.rs:layers}}
+```
+
+The last four lines of that test are the golden thread from [What resolution buys
+you](payoff.md), meeting a file. The endpoint declared `.depends_on(<path>)` for each
+candidate file, so the cached banner is valid until one of those threads is cut. Nothing
+in this host watches the directory — a real one would — so the test cuts it by hand, and
+the next read sees the override.
+
+> ⚠ The endpoint holds the **home**, not the parsed settings, and re-reads per
+> resolution. That is the right split for a value that lives in a file: the cache makes
+> the re-read free until a thread is cut, and cutting recomputes. A handle that parsed
+> the file at construction would serve the values the process started with, forever,
+> however many times the thread was cut. The other choice is right for *process* state a
+> `Sink` mutates in place — then the handle *is* the authority, not a stale copy of a
+> file. Ask which one you have before you choose.
+
+## Try it
+
+Write a file into this machine's config home and ask the host for its banner:
+
+```bash
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/ikigai"
+printf '[banner]\ntext = "hello from a file"\n' > "${XDG_CONFIG_HOME:-$HOME/.config}/ikigai/tutorial.toml"
+cargo run -p building-endpoints -- --banner
+```
+
+```text
+hello from a file
+```
+
+Then write `yours.tutorial.toml` beside it with a different `text` and run again: the
+app-scoped layer wins. Delete both and the default answers.
+
+## The other channels
+
+Command-line **flags** override the file; that is the second channel, and the two are the
+ones this book uses. **Environment variables** are the awkward third: ambient influence
+over a process, leaving no trace in any file, invisible to anyone reading the deployment,
+inherited silently by children, undiffable. A system whose thesis is that behavior should
+be nameable and inspectable is not comfortable taking instructions that way.
+
+They are not absent, and a book that said so would be lying on your first day. A host
+reads a set of `IKIGAI_*` variables today — `IKIGAI_FILES`, the one you meet first, in
+[The file workspace](file-workspace.md), and others carrying *deployment* facts. The CLI
+picks its scheduler through a three-way precedence, `decide(flag, config, env)`, and then
+*says which one won*:
 
 ```bash
 ikigai --plain -c 'source urn:kernel:scheduler'
@@ -36,55 +138,19 @@ scheduler
   source     default
 ```
 
-That `source` row is the interesting part, and it is the shape of the argument rather than
-a settlement of it: what makes an invisible channel expensive is that nothing afterwards
-can tell you it was used, and a host that reports which channel decided has bought back
-the property the objection is about.
-
-So: the boundary is being tidied, not settled, and this book is not where it gets settled.
-Configure what you build through the config file and flags. If you find yourself wanting an
-env var instead, treat that as a question worth raising rather than a pattern worth copying.
-
-## Where files live
-
-`ikigai-core` owns the answer, so every host agrees:
-
-```rust,no_run
-# extern crate ikigai_core;
-use std::path::PathBuf;
-
-let home: Option<PathBuf> = ikigai_core::config::config_home();
-let candidates: Vec<PathBuf> = ikigai_core::config::layered_paths("cms", None);
-# let _ = (home, candidates);
-```
-
-`config_home()` resolves the XDG config directory — `$XDG_CONFIG_HOME/ikigai`, else
-`~/.config/ikigai`.
-
-`layered_paths()` is the interesting one. It returns the *ordered list* of files that make
-up one logical configuration, so a host can read shared defaults and let a more specific
-file override them, rather than every crate inventing its own precedence rules.
-
-In practice you will see files like `~/.config/ikigai/cms.toml`, one per host.
+That `source` row is the shape of the argument rather than a settlement of it: what makes
+an invisible channel expensive is that nothing afterwards can tell you it was used, and a
+host that reports which channel decided has bought back the property the objection is
+about. Configure what you build through the file and flags. If you find yourself wanting
+an env var, treat that as a question worth raising rather than a pattern worth copying.
 
 ## Fail loud on missing configuration
 
-> ⚠ The house rule, and it is the opposite of what most frameworks do: **something
-> expected but unset must stop the program.** Not warn, not silently substitute a default,
-> not carry on degraded.
-
-A silent default is a lie the system tells itself — the operator believes one thing is
-configured, the process is doing another, and nothing anywhere disagrees until an outage.
-If a value is genuinely optional, model it as optional. If it is required, refuse to start
-without it and say which key is missing.
-
-## A worked example of getting this wrong
-
-The reading room's own service binary reads its passkey store from the OS keychain
-*before it prints its first line of output*. When that call blocks — which it does in any
-context that cannot answer the keychain prompt — the log shows **nothing at all**. No
-error, no partial banner.
-
-An empty log reads as "still starting". It actually means "blocked, forever". One
-`println!` before the call would have made it self-identifying. That is what failing loud
-buys, and what its absence costs.
+> ⚠ The house rule, and the opposite of what most frameworks do: **something expected but
+> unset must stop the program.** Not warn, not silently substitute, not carry on degraded.
+> The loader above draws the line where it belongs — absent is legal, broken is not — and
+> a required value with no default should refuse to start and say which key is missing.
+> The worst version of getting this wrong is a service that blocks on a keychain prompt
+> *before its first line of output*, so the log shows nothing at all: an empty log reads
+> as "still starting" and means "blocked, forever". One `println!` before the call would
+> have made it self-identifying.
