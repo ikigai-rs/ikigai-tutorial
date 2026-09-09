@@ -84,18 +84,20 @@ on the difference.
 
 ## Exercises
 
-Four, and all four run against `crates/loadable-module/src/lib.rs` — the file the listings
-in this part are pulled from. The loop is `cargo test -p loadable-module`; the test module
+Four, and all four run against **your** module — `crates/your-endpoints/src/module.rs`,
+the same shape as the `loadable-module` crate this part quotes, with a `greeting` endpoint
+under `urn:iki:tutorial:yours:module:` that calls back to the host's
+`urn:iki:tutorial:yours:name`. The loop is `cargo test -p your-endpoints`; the test module
 at the bottom of that file already has the `greet` helper that builds a kernel and resolves
-a name, so a new question is a copy of it with something changed.
+a name under a capability, so a new question is a copy of it with something changed.
 
 ### 1. Break the prefix
 
-Change `ModuleSpace::new(["urn:greet:"], …)` in `host_space()` to a prefix the request does
-not match.
+Change `ModuleSpace::new([MODULE_PREFIX], …)` in `host_space()` to a prefix the request
+does not match.
 
 - **Right when** — `the_module_resolves_a_host_resource_mid_invocation` fails with
-  `no endpoint resolved for urn:greet:hello`, and
+  `no endpoint resolved for urn:iki:tutorial:yours:module:greeting`, and
   `a_name_outside_the_module_prefix_does_not_reach_it` still passes. Then put it back.
 
 <details>
@@ -103,7 +105,7 @@ not match.
 
 Notice what did *not* change when it broke: the module is still compiled in, still
 constructed, still perfectly able to answer that name. It has an endpoint bound at
-`urn:greet:hello` in its own space, and the host cannot reach it.
+`urn:iki:tutorial:yours:module:greeting` in its own space, and the host cannot reach it.
 
 That is routing being a host decision rather than a module's claim on a name space —
 the same separation as [Binding, and a host of your own](../getting-started/binding.md),
@@ -114,11 +116,11 @@ one level up. A module does not get names by asking for them.
 ### 2. Chain a callback
 
 Bind a second endpoint in `module_space()` — one that takes no arguments and returns a
-constant — and then resolve `urn:greet:hello` with `name` pointing at *that* name instead
-of `urn:host:name`.
+constant — and then resolve `urn:iki:tutorial:yours:module:greeting` with `name` pointing
+at *that* name instead of `urn:iki:tutorial:yours:name`.
 
 - **Right when** — the greeting names whatever your second module endpoint returns, and
-  `hello` itself is untouched.
+  `greeting` itself is untouched.
 
 <details>
 <summary>Hint</summary>
@@ -132,21 +134,23 @@ It works, and it works on the loopback transport too. The reason it works is the
 reason exercise 1 broke: the module has an IRI and an `Issuer`, and no way to ask where a
 name will end up. It cannot tell that the answer came back from itself.
 
-The second endpoint is the shorter half of the exercise: `host_name()` in the same file
-already shows the shape of an endpoint that takes nothing and returns a constant.
+The second endpoint is the shorter half of the exercise: `name()` in the same file
+already shows the shape of an endpoint that takes nothing and returns a constant — and
+remember the prefix: a name the host does not route to the module never reaches it, which
+is exercise 1 arriving from the other side.
 
 </details>
 
 ### 3. Attenuate
 
-Give the host's `urn:host:name` a declared capability — `.requires("urn:cap:demo:host")` on
-its `Description` — then resolve `urn:greet:hello` under
-`Capability::root().attenuate(["urn:cap:demo:host"])`, and again under an attenuation that
-grants something else.
+Give the host's `urn:iki:tutorial:yours:name` a declared capability —
+`.requires("urn:cap:yours:name")` on its `Description` — then resolve the greeting under
+`Capability::root().attenuate(["urn:cap:yours:name"])`, and again under an attenuation
+that grants something else. The `greet` helper already takes the capability.
 
-- **Right when** — with the right scope you get `Hello, Peter!`; with the wrong one the
-  resolution fails with `denied: capability does not grant urn:cap:demo:host (declared by
-  urn:host:name)`.
+- **Right when** — with the right scope you get `Hello, Ada!`; with the wrong one the
+  resolution fails with ``denied: capability does not grant `urn:cap:yours:name` (declared
+  by `urn:iki:tutorial:yours:name`)``.
 
 <details>
 <summary>Hint</summary>
@@ -161,8 +165,8 @@ a module, it borrows the caller's, and the borrowing can only narrow. Here it is
 closed in front of you.
 
 > ⚠ Try the mirror image too, because the answer is not the one you would guess: put
-> `.requires(…)` on the module's own `hello` endpoint instead, and it is **not** enforced.
-> See "Do not assume the host enforces what a module declares", above.
+> `.requires(…)` on the module's own `greeting` endpoint instead, and it is **not**
+> enforced. See "Do not assume the host enforces what a module declares", above.
 
 </details>
 

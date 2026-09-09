@@ -82,6 +82,7 @@ dependencies = [
  "hello-camel",
  "ikigai-core",
  "loadable-module",
+ "your-endpoints",
 ]
 
 [[package]]
@@ -1342,6 +1343,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e17bb3549cc1321ae1296b9cdc2698e2b6cb1992adfa19a8c72e5b7a738f44cd"
 dependencies = [
  "time",
+]
+
+[[package]]
+name = "your-endpoints"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures",
+ "hello-camel",
+ "ikigai-core",
+ "ikigai-ipc",
+ "ikigai-module",
+ "ikigai-resolve",
+ "ikigai-vocab",
+ "two-hosts",
 ]
 
 [[package]]

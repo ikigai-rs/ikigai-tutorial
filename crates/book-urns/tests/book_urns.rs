@@ -45,7 +45,8 @@ fn binds(space: &dyn Space, iri: &str) -> bool {
     matches!(space.resolve(&request, &Scope::empty()), Resolution::Hit(_))
 }
 
-/// The hosts this workspace builds — the two the book actually stands a reader in front of.
+/// The hosts this workspace builds — the ones the book actually stands a reader in front
+/// of: the two it quotes listings from, and the reader's own, which the exercises name.
 fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
     vec![
         (
@@ -55,6 +56,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
         (
             "loadable_module::host_space()",
             Arc::new(loadable_module::host_space()) as Arc<dyn Space>,
+        ),
+        (
+            "your_endpoints::module::host_space()",
+            Arc::new(your_endpoints::module::host_space()) as Arc<dyn Space>,
         ),
     ]
 }
@@ -372,6 +377,53 @@ fn a_cross_reference_names_a_chapter_rather_than_numbering_it() {
         failures.is_empty(),
         "the book numbers a chapter where it could name one:\n  {}",
         failures.join("\n  ")
+    );
+}
+
+/// The reader's crate is never quoted. `crates/your-endpoints` exists so the exercises
+/// have a file to edit that is NOT one the chapters include listings from — doing exercise
+/// 1 used to rewrite the chapter that set it. That property holds only as long as no
+/// `{{#include}}` points there, and an include is one line anyone can add in good faith,
+/// so this is checked rather than remembered.
+#[test]
+fn no_chapter_includes_a_listing_from_the_readers_crate() {
+    let root = book_src();
+    let mut files = Vec::new();
+    fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
+        for entry in std::fs::read_dir(dir).expect("the book source is readable") {
+            let path = entry.expect("a directory entry").path();
+            if path.is_dir() {
+                walk(&path, out);
+            } else if path.extension().and_then(|e| e.to_str()) == Some("md") {
+                out.push(path);
+            }
+        }
+    }
+    walk(&root, &mut files);
+    assert!(files.len() > 10, "the walk is not reading the book");
+
+    let offenders: Vec<String> = files
+        .iter()
+        .flat_map(|path| {
+            let text = std::fs::read_to_string(path).expect("a chapter is readable");
+            let file = path
+                .strip_prefix(&root)
+                .expect("under the book root")
+                .to_string_lossy()
+                .into_owned();
+            text.lines()
+                .enumerate()
+                .filter(|(_, line)| line.contains("#include") && line.contains("your-endpoints"))
+                .map(|(index, _)| format!("{file}:{}", index + 1))
+                .collect::<Vec<_>>()
+        })
+        .collect();
+
+    assert!(
+        offenders.is_empty(),
+        "a chapter includes a listing from crates/your-endpoints, the file the exercises \
+         edit — put the listing in the crate the chapter teaches instead:\n  {}",
+        offenders.join("\n  ")
     );
 }
 
