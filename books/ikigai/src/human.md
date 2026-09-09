@@ -17,11 +17,11 @@ had no idea what it meant or was good for. A year later I migrated an
 XML processing pipeline to it in a week and picked up linear
 scalability in the process with virtually no effort.
 
-NetKernel was the brainchild of [1060
+NetKernel is the brainchild of [1060
 Research](https://1060research.com) and I owe them entire credit for
 the ideas, terminology, and vision. Basically what I have done is take
-those ideas and expand their applicability beyond the JVM (and soon
-back onto it; more on that soon) across a dramatically wider footprint,
+those ideas and expand their applicability beyond the JVM (and back
+onto it; more on that soon) across a dramatically wider footprint,
 with some personal design tweaks and additions.
 
 ## What's the point?
@@ -69,3 +69,6 @@ section and I'll try to accommodate. (As a teaser, you'll be using
 ikigai in the process of doing so.)
 
 Proceed with an open mind. Cool things are coming.
+
+Regards,  
+[Brian Sletten](https://w3id.org/people/bsletten)
