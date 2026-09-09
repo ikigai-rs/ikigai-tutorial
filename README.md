@@ -9,7 +9,8 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 
 | part | covers |
 |---|---|
-| **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), what resolution buys you (a cache hit, a golden thread cut, a trace, a catalog — each one run), self-description, binding, configuration, the file workspace |
+| **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), what resolution buys you (a cache hit, a golden thread cut, a trace, a catalog — each one run), self-description, binding, configuration (a config file the host reads, layered), the file workspace |
+| **Building endpoints** | A transreptor of your own and the kernel selecting it, a three-verb endpoint whose declared capability is enforced per verb, SPARQL over the catalog, and a clock-reading endpoint tested under a fixed clock |
 | **Loadable modules** | Modules vs. linked-in spaces, the host callback, the wire session, dual-mode crates, and an honest account of what is actually finished |
 | **Beyond one host** | A kernel behind a socket, the authority a certificate mints, the three things a mount can mean, an editor and a machine as clients — and three exercises against all of it |
 
@@ -114,7 +115,7 @@ out of the markdown and checks it against the authority that can actually answer
 
 | where the name appears | who confirms it |
 |---|---|
-| a Rust example | `hello_camel::space()` / `loadable_module::host_space()` / `your_endpoints::module::host_space()` — hosts built right here — or, for `urn:kernel:*`, the kernel built over the first of them, since those names are intercepted rather than bound |
+| a Rust example | `hello_camel::space()` / `building_endpoints::space()` / `loadable_module::host_space()` / `your_endpoints::module::host_space()` — hosts built right here — or, for `urn:kernel:*`, the kernel built over the first of them, since those names are intercepted rather than bound |
 | an `ikigai …` shell example | `books/ikigai/cli-vocabulary.txt` — the book's written-down claim about the CLI, which is another crate on another release schedule |
 | prose | either |
 
@@ -202,7 +203,8 @@ exactly like one that works.
 
 ```
 books/                 mdbook sources — prose
-crates/                the code each book teaches — compiled, linted, tested
+crates/                the code each part teaches — compiled, linted, tested
+                       (hello-camel, building-endpoints, loadable-module, two-hosts)
 crates/your-endpoints  the reader's crate: where the exercises are done, never quoted
 crates/book-urns       not a lesson: the prose gates above, and "never quoted" itself
 crates/book-a11y       likewise: the contrast gate and the skip link's target

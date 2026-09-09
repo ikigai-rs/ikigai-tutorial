@@ -25,7 +25,7 @@
 #     cargo test -p book-urns -- --ignored --nocapture
 #
 # Run it when you change this file, and when the CLI releases. Verified against
-# ikigai-cli 0.1.18 on 2026-09-08, the golden-thread entries included.
+# ikigai-cli 0.1.18 on 2026-09-08, the golden-thread and linked-data entries included.
 
 # The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
@@ -57,6 +57,14 @@ urn:kernel:scheduler
 # The file workspace, a URI template over the CLI's jail. The tail is a path the caller
 # chooses, so this has to be a prefix entry.
 urn:file:*
+
+# ── Building endpoints ────────────────────────────────────────────────────────
+#
+# The linked-data toolkit the CLI links natively (`ikigai-rdf`, `ikigai-sparql`): a
+# transreptor between RDF syntaxes, and SELECT over any graph the kernel can resolve —
+# the two the graph-face and transreption chapters drive from a shell.
+urn:rdf:transrept
+urn:sparql:select
 
 # ── Part III — Beyond one host ────────────────────────────────────────────────
 #

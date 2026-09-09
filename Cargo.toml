@@ -33,4 +33,13 @@ ikigai-fn = "0.2.0"
 # longer compiles together. This workspace only found out when Part III's dependencies
 # raised the resolved core past 0.1.63; the lockfile had been holding 0.1.62 and hiding it.
 ikigai-module = "0.1.10"
+# The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
+# Brings oxigraph, which is the price of a real query engine and is paid by one crate.
+ikigai-sparql = "0.1.7"
+# A Turtle parser and the RDF model it produces, for the transreptor the reader writes
+# in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
+oxttl = "0.2"
+oxrdf = "0.3"
+# The config file "Configuration" reads through `layered_paths`.
+toml = "0.8"
 futures = "0.3"

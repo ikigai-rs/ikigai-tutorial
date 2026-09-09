@@ -34,6 +34,11 @@ boundary on what may be done, and provenance for what was done.
 **Part I — Getting started** builds an endpoint and links it into a kernel you compose
 yourself. It is the 95% case, and everything else assumes it.
 
+**Building endpoints** is the rest of the builder's toolkit, one chapter per move: a
+transreptor of your own and the kernel finding it, an endpoint with three verbs and a
+capability that is declared *and* enforced, the catalog queried as a graph, and an
+endpoint that reads the clock tested without one.
+
 **Part II — Loadable modules** covers the other shape: a `space()` compiled separately
 and routed to at runtime, and the callback that makes a module something quite different
 from a remote peer.
@@ -45,9 +50,9 @@ one machine, that build their command surface by reading the catalog rather than
 told.
 
 Read Part I first, or at least [Resolution](getting-started/resolution.md) and
-[Binding](getting-started/binding.md). Part II assumes you know what a `space()` is and
-why binding is separate from defining; Part III assumes both, and leans hardest on
-capabilities.
+[Binding](getting-started/binding.md). Building endpoints assumes Part I and nothing else;
+Part II assumes you know what a `space()` is and why binding is separate from defining;
+Part III assumes both, and leans hardest on capabilities.
 
 ## How to read this book
 

@@ -14,6 +14,13 @@
 - [The file workspace](getting-started/file-workspace.md)
 - [Exercises](getting-started/exercises.md)
 
+# Building endpoints
+
+- [Transreption](building/transreption.md)
+- [Multi-verb endpoints](building/multi-verb.md)
+- [The graph face](building/graph-face.md)
+- [Testing an endpoint hermetically](building/hermetic.md)
+
 # Loadable modules
 
 - [What a module is](modules/index.md)

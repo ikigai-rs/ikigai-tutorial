@@ -54,6 +54,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             Arc::new(hello_camel::space()) as Arc<dyn Space>,
         ),
         (
+            "building_endpoints::space()",
+            Arc::new(building_endpoints::space(None)) as Arc<dyn Space>,
+        ),
+        (
             "loadable_module::host_space()",
             Arc::new(loadable_module::host_space()) as Arc<dyn Space>,
         ),

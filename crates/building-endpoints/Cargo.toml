@@ -1,0 +1,38 @@
+[package]
+name = "building-endpoints"
+version = "0.1.0"
+description = "The code taught by Building endpoints: a transreptor, a multi-verb endpoint with a declared capability, the graph face, a hermetically tested clock, and a host that reads a config file."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "building_endpoints"
+path = "src/lib.rs"
+
+[[bin]]
+name = "building"
+path = "src/bin/building.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-sparql.workspace = true
+# Not used by this crate. They are here to CONSTRAIN the resolver: `spareval` (under
+# oxigraph, under ikigai-sparql) admits `>=0.10,<0.12` on md-5, sha1 and sha2, while
+# `ikigai-quic` (under two-hosts, in this same workspace) pins `sha2 = "0.10"`. Left to
+# itself the resolver picks md-5/sha1 0.11 beside sha2 0.10 — two `digest` majors in one
+# crate — and spareval fails to compile with "the trait bound `…: Digest` is not
+# satisfied", nowhere near the cause. Stating 0.10 here makes every fresh resolve pick
+# one major, which a lockfile pin alone would not survive a `cargo update`.
+md-5 = "0.10"
+sha1 = "0.10"
+oxttl.workspace = true
+oxrdf.workspace = true
+toml.workspace = true
+futures.workspace = true
+# Part I's space, chained onto: the endpoints these chapters describe, query and
+# transrept are the ones the reader already has.
+hello-camel = { path = "../hello-camel" }

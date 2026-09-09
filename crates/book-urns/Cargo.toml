@@ -20,5 +20,6 @@ path = "src/lib.rs"
 ikigai-core.workspace = true
 futures.workspace = true
 hello-camel = { path = "../hello-camel" }
+building-endpoints = { path = "../building-endpoints" }
 loadable-module = { path = "../loadable-module" }
 your-endpoints = { path = "../your-endpoints" }
