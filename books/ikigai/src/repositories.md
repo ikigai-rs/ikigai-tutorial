@@ -1,7 +1,7 @@
 # The repositories
 
 One repository per module, all under <https://github.com/ikigai-rs>. This map is derived
-from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-12, grouped
+from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-13, grouped
 the way the maintainers group them; a few private repositories (the site, the release
 tooling, a secrets module and a set of Lisp programs) are omitted. If a name here does not
 resolve on GitHub, the list moved before this page did — the organization is the truth.
@@ -10,8 +10,9 @@ resolve on GitHub, the list moved before this page did — the organization is t
 
 - [`ikigai-core`](https://github.com/ikigai-rs/ikigai-core) — the kernel workspace:
   `ikigai-core` (kernel, `Description`/`ArgSpec`, capabilities, golden threads, clocks),
-  `ikigai-vocab` (the vocabulary and the Turtle renderer), `ikigai-store`. Everything
-  else depends on it.
+  `ikigai-vocab` (the vocabulary and the Turtle renderer). Those two are the whole
+  workspace — every module crate that once lived here has moved to its own repository.
+  Everything else depends on it.
 - [`ikigai-cli`](https://github.com/ikigai-rs/ikigai-cli) — the main host and a
   workspace of its own: the `ikigai` binary, the embedded host, the engine (the REPL
   grammar), resolve/wire/scheduler, the IPC and QUIC transports, the MCP projection, and
@@ -32,6 +33,10 @@ resolve on GitHub, the list moved before this page did — the organization is t
   `urn:text:*`, pure pipeline citizens.
 - [`ikigai-linkeddata`](https://github.com/ikigai-rs/ikigai-linkeddata) — `ikigai-rdf`
   (transreption between RDF syntaxes), `ikigai-sparql` (the graph face), `ikigai-sniff`.
+- [`ikigai-store`](https://github.com/ikigai-rs/ikigai-store) — the persistent RDF
+  store: a dataset opened from a path that survives a restart, owned by one process so
+  that reads can be cached. `ikigai-sparql` above queries a graph it is handed; this is
+  where the bytes live.
 - [`ikigai-jsonld`](https://github.com/ikigai-rs/ikigai-jsonld) — JSON-LD
   expand/compact/flatten, lazy-loadable as wasm.
 - [`ikigai-xslt`](https://github.com/ikigai-rs/ikigai-xslt) and
