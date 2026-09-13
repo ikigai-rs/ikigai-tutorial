@@ -510,10 +510,13 @@ mod tests {
 
     #[test]
     fn a_trailing_colon_names_a_family_not_a_resource() {
-        let scan =
-            scan_markdown("x.md", "everything under `urn:greet:` is routed\n").expect("scans");
+        let scan = scan_markdown(
+            "x.md",
+            "everything under `urn:iki:tutorial:module:` is routed\n",
+        )
+        .expect("scans");
         assert!(scan.mentions[0].is_prefix);
-        assert_eq!(scan.mentions[0].urn, "urn:greet:");
+        assert_eq!(scan.mentions[0].urn, "urn:iki:tutorial:module:");
     }
 
     #[test]
@@ -639,7 +642,7 @@ mod tests {
         assert!(!vocabulary.covers("urn:kernel:cache"));
         assert!(vocabulary.covers_family("urn:file:"));
         assert!(vocabulary.covers_family("urn:kernel:"));
-        assert!(!vocabulary.covers_family("urn:greet:"));
+        assert!(!vocabulary.covers_family("urn:iki:tutorial:module:"));
     }
 }
 

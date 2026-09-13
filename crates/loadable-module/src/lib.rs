@@ -18,14 +18,14 @@ fn text_plain_utf8() -> ReprType {
 }
 
 // ANCHOR: module_endpoint
-/// `urn:greet:hello` — the module's one endpoint.
+/// `urn:iki:tutorial:module:greeting` — the module's one endpoint.
 ///
 /// It takes a `name` argument that is *an IRI naming another resource*, and resolves it.
 /// That resolution is the whole point of this book: the module does not own the resource,
 /// cannot see it, and has no catalog of its own to find it in. `inv.source(…)` crosses
 /// back into the **host's** kernel to get it.
-pub fn hello() -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new("hello", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+pub fn greeting() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("greeting", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
         Box::pin(async move {
             let target = inv.inline_str("name")?;
             let iri = Iri::parse(target).map_err(|e| Error::InvalidArgument {
@@ -46,8 +46,8 @@ pub fn hello() -> AsyncFnEndpoint {
         })
     })
     .with_description(
-        Description::new("hello")
-            .title("Greet")
+        Description::new("greeting")
+            .title("Greeting")
             .summary("Greets whoever the `name` resource resolves to.")
             .verb(Verb::Source)
             .verb(Verb::Meta),
@@ -56,7 +56,7 @@ pub fn hello() -> AsyncFnEndpoint {
 
 /// The module's space — everything it offers, independent of any host.
 pub fn module_space() -> EndpointSpace {
-    EndpointSpace::new().bind(Exact::new("urn:greet:hello"), hello())
+    EndpointSpace::new().bind(Exact::new("urn:iki:tutorial:module:greeting"), greeting())
 }
 // ANCHOR_END: module_endpoint
 
@@ -75,7 +75,7 @@ pub fn host_name() -> AsyncFnEndpoint {
 }
 
 /// The host's root space: its own resources, plus a [`ModuleSpace`] that routes
-/// everything under `urn:greet:` to the module.
+/// everything under `urn:iki:tutorial:module:` to the module.
 ///
 /// `ModuleSpace` implements `Space`, so it sits in the `Fallback` exactly where a
 /// statically linked `space()` would — the host does not have a special case for
@@ -93,7 +93,7 @@ pub fn host_space() -> Fallback {
         Arc::new(EndpointSpace::new().bind(Exact::new("urn:host:name"), host_name()))
             as Arc<dyn Space>,
         Arc::new(ModuleSpace::new(
-            ["urn:greet:"],
+            ["urn:iki:tutorial:module:"],
             Arc::new(module),
             ModuleFloor::public(),
         )) as Arc<dyn Space>,
@@ -103,7 +103,7 @@ pub fn host_space() -> Fallback {
 
 /// The module's endpoint, described — proof it is reachable through the host.
 pub fn module_endpoint_id() -> String {
-    hello().describe().id.clone()
+    greeting().describe().id.clone()
 }
 
 #[cfg(test)]
@@ -114,8 +114,11 @@ mod tests {
 
     fn greet(name_iri: &str) -> String {
         let kernel = Kernel::new(Arc::new(host_space()));
-        let request = Request::new(Verb::Source, Iri::parse("urn:greet:hello").expect("iri"))
-            .with_arg("name", ArgRef::Inline(name_iri.as_bytes().to_vec()));
+        let request = Request::new(
+            Verb::Source,
+            Iri::parse("urn:iki:tutorial:module:greeting").expect("iri"),
+        )
+        .with_arg("name", ArgRef::Inline(name_iri.as_bytes().to_vec()));
         let repr = block_on(kernel.issue(request, &Capability::root())).expect("resolves");
         String::from_utf8(repr.bytes).expect("utf-8")
     }
@@ -129,7 +132,7 @@ mod tests {
 
     #[test]
     fn the_host_routes_by_prefix_not_by_knowing_the_endpoint() {
-        // The host bound no `urn:greet:hello`. ModuleSpace matched the prefix.
+        // The host bound no `urn:iki:tutorial:module:greeting`. ModuleSpace matched the prefix.
         let kernel = Kernel::new(Arc::new(host_space()));
         let request = Request::new(Verb::Source, Iri::parse("urn:host:name").expect("iri"));
         let repr = block_on(kernel.issue(request, &Capability::root())).expect("resolves");
@@ -143,22 +146,31 @@ mod tests {
     /// the chapter's sentence true.
     #[test]
     fn the_host_enforces_what_the_module_declares() {
-        let gated = AsyncFnEndpoint::new("gated", |_inv: &Invocation<'_>| -> InvokeFuture<'_> {
-            Box::pin(async move { Ok(Representation::new(text_plain_utf8(), b"in".to_vec())) })
-        })
+        let gated = AsyncFnEndpoint::new(
+            "gated-resource",
+            |_inv: &Invocation<'_>| -> InvokeFuture<'_> {
+                Box::pin(async move { Ok(Representation::new(text_plain_utf8(), b"in".to_vec())) })
+            },
+        )
         .with_description(
-            Description::new("gated")
+            Description::new("gated-resource")
                 .verb(Verb::Source)
                 .requires("urn:cap:demo:module"),
         );
-        let module = EndpointSpace::new().bind(Exact::new("urn:greet:gated"), gated);
+        let module =
+            EndpointSpace::new().bind(Exact::new("urn:iki:tutorial:module:gated-resource"), gated);
         let host = ModuleSpace::new(
-            ["urn:greet:"],
+            ["urn:iki:tutorial:module:"],
             Arc::new(InProcessTransport::new(module)),
             ModuleFloor::public(),
         );
         let kernel = Kernel::new(Arc::new(host));
-        let request = || Request::new(Verb::Source, Iri::parse("urn:greet:gated").expect("iri"));
+        let request = || {
+            Request::new(
+                Verb::Source,
+                Iri::parse("urn:iki:tutorial:module:gated-resource").expect("iri"),
+            )
+        };
 
         let denied = block_on(kernel.issue(
             request(),

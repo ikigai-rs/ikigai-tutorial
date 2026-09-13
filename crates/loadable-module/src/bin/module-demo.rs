@@ -13,17 +13,17 @@ use ikigai_core::{ArgRef, Capability, Iri, Kernel, Request, Verb};
 fn main() {
     let kernel = Kernel::new(Arc::new(loadable_module::host_space()));
 
-    // `urn:greet:hello` is bound by nobody in the host. The ModuleSpace matches the
-    // `urn:greet:` prefix and hands the request to the module.
+    // `urn:iki:tutorial:module:greeting` is bound by nobody in the host. The ModuleSpace
+    // matches the `urn:iki:tutorial:module:` prefix and hands the request to the module.
     let request = Request::new(
         Verb::Source,
-        Iri::parse("urn:greet:hello").expect("valid IRI"),
+        Iri::parse("urn:iki:tutorial:module:greeting").expect("valid IRI"),
     )
     .with_arg("name", ArgRef::Inline(b"urn:host:name".to_vec()));
 
     match block_on(kernel.issue(request, &Capability::root())) {
         Ok(repr) => {
-            println!("host    resolves urn:greet:hello name=urn:host:name");
+            println!("host    resolves urn:iki:tutorial:module:greeting name=urn:host:name");
             println!("module  asks the host for urn:host:name");
             println!("out     {}", String::from_utf8_lossy(&repr.bytes));
         }

@@ -5,11 +5,11 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-module` **0.2.0** and its
-shell examples were probed against `ikigai-cli` **0.1.18**, both on 2026-09-08; a test
-(`crates/book-urns/tests/book_claims.rs`) can re-check each stamped claim against the
-published crate it names, so that when one of them stops being true the fix is a diff,
-not a discovery.
+them is a claim, not a fact. This book builds against `ikigai-module` **0.2.0**, stamped on
+2026-09-08, and its shell examples were last probed against `ikigai-cli` **0.1.20** on
+2026-09-12; a test (`crates/book-urns/tests/book_claims.rs`) can re-check each stamped claim
+against the published crate it names, so that when one of them stops being true the fix is a
+diff, not a discovery.
 
 ## Phase 1
 
@@ -144,7 +144,8 @@ at *that* name instead of `urn:iki:tutorial:yours:name`.
 <details>
 <summary>Hint</summary>
 
-Follow the path before you write it: the host routes `urn:greet:hello` to the module, the
+Follow the path before you write it: the host routes `urn:iki:tutorial:yours:module:greeting`
+to the module, the
 module calls back to the host for a name, and the host routes that straight back into the
 module — while the first invocation is still open. Re-entrancy into the same module,
 mid-invocation.

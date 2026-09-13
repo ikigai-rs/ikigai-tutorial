@@ -1,7 +1,7 @@
 # The repositories
 
 One repository per module, all under <https://github.com/ikigai-rs>. This map is derived
-from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-08, grouped
+from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-12, grouped
 the way the maintainers group them; a few private repositories (the site, the release
 tooling, a secrets module and a set of Lisp programs) are omitted. If a name here does not
 resolve on GitHub, the list moved before this page did — the organization is the truth.
@@ -87,6 +87,9 @@ resolve on GitHub, the list moved before this page did — the organization is t
   SPARQL face (published as `ikigai-web-server`).
 - [`ikigai-runbook`](https://github.com/ikigai-rs/ikigai-runbook) — guided, runnable
   demos as resources.
+- [`ikigai-conformance`](https://github.com/ikigai-rs/ikigai-conformance) — what "done"
+  means for a module, as one test over a kernel: it walks every endpoint and reports
+  every violation of the recipe this book teaches at once.
 - [`ikigai-name`](https://github.com/ikigai-rs/ikigai-name) — persistent-identifier
   resolution, `urn:name:*`.
   <!-- urn-gate: illustration urn:name: — the family that repository binds; the CLI on

@@ -32,7 +32,7 @@ cargo run -p loadable-module
 ```
 
 ```text
-host    resolves urn:greet:hello name=urn:host:name
+host    resolves urn:iki:tutorial:module:greeting name=urn:host:name
 module  asks the host for urn:host:name
 out     Hello, Peter!
 ```

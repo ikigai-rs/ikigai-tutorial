@@ -9,15 +9,16 @@ cargo run -p loadable-module
 ```
 
 ```text
-host    resolves urn:greet:hello name=urn:host:name
+host    resolves urn:iki:tutorial:module:greeting name=urn:host:name
 module  asks the host for urn:host:name
 out     Hello, Peter!
 ```
 
 Three resolutions happened, in this order:
 
-1. The host resolved `urn:greet:hello`. Nothing in the host's own space matched, so the
-   `Fallback` reached the `ModuleSpace`, whose prefix `urn:greet:` did.
+1. The host resolved `urn:iki:tutorial:module:greeting`. Nothing in the host's own space
+   matched, so the `Fallback` reached the `ModuleSpace`, whose prefix
+   `urn:iki:tutorial:module:` did.
 2. The module's endpoint ran, and resolved `urn:host:name` — **back through the host**.
 3. The host answered `Peter` from a space the module cannot see.
 
@@ -35,8 +36,11 @@ use ikigai_core::{ArgRef, Capability, Iri, Kernel, Request, Verb};
 
 let kernel = Kernel::new(Arc::new(loadable_module::host_space()));
 
-let request = Request::new(Verb::Source, Iri::parse("urn:greet:hello").unwrap())
-    .with_arg("name", ArgRef::Inline(b"urn:host:name".to_vec()));
+let request = Request::new(
+    Verb::Source,
+    Iri::parse("urn:iki:tutorial:module:greeting").unwrap(),
+)
+.with_arg("name", ArgRef::Inline(b"urn:host:name".to_vec()));
 
 let repr = block_on(kernel.issue(request, &Capability::root())).unwrap();
 assert_eq!(String::from_utf8_lossy(&repr.bytes), "Hello, Peter!");
@@ -65,6 +69,6 @@ be worth opening:
 - `the_module_resolves_a_host_resource_mid_invocation` — the callback works. This single
   assertion is the difference between a module and a peer.
 - `the_host_routes_by_prefix_not_by_knowing_the_endpoint` — the host bound no
-  `urn:greet:hello`.
+  `urn:iki:tutorial:module:greeting`.
 - `a_name_outside_the_module_prefix_does_not_reach_it` — routing is bounded; the module
   does not become a catch-all.

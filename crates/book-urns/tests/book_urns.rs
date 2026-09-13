@@ -108,7 +108,8 @@ fn the_kernel_answers(iri: &str) -> bool {
 }
 
 /// A family is reachable if the book, the manifest, or a prefix-routed space can show
-/// something under it. `urn:greet:` is routed by a `ModuleSpace`, so a probe under it
+/// something under it. `urn:iki:tutorial:module:` is routed by a `ModuleSpace`, so a probe
+/// under it
 /// hits; `urn:iki:tutorial:` binds exactly, so the evidence is a sibling name instead.
 fn family_is_reachable(prefix: &str, scan: &Scan, vocabulary: &Vocabulary) -> bool {
     if vocabulary.covers_family(prefix) {
