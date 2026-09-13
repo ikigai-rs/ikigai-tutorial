@@ -32,9 +32,12 @@ Two things to notice, because they are the reason this composes at all.
 statically linked `space()` would go. The host has no special case for "modules" — it has
 one more space, tried in order like the others.
 
-**The host binds nothing under `urn:greet:`.** It has no `Exact` for `urn:greet:hello`,
-and could not write one without knowing what the module offers. Prefix routing is what
-lets a host delegate a region of the name space to code it has never seen.
+**The host binds nothing under `urn:iki:tutorial:module:`.** It owns that prefix — the name
+is in the book's own namespace, as [Binding, and a host of your
+own](../getting-started/binding.md) insists — and it has no `Exact` for
+`urn:iki:tutorial:module:greeting`, because it could not write one without knowing what the
+module offers. Prefix routing is what lets a host delegate a region of a name space it owns
+to code it has never seen.
 
 ## When each is right
 

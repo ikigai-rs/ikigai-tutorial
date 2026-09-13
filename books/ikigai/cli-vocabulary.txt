@@ -25,7 +25,10 @@
 #     cargo test -p book-urns -- --ignored --nocapture
 #
 # Run it when you change this file, and when the CLI releases. Verified against
-# ikigai-cli 0.1.18 on 2026-09-08, the front-door entries included.
+# ikigai-cli 0.1.20 on 2026-09-12, the front-door entries included: every exact entry
+# below resolved. The probe SKIPS the two prefix entries (`urn:text:*`, `urn:file:*`)
+# because a templated family has no one name to ask for; those were probed by hand the
+# same day, as `urn:text:wc`, `urn:text:head`, `urn:text:sort` and `urn:file:probe.txt`.
 
 # The function library, `ikigai-fn` 0.2.0, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
