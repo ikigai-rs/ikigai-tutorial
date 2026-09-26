@@ -95,7 +95,3 @@ You read the catalog of this book's own host in [What resolution buys you](payof
 learn why the descriptions it is built from are load-bearing in [Why an endpoint describes
 itself](self-description.md), and meet the tool list as a client would in [The machine
 client](../beyond/agent.md).
-
-Before any of it runs, [The shape of resolution](shape-of-resolution.md) is the five things
-true of every system built this way — one picture each, and the reason the terms above have
-the shapes they do.
