@@ -83,7 +83,9 @@ more than it can do; one that declares authority it does not enforce is worse. B
 treated as defects.
 
 Part I runs everything as root, on purpose; [The file workspace](file-workspace.md) is
-where a scoped capability first refuses something, and Part III leans on them hardest.
+where a scoped capability first refuses something, and Part III leans on them hardest —
+[Who is asking](../beyond/identity.md) is where *who* and *what may happen* come apart,
+and where the two ways authority could grow are named and declined.
 
 ## Where this is going
 

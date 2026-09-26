@@ -1,7 +1,8 @@
 # Glossary
 
-The nine terms of [Resolution](getting-started/resolution.md), one paragraph each, with
-the chapter where you do the thing rather than read about it.
+The nine terms of [Resolution](getting-started/resolution.md) and three the chapters
+after it needed, one paragraph each, with the chapter where you do the thing rather than
+read about it.
 
 **Resource.** Anything with a name — a URI, in this system a `urn:*`. A resource is not
 an object and not a function: it is a name a kernel can resolve, and what you get back
@@ -43,6 +44,28 @@ it requires is what the kernel *enforces*, per verb, before the endpoint runs: d
 equals enforced, and either half without the other is a defect. You declare one on your
 own endpoint in [Multi-verb endpoints](building/multi-verb.md), and watch one cross a
 socket in Part III's [Exercises](beyond/exercises.md).
+
+**Scope.** The resolution chain a request is resolved in: corridors a host injected
+ahead of the kernel's root, innermost first, and whether the root is on the end at all.
+Every sub-request inherits it. Injecting a corridor (`Kernel::issue_in`) is the host's
+authority, since a corridor placed ahead of the root can stand in for any door; cutting
+the root off (`Confine`) is the one chain-changing move an endpoint gets, and inside a
+severed chain a name outside it is unresolvable, never denied. The chain is part of the
+cache key. [Scope and alias](getting-started/scope-and-alias.md).
+
+**Alias.** A logical name that resolves to a different backing resource without the
+caller knowing — a table of exact and prefix rules, installed on the kernel. The rewrite
+is *reported*, so the two names are one resource: one cache entry, one golden thread,
+the floor checked against the backing name, the catalog listing the backing name once,
+cycles refused. Not the *alias mount* of Part III, which rewrites on the way out to
+another kernel and reports nothing. [Scope and alias](getting-started/scope-and-alias.md).
+
+**Principal.** *Who* asked — a fact a door establishes (a certificate, a passkey, a
+socket's peer credential) and stamps on a write as provenance. Not the capability, which
+is *what may happen*: an anonymous local caller has authority and no identity, a
+signed-in caller with a narrow grant has identity and little authority. Core carries no
+principal on the request yet; the door does the stamping. [Who is
+asking](beyond/identity.md).
 
 **Catalog.** `urn:kernel:catalog`: every bound endpoint's description, as one RDF graph,
 assembled from the descriptions rather than maintained beside them. Nobody writes it,

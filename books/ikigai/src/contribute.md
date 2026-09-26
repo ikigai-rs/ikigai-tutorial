@@ -43,7 +43,9 @@ agent's tool is projected from it. So, from the first endpoint:
 - `one_of(..)` for enums, `default_value(..)` where a default exists — and remember that a
   declared default is *not* injected; your code applies it.
 - Single verb: author flat. More than one verb: one `ActionSpec` per verb, per
-  [Multi-verb endpoints](building/multi-verb.md).
+  [Multi-verb endpoints](building/multi-verb.md) — and the two forms are **exclusive per
+  verb**: an explicit action's `requires` replaces the flat one for that verb rather than
+  adding to it, so restate on each action what it still needs.
 - `.requires("urn:cap:…")` on every action that needs authority, and no authority check
   anywhere else. Declared equals enforced; either half alone is a defect.
 - `.cacheable()` only for a pure function of its declared inputs; when in doubt, do not.

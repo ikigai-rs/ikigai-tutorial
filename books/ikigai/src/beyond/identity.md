@@ -7,7 +7,9 @@ answers it. A UDP datagram arrives from an address; addresses are not identities
 
 So the QUIC transport has to answer three questions the IPC one could delegate: who is on
 the other end, what may they do, and what happens to a certificate nobody has decided
-about. The third is the one worth the chapter.
+about. The third is the one worth the first half of the chapter. The second half is the
+distinctions a reader needs once *who* and *what may they do* stop being the same
+question — and they stop being the same question the moment a kernel is served.
 
 ## Trust without an authority
 
@@ -138,3 +140,201 @@ anything on the network can claim to be `plasma`. So a mount by name still requi
 pinned certificate for that name, and an impostor gets a failed handshake rather than a
 conversation. What the name buys is ergonomics — it determines the address by announcement
 and the identity by convention — and nothing else.
+
+## Identity is not authority
+
+Everything above turned a certificate into a session capability, and it is easy to
+leave the chapter believing the two are one thing. They are not, and the rest of this
+part depends on keeping them apart.
+
+The **principal** — *who* asked — is a fact a door establishes: the certificate that
+authenticated, the passkey that signed, the socket's peer credential. The
+**capability** — *what may happen* — is a value that gates. Neither derives from the
+other. An anonymous caller over the loopback socket has full authority and no identity
+at all; a signed-in caller holding a narrow grant has an identity and very little
+authority. What the door does with the principal is *stamp* it: the HTTP transport in
+`ikigai-cli` 0.1.27 attaches the authenticated principal to every mutating request as
+provenance, read off the connection and refused from the query string, so a write
+arriving from a browser carries who made it and nothing the caller typed can forge it.
+A ledger records that stamp as the author.
+
+What core does *not* do yet, stated plainly: the request carries no principal. A
+capability travels with every invocation; an identity stops at the door that
+established it, and an endpoint that wants to know who asked has to be handed the fact
+by its host. That is a known gap with a design in progress — an optional principal IRI
+beside the capability, readable, never itself authority — and until it lands the
+attribution the ledger records is the transport's doing, not the kernel's.
+
+## Authority only shrinks
+
+A capability is a set of scopes, and the only operations on one are intersections.
+`attenuate` narrows a held capability to the scopes it names; `clamp` intersects a
+carried capability with the ceiling a channel authenticated. There is no join. So along
+any chain of sub-requests authority is a staircase that only goes down, and an endpoint
+can choose to step down *on purpose*: `inv.issue_attenuated(request, scopes)` and
+`inv.source_attenuated(&iri, scopes)` (core 0.1.71) issue a sub-request under this
+invocation's capability narrowed to `scopes`. The case that wants it is a module
+dereferencing an IRI **its caller named** — resolving a target it did not choose, with
+every scope its caller happens to hold. Dropping the scopes it does not need turns "the
+caller named the secret and my caller may read secrets" from an exfiltration into a
+refusal:
+
+<!-- urn-gate: illustration urn:iki:tutorial:secret — a gated resource bound only inside
+     the block below. -->
+<!-- urn-gate: illustration urn:iki:tutorial:careless — an endpoint bound only inside the
+     block below: it dereferences a caller-named IRI with everything the caller holds. -->
+<!-- urn-gate: illustration urn:iki:tutorial:careful — its twin, which narrows first. -->
+
+```rust
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{
+    ArgRef, AsyncFnEndpoint, Capability, Description, EndpointSpace, Error, Exact,
+    FnEndpoint, Iri, Kernel, ReprType, Representation, Request, Verb,
+};
+
+// A resource that requires a scope to read.
+let secret = FnEndpoint::new("secret", |_| {
+    Ok(Representation::new(ReprType::new("text/plain"), b"s3cr3t".to_vec()))
+})
+.with_description(
+    Description::new("secret").verb(Verb::Source).requires("urn:cap:tutorial:secret:read"),
+);
+// Two endpoints that fetch whatever IRI the caller passes in `from`.
+let careless = AsyncFnEndpoint::new("careless", |inv| {
+    Box::pin(async move {
+        let from = Iri::parse(inv.inline_str("from")?).map_err(|e| Error::Endpoint(e.to_string()))?;
+        inv.source(&from).await
+    })
+});
+let careful = AsyncFnEndpoint::new("careful", |inv| {
+    Box::pin(async move {
+        let from = Iri::parse(inv.inline_str("from")?).map_err(|e| Error::Endpoint(e.to_string()))?;
+        // Fetching a caller-named resource needs no secret-reading authority.
+        inv.source_attenuated(&from, ["urn:cap:tutorial:fetch"]).await
+    })
+});
+let kernel = Kernel::new(Arc::new(
+    EndpointSpace::new()
+        .bind(Exact::new("urn:iki:tutorial:secret"), secret)
+        .bind(Exact::new("urn:iki:tutorial:careless"), careless)
+        .bind(Exact::new("urn:iki:tutorial:careful"), careful),
+));
+// The caller may read secrets — and points both endpoints at one.
+let caller = Capability::root().attenuate(["urn:cap:tutorial:secret:read", "urn:cap:tutorial:fetch"]);
+let fetch = |through: &str| {
+    Request::new(Verb::Source, Iri::parse(through).unwrap())
+        .with_arg("from", ArgRef::Inline(b"urn:iki:tutorial:secret".to_vec()))
+};
+
+let leaked = block_on(kernel.issue(fetch("urn:iki:tutorial:careless"), &caller)).unwrap();
+assert_eq!(String::from_utf8_lossy(&leaked.bytes), "s3cr3t");
+
+let refused = block_on(kernel.issue(fetch("urn:iki:tutorial:careful"), &caller)).unwrap_err();
+assert!(matches!(refused, Error::Denied(_)));
+```
+
+The narrowing is voluntary — `careful` still holds the caller's capability and could
+have called `source` — so it defends the endpoint's *downstream*, not the endpoint. That
+is the only thing an in-process, self-applied restriction can honestly claim, and it is
+worth having because the sub-request is the one place an endpoint hands control of the
+*target* to somebody else while keeping control of the *authority*.
+
+Two ways authority could grow, and why both are absent. **Delegation** — an endpoint
+acting under authority *it* holds rather than its caller's — is the confused deputy by
+another name: a module with store-write authority that passes a caller's string into a
+privileged sub-request has handed its authority to the caller. Core has the design (a
+grant table only the host can write, keyed on the canonical target, replacement never
+union) and deliberately has not built it; the cost today is that a module built on a
+gated module makes its callers hold the underlying grant too. **Ambient authority** —
+an endpoint reaching the disk or the network without a request — is structurally
+impossible for a WebAssembly module, whose only import is the host callback, and is a
+matter of review for in-process Rust, where `std::fs` is one line away. Both are stated
+here because a reader who has only "capabilities gate authority" will go looking for
+them.
+
+The fact underneath all of it: an endpoint has no way to hand a capability to the
+kernel. `Capability::root()` is a public constructor, so any code can *build* a strong
+capability; what it cannot do is *issue under it*, because the one path back into the
+kernel — the invocation — has never offered to take one. An authority-carrying
+sub-request takes its authority from the kernel, never from its caller. That single
+private seam is what makes the staircase structural rather than polite.
+
+## Declared is enforced — and who enforces
+
+The description is the contract. The kernel checks every scope an action `requires`
+**before dispatch and before the cache lookup** — so a refused caller neither enters the
+endpoint nor is served a cached answer somebody else computed (core 0.1.49). An
+endpoint may add a *finer* ceiling of its own on top: the file workspace's jail is one,
+a store's per-graph effect check is another. What it may not do is enforce a scope it
+never declared, because the offer, the pre-flight and the enforcement are all read from
+the same declaration.
+
+One trap in the declaration itself, and it has shipped: **the two authoring forms are
+exclusive per verb.** A flat `.requires(..)` on the description is the contract for
+every verb that has no explicit `ActionSpec`. Declare an `ActionSpec` for a verb and its
+`requires` *replaces* the flat one for that verb — an explicit action with an empty
+`requires` declares that the verb needs no authority, and the flat scope beside it is
+dead for that verb. Reading "one action per verb" as "one action per verb, in addition"
+is how a published module demanded a broad read token on one of its actions while its
+flat sibling was right. The normalized view says which is which:
+
+```rust
+# extern crate ikigai_core;
+use ikigai_core::{ActionSpec, ArgSpec, Description, Verb};
+
+let mixed = Description::new("note")
+    .verb(Verb::Source)
+    .requires("urn:cap:tutorial:note:read")
+    .action(ActionSpec::new(Verb::Sink).input(ArgSpec::new("content")));
+
+let specs = mixed.action_specs();
+let source = specs.iter().find(|a| a.verb == Verb::Source).unwrap();
+let sink = specs.iter().find(|a| a.verb == Verb::Sink).unwrap();
+
+// Source had no explicit action: the flat `requires` is its contract.
+assert_eq!(source.requires, vec!["urn:cap:tutorial:note:read".to_string()]);
+// Sink was declared explicitly and said nothing about authority — so it needs none.
+assert!(sink.requires.is_empty());
+```
+
+Restate on each explicit action whatever it still needs, and no more.
+
+The reader-facing consequence: the tool list an agent is handed is exactly what it may
+invoke — `urn:kernel:actions` computes reach intersected with authority from the same
+declarations the kernel enforces — so the manifold cannot lie by omission. One
+qualification, from [Scope and alias](../getting-started/scope-and-alias.md): selection
+does not yet know the chain, so inside a confinement the manifold can offer an action the
+chain cannot resolve. Names, not authority; and not yet.
+
+## What the cache knows about authority
+
+A cached answer is filed under the authority it was computed under, so two callers with
+different grants never share an entry, and a result computed inside a confinement is
+never served outside it — nor the other way round. That is why `.cacheable()` is safe on
+an endpoint whose answer depends on who is asking. Two callers holding the *same* scopes
+do share, which is the point: the fingerprint is of the authority, not the identity.
+
+The hole, stated: a result built on a **denial** is cached like any other. A change of
+grant has no golden thread, so an endpoint that catches `Denied` and returns a cacheable
+fallback serves that fallback after the grant is widened. The fix — no caching at all for
+a result built on a refusal — is designed with the rest of the cache-soundness work and
+not built.
+
+## Denied, or nowhere
+
+Resolution runs before the capability floor. That order is deliberate — the floor has
+to check the *backing* name after any rewrite, and it has to gate cached answers too —
+and it has a consequence worth knowing when you serve a kernel to strangers: an unbound
+name answers `Unresolved` to everyone, a bound-but-refused one answers `Denied`, so a
+caller with no authority can still learn which names exist. Names, not content; and on
+every surface served today the callers are the owner or an enrolled peer.
+
+Where that leak matters, the answer is structural, not a smarter refusal: a mount fence
+or a [confining corridor](../getting-started/scope-and-alias.md) that leaves the name
+with nowhere to go, indistinguishable from a name nobody ever bound. A refusal is a
+decision, and a decision can be misconfigured; an absence cannot. Capabilities are
+ikigai's decisions; the chain is its structure; use the one whose failure mode you can
+live with.

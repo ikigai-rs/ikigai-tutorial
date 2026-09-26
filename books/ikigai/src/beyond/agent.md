@@ -69,7 +69,10 @@ Two properties fall out of that, and both are worth more than the integration it
 capability its session holds — not the full catalog with the forbidden entries filtered out
 at call time. A scoped agent cannot enumerate what it may not invoke, so a whole class of
 "the model kept trying the thing it is not allowed to do" simply does not arise. Narrowing
-authority narrows the tool list, live.
+authority narrows the tool list, live. (One qualification, from [Scope and
+alias](../getting-started/scope-and-alias.md): the manifold does not yet know the
+resolution chain, so inside a confinement it can offer an action the chain cannot
+resolve — an over-offer of names, not of authority, and not yet closed.)
 
 **Federation is free at the tool layer.** The manifold is projected from the composed
 kernel, mounts and all. A `prefer` mount pointing `urn:llm:` at a heavier machine puts that
