@@ -6,7 +6,7 @@ functions — true of ikigai, true of NetKernel, true of the Web — and they ar
 carry as shapes than as rules. Each gets one picture and, where it earns one, one line of
 math. Nothing here needs a proof, and nothing here is specific to Rust.
 
-The pictures are a hotel. Peter Rodgers, who designed NetKernel, wrote resource-oriented
+The pictures are a hotel. Peter Rodgers, who co-designed NetKernel, wrote resource-oriented
 computing down as set theory in *Peter's Hotel: A Set-Theoretic Formalism*, with a parable
 beside it in which guests carry codes and corridors hold doors. The doors and the corridors
 below are his. The keys, the vault, and the clock are what this book adds, because they are
