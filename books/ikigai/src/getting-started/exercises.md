@@ -240,8 +240,8 @@ and watch how convincing a wrong answer looks.
 <details>
 <summary>Hint</summary>
 
-The cache lives in the `Kernel`, keyed on the request and the capability — so build the
-kernel **once** and issue twice against it. Two `Kernel::new` calls give you two empty
+The cache lives in the `Kernel`, keyed on the request, the capability and the resolution
+chain — so build the kernel **once** and issue twice against it. Two `Kernel::new` calls give you two empty
 caches and a test that passes for the wrong reason.
 
 ```rust,ignore

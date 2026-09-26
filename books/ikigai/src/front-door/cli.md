@@ -139,12 +139,16 @@ forgets it. Nothing was named wrongly here; there was simply nothing to invalida
 ```text
 ikigai> source urn:kernel:cache
 cache
-  entries  3
+  entries  3 / 4096
+  size     338 B / 64.0 MB
   urn:file:notes.txt  text/plain                     17 B  1 thread
-  urn:iki:fn:toUpper  application/json              268 B  0 threads
+  urn:iki:fn:toUpper  application/json              318 B  0 threads
   urn:iki:fn:toUpper  text/plain                      3 B  0 threads
 ```
 
+The first two lines are the cache's bound — 4096 entries and 64 MiB by default, the
+least-recently-used entry going when either is exceeded; [Golden threads in
+practice](../getting-started/golden-threads.md) is where a host picks a different one.
 Two entries for `toUpper` — its description, fetched once to route the arguments, and the
 answer — each with **0 threads**. The file's entry has **1 thread**, and it is still
 listed even though section 6 cut it and the probe said `not cached`: a cut bumps a

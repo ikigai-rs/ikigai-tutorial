@@ -14,6 +14,7 @@
 - [Running it](getting-started/running-it.md)
 - [Hello, resource](getting-started/hello-resource.md)
 - [What resolution buys you](getting-started/payoff.md)
+- [Golden threads in practice](getting-started/golden-threads.md)
 - [Why an endpoint describes itself](getting-started/self-description.md)
 - [Binding, and a host of your own](getting-started/binding.md)
 - [Scope and alias](getting-started/scope-and-alias.md)
