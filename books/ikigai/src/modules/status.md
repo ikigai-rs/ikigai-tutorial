@@ -5,31 +5,34 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-module` **0.2.0**, stamped on
-2026-09-08, and its shell examples were last probed against `ikigai-cli` **0.1.20** on
-2026-09-12; a test (`crates/book-urns/tests/book_claims.rs`) can re-check each stamped claim
+them is a claim, not a fact. This book builds against `ikigai-module` **0.3.0**, stamped on
+2026-09-26, and its shell examples were last probed against `ikigai-cli` **0.1.26** on
+2026-09-26 (0.1.27 was on crates.io that day; the probe runs whatever binary is installed); a test (`crates/book-urns/tests/book_claims.rs`) can re-check each stamped claim
 against the published crate it names, so that when one of them stops being true the fix is a
 diff, not a discovery.
 
 ## Phase 1
 
-`ikigai-module` 0.2.0's own first line still calls it **"the dynamically-loadable module
+`ikigai-module` 0.3.0's own first line still calls it **"the dynamically-loadable module
 format (Phase 1: in-process proof)"**. That line undersells the crate — it has grown a
-socket transport and, at 0.2.0, capability enforcement across the boundary since somebody
-wrote it — which is worth knowing as a habit: a crate's one-line self-description is the
+socket transport, at 0.2.0 capability enforcement across the boundary, and at 0.3.0 typed
+errors, golden threads and endpoint cards crossing the wire, since somebody wrote it —
+which is worth knowing as a habit: a crate's one-line self-description is the
 thing least likely to be updated when the crate changes.
 
-What is actually there, at `ikigai-module` 0.2.0:
+What is actually there, at `ikigai-module` 0.3.0:
 
 | piece | state |
 |---|---|
 | the callback machinery | **proven** — `InProcessTransport`, exercised end to end |
 | the wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |
 | an out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
-| a module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`) |
+| a module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`); since 0.3.0 the module's **cards** cross at `connect` (`ModuleCall::Cards`), so the host enforces against the module's own description and the manifold through a `ModuleSpace` lists the module's actions rather than one endpoint named `module` |
+| the error type across the wire | **since 0.3.0** — `ModuleReply::ErrorTyped` and `ModuleCall::HostError`: a module-side denial arrives at the host as a `Denied`, a host resource's `NotFound` arrives in the module as a `NotFound`; before that the wire flattened both to a string |
+| golden threads across the wire | **since 0.3.0** — `ModuleReply::ResolvedThreaded` carries a result's declared threads; before that a module result through the loopback or wasm session was cached forever with nothing to cut it, and a `Sink` through the mount left it stale |
 | an embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
 | isolation | **not there** — a process boundary is not a resource budget |
-| hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-09-08) |
+| hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-09-26) |
 
 ## Read that table the right way
 
@@ -60,17 +63,22 @@ mount's `ModuleFloor` (every request through the mount must satisfy it), and an 
 own declaration is enforced across the boundary exactly as it is for a linked-in one.
 Authority *attenuates* correctly across the boundary as it always did (the module's
 callbacks run under the caller's capability, narrowed — exercise 3 below), and now the
-module's own card is a gate too. The test that keeps this sentence true:
+module's own card is a gate too. At 0.3.0 the card itself crosses the wire when the host
+connects, so the enforcement is host-side against the module's own description rather
+than against a floor the host wrote for it. The test that keeps this sentence true:
 
 ```rust,ignore
 {{#include ../../../../crates/loadable-module/src/lib.rs:enforced}}
 ```
 
 **Do not assume you can ship a module to a running host.** Nothing loads one at runtime
-outside the browser demo (as of 2026-09-08).
+outside the browser demo (as of 2026-09-26).
 
 **Do not assume the ABI is stable.** Phase 2 exists precisely to change how these messages
-travel — and 0.2.0 already changed `ModuleSpace::new`'s signature once.
+travel — 0.2.0 changed `ModuleSpace::new`'s signature once, and 0.3.0 added variants to
+`ModuleCall` and `ModuleReply`, which are exhaustive public enums, so anyone matching on
+them had a source break while `ModuleSpace::new` did not move. (The 0.2 bytes on the wire
+are unchanged; the new messages are appended.)
 
 ## What is genuinely usable now
 
@@ -96,8 +104,8 @@ exists for an unrelated reason — the browser demo runs modules as wasm, `ikiga
 builds one, and a wasm module has no ambient filesystem or network to begin with. What does
 *not* exist is any of the native half: no host in the ecosystem embeds wasmtime, and no
 crate sets an execution or memory budget — the word "fuel" appears in none of them
-(checked across the organization's public repositories on 2026-09-08; the probe re-checks
-`ikigai-module` 0.2.0 and `ikigai-cli` 0.1.18 by manifest). Treat this section as the
+(checked across the organization's repositories on 2026-09-26; the probe re-checks
+`ikigai-module` 0.3.0 and `ikigai-cli` 0.1.27 by manifest). Treat this section as the
 direction and the table above as the state, and do not plan a deployment on the
 difference.
 

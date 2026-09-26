@@ -22,7 +22,7 @@ publish = false
 [dependencies]
 # The PUBLISHED kernel, at the version whose API you actually use. Never a path to a
 # sibling checkout: a path dependency only resolves on the machine that has both.
-ikigai-core = "0.1.66"
+ikigai-core = "0.1.72"
 ```
 
 No OS or platform API unless the module is about one — read files through the kernel
@@ -52,6 +52,11 @@ agent's tool is projected from it. So, from the first endpoint:
 - Names: nouns, kebab-case, under a prefix you own. `urn:iki:yours:word-count`, not
   `urn:fn:countWords` in somebody else's namespace.
 - Skolemize: no blank nodes in any graph you emit. Stable IRIs make graphs diffable.
+- Pipeline citizenship: a `Sink` or `Delete` that can receive a pipe declares an input
+  named `content`, because that is where the engine puts the piped value; a `Source` is
+  piped into through its one *required* unnamed argument, so a `Source` with no required
+  by-value input cannot be piped into at all — making every intake optional silently
+  removes it from every pipeline, and nothing warns.
 
 <!-- urn-gate: illustration urn:iki:yours:word-count — a stand-in for a name under a prefix
      the contributor owns; nothing binds it, by design. -->
@@ -72,7 +77,14 @@ A host chains onto it. Your crate does not decide where it is mounted.
 ## The tests
 
 A test builds a kernel over `space()`, resolves a name, and asserts the answer — the
-`text_of` helper in `crates/your-endpoints` is the four lines. Test the description too
+`text_of` helper in `crates/your-endpoints` is the four lines. Then add the one test every
+module in the ecosystem runs: [`ikigai-conformance`](https://github.com/ikigai-rs/ikigai-conformance)
+walks every endpoint of a kernel and reports every departure from the recipe on this
+page at once — a missing class, an undeclared scope, a `Sink` without `content`. It is
+what "done" means for a module, and it is a dev-dependency, not a rule you remember. Pin
+it as a range you read in both directions: under Cargo's 0.x rules `"0.2.0"` means
+`<0.3.0`, and most of the ecosystem's adopters sat one minor behind the current
+definition of done for weeks without a test saying so. Test the description too
 (`describe().inputs`), test a `.requires` by resolving under an attenuated capability and
 asserting `Denied`, and test anything with a clock under `FixedClock` ([Testing an
 endpoint hermetically](building/hermetic.md)). If the crate reads a config home, take it

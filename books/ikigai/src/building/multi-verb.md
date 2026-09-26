@@ -71,11 +71,13 @@ pre-flight and the enforcement from ever disagreeing.
 
 ## What this is not
 
-It is not a module boundary. [Where this actually stands](../modules/status.md) says
-plainly that an endpoint reached *through a module* can declare `requires` and not be
-gated by the host today. Everything on this page is about a linked-in endpoint, where the
-kernel resolving the name is the kernel enforcing the floor. That is the 95% case, and it
-is the case this book stands you in.
+It is not a module boundary — though that distinction has narrowed. [Where this actually
+stands](../modules/status.md) records that an endpoint reached *through a module* has had
+its declared `requires` enforced by the host since `ikigai-module` 0.2.0, and that since
+0.3.0 the module's own descriptions cross at connect time, so the host gates against them
+exactly as it gates a linked-in one. Everything on this page is about the linked-in case,
+where the kernel resolving the name is the kernel enforcing the floor with nothing in
+between. That is the 95% case, and it is the case this book stands you in.
 
 ## Try it
 

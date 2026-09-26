@@ -80,9 +80,13 @@ a node with a stable IRI, and a graph library's whole toolkit applies.
 The same question [The graph face](../building/graph-face.md) asked with
 `urn:sparql:select` — which endpoints take a string? — asked here by a client with its own
 query engine, over a catalog it fetched by name. Two things to notice in the answer.
-`toUpper` is not in it, because `ikigai-fn` 0.2.0 declares no `class` on its `in` input; an
-undeclared class is invisible to the question, which is [the argument for declaring
-one](../getting-started/self-description.md). And the property path
+`toUpper` is not in it — and that is a fact about the host this was run against, not about
+`toUpper`: `ikigai-fn` 0.2.0, the version `ikigai-cli` 0.1.18 linked, declared no `class`
+on its `in` input, and an undeclared class is invisible to the question, which is [the
+argument for declaring one](../getting-started/self-description.md). `ikigai-fn` 0.2.2
+declares it, so against `ikigai-cli` 0.1.26 or later the same query lists `toUpper` —
+and many more, because a dozen crates declared their classes in the meantime. Run it and
+compare; the difference is the argument, measured. And the property path
 `(ik:input | ik:action/ik:input)` is the one the graph-face chapter needed too: a
 multi-verb endpoint's inputs hang off its action nodes.
 
