@@ -99,6 +99,16 @@ from every endpoint in the host by binding one endpoint that declared what it co
 > Markdown, that is the chapter's one disappointment, and it is stated here so it is not
 > discovered at a keyboard.
 
+> ⚠ Two more things the declaration does not do. It is **declared, not enforced**: a
+> transreptor claims to change form without changing what is represented — the function
+> is injective, a summary or a thumbnail is not — and nothing in core checks the claim,
+> so a lossy conversion registered as a transreptor becomes a silent hop in a route and
+> the caller receives a projection believing it received the same resource in another
+> form. A lossless flag on the declaration is designed and not built. And when no route
+> reaches the type a `Meta` request asked for, the kernel **substitutes** the canonical
+> Turtle rather than failing: a description in a form you did not ask for, over no
+> description. Both are stated so neither is a surprise.
+
 ## Try it
 
 <!-- urn-gate: illustration urn:x — the subject of a hand-written Turtle document fed to

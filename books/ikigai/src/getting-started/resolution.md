@@ -68,7 +68,8 @@ until the thing it came from actually changes.
 > identical either way.
 
 You will cut one in [What resolution buys you](payoff.md), and watch a derived result
-recompute that never named the thread it depended on.
+recompute that never named the thread it depended on; [Golden threads in
+practice](golden-threads.md) is the whole mechanism, and what bounds the cache.
 
 ## Capabilities
 

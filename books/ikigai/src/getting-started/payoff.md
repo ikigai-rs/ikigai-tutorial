@@ -86,10 +86,13 @@ resolution is computed and the second served. Press Run again and both say `[cac
 the history under the cell keeps both runs so you can see the change. Then edit the
 name to one that is not bound and run that.
 
-The cache is keyed on the request *and the capability* — a result computed under one
-authority is never handed to a caller holding another. You will not feel that here, where
-everything runs as root, but it is why `.cacheable()` is safe to say on an endpoint whose
-answer depends on who is asking.
+The cache is keyed on the request, *the capability*, and the chain the request was
+resolved in — a result computed under one authority is never handed to a caller holding
+another, and a result computed in one context is never served in another. You will not
+feel either here, where everything runs as root in the plain root, but it is why
+`.cacheable()` is safe to say on an endpoint whose answer depends on who is asking.
+[Golden threads in practice](golden-threads.md) states the rule; [Scope and
+alias](scope-and-alias.md) shows the third slot at work.
 
 ## 2. A golden thread, cut
 
