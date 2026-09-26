@@ -531,9 +531,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-core"
-version = "0.1.66"
+version = "0.1.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e309e0754b7c54b0ab39a09179b4ab8bb847768871e356cb208e11ad25289d8"
+checksum = "cc13827755d63b0cb090d8edeb057da32cc52de367b2cff4ec4c23a4143785f9"
 dependencies = [
  "async-trait",
  "blake3",
