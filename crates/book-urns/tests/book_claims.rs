@@ -83,26 +83,26 @@ struct Claim {
 
 const MODULE: Source = Source::Crate {
     name: "ikigai-module",
-    version: "0.2.0",
+    version: "0.3.0",
 };
 const CLI: Source = Source::Crate {
     name: "ikigai-cli",
-    version: "0.1.18",
+    version: "0.1.27",
 };
 const EMBEDDED: Source = Source::Crate {
     name: "ikigai-embedded",
-    version: "0.1.18",
+    version: "0.1.27",
 };
 const WEB_DEMO: Source = Source::GitHub {
     repo: "ikigai-web-demo",
-    sha: "4f855d999ca1f9c3750471bbceeac9892d0e7d1b",
+    sha: "4ae390362cb6180df9403788d8147d95dceef238",
 };
 
 /// The claims. The stamp is what the prose must say; the rest is what the probe checks.
 const CLAIMS: &[Claim] = &[
     Claim {
         chapter: "modules/status.md",
-        stamp: "ikigai-module` 0.2.0's own first line still calls it",
+        stamp: "ikigai-module` 0.3.0's own first line still calls it",
         says: "the crate's first line still says Phase 1: in-process proof",
         source: MODULE,
         file: "src/lib.rs",
@@ -156,7 +156,34 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/status.md",
-        stamp: "`ikigai-cli` 0.1.18 by manifest",
+        stamp: "`ModuleReply::ErrorTyped`",
+        says: "the module wire carries the error type (0.3.0)",
+        source: MODULE,
+        file: "src/lib.rs",
+        needle: "ErrorTyped",
+        present: true,
+    },
+    Claim {
+        chapter: "modules/status.md",
+        stamp: "`ModuleReply::ResolvedThreaded`",
+        says: "the module wire carries a result's declared golden threads (0.3.0)",
+        source: MODULE,
+        file: "src/lib.rs",
+        needle: "ResolvedThreaded",
+        present: true,
+    },
+    Claim {
+        chapter: "modules/status.md",
+        stamp: "`ModuleCall::Cards`",
+        says: "the module's cards cross at connect (0.3.0)",
+        source: MODULE,
+        file: "src/lib.rs",
+        needle: "Cards",
+        present: true,
+    },
+    Claim {
+        chapter: "modules/status.md",
+        stamp: "`ikigai-cli` 0.1.27 by manifest",
         says: "the CLI does not embed wasmtime",
         source: CLI,
         file: "Cargo.toml",
@@ -165,7 +192,7 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/status.md",
-        stamp: "`WasmModuleSpace`, as of 2026-09-08",
+        stamp: "`WasmModuleSpace`, as of 2026-09-26",
         says: "the browser demo loads modules",
         source: WEB_DEMO,
         file: "src/lib.rs",
@@ -174,7 +201,7 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "beyond/agent.md",
-        stamp: "runs as root, loudly** (`ikigai-cli` 0.1.18)",
+        stamp: "runs as root, loudly** (`ikigai-cli` 0.1.27)",
         says: "ikigai mcp with no grant prints that it runs unrestricted",
         source: CLI,
         file: "src/main.rs",
@@ -183,7 +210,7 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "getting-started/configuration.md",
-        stamp: "(`ikigai-cli` 0.1.18) reads a set of `IKIGAI_*` variables",
+        stamp: "(`ikigai-cli` 0.1.27) reads a set of `IKIGAI_*` variables",
         says: "IKIGAI_FILES is read by the embedded host",
         source: EMBEDDED,
         file: "src/lib.rs",
@@ -203,11 +230,11 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/dual-mode.md",
-        stamp: "`ikigai-xslt` 0.1.1",
+        stamp: "`ikigai-xslt` 0.1.3",
         says: "ikigai-xslt has a module feature",
         source: Source::Crate {
             name: "ikigai-xslt",
-            version: "0.1.1",
+            version: "0.1.3",
         },
         file: "Cargo.toml",
         needle: "\nmodule = [",
@@ -215,11 +242,11 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/dual-mode.md",
-        stamp: "`ikigai-jsonld`\n0.1.1",
+        stamp: "`ikigai-jsonld` 0.1.2",
         says: "ikigai-jsonld has a module feature",
         source: Source::Crate {
             name: "ikigai-jsonld",
-            version: "0.1.1",
+            version: "0.1.2",
         },
         file: "Cargo.toml",
         needle: "\nmodule = [",
@@ -227,11 +254,11 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/dual-mode.md",
-        stamp: "`ikigai-shacl` 0.1.1",
+        stamp: "`ikigai-shacl` 0.1.2",
         says: "ikigai-shacl has a module feature",
         source: Source::Crate {
             name: "ikigai-shacl",
-            version: "0.1.1",
+            version: "0.1.2",
         },
         file: "Cargo.toml",
         needle: "\nmodule = [",

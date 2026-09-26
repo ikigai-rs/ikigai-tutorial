@@ -580,9 +580,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-module"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f35ed99ca808f62ca70b750ffdf8e0e3f058eaab757a5f59693cfa5eeca31f4"
+checksum = "f1c5136b3deaff53a7e83238dc2d9b2493049b0863dd63d69595b89bfe2caba1"
 dependencies = [
  "async-trait",
  "futures",
@@ -590,6 +590,7 @@ dependencies = [
  "libc",
  "postcard",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

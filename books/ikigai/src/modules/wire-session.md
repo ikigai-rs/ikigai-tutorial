@@ -14,7 +14,12 @@ So the session has two enums:
 - **`ModuleCall`** — what the host sends: the invocation, and later the *results* of host
   calls the module asked for.
 - **`ModuleReply`** — what the module sends: the finished representation, an error, or
-  **`HostCall`** — "resolve this for me and call me back."
+  **`HostCall`** — "resolve this for me and call me back." Since `ikigai-module` 0.3.0
+  the finished representation can also carry its declared golden threads, and an error
+  crosses with its *type* (a denial is a denial on the other side too); the host's replies
+  to a `HostCall` carry a typed error the same way, and a `Cards` call at connect time
+  fetches every binding's description so the host can list and gate the module's
+  endpoints as its own.
 
 `ModuleReply::HostCall` is the interesting variant, and it is why this is a *session*
 rather than a call. A single invocation can bounce back and forth several times before it

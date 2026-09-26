@@ -1,8 +1,8 @@
 # Dual-mode crates
 
-Three crates in the ecosystem support being modules — `ikigai-xslt` 0.1.1, `ikigai-jsonld`
-0.1.1 and `ikigai-shacl` 0.1.1, the versions published as this was written — and **none of
-them is module-only**. All three are ordinary linked libraries by default (each has a
+Three crates in the ecosystem support being modules — `ikigai-xslt` 0.1.3,
+`ikigai-jsonld` 0.1.2 and `ikigai-shacl` 0.1.2, the versions published as this was
+re-checked (2026-09-26) — and **none of them is module-only**. All three are ordinary linked libraries by default (each has a
 `module` Cargo feature), and become loadable WebAssembly when you ask:
 
 ```bash
@@ -16,7 +16,7 @@ identity:
 
 ```toml
 [dependencies.ikigai-module]
-version = "0.1.6"
+version = "0.1.9"   # the floor that builds against the core these crates use
 optional = true
 
 [features]

@@ -1,7 +1,7 @@
 # The repositories
 
 One repository per module, all under <https://github.com/ikigai-rs>. This map is derived
-from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-13, grouped
+from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-26, grouped
 the way the maintainers group them; a few private repositories (the site, the release
 tooling, a secrets module and a set of Lisp programs) are omitted. If a name here does not
 resolve on GitHub, the list moved before this page did — the organization is the truth.
@@ -39,6 +39,16 @@ resolve on GitHub, the list moved before this page did — the organization is t
   where the bytes live.
 - [`ikigai-jsonld`](https://github.com/ikigai-rs/ikigai-jsonld) — JSON-LD
   expand/compact/flatten, lazy-loadable as wasm.
+- [`ikigai-compress`](https://github.com/ikigai-rs/ikigai-compress) — gzip and zlib as
+  resources, `urn:compress:*` and `urn:decompress:*`, registered as transreptors too.
+  <!-- urn-gate: illustration urn:compress: — the family that repository binds; the CLI
+       on this machine does not link it, so nothing here can vouch for a name under it. -->
+  <!-- urn-gate: illustration urn:decompress: — likewise. -->
+- [`ikigai-markdown`](https://github.com/ikigai-rs/ikigai-markdown) — Markdown as a
+  graph: one structural lift, every dialect a mapping resource.
+- [`ikigai-ledger`](https://github.com/ikigai-rs/ikigai-ledger) — the work ledger:
+  items, comments, labels and links as resources, and `next` as a resource with a
+  swappable ranking policy.
 - [`ikigai-xslt`](https://github.com/ikigai-rs/ikigai-xslt) and
   [`ikigai-xslt-module`](https://github.com/ikigai-rs/ikigai-xslt-module) — XSLT as a
   resource, linked or loadable.
@@ -88,6 +98,8 @@ resolve on GitHub, the list moved before this page did — the organization is t
   as resources, with text, HTML and Turtle faces.
 - [`ikigai-dev-server`](https://github.com/ikigai-rs/ikigai-dev-server) — the standalone
   IPC server for those, whose `Cargo.toml` is its manifest.
+- [`ikigai-gonk`](https://github.com/ikigai-rs/ikigai-gonk) — a standalone host for the
+  ledger: items, comments, links and a next-item ranking, over HTTP and QUIC.
 - [`ikigai-web`](https://github.com/ikigai-rs/ikigai-web) — the standalone HTTP and
   SPARQL face (published as `ikigai-web-server`).
 - [`ikigai-runbook`](https://github.com/ikigai-rs/ikigai-runbook) — guided, runnable
