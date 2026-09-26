@@ -23,6 +23,13 @@ serves `urn:*` like everyone else — recognizes the name, and its catalog comes
 re-prefixed and tagged with where it came from, so a federated listing shows which machine
 each resource lives on.
 
+> ⚠ This is not core's `Alias` from [Scope and alias](../getting-started/scope-and-alias.md),
+> and the difference is the one field that matters. Core's table makes two names *one
+> resource in this kernel* and reports the backing name, so the cache and the golden
+> thread fuse them. This mount rewrites a name on its way **out** to another kernel, where
+> the rewritten spelling is a wire address — so it reports nothing, because this kernel
+> may serve an unrelated resource under that spelling. Same word, opposite contract.
+
 The failure mode is worth naming, because everything about it looks fine: point an alias at
 a prefix the local kernel already serves, and the local binding wins every time — requests
 under the mount resolve, answers come back, and the peer is never asked. The composition
