@@ -169,7 +169,9 @@ report `cache_hit=true`.
 
 The events are plain, serializable data. That matters in [Part
 III](../beyond/socket.md), where a remote kernel records its own events and ships them back
-to be stitched into the caller's tree.
+to be stitched into the caller's tree — and [Tracing a resolution](../beyond/tracing.md) is
+where the events that name something which *never ran* (a denial, a miss inside a
+confinement) get their own chapter.
 
 <div class="ikigai-run" data-cmd='sink urn:kernel:cut urn:iki:tutorial:title
 trace urn:iki:tutorial:camel-title'>

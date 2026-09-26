@@ -44,6 +44,7 @@
 - [Who is asking](beyond/identity.md)
 - [Preferential resolution](beyond/preference.md)
 - [The editor as a client](beyond/emacs.md)
+- [Tracing a resolution](beyond/tracing.md)
 - [The machine client](beyond/agent.md)
 - [Exercises: beyond one host](beyond/exercises.md)
 
