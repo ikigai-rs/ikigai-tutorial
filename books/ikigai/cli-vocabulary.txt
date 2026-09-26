@@ -117,3 +117,12 @@ urn:llm:config
 # then a pre-flight validation of the arguments against the declared contract.
 urn:agent:select
 urn:kernel:validate
+
+# The tracing chapter. `urn:kernel:aliases` is the kernel's readout of its own logical-
+# rewrite table (intercepted like the other `urn:kernel:*` names). `urn:fn:toUpper` is
+# the OLD spelling of `urn:iki:fn:toUpper`: the CLI's table rewrites the `urn:fn:` prefix,
+# so the old name resolves, and tracing it is how the chapter shows an alias hop. It is
+# an entry because the CLI really answers it, not because anything is bound there —
+# which is exactly what the trace line in that chapter says.
+urn:kernel:aliases
+urn:fn:toUpper
