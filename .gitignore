@@ -5,3 +5,5 @@ books/*/book
 a11y/node_modules/
 # Emacs undo-tree history files
 *.~undo-tree~
+# scripts/serve-with-drafts.sh builds the book plus unpublished chapters in a sibling copy
+books/.drafts.*

@@ -1,0 +1,3 @@
+# Chapters written but not yet public: kept out of SUMMARY.md, so not built or deployed.
+# Read them locally with ./scripts/serve-with-drafts.sh (one line per chapter: Title | path).
+The shape of resolution | getting-started/shape-of-resolution.md

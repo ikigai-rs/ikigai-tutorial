@@ -11,7 +11,6 @@
 # Getting started
 
 - [Resolution](getting-started/resolution.md)
-- [The shape of resolution](getting-started/shape-of-resolution.md)
 - [Running it](getting-started/running-it.md)
 - [Hello, resource](getting-started/hello-resource.md)
 - [What resolution buys you](getting-started/payoff.md)
