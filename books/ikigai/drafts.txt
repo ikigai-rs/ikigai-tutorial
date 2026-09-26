@@ -1,3 +1,9 @@
 # Chapters written but not yet public: kept out of SUMMARY.md, so not built or deployed.
 # Read them locally with ./scripts/serve-with-drafts.sh (one line per chapter: Title | path).
 The shape of resolution | getting-started/shape-of-resolution.md
+# Four sidebars from Peter Rodgers' paper, each with a one-line note of its intended home
+# once the paper is public (a comment at the top of the file). Prose and tables only.
+The Web as an instance | drafts/web-instance.md
+The algebra of reach | drafts/algebra-of-reach.md
+Names and where you stand | drafts/names-and-context.md
+Authority, three ways | drafts/authority-three-ways.md
