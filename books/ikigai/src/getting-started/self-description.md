@@ -16,6 +16,13 @@ a person who already knows*.
 4. **The agent tool list *is* it.** Projected over MCP, an endpoint's description becomes
    a tool definition. Nobody writes that by hand.
 
+The third job deserves one more sentence, because it looks circular and is not. The
+catalog is the arrangement describing itself — the kernel's own bindings, rendered from
+the same descriptions — and it is one resource among the resources, reached by a name
+like any other. A reader who can resolve `urn:kernel:catalog` has everything needed to
+learn what else can be resolved, including the catalog; nothing about that requires
+knowing in advance.
+
 An endpoint with a thin description still runs. It is simply invisible to everything above
 — like a library function with no signature.
 

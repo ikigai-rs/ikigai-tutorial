@@ -58,6 +58,12 @@ the catalog told were fine. The description is the only place authority is state
 the kernel is the only place it is checked — which is what keeps the offer, the
 pre-flight and the enforcement from ever disagreeing.
 
+> ⚠ The two authoring forms are **exclusive per verb**. Had `counter` also carried a
+> flat `.requires(..)` on its description, that scope would be dead for every verb with an
+> explicit `ActionSpec` — an explicit action's `requires` *replaces* the flat one, it does
+> not add to it. Restate on each action what it needs; [Who is
+> asking](../beyond/identity.md) shows the normalized view that decides.
+
 > ⚠ Delete `.requires(WRITE)` from the `Sink` action and run the test. The write goes
 > through for the narrow reader, and no test in the crate but this one notices — the
 > code is unchanged and correct. **Declared = enforced** means the declaration is the
