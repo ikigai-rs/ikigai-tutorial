@@ -11,7 +11,7 @@ There is a way of building software in which nothing is ever called. A program a
 now — where the answer lives, whether it was computed a moment ago and kept, who is allowed
 to have it, and in what form. NetKernel has worked this way for twenty years; the Web works
 this way whether or not anyone means it to; ikigai is my attempt to make it the ordinary
-way to write a program. Peter Rodgers, who designed NetKernel, has recently written the
+way to write a program. Peter Rodgers, who co-designed NetKernel, has recently written the
 model down as set theory, and the surprise of reading it was how little of it is about
 computers. Five things fall out that are true of any system that resolves names, and they
 can be carried as pictures rather than proofs. Here they are — the doors and corridors are
