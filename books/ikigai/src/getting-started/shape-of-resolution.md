@@ -39,9 +39,9 @@ to answer alike, and nothing about the name says so.
 | a keypad door | a grammar bound to an endpoint | [Hello, resource](hello-resource.md) |
 | a corridor | `EndpointSpace` — first match wins | [Binding, and a host of your own](binding.md) |
 | a corridor that ends in another | `Fallback` — one more space, tried in order | [Two ways to reach a kernel](../modules/two-ways.md) |
-| a wing imported under a prefix | a mount | [Preferential resolution](../beyond/preference.md) |
-| a door that rewrites the code | `Rewrite`; `Alias` is its table-driven form | below, and [Preferential resolution](../beyond/preference.md) |
-| the corridor you are standing in | `Scope` | below |
+| a wing imported under a prefix | `Mount` — a prefix in front of a space | [Scope and alias](scope-and-alias.md); over a wire, [Preferential resolution](../beyond/preference.md) |
+| a door that rewrites the code | `Rewrite`; `Alias` is its table-driven form | below, and [Scope and alias](scope-and-alias.md) |
+| the corridor you are standing in | `Scope`; `Confine` for cutting the root off | below, and [Scope and alias](scope-and-alias.md) |
 
 The last row is the one a function call has no word for. A kernel has a root corridor — the
 space you hand it when you build it — and a request can carry a chain of corridors to try

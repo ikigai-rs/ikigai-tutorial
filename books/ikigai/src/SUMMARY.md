@@ -16,6 +16,7 @@
 - [What resolution buys you](getting-started/payoff.md)
 - [Why an endpoint describes itself](getting-started/self-description.md)
 - [Binding, and a host of your own](getting-started/binding.md)
+- [Scope and alias](getting-started/scope-and-alias.md)
 - [Configuration](getting-started/configuration.md)
 - [The file workspace](getting-started/file-workspace.md)
 - [Exercises: getting started](getting-started/exercises.md)
