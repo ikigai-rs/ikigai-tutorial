@@ -1,0 +1,39 @@
+[package]
+name = "ttt-host"
+version = "0.1.0"
+description = "The tutorial's tic-tac-toe, served: the game's own htmx markup over HTTP (ikigai-web) and the kernel over the IPC socket, with each game's store in this process or mounted from a peer that keeps the store contract."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+# Native only: a socket server and an HTTP server. Not part of the wasm build (ci.yml's
+# `wasm-packages` names book-wasm alone), and nothing in the page depends on it.
+
+[lib]
+name = "ttt_host"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ttt-host"
+path = "src/main.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+# The Meta renderer, so each served kernel answers `describe` and a peer's JSON Meta.
+ikigai-vocab.workspace = true
+tic-tac-toe = { path = "../tic-tac-toe" }
+# The HTTP edge: `serve_with_listener`, `EdgeConfig`, `RouteTable` / `Route`, `public_cap`.
+# All there by 0.1.28, the version the rest of this workspace's cli crates resolve to.
+ikigai-web = "0.1.28"
+# The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
+# peer store). 0.1.28 speaks wire v7, which the Python and Deno faces speak.
+ikigai-ipc = "0.1.28"
+# `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
+# `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds.
+ikigai-resolve = "0.1.28"
+async-trait = "0.1"
+futures.workspace = true
+# The runtime ikigai-web's server runs on.
+tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "io-util"] }
