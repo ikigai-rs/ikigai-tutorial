@@ -1,83 +1,94 @@
 //! The book, and the code it teaches, are written in American English.
 //!
-//! Not a style preference that review can hold: the words drift in from briefs, from
-//! quoted sources and from habit, and a relapse is invisible in a diff that is about
-//! something else. So this fails on a short DENYLIST of British spellings in the book's
-//! prose, its page scripts and styles, and every crate's sources and READMEs.
+//! Not a style preference review can hold: the words drift in from briefs, from quoted
+//! sources and from habit, and a relapse is invisible in a diff that is about something
+//! else. So this fails on a short denylist of spellings that are British and nothing
+//! else — no word on it has an American reading, so a hit is never a false one.
 //!
-//! The denylist is deliberately short and unambiguous: only words that have no American
-//! meaning at all, so it never fires on a false positive. `grey` and `judgement` are
-//! accepted American variants and are not on it; `labelledby` is a different token from
-//! `labelled` (it is an HTML attribute, `aria-labelledby`) and never matches.
+//! ⚠ **The matcher and the marker are ikigai-core's** (`crates/ikigai-core/tests/
+//! american_spelling.rs`, ikigai-rs/ikigai-core PR #131), kept the same on purpose so
+//! the two guards read the same. What differs is only what is scanned, and one short
+//! list of words this repository has had to refuse ([`LOCAL_EXACT`]).
 //!
-//! ## The escape, for a quote
+//! Scanned: the book's pages, scripts and styles (`books/ikigai/{src,css,js}`), every
+//! crate's sources, READMEs, templates and static files, the root `README.md`, and
+//! `docs/`, `scripts/`, `a11y/` and `.github/`. The scripts and styles are in scope
+//! because that is where half of the first sweep's hits were (`a11y.css`, `run.js`);
+//! `center` is an American word, so a CSS property never matches. Skipped: build output
+//! (`target`), installed packages (`node_modules`) and vendored third-party files
+//! (`books/ikigai/src/vendor/`), which stay byte for byte upstream's. Words are split on
+//! anything that is not a letter, so a `snake_case` name is checked part by part and
+//! `aria-labelledby` is `labelledby`, which is not on the list.
 //!
-//! A direct quote keeps its author's spelling. Say so where it stands, in the same
-//! directive style as `urn-gate:`, naming the word and the reason:
+//! **A direct quote keeps its own spelling.** Put `spelling: quote` anywhere on the
+//! line — in Markdown an HTML comment (`<!-- spelling: quote (the paper's own title) -->`)
+//! renders as nothing — and the line is skipped.
 //!
-//! ```text
-//! <!-- spelling: allow colour — a quoted source's own words. -->
-//! // spelling: allow colour — the upstream error text, matched verbatim.
-//! ```
-//!
-//! A directive covers its own line and the block that follows it, up to the next blank
-//! line — in Markdown, the paragraph it sits directly above. Same teeth both ways: a
-//! directive with no reason is refused, and so is one that allows nothing, because a
-//! stale exemption is how a gate rots.
+//! This file is excluded from the scan, since it has to spell the denylist out.
 
+use std::fs;
 use std::path::{Path, PathBuf};
 
-/// Words with no American meaning. Keep it that way: a word with a legitimate American
-/// use belongs in review, not here.
-const DENYLIST: &[&str] = &[
-    "analyse",
-    "analysed",
-    "artefact",
-    "artefacts",
+/// Any word that begins with one of these is British: behaviour(al), colour(ful),
+/// honour(ed), neighbour(hood), favour(ite), flavour(s).
+const OUR_STEMS: [&str; 6] = [
     "behaviour",
-    "behaviours",
-    "cancelled",
-    "cancelling",
-    "centre",
-    "centred",
-    "centres",
     "colour",
-    "coloured",
-    "colours",
-    "enrolment",
-    "favour",
-    "favourite",
     "honour",
-    "honoured",
-    "honouring",
-    "honours",
-    "labelled",
-    "labelling",
-    "licence",
-    "modelled",
-    "modelling",
     "neighbour",
-    "neighbours",
-    "noughts",
-    "normalise",
-    "normalised",
-    "organise",
-    "organised",
-    "realise",
-    "realised",
-    "recognise",
-    "recognised",
-    "serialise",
-    "serialised",
-    "travelled",
-    "travelling",
-    "whilst",
+    "favour",
+    "flavour",
 ];
 
-const DIRECTIVE: &str = "spelling: allow";
+/// `-ise` stems that are British only with one of `ISE_SUFFIXES` after them. Stem and
+/// suffix together, so `realism` and `formalism` never match.
+const ISE_STEMS: [&str; 11] = [
+    "realis",
+    "serialis",
+    "normalis",
+    "initialis",
+    "recognis",
+    "organis",
+    "summaris",
+    "authoris",
+    "optimis",
+    "memois",
+    "categoris",
+];
+const ISE_SUFFIXES: [&str; 9] = [
+    "e", "ed", "es", "ing", "ation", "ations", "er", "ers", "ably",
+];
 
-/// Where we write. Relative to the repository root; each is walked for [`EXTENSIONS`].
-const ROOTS: &[&str] = &[
+/// Whole words — ikigai-core's list, unchanged.
+const EXACT: [&str; 17] = [
+    "modelled",
+    "modelling",
+    "labelled",
+    "labelling",
+    "travelled",
+    "travelling",
+    "cancelled",
+    "cancelling",
+    "artefact",
+    "artefacts",
+    "catalogue",
+    "catalogues",
+    "centre",
+    "centres",
+    "analyse",
+    "analysed",
+    "analysing",
+];
+
+/// Whole words this repository has had to refuse beyond core's list. `noughts`: the
+/// game in the book is tic-tac-toe, and its British name appears once, as a marked note.
+/// The rest were found in this tree by the first sweep (or named in its brief).
+const LOCAL_EXACT: [&str; 4] = ["noughts", "licence", "enrolment", "whilst"];
+
+const QUOTE_MARKER: &str = "spelling: quote";
+
+/// Where we write, relative to the repository root. A file is scanned as itself.
+const ROOTS: [&str; 9] = [
     "README.md",
     "books/ikigai/src",
     "books/ikigai/css",
@@ -89,13 +100,38 @@ const ROOTS: &[&str] = &[
     ".github",
 ];
 
-const EXTENSIONS: &[&str] = &[
+const EXTENSIONS: [&str; 11] = [
     "md", "rs", "css", "js", "mjs", "html", "toml", "yml", "yaml", "sh", "txt",
 ];
 
-/// Directories that are not ours to spell: build output, installed packages, and vendored
-/// third-party files (`books/ikigai/src/vendor/`), which stay byte for byte upstream's.
-const SKIP_DIRS: &[&str] = &["target", "node_modules", "vendor"];
+const SKIP_DIRS: [&str; 3] = ["target", "node_modules", "vendor"];
+
+fn is_british(word: &str) -> bool {
+    let w = word.to_ascii_lowercase();
+    OUR_STEMS.iter().any(|s| w.starts_with(s))
+        || EXACT.contains(&w.as_str())
+        || LOCAL_EXACT.contains(&w.as_str())
+        || ISE_STEMS.iter().any(|s| {
+            w.strip_prefix(s)
+                .is_some_and(|rest| ISE_SUFFIXES.contains(&rest))
+        })
+}
+
+/// Every British word in `text`, as `file:line: word`, skipping lines marked as quotes.
+fn hits_in(file: &str, text: &str) -> Vec<String> {
+    let mut hits = Vec::new();
+    for (n, line) in text.lines().enumerate() {
+        if line.contains(QUOTE_MARKER) {
+            continue;
+        }
+        for word in line.split(|c: char| !c.is_ascii_alphabetic()) {
+            if !word.is_empty() && is_british(word) {
+                hits.push(format!("{file}:{}: {word}", n + 1));
+            }
+        }
+    }
+    hits
+}
 
 fn repo_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -107,11 +143,14 @@ fn repo_root() -> PathBuf {
 
 fn collect(path: &Path, out: &mut Vec<PathBuf>) {
     if path.is_dir() {
-        let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-        if SKIP_DIRS.contains(&name) {
+        if path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| SKIP_DIRS.contains(&n))
+        {
             return;
         }
-        let mut entries: Vec<_> = std::fs::read_dir(path)
+        let mut entries: Vec<PathBuf> = fs::read_dir(path)
             .unwrap_or_else(|e| panic!("reading {}: {e}", path.display()))
             .map(|e| e.expect("a directory entry").path())
             .collect();
@@ -128,92 +167,55 @@ fn collect(path: &Path, out: &mut Vec<PathBuf>) {
     }
 }
 
-/// One `spelling: allow` directive, and whether any line it covers used it.
-#[derive(Debug)]
-struct Allow {
-    line: usize,
-    word: String,
-    used: bool,
-}
-
-/// The denylisted words on one line, lowercased, as whole alphabetic tokens — so
-/// `colour_pair` and `Colour` both match and `labelledby` does not.
-fn denied_words(line: &str) -> Vec<String> {
-    line.split(|c: char| !c.is_ascii_alphabetic())
-        .map(str::to_ascii_lowercase)
-        .filter(|w| DENYLIST.contains(&w.as_str()))
-        .collect()
-}
-
-/// Every problem in one file: a denylisted word no directive covers, a directive with no
-/// reason, a directive that allows nothing.
-fn check(file: &str, text: &str) -> Vec<String> {
-    let mut problems = Vec::new();
-    // The directives in force: those since the last blank line.
-    let mut active: Vec<Allow> = Vec::new();
-    let retire = |active: &mut Vec<Allow>, problems: &mut Vec<String>| {
-        for allow in active.drain(..) {
-            if !allow.used {
-                problems.push(format!(
-                    "{file}:{}: `spelling: allow {}` covers no use of it — remove the \
-                     directive",
-                    allow.line, allow.word
-                ));
-            }
-        }
-    };
-    for (index, raw) in text.lines().enumerate() {
-        let line_no = index + 1;
-        if raw.trim().is_empty() {
-            retire(&mut active, &mut problems);
-            continue;
-        }
-        // The directive's own words are a declaration, not prose: scan only what is
-        // before it.
-        let prose = match raw.find(DIRECTIVE) {
-            Some(at) => {
-                let rest = raw[at + DIRECTIVE.len()..].replace("-->", " ");
-                let mut words = rest.split_whitespace();
-                let word = words.next().unwrap_or("").to_ascii_lowercase();
-                let reason = words.collect::<Vec<_>>().join(" ");
-                let reason = reason.trim_start_matches(['—', '-', ':']).trim();
-                if word.is_empty() || reason.is_empty() {
-                    problems.push(format!(
-                        "{file}:{line_no}: a `spelling: allow` directive needs a word and a \
-                         reason (`spelling: allow colour — a quoted source's own words`)"
-                    ));
-                } else {
-                    active.push(Allow {
-                        line: line_no,
-                        word,
-                        used: false,
-                    });
-                }
-                &raw[..at]
-            }
-            None => raw,
-        };
-        for word in denied_words(prose) {
-            match active.iter_mut().find(|a| a.word == word) {
-                Some(allow) => allow.used = true,
-                None => problems.push(format!(
-                    "{file}:{line_no}: British spelling `{word}` — the book is written in \
-                     American English (a direct quote takes a `spelling: allow` directive)"
-                )),
-            }
-        }
+#[test]
+fn the_denylist_matches_what_it_should_and_nothing_else() {
+    for british in [
+        "behaviour",
+        "Behavioural",
+        "colours",
+        "honoured",
+        "neighbourhood",
+        "realised",
+        "Realisation",
+        "serialisers",
+        "modelled",
+        "artefact",
+        "Centre",
+        "labelled",
+        "noughts",
+        "licence",
+    ] {
+        assert!(is_british(british), "{british} should be refused");
     }
-    retire(&mut active, &mut problems);
-    problems
+    for fine in [
+        "behavior",
+        "realism",
+        "formalism",
+        "realize",
+        "serialize",
+        "analysis",
+        "center",
+        "drawCentredString",
+        "modeled",
+        "otherwise",
+        "promise",
+        "labelledby",
+        "license",
+        "enrolled",
+    ] {
+        assert!(!is_british(fine), "{fine} is not British-only");
+    }
+}
+
+#[test]
+fn a_quote_marker_skips_its_line_and_only_its_line() {
+    let text = "the colour <!-- spelling: quote (their words) -->\nthe colour_pair\n";
+    assert_eq!(hits_in("f.md", text), ["f.md:2: colour"]);
 }
 
 #[test]
 fn the_book_and_its_crates_are_written_in_american_english() {
     let root = repo_root();
-    let this_file = Path::new(file!())
-        .file_name()
-        .expect("this test has a file name")
-        .to_owned();
     let mut files = Vec::new();
     for r in ROOTS {
         collect(&root.join(r), &mut files);
@@ -222,83 +224,31 @@ fn the_book_and_its_crates_are_written_in_american_english() {
         files
             .iter()
             .any(|f| f.ends_with("books/ikigai/src/SUMMARY.md")),
-        "the scan must reach the book's pages; the roots are wrong"
+        "the scan does not reach the book's pages — it would pass vacuously"
     );
-    let mut problems = Vec::new();
+    let this = Path::new(file!())
+        .file_name()
+        .expect("this test has a file name")
+        .to_owned();
+    let mut hits = Vec::new();
     for path in &files {
-        // This file names the denylist, so it is the one file that cannot be scanned.
-        if path.file_name() == Some(this_file.as_os_str()) {
+        if path.ends_with(Path::new("tests").join(&this)) {
             continue;
         }
-        let text = std::fs::read_to_string(path)
-            .unwrap_or_else(|e| panic!("reading {}: {e}", path.display()));
-        let shown = path
+        let text =
+            fs::read_to_string(path).unwrap_or_else(|e| panic!("reading {}: {e}", path.display()));
+        let rel = path
             .strip_prefix(&root)
             .unwrap_or(path)
             .display()
             .to_string();
-        problems.extend(check(&shown, &text));
+        hits.extend(hits_in(&rel, &text));
     }
     assert!(
-        problems.is_empty(),
-        "{} spelling problem(s):\n  {}",
-        problems.len(),
-        problems.join("\n  ")
+        hits.is_empty(),
+        "{} British spelling(s) — write American (behavior, color, center, labeled, \
+         tic-tac-toe), or mark a direct quote with `{QUOTE_MARKER}` on its line:\n  {}",
+        hits.len(),
+        hits.join("\n  ")
     );
-}
-
-#[test]
-fn a_british_spelling_is_refused_and_an_american_one_is_not() {
-    assert_eq!(
-        check("f.md", "the color of the center\n"),
-        Vec::<String>::new()
-    );
-    let problems = check("f.md", "the colour of the Centre\n");
-    assert_eq!(problems.len(), 2, "{problems:?}");
-    assert!(problems[0].starts_with("f.md:1:"));
-}
-
-#[test]
-fn a_token_is_matched_whole_so_an_attribute_name_is_not_a_word() {
-    assert!(check("f.js", "el.setAttribute(\"aria-labelledby\", id);\n").is_empty());
-    assert_eq!(check("f.rs", "let colour_pair = 1;\n").len(), 1);
-}
-
-#[test]
-fn a_directive_covers_the_paragraph_after_it_and_no_further() {
-    let text = "<!-- spelling: allow colour — quoted. -->\nfirst line\nthe colour, quoted\n\n\
-                a later colour\n";
-    let problems = check("f.md", text);
-    assert_eq!(problems.len(), 1, "{problems:?}");
-    assert!(problems[0].starts_with("f.md:5:"), "{problems:?}");
-}
-
-#[test]
-fn a_directive_on_the_same_line_covers_that_line() {
-    assert!(check(
-        "f.rs",
-        "let s = \"colour\"; // spelling: allow colour — upstream text\n"
-    )
-    .is_empty());
-}
-
-#[test]
-fn a_directive_without_a_reason_is_refused() {
-    let problems = check("f.md", "<!-- spelling: allow colour -->\nthe colour\n");
-    assert!(
-        problems
-            .iter()
-            .any(|p| p.contains("needs a word and a reason")),
-        "{problems:?}"
-    );
-}
-
-#[test]
-fn a_directive_that_allows_nothing_is_refused() {
-    let problems = check(
-        "f.md",
-        "<!-- spelling: allow colour — quoted. -->\nthe color\n",
-    );
-    assert_eq!(problems.len(), 1, "{problems:?}");
-    assert!(problems[0].contains("covers no use"), "{problems:?}");
 }

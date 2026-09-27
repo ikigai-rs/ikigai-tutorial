@@ -1,10 +1,9 @@
 # Tic-tac-toe, I: the resource model and the atoms
 
-<!-- spelling: allow noughts — Britain's name for the game, given once as a note, not as its name. -->
 Everything so far has been one idea at a time. This part builds one small application
 end to end, in the order resource-oriented design says to: name the resources first, write
 code for the few that have to *hold* something, and get the rest by composing names. The
-application is tic-tac-toe (noughts and crosses, in Britain), because everyone already
+application is tic-tac-toe (noughts and crosses, in Britain), because everyone already <!-- spelling: quote (Britain's name for the game, a note) -->
 knows its rules, so every ounce of attention goes to the shape rather than the domain.
 
 The design is not new. It follows *Resource Oriented Analysis and Design*, a nine-part

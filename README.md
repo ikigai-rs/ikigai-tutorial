@@ -208,19 +208,14 @@ stands](../modules/status.md)` says both halves and a reorder cannot falsify eit
 
 The book is written in American English, and a relapse is invisible in a diff that is
 about something else — the words drift in from briefs, quoted sources and habit.
-`crates/book-urns/tests/book_spelling.rs` fails on a short denylist of British spellings
-(its `DENYLIST`) in the book's pages, scripts and styles and in every crate's sources and
-READMEs. The list holds only words with no American meaning, so it has nothing to be wrong
-about. A direct quote keeps its author's spelling and says so, in the same style as
-`urn-gate:`:
+`crates/book-urns/tests/book_spelling.rs` fails on a short denylist of spellings that are
+British and nothing else, in the book's pages, scripts and styles and in every crate's
+sources and READMEs. The matcher and the marker are ikigai-core's, kept the same on
+purpose. A direct quote keeps its author's spelling and says so on its own line:
 
 ```markdown
-<!-- spelling: allow colour — a quoted source's own words. -->
-> "… the colour of the thing …"
+> "… the colour of the thing …" <!-- spelling: quote (a quoted source's own words) -->
 ```
-
-A directive covers its own line and the paragraph under it, needs a reason, and is
-refused if it allows nothing.
 
 ### And the colors
 
