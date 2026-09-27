@@ -33,12 +33,9 @@ every kind of thing in it:
 | which lines a cell is on | `urn:iki:tutorial:ttt:checkset:{x}:{y}` | a list of the names of other resources | part III |
 | **whose turn** | `urn:iki:tutorial:ttt:turn` | a question about the board | part III |
 | **who won** | `urn:iki:tutorial:ttt:winner` | another | part III |
+| a **move** | `urn:iki:tutorial:ttt:move:{x}:{y}` | a mark played, if the rules allow it | part III |
 | many games | — | the game as context, or the game in the name | part IV |
 | a board you can play | — | a face over all of the above, in this page | part V |
-
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:checkset:{x}:{y} — planned for part III; the name is not bound yet, and binding it should fail this directive so part III deletes it. -->
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:turn — planned for part III, as above. -->
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:winner — planned for part III, as above. -->
 
 Read down the second column and notice how little of it is code. Only the cell holds
 state: everything above it is a set of cells, or a question about sets of cells, and a set
