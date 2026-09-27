@@ -95,6 +95,130 @@ nowhere to go — but it cannot widen the chain, and it cannot get ahead of a co
 host injected. That asymmetry is idea 3 in a different coat, and it is why the chain is
 safe to expose at all.
 
+### The arrangement is a resource, so a question about it is a query
+
+One more kind of door, and then the corridor can answer a question about itself. A
+**limiter** admits a whole family of codes and opens on a wall. Because a corridor is
+first-match, every door in that family *behind* the wall is unreachable from where you
+stand, and a guest who tries one gets exactly the answer a missing door gives — not a
+refusal, nothing. A wall that said "there is something back here" would already be a leak.
+
+So a host that serves one corridor to the public can keep its private wing out of reach by
+*structure*: put the wall ahead of the wing, and there is no decision left to misconfigure.
+The question the operator then wants answered is the paper's Theorem 4(b), gatekeeper
+completeness: **is any door of the private family reachable from the public entrance
+without passing a wall over that family?** In the paper it is decided by a pushdown
+analysis over the graph of imports. In ikigai the arrangement is a tree with no way back
+up it — a wing that misses hands the *original* code back to its parent, which just tries
+the next door — so nothing is ever pushed to be popped later, and the question collapses to
+a path query. That needs the arrangement to be something a query can read, and it is:
+`urn:kernel:topology` renders the corridor you are standing in as Turtle, every space an
+IRI, every corridor an ordered list of what it tries.
+
+Here is the arrangement, in hotel terms and as the kernel renders it. The public entrance
+is a corridor of two: first a wall over `urn:personal:`, then the host's root, which imports
+a personal wing and a public one.
+
+```text
+  entrance ──▶ [ wall: urn:personal:* ][ root ]
+                                          └──▶ [ wing "urn:personal:" ][ wing "urn:public:" ]
+                                                       └─ door urn:personal:calendar
+```
+
+```turtle
+@prefix ik:  <https://ikigai-rs.dev/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<urn:ikigai:chain:root> a ik:Chain ; ik:severed false ;
+    ik:layers <urn:ikigai:chain:root:layer:1> .
+<urn:ikigai:chain:root:layer:1> rdf:first <urn:ikigai:space:_:1> ; rdf:rest rdf:nil .
+
+<urn:ikigai:space:_:1> a ik:Fallback ; ik:layers <urn:ikigai:space:_:1:layer:1> .
+<urn:ikigai:space:_:1:layer:1> rdf:first <urn:example:space:gatekeeper> ;
+    rdf:rest <urn:ikigai:space:_:1:layer:2> .
+<urn:ikigai:space:_:1:layer:2> rdf:first <urn:example:space:root> ; rdf:rest rdf:nil .
+
+<urn:example:space:gatekeeper> a ik:Limit ; ik:family "urn:personal:" .
+
+<urn:example:space:root> a ik:Fallback ; ik:layers <urn:example:space:root:layer:1> .
+<urn:example:space:root:layer:1> rdf:first <urn:ikigai:space:_:2> ;
+    rdf:rest <urn:example:space:root:layer:2> .
+<urn:ikigai:space:_:2> a ik:Mount ; ik:prefix "urn:personal:" ;
+    ik:space <urn:example:space:personal> .
+<urn:example:space:personal> a ik:EndpointSpace ; ik:pattern "urn:personal:calendar" .
+# … the public wing, the same shape, under layer 2.
+```
+
+Two things to notice before the query. The lists are spelled out as `rdf:first` / `rdf:rest`
+cells with their own IRIs rather than with the `( … )` shorthand, because that shorthand
+makes blank nodes and a blank node cannot be named in a second graph or a diff. And a space
+that has no name of its own is given one — `urn:ikigai:space:_:1` — so that the graph has no
+anonymous nodes at all. The order of a list is the order the corridor tries doors in, and it
+is the whole reason the query below can say "ahead of".
+
+```sparql
+PREFIX ik:  <https://ikigai-rs.dev/ns#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ASK {
+  BIND("urn:personal:" AS ?family)
+  <urn:ikigai:chain:root> (ik:layers/rdf:rest*/rdf:first | ik:space)* ?leaf .
+  ?leaf a ik:EndpointSpace ; ik:pattern ?door .
+  FILTER(STRSTARTS(?door, ?family))
+  FILTER NOT EXISTS {
+    <urn:ikigai:chain:root> (ik:layers/rdf:rest*/rdf:first | ik:space)* ?list_owner .
+    ?list_owner ik:layers ?head .
+    ?head rdf:rest* ?cell . ?cell rdf:first ?limiter .
+    ?limiter a ik:Limit ; ik:family ?limited .
+    FILTER(STRSTARTS(?family, ?limited))
+    ?cell rdf:rest+ ?later . ?later rdf:first ?branch .
+    ?branch (ik:layers/rdf:rest*/rdf:first | ik:space)* ?leaf .
+  }
+}
+```
+
+Read it one clause at a time:
+
+- **`BIND("urn:personal:" AS ?family)`** names the family you are asking about. Change this
+  line and nothing else to ask about a different wing.
+- **`(ik:layers/rdf:rest*/rdf:first | ik:space)*`** is the whole of "walk down the
+  arrangement." From any node you may step into *any* cell of its list — `ik:layers` to the
+  head, `rdf:rest*` along it as far as you like, `rdf:first` into the space that cell holds —
+  *or* step through a wing (`ik:space`) into what it imports. The outer `*` says: any number
+  of such steps, including none. Everything reachable from the entrance by resolution is
+  reachable from `<urn:ikigai:chain:root>` by this path, and nothing else is.
+- **`?leaf a ik:EndpointSpace ; ik:pattern ?door`** with **`STRSTARTS(?door, ?family)`** finds
+  a corridor of real doors, reachable from the entrance, holding a door whose code is in the
+  family. That is a candidate path into the private wing.
+- **`FILTER NOT EXISTS { … }`** throws the candidate out if a wall stands in its way. Inside
+  it: find some list on the way down (`?list_owner`, itself reached by the same walk), a
+  cell of that list holding a limiter (`?cell rdf:first ?limiter`) whose family covers ours
+  (`STRSTARTS(?family, ?limited)` — the wall is over `urn:personal:` or something broader),
+  and a **later** cell (`?cell rdf:rest+ ?later`, one or more steps further along the same
+  list) whose space leads on down to the very leaf we found. First-match is what makes
+  "later" mean "unreachable": the wall answers first, and the branch behind it is never
+  consulted.
+- **`ASK`** answers `true` if any candidate survives — a door of the family is reachable
+  with no covering wall ahead of it — and `false` if none does.
+
+So the answer is inverted from the way the theorem is phrased: **`false` is the safe
+answer**. For the arrangement above it is `false`; remove `<urn:example:space:gatekeeper>`
+from the first list and it is `true`. A wall injected as a corridor for one request is a
+cell of the `ik:Chain`'s own list, ahead of the root, and the same query finds it there.
+
+Three things the query does *not* claim. A space that reports nothing about itself — a
+remote peer, or an overlay written before the kernel could ask — renders as `ik:OpaqueSpace`,
+and a path through one is *unknown*, never *no*: the walk stops there. A rewriting door is
+walked straight through, as if every code reached what is behind it, which can only
+over-report reachability — the safe direction to be wrong in. And a wall over a *narrower*
+family than the one you asked about does not count: `STRSTARTS("urn:personal:",
+"urn:personal:calendar:")` is false, and a wall over one door is not a wall over the wing.
+
+You can run this against any store that speaks SPARQL — the ikigai host's own `urn:sparql:ask`
+over the Turtle that `urn:kernel:topology` returns, for one — and ikigai-core's test suite
+walks the same triples without a store and pins the answers: no with the wall, yes without,
+no again with the wall injected as a corridor, still yes under a narrower wall, and unknown
+when an opaque space is on the path.
+
 ## 2. What the key must hold
 
 A cache is a vault of answers, each behind a key, and the key must hold **everything the
@@ -244,6 +368,7 @@ you](payoff.md).
 | idea | the mechanism | status |
 |---|---|---|
 | 1. name and context | `Scope`: a named chain of corridors ahead of the root, per request; `Confine` for narrowing it from inside | built (ikigai-core 0.1.72) |
+| 1, again: the arrangement | `Limit`, a door onto a wall; `urn:kernel:topology`, the corridor you stand in as Turtle | built (ikigai-core 0.1.76, 0.1.78); the gatekeeper check is the query above |
 | 2. the key | request id + capability fingerprint + chain fingerprint | built; whole chain, not consulted corridors |
 | 3. authority shrinks | `attenuate` is the intersection; `clamp` is it on the wire | built; enforced everywhere a capability is declared |
 | 4. lossless vs lossy | a transreptor declares the pair it converts between | **declared, not enforced**: nothing checks that a declared transreption is injective |
