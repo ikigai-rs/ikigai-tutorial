@@ -41,11 +41,11 @@ goal is a bound that cannot be got wrong per request, use the structural rows.
 | import | `Mount` — an import restricted to a prefix | built |
 | the chain | `Fallback` — ordered, first hit wins; and `Scope`, the per-request chain | built |
 | order as meaning | the *override* and *prefer* mounts: composed before or after the local spaces | built (`ikigai-cli`'s mount kinds) |
-| mapper | `Alias` and `Rewrite` — the preimage, with the rewrite reported so two names are one resource | built |
+| mapper | `Alias` and `Rewrite` — the preimage, with the rewrite reported so two names are one resource | built; and see below for what a mapper does behind a limiter |
 | interception | the capability floor on every door, and the transport's clamp | built, and it is a decision |
 | trapdoor | `Confine` / `inv.confine` — restriction to `⟨host corridors, S⟩`, no root | built (core 0.1.72) |
-| projection | the served kernel: a smaller root per process, plus the clamp on what a peer carries | built, as a choice of root |
-| limiter | — | **not built**: resolution has no third outcome, so nothing can carve a family *out* of a chain; subtraction happens only by building a smaller root |
+| projection | the served kernel: a smaller root per process, plus the clamp on what a peer carries | built, as a choice of root; serving *one* root behind a limiter instead is the host's next step |
+| limiter | `Limit` — a door onto ⊥: a name in its family is *unresolved*, with the same error as no door anywhere, and the catalog and the action manifold leave it out | built (core 0.1.76), without a third outcome: the limiter is a hit on an endpoint the kernel recognizes, so nothing that matches on a resolution had to change |
 
 Two consequences of the table are worth stating, because each one settles a question
 this book raised elsewhere.
@@ -54,13 +54,25 @@ this book raised elsewhere.
 reachable set of a static arrangement is determined by the arrangement. That is why
 `urn:kernel:actions` can exist at all: an agent's tool list is *reach intersected with
 authority* — what the chain can resolve, restricted to what the capability admits — and
-both halves are computed from the same declarations. (Today the manifold computes reach
-by enumerating bindings; the day the arrangement is itself a resource, it can subtract
-limiters and compose mounts by structure.)
+both halves are computed from the same declarations. The manifold still computes reach
+by enumerating bindings, and subtracts a limited family by probing each one. But since core
+0.1.78 the arrangement is itself a resource — `urn:kernel:topology` renders the chain a
+request stands in as a graph — so a question about reach can also be asked of the structure
+directly, as a query, without resolving anything.
 
 **Absence reveals less than refusal.** A projection leaves an undeclared door absent, and
 a limiter leaves a name with the same response as no door anywhere. A refusal is
 distinguishable by construction: it says something was there. That is the asymmetry
 [Who is asking](../beyond/identity.md) closes its second half on — an unbound name and a
-refused one still answer differently in ikigai, and the structural rows are the way to
-make them answer alike.
+refused one still answer differently in ikigai, and a limiter is now the way to make them
+answer alike: put the wall where the refusal was, and the name simply is not there.
+
+**Difference is over names, not doors.** The rows compose, and one composition is worth
+knowing before you rely on a limiter. A limiter removes a family of *names*. A mapper
+standing behind it can send some *other* name into that family — and that other name was
+never walled, so the request passes the limiter, is rewritten, and reaches the very door
+the limiter was meant to hide. In set terms, the difference is taken before the preimage,
+not after it. This is the paper's own warning in miniature: one added mapping opens a path
+that no request has taken yet, and the only place to see it coming is the arrangement. A
+check over the arrangement has to follow the mapper's rules to find it, and where a mapper
+is a function rather than a table it cannot — the honest answer there is *unknown*.
