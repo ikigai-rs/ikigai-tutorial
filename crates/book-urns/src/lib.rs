@@ -66,8 +66,8 @@ pub enum Context {
     /// Inside a Rust fence. A host this workspace builds answers.
     Rust,
     /// Inside a runnable cell's `data-cmd` — a line the **in-page kernel** runs when the
-    /// reader presses Run. Only that kernel answers: `hello_camel::kernel()`, compiled to
-    /// wasm by `crates/book-wasm`. A name the CLI resolves is no use here.
+    /// reader presses Run. Only that kernel answers: `book_wasm::page_kernel()`, compiled to
+    /// wasm. A name the CLI resolves is no use here.
     Cell,
     /// Prose, program output, a config fence — anything else. Either may answer.
     Prose,
@@ -141,8 +141,15 @@ impl Scan {
 /// often enough that swallowing an asterisk would corrupt tokens more often than it would
 /// capture a real one. `urn:cap:net:*` therefore arrives as `urn:cap:net:`, which the test
 /// skips anyway as a capability scope.
+///
+/// `,` is included: RFC 8141 allows it in a name, and the applied chapter's lines of
+/// cells are named with it (`urn:iki:tutorial:ttt:cells:0.0,1.0,2.0`). Without it the gate
+/// checked `…:cells:0.0` — a real name, which resolved, so the gate passed while vouching
+/// for a name the book never printed. A comma that ends a sentence is trimmed below, as a
+/// full stop is.
 fn is_urn_char(c: char) -> bool {
-    c.is_ascii_alphanumeric() || matches!(c, ':' | '.' | '-' | '_' | '~' | '/' | '{' | '}' | '%')
+    c.is_ascii_alphanumeric()
+        || matches!(c, ':' | '.' | ',' | '-' | '_' | '~' | '/' | '{' | '}' | '%')
 }
 
 /// Pull the `urn:` literals out of one line.
@@ -506,6 +513,20 @@ mod tests {
         let scan = scan_markdown("x.md", "resolves urn:host:name.\n").expect("scans");
         assert_eq!(scan.mentions[0].urn, "urn:host:name");
         assert!(!scan.mentions[0].is_prefix);
+    }
+
+    #[test]
+    fn a_comma_inside_a_name_is_part_of_it_and_one_after_it_is_not() {
+        let scan = scan_markdown(
+            "x.md",
+            "read urn:iki:tutorial:ttt:cells:0.0,1.0,2.0, then `urn:iki:tutorial:ttt:board`\n",
+        )
+        .expect("scans");
+        assert_eq!(
+            scan.mentions[0].urn,
+            "urn:iki:tutorial:ttt:cells:0.0,1.0,2.0"
+        );
+        assert_eq!(scan.mentions[1].urn, "urn:iki:tutorial:ttt:board");
     }
 
     #[test]

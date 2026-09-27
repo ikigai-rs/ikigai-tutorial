@@ -16,16 +16,29 @@
 //!   exists"; nobody has to create a game before reading one.
 //!
 //! Neither endpoint cuts or declares a golden thread, and that is the point of the chapter:
-//! the kernel keeps both honest by itself. Read the book: `mdbook serve books/ikigai`, or
-//! `./scripts/serve-with-drafts.sh` while the chapter is still a draft.
+//! the kernel keeps both honest by itself.
+//!
+//! Increment 2 gathers cells into composites:
+//!
+//! * `urn:iki:tutorial:ttt:cells:{list}` — a **line of cells**, named by its members in
+//!   order (`cells:0.0,1.0,2.0`). It sources each platonic cell and answers the marks
+//!   side by side (`X-O`).
+//! * `urn:iki:tutorial:ttt:row:{y}`, `column:{x}`, `diagonal:{n}` — **no endpoint**. Eight
+//!   exact [`Alias`] rules ([`LINES`]) rename a line of cells, and the space the game
+//!   exports is the endpoints wrapped in that table.
+//! * `urn:iki:tutorial:ttt:board` — the three rows, read through the aliases, one per line.
+//!
+//! Read the book: `mdbook serve books/ikigai`, or `./scripts/serve-with-drafts.sh` while
+//! the chapters are still drafts.
 
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 use ikigai_core::{
-    ActionSpec, ArgSpec, AsyncFnEndpoint, Description, EndpointSpace, Error, FnEndpoint,
-    Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Result, UriTemplate, Verb,
+    ActionSpec, Alias, AliasTable, ArgSpec, AsyncFnEndpoint, Description, EndpointSpace, Error,
+    FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Result,
+    UriTemplate, Verb,
 };
 use ikigai_vocab::TurtleRenderer;
 
@@ -84,6 +97,11 @@ fn coordinate(inv: &Invocation<'_>, name: &str) -> Result<i64> {
         .bindings
         .get(name)
         .ok_or_else(|| Error::MissingArgument(name.to_string()))?;
+    plain_integer(name, text)
+}
+
+/// `text` as an integer, if it is spelled the one way that integer is spelled.
+fn plain_integer(name: &str, text: &str) -> Result<i64> {
     match text.parse::<i64>() {
         Ok(value) if value.to_string() == text => Ok(value),
         _ => Err(Error::InvalidArgument {
@@ -246,20 +264,166 @@ pub fn platonic_cell() -> AsyncFnEndpoint {
 }
 // ANCHOR_END: platonic
 
+// ANCHOR: line_names
+/// A line of cells: the members, in order, each spelled `x.y`, joined by `,`.
+pub const CELLS: &str = "urn:iki:tutorial:ttt:cells:{list}";
+
+/// The board: every row, top to bottom.
+pub const BOARD: &str = "urn:iki:tutorial:ttt:board";
+// ANCHOR_END: line_names
+
+/// The name of the line through `members`, in order — spelled the one way the endpoint
+/// accepts.
+pub fn cells_name(members: &[(i64, i64)]) -> String {
+    let list: Vec<String> = members.iter().map(|(x, y)| format!("{x}.{y}")).collect();
+    format!("urn:iki:tutorial:ttt:cells:{}", list.join(","))
+}
+
+/// The name of row `y` — an alias, bound by [`LINES`], not by an endpoint.
+pub fn row_name(y: i64) -> String {
+    format!("urn:iki:tutorial:ttt:row:{y}")
+}
+
+// ANCHOR: members
+/// The members of a line, read out of its name: `0.0,1.0,2.0` is `(0,0) (1,0) (2,0)`.
+///
+/// The same strictness as a single cell's coordinates, for the same reason. Every member
+/// is two integers in their plain form, joined by one `.`; members are joined by one `,`;
+/// nothing else — no spaces, no empty member, no trailing comma. A list has exactly one
+/// spelling, so a line has exactly one name, and one name is one cache entry and one
+/// golden thread. The model stays loose about *which* cells: any coordinates, any
+/// length, repeats allowed.
+fn members(inv: &Invocation<'_>) -> Result<Vec<(i64, i64)>> {
+    let list = inv
+        .bindings
+        .get("list")
+        .ok_or_else(|| Error::MissingArgument("list".to_string()))?;
+    let refuse = |detail: String| Error::InvalidArgument {
+        name: "list".to_string(),
+        detail,
+    };
+    list.split(',')
+        .map(|member| match member.split_once('.') {
+            _ if member.is_empty() => Err(refuse(
+                "an empty member — cells are x.y, joined by single commas".to_string(),
+            )),
+            Some((x, y)) => Ok((plain_integer("list", x)?, plain_integer("list", y)?)),
+            None => Err(refuse(format!(
+                "`{member}` is not a cell spelled x.y (e.g. 0.2)"
+            ))),
+        })
+        .collect()
+}
+// ANCHOR_END: members
+
+// ANCHOR: line
+/// `ttt-cells`: a line of cells — the marks of its members, side by side, in order.
+///
+/// A composite over the platonic cell, and nothing more: it sources each member through
+/// the kernel and concatenates the answers, so an empty cell reads `-` and a row reads
+/// like `X-O`. It is `.cacheable()` and names no thread; its dependencies are its
+/// sub-requests, so a move that changes one member cuts this line's cached answer and
+/// leaves every line that does not pass through that cell alone.
+pub fn line_of_cells() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("ttt-cells", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+        Box::pin(async move {
+            let mut marks = Vec::new();
+            for (x, y) in members(inv)? {
+                let cell = Iri::parse(cell_name(x, y))
+                    .map_err(|e| Error::Endpoint(format!("a cell's name: {e}")))?;
+                marks.extend(inv.source(&cell).await?.bytes);
+            }
+            Ok(Representation::new(text_plain_utf8(), marks).cacheable())
+        })
+    })
+    .with_description(
+        Description::new("ttt-cells")
+            .title("Line of cells")
+            .summary("The marks of the named cells, in order, side by side: X-O.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .input(
+                ArgSpec::new("list")
+                    .summary("the cells, in order: x.y joined by commas, e.g. 0.0,1.0,2.0")
+                    .class(XSD_STRING)
+                    .binding(),
+            )
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: line
+
+// ANCHOR: lines
+/// The rows, columns and diagonals of a 3×3 board, as names for lines of cells.
+///
+/// This table is where "three by three" lives — not in the cell, which takes any
+/// coordinates, and not in the line, which takes any cells. `y` runs down the board, so
+/// row 0 is the top row; a line reads left to right, or top to bottom, and diagonal 1
+/// runs from the top-right corner to the bottom-left.
+pub const LINES: &str = "\
+exact urn:iki:tutorial:ttt:row:0      urn:iki:tutorial:ttt:cells:0.0,1.0,2.0
+exact urn:iki:tutorial:ttt:row:1      urn:iki:tutorial:ttt:cells:0.1,1.1,2.1
+exact urn:iki:tutorial:ttt:row:2      urn:iki:tutorial:ttt:cells:0.2,1.2,2.2
+exact urn:iki:tutorial:ttt:column:0   urn:iki:tutorial:ttt:cells:0.0,0.1,0.2
+exact urn:iki:tutorial:ttt:column:1   urn:iki:tutorial:ttt:cells:1.0,1.1,1.2
+exact urn:iki:tutorial:ttt:column:2   urn:iki:tutorial:ttt:cells:2.0,2.1,2.2
+exact urn:iki:tutorial:ttt:diagonal:0 urn:iki:tutorial:ttt:cells:0.0,1.1,2.2
+exact urn:iki:tutorial:ttt:diagonal:1 urn:iki:tutorial:ttt:cells:2.0,1.1,0.2
+";
+// ANCHOR_END: lines
+
+/// [`LINES`], parsed.
+pub fn lines() -> AliasTable {
+    AliasTable::parse(LINES).expect("the constant alias table parses")
+}
+
+// ANCHOR: board
+/// `ttt-board`: the three rows, top to bottom, one per line of text.
+///
+/// It reads the rows by their alias names, through the kernel, like any other caller —
+/// it does not know that a row is a line of cells, or that a line is cells. Cacheable,
+/// with no thread named: the move that changes one cell reaches the board through the
+/// one row that holds the cell, and through nothing else.
+pub fn board() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("ttt-board", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+        Box::pin(async move {
+            let mut rows = Vec::new();
+            for y in 0..3 {
+                let row = Iri::parse(row_name(y))
+                    .map_err(|e| Error::Endpoint(format!("a row's name: {e}")))?;
+                rows.push(String::from_utf8_lossy(&inv.source(&row).await?.bytes).into_owned());
+            }
+            Ok(Representation::new(text_plain_utf8(), rows.join("\n").into_bytes()).cacheable())
+        })
+    })
+    .with_description(
+        Description::new("ttt-board")
+            .title("Board")
+            .summary("The board: row 0 (the top row) to row 2, one row per line.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: board
+
 // ANCHOR: space
-/// The game's space: the two cells, bound by template.
-pub fn space() -> EndpointSpace {
+/// The game's space: the endpoints, wrapped in the table that names the lines.
+pub fn space() -> Alias {
     space_over(Arc::default())
 }
-// ANCHOR_END: space
 
 /// [`space`], with the stored cells in a [`CellStore`] the caller keeps — so a test can
 /// read the counter.
-pub fn space_over(store: Arc<CellStore>) -> EndpointSpace {
-    EndpointSpace::new()
+pub fn space_over(store: Arc<CellStore>) -> Alias {
+    let endpoints = EndpointSpace::new()
         .bind(template(STORED), stored_cell(store))
         .bind(template(CELL), platonic_cell())
+        .bind(template(CELLS), line_of_cells())
+        .bind(template(BOARD), board());
+    Alias::new(Arc::new(lines()), Arc::new(endpoints))
 }
+// ANCHOR_END: space
 
 /// A constant template. Both are literals in this file, and a test parses them.
 fn template(source: &str) -> UriTemplate {
@@ -287,6 +451,52 @@ mod tests {
         assert_eq!(template(CELL).source(), CELL);
         assert_eq!(stored_name(0, -1), "urn:iki:tutorial:ttt:stored:0:-1");
         assert_eq!(cell_name(2, 1), "urn:iki:tutorial:ttt:cell:2:1");
+        assert_eq!(template(CELLS).source(), CELLS);
+        assert_eq!(template(BOARD).source(), BOARD);
+        assert_eq!(
+            cells_name(&[(0, 0), (1, 0), (-2, 7)]),
+            "urn:iki:tutorial:ttt:cells:0.0,1.0,-2.7"
+        );
+        assert_eq!(row_name(2), "urn:iki:tutorial:ttt:row:2");
+    }
+
+    /// The eight rules, checked against the geometry they claim: each alias names the
+    /// line [`cells_name`] would spell for those coordinates. A typo in [`LINES`] — a
+    /// column that is really a row, a diagonal with a cell off it — fails here.
+    #[test]
+    fn the_table_names_the_eight_lines_of_a_three_by_three_board() {
+        let mut expected: Vec<(String, String)> = Vec::new();
+        for i in 0..3 {
+            expected.push((
+                format!("urn:iki:tutorial:ttt:row:{i}"),
+                cells_name(&[(0, i), (1, i), (2, i)]),
+            ));
+            expected.push((
+                format!("urn:iki:tutorial:ttt:column:{i}"),
+                cells_name(&[(i, 0), (i, 1), (i, 2)]),
+            ));
+        }
+        expected.push((
+            "urn:iki:tutorial:ttt:diagonal:0".into(),
+            cells_name(&[(0, 0), (1, 1), (2, 2)]),
+        ));
+        expected.push((
+            "urn:iki:tutorial:ttt:diagonal:1".into(),
+            cells_name(&[(2, 0), (1, 1), (0, 2)]),
+        ));
+        expected.sort();
+
+        let table = lines();
+        let mut got: Vec<(String, String)> = table
+            .rules()
+            .iter()
+            .map(|rule| {
+                assert_eq!(rule.kind().keyword(), "exact", "{}", rule.from());
+                (rule.from().to_string(), rule.to().to_string())
+            })
+            .collect();
+        got.sort();
+        assert_eq!(got, expected);
     }
 
     #[test]

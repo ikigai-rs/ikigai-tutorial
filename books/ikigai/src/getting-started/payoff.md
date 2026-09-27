@@ -18,11 +18,15 @@ says. Here is `title`:
 {{#include ../../../../crates/hello-camel/src/lib.rs:title}}
 ```
 
-Two things to notice before it runs. The `Source` arm says `.cacheable()` **and**
-`.depends_on(TITLE)` — "cache this, and treat it as valid until the thread named
-`urn:iki:tutorial:title` is cut." And the `Sink` arm cuts nothing: the kernel does that
-itself, after any successful write, to the thread named after the write's target. The two
-names are the same string on purpose.
+Two things to notice before it runs. The `Source` arm says `.cacheable()` — "cache this,
+and treat it as valid until the thread named `urn:iki:tutorial:title` is cut." It needs to
+say nothing more: since `ikigai-core` 0.1.73 the kernel hangs every cacheable read from the
+thread named after the resource it read. (The `.depends_on(TITLE)` beside it was needed
+before that, and is now harmless rather than load-bearing — a thread declared twice is one
+thread; [Golden threads](golden-threads.md) shows the endpoint without it.) And the `Sink`
+arm cuts nothing: the kernel does that itself, after any successful write, to the thread
+named after the write's target. The two names are the same string, so the write reaches
+the read.
 
 And `camel-title`, which is the interesting one:
 
@@ -43,7 +47,8 @@ cargo test -p hello-camel --test payoff -- --nocapture --test-threads 1
 
 Or press **Run**. Each section below ends in a cell: a command you can edit, and the
 output the listing produces, shown as *expected* until you run it against **this book's
-own kernel, in this page** — `hello_camel::kernel()` compiled to WebAssembly, under the
+own kernel, in this page** — `book_wasm::page_kernel()` compiled to WebAssembly, which
+serves Part I's names exactly as `hello_camel::kernel()` does, under the
 same engine the `ikigai` CLI uses, so the lines are the CLI's grammar and the answers are
 real resolutions. Nothing runs until you press Run (or Enter in the command). One kernel
 serves every cell on the page and keeps its cache and its golden threads between runs;
@@ -108,7 +113,8 @@ resolution. Then `title` is written — and `camel-title`'s cache entry is gone,
 thread cut: camel-title recomputed after a Sink to title
 ```
 
-Follow the thread. `title`'s `Source` declared `.depends_on(TITLE)`. `camel-title` resolved
+Follow the thread. `title`'s `Source` answered a cacheable read, and the kernel hung it
+from the thread named after `title`. `camel-title` resolved
 `title` through the kernel, and the kernel recorded that: a composite inherits the golden
 threads of everything it resolved. The `Sink` to `title` succeeded, so the kernel cut the
 thread named `urn:iki:tutorial:title`. Every cached representation depending on that thread

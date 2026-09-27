@@ -25,10 +25,10 @@ every kind of thing in it:
 | the set | its name | what it is | built in |
 |---|---|---|---|
 | a **cell** | `urn:iki:tutorial:ttt:cell:{x}:{y}` | the mark at one place, or empty | this part |
-| a set of cells | named by its members | any cells, gathered into one resource | part II |
-| a **row** | `urn:iki:tutorial:ttt:row:{y}` | a set of cells, by name — no code | part II |
-| a **column** | `urn:iki:tutorial:ttt:column:{x}` | the same, the other way | part II |
-| a **diagonal** | `urn:iki:tutorial:ttt:diagonal:{n}` | the same, corner to corner | part II |
+| a **line** of cells | `urn:iki:tutorial:ttt:cells:{list}` | any cells, in order, named by their coordinates | part II |
+| a **row** | `urn:iki:tutorial:ttt:row:0` (and `:1`, `:2`) | a line of cells, by name — no code | part II |
+| a **column** | `urn:iki:tutorial:ttt:column:0` (and `:1`, `:2`) | the same, the other way | part II |
+| a **diagonal** | `urn:iki:tutorial:ttt:diagonal:0` (and `:1`) | the same, corner to corner | part II |
 | the **board** | `urn:iki:tutorial:ttt:board` | every row | part II |
 | which lines a cell is on | `urn:iki:tutorial:ttt:checkset:{x}:{y}` | a list of the names of other resources | part III |
 | **whose turn** | `urn:iki:tutorial:ttt:turn` | a question about the board | part III |
@@ -36,11 +36,7 @@ every kind of thing in it:
 | many games | — | the game as context, or the game in the name | part IV |
 | a board you can play | — | a face over all of the above, in this page | part V |
 
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:row:{y} — planned for part II; the name is not bound yet, and binding it should fail this directive so part II deletes it. -->
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:column:{x} — planned for part II, as above. -->
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:diagonal:{n} — planned for part II, as above. -->
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:board — planned for part II, as above. -->
-<!-- urn-gate: unbound urn:iki:tutorial:ttt:checkset:{x}:{y} — planned for part III, as above. -->
+<!-- urn-gate: unbound urn:iki:tutorial:ttt:checkset:{x}:{y} — planned for part III; the name is not bound yet, and binding it should fail this directive so part III deletes it. -->
 <!-- urn-gate: unbound urn:iki:tutorial:ttt:turn — planned for part III, as above. -->
 <!-- urn-gate: unbound urn:iki:tutorial:ttt:winner — planned for part III, as above. -->
 
@@ -265,6 +261,6 @@ serving the old mark. One spelling per cell keeps one thread per cell.
 
 ## Next
 
-Part II gathers cells into sets by name, makes the rows, columns and diagonals from those
-names with no code at all, and shows that one move recomputes one row and the board — and
-nothing else.
+[Part II](tic-tac-toe-2.md) gathers cells into lines by name, makes the rows, columns and
+diagonals from those names with no code at all, and shows that one move recomputes the
+lines through it and the board — and nothing else.
