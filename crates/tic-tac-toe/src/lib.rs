@@ -47,6 +47,18 @@
 //!   [`STORED`], and [`check_store`] is the contract such a space keeps — so a store in
 //!   Python or TypeScript, served over the wire, is a game's store like the in-memory one.
 //!
+//! Increment 5 gives the game a face, and it is resources too:
+//!
+//! * `urn:iki:tutorial:ttt:template:{name}` — the game's HTML, in pieces, with `{{…}}`
+//!   slots ([`TEMPLATES`], [`fill`]). The same bytes for every host: the page, `ttt-host`,
+//!   and apps in other languages that fill the slots themselves.
+//! * `urn:iki:tutorial:ttt:view:board` and `view:status` — the templates filled from the
+//!   cells, the winner and the turn: composites like the rest, so cached, recomputed by the
+//!   move that touches them, and per game through the corridor.
+//! * `urn:iki:tutorial:ttt:view:play:{x}:{y}` and `view:reset` — the view's writes, `Sink`
+//!   only: a move (or [`RESET`]) through the kernel, answered with what happened and the
+//!   status, as HTML text.
+//!
 //! Read the book: `mdbook serve books/ikigai`, or `./scripts/serve-with-drafts.sh` while
 //! the chapters are still drafts.
 
@@ -155,7 +167,8 @@ fn coordinates() -> [ArgSpec; 2] {
 #[derive(Debug, Default)]
 pub struct CellStore {
     marks: Mutex<BTreeMap<(i64, i64), String>>,
-    /// How many times the stored cell's `Source` has actually run.
+    /// How many times the stored cell has actually been read — its `Source` or `Exists`
+    /// run, rather than a cached answer served.
     pub reads: AtomicUsize,
 }
 // ANCHOR_END: store
@@ -168,6 +181,9 @@ pub struct CellStore {
 /// and cuts that thread after every successful `Sink` or `Delete` to the same name. A
 /// cell nobody has played is [`Error::NotFound`] — the endpoint is bound, and there is
 /// nothing there.
+///
+/// `Exists` answers `true` or `false`: is a mark played here? Never `NotFound`, since the
+/// name is bound either way. Cacheable like the mark, so the same write cuts it.
 ///
 /// `Sink` takes the mark as `content` and keeps any mark — `X`, `O`, or a Connect-Four
 /// `R` — refusing only an empty one, since "no mark" is what `Delete` says. Whether this
@@ -191,6 +207,15 @@ pub fn stored_cell(store: Arc<CellStore>) -> FnEndpoint {
             Verb::Delete => {
                 marks.remove(&at);
                 Ok(Representation::new(text_plain_utf8(), b"ok".to_vec()))
+            }
+            Verb::Exists => {
+                store.reads.fetch_add(1, Ordering::SeqCst);
+                let played = if marks.contains_key(&at) {
+                    "true"
+                } else {
+                    "false"
+                };
+                Ok(Representation::new(text_plain_utf8(), played.as_bytes().to_vec()).cacheable())
             }
             _ => {
                 store.reads.fetch_add(1, Ordering::SeqCst);
@@ -232,6 +257,13 @@ pub fn stored_cell(store: Arc<CellStore>) -> FnEndpoint {
                             .summary("the mark to play, e.g. X or O")
                             .class(XSD_STRING),
                     )
+                    .output(TEXT_PLAIN_UTF8),
+            )
+            .action(
+                ActionSpec::new(Verb::Exists)
+                    .summary("true if a mark has been played at (x, y), false if none has")
+                    .input(coordinates()[0].clone())
+                    .input(coordinates()[1].clone())
                     .output(TEXT_PLAIN_UTF8),
             )
             .action(
@@ -682,6 +714,446 @@ pub fn play_move() -> AsyncFnEndpoint {
 }
 // ANCHOR_END: move
 
+// ANCHOR: view_names
+/// A template: HTML with `{{…}}` slots, the same bytes for every host that renders the game.
+pub const TEMPLATE: &str = "urn:iki:tutorial:ttt:template:{name}";
+
+/// The board as HTML: one button per square, each empty one a move.
+pub const VIEW_BOARD: &str = "urn:iki:tutorial:ttt:view:board";
+
+/// Whose turn it is, or who won, as one line of text.
+pub const VIEW_STATUS: &str = "urn:iki:tutorial:ttt:view:status";
+
+/// Play the side to move at `(x, y)`, and answer with what happened and the status —
+/// `Sink` only.
+pub const VIEW_PLAY: &str = "urn:iki:tutorial:ttt:view:play:{x}:{y}";
+
+/// Clear the board, and answer with what happened and the status — `Sink` only.
+pub const VIEW_RESET: &str = "urn:iki:tutorial:ttt:view:reset";
+
+/// Clear every square of the board — `Sink` only.
+pub const RESET: &str = "urn:iki:tutorial:ttt:reset";
+// ANCHOR_END: view_names
+
+/// Every template, by the name it is resolved at: `template:{name}`.
+///
+/// The files live beside this crate's source (`templates/*.html`) so they can be read and
+/// edited as HTML. A file's final newline is not part of the template.
+pub const TEMPLATES: &[(&str, &str)] = &[
+    ("game", include_str!("../templates/game.html")),
+    ("board", include_str!("../templates/board.html")),
+    ("square-open", include_str!("../templates/square-open.html")),
+    (
+        "square-taken",
+        include_str!("../templates/square-taken.html"),
+    ),
+    (
+        "square-closed",
+        include_str!("../templates/square-closed.html"),
+    ),
+    ("status-turn", include_str!("../templates/status-turn.html")),
+    ("status-won", include_str!("../templates/status-won.html")),
+    ("status-draw", include_str!("../templates/status-draw.html")),
+    ("reply", include_str!("../templates/reply.html")),
+];
+
+/// The template `name`'s resource name.
+pub fn template_name(name: &str) -> String {
+    format!("urn:iki:tutorial:ttt:template:{name}")
+}
+
+/// The name of the view that plays `(x, y)`.
+pub fn view_play_name(x: i64, y: i64) -> String {
+    format!("urn:iki:tutorial:ttt:view:play:{x}:{y}")
+}
+
+/// `text/html; charset=utf-8` as a [`ReprType`].
+fn text_html_utf8() -> ReprType {
+    ReprType::new("text/html").with_param("charset", "utf-8")
+}
+
+/// The same media type as a string, for a [`Description`].
+const TEXT_HTML_UTF8: &str = "text/html;charset=utf-8";
+
+// ANCHOR: slots
+/// One slot of a template, `{{name}}` or `{{name 1 -2}}`: a name, and any integers after it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Slot {
+    /// A lower-case letter, then lower-case letters and `-`, e.g. `square`.
+    pub name: String,
+    /// Plain integers, each after one space, e.g. `[0, 2]` for `{{square 0 2}}`.
+    pub args: Vec<i64>,
+}
+
+/// What fills a slot.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Fill {
+    /// Text, HTML-escaped as it goes in: a mark, a coordinate, a message.
+    Text(String),
+    /// HTML that goes in as it is — the output of another template.
+    Html(String),
+}
+
+/// The pieces of a template: text between slots, and the slots.
+enum Piece<'t> {
+    Literal(&'t str),
+    Slot(Slot),
+}
+
+/// Read `template` into pieces. Every `{{` opens a slot, so one that does not — an unclosed
+/// `{{`, a name in capitals, an argument that is not a plain integer — is refused rather than
+/// passed through, since a slot nobody fills would reach a page as `{{…}}`.
+fn pieces(template: &str) -> Result<Vec<Piece<'_>>> {
+    let refuse = |detail: String| Error::Endpoint(format!("a template: {detail}"));
+    let mut out = Vec::new();
+    let mut rest = template;
+    while let Some(open) = rest.find("{{") {
+        out.push(Piece::Literal(&rest[..open]));
+        let after = &rest[open + 2..];
+        let close = after
+            .find("}}")
+            .ok_or_else(|| refuse("a `{{` is never closed".to_string()))?;
+        let inner = &after[..close];
+        let mut words = inner.split(' ');
+        let name = words.next().unwrap_or_default();
+        let named = name.starts_with(|c: char| c.is_ascii_lowercase())
+            && name.chars().all(|c| c.is_ascii_lowercase() || c == '-');
+        if !named {
+            return Err(refuse(format!("`{{{{{inner}}}}}` is not a slot")));
+        }
+        let args = words
+            .map(|word| {
+                plain_integer("slot", word)
+                    .map_err(|_| refuse(format!("`{{{{{inner}}}}}` has an argument `{word}`")))
+            })
+            .collect::<Result<Vec<i64>>>()?;
+        out.push(Piece::Slot(Slot {
+            name: name.to_string(),
+            args,
+        }));
+        rest = &after[close + 2..];
+    }
+    out.push(Piece::Literal(rest));
+    Ok(out)
+}
+
+/// The slots of `template`, in order.
+pub fn slots(template: &str) -> Result<Vec<Slot>> {
+    Ok(pieces(template)?
+        .into_iter()
+        .filter_map(|piece| match piece {
+            Piece::Slot(slot) => Some(slot),
+            Piece::Literal(_) => None,
+        })
+        .collect())
+}
+
+/// `template`, every slot replaced by what `value` says fills it.
+pub fn fill(template: &str, mut value: impl FnMut(&Slot) -> Result<Fill>) -> Result<String> {
+    let mut out = String::with_capacity(template.len());
+    for piece in pieces(template)? {
+        match piece {
+            Piece::Literal(text) => out.push_str(text),
+            Piece::Slot(slot) => match value(&slot)? {
+                Fill::Text(text) => out.push_str(&escape(&text)),
+                Fill::Html(html) => out.push_str(&html),
+            },
+        }
+    }
+    Ok(out)
+}
+
+/// `text`, safe to put in HTML text or a quoted attribute.
+pub fn escape(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for c in text.chars() {
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            '\'' => out.push_str("&#39;"),
+            c => out.push(c),
+        }
+    }
+    out
+}
+// ANCHOR_END: slots
+
+/// The refusal for a slot a template has that its view does not fill.
+fn unfilled(template: &str, slot: &Slot) -> Error {
+    Error::Endpoint(format!(
+        "the template `{template}` has a slot `{}` this view does not fill",
+        slot.name
+    ))
+}
+
+/// `ttt-template`: the template `name`, as `text/html`, computed once.
+pub fn templates() -> FnEndpoint {
+    FnEndpoint::new("ttt-template", |inv: &Invocation<'_>| {
+        let name = inv
+            .bindings
+            .get("name")
+            .ok_or_else(|| Error::MissingArgument("name".to_string()))?;
+        let (_, text) = TEMPLATES
+            .iter()
+            .find(|(known, _)| *known == name)
+            .ok_or_else(|| Error::NotFound(format!("there is no template named `{name}`")))?;
+        let text = text.strip_suffix('\n').unwrap_or(text);
+        Ok(Representation::new(text_html_utf8(), text.as_bytes().to_vec()).cacheable())
+    })
+    .with_description(
+        Description::new("ttt-template")
+            .title("Template")
+            .summary("A piece of the game's HTML, with {{…}} slots for a host to fill.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .input(
+                ArgSpec::new("name")
+                    .summary("which template")
+                    .class(XSD_STRING)
+                    .one_of(TEMPLATES.iter().map(|(name, _)| *name))
+                    .binding(),
+            )
+            .output(TEXT_HTML_UTF8),
+    )
+}
+
+// ANCHOR: view_board
+/// `ttt-view-board`: the board as HTML — the `board` template with each `{{square x y}}`
+/// filled by the square template the cell calls for.
+///
+/// A played square is `square-taken`; an empty one is `square-open` while the game goes on
+/// and `square-closed` once it is over. Which squares there are is the template's business:
+/// this code has no 3×3 in it, only "a slot names a cell". A composite over the cells, the
+/// winner and the templates, all sourced through the kernel, so it is cacheable and a move
+/// recomputes it through the cell it played.
+pub fn view_board() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new(
+        "ttt-view-board",
+        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            Box::pin(async move {
+                let board = text_of(inv, &template_name("board")).await?;
+                let over = text_of(inv, WINNER).await? != EMPTY;
+                let mut squares: BTreeMap<(i64, i64), String> = BTreeMap::new();
+                for slot in slots(&board)? {
+                    let (x, y) = match (slot.name.as_str(), slot.args.as_slice()) {
+                        ("square", &[x, y]) => (x, y),
+                        _ => return Err(unfilled("board", &slot)),
+                    };
+                    if squares.contains_key(&(x, y)) {
+                        continue;
+                    }
+                    let mark = text_of(inv, &cell_name(x, y)).await?;
+                    let kind = match (mark != EMPTY, over) {
+                        (true, _) => "square-taken",
+                        (false, false) => "square-open",
+                        (false, true) => "square-closed",
+                    };
+                    let square = text_of(inv, &template_name(kind)).await?;
+                    let html = fill(&square, |slot| match slot.name.as_str() {
+                        "x" => Ok(Fill::Text(x.to_string())),
+                        "y" => Ok(Fill::Text(y.to_string())),
+                        "mark" => Ok(Fill::Text(mark.clone())),
+                        _ => Err(unfilled(kind, slot)),
+                    })?;
+                    squares.insert((x, y), html);
+                }
+                let html = fill(&board, |slot| match slot.args.as_slice() {
+                    &[x, y] => Ok(Fill::Html(squares[&(x, y)].clone())),
+                    _ => Err(unfilled("board", slot)),
+                })?;
+                Ok(Representation::new(text_html_utf8(), html.into_bytes()).cacheable())
+            })
+        },
+    )
+    .with_description(
+        Description::new("ttt-view-board")
+            .title("Board view")
+            .summary("The board as HTML: a button per square, each empty one a move.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_HTML_UTF8),
+    )
+}
+// ANCHOR_END: view_board
+
+// ANCHOR: view_status
+/// `ttt-view-status`: `X to play.`, `O has won.`, `A draw.` — one of the three status
+/// templates, filled with the mark. A composite over the winner and (while the game goes on)
+/// the turn; cacheable.
+pub fn view_status() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new(
+        "ttt-view-status",
+        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            Box::pin(async move {
+                let won = text_of(inv, WINNER).await?;
+                let (kind, mark) = match won.as_str() {
+                    w if w == EMPTY => ("status-turn", text_of(inv, TURN).await?),
+                    DRAW => ("status-draw", String::new()),
+                    _ => ("status-won", won.clone()),
+                };
+                let template = text_of(inv, &template_name(kind)).await?;
+                let text = fill(&template, |slot| match slot.name.as_str() {
+                    "mark" => Ok(Fill::Text(mark.clone())),
+                    _ => Err(unfilled(kind, slot)),
+                })?;
+                Ok(Representation::new(text_html_utf8(), text.into_bytes()).cacheable())
+            })
+        },
+    )
+    .with_description(
+        Description::new("ttt-view-status")
+            .title("Status view")
+            .summary("Whose turn it is, or who won, as one line of HTML text.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_HTML_UTF8),
+    )
+}
+// ANCHOR_END: view_status
+
+// ANCHOR: view_play
+/// What a view's `Sink` answers: the `reply` template — what happened, then the status.
+///
+/// `message` is whatever the write said, success or refusal alike, as text: the view does
+/// not look inside an error to decide how to show it, so a refusal of any kind reaches the
+/// player in the kernel's own words.
+async fn reply(inv: &Invocation<'_>, outcome: Result<Representation>) -> Result<Representation> {
+    let message = match outcome {
+        Ok(said) => String::from_utf8_lossy(&said.bytes).into_owned(),
+        Err(refused) => refused.to_string(),
+    };
+    let status = text_of(inv, VIEW_STATUS).await?;
+    let template = text_of(inv, &template_name("reply")).await?;
+    let html = fill(&template, |slot| match slot.name.as_str() {
+        "message" => Ok(Fill::Text(message.clone())),
+        "status" => Ok(Fill::Html(status.clone())),
+        _ => Err(unfilled("reply", slot)),
+    })?;
+    Ok(Representation::new(text_html_utf8(), html.into_bytes()))
+}
+
+/// `ttt-view-play`: play the side to move at `(x, y)` — a `Sink` to the move, through the
+/// kernel — and answer the reply: `X plays 1,1. O to play.` A refused move is answered, not
+/// failed: `…1,1 is taken — X played there. O to play.` This is the view's one write, and it
+/// changes nothing about the move: the rules are still the move's.
+pub fn view_play() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new(
+        "ttt-view-play",
+        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            Box::pin(async move {
+                sink_only(
+                    inv,
+                    "a play is made, not read: `sink` it (read the board view)",
+                )?;
+                let (x, y) = (coordinate(inv, "x")?, coordinate(inv, "y")?);
+                let play = Request::new(Verb::Sink, name_iri(&move_name(x, y))?);
+                let outcome = inv.issue(play).await;
+                reply(inv, outcome).await
+            })
+        },
+    )
+    .with_description(
+        Description::new("ttt-view-play")
+            .title("Play, as a view")
+            .summary(
+                "Play the side to move at (x, y) and answer, as HTML text, what happened and \
+                 whose turn it is — a refused move included.",
+            )
+            .verb(Verb::Sink)
+            .verb(Verb::Meta)
+            .input(coordinates()[0].clone())
+            .input(coordinates()[1].clone())
+            .output(TEXT_HTML_UTF8),
+    )
+}
+// ANCHOR_END: view_play
+
+/// `ttt-view-reset`: clear the board ([`RESET`]) and answer the reply.
+pub fn view_reset() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new(
+        "ttt-view-reset",
+        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            Box::pin(async move {
+                sink_only(inv, "a reset is made, not read: `sink` it")?;
+                let outcome = inv.issue(Request::new(Verb::Sink, name_iri(RESET)?)).await;
+                reply(inv, outcome).await
+            })
+        },
+    )
+    .with_description(
+        Description::new("ttt-view-reset")
+            .title("New game, as a view")
+            .summary("Clear the board and answer, as HTML text, that it is clear and who opens.")
+            .verb(Verb::Sink)
+            .verb(Verb::Meta)
+            .output(TEXT_HTML_UTF8),
+    )
+}
+
+// ANCHOR: reset
+/// `ttt-reset`: clear every square a line of `table` passes through — a `Delete` of each
+/// stored cell, issued through the kernel, so each one cuts its own thread.
+///
+/// The squares come from the table, like the CheckSet's lines, so a bigger board's table
+/// resets a bigger board. The stored cell's `Delete` succeeds on an empty square, so a reset
+/// of a fresh board is not an error.
+pub fn reset(table: Arc<AliasTable>) -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new(
+        "ttt-reset",
+        move |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            let table = Arc::clone(&table);
+            Box::pin(async move {
+                sink_only(inv, "a reset is made, not read: `sink` it")?;
+                let line = CELLS.trim_end_matches("{list}");
+                let mut squares = std::collections::BTreeSet::new();
+                for rule in table.rules() {
+                    if let Some(list) = rule.to().strip_prefix(line) {
+                        for member in list.split(',') {
+                            let (x, y) = member.split_once('.').ok_or_else(|| {
+                                Error::Endpoint(format!("the line table's member `{member}`"))
+                            })?;
+                            squares.insert((plain_integer("x", x)?, plain_integer("y", y)?));
+                        }
+                    }
+                }
+                for (x, y) in squares {
+                    inv.issue(Request::new(Verb::Delete, name_iri(&stored_name(x, y))?))
+                        .await?;
+                }
+                Ok(Representation::new(
+                    text_plain_utf8(),
+                    b"The board is clear".to_vec(),
+                ))
+            })
+        },
+    )
+    .with_description(
+        Description::new("ttt-reset")
+            .title("New game")
+            .summary("Clear every square of the board, so the next move opens a new game.")
+            .verb(Verb::Sink)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: reset
+
+/// Refuse any verb but `Sink`, saying `why`.
+fn sink_only(inv: &Invocation<'_>, why: &str) -> Result<()> {
+    if inv.request.verb == Verb::Sink {
+        Ok(())
+    } else {
+        Err(Error::Endpoint(why.to_string()))
+    }
+}
+
+/// A name the game builds, parsed.
+fn name_iri(name: &str) -> Result<Iri> {
+    Iri::parse(name).map_err(|e| Error::Endpoint(format!("the game's name {name}: {e}")))
+}
+
 // ANCHOR: space
 /// The game's space: the endpoints, wrapped in the table that names the lines.
 pub fn space() -> Alias {
@@ -710,7 +1182,13 @@ pub fn space_with_store(store: Arc<dyn Space>) -> Alias {
         .bind(template(CHECKSET), checkset(Arc::clone(&table)))
         .bind(template(WINNER), winner(Arc::clone(&table)))
         .bind(template(TURN), turn())
-        .bind(template(MOVE), play_move());
+        .bind(template(MOVE), play_move())
+        .bind(template(RESET), reset(Arc::clone(&table)))
+        .bind(template(TEMPLATE), templates())
+        .bind(template(VIEW_BOARD), view_board())
+        .bind(template(VIEW_STATUS), view_status())
+        .bind(template(VIEW_PLAY), view_play())
+        .bind(template(VIEW_RESET), view_reset());
     Alias::new(
         table,
         Arc::new(Fallback::new(vec![Arc::new(composites), store])),
@@ -783,7 +1261,9 @@ pub fn game(id: &str, store: Arc<dyn Space>) -> Result<Scope> {
 ///    answer, and not `Unresolved`.
 /// 3. `Sink` takes the mark as `content`, trimmed, and keeps any non-empty mark; an empty
 ///    one is `InvalidArgument` naming `content`.
-/// 4. `Delete` clears the cell, and succeeds whether or not anything was there.
+/// 4. `Exists` answers `true` where a mark is played and `false` where none is — never
+///    `NotFound` — as `text/plain`, cacheable.
+/// 5. `Delete` clears the cell, and succeeds whether or not anything was there.
 ///
 /// It WRITES: it plays and clears `(7, -3)`, a square off the board, and leaves it clear.
 /// Point it at a scratch store, not a game in progress.
@@ -808,6 +1288,7 @@ pub async fn check_store(store: Arc<dyn Space>) -> std::result::Result<(), Strin
         Err(Error::NotFound(_)) => {}
         other => return Err(format!("an unplayed cell must be NotFound, got {other:?}")),
     }
+    exists(&issue, &here, "false").await?;
     issue(with(Verb::Sink, " X\n"))
         .await
         .map_err(|e| format!("Sink of `content` must succeed: {e}"))?;
@@ -828,6 +1309,7 @@ pub async fn check_store(store: Arc<dyn Space>) -> std::result::Result<(), Strin
             "a mark must be cacheable, or nothing above the store can be cached".to_string(),
         );
     }
+    exists(&issue, &here, "true").await?;
     match issue(with(Verb::Sink, "  ")).await {
         Err(Error::InvalidArgument { name, .. }) if name == "content" => {}
         other => return Err(format!("an empty mark must be refused, got {other:?}")),
@@ -839,12 +1321,14 @@ pub async fn check_store(store: Arc<dyn Space>) -> std::result::Result<(), Strin
         "stored:0:-0",
     ] {
         let name = format!("urn:iki:tutorial:ttt:{spelling}");
-        match issue(Request::new(Verb::Source, at(&name))).await {
-            Err(Error::InvalidArgument { name: arg, .. }) if arg == "x" || arg == "y" => {}
-            other => {
-                return Err(format!(
-                    "{name} must be refused (one spelling), got {other:?}"
-                ))
+        for verb in [Verb::Source, Verb::Exists] {
+            match issue(Request::new(verb, at(&name))).await {
+                Err(Error::InvalidArgument { name: arg, .. }) if arg == "x" || arg == "y" => {}
+                other => {
+                    return Err(format!(
+                        "{name} must be refused by {verb:?} (one spelling), got {other:?}"
+                    ))
+                }
             }
         }
     }
@@ -852,9 +1336,35 @@ pub async fn check_store(store: Arc<dyn Space>) -> std::result::Result<(), Strin
         .await
         .map_err(|e| format!("Delete must clear a played cell: {e}"))?;
     match read().await {
-        Err(Error::NotFound(_)) => Ok(()),
-        other => Err(format!(
-            "a cleared cell must be NotFound again, got {other:?}"
+        Err(Error::NotFound(_)) => {}
+        other => {
+            return Err(format!(
+                "a cleared cell must be NotFound again, got {other:?}"
+            ))
+        }
+    }
+    exists(&issue, &here, "false").await
+}
+
+/// Clause 4 of the contract: `Exists` at `here` answers exactly `expected`, cacheably.
+async fn exists<F, Fut>(issue: &F, here: &Iri, expected: &str) -> std::result::Result<(), String>
+where
+    F: Fn(Request) -> Fut,
+    Fut: std::future::Future<Output = Result<Representation>>,
+{
+    match issue(Request::new(Verb::Exists, here.clone())).await {
+        Ok(answer) if answer.bytes == expected.as_bytes() && answer.expiry != Expiry::Always => {
+            Ok(())
+        }
+        Ok(answer) if answer.bytes == expected.as_bytes() => Err(format!(
+            "Exists must be cacheable like the mark (it answered `{expected}`, uncacheable)"
+        )),
+        Ok(answer) => Err(format!(
+            "Exists must answer `{expected}` here, got {:?}",
+            String::from_utf8_lossy(&answer.bytes)
+        )),
+        Err(e) => Err(format!(
+            "Exists must answer true or false, never fail (expected `{expected}`): {e}"
         )),
     }
 }
@@ -984,7 +1494,10 @@ mod tests {
         use ikigai_core::{Endpoint, InputSource};
         let actions = stored_cell(Arc::default()).describe().action_specs();
         let verbs: Vec<Verb> = actions.iter().map(|a| a.verb).collect();
-        assert_eq!(verbs, vec![Verb::Source, Verb::Sink, Verb::Delete]);
+        assert_eq!(
+            verbs,
+            vec![Verb::Source, Verb::Sink, Verb::Exists, Verb::Delete]
+        );
         for action in &actions {
             let bound: Vec<&str> = action
                 .inputs

@@ -73,6 +73,9 @@
         });
         return kernel;
     }
+    // The ONE loader for the page, shared: `js/ttt.js` (the playable board) resolves in the
+    // same wasm instance, so a click on the board and a Run in a cell are one kernel.
+    window.ikigaiBookKernel = load;
 
     function el(tag, className, text) {
         var node = document.createElement(tag);
@@ -268,6 +271,11 @@
                     caption.textContent = "run " + runs + " — from the kernel in this page" +
                         (runs > 1 ? "; compare it with the runs below" : "");
                     run.disabled = false;
+                    // A cell may have changed a game a board on this page shows; the board
+                    // is a copy the kernel cannot cut, so say that something ran (ttt.js).
+                    document.dispatchEvent(new CustomEvent("ikigai:cell-ran", {
+                        detail: { game: game }
+                    }));
                 });
             }).catch(function (err) {
                 pane.textContent = expectedText;
