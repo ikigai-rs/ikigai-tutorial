@@ -37,6 +37,16 @@
 //! * `urn:iki:tutorial:ttt:move:{x}:{y}` — **Sink only**: plays the side to move, or
 //!   refuses. The stored cell underneath still takes any mark anywhere.
 //!
+//! Increment 4 plays many games at once, and changes no name and no endpoint to do it:
+//!
+//! * A **game** is a resolution chain ([`game`]): one corridor, named
+//!   `urn:iki:tutorial:ttt:game:{id}`, that binds the stored cell to that game's store. It
+//!   sits ahead of the root for a request and everything the request gives rise to, so the
+//!   board, the winner and the move all find this game's marks and nobody else's.
+//! * The **store is a space**: [`space_with_store`] builds the game over whatever binds
+//!   [`STORED`], and [`check_store`] is the contract such a space keeps — so a store in
+//!   Python or TypeScript, served over the wire, is a game's store like the in-memory one.
+//!
 //! Read the book: `mdbook serve books/ikigai`, or `./scripts/serve-with-drafts.sh` while
 //! the chapters are still drafts.
 
@@ -45,9 +55,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 use ikigai_core::{
-    ActionSpec, Alias, AliasTable, ArgRef, ArgSpec, AsyncFnEndpoint, Description, EndpointSpace,
-    Error, FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Request,
-    Result, UriTemplate, Verb,
+    ActionSpec, Alias, AliasTable, ArgRef, ArgSpec, AsyncFnEndpoint, Capability, Description,
+    EndpointSpace, Error, Expiry, Fallback, FnEndpoint, Invocation, InvokeFuture, Iri, Kernel,
+    ReprType, Representation, Request, Result, Scope, Space, UriTemplate, Verb,
 };
 use ikigai_vocab::TurtleRenderer;
 
@@ -681,10 +691,19 @@ pub fn space() -> Alias {
 /// [`space`], with the stored cells in a [`CellStore`] the caller keeps — so a test can
 /// read the counter.
 pub fn space_over(store: Arc<CellStore>) -> Alias {
+    space_with_store(Arc::new(stored_space(store)))
+}
+
+/// The game over ANY store: every composite, then `store` for the stored cells, all
+/// wrapped in the table that names the lines.
+///
+/// Nothing here holds state. `store` is whatever binds [`STORED`] — the in-memory
+/// [`stored_space`], or a peer in another process or language — and the composites reach
+/// it by name, through the kernel, so they cannot tell which one answered.
+pub fn space_with_store(store: Arc<dyn Space>) -> Alias {
     // One table, shared: the aliases rewrite through it, and the rules read it.
     let table = Arc::new(lines());
-    let endpoints = EndpointSpace::new()
-        .bind(template(STORED), stored_cell(store))
+    let composites = EndpointSpace::new()
         .bind(template(CELL), platonic_cell())
         .bind(template(CELLS), line_of_cells())
         .bind(template(BOARD), board())
@@ -692,9 +711,154 @@ pub fn space_over(store: Arc<CellStore>) -> Alias {
         .bind(template(WINNER), winner(Arc::clone(&table)))
         .bind(template(TURN), turn())
         .bind(template(MOVE), play_move());
-    Alias::new(table, Arc::new(endpoints))
+    Alias::new(
+        table,
+        Arc::new(Fallback::new(vec![Arc::new(composites), store])),
+    )
+}
+
+/// A store: the stored cell over one [`CellStore`], and nothing else.
+pub fn stored_space(store: Arc<CellStore>) -> EndpointSpace {
+    EndpointSpace::new().bind(template(STORED), stored_cell(store))
 }
 // ANCHOR_END: space
+
+// ANCHOR: game
+/// A game: the name of the corridor it is played in.
+///
+/// Not a resource. Nothing is bound at this name and nothing resolves it; it is the name a
+/// resolution chain carries, and so the name the cache files a game's answers under.
+pub const GAME: &str = "urn:iki:tutorial:ttt:game:{id}";
+
+/// The corridor name of game `id`. An id is letters, digits and `-`, so a game is named by
+/// one segment, in one spelling.
+pub fn game_name(id: &str) -> Result<Iri> {
+    if id.is_empty() || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+        return Err(Error::InvalidArgument {
+            name: "game".to_string(),
+            detail: format!("`{id}` is not a game id: letters, digits and - only (e.g. a, b, 7)"),
+        });
+    }
+    Iri::parse(format!("urn:iki:tutorial:ttt:game:{id}"))
+        .map_err(|e| Error::Endpoint(format!("a game's name: {e}")))
+}
+
+/// Game `id`, played over `store`: a resolution chain whose one corridor is the store.
+///
+/// Resolve anything in it — a cell, the board, the winner, a move — and that request, and
+/// every sub-request it gives rise to, looks for `stored:{x}:{y}` in `store` ahead of the
+/// root. Every other name falls through to the root, so the game above the atom is the same
+/// names and the same code in every game. Only what the corridor binds differs.
+///
+/// The name is a claim: *any corridor named `game:{id}` holds these doors*. The cache keys on
+/// it, so build a game's corridor once and keep it, and never give two stores one id.
+/// Injecting a corridor is the host's authority — whoever may push one chooses the game.
+pub fn game(id: &str, store: Arc<dyn Space>) -> Result<Scope> {
+    let name = game_name(id)?;
+    // `Scope::with_named` refuses (panics on) a space that names itself otherwise; a store
+    // is anyone's space, so say it as an error instead.
+    if let Some(own) = store.id() {
+        if own.as_str() != name.as_str() {
+            return Err(Error::InvalidArgument {
+                name: "game".to_string(),
+                detail: format!(
+                    "this store names itself `{}`, so it cannot be game `{id}`",
+                    own.as_str()
+                ),
+            });
+        }
+    }
+    Ok(Scope::empty().with_named(name, store))
+}
+// ANCHOR_END: game
+
+// ANCHOR: contract
+/// Check `store` against the **store contract** — what any space must do to be a game's
+/// store, whatever language it is written in:
+///
+/// 1. It binds [`STORED`], `urn:iki:tutorial:ttt:stored:{x}:{y}`, for any integer `x`, `y`
+///    in its one plain spelling; `01`, `+1` and `-0` are `InvalidArgument` naming `x` or `y`.
+/// 2. `Source` answers the mark as `text/plain`, its bytes exactly the mark (no trailing
+///    newline), cacheable. A cell nothing was played at is `NotFound` — not an empty
+///    answer, and not `Unresolved`.
+/// 3. `Sink` takes the mark as `content`, trimmed, and keeps any non-empty mark; an empty
+///    one is `InvalidArgument` naming `content`.
+/// 4. `Delete` clears the cell, and succeeds whether or not anything was there.
+///
+/// It WRITES: it plays and clears `(7, -3)`, a square off the board, and leaves it clear.
+/// Point it at a scratch store, not a game in progress.
+pub async fn check_store(store: Arc<dyn Space>) -> std::result::Result<(), String> {
+    let kernel = Kernel::new(store);
+    let root = Capability::root();
+    let at = |name: &str| Iri::parse(name).expect("a constant name");
+    let here = at(&stored_name(7, -3));
+    let issue = |request: Request| kernel.issue(request, &root);
+    let with = |verb: Verb, content: &str| {
+        Request::new(verb, here.clone())
+            .with_arg("content", ArgRef::Inline(content.as_bytes().to_vec()))
+    };
+    let read = || issue(Request::new(Verb::Source, here.clone()));
+
+    for round in ["first", "second"] {
+        issue(Request::new(Verb::Delete, here.clone()))
+            .await
+            .map_err(|e| format!("Delete must succeed on any cell ({round} delete): {e}"))?;
+    }
+    match read().await {
+        Err(Error::NotFound(_)) => {}
+        other => return Err(format!("an unplayed cell must be NotFound, got {other:?}")),
+    }
+    issue(with(Verb::Sink, " X\n"))
+        .await
+        .map_err(|e| format!("Sink of `content` must succeed: {e}"))?;
+    let played = read()
+        .await
+        .map_err(|e| format!("a played cell must answer: {e}"))?;
+    if played.bytes != b"X" {
+        return Err(format!(
+            "a played cell answers exactly its mark, trimmed: expected `X`, got {:?}",
+            String::from_utf8_lossy(&played.bytes)
+        ));
+    }
+    if !played.repr_type.to_string().starts_with("text/plain") {
+        return Err(format!("a mark is text/plain, not {}", played.repr_type));
+    }
+    if played.expiry == Expiry::Always {
+        return Err(
+            "a mark must be cacheable, or nothing above the store can be cached".to_string(),
+        );
+    }
+    match issue(with(Verb::Sink, "  ")).await {
+        Err(Error::InvalidArgument { name, .. }) if name == "content" => {}
+        other => return Err(format!("an empty mark must be refused, got {other:?}")),
+    }
+    for spelling in [
+        "stored:07:-3",
+        "stored:+7:-3",
+        "stored:7:-03",
+        "stored:0:-0",
+    ] {
+        let name = format!("urn:iki:tutorial:ttt:{spelling}");
+        match issue(Request::new(Verb::Source, at(&name))).await {
+            Err(Error::InvalidArgument { name: arg, .. }) if arg == "x" || arg == "y" => {}
+            other => {
+                return Err(format!(
+                    "{name} must be refused (one spelling), got {other:?}"
+                ))
+            }
+        }
+    }
+    issue(Request::new(Verb::Delete, here.clone()))
+        .await
+        .map_err(|e| format!("Delete must clear a played cell: {e}"))?;
+    match read().await {
+        Err(Error::NotFound(_)) => Ok(()),
+        other => Err(format!(
+            "a cleared cell must be NotFound again, got {other:?}"
+        )),
+    }
+}
+// ANCHOR_END: contract
 
 /// A constant template. Both are literals in this file, and a test parses them.
 fn template(source: &str) -> UriTemplate {

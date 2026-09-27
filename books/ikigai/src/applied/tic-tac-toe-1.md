@@ -34,7 +34,7 @@ every kind of thing in it:
 | **whose turn** | `urn:iki:tutorial:ttt:turn` | a question about the board | part III |
 | **who won** | `urn:iki:tutorial:ttt:winner` | another | part III |
 | a **move** | `urn:iki:tutorial:ttt:move:{x}:{y}` | a mark played, if the rules allow it | part III |
-| many games | — | the game as context, or the game in the name | part IV |
+| many games | — | the game as context: a corridor around the names, not a name | part IV |
 | a board you can play | — | a face over all of the above, in this page | part V |
 
 Read down the second column and notice how little of it is code. Only the cell holds

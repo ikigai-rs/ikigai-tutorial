@@ -82,9 +82,10 @@ a name. Eight exact rules, as text:
 ```
 
 The game's space is its bound endpoints wrapped in an
-[`Alias`](../getting-started/scope-and-alias.md) that rewrites through that table. Four of
+[`Alias`](../getting-started/scope-and-alias.md) that rewrites through that table. Three of
 them are this part's and the one before it; the last four are the rules, which
-[Part III](tic-tac-toe-3.md) builds, reading the same table. No
+[Part III](tic-tac-toe-3.md) builds, reading the same table. The stored cell sits in a space
+of its own after them, because [Part IV](tic-tac-toe-4.md) swaps it per game. No
 endpoint implements a row. `urn:iki:tutorial:ttt:row:0` resolves because the table
 rewrites it to `urn:iki:tutorial:ttt:cells:0.0,1.0,2.0`, and the line endpoint answers
 that. The table parses from text, so it could as easily have been read from a file.
@@ -141,7 +142,7 @@ other host get the rows with no wiring of their own.)
 Nor does the catalog list the aliases. It lists what is bound — `cells:{list}` once, and
 `board` — and the table is data of its own: in `urn:kernel:topology`, the game's space is an
 `ik:Alias` node carrying eight `ik:RewriteRule`s, each with its logical and canonical name,
-above the `EndpointSpace` that binds the templates. Type `source urn:kernel:topology`
+above the spaces that bind the templates. Type `source urn:kernel:topology`
 into any cell on this page to see the whole arrangement as a graph.
 
 ## The board

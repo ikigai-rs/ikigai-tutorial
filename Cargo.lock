@@ -107,10 +107,13 @@ dependencies = [
 name = "book-wasm"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "console_error_panic_hook",
+ "futures",
  "hello-camel",
  "ikigai-core",
  "ikigai-engine",
+ "ikigai-resolve",
  "ikigai-vocab",
  "js-sys",
  "serde_json",

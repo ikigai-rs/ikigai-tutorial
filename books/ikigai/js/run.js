@@ -48,6 +48,13 @@
 // One kernel per page, shared by every cell: the cache and the golden threads live in it,
 // and "cached the second time" is only demonstrable against state that persists. So
 // the order cells are run in matters, and that is the lesson, not a bug.
+//
+// A cell may name a GAME: `<div class="ikigai-run" data-game='a' data-cmd='…'>`. Its lines
+// then run in that game's resolution chain on the same kernel (`evalLineInGameAsync`; see
+// `crates/book-wasm`). The game is markup, not something the reader types, because choosing
+// a chain is the host's authority: the REPL grammar has no way to name one, and a line that
+// could would let whoever writes it decide what every name in it means. The cell says which
+// game it plays in, beside its label.
 (function () {
     "use strict";
 
@@ -129,6 +136,7 @@
 
     function install(cell) {
         var original = cell.getAttribute("data-cmd") || "";
+        var game = cell.getAttribute("data-game");
         var expected = cell.querySelector(".ikigai-run-expected");
         var expectedText = expected ? expected.textContent : "";
         cellCount += 1;
@@ -140,7 +148,7 @@
         // A labelled textarea (SC 3.3.2 Labels or Instructions; SC 4.1.2), one row per
         // line, with the keys explained in a description the field points at.
         var form = el("form", "ikigai-run-head");
-        var label = el("label", "ikigai-run-label", "Command");
+        var label = el("label", "ikigai-run-label", game ? "Command, in game " + game : "Command");
         label.htmlFor = id + "-cmd";
         var field = el("textarea", "ikigai-run-cmd");
         field.id = id + "-cmd";
@@ -241,7 +249,9 @@
                 // side effect (a Sink, a cut), so they run in order, one at a time.
                 return lines.reduce(function (chain, line) {
                     return chain.then(function () {
-                        return mod.evalLineAsync(line).then(function (json) {
+                        var reply = game ? mod.evalLineInGameAsync(game, line)
+                            : mod.evalLineAsync(line);
+                        return reply.then(function (json) {
                             var reply = JSON.parse(json);
                             acc += render(reply);
                             if (reply.cache) {
