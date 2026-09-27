@@ -125,6 +125,22 @@ a personal wing and a public one.
                                                        └─ door urn:personal:calendar
 ```
 
+<!-- urn-gate: unbound urn:kernel:topology — the arrangement as a resource, ikigai-core 0.1.78;
+     this book pins 0.1.72, so no host it builds binds it yet. Delete this line on the bump. -->
+<!-- urn-gate: illustration urn:ikigai:chain:root — the entry node the kernel names an empty chain by. -->
+<!-- urn-gate: illustration urn:ikigai:chain:root:layer:1 — a list cell of the rendered chain. -->
+<!-- urn-gate: illustration urn:ikigai:space:_:1 — an unnamed space, skolemized by the renderer. -->
+<!-- urn-gate: illustration urn:ikigai:space:_:1:layer:1 — a list cell. -->
+<!-- urn-gate: illustration urn:ikigai:space:_:1:layer:2 — a list cell. -->
+<!-- urn-gate: illustration urn:ikigai:space:_:2 — an unnamed space, skolemized by the renderer. -->
+<!-- urn-gate: illustration urn:example:space:gatekeeper — the wall's name in the example arrangement. -->
+<!-- urn-gate: illustration urn:example:space:root — the example root's name. -->
+<!-- urn-gate: illustration urn:example:space:root:layer:1 — a list cell. -->
+<!-- urn-gate: illustration urn:example:space:root:layer:2 — a list cell. -->
+<!-- urn-gate: illustration urn:example:space:personal — the private wing's name in the example. -->
+<!-- urn-gate: illustration urn:personal:calendar — the one door in the private wing; a stand-in, not a name a reader can resolve. -->
+<!-- urn-gate: illustration urn:public: — the public wing's family in the example. -->
+<!-- urn-gate: illustration urn:personal:calendar: — the narrower family in the last caveat, a wall over one door. -->
 ```turtle
 @prefix ik:  <https://ikigai-rs.dev/ns#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
