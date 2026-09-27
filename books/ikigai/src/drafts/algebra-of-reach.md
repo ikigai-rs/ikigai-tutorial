@@ -10,11 +10,13 @@
 corridor. Read together they look like a bag of features. They are not; they are six
 operations on one set, and knowing which set makes every one of them predictable.
 
-The set is **what a request can reach** from where it stands — the names that some door
-in its chain will answer. Peter Rodgers, who co-designed NetKernel with Tony Butterfield,
-works this out in *Peter's Hotel: A Set-Theoretic Formalism*: each construct of
-resource-oriented computing is a set operation on the reachable set, and the arrangement
-of corridors determines the set by composing them in the order resolution walks.
+The set is **what a request can reach** from where it stands — the
+names that some door in its chain will answer. Peter Rodgers, who
+co-designed NetKernel works this out in *Peter's Hotel: A
+Set-Theoretic Formalism*: each construct of resource-oriented
+computing is a set operation on the reachable set, and the arrangement
+of corridors determines the set by composing them in the order
+resolution walks.
 
 | construct | on the reachable set | the one thing to remember |
 |---|---|---|

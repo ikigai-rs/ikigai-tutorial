@@ -5,11 +5,13 @@
      introduction's "Why bother". Prose and one table; no code, so nothing can rot. -->
 
 If [the shape of resolution](../getting-started/shape-of-resolution.md) felt abstract,
-here is the one instance of it you have used every day for thirty years. Peter Rodgers,
-who co-designed NetKernel with Tony Butterfield, makes the point in *Peter's Hotel: A
-Set-Theoretic Formalism*: the Web is not a special case of resource-oriented computing
-and not an ancestor of it. It is the same model, taken to one limit — every name carries
-its whole context — and its parts map onto the constructs this book has been naming.
+here is the one instance of it you have used every day for thirty
+years. Peter Rodgers, who co-designed NetKernel, makes the point in
+*Peter's Hotel: A Set-Theoretic Formalism*: the Web is not a special
+case of resource-oriented computing and not an ancestor of it. It is
+the same model, taken to one limit — every name carries its whole
+context — and its parts map onto the constructs this book has been
+naming.
 
 | on the Web | in the hotel | in ikigai |
 |---|---|---|

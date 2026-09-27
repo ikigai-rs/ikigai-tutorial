@@ -7,7 +7,7 @@
 [Who is asking](../beyond/identity.md) answers three questions in order — who is on the
 other end, what may they do, what happens to a certificate nobody has decided about —
 and then spends its second half on the distinctions between *who* and *what may happen*.
-Peter Rodgers, who co-designed NetKernel with Tony Butterfield, makes the same cut in
+Peter Rodgers, who co-designed NetKernel, makes the same cut in
 *Peter's Hotel: A Set-Theoretic Formalism* and gives each question a construct of its
 own. Laying the two side by side is the shortest way to see what ikigai has, what it
 decided against, and where it is honestly weaker than the model.
