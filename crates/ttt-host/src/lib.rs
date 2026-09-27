@@ -541,7 +541,7 @@ impl PageEndpoint {
             }
         })?;
         let base = id.map_or_else(|| "/".to_string(), |id| format!("/game/{id}/"));
-        let mut links = vec![format!("<li><a href=\"/\">the root game</a></li>")];
+        let mut links = vec!["<li><a href=\"/\">the root game</a></li>".to_string()];
         for other in &self.games {
             links.push(format!(
                 "<li><a href=\"/game/{other}/\">game {other}</a></li>"
