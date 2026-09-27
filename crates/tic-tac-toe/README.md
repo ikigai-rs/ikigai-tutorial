@@ -307,11 +307,57 @@ Templates are the files in `templates/` (`TEMPLATES` in `lib.rs`), served at
 `status-turn`, `status-won`, `status-draw`, `reply`. A file's final newline is not part of
 the template.
 
-- A **slot** is `{{` NAME (` ` INTEGER)* `}}`: NAME is `[a-z][a-z-]*`, each INTEGER a plain
-  integer (`0`, `-2`; not `01`, `+1`, `-0`), one space before each. The regex is
-  `\{\{([a-z][a-z-]*)((?: -?[0-9]+)*)\}\}`. Rust refuses any other `{{` (`fill`/`slots`).
-- A value is **text, HTML-escaped** (`& < > " '` → `&amp; &lt; &gt; &quot; &#39;`), except
-  the two slots that take another template's output raw: `{{square X Y}}` and `{{status}}`.
+- **Every `{{` opens a slot, and the slot ends at the first `}}` after it.** Read left to
+  right: find `{{`, then the first `}}` after it; the text between is the slot's INSIDE. A
+  `{{` with no `}}` after it is refused. A `}}` or a single `{` outside a slot is plain text.
+- **The inside must be a slot, or the template is refused** — never passed through, since
+  a slot nobody fills would reach the page as `{{…}}`. A slot is NAME (` ` INTEGER)*:
+  NAME is `[a-z][a-z-]*`, each INTEGER in its ONE plain spelling (`0|-?[1-9][0-9]*`, and
+  within a signed 64-bit range), exactly one space before each. The inside's full-match
+  regex is `([a-z][a-z-]*)((?: (?:0|-?[1-9][0-9]*))*)`.
+- ⚠ **So a filler is two steps, not one regex substitution.** The single pattern
+  `\{\{([a-z][a-z-]*)((?: -?[0-9]+)*)\}\}` this README used to give accepts `{{x 01}}` as a
+  slot and silently leaves `{{Mark}}` in the output. Tokenize with `\{\{(.*?)\}\}`
+  (non-greedy, `.` matching newlines — the same first-`}}` rule), refuse any inside that is
+  not a slot, and refuse any `{{` left in the text between the matches (an unclosed one).
+- A value is **text, HTML-escaped** — `&` `<` `>` `"` `'` become `&amp;` `&lt;` `&gt;`
+  `&quot;` `&#39;`, and nothing else changes — except the two slots that take another
+  template's output raw: `{{square X Y}}` and `{{status}}`. ⚠ The escape for `'` is
+  **`&#39;`**: Python's `html.escape` writes `&#x27;`, which a browser reads the same and a
+  byte-for-byte parity test does not.
+- The cases below are the spec, and `tests/views.rs`
+  (`the_template_format_cases_in_the_readme_hold`) reads THIS block and checks every line
+  against the Rust filler, so the two cannot drift. `refuse` is a template the filler must
+  refuse; `slots` lists what a template reads as, one `name args…` per slot joined by ` | `
+  (and `-` for none); `escape` gives a text and its escaped form, separated by a tab.
+
+<!-- template-cases: begin -->
+```text
+slots   a {{square 0 -2}} b {{mark}}	square 0 -2 | mark
+slots   {{x}}}	x
+slots   }} {x} { {x}	-
+slots   {{a-b 12 -345}}	a-b 12 -345
+refuse  {{x 01}}
+refuse  {{x -0}}
+refuse  {{x +1}}
+refuse  {{x 1 }}
+refuse  {{x  1}}
+refuse  {{ x}}
+refuse  {{Mark}}
+refuse  {{-x}}
+refuse  {{}}
+refuse  {{x}
+refuse  {{x}} {{
+refuse  {{{x}}}
+refuse  {{x 99999999999999999999}}
+refuse  {{x
+y}}
+escape  a&b<c>"d'e	a&amp;b&lt;c&gt;&quot;d&#39;e
+escape  it's	it&#39;s
+escape  ✓ 1,1	✓ 1,1
+```
+<!-- template-cases: end -->
+
 - No loops, no conditions. Which template to use is chosen by the filler:
   - `board`: each `{{square X Y}}` is the square template for the cell at (X, Y), filled with
     `{{x}}`, `{{y}}`, `{{mark}}`: **`square-taken`** if the cell is not `-`; else
@@ -324,7 +370,7 @@ the template.
     typed precondition variant will render with no view change), `{{status}}` = the status.
   - `game`: the page shell; `{{game}}` = the game's id as the host names it (text).
 - The JS filler in `books/ikigai/js/ttt.js` (`fill`) is the reference in a dozen lines; a
-  Python one is `re.sub` with the regex above and a callback.
+  Python one is `re.sub` over the tokenizer above with a callback that checks the inside.
 
 ### The path ↔ IRI rule — what every host of this markup implements
 
@@ -390,8 +436,11 @@ when the page is linked.
 ttt-host [--http <addr>] [--socket <path>] [--store <socket>] [--game <id>[=<socket>]]…
   --http 127.0.0.1:8070 (default)   --socket $TMPDIR/ttt-host.sock (default; must fit 104 bytes)
   --store <socket>   the ROOT game's store is a peer     --game <id>[=<socket>]   a game, in memory or a peer
-  no --game → games a and b, in memory
+  no --game → games a and b, in memory; `root` is the root game's id, so --game refuses it
 ```
+
+The startup line names the address the listener BOUND (`--http 127.0.0.1:0` prints the port
+the system chose), and lists the games sorted.
 
 - **One game kernel**: `space_with_store(root store)` + a `game(id, store)` corridor per
   `--game`. **Two front kernels** forward into it, because `ikigai-web` and `ikigai-ipc` both
@@ -399,6 +448,17 @@ ttt-host [--http <addr>] [--socket <path>] [--store <socket>] [--game <id>[=<soc
   - `Gateway`: `urn:game:{id}:iki:tutorial:ttt:{rest}` → `urn:iki:tutorial:ttt:{rest}` issued
     in game `id`'s corridor. Over HTTP that is the mechanical mapping of
     `/game/{id}/iki/tutorial/ttt/{rest…}`; over IPC it is the name itself.
+  - **The root game's gateway name is `urn:game:root:…`** (`/game/root/…` over HTTP, and a
+    page at `/game/root/`): the same answers as its plain names, issued with no corridor, so
+    a client can spell every game `urn:game:{id}:` with no special case. The plain names
+    keep working. `root` is reserved (`--game root` is refused). The catalog lists the
+    root's names ONCE, plainly — `urn:game:root:…` is a second spelling, left out the way
+    an alias is — so the catalog's `urn:game:{id}:` entries remain exactly the `--game`
+    games, which is what the apps' navigation lists.
+  - **Games are sorted** (`Host::games`, a `BTreeMap`): the startup line, every page's
+    navigation and the catalog's gateway names are in id order whatever order the `--game`
+    flags came in (`the_games_are_listed_sorted_whatever_order_the_flags_came_in`). This was
+    already so; the test pins it.
   - `Forward`: the root game's `urn:iki:tutorial:ttt:*` as they are.
   - A forwarded answer is re-marked `Expiry::Always` in the front: the front never saw the
     reads it depends on, so it could never cut a copy. The game kernel caches and cuts.

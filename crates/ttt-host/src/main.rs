@@ -39,6 +39,11 @@ fn run() -> Result<(), String> {
         let listener = tokio::net::TcpListener::bind(http)
             .await
             .map_err(|e| format!("--http {http}: {e}"))?;
+        // The address the listener GOT, not the one asked for: `--http 127.0.0.1:0` binds a
+        // port the kernel chooses, and this line is how a script finds out which.
+        let http = listener
+            .local_addr()
+            .map_err(|e| format!("--http {http}: {e}"))?;
         let games: Vec<&str> = host.games().collect();
         eprintln!("ttt-host: http://{http}/ (the root game); games at /game/<id>/: {games:?}");
         eprintln!("ttt-host: IPC on {}", socket.display());
