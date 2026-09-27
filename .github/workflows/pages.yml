@@ -80,6 +80,7 @@ jobs:
         run: |
           test -s books/ikigai/book/wasm/book_wasm_bg.wasm
           grep -q '^export function evalLineAsync' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function evalLineInGameAsync' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function boundNames' books/ikigai/book/wasm/book_wasm.js
           grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
 

@@ -373,5 +373,5 @@ still cached, because nothing it depends on can change.
 
 ## Next
 
-Part IV plays more than one game at once, and asks where the game belongs: in every name,
-or around them as context.
+[Part IV](tic-tac-toe-4.md) plays more than one game at once, and asks where the game
+belongs: in every name, or around them as context.

@@ -14,20 +14,35 @@
 //! the cache and the golden threads live in the kernel, and "cached the second time" is only
 //! demonstrable against state that persists between two runs.
 //!
+//! A cell may also name a **game** (`data-game='a'`, Part IV of the applied chapter). It then
+//! runs in that game's resolution chain — [`tic_tac_toe::game`], one corridor binding the
+//! stored cell to that game's own store — on the SAME kernel, through an engine whose
+//! resolver ([`InGame`]) issues every request in the chain. Choosing the game is the host's
+//! act, not the line's: the REPL grammar has no way to name a chain, and injecting one is
+//! authority (whoever may push a corridor chooses what the names mean), so the page's host
+//! code does it from markup the chapter wrote.
+//!
 //! Built for `wasm32-unknown-unknown` by `pages.yml` and bound with `wasm-bindgen --target
 //! web`; the output lands in the built book under `wasm/` and is never committed. The crate
 //! also builds natively (an `rlib`), which is how the workspace gates lint and test it.
 
+use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use ikigai_core::{Fallback, Kernel, Space};
+use ikigai_core::{
+    Capability, Error, Expiry, Fallback, Kernel, Provenance, Representation, Request, Scope, Space,
+    SpaceEntry, Tracer,
+};
+use ikigai_engine::Engine;
+use ikigai_resolve::{CacheStatus, Resolver};
 use wasm_bindgen::prelude::*;
 
 thread_local! {
     // `Rc` so an async eval can own a handle across `.await` points — a thread-local
     // borrow cannot span an await.
-    static ENGINE: Rc<ikigai_engine::Engine> = Rc::new(ikigai_engine::Engine::new(page_kernel()));
+    static PAGE: Rc<Page> = Rc::new(Page::new());
 }
 
 /// Every name a cell may resolve: Part I's space first, then the applied chapter's game.
@@ -53,6 +68,145 @@ pub fn page_kernel() -> Kernel {
         Arc::new(ikigai_vocab::TurtleRenderer),
     )
 }
+
+/// The page: one kernel, the engine a cell with no game runs in, and one engine per game a
+/// cell has named — every engine over the SAME kernel, so one cache and one set of golden
+/// threads serve them all, partitioned by the chain each request carries.
+pub struct Page {
+    kernel: Arc<Kernel>,
+    root: Rc<Engine>,
+    games: RefCell<BTreeMap<String, Rc<Engine>>>,
+}
+
+impl Default for Page {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Page {
+    /// A fresh page: [`page_kernel`], and no game played yet.
+    pub fn new() -> Self {
+        let kernel = Arc::new(page_kernel());
+        Self {
+            root: Rc::new(Engine::new(Arc::clone(&kernel))),
+            kernel,
+            games: RefCell::default(),
+        }
+    }
+
+    /// The engine for a cell: the root's when it names no game, else game `id`'s — created
+    /// on first use with an empty in-memory store, and kept for the life of the page, since
+    /// a game's corridor is built ONCE (its name is the cache's claim that it is one game).
+    pub fn engine(&self, game: Option<&str>) -> Result<Rc<Engine>, String> {
+        let Some(id) = game else {
+            return Ok(Rc::clone(&self.root));
+        };
+        if let Some(engine) = self.games.borrow().get(id) {
+            return Ok(Rc::clone(engine));
+        }
+        let store = Arc::new(tic_tac_toe::stored_space(Arc::default()));
+        let scope = tic_tac_toe::game(id, store).map_err(|e| e.to_string())?;
+        let engine = Rc::new(Engine::new(InGame::new(Arc::clone(&self.kernel), scope)));
+        self.games
+            .borrow_mut()
+            .insert(id.to_string(), Rc::clone(&engine));
+        Ok(engine)
+    }
+}
+
+// ANCHOR: in_game
+/// A [`Resolver`] that issues every request in ONE resolution chain — a game's — on a shared
+/// kernel. The engine takes any resolver, so an engine over `InGame` is the whole REPL
+/// grammar (`source`, `sink`, `cache`, `trace`, pipes, maps) played in one game: every
+/// stage, every contract fetch and every cache probe carries the chain, and the kernel hands
+/// it on to every sub-request.
+pub struct InGame {
+    kernel: Arc<Kernel>,
+    scope: Scope,
+}
+
+impl InGame {
+    /// Resolve in `scope` on `kernel`.
+    pub fn new(kernel: Arc<Kernel>, scope: Scope) -> Self {
+        Self { kernel, scope }
+    }
+
+    /// How the cache served a resolution, from a probe taken before it.
+    fn status(was_cached: bool, representation: &Representation) -> CacheStatus {
+        match (representation.expiry == Expiry::Always, was_cached) {
+            (true, _) => CacheStatus::Uncacheable,
+            (false, true) => CacheStatus::Hit,
+            (false, false) => CacheStatus::Miss,
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl Resolver for InGame {
+    fn issue(&self, request: Request) -> Result<(Representation, CacheStatus), Error> {
+        self.issue_as(request, &Capability::root())
+    }
+
+    fn issue_as(
+        &self,
+        request: Request,
+        capability: &Capability,
+    ) -> Result<(Representation, CacheStatus), Error> {
+        futures::executor::block_on(self.issue_as_async(request, capability))
+    }
+
+    async fn issue_as_async(
+        &self,
+        request: Request,
+        capability: &Capability,
+    ) -> Result<(Representation, CacheStatus), Error> {
+        let was_cached = self.kernel.is_cached_in(&request, capability, &self.scope);
+        let representation = self
+            .kernel
+            .issue_in(request, capability, self.scope.clone())
+            .await?;
+        let status = Self::status(was_cached, &representation);
+        Ok((representation, status))
+    }
+
+    async fn issue_as_async_with_incoming(
+        &self,
+        request: Request,
+        capability: &Capability,
+        incoming: Provenance,
+    ) -> Result<(Representation, CacheStatus), Error> {
+        let was_cached = self.kernel.is_cached_in(&request, capability, &self.scope);
+        let representation = self
+            .kernel
+            .issue_with_incoming_in(request, capability, incoming, self.scope.clone())
+            .await?;
+        let status = Self::status(was_cached, &representation);
+        Ok((representation, status))
+    }
+
+    fn is_cached(&self, request: &Request, capability: &Capability) -> bool {
+        self.kernel.is_cached_in(request, capability, &self.scope)
+    }
+
+    fn set_tracer(&self, tracer: Arc<dyn Tracer>) {
+        self.kernel.set_tracer(tracer);
+    }
+
+    fn clear_tracer(&self) {
+        self.kernel.clear_tracer();
+    }
+
+    fn entries(&self) -> Option<Vec<SpaceEntry>> {
+        self.kernel.entries()
+    }
+
+    /// What `trace` prints as the transport — so a traced line says which game it ran in.
+    fn transport(&self) -> String {
+        format!("embedded · in-process · chain {}", self.scope)
+    }
+}
+// ANCHOR_END: in_game
 
 /// One evaluated line as JSON for the page: `{ "kind", "text", "cache" }`.
 ///
@@ -87,11 +241,26 @@ pub fn start() {
 /// once, but the shape is the one that stays correct if a cell ever awaits anything.
 #[wasm_bindgen(js_name = evalLineAsync)]
 pub fn eval_line_async(line: String) -> js_sys::Promise {
-    let engine = ENGINE.with(Rc::clone);
+    eval_in(None, line)
+}
+
+/// [`eval_line_async`] in game `game` — what a cell carrying `data-game='…'` sends. The
+/// game is created on first use, with an empty board, and kept for the life of the page.
+#[wasm_bindgen(js_name = evalLineInGameAsync)]
+pub fn eval_line_in_game_async(game: String, line: String) -> js_sys::Promise {
+    eval_in(Some(game), line)
+}
+
+fn eval_in(game: Option<String>, line: String) -> js_sys::Promise {
+    let engine = PAGE.with(|page| page.engine(game.as_deref()));
     wasm_bindgen_futures::future_to_promise(async move {
-        Ok(JsValue::from_str(&action_to_json(
-            engine.eval_async(&line).await,
-        )))
+        let json = match engine {
+            Ok(engine) => action_to_json(engine.eval_async(&line).await),
+            Err(refusal) => {
+                serde_json::json!({ "kind": "error", "text": refusal, "cache": "" }).to_string()
+            }
+        };
+        Ok(JsValue::from_str(&json))
     })
 }
 
@@ -213,9 +382,10 @@ mod tests {
         out
     }
 
-    /// The runnable cells of a chapter, in page order: each one's command and the text of
-    /// its expected-output `<pre>`, with the HTML escapes the markup needs undone.
-    fn cells(chapter: &str) -> Vec<(String, String)> {
+    /// The runnable cells of a chapter, in page order: the game each names (`data-game`, if
+    /// any), its command, and the text of its expected-output `<pre>`, with the HTML escapes
+    /// the markup needs undone.
+    fn cells(chapter: &str) -> Vec<(Option<String>, String, String)> {
         let unescape = |s: &str| {
             s.replace("&#32;", "")
                 .replace("&lt;", "<")
@@ -226,13 +396,19 @@ mod tests {
         let mut found = Vec::new();
         let mut rest = chapter;
         while let Some(at) = rest.find("data-cmd='") {
+            // `data-game='…'` sits in the same tag, before `data-cmd`.
+            let tag = &rest[rest[..at].rfind("<div").expect("a cell is a <div>")..at];
+            let game = tag.find("data-game='").map(|g| {
+                let value = &tag[g + "data-game='".len()..];
+                value[..value.find('\'').expect("a closed data-game")].to_string()
+            });
             let after = &rest[at + "data-cmd='".len()..];
             let end = after.find('\'').expect("a closed data-cmd");
             let command = after[..end].to_string();
             let open = "<pre class=\"ikigai-run-expected\">";
             let pre = after.find(open).expect("an expected <pre> after the cell") + open.len();
             let close = after[pre..].find("</pre>").expect("a closed <pre>") + pre;
-            found.push((command, unescape(&after[pre..close])));
+            found.push((game, command, unescape(&after[pre..close])));
             rest = &after[close..];
         }
         found
@@ -260,9 +436,11 @@ mod tests {
             .name()
             .map(|name| format!(" · {name} · "));
 
-        let engine = ikigai_engine::Engine::new(page_kernel());
+        // One page: one kernel, and an engine per game a cell names — as in the browser.
+        let page = Page::new();
         let mut transcript = Vec::new();
-        for (command, expected) in &cells {
+        for (game, command, expected) in &cells {
+            let engine = page.engine(game.as_deref()).expect("a valid game id");
             let mut got: String = command
                 .lines()
                 .map(|line| render(&action_to_json(engine.eval(line))))
@@ -443,6 +621,94 @@ mod tests {
         // is still the entry computed in the first cell.
         assert!(t[12].contains("XXX\n"), "{}", t[12]);
         assert!(t[12].ends_with("cached\n"), "{}", t[12]);
+    }
+
+    /// Part IV's cells, the same way — several of them in games (`data-game`), each in its
+    /// own chain on the one page kernel — and the lessons stated rather than only matched.
+    #[test]
+    fn the_fourth_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("tic-tac-toe-4.md", 15);
+        let fresh = "---\n---\n---\n[computed]\n";
+
+        // Two games and the root: three boards under the same names. Game b's first move is
+        // X's — its turn is read from its own board, not from game a's.
+        assert!(t[0].ends_with("---\n-X-\n---\n[computed]\n"), "{}", t[0]);
+        assert!(t[1].starts_with(fresh), "{}", t[1]);
+        assert!(t[1].contains("X plays 0,0\n"), "{}", t[1]);
+        assert_eq!(t[2], fresh);
+
+        // A move stays in its game: a is won and refuses; b, whose corner is the same
+        // square a just took, plays on.
+        assert!(t[3].ends_with("X\n[computed]\n"), "{}", t[3]);
+        assert!(t[4].contains("the game is over — X has won"), "{}", t[4]);
+        assert!(t[5].starts_with("O plays 0,2\n"), "{}", t[5]);
+        assert!(t[5].contains("-\n[computed]\n"), "{}", t[5]);
+
+        // Two games, two cache partitions: the CheckSet computed in a is not cached in b or
+        // in the root, and b computes it again.
+        assert!(
+            t[6].ends_with(
+                "[computed]\nurn:iki:tutorial:ttt:column:2\nurn:iki:tutorial:ttt:row:1\n[cached]\n"
+            ),
+            "{}",
+            t[6]
+        );
+        assert!(
+            t[7].starts_with("not cached\n") && t[7].ends_with("[computed]\n"),
+            "{}",
+            t[7]
+        );
+        assert_eq!(t[8], "not cached\n");
+
+        // A golden thread is a name: the ROOT's move on 0,0 un-caches game b's top row, and
+        // b's corner is recomputed from b's own store — still b's X.
+        // …and it had already happened: game a's moves on the top row un-cached game b's
+        // row 0 before this section asked for it.
+        assert_eq!(t[9], "X--\n[computed]\ncached\n");
+        assert!(t[11].starts_with("not cached\n"), "{}", t[11]);
+        let stored = t[11]
+            .lines()
+            .find(|line| line.contains("urn:iki:tutorial:ttt:stored:0:0 "))
+            .unwrap_or_else(|| panic!("the stored corner is a node:\n{}", t[11]));
+        assert!(stored.contains(" · computed · "), "{stored}");
+        assert!(
+            stored.contains("answered-by=urn:iki:tutorial:ttt:game:b"),
+            "{stored}"
+        );
+        assert!(t[11].contains("→ 1b  X"), "{}", t[11]);
+
+        // Three boards, one kernel.
+        let boards: Vec<&String> = t[12..].iter().collect();
+        assert_eq!(boards.len(), 3);
+        assert!(boards[0] != boards[1] && boards[1] != boards[2] && boards[0] != boards[2]);
+    }
+
+    /// A game's engine runs in that game; the root's does not; and a game id that is not
+    /// one spelling of one segment is refused rather than made into a corridor.
+    #[test]
+    fn a_page_keeps_one_engine_per_game_over_one_kernel() {
+        let page = Page::new();
+        let a = page.engine(Some("a")).expect("a game");
+        assert!(Rc::ptr_eq(
+            &a,
+            &page.engine(Some("a")).expect("the same game")
+        ));
+        assert!(!Rc::ptr_eq(&a, &page.engine(None).expect("the root")));
+        assert!(page.engine(Some("a b")).is_err());
+        assert!(page.engine(Some("")).is_err());
+
+        let text = |engine: &Engine, line: &str| -> String {
+            let reply: serde_json::Value =
+                serde_json::from_str(&action_to_json(engine.eval(line))).unwrap();
+            reply["text"].as_str().unwrap().to_string()
+        };
+        assert_eq!(
+            text(&a, "sink urn:iki:tutorial:ttt:move:1:1"),
+            "X plays 1,1"
+        );
+        let root = page.engine(None).unwrap();
+        assert_eq!(text(&root, "source urn:iki:tutorial:ttt:cell:1:1"), "-");
+        assert_eq!(text(&a, "source urn:iki:tutorial:ttt:cell:1:1"), "X");
     }
 
     /// What the chapter says `urn:kernel:topology` shows, without printing it: the game's
