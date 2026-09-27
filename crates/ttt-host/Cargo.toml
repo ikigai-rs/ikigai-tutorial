@@ -33,6 +33,10 @@ ikigai-ipc = "0.1.28"
 # `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
 # `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds.
 ikigai-resolve = "0.1.28"
+# `-c <line>`: the REPL grammar (`source`, `sink`, `cache`, `trace`) run against the game's
+# own kernel in this process, so a line's verdict is that kernel's. 0.1.18 is the floor
+# book-wasm states for the same `Engine::new` / `eval` / `Action` surface.
+ikigai-engine = "0.1.18"
 async-trait = "0.1"
 futures.workspace = true
 # The runtime ikigai-web's server runs on.

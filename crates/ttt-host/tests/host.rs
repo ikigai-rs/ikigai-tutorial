@@ -283,6 +283,11 @@ fn the_command_line_says_what_to_serve() {
         "/tmp/root.sock",
     ]);
     assert_eq!(custom.http, Some("127.0.0.1:9999".parse().unwrap()));
+    assert!(custom.commands.is_empty());
+    assert_eq!(
+        options(&["-c", "source urn:iki:tutorial:ttt:board", "-c", "cache x"]).commands,
+        ["source urn:iki:tutorial:ttt:board", "cache x"]
+    );
     assert_eq!(
         custom.store,
         Some(Path::new("/tmp/root.sock").to_path_buf())
@@ -303,6 +308,7 @@ fn the_command_line_says_what_to_serve() {
         vec!["--http", "nowhere"],
         vec!["--frob"],
         vec!["--game"],
+        vec!["-c"],
     ] {
         assert!(
             parse_args(bad.iter().map(|a| a.to_string())).is_err(),
@@ -445,3 +451,41 @@ fn the_startup_line_names_the_port_it_bound() {
         "{line}: {answered:?}"
     );
 }
+
+// ANCHOR: run_lines
+/// `-c`: the reader's own commands, run on the game's kernel in this process with the store
+/// in ANOTHER process — the verdicts are that kernel's, `[computed]` then `[cached]`, and a
+/// trace shows the peer's own span under the stored cell.
+#[test]
+fn run_lines_answer_with_the_game_kernels_verdicts_over_a_peer_store() {
+    let peer = serve_peer(Kernel::new(Arc::new(stored_space(Arc::default()))));
+    let args = ["--store".to_string(), peer.display().to_string()];
+    let host = Host::build(&parse_args(args).expect("valid")).expect("accepted");
+    let lines: Vec<String> = [
+        "source urn:iki:tutorial:ttt:cell:1:1",
+        "sink urn:iki:tutorial:ttt:move:1:1",
+        "trace urn:iki:tutorial:ttt:cell:1:1",
+        "source urn:iki:tutorial:ttt:board",
+        "source urn:iki:tutorial:ttt:board",
+        "sink urn:iki:tutorial:ttt:move:1:1",
+    ]
+    .map(String::from)
+    .to_vec();
+    let out = host.run(&lines);
+    assert!(
+        out.starts_with("-\n[computed]\nX plays 1,1\n[uncacheable]\n"),
+        "{out}"
+    );
+    assert!(
+        out.contains("---\n-X-\n---\n[computed]\n---\n-X-\n---\n[cached]\n"),
+        "{out}"
+    );
+    // The stored cell twice: the mount's node in this kernel, and the peer's own under it.
+    assert_eq!(
+        out.matches("urn:iki:tutorial:ttt:stored:1:1 ").count(),
+        2,
+        "{out}"
+    );
+    assert!(out.ends_with("error: invalid argument `x, y`: 1,1 is taken — X played there\n"));
+}
+// ANCHOR_END: run_lines

@@ -17,6 +17,10 @@ fn run() -> Result<(), String> {
     // Every peer store is connected to and checked against the contract HERE, before any
     // listener opens: a host with a broken store does not start.
     let host = std::sync::Arc::new(ttt_host::Host::build(&options)?);
+    if !options.commands.is_empty() {
+        print!("{}", host.run(&options.commands));
+        return Ok(());
+    }
     let socket = match &options.socket {
         Some(socket) => socket.clone(),
         None => ttt_host::default_socket()?,

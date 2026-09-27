@@ -28,8 +28,12 @@ Both tracks mirror Part I chapter for chapter, in a language with no kernel in i
 | [Binding, and a host of your own](../getting-started/binding.md) | `ikigai --mount urn:py:=<socket>` — a mount is a binding, and the host owns the name |
 | [What resolution buys you](../getting-started/payoff.md) | `is_cached`, `source_traced`: the kernel's cache and trace, seen from outside |
 | capabilities | a scoped `connect()`, and a typed `DeniedError` |
+| [Multi-verb endpoints](../building/multi-verb.md) | a **family**: one URI template, a contract per verb (Source, Sink, Delete, Exists), and which door answers a name |
 
 Then a [notebook](notebook.md): the catalog as a graph, in rdflib, with one SPARQL query.
+And for a whole application served this way, the tic-tac-toe arc ends with
+[the same game in Python and TypeScript](../applied/tic-tac-toe-6.md): a store in each
+language under a Rust host, and an app in each language that serves the host's board.
 
 ## What you need
 

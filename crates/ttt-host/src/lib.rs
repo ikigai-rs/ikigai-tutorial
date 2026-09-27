@@ -81,6 +81,8 @@ pub struct Options {
     pub store: Option<PathBuf>,
     /// Every other game: its id, and a peer's socket or `None` for in memory (`--game`).
     pub games: Vec<(String, Option<PathBuf>)>,
+    /// REPL lines to run against the root game and print, instead of serving (`-c`).
+    pub commands: Vec<String>,
 }
 // ANCHOR_END: options
 
@@ -93,12 +95,14 @@ pub const DEFAULT_HTTP: &str = "127.0.0.1:8070";
 
 /// The usage line.
 pub const USAGE: &str = "usage: ttt-host [--http <addr>] [--socket <path>] [--store <socket>] \
-                         [--game <id>[=<socket>]]…\n\
+                         [--game <id>[=<socket>]]… [-c <line>]…\n\
   --http <addr>          serve the game's pages over HTTP (default 127.0.0.1:8070)\n\
   --socket <path>        serve the kernel over IPC (default: ttt-host.sock in the temp dir)\n\
   --store <socket>       the ROOT game's store is the peer at <socket>\n\
   --game <id>            a game with its store in memory, at /game/<id>/\n\
   --game <id>=<socket>   a game whose store is the peer at <socket>\n\
+  -c <line>              run a REPL line in the root game, print what it answers, and \
+                         exit without serving (repeatable; one kernel for every line)\n\
   with no --game, games a and b are served, in memory; the id `root` is the root game's";
 
 /// Read the command line (without the program name).
@@ -108,6 +112,7 @@ pub fn parse_args<I: IntoIterator<Item = String>>(args: I) -> std::result::Resul
         http: None,
         store: None,
         games: Vec::new(),
+        commands: Vec::new(),
     };
     let mut args = args.into_iter();
     while let Some(flag) = args.next() {
@@ -143,6 +148,7 @@ pub fn parse_args<I: IntoIterator<Item = String>>(args: I) -> std::result::Resul
                 }
                 options.games.push((id, socket));
             }
+            "-c" => options.commands.push(value()?),
             "--help" | "-h" => return Err(USAGE.to_string()),
             other => return Err(format!("unknown argument `{other}`\n{USAGE}")),
         }
@@ -214,6 +220,39 @@ impl Host {
     /// same whatever order the flags came in. The root game is not among them.
     pub fn games(&self) -> impl Iterator<Item = &str> {
         self.games.keys().map(String::as_str)
+    }
+
+    /// Run REPL lines against the root game, in order, on ONE engine over the game's own
+    /// kernel — so the cache carries from line to line, and each line's verdict is the
+    /// kernel's own (`[computed]`, `[cached]`), which a client of the IPC face cannot see:
+    /// that face is a front kernel, and its forwarded answers are uncacheable there.
+    ///
+    /// Each line prints the way the book's runnable cells print it: the answer, then the
+    /// verdict in brackets on its own line; a refusal as `error: …`.
+    pub fn run(&self, lines: &[String]) -> String {
+        use ikigai_engine::{Action, Engine};
+        let engine = Engine::new(Arc::clone(&self.kernel));
+        let mut out = String::new();
+        for line in lines {
+            let (text, verdict) = match engine.eval(line) {
+                Action::Output(entry) => match entry.result {
+                    Ok(text) => (text, entry.cache.label()),
+                    Err(error) => (format!("error: {error}"), None),
+                },
+                Action::Help => (ikigai_engine::HELP.to_string(), None),
+                Action::Clear | Action::Quit | Action::Noop => (String::new(), None),
+            };
+            if !text.is_empty() {
+                out.push_str(&text);
+                if !text.ends_with('\n') {
+                    out.push('\n');
+                }
+            }
+            if let Some(verdict) = verdict {
+                out.push_str(&format!("[{verdict}]\n"));
+            }
+        }
+        out
     }
 
     /// The kernel the IPC socket serves: every game at its edge name, and the root game's

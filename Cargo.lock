@@ -1737,6 +1737,7 @@ dependencies = [
  "async-trait",
  "futures",
  "ikigai-core",
+ "ikigai-engine",
  "ikigai-ipc",
  "ikigai-resolve",
  "ikigai-vocab",

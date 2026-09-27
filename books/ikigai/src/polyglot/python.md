@@ -114,6 +114,109 @@ channel is entitled to and enforced it. The refusal crossed the wire **typed** �
 `DeniedError`, not a string to parse — which is what lets a REST face over this client
 answer 403 rather than 500 ([Who is asking](../beyond/identity.md), from a client).
 
+## Families: one door, many names, four verbs
+
+<!-- urn-gate: illustration urn:py:note:{name} — the family examples/python/notes.py serves,
+     mounted at the reader's own `--mount urn:py:=`; not a name the CLI or this workspace
+     binds. -->
+<!-- urn-gate: illustration urn:py:note:milk — a note in that family; likewise. -->
+<!-- urn-gate: illustration urn:py:note:bread — a note nobody wrote; likewise. -->
+<!-- urn-gate: illustration urn:py:note:index — the family's index door; likewise. -->
+<!-- urn-gate: illustration urn:note:{name} — the alias-stripped form of the family, what a
+     `--mount urn:py:=` host forwards; a placeholder, not a resource. -->
+<!-- urn-gate: illustration urn:note:milk — likewise, for one note. -->
+<!-- urn-gate: illustration urn:py:note: — the prefix a deeper mount of that family would
+     take; a placeholder, not a resource. -->
+
+Every name so far was one resource. Most interesting resources come in families, such as
+a note for every name or a cell for every square, and a Rust endpoint binds a family with a
+`UriTemplate`. In Python a family is `family(pattern)`, and each verb is a decorated function whose parameters include the template's variables:
+
+```python
+{{#include ../../../../examples/python/notes.py:family}}
+```
+
+`{name}` is a Level 1 variable, and it matches the way `ikigai_core::UriTemplate` matches,
+line for line. A variable followed by a literal captures up to the leftmost occurrence of
+that literal, a trailing variable takes the rest, and every capture is non-empty. The host
+and the peer have to agree on which names a pattern covers, because the host reads the
+peer's catalog to decide what to forward, so the face mirrors core's rule and does not
+approximate it. The catalog lists the template, so `list` shows one family, not every note
+anyone has written.
+
+Each verb gets its own contract, which is core's per-verb `ActionSpec` form: a Source that
+is cacheable and answers `NotFound` for a missing note, a Sink whose body arrives as
+`content`, and a Delete. Exists is not written at all. It defaults to "would Source
+succeed", so a `NotFound` answers `false`.
+
+```bash
+python3 examples/python/notes.py /tmp/py-notes.sock &
+ikigai --plain --mount urn:py:=/tmp/py-notes.sock -c 'sink urn:py:note:milk two liters' \
+  -c 'source urn:py:note:milk' -c 'source urn:py:note:milk' \
+  -c 'sink urn:py:note:milk three liters' -c 'source urn:py:note:milk' \
+  -c 'source urn:py:note:index' -c 'delete urn:py:note:milk' -c 'source urn:py:note:milk'
+```
+
+```text
+wrote milk
+[uncacheable]
+two liters
+[computed]
+two liters
+[cached]
+wrote milk
+[uncacheable]
+three liters
+[computed]
+milk
+[uncacheable]
+forgot milk
+[uncacheable]
+error: not found: no note called milk
+```
+
+Read the verdicts. The second read of `milk` was served from the host's cache. The peer
+keeps no cache. The write that followed cut the note's golden thread in the host, so the
+next read computed again and saw the new text. The peer wrote no invalidation code. The
+host cuts a name's thread after every Sink or Delete it forwards to that name. The index is
+uncacheable on purpose, because it reads every note and a write cuts only the note it
+wrote. Exists, from a client:
+
+```python
+k = ikigai.connect("/tmp/py-notes.sock")   # the peer itself; Exists is a read
+print(k.exists("urn:py:note:milk").text)    # true, after `sink urn:py:note:milk two liters`
+print(k.exists("urn:py:note:bread").text)   # false
+```
+
+### Which door answers
+
+Two rules, and the second one is the reason the first can be trusted.
+
+**The first declared door that matches wins**, as in core's `EndpointSpace`. The family
+would match `urn:py:note:index` too, with `{name}` capturing `index`. The index works
+because it is declared first:
+
+```python
+{{#include ../../../../examples/python/notes.py:index}}
+```
+
+**Every door has two forms, and every door's declared form is tried before any door's
+stripped form.** `--mount urn:py:=` is an *alias* mount: the host rewrites
+`urn:py:note:milk` to `urn:note:milk` before forwarding it, the way
+[Binding](../getting-started/binding.md) described. A peer cannot know the prefix it was
+mounted at, only that it was aliased, so it answers each door at its declared pattern and at
+that pattern with the first segment stripped: `urn:py:note:{name}` and `urn:note:{name}`.
+If the forms were tried door by door, one door's stripped form could shadow the next door's
+declared name. Trying every declared form first means a stripped form can only answer a
+name that no door declares. A connection whose hello says it comes from an alias mount is
+sending stripped names, so for that connection the order reverses, and stripped forms go
+first. Because only the first segment can be stripped, a family mounted deeper,
+at `urn:py:note:` for example, needs `--override`, which forwards names unchanged.
+
+A family is how a store in another language holds a game: the last part of the tic-tac-toe
+arc, [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md), serves the game's stored cell as one,
+from Python, under a Rust host that keeps everything else.
+
 ## What an L0 peer cannot do
 
 `camel-title` in [What resolution buys you](../getting-started/payoff.md) resolved
