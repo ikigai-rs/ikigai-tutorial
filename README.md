@@ -28,18 +28,28 @@ chapter's tic-tac-toe game) and the CLI's engine, built by `pages.yml`
 into `wasm/` beside the book, and `books/ikigai/js/run.js` turns a
 `<div class="ikigai-run" data-cmd='…'>` in a chapter into a cell: an editable command,
 Run (or Enter), Reset, and a history of every run with its cache verdict and elapsed
-time. Nothing runs until the reader does; until then the cell shows the listing's output,
-marked as expected. The four runs in "What resolution buys you" resolve in your browser,
-against the same space the chapter's tests run against; with the wasm absent a cell
-keeps the expected output and says so. The URN gate checks the chapter's original
-command; what the reader types is theirs.
+time. Nothing runs until the reader does, and nothing is answered in advance: the result
+is empty until Run, and the listing's output waits behind an "Expected output" disclosure.
+The four runs in "What resolution buys you" resolve in your browser, against the same
+space the chapter's tests run against; with the wasm absent a cell cannot run — Run is
+disabled and says why — and still answers nothing (`a11y/no-kernel.mjs` pins that in CI).
+The URN gate checks the chapter's original command; what the reader types is theirs.
 
 Or clone it and serve it locally:
 
 ```bash
 cargo install mdbook
-mdbook serve books/ikigai --open
+mdbook serve books/ikigai --open        # the prose; Run is disabled (no kernel)
+./scripts/serve-with-drafts.sh          # prose + drafts + the in-page kernel, on 127.0.0.1:3000
 ```
+
+`mdbook serve` never builds `crates/book-wasm`, so its cells cannot run. The drafts script
+builds the book with the unpublished chapters linked in, builds the kernel the way
+`pages.yml` does, and serves the result statically (no live reload — run it again after an
+edit). It needs the `wasm32-unknown-unknown` target and `wasm-bindgen-cli` at the version
+`crates/book-wasm` pins, and prints the install commands if either is missing;
+`--no-kernel` skips it. It builds into `target/drafts-book/`, which `./scripts/test-books.sh`
+does not wipe.
 
 Each part ends in exercises, and each exercise names the file to open, the command to run,
 what "right" looks like, and the section to re-read — with a worked hint behind a

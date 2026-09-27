@@ -76,8 +76,11 @@ listings are **included from the crates that compile them** rather than copied. 
 that paraphrases its own examples is a book that will eventually be wrong about them.
 
 ```bash
-# read it
+# read it (mdbook serve never builds the in-page kernel, so Run is disabled there)
 mdbook serve books/ikigai --open
+
+# read it with runnable cells: builds the kernel, serves on 127.0.0.1:3000
+./scripts/serve-with-drafts.sh
 
 # check that it still tells the truth
 ./scripts/test-books.sh

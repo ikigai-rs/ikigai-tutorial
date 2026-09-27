@@ -22,7 +22,8 @@ edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/book
 additional-css = ["css/a11y.css", "css/run.css", "css/ttt.css"]
 # run.js turns `<div class="ikigai-run" data-cmd='…'>` into a runnable cell backed by the
 # book's own kernel (`crates/book-wasm`, built by pages.yml into `wasm/` beside this
-# book's output). With the wasm absent the cell shows the listing's output instead.
+# book's output). With the wasm absent the cell cannot run: Run is disabled, the result
+# stays empty, and the listing's output stays behind its "Expected output" disclosure.
 # ttt.js turns `<div class="ttt-play" data-game='…'>` into a playable board: the game's own
 # htmx markup, with htmx's requests answered by that same kernel. It returns at once on a
 # page with no board, and loads the vendored htmx (`src/vendor/`) only on one that has.

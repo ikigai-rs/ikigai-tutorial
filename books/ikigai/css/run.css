@@ -214,3 +214,13 @@
 .ikigai-run-expected-summary { cursor: pointer; color: var(--fg); opacity: .8; }
 .ikigai-run-expected-summary:focus-visible { outline: 2px solid var(--links); outline-offset: 2px; }
 .ikigai-run-expected-wrap[open] .ikigai-run-expected { margin-top: .35rem; }
+
+/* Before `js/run.js` has built a cell, the chapter's raw `<pre class="ikigai-run-expected">`
+   is a direct child of the cell's div, and a browser can paint it — the answer, unlabeled —
+   in the moment between parsing the chapter and running the scripts at the end of the body.
+   mdbook's head script sets `js` on <html> before anything paints, so this hides the raw
+   `<pre>` exactly when a script is coming to put it behind the disclosure. With JavaScript
+   off there is no Run to press, and the listing's output is the whole content of the cell,
+   so it stays visible. (After run.js, the `<pre>` sits inside the <details>, not directly
+   in the cell, and this rule no longer matches it.) */
+.js .ikigai-run > .ikigai-run-expected { display: none; }
