@@ -21,7 +21,7 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
 | **2** | Composites: a line of cells by name, rows / columns / diagonals as zero-code `Alias`es, the board; one move recomputes the lines through it and the board (trace shows it) | Part 4 | done — `tic-tac-toe-2.md` |
 | **3** | Rules as resources: CheckSet (a representation that is a list of IRIs), winner, whose turn; constraint at the edge, model kept loose | Parts 6–7 | done — `tic-tac-toe-3.md` |
 | **4** | Many games: the game as context (a `Scope` corridor) versus the game in the name — argue it; the store as a swappable space | Part 8 | done — `tic-tac-toe-4.md` |
-| **5** | The views and templates as resources; a playable board in the page over the same kernel (htmx, answered by the wasm kernel); `ttt-host`; the wrap-up | Parts 5, 9 | in-book board done — `tic-tac-toe-5.md`; `ttt-host` in its own PR |
+| **5** | The views and templates as resources; a playable board in the page over the same kernel (htmx, answered by the wasm kernel); `ttt-host`; the wrap-up | Parts 5, 9 | done — `tic-tac-toe-5.md`, `crates/ttt-host` |
 
 ## What increment 1 left for the next ones
 
@@ -346,7 +346,7 @@ Hosts, as built or planned:
 | host | where the game comes from | status |
 |---|---|---|
 | the book page (`js/ttt.js`) | `data-game` on the `.ttt-play` element holding the board | done |
-| `ttt-host` over HTTP | the path prefix `/game/{id}/` (the page's `<base href>`) | next PR |
+| `ttt-host` over HTTP | the path prefix `/game/{id}/` (the page's `<base href>`); `/` is the root game | done |
 | Python / Deno apps | their own path prefix, same rule | increment 6 |
 
 ### The in-page shim
@@ -381,3 +381,70 @@ a real browser (light, rust, navy themes: no violations in the boards) and with 
 `a11y/axe.mjs` + `book-a11y` over a with-drafts build. ⚠ CI does not see this page's board:
 drafts are not built by `pages.yml`, and jsdom cannot load the wasm, so CI's axe only ever
 sees the fallback line. Re-run the in-browser check when the page is linked.
+
+### `ttt-host` (`crates/ttt-host`)
+
+```text
+ttt-host [--http <addr>] [--socket <path>] [--store <socket>] [--game <id>[=<socket>]]…
+  --http 127.0.0.1:8070 (default)   --socket $TMPDIR/ttt-host.sock (default; must fit 104 bytes)
+  --store <socket>   the ROOT game's store is a peer     --game <id>[=<socket>]   a game, in memory or a peer
+  no --game → games a and b, in memory
+```
+
+- **One game kernel**: `space_with_store(root store)` + a `game(id, store)` corridor per
+  `--game`. **Two front kernels** forward into it, because `ikigai-web` and `ikigai-ipc` both
+  issue with `Kernel::issue` (no chain) and only the kernel's holder can `issue_in`:
+  - `Gateway`: `urn:game:{id}:iki:tutorial:ttt:{rest}` → `urn:iki:tutorial:ttt:{rest}` issued
+    in game `id`'s corridor. Over HTTP that is the mechanical mapping of
+    `/game/{id}/iki/tutorial/ttt/{rest…}`; over IPC it is the name itself.
+  - `Forward`: the root game's `urn:iki:tutorial:ttt:*` as they are.
+  - A forwarded answer is re-marked `Expiry::Always` in the front: the front never saw the
+    reads it depends on, so it could never cut a copy. The game kernel caches and cuts.
+    (`ikigai-web` then says `Cache-Control: no-store`, which is right for a live board.)
+  - **HTTP does not serve `stored:`** (404): a browser reaches the store through the rules.
+    **IPC does** (a socket client is the host's own user). Unknown game → 404 / Unresolved.
+- **Pages**: routes `/` (root game) and `/game/{id}` → a document around `template:game` with
+  `<base href="/game/{id}/">`, `/static/htmx-2.0.4.min.js` (the book's vendored copy,
+  `include_str!`), `/static/ttt.css` (the book's `css/ttt.css`, the ONE stylesheet for the
+  markup), `/static/host.css` (the colour variables mdbook gives the book). Page routes set
+  CSP `base-uri 'self'` — `ikigai-web`'s default `base-uri 'none'` blocks the `<base>`, and
+  then `/game/a` (no slash) sends every request to `/game/iki/…`. htmx is configured by a
+  `<meta name="htmx-config">`: `allowEval:false`, `includeIndicatorStyles:false` (the CSP
+  would refuse htmx's inline style), `historyEnabled:false`.
+- **A peer store**: `ikigai_ipc::connect` → `MountedRemote::overriding(…,
+  "urn:iki:tutorial:ttt:stored:", …)` — the same mount as `ikigai --override
+  urn:iki:tutorial:ttt:stored:=<socket>`, NOT an alias `--mount` (ledger #578: the faces
+  strip at most the first segment of an alias prefix) — then `check_store` on it, and a
+  refusal names the clause: `the store at … breaks the store contract: …`. Checked live on
+  2026-09-27 against `ikigai-python` and `ikigai-deno`'s `examples/tictactoe_store.*`: both
+  pass (Exists included) and play over HTTP; a Python store keeps its game across a host
+  restart.
+- **Tests** (`tests/host.rs`, hermetic: sockets in `temp_dir()` with a length assert, HTTP on
+  `127.0.0.1:0`): an HTTP move re-renders that game's board and no other; the pages, the
+  static files, 404 for `stored:` and unknown games, 405 for GET on a play; a Rust
+  `stored_space` served by `ikigai_ipc::serve` in the test passes the contract and plays a
+  won game whose marks are in the PEER; a peer answering empty for an unplayed square is
+  refused at startup; a missing socket is refused; the IPC face serves the root's and game
+  `a`'s names; argument parsing.
+
+## What increment 6 inherits
+
+- **The markup is fixed.** A Python or Deno app that serves the board implements three
+  things, all stated above: the template slot format and its choice rules, the path ↔ IRI
+  rule, and a page around `template:game` with a `<base>` at the game's path. It loads the
+  vendored htmx and `ttt.css` (same files, same versions).
+- **Where the app gets its answers is the open choice.**
+  (a) Source `view:*` from `ttt-host` over IPC by edge name (`urn:game:{id}:…`): no rendering
+  in the app at all, and the board is exactly the Rust one — but then the app is a proxy.
+  (b) Fill the templates itself from `template:*`, `cell:*`, `winner` and `turn` read over
+  IPC: the "a dozen lines of any language" claim gets exercised, which is the point of a
+  showcase. Either way a game's state must be written THROUGH the host, never to a store
+  directly (no golden thread over the wire).
+- ⚠ **The chain still does not cross the wire.** `ttt-host`'s `urn:game:{id}:…` edge names
+  are the workaround, and they are the host's addressing, not the resource model. An
+  `ikigai-web` `ScopeFn` (a request → a `Scope`, the chain twin of `CapFn`) would retire the
+  HTTP front; ledger #564's "context crosses as values" would retire the IPC one.
+- ⚠ **ids and two boards.** Squares carry game-free ids for htmx's focus restoration. One
+  board per page is fine; two need the ids namespaced (the book's shim prefixes the game).
+- ⚠ **ledger #575** will change the refusal TEXT the reply shows (the variant's Display), not
+  the view code; the chapter's pinned refusal lines (they start `invalid argument`) will move with it.

@@ -261,12 +261,91 @@ Across processes this is the same gap Part IV's store contract names: a write th
 not see leaves a copy stale, and there is no golden thread over the wire yet to tell it.
 
 **A host process.** `ttt-host` serves the same game over HTTP and over the kernel's IPC
-socket, and can take its store from another process.
+socket, and can take a game's store from another process. The next section is about it.
 
 **Other languages.** The Python and TypeScript faces of ikigai can serve the stored cell
 already, under the contract Part IV wrote. They can also serve this markup: the templates are
 resources they can read, the slot format is a dozen lines to fill, and the path rule is one
 line. That is the next part of the arc, and the markup will not change for it.
+
+## The same board from a server
+
+`ttt-host` is a crate in this repository and a program you can run. It holds the game in one
+kernel, `space_with_store` as the root game, with one corridor per game named on its command
+line, and it serves that kernel two ways.
+
+Over HTTP, through `ikigai-web`, it serves a page per game, `/game/a/` for game `a`. The
+page is a document around the game's own `game` template, the same bytes this page fills,
+with a `<base href="/game/a/">` so that the markup's relative paths arrive under the game.
+The host does the rest: it takes `/game/a/` off the front of a request and turns it into
+game `a`'s corridor, and maps what is left by the rule above.
+
+```rust,ignore
+{{#include ../../../../crates/ttt-host/src/lib.rs:gateway}}
+```
+
+<!-- urn-gate: illustration urn:game:a:iki:tutorial:ttt:board — ttt-host's edge name for game
+     a's board, which the crate's tests resolve; no host this book builds binds it. -->
+
+That is a space of its own because of who may inject a corridor. `ikigai-web` issues every
+request with `Kernel::issue`, in the root's chain, and putting a corridor ahead of the root is
+`Kernel::issue_in`, which only the holder of the kernel can call. The host holds it, so the
+host's own small space in front of the game does the injecting. Over the IPC socket the same
+space serves the same names, spelled as the HTTP paths are: game `a`'s board is
+`urn:game:a:iki:tutorial:ttt:board` there. The pages, the files they load and the routes are
+in the crate; the tests post a move to game `a`'s path and read game `a`'s board back, with
+game `b` and the root untouched:
+
+```rust,ignore
+{{#include ../../../../crates/ttt-host/tests/host.rs:http_move}}
+```
+
+### A store in another process
+
+A game's store can be another process: `--game py=/tmp/ttt-py.sock` makes game `py`'s store
+whatever answers the stored cell's names on that socket. The host mounts it the way
+`ikigai --override urn:iki:tutorial:ttt:stored:=/tmp/ttt-py.sock` would, names forwarded
+unchanged, and before it accepts it, it runs Part IV's store contract against it:
+
+```rust,ignore
+{{#include ../../../../crates/ttt-host/src/lib.rs:peer}}
+```
+
+A store that breaks the contract is refused before anything listens, with the clause it
+broke. The contract gained a clause in this part: `Exists` answers `true` or `false`, never
+`NotFound`, and is cacheable like the mark. The Python and TypeScript stores already answered
+that way; the Rust one used to answer `Exists` as if it were `Source`, and now does not.
+
+Both of those stores are in their own repositories, as `examples/tictactoe_store.py` and
+`examples/tictactoe_store.ts`. To play against one, start it on a socket, then start the host
+with a game over that socket. From a clone of `ikigai-python`:
+
+```sh
+PYTHONPATH=src python3 -m examples.tictactoe_store /tmp/ttt-py.sock
+```
+
+or from a clone of `ikigai-deno`:
+
+```sh
+deno run -A examples/tictactoe_store.ts /tmp/ttt-ts.sock
+```
+
+and then, from this repository:
+
+```sh
+cargo run -p ttt-host -- --game a --game py=/tmp/ttt-py.sock --game ts=/tmp/ttt-ts.sock
+```
+
+and open `http://127.0.0.1:8070/game/py/`. The board is this page's board, the markup is the
+same markup, and every mark on it lives in a Python dictionary. Stop the host and start it
+again, and the Python store still has the game.
+
+Two things to know. The mount is an override and not an alias: an alias mount at
+`urn:iki:tutorial:ttt:stored:` would strip that prefix and forward names the Python and
+TypeScript servers do not bind. And every write has to go through the host. The host cuts a
+stored cell's thread when *its* kernel issues the write. A mark written to the Python process
+by some other client is invisible to the host's cache, which goes on serving the old board
+until something else cuts it, because there is no golden thread over the wire yet.
 
 ## What the board does for a reader who cannot see it
 
