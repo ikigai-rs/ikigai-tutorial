@@ -238,27 +238,38 @@ mod tests {
         found
     }
 
-    /// Every cell of the applied chapter, run natively in PAGE ORDER against one kernel
-    /// — which is what the page does — and compared with the output the chapter shows.
-    /// The chapter's expected output is therefore not a claim about the kernel but a
+    /// Every cell of one applied chapter, run natively in PAGE ORDER against one fresh
+    /// kernel — which is what the page does — and compared with the output the chapter
+    /// shows. The chapter's expected output is therefore not a claim about the kernel but a
     /// reading of it: an edit to either that the other does not follow fails here.
-    #[test]
-    fn the_tic_tac_toe_cells_answer_as_the_chapter_says_in_page_order() {
-        let chapter = std::fs::read_to_string(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../../books/ikigai/src/applied/tic-tac-toe-1.md"
-        ))
-        .expect("the chapter is readable");
+    ///
+    /// Returns what each cell printed, in order, for the caller's own assertions.
+    fn run_chapter_in_page_order(file: &str, expected_cells: usize) -> Vec<String> {
+        let path = format!(
+            "{}/../../books/ikigai/src/applied/{file}",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let chapter = std::fs::read_to_string(&path).expect("the chapter is readable");
         let cells = cells(&chapter);
-        assert_eq!(cells.len(), 5, "the chapter's cells: {cells:#?}");
+        assert_eq!(cells.len(), expected_cells, "{file}'s cells: {cells:#?}");
+
+        // A trace names the thread each node ran on. The page has one, which prints as
+        // `ThreadId(1)`; a test runs on a thread named after the test (or `main`). Spell
+        // this one the way the page does, so the chapter can show what a reader sees.
+        let here = std::thread::current()
+            .name()
+            .map(|name| format!(" · {name} · "));
 
         let engine = ikigai_engine::Engine::new(page_kernel());
         let mut transcript = Vec::new();
         for (command, expected) in &cells {
-            let got: String = command
+            let mut got: String = command
                 .lines()
                 .map(|line| render(&action_to_json(engine.eval(line))))
                 .collect();
+            if let Some(here) = &here {
+                got = got.replace(here.as_str(), " · ThreadId(1) · ");
+            }
             let tidy = |s: &str| -> Vec<String> {
                 s.trim_end()
                     .lines()
@@ -268,10 +279,16 @@ mod tests {
             assert_eq!(
                 tidy(&got),
                 tidy(expected),
-                "the cell `{command}` answers differently from the chapter.\n--- got ---\n{got}"
+                "{file}: the cell `{command}` answers differently from the chapter.\n--- got ---\n{got}"
             );
             transcript.push(got);
         }
+        transcript
+    }
+
+    #[test]
+    fn the_tic_tac_toe_cells_answer_as_the_chapter_says_in_page_order() {
+        let transcript = run_chapter_in_page_order("tic-tac-toe-1.md", 5);
 
         // And the lesson itself, stated rather than only matched: empty computed then
         // served; the store's own miss is NotFound, not Unresolved; the Sink to the
@@ -297,6 +314,84 @@ mod tests {
         );
     }
 
+    /// Part II's cells, the same way — and the normalized-recompute lesson stated rather
+    /// than only matched.
+    #[test]
+    fn the_second_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("tic-tac-toe-2.md", 9);
+
+        // Any cells, any length; a second spelling refused.
+        assert_eq!(t[0], "---\n[computed]\n--\n[computed]\n");
+        assert_eq!(
+            t[1].matches("error: invalid argument `list`").count(),
+            2,
+            "{}",
+            t[1]
+        );
+        // The row and its line are one cache entry: read one, the other is cached.
+        assert_eq!(t[2], "---\n[computed]\ncached\n---\n[cached]\n");
+        // The move through the corner un-caches row 0, column 0, diagonal 0 and the
+        // board; the four lines that miss it stay cached.
+        assert!(
+            t[5].ends_with("not cached\nnot cached\nnot cached\nnot cached\n"),
+            "{}",
+            t[5]
+        );
+        assert_eq!(t[6], "cached\ncached\ncached\ncached\n");
+        // The trace: row 0 recomputed down to the stored corner, its other two cells
+        // and rows 1 and 2 served.
+        let trace = &t[7];
+        for (node, verdict) in [
+            ("urn:iki:tutorial:ttt:board ", "computed"),
+            ("urn:iki:tutorial:ttt:cells:0.0,1.0,2.0 ", "computed"),
+            ("urn:iki:tutorial:ttt:cell:0:0 ", "computed"),
+            ("urn:iki:tutorial:ttt:stored:0:0 ", "computed"),
+            ("urn:iki:tutorial:ttt:cell:1:0 ", "cached"),
+            ("urn:iki:tutorial:ttt:cell:2:0 ", "cached"),
+            ("urn:iki:tutorial:ttt:cells:0.1,1.1,2.1 ", "cached"),
+            ("urn:iki:tutorial:ttt:cells:0.2,1.2,2.2 ", "cached"),
+        ] {
+            let line = trace
+                .lines()
+                .find(|line| line.contains(node))
+                .unwrap_or_else(|| panic!("{node} is not a node of:\n{trace}"));
+            assert!(line.contains(&format!(" · {verdict} · ")), "{line}");
+        }
+        assert!(
+            !trace.contains("urn:iki:tutorial:ttt:cell:0:1"),
+            "row 1's cells were never asked:\n{trace}"
+        );
+        assert!(t[8].ends_with("X--\n-O-\n---\n[cached]\n"), "{}", t[8]);
+    }
+
+    /// What the chapter says `urn:kernel:topology` shows, without printing it: the game's
+    /// space is an `ik:Alias` carrying eight rules over the four bound templates.
+    #[test]
+    fn the_topology_shows_the_alias_the_chapter_describes() {
+        let engine = ikigai_engine::Engine::new(page_kernel());
+        let reply: serde_json::Value =
+            serde_json::from_str(&action_to_json(engine.eval("source urn:kernel:topology")))
+                .unwrap();
+        let turtle = reply["text"].as_str().unwrap();
+        assert_eq!(turtle.matches(" a ik:Alias ").count(), 1, "{turtle}");
+        assert_eq!(turtle.matches(" a ik:RewriteRule ").count(), 8, "{turtle}");
+        for pattern in [
+            tic_tac_toe::STORED,
+            tic_tac_toe::CELL,
+            tic_tac_toe::CELLS,
+            tic_tac_toe::BOARD,
+        ] {
+            assert!(
+                turtle.contains(&format!("ik:pattern \"{pattern}\"")),
+                "{pattern}: {turtle}"
+            );
+        }
+        assert!(
+            turtle.contains("ik:logical \"urn:iki:tutorial:ttt:row:0\""),
+            "{turtle}"
+        );
+    }
+
     #[test]
     fn part_one_and_the_game_share_the_page_without_overlapping() {
         // Each family resolves to its own endpoint: the Fallback's order decides nothing.
@@ -304,6 +399,8 @@ mod tests {
         for name in [
             "urn:iki:tutorial:ttt:stored:{x}:{y}",
             "urn:iki:tutorial:ttt:cell:{x}:{y}",
+            "urn:iki:tutorial:ttt:cells:{list}",
+            "urn:iki:tutorial:ttt:board",
         ] {
             assert!(
                 names.lines().any(|n| n == name),
