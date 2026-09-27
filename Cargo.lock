@@ -93,11 +93,13 @@ dependencies = [
 name = "book-urns"
 version = "0.1.0"
 dependencies = [
+ "book-wasm",
  "building-endpoints",
  "futures",
  "hello-camel",
  "ikigai-core",
  "loadable-module",
+ "tic-tac-toe",
  "your-endpoints",
 ]
 
@@ -109,8 +111,10 @@ dependencies = [
  "hello-camel",
  "ikigai-core",
  "ikigai-engine",
+ "ikigai-vocab",
  "js-sys",
  "serde_json",
+ "tic-tac-toe",
  "wasm-bindgen",
  "wasm-bindgen-futures",
 ]
@@ -1513,6 +1517,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.4",
+]
+
+[[package]]
+name = "tic-tac-toe"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "ikigai-vocab",
 ]
 
 [[package]]

@@ -63,8 +63,8 @@ jobs:
       #
       # After the gate, never before it: `test-books.sh` wipes and rebuilds
       # `books/ikigai/book`, so anything copied in earlier would be gone. The wasm is a
-      # face over `hello_camel::kernel()` — the crate the book's listings are included
-      # from — bound with `wasm-bindgen --target web` into `wasm/` beside the book, same
+      # face over `book_wasm::page_kernel()` — Part I's space and the tic-tac-toe game,
+      # the crates the book's listings are included from — bound with `wasm-bindgen --target web` into `wasm/` beside the book, same
       # origin as the pages that load it. Generated output; never committed.
       - name: build the in-page kernel (crates/book-wasm) into the book
         run: |
