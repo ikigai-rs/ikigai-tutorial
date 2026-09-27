@@ -7,3 +7,6 @@ The Web as an instance | drafts/web-instance.md
 The algebra of reach | drafts/algebra-of-reach.md
 Names and where you stand | drafts/names-and-context.md
 Authority, three ways | drafts/authority-three-ways.md
+# The applied arc, one page per increment (one kernel per page, so each part starts on a
+# fresh board). Unlinked until the whole arc is done and Brian says link it.
+Tic-tac-toe, I: the model and the atoms | applied/tic-tac-toe-1.md

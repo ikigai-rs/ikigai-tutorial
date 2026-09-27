@@ -1,7 +1,7 @@
 [package]
 name = "book-wasm"
 version = "0.1.0"
-description = "The book's own kernel, in the page: a wasm-bindgen face over hello_camel::kernel() and the CLI's engine, so a chapter's runnable cells resolve for real."
+description = "The book's own kernel, in the page: a wasm-bindgen face over the book's spaces (Part I and the tic-tac-toe game) and the CLI's engine, so a chapter's runnable cells resolve for real."
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -20,6 +20,13 @@ ikigai-core.workspace = true
 # Part I's space and host — the same `kernel()` the chapter's tests run against, so a
 # cell in the page and a listing in the crate answer the same question the same way.
 hello-camel = { path = "../hello-camel" }
+# The applied chapter's game (tic-tac-toe), composed beside Part I's space in ONE page
+# kernel — see `page_space()`. Its names do not overlap Part I's, so every existing cell
+# answers exactly as it did.
+tic-tac-toe = { path = "../tic-tac-toe" }
+# `TurtleRenderer`, now that the page builds its own kernel rather than taking
+# `hello_camel::kernel()` whole: the same renderer that one injects.
+ikigai-vocab.workspace = true
 # The CLI's renderer-agnostic engine: the REPL grammar (`source a | b`, `cache`, `trace`,
 # `describe … text/turtle`) over any `Resolver`. Wasm-clean — ikigai-web-demo has driven
 # it in the browser since 0.1.4 — and `eval_async` is what lets a cell run on the JS event

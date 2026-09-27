@@ -9,7 +9,8 @@
 //
 // and this script turns it into an editable command, Run / Reset / Clear buttons, an
 // output pane, and a history of runs. Run sends each line of the command to
-// `crates/book-wasm` — `hello_camel::kernel()` under the CLI's engine, compiled to
+// `crates/book-wasm` — `book_wasm::page_kernel()` (Part I's space and the tic-tac-toe
+// game) under the CLI's engine, compiled to
 // WebAssembly by pages.yml — and shows what came back with the engine's cache verdict,
 // exactly as `ikigai --plain` prints it.
 //

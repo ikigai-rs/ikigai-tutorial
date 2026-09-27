@@ -37,7 +37,21 @@ fn vocabulary() -> Vocabulary {
 
 /// Is `iri` bound in this space? A `Source` resolution that hits is exactly the question
 /// "does anything answer to this name", and it invokes nothing.
+///
+/// A name with a `{var}` in it is not a name but a TEMPLATE — `urn:iki:tutorial:ttt:cell:{x}:{y}`
+/// — and prose quotes those whenever it describes a family of cells. No IRI parses with a
+/// brace in it, so resolution cannot answer; the authority is the space's own list of
+/// what it binds, and the check is that one of its patterns is that template, verbatim.
+/// Same teeth both ways: a renamed template fails here, and an `unbound` template that
+/// somebody binds fails its directive.
 fn binds(space: &dyn Space, iri: &str) -> bool {
+    if iri.contains('{') {
+        return space
+            .entries()
+            .unwrap_or_default()
+            .iter()
+            .any(|entry| entry.pattern == iri);
+    }
     let Ok(parsed) = Iri::parse(iri) else {
         return false;
     };
@@ -64,6 +78,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
         (
             "your_endpoints::module::host_space()",
             Arc::new(your_endpoints::module::host_space()) as Arc<dyn Space>,
+        ),
+        (
+            "tic_tac_toe::space()",
+            Arc::new(tic_tac_toe::space()) as Arc<dyn Space>,
         ),
     ]
 }
@@ -147,7 +165,9 @@ fn the_catalog_contains(node: &str) -> bool {
     use std::sync::OnceLock;
     static CATALOG: OnceLock<String> = OnceLock::new();
     let catalog = CATALOG.get_or_init(|| {
-        let kernel = hello_camel::kernel();
+        // The page's kernel: Part I's space and the applied chapter's game, so a node the
+        // game's `describe` cell prints is checked against a catalog that has it.
+        let kernel = book_wasm::page_kernel();
         let request = Request::new(
             Verb::Source,
             Iri::parse("urn:kernel:catalog").expect("a constant IRI"),
@@ -159,10 +179,11 @@ fn the_catalog_contains(node: &str) -> bool {
     catalog.contains(&format!("<{node}>"))
 }
 
-/// The kernel the page runs: `hello_camel::kernel()` compiled to wasm. A cell may name
-/// only what it binds — Part I's space, plus the kernel's own `urn:kernel:*`.
+/// The kernel the page runs: `book_wasm::page_kernel()` compiled to wasm. A cell may name
+/// only what it binds — Part I's space and the applied chapter's game
+/// (`book_wasm::page_space()`), plus the kernel's own `urn:kernel:*`.
 fn the_in_page_kernel_answers(iri: &str) -> bool {
-    binds(&hello_camel::space(), iri) || the_kernel_answers(iri)
+    binds(&book_wasm::page_space(), iri) || the_kernel_answers(iri)
 }
 
 fn describe(mention: &Mention) -> String {
@@ -249,14 +270,14 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
                     ));
                 }
             }
-            // A runnable cell runs in the page, against hello_camel::kernel() and nothing
-            // else — not the CLI, not the other parts' hosts.
+            // A runnable cell runs in the page, against book_wasm::page_kernel() and
+            // nothing else — not the CLI, not the other parts' hosts.
             Context::Cell => {
                 if !the_in_page_kernel_answers(&mention.urn) {
                     failures.push(format!(
-                        "{}: the in-page kernel (hello_camel::kernel(), via \
-                         crates/book-wasm) does not bind it, so Run would fail. Cells may \
-                         name only what Part I's space binds.",
+                        "{}: the in-page kernel (book_wasm::page_kernel()) does not bind \
+                         it, so Run would fail. Cells may name only what Part I's space \
+                         or the tic-tac-toe game binds.",
                         describe(mention)
                     ));
                 }

@@ -23,7 +23,8 @@ Read it:
 by the same run that tests it (below), so what is at that URL is a book that passed.
 
 The published book runs **its own kernel in the page**: `crates/book-wasm` is a
-wasm-bindgen face over `hello_camel::kernel()` and the CLI's engine, built by `pages.yml`
+wasm-bindgen face over `book_wasm::page_kernel()` (Part I's space and the applied
+chapter's tic-tac-toe game) and the CLI's engine, built by `pages.yml`
 into `wasm/` beside the book, and `books/ikigai/js/run.js` turns a
 `<div class="ikigai-run" data-cmd='…'>` in a chapter into a cell: an editable command,
 Run (or Enter), Reset, and a history of every run with its cache verdict and elapsed

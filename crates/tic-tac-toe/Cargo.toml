@@ -1,0 +1,24 @@
+[package]
+name = "tic-tac-toe"
+version = "0.1.0"
+description = "The code taught by the tutorial's applied chapter: tic-tac-toe designed as resources before it is code — the stored cell and the platonic cell first."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "tic_tac_toe"
+path = "src/lib.rs"
+
+# Compiled into the page (`crates/book-wasm`), so it stays wasm-clean: no std::fs, no
+# threads, no clock. State is in memory behind an `Arc` the host holds.
+[dependencies]
+ikigai-core.workspace = true
+# `TurtleRenderer`, so the game's own `kernel()` answers `Meta` and `describe` the way
+# the page's kernel does.
+ikigai-vocab.workspace = true
+
+[dev-dependencies]
+futures.workspace = true
