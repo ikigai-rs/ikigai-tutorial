@@ -114,16 +114,35 @@
         return html.replace(/(\s)id="/g, "$1id=\"" + game + "-");
     }
 
-    function unavailable(board, why) {
+    // WITHOUT THE KERNEL (or htmx), A BOARD IS A SENTENCE, NOT A GRID. Everything a board
+    // shows is the kernel's answer to a request — the squares, whose turn it is, who won —
+    // so with nothing to answer, the board is replaced by one short message: no squares, no
+    // status, no state. A half-drawn grid would look playable and answer nothing; the cells'
+    // own "Expected output" disclosures are where a reader without the kernel can see what
+    // each request returns. `a11y/no-kernel.mjs` pins this in CI. With the kernel, the
+    // board's first render is the game's UI, not an answer to a cell, and is unchanged.
+    function unavailable(board, what, err) {
+        var why = err && err.message ? err.message : String(err);
         board.textContent = "";
         var note = document.createElement("p");
         note.className = "ttt-unavailable";
-        note.textContent = "This board plays against the in-page kernel, which did not load (" +
-            why + "). The runnable cells below show what each request answers.";
+        note.textContent = "Game " + board.getAttribute("data-game") + "'s board needs " + what +
+            ", which did not load (" + why + "), so there is nothing to play here. Each " +
+            "runnable cell's \u201cExpected output\u201d shows what its request answers.";
         board.appendChild(note);
     }
 
-    Promise.all([loadHtmx(), loadKernel()]).then(function (loaded) {
+    // Each load says which half failed, so the message names the right one.
+    function labeled(promise, what) {
+        return promise.catch(function (err) {
+            throw { what: what, err: err };
+        });
+    }
+
+    Promise.all([
+        labeled(loadHtmx(), "htmx"),
+        labeled(loadKernel(), "the in-page kernel"),
+    ]).then(function (loaded) {
         var htmx = loaded[0];
         var kernel = loaded[1];
         htmx.config.allowEval = false;
@@ -151,6 +170,9 @@
                 var reply = JSON.parse(json);
                 var html = reply.kind === "output" ? reply.text : escape("error: " + reply.text);
                 htmx.swap(target, namespaced(html, game), { swapStyle: "innerHTML" });
+            }).catch(function (err) {
+                htmx.swap(target, escape("error: " + (err && err.message ? err.message : err)),
+                    { swapStyle: "innerHTML" });
             });
         });
 
@@ -176,18 +198,21 @@
                 .then(function (json) {
                     var reply = JSON.parse(json);
                     if (reply.kind !== "output") {
-                        unavailable(board, reply.text);
+                        unavailable(board, "its page shell from the kernel", reply.text);
                         return;
                     }
                     board.innerHTML = fill(reply.text, function (name) {
                         return name === "game" ? game : "";
                     });
                     htmx.process(board);
+                }).catch(function (err) {
+                    unavailable(board, "its page shell from the kernel", err);
                 });
         });
-    }).catch(function (err) {
+    }).catch(function (failed) {
         boards.forEach(function (board) {
-            unavailable(board, err && err.message ? err.message : String(err));
+            unavailable(board, failed && failed.what ? failed.what : "the in-page kernel",
+                failed && failed.what ? failed.err : failed);
         });
     });
 })();

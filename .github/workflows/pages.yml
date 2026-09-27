@@ -72,10 +72,10 @@ jobs:
           wasm-bindgen --target web --out-dir books/ikigai/book/wasm \
             target/wasm32-unknown-unknown/release/book_wasm.wasm
 
-      # A silent load failure is the failure: `run.js` falls back to the listing's
-      # output when the module is absent, so a deploy with a broken or renamed export
-      # would look fine and teach nothing. Assert the names the page imports are in
-      # the generated JS, by name, before anything is uploaded.
+      # A silent load failure is the failure: with the module absent every cell's Run
+      # is disabled and each board is a sentence, so a deploy with a broken or renamed
+      # export would publish a book that cannot run anything. Assert the names the page
+      # imports are in the generated JS, by name, before anything is uploaded.
       - name: smoke — the exports run.js and ttt.js import are present
         run: |
           test -s books/ikigai/book/wasm/book_wasm_bg.wasm
@@ -93,8 +93,9 @@ jobs:
       # `js/a11y.js` makes to the search box. axe-core over a jsdom of each built page,
       # with the book's scripts run, sees exactly that. No browser: jsdom has no layout,
       # so axe's color-contrast rule is skipped here — that is book-a11y's job — and the
-      # dynamic `import()` of the wasm fails in jsdom, which exercises the cells' static
-      # fallback path rather than the kernel. Both instruments gate the deploy.
+      # dynamic `import()` of the wasm fails in jsdom, which exercises the cells' no-kernel
+      # path (Run disabled, the reason said) rather than the kernel. Both instruments gate
+      # the deploy.
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -105,6 +106,22 @@ jobs:
         run: |
           npm ci
           node axe.mjs ../books/ikigai/book
+
+      # ── Without the kernel, nothing is answered ───────────────────────────
+      #
+      # Every step above builds the wasm, so the path a reader gets when it does NOT load
+      # is the one CI would otherwise never see — and it once pre-filled every cell with
+      # the listing's output (2026-09-27). `a11y/no-kernel.mjs` loads every page with a
+      # cell or a board, refusing `wasm/`, and requires empty results, disabled and
+      # described Run buttons, and boards with no squares. The boards are still drafts, so
+      # the drafts are built too — with --no-kernel, into `target/` (ignored, and a path
+      # that means the same thing locally, where `just gates` runs this step), never into
+      # the uploaded `books/ikigai/book`: drafts must not deploy.
+      - name: no kernel, no answers (a11y/no-kernel.mjs)
+        run: |
+          ./scripts/serve-with-drafts.sh build target/drafts-no-kernel --no-kernel
+          cd a11y
+          node no-kernel.mjs ../books/ikigai/book ../target/drafts-no-kernel
 
       - uses: actions/upload-pages-artifact@v3
         with:

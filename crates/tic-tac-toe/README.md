@@ -379,8 +379,10 @@ what a move did is announced once. Its content is plain text on purpose: an elem
 would fire extra `htmx:afterSettle` events and re-trigger the board. Checked with axe-core in
 a real browser (light, rust, navy themes: no violations in the boards) and with jsdom
 `a11y/axe.mjs` + `book-a11y` over a with-drafts build. ⚠ CI does not see this page's board:
-drafts are not built by `pages.yml`, and jsdom cannot load the wasm, so CI's axe only ever
-sees the fallback line. Re-run the in-browser check when the page is linked.
+drafts are not built for axe by `pages.yml`, and jsdom cannot load the wasm, so CI's axe only
+ever sees the fallback line. (`a11y/no-kernel.mjs` does build the drafts in CI, but only to
+check that a board with no kernel is a message with no squares.) Re-run the in-browser check
+when the page is linked.
 
 ### `ttt-host` (`crates/ttt-host`)
 

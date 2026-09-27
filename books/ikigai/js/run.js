@@ -14,14 +14,24 @@
 // WebAssembly by pages.yml — and shows what came back with the engine's cache verdict,
 // exactly as `ikigai --plain` prints it.
 //
-// Three things are deliberate about how it behaves.
+// Four things are deliberate about how it behaves.
 //
 // NOTHING RUNS ON LOAD except loading the kernel, and NOTHING IS ANSWERED IN ADVANCE: a
 // cell shows its command and an empty result until the reader presses Run. The listing's
 // own output sits behind a disclosure ("Expected output") for whoever wants to check, and
-// stands in for the result only when the kernel cannot load. "Cached the second time" is
-// a thing the reader does, twice, and watches change; a page that had already shown the
-// answer would have taken the payoff away (Brian, on the first version, which did).
+// it NEVER moves into the result pane — not on load, not on Run, not when the kernel is
+// missing. "Cached the second time" is a thing the reader does, twice, and watches change;
+// a page that had already shown the answer would have taken the payoff away (Brian, on the
+// first version, which did — and again on 2026-09-27, when a drafts server that had lost
+// its wasm arrived with every cell answered by the fallback this paragraph used to allow).
+//
+// WITHOUT THE KERNEL, A CELL IS UNAVAILABLE, NOT ANSWERED. When the wasm cannot load, the
+// moment the load fails (on page load, not on a click): the result pane stays empty, Run
+// is disabled and described by the caption, which says the kernel did not load and that
+// the listing's output is under "Expected output" (still closed). The page's one kernel
+// status line announces the failure; the cells' own regions stop being live first, so a
+// screen reader hears it once rather than once per cell. `a11y/no-kernel.mjs` pins all of
+// this in CI, which otherwise only ever sees the page WITH its kernel.
 //
 // THE COMMAND IS EDITABLE. It is a real textarea (one row per line, monospace): Enter
 // runs it, Shift+Enter adds a line, Run runs it, Reset restores the chapter's original.
@@ -37,8 +47,8 @@
 // Two rules the markup relies on. `data-cmd` is delimited by SINGLE quotes, because a
 // REPL line can carry double quotes (`in="a b"`). And the expected output is the
 // listing's output — the tests in the crate are the source of truth for it — so if the
-// wasm does not load, the cell keeps showing that and says so; the page is never broken
-// by the kernel being absent.
+// wasm does not load, the disclosure still holds it and the caption points there; the
+// page is never broken by the kernel being absent, only unable to run.
 //
 // ⚠ One CommonMark rule bites here: an HTML block that starts with `<div` ENDS at the
 // first blank line, and everything after it is ordinary markdown again — so a blank line
@@ -131,7 +141,8 @@
         }).catch(function (err) {
             status.textContent =
                 "The in-page kernel did not load (" + (err && err.message ? err.message : err) +
-                "). Each cell shows the output its listing produces instead.";
+                "), so Run is unavailable on this page. Each cell's listing output is under " +
+                "“Expected output”.";
         });
     }
 
@@ -199,20 +210,41 @@
         result.appendChild(pane);
         cell.appendChild(result);
 
+        caption.id = id + "-caption";
+
         // The listing's own output stays available — behind a disclosure, so the
-        // answer is not on the page before the reader has asked the question. It is
-        // also what the pane shows when the kernel cannot load (the static fallback).
+        // answer is not on the page before the reader has asked the question. With or
+        // without the kernel, this is the ONLY place it appears.
         var expectedWrap = el("details", "ikigai-run-expected-wrap");
         var expectedSummary = el("summary", "ikigai-run-expected-summary",
             "Expected output (what the listing produces)");
         expectedWrap.appendChild(expectedSummary);
         expectedWrap.appendChild(el("pre", "ikigai-run-expected", expectedText));
         cell.appendChild(expectedWrap);
-        load().catch(function () {
-            // Static fallback: no kernel, so the listing's output stands in, labeled.
-            pane.textContent = expectedText;
-            caption.textContent = "the in-page kernel did not load — this is the output the listing produces";
-        });
+
+        // No kernel: the cell cannot run, and says so — it does not answer. Called the
+        // moment the load fails, so Run is disabled before anyone presses it. The result
+        // stops being a live region first: nothing can ever happen in it now, and the
+        // page's one kernel status line (announceKernel) is what a screen reader should
+        // hear, once, rather than this caption once per cell.
+        var unavailable = false;
+        function markUnavailable(err) {
+            if (unavailable) {
+                return;
+            }
+            unavailable = true;
+            result.removeAttribute("role");
+            result.removeAttribute("aria-live");
+            result.removeAttribute("aria-atomic");
+            pane.textContent = "";
+            caption.textContent =
+                "the in-page kernel did not load (" + (err && err.message ? err.message : err) +
+                "), so this cell cannot run; the listing's output is under “Expected output” below";
+            run.disabled = true;
+            // A disabled button with no reason reads as broken; the caption is the reason.
+            run.setAttribute("aria-describedby", caption.id);
+        }
+        load().catch(markUnavailable);
 
         // ── the history ──────────────────────────────────────────────────────
         var history = el("ol", "ikigai-run-history");
@@ -237,6 +269,10 @@
         }
 
         function execute() {
+            // Enter in the field reaches here without the (disabled) button.
+            if (unavailable) {
+                return;
+            }
             var lines = linesOf(field.value);
             if (lines.length === 0) {
                 caption.textContent = "nothing to run — the command is empty; Reset restores the chapter's";
@@ -277,12 +313,17 @@
                         detail: { game: game }
                     }));
                 });
-            }).catch(function (err) {
-                pane.textContent = expectedText;
+            }, markUnavailable).catch(function (err) {
+                // The kernel loaded, and something in the page's own path failed while
+                // running (a rejected evaluation, a reply that is not JSON). That is not
+                // the kernel's answer and not the listing's either: say what happened and
+                // leave the pane empty. (This used to be where the expected output was
+                // copied in, labeled as a fallback, for a kernel that HAD loaded.)
+                pane.textContent = "";
                 caption.textContent =
-                    "the in-page kernel did not load (" + (err && err.message ? err.message : err) +
-                    ") — this is the output the listing produces";
-                run.disabled = true;
+                    "the page failed while running this (" + (err && err.message ? err.message : err) +
+                    ") — no result; the listing's output is under “Expected output”";
+                run.disabled = false;
             });
         }
 
@@ -307,7 +348,9 @@
             clear.hidden = true;
             runs = 0;
             pane.textContent = "";
-            caption.textContent = "reset — the chapter's command is back; press Run to resolve it in this page";
+            if (!unavailable) {
+                caption.textContent = "reset — the chapter's command is back; press Run to resolve it in this page";
+            }
             field.focus();
         });
         clear.addEventListener("click", function () {
@@ -316,7 +359,9 @@
             clear.hidden = true;
             runs = 0;
             pane.textContent = "";
-            caption.textContent = "history cleared — press Run to resolve it in this page";
+            if (!unavailable) {
+                caption.textContent = "history cleared — press Run to resolve it in this page";
+            }
         });
     }
 
