@@ -156,7 +156,7 @@ let separator = inv.inline_str("separator").unwrap_or(/* your default */);
 Which means the failure mode to watch for is the two halves disagreeing — a description
 that promises one default while the code applies another. Nothing in the system catches
 that; a test that resolves without the argument and asserts the declared default's
-behaviour does.
+behavior does.
 
 `urn:kernel:actions` will *not* show your change, by the way: it lists names, and the name
 was already there. It is the description that changed, and in this host you read that

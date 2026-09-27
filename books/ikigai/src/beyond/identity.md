@@ -80,7 +80,7 @@ forgotten config entry silently becomes an over-grant, and it fails in the direc
 nothing goes wrong until it goes very wrong.
 
 The session is minted **per connection and never cached**, which turns revocation into a
-file edit: change the enrolment and the client loses its authority on its next connection,
+file edit: change the enrollment and the client loses its authority on its next connection,
 rather than at the end of some token's lifetime.
 
 ## Carrying a capability, and being clamped

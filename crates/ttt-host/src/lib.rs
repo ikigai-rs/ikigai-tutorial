@@ -60,7 +60,7 @@ const HTMX: &str = include_str!("../../../books/ikigai/src/vendor/htmx-2.0.4.min
 /// The board's stylesheet — the book's own, the one stylesheet for this markup.
 const TTT_CSS: &str = include_str!("../../../books/ikigai/css/ttt.css");
 
-/// This page's colours and layout, which the book's pages get from mdbook.
+/// This page's colors and layout, which the book's pages get from mdbook.
 const HOST_CSS: &str = include_str!("../static/host.css");
 
 // ANCHOR: options

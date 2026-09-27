@@ -1,11 +1,11 @@
 //! Measure the contrast of the palette the book is actually served in.
 //!
 //! `mdbook` is sound by default in most of the ways that matter — `<html lang>`, a
-//! `<main>`, a labelled `<nav>`, labelled theme buttons, no image without `alt` — and none
-//! of that needed doing here. Colour is the exception, because a theme is a palette
+//! `<main>`, a labeled `<nav>`, labeled theme buttons, no image without `alt` — and none
+//! of that needed doing here. Color is the exception, because a theme is a palette
 //! somebody chose by eye and **nothing in a static site generator measures one**.
 //!
-//! ## Why this reads generated CSS rather than a table of colours
+//! ## Why this reads generated CSS rather than a table of colors
 //!
 //! The obvious version of this check is a list of hex pairs in a Rust file. That version
 //! is worse than no check: mdbook ships the palette, mdbook can change it in a release,
@@ -57,7 +57,7 @@ const COMPONENT: f64 = 3.0;
 /// The pairs a reader of *this* book actually meets.
 ///
 /// Deliberately not every combination in the stylesheet: a pair nobody sees is noise, and
-/// a gate with noise in it gets muted. Blockquote alert colours (`--blockquote-tip` and
+/// a gate with noise in it gets muted. Blockquote alert colors (`--blockquote-tip` and
 /// friends) are absent because this book writes plain `>` blockquotes rather than GitHub
 /// alerts — add them here on the day it uses one.
 pub const PAIRS: &[Pair] = &[
@@ -156,7 +156,7 @@ pub struct Finding {
     pub foreground: String,
     /// The background property.
     pub background: String,
-    /// The colours those resolved to, as CSS.
+    /// The colors those resolved to, as CSS.
     pub colors: (String, String),
     /// The measured ratio.
     pub ratio: f64,
@@ -292,7 +292,7 @@ pub fn merge(sheets: &[String]) -> Palette {
     merged
 }
 
-/// Resolve one property to a colour, following `var(--other)` within the same theme.
+/// Resolve one property to a color, following `var(--other)` within the same theme.
 pub fn color(values: &BTreeMap<String, String>, name: &str) -> Option<Rgba> {
     let mut name = name.to_string();
     // A short chain, and a bound on it: a cycle in a stylesheet must not hang the gate.
@@ -307,7 +307,7 @@ pub fn color(values: &BTreeMap<String, String>, name: &str) -> Option<Rgba> {
     None
 }
 
-/// Parse the colour notations mdbook's own themes are written in.
+/// Parse the color notations mdbook's own themes are written in.
 ///
 /// `hsl()` is here because mdbook writes several of its grounds that way — `--bg` in the
 /// `rust` theme is `hsl(60, 9%, 87%)` — and `ikigai-a11y` reads hex only, which is the
@@ -381,11 +381,11 @@ pub fn check(palette: &Palette) -> Vec<Finding> {
     findings
 }
 
-/// The nearest colour along the black/white axis that would clear a floor.
+/// The nearest color along the black/white axis that would clear a floor.
 ///
-/// Not a design opinion — a starting point with a number attached. It moves the colour
+/// Not a design opinion — a starting point with a number attached. It moves the color
 /// toward black on a light ground and toward white on a dark one, in one-percent steps,
-/// and stops at the first value that clears; the human picking the final colour still has
+/// and stops at the first value that clears; the human picking the final color still has
 /// to look at it, and the gate is what says whether the choice worked.
 pub fn nearest_passing(foreground: Rgba, background: Rgba, floor: f64) -> Option<Rgba> {
     let toward_white = background.luminance() < 0.5;
@@ -406,7 +406,7 @@ pub fn nearest_passing(foreground: Rgba, background: Rgba, floor: f64) -> Option
 
 /// For one failing pair, the two single-property repairs that would clear it.
 ///
-/// Both ends are offered because which one is right is a judgement about the page: a
+/// Both ends are offered because which one is right is a judgment about the page: a
 /// foreground shared by a dozen passing pairs is the expensive one to move, and sometimes
 /// the ground is simply too close to the text.
 pub fn suggest(finding: &Finding) -> (Option<String>, Option<String>) {
@@ -503,7 +503,7 @@ mod tests {
 
     #[test]
     fn hsl_is_read_the_way_a_browser_reads_it() {
-        // mdbook writes the `rust` theme's ground this way, and it is the same colour as
+        // mdbook writes the `rust` theme's ground this way, and it is the same color as
         // that theme's `--theme-popup-bg`, which is written as hex — so the two notations
         // agreeing is a real check rather than a restatement of the formula.
         assert_eq!(

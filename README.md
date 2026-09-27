@@ -204,10 +204,28 @@ target there is nothing to check it against. Both are fixed the same way, which 
 neither is a nuisance: name the chapter. `[Where this actually
 stands](../modules/status.md)` says both halves and a reorder cannot falsify either.
 
-### And the colours
+### And the spelling
+
+The book is written in American English, and a relapse is invisible in a diff that is
+about something else — the words drift in from briefs, quoted sources and habit.
+`crates/book-urns/tests/book_spelling.rs` fails on a short denylist of British spellings
+(its `DENYLIST`) in the book's pages, scripts and styles and in every crate's sources and
+READMEs. The list holds only words with no American meaning, so it has nothing to be wrong
+about. A direct quote keeps its author's spelling and says so, in the same style as
+`urn-gate:`:
+
+```markdown
+<!-- spelling: allow colour — a quoted source's own words. -->
+> "… the colour of the thing …"
+```
+
+A directive covers its own line and the paragraph under it, needs a reason, and is
+refused if it allows nothing.
+
+### And the colors
 
 `mdbook` is sound by default in the ways a generator can be — `<html lang>`, a `<main>`, a
-labelled `<nav>`, labelled theme buttons, no image without `alt`. Colour is the exception,
+labeled `<nav>`, labeled theme buttons, no image without `alt`. Color is the exception,
 because a theme is a palette somebody chose by eye and **nothing measures one**.
 
 So `./scripts/test-books.sh` also runs `crates/book-a11y`, which reads the palette mdbook
@@ -222,7 +240,7 @@ inside a blockquote, and inline code — which this book uses in nearly every se
 4.07:1 and 2.99:1. The repairs are in
 [`books/ikigai/css/a11y.css`](books/ikigai/css/a11y.css), each with the ratio it started
 from in a comment, and the gate is what says they worked. The tool prints the nearest
-passing colour along with the fault, so a repair starts from a number rather than a guess:
+passing color along with the fault, so a repair starts from a number rather than a guess:
 
 ```bash
 cargo run -p book-a11y -- books/ikigai --survey   # every pair, pass or fail

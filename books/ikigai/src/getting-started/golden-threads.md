@@ -172,7 +172,7 @@ cached resource, measure the read before and after. That is the only signal ther
 Two holes in the mechanism were on the record here through core 0.1.72, so you would
 build around them rather than into them. Both closed in 0.1.73 (the kernel's design notes
 track them as one arc, ledger item 512), and the block that used to pin the *old*
-behaviour — it was written to fail the day the kernel closed the hole, and it did — now
+behavior — it was written to fail the day the kernel closed the hole, and it did — now
 shows the new one.
 
 **A cacheable read hangs from its own name, whether or not it says so.** The kernel adds

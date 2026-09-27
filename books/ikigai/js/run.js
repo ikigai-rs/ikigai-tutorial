@@ -148,7 +148,7 @@
         cell.textContent = "";
 
         // ── the command, editable ────────────────────────────────────────────
-        // A labelled textarea (SC 3.3.2 Labels or Instructions; SC 4.1.2), one row per
+        // A labeled textarea (SC 3.3.2 Labels or Instructions; SC 4.1.2), one row per
         // line, with the keys explained in a description the field points at.
         var form = el("form", "ikigai-run-head");
         var label = el("label", "ikigai-run-label", game ? "Command, in game " + game : "Command");
@@ -209,7 +209,7 @@
         expectedWrap.appendChild(el("pre", "ikigai-run-expected", expectedText));
         cell.appendChild(expectedWrap);
         load().catch(function () {
-            // Static fallback: no kernel, so the listing's output stands in, labelled.
+            // Static fallback: no kernel, so the listing's output stands in, labeled.
             pane.textContent = expectedText;
             caption.textContent = "the in-page kernel did not load — this is the output the listing produces";
         });

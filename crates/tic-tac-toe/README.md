@@ -1,6 +1,6 @@
 # tic-tac-toe
 
-The code taught by the book's applied arc: noughts and crosses designed as resources
+The code taught by the book's applied arc: tic-tac-toe designed as resources
 before it is code, after *Resource Oriented Analysis and Design*, Parts 1–9, by Peter
 Rodgers (NetKernel News 3.34–3.42, August–October 2012). The prose is
 `books/ikigai/src/applied/tic-tac-toe-N.md`, one page per increment; the listings are
@@ -97,7 +97,7 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
   trace note `alias=… -> …` shows both.
 - **Winner**: a line whose marks are three of one kind — a pure function of line
   representations, so cacheable and normalized for free: a move recomputes the winner
-  only through the lines it touched. The centre is on four lines, a corner on three, an
+  only through the lines it touched. The center is on four lines, a corner on three, an
   edge on two (part II ends on that count).
 - **Whose turn**: counts marks on the board, which is already a resource; the constraint
   ("X plays when counts are equal") belongs at the edge, in a Sink-side check, with the
@@ -181,7 +181,7 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
   claim that it is one game.
 - **The seam.** `space_with_store(store: Arc<dyn Space>) -> Alias` builds every composite
   and puts `store` after them in a `Fallback`, wrapped in `LINES`. `space()` /
-  `space_over(CellStore)` are unchanged in behaviour and are now `space_with_store(
+  `space_over(CellStore)` are unchanged in behavior and are now `space_with_store(
   stored_space(store))`; `stored_space(Arc<CellStore>)` is the in-memory store alone. The
   topology changed shape (Alias → Fallback → [composites, store]); part II's prose was
   adjusted to say so. The root keeps its own store: that is the game a request plays when it
@@ -406,7 +406,7 @@ ttt-host [--http <addr>] [--socket <path>] [--store <socket>] [--game <id>[=<soc
 - **Pages**: routes `/` (root game) and `/game/{id}` → a document around `template:game` with
   `<base href="/game/{id}/">`, `/static/htmx-2.0.4.min.js` (the book's vendored copy,
   `include_str!`), `/static/ttt.css` (the book's `css/ttt.css`, the ONE stylesheet for the
-  markup), `/static/host.css` (the colour variables mdbook gives the book). Page routes set
+  markup), `/static/host.css` (the color variables mdbook gives the book). Page routes set
   CSP `base-uri 'self'` — `ikigai-web`'s default `base-uri 'none'` blocks the `<base>`, and
   then `/game/a` (no slash) sends every request to `/game/iki/…`. htmx is configured by a
   `<meta name="htmx-config">`: `allowEval:false`, `includeIndicatorStyles:false` (the CSP

@@ -49,7 +49,7 @@ do not cache*. `camel-case` is genuinely pure, so it says so.
 
 Not a `char`. Some characters upper-case to more than one — German ß becomes SS — so the
 API cannot pretend otherwise. `output.extend(first.to_uppercase())` is the Unicode-correct
-form; `push` would not compile, which is the type system doing you a favour.
+form; `push` would not compile, which is the type system doing you a favor.
 
 ## Try it
 

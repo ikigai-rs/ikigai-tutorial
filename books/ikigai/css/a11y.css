@@ -1,14 +1,14 @@
 /* The book's accessibility overrides.
  *
  * Two things live here, and both are additions to mdbook's own theme rather than a fork of
- * it: a skip link, and the colour repairs that bring every theme to the WCAG AA contrast
+ * it: a skip link, and the color repairs that bring every theme to the WCAG AA contrast
  * floor. `book.toml` loads this after mdbook's palette, so these declarations win by
  * cascade order — which is also why `crates/book-a11y` reads the files in that order when
  * it measures the result.
  *
- * ⚠ Do not adjust a colour here by eye. Every value below was chosen by
+ * ⚠ Do not adjust a color here by eye. Every value below was chosen by
  * `cargo run -p book-a11y -- books/ikigai`, which reports the ratio it measured and the
- * nearest colour that clears the floor, and the same command is a gate in CI.
+ * nearest color that clears the floor, and the same command is a gate in CI.
  */
 
 /* ── Skip to content ──────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ summary:focus-visible {
     /* link: #2b79a2 was 3.80:1 on the page and 3.09:1 in a blockquote */
     --links: #5f9abb;
     /* table header: #98a3ad on #42494c was 3.57:1 — the ground moved, not the text,
-     * because that foreground is the theme's body colour and clears everywhere else */
+     * because that foreground is the theme's body color and clears everywhere else */
     --table-header-bg: #31373a;
     /* current chapter in the sidebar: #3473ad was 2.81:1 */
     --sidebar-active: #6f9dc7;

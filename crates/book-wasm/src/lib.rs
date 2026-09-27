@@ -835,7 +835,7 @@ mod tests {
             t[2],
             "X plays 1,1. O to play.\n[uncacheable]\nnot cached\ncached\n"
         );
-        // …and the board refresh after the cell cached the board again, with X in the centre.
+        // …and the board refresh after the cell cached the board again, with X in the center.
         assert!(
             t[3].contains("aria-label=\"X at 1,1\">X</button>"),
             "{}",

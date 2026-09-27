@@ -244,7 +244,7 @@ urn:iki:tutorial:ttt:board   ttt-board · computed · ThreadId(1) · —   → 1
 </div>
 
 Read it from the top. The board was computed. Row 0 was computed, and inside it only the
-corner went back to the store: its two neighbours were served from cache. Rows 1 and 2 were
+corner went back to the store: its two neighbors were served from cache. Rows 1 and 2 were
 served whole, and their six cells were never asked, so they are not in the tree at all.
 Each row carries a note, `alias=… -> …`, which is the name the board asked for beside the
 name the kernel filed it under. Of nine stored cells, one was read.
@@ -256,7 +256,7 @@ cell as a child because it has been played. An unplayed cell that recomputed wou
 one line: its failed read of the store is recorded as a dependency, but a trace in this
 release does not draw it.)
 
-One more move, in the centre, and the board again: computed once, then served.
+One more move, in the center, and the board again: computed once, then served.
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:stored:1:1 O
 source urn:iki:tutorial:ttt:board
@@ -273,12 +273,12 @@ X--
 [cached]</pre>
 </div>
 
-The centre is on four lines (row 1, column 1 and both diagonals), a corner on three, and an
+The center is on four lines (row 1, column 1 and both diagonals), a corner on three, and an
 edge on two. That count is about to matter.
 
 ## Next
 
 Part III asks questions of the board. Which lines a cell is on becomes a resource of its
 own: a representation that is a list of the names of other resources. Whose turn it is and
-who has won are questions about those lines, and the rules of noughts and crosses arrive
+who has won are questions about those lines, and the rules of tic-tac-toe arrive
 there, at the edge of the application, with the model underneath still loose.

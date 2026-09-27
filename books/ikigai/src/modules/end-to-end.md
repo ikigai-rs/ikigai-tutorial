@@ -56,7 +56,7 @@ The demo uses `InProcessTransport`, which runs the module in the same process: i
 the request in the module's space and invokes the endpoint **with the host as its issuer**.
 
 That sounds like it is skipping the hard part, and in one sense it is — there is no
-marshalling. But it exercises the part that actually carries risk: the re-entrancy. The
+marshaling. But it exercises the part that actually carries risk: the re-entrancy. The
 host is inside a resolution, calls the module, and the module calls back into the host
 before the first resolution has returned. Deadlocks, borrow problems and lock inversions
 live there, not in the byte format.

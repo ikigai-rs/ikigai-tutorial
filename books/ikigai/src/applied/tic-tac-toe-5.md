@@ -1,6 +1,6 @@
 # Tic-tac-toe, V: a board you can play
 
-Parts [I](tic-tac-toe-1.md) to [IV](tic-tac-toe-4.md) built noughts and crosses out of
+Parts [I](tic-tac-toe-1.md) to [IV](tic-tac-toe-4.md) built tic-tac-toe out of
 names: a stored cell, a platonic cell, lines, rows by alias, a board, the rules, and games
 as corridors around them. Nobody could *play* it except by typing `sink` at a prompt. This
 part gives it a face, and the face is resources too: HTML that the game serves under names
@@ -129,7 +129,7 @@ The move cut the stored cell's thread, and both views hung from it, so both were
 the reply *read* the status, to answer with it, which cached the new one. The board waits
 until something asks for it. On this page something did: after a cell runs in a board's
 game, the page asks that board to refresh, which is the next section's subject. So the
-board view is cached again, with X in the centre:
+board view is cached again, with X in the center:
 
 <div class="ikigai-run" data-game='a' data-cmd='source urn:iki:tutorial:ttt:view:board'>
 <pre class="ikigai-run-expected">&lt;div class=&quot;ttt-grid&quot; role=&quot;group&quot; aria-label=&quot;The board: row 0 is the top row, column 0 the left&quot;&gt;

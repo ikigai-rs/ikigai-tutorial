@@ -67,21 +67,21 @@ const DIAGONAL_1: &str = "urn:iki:tutorial:ttt:cells:2.0,1.1,0.2";
 #[test]
 fn the_checkset_is_a_list_of_names_computed_once() -> Result<()> {
     let kernel = kernel_over(Arc::default());
-    let centre = checkset_name(1, 1);
+    let center = checkset_name(1, 1);
 
     assert_eq!(
-        source(&kernel, &centre)?,
+        source(&kernel, &center)?,
         "urn:iki:tutorial:ttt:column:1\n\
          urn:iki:tutorial:ttt:diagonal:0\n\
          urn:iki:tutorial:ttt:diagonal:1\n\
          urn:iki:tutorial:ttt:row:1"
     );
-    assert!(cached(&kernel, &centre));
+    assert!(cached(&kernel, &center));
 
     play(&kernel, 1, 1)?;
     play(&kernel, 0, 0)?;
     sink(&kernel, &stored_name(1, 1), "O")?; // straight into the store, past the rules
-    assert!(cached(&kernel, &centre), "nothing it depends on can change");
+    assert!(cached(&kernel, &center), "nothing it depends on can change");
     Ok(())
 }
 // ANCHOR_END: platonic_checkset

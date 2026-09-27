@@ -1,7 +1,7 @@
 # Tic-tac-toe, III: the rules as resources
 
 [Part II](tic-tac-toe-2.md) built the gatherings: a line of cells, the eight lines a board
-has, and the board. None of it knows the rules of noughts and crosses. This part adds
+has, and the board. None of it knows the rules of tic-tac-toe. This part adds
 them, and adds them the same way as everything else: as resources. Which lines a square is
 on, who has won and whose turn it is are each a name that answers. Then comes the one
 resource that changes the game, the move, and the rules are enforced there and nowhere
@@ -13,7 +13,7 @@ else. It covers the ground of the sixth and seventh parts of the series Part I c
 
 ## Which lines a square is on
 
-The centre of the board is on four lines, a corner on three and an edge on two. That is a
+The center of the board is on four lines, a corner on three and an edge on two. That is a
 fact about the board, and it can be a resource of its own: the **CheckSet**,
 `urn:iki:tutorial:ttt:checkset:{x}:{y}`, which answers the names of the lines through a
 square, one per line of text.
@@ -37,7 +37,7 @@ the game. Each one resolves, through the alias, to its line, and the line's own 
 the one the cache files the answer under.
 
 As before, one kernel serves every cell on this page, and the page starts on a fresh
-board. Ask the centre, twice:
+board. Ask the center, twice:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:ttt:checkset:1:1
 source urn:iki:tutorial:ttt:checkset:1:1'>
@@ -156,7 +156,7 @@ so rather than silently playing for the other side.
 This is the series' seventh part in one sentence: keep the model loose, and constrain it at
 the boundary of the application. The stored cell does not know about turns, and the move
 does not change it. The atoms are still the atoms Part I built. Another game on the same
-cells (Connect Four, or noughts and crosses on a bigger board) would write its own move
+cells (Connect Four, or tic-tac-toe on a bigger board) would write its own move
 and its own table and reuse everything else. Put the rules into the stored cell, and the
 store would stop being reusable.
 
@@ -168,7 +168,7 @@ is still a `Sink` to the kernel. It cuts the thread named after its target, exac
 {{#include ../../../../crates/tic-tac-toe/tests/rules.rs:inner_sink}}
 ```
 
-Play the centre, with no mark named. The turn passes to O:
+Play the center, with no mark named. The turn passes to O:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:move:1:1
 source urn:iki:tutorial:ttt:turn'>
@@ -354,7 +354,7 @@ XO-
 Finally, follow the links. The CheckSet answers names, and the engine's map, `..`, runs a
 stage once for each line of its input. `urn:iki:fn:compose` sources the resource its `src`
 names and expands any transclusion markers in it. A line has none, so here it does exactly
-one thing: read the resource a name names. So this reads the four lines through the centre,
+one thing: read the resource a name names. So this reads the four lines through the center,
 the winning diagonal among them:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:ttt:checkset:1:1 .. urn:iki:fn:compose
@@ -368,7 +368,7 @@ cached</pre>
 </div>
 
 The one cached answer in that tally is the CheckSet itself. It was computed in the first
-cell on this page, and after five moves, one of them on the centre square itself, it is
+cell on this page, and after five moves, one of them on the center square itself, it is
 still cached, because nothing it depends on can change.
 
 ## Next

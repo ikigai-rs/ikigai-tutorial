@@ -32,7 +32,7 @@ the interesting part. Where the paper has three structural constructs, ikigai ha
 structural ones and a value that travels: the capability. The gatekeeper's *refusal* is
 the capability floor, evaluated at every door rather than at one; the mapper is a choice
 of root and a table; the trapdoor is `Confine`. The staircase — authority only shrinks
-along a chain of sub-requests — is what makes the travelling value safe to carry inward,
+along a chain of sub-requests — is what makes the traveling value safe to carry inward,
 and the paper has no counterpart for it because its authority is decided at the
 gatekeeper and then not carried at all.
 

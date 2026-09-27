@@ -42,7 +42,7 @@ came first — re-entrancy, capability inheritance, the session shape — and ev
 since has been that same session with a different pipe under it: a direct call, then the
 codec over in-memory channels, then a socket.
 
-That is the harder half done first. Marshalling bytes over a socket is well-understood
+That is the harder half done first. Marshaling bytes over a socket is well-understood
 work; a host and a module calling into each other mid-invocation without deadlocking, with
 authority attenuating correctly across the boundary, is where the design risk lives.
 

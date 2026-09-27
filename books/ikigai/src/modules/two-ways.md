@@ -10,7 +10,7 @@ ikigai_fn::space().bind(Exact::new("urn:iki:tutorial:camel-case"), camel_case())
 ```
 
 The endpoints are in the binary. Resolution is a function call away. There is no
-marshalling, no versioning question at runtime, and nothing to go wrong at load time
+marshaling, no versioning question at runtime, and nothing to go wrong at load time
 because there is no load time.
 
 **Every endpoint in the `ikigai` CLI arrives this way.** The CLI does not depend on

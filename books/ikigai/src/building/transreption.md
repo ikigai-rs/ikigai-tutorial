@@ -103,7 +103,7 @@ from every endpoint in the host by binding one endpoint that declared what it co
 > Markdown, that is the chapter's one disappointment, and it is stated here so it is not
 > discovered at a keyboard.
 
-## Declared, and the planner honours it
+## Declared, and the planner honors it
 
 A transreptor claims to change form without changing what is represented: the function
 is injective, and the caller can treat the output as the same resource in another
