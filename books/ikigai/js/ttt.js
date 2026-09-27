@@ -42,7 +42,7 @@
 //
 // HTMX IS VENDORED, not fetched from a CDN: `src/vendor/htmx-2.0.4.min.js`, byte for byte
 // the copy `ikigai-web/assets/htmx.min.js` serves, sha256
-// e209dda5c8235479f3166defc7750e1dbcd5a5c1808b7792fc2e6733768fb447, licence 0BSD
+// e209dda5c8235479f3166defc7750e1dbcd5a5c1808b7792fc2e6733768fb447, license 0BSD
 // (https://github.com/bigskysoftware/htmx). It is loaded only on a page that has a board.
 (function () {
     "use strict";

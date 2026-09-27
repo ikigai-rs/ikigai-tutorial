@@ -1,4 +1,4 @@
-//! Measure the built book against the WCAG 2.2 AA floor — colour and structure.
+//! Measure the built book against the WCAG 2.2 AA floor — color and structure.
 //!
 //!     cargo run -p book-a11y -- books/ikigai            # gate: exits non-zero on a fault
 //!     cargo run -p book-a11y -- books/ikigai --survey   # every pair and every page
@@ -99,14 +99,14 @@ fn main() -> ExitCode {
     }
 
     eprintln!(
-        "book-a11y: {} colour pair{} below the WCAG floor:",
+        "book-a11y: {} color pair{} below the WCAG floor:",
         findings.len(),
         if findings.len() == 1 { "" } else { "s" }
     );
     for finding in &findings {
         eprintln!("  {}", finding.report());
         // Either end can be the right one to move, and sometimes only one end can move
-        // at all — a ground already at white cannot get further from grey.
+        // at all — a ground already at white cannot get further from gray.
         let (foreground, background) = book_a11y::suggest(finding);
         let mut options = Vec::new();
         if let Some(fg) = foreground {

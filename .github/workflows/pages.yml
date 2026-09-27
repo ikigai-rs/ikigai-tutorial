@@ -115,7 +115,7 @@ jobs:
     needs: books
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    # One deploy at a time, and a deploy in flight is never cancelled: Pages would be
+    # One deploy at a time, and a deploy in flight is never canceled: Pages would be
     # left with whichever half-finished state the cancellation interrupted. A fixed group
     # rather than one keyed by ref because only main ever reaches this job. (The PR-side
     # `books` runs above are not in the group, so concurrent PRs do not queue on each

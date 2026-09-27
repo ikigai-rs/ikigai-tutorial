@@ -5,7 +5,7 @@
 //! is ikigai's own version of that design, built one increment at a time; `README.md`
 //! beside this file holds the plan for the whole arc.
 //!
-//! Increment 1 is the atom — the one piece of state a game of noughts and crosses has:
+//! Increment 1 is the atom — the one piece of state a game of tic-tac-toe has:
 //!
 //! * `urn:iki:tutorial:ttt:stored:{x}:{y}` — the **stored cell**. What has been played at
 //!   `(x, y)`, held in memory: `Source` reads the mark, `Sink` plays one, `Delete` clears
@@ -1422,7 +1422,7 @@ mod tests {
     }
 
     /// The CheckSet is read from the table, so it answers for whatever table it is given:
-    /// four lines through a 3×3 centre, three through a corner, two through an edge — and,
+    /// four lines through a 3×3 center, three through a corner, two through an edge — and,
     /// over another table, that table's lines.
     #[test]
     fn the_lines_through_a_cell_come_from_the_table() {

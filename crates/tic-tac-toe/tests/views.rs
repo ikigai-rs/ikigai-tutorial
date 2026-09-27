@@ -117,7 +117,7 @@ fn a_play_answers_what_happened_and_whose_turn_it_is() -> Result<()> {
 }
 // ANCHOR_END: play_view
 
-/// Once the game is over every empty square is closed — present, labelled, and not a move —
+/// Once the game is over every empty square is closed — present, labeled, and not a move —
 /// and the status says who won.
 #[test]
 fn a_won_game_closes_the_empty_squares() -> Result<()> {

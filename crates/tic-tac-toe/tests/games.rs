@@ -149,12 +149,12 @@ fn a_finished_root_game_does_not_end_a_game_in_a_corridor() -> Result<()> {
 fn every_game_computes_its_own_checkset() -> Result<()> {
     let kernel = kernel_over(Arc::default());
     let games: Vec<Scope> = ["a", "b", "c"].iter().map(|id| new_game(id).0).collect();
-    let centre = checkset_name(1, 1);
+    let center = checkset_name(1, 1);
 
-    source_in(&kernel, &games[0], &centre)?;
-    assert!(cached_in(&kernel, &games[0], &centre));
-    assert!(!cached_in(&kernel, &games[1], &centre));
-    assert!(!cached_in(&kernel, &Scope::empty(), &centre));
+    source_in(&kernel, &games[0], &center)?;
+    assert!(cached_in(&kernel, &games[0], &center));
+    assert!(!cached_in(&kernel, &games[1], &center));
+    assert!(!cached_in(&kernel, &Scope::empty(), &center));
 
     // Every CheckSet of the board, in the root and in each of three games: nine answers,
     // the same nine every time, filed four times over.
@@ -170,7 +170,7 @@ fn every_game_computes_its_own_checkset() -> Result<()> {
         }
     }
     assert_eq!(answers.len(), 9);
-    assert_eq!(kernel.cache_len() - before, 4 * 9 - 1); // the centre in `a` was already there
+    assert_eq!(kernel.cache_len() - before, 4 * 9 - 1); // the center in `a` was already there
     Ok(())
 }
 // ANCHOR_END: partitions

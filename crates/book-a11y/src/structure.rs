@@ -1,7 +1,7 @@
 //! Structural accessibility checks over the built HTML — the half of the gate a parser
 //! can decide.
 //!
-//! The contrast half (`lib.rs`) measures colours; this half reads the pages `mdbook`
+//! The contrast half (`lib.rs`) measures colors; this half reads the pages `mdbook`
 //! wrote and refuses the faults that a static document can prove: a missing `lang`, a
 //! page without exactly one `h1` in its content, a heading level that skips, an image
 //! with no `alt`, a link with no text or with text that says nothing out of context, a
@@ -134,7 +134,7 @@ fn tokenize(html: &str) -> Vec<Token> {
     tokens
 }
 
-/// The index of the `>` that closes the tag starting at `rest[0]`, honouring quotes.
+/// The index of the `>` that closes the tag starting at `rest[0]`, honoring quotes.
 fn find_tag_end(rest: &str) -> Option<usize> {
     let mut quote: Option<char> = None;
     for (i, c) in rest.char_indices().skip(1) {

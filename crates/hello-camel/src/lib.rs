@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     fn the_first_word_keeps_its_given_case() {
-        // Documented behaviour, not an accident: input casing is meaningful.
+        // Documented behavior, not an accident: input casing is meaningful.
         assert_eq!(camel("Hello WORLD"), "HelloWORLD");
     }
 

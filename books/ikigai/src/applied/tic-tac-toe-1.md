@@ -3,8 +3,8 @@
 Everything so far has been one idea at a time. This part builds one small application
 end to end, in the order resource-oriented design says to: name the resources first, write
 code for the few that have to *hold* something, and get the rest by composing names. The
-application is noughts and crosses, because everyone already knows its rules, so every
-ounce of attention goes to the shape rather than the domain.
+application is tic-tac-toe (noughts and crosses, in Britain), because everyone already <!-- spelling: quote (Britain's name for the game, a note) -->
+knows its rules, so every ounce of attention goes to the shape rather than the domain.
 
 The design is not new. It follows *Resource Oriented Analysis and Design*, a nine-part
 series by Peter Rodgers in NetKernel News, issues 3.34 to 3.42 (August to October 2012),
@@ -19,7 +19,7 @@ then builds only the atom: a single cell.
 
 ## The model, on paper
 
-Before any code, list the sets. A game of noughts and crosses is small enough to name
+Before any code, list the sets. A game of tic-tac-toe is small enough to name
 every kind of thing in it:
 
 | the set | its name | what it is | built in |
@@ -174,7 +174,7 @@ That is `NotFound`, not `no endpoint resolved`: the name is bound, and the thing
 is absent. The two errors are different on purpose, and the difference is the whole reason
 `Fallback` could not help.
 
-Now play the centre. The cached empty cell is still cached until the write lands, and
+Now play the center. The cached empty cell is still cached until the write lands, and
 then it is not:
 
 <div class="ikigai-run" data-cmd='cache urn:iki:tutorial:ttt:cell:1:1
@@ -243,8 +243,8 @@ Both endpoints describe themselves, so the page can tell you what a cell takes. 
 ## Loose on purpose
 
 `{x}` and `{y}` are any integers — `-1`, `3`, a cell far off the board — and not 0 to 2.
-Writing the board's edges into the grammar would make the model watertight for noughts
-and crosses and useless for anything else (Connect Four is a board of cells too), so the
+Writing the board's edges into the grammar would make the model watertight for
+tic-tac-toe and useless for anything else (Connect Four is a board of cells too), so the
 atoms stay loose and the rules arrive at the edge of the application, in part III.
 
 ```rust,ignore

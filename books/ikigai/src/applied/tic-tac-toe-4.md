@@ -91,7 +91,7 @@ with no `data-game` plays the root's game, the one every earlier part played.
 
 ## Two games, side by side
 
-X opens in game `a`, in the centre:
+X opens in game `a`, in the center:
 
 <div class="ikigai-run" data-game='a' data-cmd='sink urn:iki:tutorial:ttt:move:1:1
 source urn:iki:tutorial:ttt:board'>
