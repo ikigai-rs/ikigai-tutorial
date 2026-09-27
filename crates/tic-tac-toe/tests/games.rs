@@ -16,8 +16,9 @@ use std::sync::{Arc, Mutex};
 
 use futures::executor::block_on;
 use ikigai_core::{
-    ArgRef, Capability, EndpointSpace, Error, FnEndpoint, Invocation, Iri, Kernel, ReprType,
-    Representation, Request, Result, Scope, Space, UriTemplate, Verb,
+    ArgRef, AsyncFnEndpoint, Capability, EndpointSpace, Error, FnEndpoint, Invocation,
+    InvokeFuture, Iri, Kernel, ReprType, Representation, Request, Result, Scope, Space,
+    UriTemplate, Verb,
 };
 use tic_tac_toe::{
     check_store, checkset_name, game, game_name, kernel_over, move_name, space_with_store,
@@ -255,6 +256,36 @@ fn a_store_that_answers_empty_for_unplayed_breaks_the_contract() {
     assert!(refusal.contains("NotFound"), "{refusal}");
 }
 
+/// `Exists` is a question with an answer, `true` or `false`, and a store that answers it by
+/// failing — the stored cell's own shape before increment 5, which let Exists fall into its
+/// `Source` arm — breaks the contract. The Python and TypeScript stores answer `false`.
+#[test]
+fn a_store_whose_exists_fails_on_an_empty_square_breaks_the_contract() {
+    let cells = Arc::new(by_name_store());
+    let exists_by_source = EndpointSpace::new().bind(
+        UriTemplate::parse(STORED).expect("parses"),
+        AsyncFnEndpoint::new(
+            "exists-by-source",
+            move |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+                let cells = Arc::clone(&cells);
+                Box::pin(async move {
+                    let mut request = inv.request.clone();
+                    if request.verb == Verb::Exists {
+                        request.verb = Verb::Source;
+                    }
+                    let kernel = Kernel::new(cells);
+                    kernel.issue(request, &Capability::root()).await
+                })
+            },
+        ),
+    );
+    let refusal = block_on(check_store(Arc::new(exists_by_source))).expect_err("must be refused");
+    assert!(
+        refusal.starts_with("Exists must answer true or false"),
+        "{refusal}"
+    );
+}
+
 /// The whole game over a store that is not a `CellStore` at all: `space_with_store` over
 /// the differently-written store, as a kernel's ROOT rather than a corridor.
 #[test]
@@ -303,6 +334,7 @@ fn by_name_store() -> EndpointSpace {
                 marks.remove(&key);
                 Ok(text("ok"))
             }
+            Verb::Exists => Ok(text(&marks.contains_key(&key).to_string()).cacheable()),
             _ => match marks.get(&key) {
                 Some(mark) => Ok(text(mark).cacheable()),
                 None => Err(Error::NotFound(key)),

@@ -21,7 +21,7 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
 | **2** | Composites: a line of cells by name, rows / columns / diagonals as zero-code `Alias`es, the board; one move recomputes the lines through it and the board (trace shows it) | Part 4 | done — `tic-tac-toe-2.md` |
 | **3** | Rules as resources: CheckSet (a representation that is a list of IRIs), winner, whose turn; constraint at the edge, model kept loose | Parts 6–7 | done — `tic-tac-toe-3.md` |
 | **4** | Many games: the game as context (a `Scope` corridor) versus the game in the name — argue it; the store as a swappable space | Part 8 | done — `tic-tac-toe-4.md` |
-| 5 | A playable board in the page over the same kernel; the wrap-up | Parts 5, 9 | |
+| **5** | The views and templates as resources; a playable board in the page over the same kernel (htmx, answered by the wasm kernel); `ttt-host`; the wrap-up | Parts 5, 9 | in-book board done — `tic-tac-toe-5.md`; `ttt-host` in its own PR |
 
 ## What increment 1 left for the next ones
 
@@ -232,9 +232,16 @@ What any space must do to be a game's store, in any language. `check_store(space
 3. **Sink** takes the mark as the argument `content`, **trimmed**, and keeps ANY non-empty
    mark (the rules live in `move`, not the store). An empty or all-whitespace mark is
    `InvalidArgument` naming `content`. The answer's bytes are not read by anything.
-4. **Delete** clears the square and succeeds whether or not anything was there.
-5. **Meta** (optional, recommended): describe `Source`/`Sink`/`Delete` as three actions,
-   each naming `x`, `y` as bindings, `Sink` naming `content` (see `stored_cell`).
+4. **Exists** answers `true` where a mark is played and `false` where none is — **never
+   `NotFound`** — as `text/plain`, **cacheable** (the same write cuts it). Added in increment
+   5 (ledger #580): the Rust store's Exists used to fall into its Source arm (the mark, or
+   NotFound) while the Python and Deno faces answered true/false; the faces' answer is the
+   ecosystem's convention (core's own `an_exists_answer_hangs_from_its_target_too` has the
+   same shape), so the Rust store changed. Both faces' DEFAULT Exists ("would Source
+   succeed") already passes. Bad spellings are refused on Exists too.
+5. **Delete** clears the square and succeeds whether or not anything was there.
+6. **Meta** (optional, recommended): describe `Source`/`Sink`/`Exists`/`Delete` as four
+   actions, each naming `x`, `y` as bindings, `Sink` naming `content` (see `stored_cell`).
 
 Two consequences a peer store must know, neither checkable by `check_store`:
 
@@ -269,3 +276,108 @@ Two consequences a peer store must know, neither checkable by `check_store`:
 - The ledger-563 fix and a scoped golden thread would make N games cost what one does; both
   are core.
 
+
+## What increment 5 left for the next ones
+
+### The names
+
+All under `urn:iki:tutorial:ttt:`, all bound in `space_with_store`, so they exist in every
+game through the corridor with no wiring:
+
+| name | endpoint | verbs | answers |
+|---|---|---|---|
+| `template:{name}` | `ttt-template` | Source | a template, `text/html`, `Never`; unknown name → `NotFound` |
+| `view:board` | `ttt-view-board` | Source | the board as HTML, cacheable |
+| `view:status` | `ttt-view-status` | Source | `X to play.` / `O has won.` / `A draw.` — HTML text, cacheable |
+| `view:play:{x}:{y}` | `ttt-view-play` | **Sink only** | Sinks `move:{x}:{y}`; answers the `reply` template |
+| `view:reset` | `ttt-view-reset` | **Sink only** | Sinks `reset`; answers the `reply` template |
+| `reset` | `ttt-reset` | **Sink only** | Deletes every square a `LINES` rule passes through; `The board is clear` |
+
+`view:board` reads the templates, the **winner** and the nine **cells** (not the board text:
+a cell's answer is the exact mark, and the board concatenates marks, which is ambiguous for a
+multi-character mark). `view:status` reads the winner and, while the game is on, the turn.
+Both are composites, so they are cached per game and a move recomputes them through what it
+touched. A view's Sink answer is not cacheable; the reply READS `view:status`, so after a
+play the status is cached again (the new one) and the board is not until someone asks.
+
+### The template format — what every host of this markup implements
+
+Templates are the files in `templates/` (`TEMPLATES` in `lib.rs`), served at
+`template:{name}`: `game`, `board`, `square-open`, `square-taken`, `square-closed`,
+`status-turn`, `status-won`, `status-draw`, `reply`. A file's final newline is not part of
+the template.
+
+- A **slot** is `{{` NAME (` ` INTEGER)* `}}`: NAME is `[a-z][a-z-]*`, each INTEGER a plain
+  integer (`0`, `-2`; not `01`, `+1`, `-0`), one space before each. The regex is
+  `\{\{([a-z][a-z-]*)((?: -?[0-9]+)*)\}\}`. Rust refuses any other `{{` (`fill`/`slots`).
+- A value is **text, HTML-escaped** (`& < > " '` → `&amp; &lt; &gt; &quot; &#39;`), except
+  the two slots that take another template's output raw: `{{square X Y}}` and `{{status}}`.
+- No loops, no conditions. Which template to use is chosen by the filler:
+  - `board`: each `{{square X Y}}` is the square template for the cell at (X, Y), filled with
+    `{{x}}`, `{{y}}`, `{{mark}}`: **`square-taken`** if the cell is not `-`; else
+    **`square-open`** while the winner is `-`; else **`square-closed`**. The template, not the
+    code, decides which squares exist (a test pins them to the `LINES` squares).
+  - status: winner `-` → **`status-turn`** with `{{mark}}` = the turn; `draw` →
+    **`status-draw`**; `X`/`O` → **`status-won`** with `{{mark}}` = the winner.
+  - `reply` (a play's or reset's answer): `{{message}}` = what the write answered, **or the
+    error's Display on a refusal** (the view never looks inside an error — so ledger #575's
+    typed precondition variant will render with no view change), `{{status}}` = the status.
+  - `game`: the page shell; `{{game}}` = the game's id as the host names it (text).
+- The JS filler in `books/ikigai/js/ttt.js` (`fill`) is the reference in a dozen lines; a
+  Python one is `re.sub` with the regex above and a callback.
+
+### The path ↔ IRI rule — what every host of this markup implements
+
+The markup's `hx-get` / `hx-post` values are **relative** paths and name **no game and no
+host**: `iki/tutorial/ttt/view/board`, `iki/tutorial/ttt/view/play/1/1`,
+`iki/tutorial/ttt/view/status`, `iki/tutorial/ttt/view/reset`
+(`the_markup_names_no_game_and_no_host` pins it).
+
+- A request for the relative path `a/b/c` is a request for `urn:a:b:c` — the segments joined
+  by `:` after `urn:` (ikigai-web's mechanical `/noun/partition/key` default, made relative).
+- `GET` → `Source`, `POST` → `Sink`, `DELETE` → `Delete`. The body is ignored by every view.
+- **The game is where the page is.** The part of the URL in front of the relative path is
+  the host's; the host turns it into the game's corridor. It is never read from the request
+  body, a query parameter, or a header.
+- A path that is absolute, has an empty, `.` or `..` segment, or is a URL, is not answered.
+
+Hosts, as built or planned:
+
+| host | where the game comes from | status |
+|---|---|---|
+| the book page (`js/ttt.js`) | `data-game` on the `.ttt-play` element holding the board | done |
+| `ttt-host` over HTTP | the path prefix `/game/{id}/` (the page's `<base href>`) | next PR |
+| Python / Deno apps | their own path prefix, same rule | increment 6 |
+
+### The in-page shim
+
+- `js/ttt.js` loads the vendored htmx (`books/ikigai/src/vendor/htmx-2.0.4.min.js`, byte-
+  identical to `ikigai-web/assets/htmx.min.js`, sha256 `e209dda5…fb447`, 0BSD) only on a
+  page with a board, fills `template:game` into each `.ttt-play[data-game]`, and
+  `htmx.process`es it.
+- **Mechanism:** `htmx:beforeRequest` → `preventDefault()` for requests from inside a board
+  → path → IRI → `issueAsync(game, verb, iri)` (a new wasm export over `Page::issue`, which
+  issues in the SAME `Scope` the game's cells run in) → `htmx.swap(target, html,
+  {swapStyle: "innerHTML"})`, which fires afterSwap/afterSettle as a real response would. It
+  does not implement `hx-swap` (the markup uses only innerHTML).
+- **Ids are namespaced per game** by the shim (`a-ttt-square-1-1`): htmx restores focus by
+  id after a swap, and two boards on one page would otherwise duplicate every id.
+- **The DOM is a copy the kernel cannot cut.** `run.js` now dispatches `ikigai:cell-ran`
+  with the cell's game after every run, and the shim re-fetches that board's status (its own
+  `hx-get`), which re-renders the board. `run_chapter_in_page_order` replays both the boards'
+  initial loads and these refreshes, so the chapter's pinned outputs include them.
+- `run.js` exposes its loader as `window.ikigaiBookKernel`, so the board and the cells share
+  one wasm instance.
+
+### Accessibility, as built
+
+Buttons for squares (keyboard-operable with no code); every square named (`2,0: empty,
+play here`, `X at 1,1`, `0,1: empty, the game is over`); unplayable squares are
+`aria-disabled="true"`, not `disabled`, so they stay focusable and focus survives the
+re-render; the status line is `role="status"` and is the target of every play and reset, so
+what a move did is announced once. Its content is plain text on purpose: an element inside it
+would fire extra `htmx:afterSettle` events and re-trigger the board. Checked with axe-core in
+a real browser (light, rust, navy themes: no violations in the boards) and with jsdom
+`a11y/axe.mjs` + `book-a11y` over a with-drafts build. ⚠ CI does not see this page's board:
+drafts are not built by `pages.yml`, and jsdom cannot load the wasm, so CI's axe only ever
+sees the fallback line. Re-run the in-browser check when the page is linked.

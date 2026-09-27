@@ -32,8 +32,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use ikigai_core::{
-    Capability, Error, Expiry, Fallback, Kernel, Provenance, Representation, Request, Scope, Space,
-    SpaceEntry, Tracer,
+    Capability, Error, Expiry, Fallback, Iri, Kernel, Provenance, Representation, Request, Scope,
+    Space, SpaceEntry, Tracer, Verb,
 };
 use ikigai_engine::Engine;
 use ikigai_resolve::{CacheStatus, Resolver};
@@ -75,7 +75,14 @@ pub fn page_kernel() -> Kernel {
 pub struct Page {
     kernel: Arc<Kernel>,
     root: Rc<Engine>,
-    games: RefCell<BTreeMap<String, Rc<Engine>>>,
+    games: RefCell<BTreeMap<String, Game>>,
+}
+
+/// One game on the page: the engine its cells run in, and the chain it is played in — the
+/// same chain, cloned, so a cell and a click in one game are one game to the cache.
+struct Game {
+    engine: Rc<Engine>,
+    scope: Scope,
 }
 
 impl Default for Page {
@@ -99,20 +106,57 @@ impl Page {
     /// on first use with an empty in-memory store, and kept for the life of the page, since
     /// a game's corridor is built ONCE (its name is the cache's claim that it is one game).
     pub fn engine(&self, game: Option<&str>) -> Result<Rc<Engine>, String> {
-        let Some(id) = game else {
-            return Ok(Rc::clone(&self.root));
-        };
-        if let Some(engine) = self.games.borrow().get(id) {
-            return Ok(Rc::clone(engine));
+        match game {
+            None => Ok(Rc::clone(&self.root)),
+            Some(id) => self.game(id, |game| Rc::clone(&game.engine)),
+        }
+    }
+
+    /// Game `id`, made on first use, handed to `with`.
+    fn game<T>(&self, id: &str, with: impl FnOnce(&Game) -> T) -> Result<T, String> {
+        if let Some(game) = self.games.borrow().get(id) {
+            return Ok(with(game));
         }
         let store = Arc::new(tic_tac_toe::stored_space(Arc::default()));
         let scope = tic_tac_toe::game(id, store).map_err(|e| e.to_string())?;
-        let engine = Rc::new(Engine::new(InGame::new(Arc::clone(&self.kernel), scope)));
-        self.games
-            .borrow_mut()
-            .insert(id.to_string(), Rc::clone(&engine));
-        Ok(engine)
+        let game = Game {
+            engine: Rc::new(Engine::new(InGame::new(
+                Arc::clone(&self.kernel),
+                scope.clone(),
+            ))),
+            scope,
+        };
+        let answer = with(&game);
+        self.games.borrow_mut().insert(id.to_string(), game);
+        Ok(answer)
     }
+
+    // ANCHOR: page_issue
+    /// One request, straight to the kernel — not a line of the REPL — in game `game`'s
+    /// chain, or the root's when it names none. What the page's htmx shim sends for a click:
+    /// `GET` a view is a `Source`, `POST` a play is a `Sink`, in the game the board's markup
+    /// names. Resolves to the representation, or the kernel's refusal as its message.
+    pub fn issue(
+        &self,
+        game: Option<&str>,
+        verb: Verb,
+        target: &str,
+    ) -> impl std::future::Future<Output = Result<Representation, String>> + 'static {
+        let kernel = Arc::clone(&self.kernel);
+        let scope = match game {
+            None => Ok(Scope::empty()),
+            Some(id) => self.game(id, |game| game.scope.clone()),
+        };
+        let target = Iri::parse(target).map_err(|e| format!("not a resource name: {e}"));
+        async move {
+            let request = Request::new(verb, target?);
+            kernel
+                .issue_in(request, &Capability::root(), scope?)
+                .await
+                .map_err(|e| e.to_string())
+        }
+    }
+    // ANCHOR_END: page_issue
 }
 
 // ANCHOR: in_game
@@ -262,6 +306,52 @@ fn eval_in(game: Option<String>, line: String) -> js_sys::Promise {
         };
         Ok(JsValue::from_str(&json))
     })
+}
+
+/// One request to the page's kernel, as the htmx shim (`js/ttt.js`) sends it: `verb` is
+/// `source`, `sink`, `exists` or `delete`; `game` is the game the board's markup names, or
+/// empty for the root's. Resolves to the JSON of [`reply_to_json`].
+#[wasm_bindgen(js_name = issueAsync)]
+pub fn issue_async(game: String, verb: String, target: String) -> js_sys::Promise {
+    let reply = match verb_named(&verb) {
+        Ok(verb) => {
+            let game = (!game.is_empty()).then_some(game);
+            Ok(PAGE.with(|page| page.issue(game.as_deref(), verb, &target)))
+        }
+        Err(refusal) => Err(refusal),
+    };
+    wasm_bindgen_futures::future_to_promise(async move {
+        let json = match reply {
+            Ok(issued) => reply_to_json(issued.await),
+            Err(refusal) => reply_to_json(Err(refusal)),
+        };
+        Ok(JsValue::from_str(&json))
+    })
+}
+
+/// A verb by the name the shim sends — the four an htmx request can map to.
+pub fn verb_named(name: &str) -> Result<Verb, String> {
+    match name {
+        "source" => Ok(Verb::Source),
+        "sink" => Ok(Verb::Sink),
+        "exists" => Ok(Verb::Exists),
+        "delete" => Ok(Verb::Delete),
+        other => Err(format!("`{other}` is not a verb the page sends")),
+    }
+}
+
+/// One issued request as JSON for the shim: `{ "kind": "output", "type", "text" }`, or
+/// `{ "kind": "error", "text" }` with the kernel's refusal.
+pub fn reply_to_json(reply: Result<Representation, String>) -> String {
+    match reply {
+        Ok(representation) => serde_json::json!({
+            "kind": "output",
+            "type": representation.repr_type.to_string(),
+            "text": String::from_utf8_lossy(&representation.bytes),
+        }),
+        Err(refusal) => serde_json::json!({ "kind": "error", "text": refusal }),
+    }
+    .to_string()
 }
 
 /// The names the in-page kernel binds, one per line — what a cell may name. The URN gate
@@ -414,6 +504,15 @@ mod tests {
         found
     }
 
+    /// The games of the playable boards a chapter places, in page order.
+    fn boards(chapter: &str) -> Vec<String> {
+        chapter
+            .split("<div class=\"ttt-play\" data-game='")
+            .skip(1)
+            .map(|rest| rest[..rest.find('\'').expect("a closed data-game")].to_string())
+            .collect()
+    }
+
     /// Every cell of one applied chapter, run natively in PAGE ORDER against one fresh
     /// kernel — which is what the page does — and compared with the output the chapter
     /// shows. The chapter's expected output is therefore not a claim about the kernel but a
@@ -438,6 +537,30 @@ mod tests {
 
         // One page: one kernel, and an engine per game a cell names — as in the browser.
         let page = Page::new();
+        // A playable board (`<div class="ttt-play" data-game='…'>`, Part V) loads when the
+        // kernel does, before any cell can run: `js/ttt.js` fetches the page shell, and the
+        // shell's markup asks for the status and then the board. And after a cell runs in a
+        // board's game, the shim refreshes that board the same way. Both are reads that fill
+        // the cache, so the chapter's cells see them — replay them here, in the same order.
+        let boards = boards(&chapter);
+        let refresh = |game: &str| {
+            for view in [
+                "urn:iki:tutorial:ttt:view:status",
+                "urn:iki:tutorial:ttt:view:board",
+            ] {
+                futures::executor::block_on(page.issue(Some(game), Verb::Source, view))
+                    .unwrap_or_else(|e| panic!("board {game}: {view}: {e}"));
+            }
+        };
+        for game in &boards {
+            futures::executor::block_on(page.issue(
+                Some(game),
+                Verb::Source,
+                "urn:iki:tutorial:ttt:template:game",
+            ))
+            .expect("the page shell");
+            refresh(game);
+        }
         let mut transcript = Vec::new();
         for (game, command, expected) in &cells {
             let engine = page.engine(game.as_deref()).expect("a valid game id");
@@ -454,11 +577,20 @@ mod tests {
                     .map(|l| l.trim_end().to_string())
                     .collect()
             };
-            assert_eq!(
-                tidy(&got),
-                tidy(expected),
-                "{file}: the cell `{command}` answers differently from the chapter.\n--- got ---\n{got}"
-            );
+            // `BOOK_CELLS_PRINT=1 cargo test -p book-wasm --lib -- --nocapture` prints what
+            // each cell answers instead of comparing: how a new chapter's outputs are read.
+            if std::env::var_os("BOOK_CELLS_PRINT").is_some() {
+                println!("=== {game:?}\n{command}\n--- got\n{got}=== end");
+            } else {
+                assert_eq!(
+                    tidy(&got),
+                    tidy(expected),
+                    "{file}: the cell `{command}` answers differently from the chapter.\n--- got ---\n{got}"
+                );
+            }
+            if let Some(game) = game.as_deref().filter(|g| boards.iter().any(|b| b == g)) {
+                refresh(game);
+            }
             transcript.push(got);
         }
         transcript
@@ -681,6 +813,73 @@ mod tests {
         let boards: Vec<&String> = t[12..].iter().collect();
         assert_eq!(boards.len(), 3);
         assert!(boards[0] != boards[1] && boards[1] != boards[2] && boards[0] != boards[2]);
+    }
+
+    /// Part V's cells, the same way — with its two boards loaded first, as the page loads
+    /// them, and each refreshed after a cell runs in its game.
+    #[test]
+    fn the_fifth_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("tic-tac-toe-5.md", 8);
+
+        // A template is served as written, slots and all.
+        assert!(t[0].contains("aria-label=\"{{mark}} at {{x}},{{y}}\">{{mark}}</button>"));
+        assert!(
+            t[0].ends_with("{{mark}} to play.\n[computed]\n"),
+            "{}",
+            t[0]
+        );
+        // The boards loaded both views in game a before any cell ran.
+        assert_eq!(t[1], "cached\nX to play.\n[cached]\n");
+        // A play through the view: the move cut both views, the reply re-read the status.
+        assert_eq!(
+            t[2],
+            "X plays 1,1. O to play.\n[uncacheable]\nnot cached\ncached\n"
+        );
+        // …and the board refresh after the cell cached the board again, with X in the centre.
+        assert!(
+            t[3].contains("aria-label=\"X at 1,1\">X</button>"),
+            "{}",
+            t[3]
+        );
+        assert!(t[3].ends_with("[cached]\n"), "{}", t[3]);
+        // A refused play is answered in the kernel's words, then the status.
+        assert!(
+            t[4].starts_with(
+                "invalid argument `x, y`: 1,1 is taken — X played there. O to play.\n"
+            ),
+            "{}",
+            t[4]
+        );
+        // The trace: the three lines through the corner recomputed, the other five served.
+        let trace = &t[5];
+        let verdict = |node: &str| {
+            trace
+                .lines()
+                .find(|line| line.contains(node))
+                .unwrap_or_else(|| panic!("{node} is not a node of:\n{trace}"))
+                .to_string()
+        };
+        assert!(verdict("view:status ").contains(" · computed · "));
+        for line in [
+            "cells:0.0,1.0,2.0 ",
+            "cells:0.0,0.1,0.2 ",
+            "cells:0.0,1.1,2.2 ",
+        ] {
+            assert!(verdict(line).contains(" · computed · "), "{line}");
+        }
+        for line in [
+            "cells:0.1,1.1,2.1 ",
+            "cells:0.2,1.2,2.2 ",
+            "cells:1.0,1.1,1.2 ",
+            "cells:2.0,2.1,2.2 ",
+            "cells:2.0,1.1,0.2 ",
+            "template:status-turn ",
+        ] {
+            assert!(verdict(line).contains(" · cached · "), "{line}");
+        }
+        // Game b: untouched, but recomputed — a's move on 0,0 cut the name in every game.
+        assert_eq!(t[6], "X to play.\n[computed]\n");
+        assert_eq!(t[7], "The board is clear. X to play.\n[uncacheable]\n");
     }
 
     /// A game's engine runs in that game; the root's does not; and a game id that is not
