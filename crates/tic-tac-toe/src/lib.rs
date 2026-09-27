@@ -28,6 +28,15 @@
 //!   exports is the endpoints wrapped in that table.
 //! * `urn:iki:tutorial:ttt:board` — the three rows, read through the aliases, one per line.
 //!
+//! Increment 3 makes the rules resources, and puts the one constraint at the edge:
+//!
+//! * `urn:iki:tutorial:ttt:checkset:{x}:{y}` — the **CheckSet**: the names of the lines
+//!   through a cell, read from [`LINES`]. Computed once and never un-cached.
+//! * `urn:iki:tutorial:ttt:winner` and `urn:iki:tutorial:ttt:turn` — pure functions of the
+//!   lines and the board, cacheable like them.
+//! * `urn:iki:tutorial:ttt:move:{x}:{y}` — **Sink only**: plays the side to move, or
+//!   refuses. The stored cell underneath still takes any mark anywhere.
+//!
 //! Read the book: `mdbook serve books/ikigai`, or `./scripts/serve-with-drafts.sh` while
 //! the chapters are still drafts.
 
@@ -36,9 +45,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 use ikigai_core::{
-    ActionSpec, Alias, AliasTable, ArgSpec, AsyncFnEndpoint, Description, EndpointSpace, Error,
-    FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Result,
-    UriTemplate, Verb,
+    ActionSpec, Alias, AliasTable, ArgRef, ArgSpec, AsyncFnEndpoint, Description, EndpointSpace,
+    Error, FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Request,
+    Result, UriTemplate, Verb,
 };
 use ikigai_vocab::TurtleRenderer;
 
@@ -407,6 +416,262 @@ pub fn board() -> AsyncFnEndpoint {
 }
 // ANCHOR_END: board
 
+// ANCHOR: rule_names
+/// Which lines pass through `(x, y)`: a list of their names.
+pub const CHECKSET: &str = "urn:iki:tutorial:ttt:checkset:{x}:{y}";
+
+/// Who has won: `X`, `O`, [`EMPTY`] for nobody yet, or [`DRAW`].
+pub const WINNER: &str = "urn:iki:tutorial:ttt:winner";
+
+/// Whose move it is: `X` or `O`, or [`EMPTY`] once the game is over.
+pub const TURN: &str = "urn:iki:tutorial:ttt:turn";
+
+/// Play the side to move at `(x, y)` — `Sink` only.
+pub const MOVE: &str = "urn:iki:tutorial:ttt:move:{x}:{y}";
+
+/// What the winner answers when every square is played and no line is won.
+pub const DRAW: &str = "draw";
+// ANCHOR_END: rule_names
+
+/// The CheckSet's name at `(x, y)`.
+pub fn checkset_name(x: i64, y: i64) -> String {
+    format!("urn:iki:tutorial:ttt:checkset:{x}:{y}")
+}
+
+/// The move's name at `(x, y)`.
+pub fn move_name(x: i64, y: i64) -> String {
+    format!("urn:iki:tutorial:ttt:move:{x}:{y}")
+}
+
+/// Source `name` through the invocation and answer its text — a sub-request, so a
+/// dependency of whatever the caller computes from it.
+async fn text_of(inv: &Invocation<'_>, name: &str) -> Result<String> {
+    let iri =
+        Iri::parse(name).map_err(|e| Error::Endpoint(format!("the game's name {name}: {e}")))?;
+    Ok(String::from_utf8_lossy(&inv.source(&iri).await?.bytes).into_owned())
+}
+
+// ANCHOR: checkset
+/// The names of the lines `table` makes that pass through the cell spelled `member`
+/// (`x.y`), in name order.
+///
+/// Read from the table, never listed by hand: a line passes through a cell when its
+/// target's member list holds that cell. A string match is exact because a cell has one
+/// spelling. The answer is the ALIAS names — `row:1`, not `cells:0.1,1.1,2.1` — because
+/// they read as the game; each resolves to its line, and the line's name is the cache key.
+/// Sorted, because a table keeps its rules most-specific-first, not in the order written.
+fn lines_through<'t>(table: &'t AliasTable, member: &str) -> Vec<&'t str> {
+    let line = CELLS.trim_end_matches("{list}");
+    let mut names: Vec<&str> = table
+        .rules()
+        .iter()
+        .filter(|rule| {
+            rule.to()
+                .strip_prefix(line)
+                .is_some_and(|list| list.split(',').any(|m| m == member))
+        })
+        .map(|rule| rule.from())
+        .collect();
+    names.sort_unstable();
+    names
+}
+
+/// `ttt-checkset`: the lines through `(x, y)`, one name per line of text.
+///
+/// A representation whose content is the names of other resources. It depends on its
+/// name and a constant table and on nothing else — no sub-request, so no dependency any
+/// `Sink` could cut — and `.cacheable()` is `Expiry::Never`: computed once in the life of
+/// the kernel, and served from then on, whatever is played. A cell off the board is on no
+/// line and answers the empty list; the cell itself is still a cell.
+pub fn checkset(table: Arc<AliasTable>) -> FnEndpoint {
+    FnEndpoint::new("ttt-checkset", move |inv: &Invocation<'_>| {
+        let member = format!("{}.{}", coordinate(inv, "x")?, coordinate(inv, "y")?);
+        let names = lines_through(&table, &member).join("\n");
+        Ok(Representation::new(text_plain_utf8(), names.into_bytes()).cacheable())
+    })
+    .with_description(
+        Description::new("ttt-checkset")
+            .title("CheckSet")
+            .summary(
+                "The names of the lines through (x, y), one per line; none for a cell off \
+                 the board.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .input(coordinates()[0].clone())
+            .input(coordinates()[1].clone())
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: checkset
+
+// ANCHOR: winner
+/// The mark that fills `line` — every mark one kind, and not the empty cell — if one does.
+fn filled_by(line: &str) -> Option<char> {
+    let mut marks = line.chars();
+    let first = marks.next()?;
+    (first.to_string() != EMPTY && marks.all(|mark| mark == first)).then_some(first)
+}
+
+/// `ttt-winner`: `X` or `O` if a line is filled by one of them, [`DRAW`] if every square
+/// is played and none is, and [`EMPTY`] while the game goes on.
+///
+/// A pure function of the lines, read by their alias names from the table, through the
+/// kernel. It names no thread: its dependencies are the eight lines, so a move recomputes
+/// the lines through its square and this, and serves the others from cache. A board no
+/// game reaches — both marks with a full line, played straight into the store — answers
+/// the mark of whichever full line the table lists first.
+pub fn winner(table: Arc<AliasTable>) -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new(
+        "ttt-winner",
+        move |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            let table = Arc::clone(&table);
+            Box::pin(async move {
+                let mut lines = Vec::new();
+                for rule in table.rules() {
+                    lines.push(text_of(inv, rule.from()).await?);
+                }
+                let answer = match lines.iter().find_map(|line| filled_by(line)) {
+                    Some(mark) => mark.to_string(),
+                    None if lines.iter().all(|line| !line.contains(EMPTY)) => DRAW.to_string(),
+                    None => EMPTY.to_string(),
+                };
+                Ok(Representation::new(text_plain_utf8(), answer.into_bytes()).cacheable())
+            })
+        },
+    )
+    .with_description(
+        Description::new("ttt-winner")
+            .title("Winner")
+            .summary("X or O once a line is theirs, draw on a full board, - until then.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: winner
+
+// ANCHOR: turn
+/// `ttt-turn`: whose move it is — `X` when the marks are level (so `X` opens), `O` when
+/// `X` is ahead — and [`EMPTY`] once the winner says the game is over.
+///
+/// A pure function of two resources, the winner and the board, and cacheable for the same
+/// reason they are.
+pub fn turn() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("ttt-turn", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+        Box::pin(async move {
+            let side = if text_of(inv, WINNER).await? != EMPTY {
+                EMPTY
+            } else {
+                let board = text_of(inv, BOARD).await?;
+                let count = |mark: char| board.chars().filter(|&c| c == mark).count();
+                if count('X') <= count('O') {
+                    "X"
+                } else {
+                    "O"
+                }
+            };
+            Ok(Representation::new(text_plain_utf8(), side.as_bytes().to_vec()).cacheable())
+        })
+    })
+    .with_description(
+        Description::new("ttt-turn")
+            .title("Turn")
+            .summary("Whose move it is: X (who opens) or O; - once the game is over.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: turn
+
+// ANCHOR: move
+/// `ttt-move`: play the side to move at `(x, y)` — the one place the rules are enforced.
+///
+/// Each check reads a resource the game already has, and the move itself is a `Sink` to
+/// the stored cell issued through the invocation — the same request a player could make
+/// by hand, and so the same cut of the stored cell's thread. Nothing about turns or boards
+/// moves into the stored cell, which still takes any mark at any square.
+///
+/// Refused, with [`Error::InvalidArgument`]: a square no line passes through (off the
+/// board), any square once the game is over, a square already played, and a `content`
+/// mark that is not the side to play. `content` is optional; left out, the move plays
+/// whoever's turn it is.
+pub fn play_move() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("ttt-move", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+        Box::pin(async move {
+            if inv.request.verb != Verb::Sink {
+                return Err(Error::Endpoint(
+                    "a move is played, not read: `sink` it (read the board instead)".into(),
+                ));
+            }
+            let (x, y) = (coordinate(inv, "x")?, coordinate(inv, "y")?);
+            let square = |detail: String| Error::InvalidArgument {
+                name: "x, y".to_string(),
+                detail,
+            };
+            if text_of(inv, &checkset_name(x, y)).await?.is_empty() {
+                return Err(square(format!(
+                    "{x},{y} is off the board — no line passes through it"
+                )));
+            }
+            match text_of(inv, WINNER).await?.as_str() {
+                won if won == EMPTY => {}
+                DRAW => return Err(square("the game is over — a draw".to_string())),
+                mark => return Err(square(format!("the game is over — {mark} has won"))),
+            }
+            let there = text_of(inv, &cell_name(x, y)).await?;
+            if there != EMPTY {
+                return Err(square(format!("{x},{y} is taken — {there} played there")));
+            }
+            let side = text_of(inv, TURN).await?;
+            let offered = match inv.inline_str("content") {
+                Ok(mark) => mark.trim(),
+                Err(Error::MissingArgument(_)) => "",
+                Err(other) => return Err(other),
+            };
+            if !offered.is_empty() && offered != side {
+                return Err(Error::InvalidArgument {
+                    name: "content".to_string(),
+                    detail: format!("it is {side}'s turn, not {offered}'s"),
+                });
+            }
+            let stored = Iri::parse(stored_name(x, y))
+                .map_err(|e| Error::Endpoint(format!("the stored cell's name: {e}")))?;
+            let play = Request::new(Verb::Sink, stored)
+                .with_arg("content", ArgRef::Inline(side.clone().into_bytes()));
+            inv.issue(play).await?;
+            Ok(Representation::new(
+                text_plain_utf8(),
+                format!("{side} plays {x},{y}").into_bytes(),
+            ))
+        })
+    })
+    .with_description(
+        Description::new("ttt-move")
+            .title("Move")
+            .summary(
+                "Play the side to move at (x, y), if the rules allow it: on the board, the \
+                 game not over, the square free, and the mark (if given) the side to play.",
+            )
+            .verb(Verb::Sink)
+            .verb(Verb::Meta)
+            .input(coordinates()[0].clone())
+            .input(coordinates()[1].clone())
+            .input(
+                ArgSpec::new("content")
+                    .summary(
+                        "the mark to play — checked against the turn; left out, the turn plays",
+                    )
+                    .class(XSD_STRING)
+                    .one_of(["X", "O"])
+                    .optional(),
+            )
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: move
+
 // ANCHOR: space
 /// The game's space: the endpoints, wrapped in the table that names the lines.
 pub fn space() -> Alias {
@@ -416,12 +681,18 @@ pub fn space() -> Alias {
 /// [`space`], with the stored cells in a [`CellStore`] the caller keeps — so a test can
 /// read the counter.
 pub fn space_over(store: Arc<CellStore>) -> Alias {
+    // One table, shared: the aliases rewrite through it, and the rules read it.
+    let table = Arc::new(lines());
     let endpoints = EndpointSpace::new()
         .bind(template(STORED), stored_cell(store))
         .bind(template(CELL), platonic_cell())
         .bind(template(CELLS), line_of_cells())
-        .bind(template(BOARD), board());
-    Alias::new(Arc::new(lines()), Arc::new(endpoints))
+        .bind(template(BOARD), board())
+        .bind(template(CHECKSET), checkset(Arc::clone(&table)))
+        .bind(template(WINNER), winner(Arc::clone(&table)))
+        .bind(template(TURN), turn())
+        .bind(template(MOVE), play_move());
+    Alias::new(table, Arc::new(endpoints))
 }
 // ANCHOR_END: space
 
@@ -458,6 +729,51 @@ mod tests {
             "urn:iki:tutorial:ttt:cells:0.0,1.0,-2.7"
         );
         assert_eq!(row_name(2), "urn:iki:tutorial:ttt:row:2");
+        for (source, name) in [(CHECKSET, checkset_name(1, -1)), (MOVE, move_name(1, -1))] {
+            assert_eq!(template(source).source(), source);
+            assert!(name.ends_with(":1:-1"), "{name}");
+        }
+        assert_eq!(template(WINNER).source(), WINNER);
+        assert_eq!(template(TURN).source(), TURN);
+    }
+
+    #[test]
+    fn a_line_is_filled_by_one_mark_three_times_and_never_by_the_empty_cell() {
+        assert_eq!(filled_by("XXX"), Some('X'));
+        assert_eq!(filled_by("OOO"), Some('O'));
+        assert_eq!(filled_by("XX-"), None);
+        assert_eq!(filled_by("XOX"), None);
+        assert_eq!(filled_by("---"), None);
+        assert_eq!(filled_by(""), None);
+    }
+
+    /// The CheckSet is read from the table, so it answers for whatever table it is given:
+    /// four lines through a 3×3 centre, three through a corner, two through an edge — and,
+    /// over another table, that table's lines.
+    #[test]
+    fn the_lines_through_a_cell_come_from_the_table() {
+        let table = lines();
+        let through = |member: &str| lines_through(&table, member).len();
+        assert_eq!(through("1.1"), 4);
+        assert_eq!(through("0.0"), 3);
+        assert_eq!(through("1.0"), 2);
+        assert_eq!(through("3.1"), 0);
+        assert_eq!(
+            lines_through(&table, "2.2"),
+            [
+                "urn:iki:tutorial:ttt:column:2",
+                "urn:iki:tutorial:ttt:diagonal:0",
+                "urn:iki:tutorial:ttt:row:2"
+            ]
+        );
+        let other =
+            AliasTable::parse("exact urn:x:long urn:iki:tutorial:ttt:cells:0.0,1.0,2.0,3.0\n")
+                .expect("parses");
+        assert_eq!(lines_through(&other, "3.0"), ["urn:x:long"]);
+        // `1.0` is a member; `11.0` merely contains the text `1.0`.
+        let tricky =
+            AliasTable::parse("exact urn:x:t urn:iki:tutorial:ttt:cells:11.0\n").expect("parses");
+        assert!(lines_through(&tricky, "1.0").is_empty());
     }
 
     /// The eight rules, checked against the geometry they claim: each alias names the

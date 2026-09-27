@@ -364,6 +364,87 @@ mod tests {
         assert!(t[8].ends_with("X--\n-O-\n---\n[cached]\n"), "{}", t[8]);
     }
 
+    /// Part III's cells, the same way — the rules as resources, the refusals at the edge,
+    /// and what one move recomputes, stated rather than only matched.
+    #[test]
+    fn the_third_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("tic-tac-toe-3.md", 13);
+
+        // The CheckSet: names of other resources, computed once, then served.
+        assert!(
+            t[0].starts_with("urn:iki:tutorial:ttt:column:1\n"),
+            "{}",
+            t[0]
+        );
+        assert!(
+            t[0].ends_with("urn:iki:tutorial:ttt:row:1\n[cached]\n"),
+            "{}",
+            t[0]
+        );
+        // Off the board: the empty list, still an answer.
+        assert!(t[1].ends_with("[computed]\n[computed]\n"), "{}", t[1]);
+        // A fresh board: nobody has won, X opens.
+        assert_eq!(t[2], "-\n[computed]\nX\n[computed]\n");
+        // Each refusal once, each an InvalidArgument naming what to fix.
+        assert!(
+            t[4].starts_with("error: invalid argument `content`:"),
+            "{}",
+            t[4]
+        );
+        assert_eq!(
+            t[5].matches("error: invalid argument `x, y`:").count(),
+            2,
+            "{}",
+            t[5]
+        );
+        assert!(t[11].starts_with("error: invalid argument `x, y`: the game is over"));
+        // One move through the corner: its three lines, the winner and the turn are cut;
+        // a line that misses it and the corner's CheckSet are not.
+        assert!(
+            t[8].ends_with(
+                "not cached\nnot cached\nnot cached\nnot cached\nnot cached\ncached\ncached\n"
+            ),
+            "{}",
+            t[8]
+        );
+        // The trace: three lines recomputed, five served, and one stored cell read.
+        let trace = &t[9];
+        let verdict = |node: &str| {
+            trace
+                .lines()
+                .find(|line| line.contains(node))
+                .unwrap_or_else(|| panic!("{node} is not a node of:\n{trace}"))
+                .to_string()
+        };
+        for line in [
+            "cells:0.0,1.0,2.0 ",
+            "cells:0.0,0.1,0.2 ",
+            "cells:0.0,1.1,2.2 ",
+        ] {
+            assert!(verdict(line).contains(" · computed · "), "{line}");
+        }
+        for line in [
+            "cells:0.1,1.1,2.1 ",
+            "cells:0.2,1.2,2.2 ",
+            "cells:1.0,1.1,1.2 ",
+            "cells:2.0,2.1,2.2 ",
+            "cells:2.0,1.1,0.2 ",
+        ] {
+            assert!(verdict(line).contains(" · cached · "), "{line}");
+        }
+        assert_eq!(trace.matches("ttt-stored").count(), 1, "{trace}");
+        // A win detected, and the turn closes.
+        assert!(
+            t[10].ends_with("X\n[computed]\n-\n[computed]\n"),
+            "{}",
+            t[10]
+        );
+        // Following the CheckSet's links reads the winning diagonal; the CheckSet itself
+        // is still the entry computed in the first cell.
+        assert!(t[12].contains("XXX\n"), "{}", t[12]);
+        assert!(t[12].ends_with("cached\n"), "{}", t[12]);
+    }
+
     /// What the chapter says `urn:kernel:topology` shows, without printing it: the game's
     /// space is an `ik:Alias` carrying eight rules over the four bound templates.
     #[test]

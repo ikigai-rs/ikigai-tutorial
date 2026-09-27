@@ -19,7 +19,7 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
 |---|---|---|---|
 | **1** | Name the sets on paper (the resource model); the atoms: a stored cell and the platonic empty cell; wire the game into the page's kernel; runnable cells | Parts 1–3 | done — `tic-tac-toe-1.md` |
 | **2** | Composites: a line of cells by name, rows / columns / diagonals as zero-code `Alias`es, the board; one move recomputes the lines through it and the board (trace shows it) | Part 4 | done — `tic-tac-toe-2.md` |
-| 3 | Rules as resources: CheckSet (a representation that is a list of IRIs), winner, whose turn; constraint at the edge, model kept loose | Parts 6–7 | |
+| **3** | Rules as resources: CheckSet (a representation that is a list of IRIs), winner, whose turn; constraint at the edge, model kept loose | Parts 6–7 | done — `tic-tac-toe-3.md` |
 | 4 | Many games: the game as context (a `Scope` corridor) versus the game in the name — argue it | Part 8 | |
 | 5 | A playable board in the page over the same kernel; the wrap-up | Parts 5, 9 | |
 
@@ -104,3 +104,69 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
   stored cell still accepting any mark. Refusing an out-of-turn move is the first thing
   that makes `stored`'s Sink conditional — keep the store loose and put the rule in a
   new resource in front of it, or the atoms stop being reusable.
+
+## What increment 3 left for the next ones
+
+- **Names.** `urn:iki:tutorial:ttt:checkset:{x}:{y}` (endpoint `ttt-checkset`: Source),
+  `urn:iki:tutorial:ttt:winner` (`ttt-winner`: Source), `urn:iki:tutorial:ttt:turn`
+  (`ttt-turn`: Source) and `urn:iki:tutorial:ttt:move:{x}:{y}` (`ttt-move`: **Sink only**;
+  any other verb is an `Endpoint` error). Name helpers: `checkset_name`, `move_name`.
+  Part I's table now lists the move too; its three `urn-gate: unbound` directives are gone
+  (re-adding one fails the gate — checked).
+- **The CheckSet answers ALIAS names, sorted** (`column:1`, `diagonal:0`, `diagonal:1`,
+  `row:1`), newline-joined with no trailing newline, and the empty string off the board.
+  Sorted because `AliasTable::rules()` is most-specific-first (longest `from`, then
+  alphabetical), NOT the order `LINES` is written in — a CheckSet in "table order" would
+  have read diagonals, columns, rows. It is computed from the shared `Arc<AliasTable>` that
+  `space_over` now builds once and hands to both the `Alias` and the rules: a line passes
+  through `x.y` when its target's member list holds exactly that member (a string match,
+  exact only because of the one-spelling rule). `.cacheable()`, no sub-requests: nothing
+  but `urn:kernel:cut` can ever un-cache it.
+- **Winner** answers `X`, `O`, `-` (`EMPTY`) or `draw` (`DRAW`). It reads ALL eight lines
+  through their aliases in the table's own order (so a trace lists diagonals, columns, rows)
+  and decides after: first full line in that order, else `draw` if no line holds `-`, else
+  `-`. Reading all eight rather than stopping at the first win keeps "a pure function of the
+  eight lines" literally true; an early return would also be correct and lazier.
+- **Turn** answers `X` when X's count ≤ O's (X opens), `O` otherwise, and `-` whenever the
+  winner is not `-`. It reads the winner and the board.
+- **The move** checks, in order: on the board (its CheckSet is non-empty), game not over
+  (winner), square free (the platonic cell), `content` (optional; empty or absent plays the
+  turn; anything else must equal the turn). Every refusal is `InvalidArgument`: the square
+  ones are named `` `x, y` `` (there is no single argument to name), the mark one
+  `content`. Messages, verbatim: `3,1 is off the board — no line passes through it`,
+  `the game is over — X has won` / `the game is over — a draw`, `1,1 is taken — X played
+  there`, `it is O's turn, not X's`. On success it issues `Sink stored:{x}:{y}` through the
+  invocation and answers `X plays 1,1`. `content` declares `one_of(["X","O"])` and
+  `.optional()`; nothing enforces `one_of` at issue time (only `urn:kernel:validate` reads it).
+- **A Sink issued inside an endpoint cuts exactly like a top-level one** — pinned by
+  `tests/rules.rs::a_sink_issued_inside_the_move_cuts_the_stored_cells_thread`.
+- **`..` CAN follow the CheckSet's links**, through `urn:iki:fn:compose`: the map feeds each
+  name as compose's one declared argument, `src`, and compose sources it (a line has no
+  `$a{}` markers, so compose is exactly "dereference"). The engine's map has no deref of
+  its own — the stage's target is fixed and the item is its INPUT — so without a
+  "source the IRI you are given" endpoint in the page it could not have been done.
+- **The page's `cells` parser does not unescape `&#39;`** (only `&#32; &lt; &gt; &quot;
+  &amp;`). A raw `'` inside an expected `<pre>` is fine; inside `data-cmd='…'` it is not.
+
+### What increment 4 (many games) inherits
+
+- ⚠ **Exact aliases do not parameterize.** `LINES` names `row:0` … `diagonal:1` for ONE
+  board. Putting the game in the name (`…:game:{g}:row:0`) would need either eight rules per
+  game or `prefix` rules, and a prefix rule rewrites a prefix, not an infix: the game id
+  would have to be at the END of the name, or every composite would have to build
+  game-qualified names itself. That argues for the game as a `Scope` corridor: the names
+  stay as they are and the stored cell's state is looked up per scope.
+- **Only `stored` holds state.** Everything above it (cell, line, board, CheckSet, winner,
+  turn, move) is a pure function of names it sources, so a corridor that changes what
+  `stored:{x}:{y}` resolves to changes the whole game with no code above it moving. The
+  CheckSet is the exception worth stating: it depends on nothing, so ONE entry could serve
+  every game — check whether the cache key under a scope keeps that true, or whether each
+  game recomputes its own copy (harmless, but it would un-teach "computed once").
+- **The cache and the probe.** Every cell in parts II–III probes by LINE name because
+  `cache` does not resolve (ledger #561). Under a corridor, a probe will also need the
+  scope, and `Kernel::is_cached_in` exists for that (core 0.1.75) — the engine's `cache`
+  command would need a way to name it.
+- **The move reads four resources before it writes.** Under a scope, each of those
+  sub-requests must resolve in the SAME game's scope as the Sink; that is the property to
+  pin first (a move in game A refused because game B is over would be the bug).
+
