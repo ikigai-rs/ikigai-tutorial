@@ -125,8 +125,6 @@ a personal wing and a public one.
                                                        └─ door urn:personal:calendar
 ```
 
-<!-- urn-gate: unbound urn:kernel:topology — the arrangement as a resource, ikigai-core 0.1.78;
-     this book pins 0.1.72, so no host it builds binds it yet. Delete this line on the bump. -->
 <!-- urn-gate: illustration urn:ikigai:chain:root — the entry node the kernel names an empty chain by. -->
 <!-- urn-gate: illustration urn:ikigai:chain:root:layer:1 — a list cell of the rendered chain. -->
 <!-- urn-gate: illustration urn:ikigai:space:_:1 — an unnamed space, skolemized by the renderer. -->
@@ -221,12 +219,19 @@ answer**. For the arrangement above it is `false`; remove `<urn:example:space:ga
 from the first list and it is `true`. A wall injected as a corridor for one request is a
 cell of the `ik:Chain`'s own list, ahead of the root, and the same query finds it there.
 
-Three things the query does *not* claim. A space that reports nothing about itself — a
-remote peer, or an overlay written before the kernel could ask — renders as `ik:OpaqueSpace`,
-and a path through one is *unknown*, never *no*: the walk stops there. A rewriting door is
-walked straight through, as if every code reached what is behind it, which can only
-over-report reachability — the safe direction to be wrong in. And a wall over a *narrower*
-family than the one you asked about does not count: `STRSTARTS("urn:personal:",
+What the query answers, and what it does not. It answers *exactly* for arrangements built
+from a chain, `Fallback`, `Mount`, `Limit` and `EndpointSpace` with prefix-shaped patterns —
+walls and doors over families of names, which is the arrangement above. It does not answer
+for three kinds of node on a path *below* a wall: an opaque space (a remote peer, or an
+overlay written before the kernel could ask), a rewriting door, and a template door or
+family whose codes are not a prefix. A path through one of those is *unknown*, never *no*,
+and a second query — which the kernel's formal document will carry from ikigai-core
+0.1.79 — reports exactly those nodes so that "unknown" is a list rather than a shrug. The
+rewriting door is the one to take seriously: a code from *outside* the family walks past
+the wall, is rewritten *into* the family by an alias behind it, and opens the private
+door, because the wall is over the name asked for and not over the door. The first query
+alone says guarded; the arrangement leaks. And, as before, a wall over a *narrower* family
+than the one you asked about does not count: `STRSTARTS("urn:personal:",
 "urn:personal:calendar:")` is false, and a wall over one door is not a wall over the wing.
 
 You can run this against any store that speaks SPARQL — the ikigai host's own `urn:sparql:ask`
@@ -387,7 +392,7 @@ you](payoff.md).
 | 1, again: the arrangement | `Limit`, a door onto a wall; `urn:kernel:topology`, the corridor you stand in as Turtle | built (ikigai-core 0.1.76, 0.1.78); the gatekeeper check is the query above |
 | 2. the key | request id + capability fingerprint + chain fingerprint | built; whole chain, not consulted corridors |
 | 3. authority shrinks | `attenuate` is the intersection; `clamp` is it on the wire | built; enforced everywhere a capability is declared |
-| 4. lossless vs lossy | a transreptor declares the pair it converts between | **declared, not enforced**: nothing checks that a declared transreption is injective |
+| 4. lossless vs lossy | a transreptor declares the pair it converts between, and `.lossy()` says which are projections | declared, and the planner refuses a lossy hop without consent (ikigai-core 0.1.77); nothing checks that a declared transreption is injective |
 | 5. the clock | golden threads: a write cuts, a read never does | built |
 
 One sentence ties them. A pinned context — a named corridor that answers `now` with the

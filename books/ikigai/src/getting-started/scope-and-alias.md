@@ -317,33 +317,130 @@ confined endpoint can read a list of names it cannot resolve (names, never conte
 the declared-capability floor runs unchanged, against whichever endpoint the chain
 resolved to: a corridor shadowing an open door with a gated one is gated.
 
+## As of: the corridor that pins time
+
+Everything this chapter has gestured at comes together in one corridor. "Now" is the
+least cacheable resource there is — a live door, `Always`, and anything that reads it
+inherits that — and a corridor that binds `now` to one fixed instant turns it into a pure
+function of its context. Since 0.1.75 the chain can carry a **clock** as well as doors:
+`Scope::with_named_at(name, space, clock)` injects the corridor and sets the chain's clock
+in one call, the only way a chain acquires one, so the binding and the clock cannot
+disagree. `inv.now()` then answers from the chain's clock before the kernel's. An endpoint
+that reads time by *resolution* and one that reads it from the *clock* see the same
+instant, and the result is `Never` under the corridor and `Always` under the root —
+checked here with `Kernel::is_cached_in`, the cache probe for a chain, rather than by
+counting entries:
+
+<!-- urn-gate: illustration urn:iki:tutorial:now — the time door, bound only inside the
+     block below: live in its root, pinned in its corridor. -->
+<!-- urn-gate: illustration urn:iki:tutorial:stamp — the endpoint that reads time both
+     ways; bound only inside the block below. -->
+
+```rust
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{
+    AsyncFnEndpoint, Capability, EndpointSpace, Exact, Expiry, FixedClock, FnEndpoint, Iri,
+    Kernel, ReprType, Representation, Request, Scope, Verb,
+};
+
+fn text(s: String) -> Representation {
+    Representation::new(ReprType::new("text/plain"), s.into_bytes())
+}
+fn millis(time: Option<ikigai_core::Time>) -> String {
+    time.map(|t| t.as_millis().to_string()).unwrap_or_default()
+}
+
+// `now`, as the root binds it: the kernel's clock, read through the invocation. A live
+// door — uncacheable, the default `Always`.
+let live_now = FnEndpoint::new("now", |inv| Ok(text(millis(inv.now()))));
+// `stamp` reads time both ways an endpoint can — by resolution and from the clock — and
+// is a pure function of what it read.
+let stamp = AsyncFnEndpoint::new("stamp", |inv| {
+    Box::pin(async move {
+        let resolved = inv.source(&Iri::parse("urn:iki:tutorial:now").unwrap()).await?;
+        let resolved = String::from_utf8_lossy(&resolved.bytes).into_owned();
+        Ok(text(format!("{resolved} {}", millis(inv.now()))).cacheable())
+    })
+});
+let kernel = Kernel::new(Arc::new(
+    EndpointSpace::new()
+        .bind(Exact::new("urn:iki:tutorial:now"), live_now)
+        .bind(Exact::new("urn:iki:tutorial:stamp"), stamp),
+))
+.with_clock(Arc::new(FixedClock::at(2_000)));
+let root = Capability::root();
+let stamp = || Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:stamp").unwrap());
+
+// The corridor: `now` pinned to one instant AND the clock derived from it, in one call.
+let six_pm = || {
+    Scope::empty().with_named_at(
+        Iri::parse("urn:iki:tutorial:ctx:six-pm").unwrap(),
+        Arc::new(EndpointSpace::new().bind(
+            Exact::new("urn:iki:tutorial:now"),
+            FnEndpoint::new("now-at-six", |_| Ok(text("1000".to_string()).cacheable())),
+        )),
+        Arc::new(FixedClock::at(1_000)),
+    )
+};
+
+// Under the root: live on both faces, and not kept.
+let live = block_on(kernel.issue(stamp(), &root)).unwrap();
+assert_eq!(String::from_utf8_lossy(&live.bytes), "2000 2000");
+assert_eq!(live.expiry, Expiry::Always);
+assert!(!kernel.is_cached(&stamp(), &root));
+
+// Under the corridor: one instant, whichever seam the endpoint used — and immutable.
+// Cached in that chain, and in that chain only.
+let pinned = block_on(kernel.issue_in(stamp(), &root, six_pm())).unwrap();
+assert_eq!(String::from_utf8_lossy(&pinned.bytes), "1000 1000");
+assert_eq!(pinned.expiry, Expiry::Never);
+assert!(kernel.is_cached_in(&stamp(), &root, &six_pm()));
+assert!(!kernel.is_cached(&stamp(), &root));
+```
+
+That is as-of resolution: the same request, the same endpoint, and a *then* in place of
+a *now* for the whole resolution and every cache entry under it. Two things keep it
+honest. The corridor's name is still the whole of its identity — the fingerprint does not
+include the clock, so two corridors named alike with different clocks would share
+answers, and the pairing is the injector's claim exactly as the name is. And validity is
+judged on the **kernel's** clock, never the chain's: a corridor pinned in the past cannot
+un-expire an `At(deadline)` entry that has passed, and one pinned in the future cannot
+expire a fresh one. The chain's clock is what an endpoint *sees*; the kernel's is what
+decides whether to serve.
+
 ## Not yet
 
-The chain landed in 0.1.72 and four kernel faces have not caught up with it, stated so
-you do not discover them at a keyboard (`docs/design/resolution-scope.md` in
-`ikigai-core` is the full account; the ecosystem's ledger tracks the gaps as items 516
-and 511):
+The chain landed in 0.1.72, and by 0.1.75 three of the four kernel faces that used to
+answer for the empty chain answer for the chain instead: **selection**
+(`select_transreptor_in`, `select_action_in` — a confined endpoint's manifold no longer
+offers an action its chain cannot resolve, and `Meta … as=` plans its route inside the
+chain), **the cache probe** (`is_cached_in`, and a scope column on `urn:kernel:cache`),
+and **the pipe** (`issue_with_incoming_in`). What remains, stated so you do not discover
+it at a keyboard (`docs/design/resolution-scope.md` in `ikigai-core` is the full account):
 
-- **Selection is over the root.** `urn:kernel:actions` and the transreptor search do not
-  know the chain, so inside a confinement the manifold can offer an action the chain
-  cannot resolve.
-- **`is_cached` and `urn:kernel:cache` answer for the empty chain only.** The two-entry
-  assertion above counted; it did not probe.
 - **The REPL's pipeline runs in the plain root**, so nothing on this page has a Run
   button.
 - **The chain does not cross the wire.** A mount inside a confining corridor forwards
   with no chain, and the remote resolves in its own root — confining to a corridor that
   contains a mount confines to whatever the mount reaches. The wire's default refuses a
   non-empty chain rather than dropping it, so a module endpoint inside a confinement
-  fails loudly instead of quietly escaping.
+  fails loudly instead of quietly escaping. Carrying it is a protocol bump, its own
+  decision.
+- **The key holds the whole chain, not the corridors consulted.** Sound and
+  over-partitioned, as above. The datum a consulted-corridors key would need —
+  *which* space answered — is reported since 0.1.78 (`Resolved::answered_by`); keying
+  on it is not built.
 
-And two things that are not built at all: a **limiter** — a door that stops a family of
-names in place, so subtraction today happens only by building a smaller root — and any
-shipped **corridor**. The one this chapter keeps gesturing at is a corridor that binds
-the time resource to a fixed instant, turning "now" into "then" for a whole resolution
-and its cache entries with it. The design is decided (the chain would carry a clock
-derived from that corridor, and the kernel keeps its own clock for validity); the code
-is not there.
+And one thing that was "not built at all" here at 0.1.72 and is now a construct:
+**`Limit`**, the door that stops a family of names in place (0.1.76). `Limit::new(prefix)`
+is a space that answers a *hit on nothing* for every name under `prefix` and a miss for
+everything else, so `Fallback([Limit("urn:personal:"), root])` is the root minus that
+family — by structure, with no decision left to misconfigure per request — and a `Limit`
+injected with `with_named` is the same wall at a position in the chain. A limited name
+is `Unresolved`, never `Denied`, and the catalog subtracts it too.
 
 The three constructs — mount, alias, scope — are the arrangement, the naming, and the
 context of resolution. [What resolution buys you](payoff.md) is what you get for having

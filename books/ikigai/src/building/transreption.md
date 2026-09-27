@@ -47,7 +47,10 @@ worth knowing before you write one:
 
 The endpoint below turns the ikigai description vocabulary — the Turtle every `Meta`
 answers with — into Markdown. It parses real triples rather than lines, so it works on
-one endpoint's description or a whole catalog, and it knows nothing about which:
+one endpoint's description or a whole catalog, and it knows nothing about which. It is
+also, deliberately, not a transreption in the strict sense: it keeps the title, the
+summary and the inputs and drops the rest, so the Turtle cannot be recovered from it. That
+makes it a *rendering* — a projection — and the description says so:
 
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/transreption.rs:impl}}
@@ -69,7 +72,8 @@ its name:
 ```
 
 And then the payoff. `camel-case` has never heard of Markdown. Ask for its description
-*as* Markdown and the kernel renders Turtle, finds the route, and runs it:
+*as* Markdown — with consent to the projection, the next section — and the kernel renders
+Turtle, finds the route, and runs it:
 
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/transreption.rs:meta_as}}
@@ -99,15 +103,70 @@ from every endpoint in the host by binding one endpoint that declared what it co
 > Markdown, that is the chapter's one disappointment, and it is stated here so it is not
 > discovered at a keyboard.
 
-> ⚠ Two more things the declaration does not do. It is **declared, not enforced**: a
-> transreptor claims to change form without changing what is represented — the function
-> is injective, a summary or a thumbnail is not — and nothing in core checks the claim,
-> so a lossy conversion registered as a transreptor becomes a silent hop in a route and
-> the caller receives a projection believing it received the same resource in another
-> form. A lossless flag on the declaration is designed and not built. And when no route
-> reaches the type a `Meta` request asked for, the kernel **substitutes** the canonical
-> Turtle rather than failing: a description in a form you did not ask for, over no
-> description. Both are stated so neither is a surprise.
+## Declared, and the planner honours it
+
+A transreptor claims to change form without changing what is represented: the function
+is injective, and the caller can treat the output as the same resource in another
+syntax. A summary, a thumbnail, an embedding, this chapter's Markdown are not injective.
+They are **projections** — different resources that have lost information — and a
+projection registered as a transreptor would become a silent hop in a route, handing the
+caller less than it asked for under exactly the type it asked for, which no reader of
+the type can detect. So the declaration carries the distinction, since core 0.1.77:
+`.transreptor(from, to)` claims lossless by default, and `.lossy()` says this edge is
+not. It is a declaration, not a checked property — core cannot decide injectivity — but
+the planner reads it. Selection plans through lossless edges only, unless the caller
+consents; consent *widens* the search without reordering it, so a lossless route still
+wins wherever one exists, and every step of a plan reports its own declaration.
+
+What that looks like at the `Meta` face. Ask for Markdown and the kernel finds the route,
+sees that its one hop is a projection, and refuses — typed, naming the step and the
+consent, never a silent projection and never a substitution that would hide that a route
+exists. Ask again with `lossy=allow` and the same route runs:
+
+```rust
+# extern crate building_endpoints;
+# extern crate ikigai_core;
+# extern crate futures;
+use futures::executor::block_on;
+use ikigai_core::{ArgRef, Capability, Error, Iri, Request, Verb};
+
+let kernel = building_endpoints::kernel_in(None);
+let root = Capability::root();
+let meta_as_markdown = || {
+    Request::new(Verb::Meta, Iri::parse("urn:iki:tutorial:camel-case").unwrap())
+        .with_arg("as", ArgRef::Inline(b"text/markdown".to_vec()))
+};
+
+// Without consent: refused, and the refusal says which step is lossy and what consents.
+let refused = block_on(kernel.issue(meta_as_markdown(), &root)).unwrap_err();
+assert!(matches!(refused, Error::Endpoint(_)));
+assert_eq!(
+    refused.to_string(),
+    "endpoint error: meta face `text/markdown` is reachable only through a lossy \
+     transreptor (`urn:iki:tutorial:markdown`): a projection loses information and \
+     would not describe the endpoint; pass `lossy=allow` to consent"
+);
+
+// With consent: the route runs, and what comes back is Markdown.
+let consented = meta_as_markdown().with_arg("lossy", ArgRef::Inline(b"allow".to_vec()));
+let repr = block_on(kernel.issue(consented, &root)).unwrap();
+assert_eq!(repr.repr_type.media_type, "text/markdown");
+assert!(String::from_utf8_lossy(&repr.bytes).starts_with("## Camel-case (`camel-case`)\n"));
+```
+
+The error is an `Endpoint` error on purpose. The face is not absent, so it is not
+`NotFound`; no capability is at issue, so it is not `Denied` — consent is per request,
+not per holder; and the arguments are well-formed, so it is not `InvalidArgument`. A
+mistyped consent (`lossy=alow`) *is* an `InvalidArgument`, rather than being read as the
+default and blamed on the face. At the REPL the same refusal is what
+`describe urn:iki:tutorial:camel-case text/markdown` prints.
+
+> ⚠ One thing the declaration still does not do. When **no route at all** reaches the
+> type a `Meta` request asked for, the kernel **substitutes** the canonical Turtle rather
+> than failing: a description in a form you did not ask for, over no description. The
+> type on what comes back says `text/turtle`, so a caller that reads it knows. The
+> refusal above is only for a route that exists and is lossy; a route that does not
+> exist is a substitution, and that is unchanged.
 
 ## Try it
 

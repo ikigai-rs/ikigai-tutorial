@@ -83,15 +83,15 @@ struct Claim {
 
 const MODULE: Source = Source::Crate {
     name: "ikigai-module",
-    version: "0.3.0",
+    version: "0.3.1",
 };
 const CLI: Source = Source::Crate {
     name: "ikigai-cli",
-    version: "0.1.27",
+    version: "0.1.28",
 };
 const EMBEDDED: Source = Source::Crate {
     name: "ikigai-embedded",
-    version: "0.1.27",
+    version: "0.1.28",
 };
 const WEB_DEMO: Source = Source::GitHub {
     repo: "ikigai-web-demo",
@@ -102,7 +102,7 @@ const WEB_DEMO: Source = Source::GitHub {
 const CLAIMS: &[Claim] = &[
     Claim {
         chapter: "modules/status.md",
-        stamp: "ikigai-module` 0.3.0's own first line still calls it",
+        stamp: "ikigai-module` 0.3.1's own first line still calls it",
         says: "the crate's first line still says Phase 1: in-process proof",
         source: MODULE,
         file: "src/lib.rs",
@@ -183,7 +183,7 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/status.md",
-        stamp: "`ikigai-cli` 0.1.27 by manifest",
+        stamp: "`ikigai-cli` 0.1.28 by manifest",
         says: "the CLI does not embed wasmtime",
         source: CLI,
         file: "Cargo.toml",
@@ -201,7 +201,7 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "beyond/agent.md",
-        stamp: "runs as root, loudly** (`ikigai-cli` 0.1.27)",
+        stamp: "runs as root, loudly** (`ikigai-cli` 0.1.28)",
         says: "ikigai mcp with no grant prints that it runs unrestricted",
         source: CLI,
         file: "src/main.rs",
@@ -210,7 +210,7 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "getting-started/configuration.md",
-        stamp: "(`ikigai-cli` 0.1.27) reads a set of `IKIGAI_*` variables",
+        stamp: "(`ikigai-cli` 0.1.28) reads a set of `IKIGAI_*` variables",
         says: "IKIGAI_FILES is read by the embedded host",
         source: EMBEDDED,
         file: "src/lib.rs",

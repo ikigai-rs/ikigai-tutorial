@@ -5,22 +5,23 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-module` **0.3.0**, stamped on
-2026-09-26, and its shell examples were last probed against `ikigai-cli` **0.1.26** on
-2026-09-26 (0.1.27 was on crates.io that day; the probe runs whatever binary is installed); a test (`crates/book-urns/tests/book_claims.rs`) can re-check each stamped claim
-against the published crate it names, so that when one of them stops being true the fix is a
-diff, not a discovery.
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.78** and
+`ikigai-module` **0.3.1**, stamped on 2026-09-27, and its shell examples were last probed
+against `ikigai-cli` **0.1.26** on 2026-09-26 (0.1.28 is on crates.io as of 2026-09-27; the
+probe runs whatever binary is installed); a test (`crates/book-urns/tests/book_claims.rs`)
+can re-check each stamped claim against the published crate it names, so that when one of
+them stops being true the fix is a diff, not a discovery.
 
 ## Phase 1
 
-`ikigai-module` 0.3.0's own first line still calls it **"the dynamically-loadable module
+`ikigai-module` 0.3.1's own first line still calls it **"the dynamically-loadable module
 format (Phase 1: in-process proof)"**. That line undersells the crate — it has grown a
 socket transport, at 0.2.0 capability enforcement across the boundary, and at 0.3.0 typed
 errors, golden threads and endpoint cards crossing the wire, since somebody wrote it —
 which is worth knowing as a habit: a crate's one-line self-description is the
 thing least likely to be updated when the crate changes.
 
-What is actually there, at `ikigai-module` 0.3.0:
+What is actually there, at `ikigai-module` 0.3.1 (0.3.1 over 0.3.0 is a constructor form, no new surface):
 
 | piece | state |
 |---|---|
@@ -105,9 +106,41 @@ builds one, and a wasm module has no ambient filesystem or network to begin with
 *not* exist is any of the native half: no host in the ecosystem embeds wasmtime, and no
 crate sets an execution or memory budget — the word "fuel" appears in none of them
 (checked across the organization's repositories on 2026-09-26; the probe re-checks
-`ikigai-module` 0.3.0 and `ikigai-cli` 0.1.27 by manifest). Treat this section as the
+`ikigai-module` 0.3.1 and `ikigai-cli` 0.1.28 by manifest). Treat this section as the
 direction and the table above as the state, and do not plan a deployment on the
 difference.
+
+## The kernel since this book's last bump
+
+The chapters above build against `ikigai-core` 0.1.78. Between the previous edition's
+0.1.72 and it, six releases landed in nine days, each one sentence here and taught where a
+chapter teaches it:
+
+- **0.1.73 — the two cache-soundness holes closed, and a depth budget.** A cacheable read
+  hangs from its own name whether or not it declares it, and a failed sub-request is a
+  dependency — a thread on the missing name, or no caching at all for a result built on a
+  refusal ([Golden threads in practice](../getting-started/golden-threads.md)); and a
+  sub-request has a nesting budget, `Kernel::with_max_depth`, default 64, refused as
+  `DepthExceeded` rather than overflowed.
+<!-- urn-gate: illustration urn:kernel:bindings — a golden thread's name, not a resource;
+     see "Golden threads in practice". -->
+- **0.1.74 — `urn:kernel:bindings`.** One thread meaning "the binding set changed", which
+  every face derived from the bindings hangs from and the party that rebinds a running
+  kernel cuts ([Golden threads in practice](../getting-started/golden-threads.md), "Not
+  yet"); and the capability floor memoizes an endpoint's description instead of rebuilding
+  it per request.
+- **0.1.75 — the first temporal corridor.** The chain reaches selection, the cache probe
+  and the pipe, and `Scope::with_named_at` carries a clock derived from the corridor that
+  pins time ([Scope and alias](../getting-started/scope-and-alias.md), "As of").
+- **0.1.76 — `Limit`.** A door onto a wall: a family of names carved out of a chain by
+  structure, `Unresolved` rather than `Denied`, and subtracted from the catalog ([Scope
+  and alias](../getting-started/scope-and-alias.md), "Not yet").
+- **0.1.77 — lossless by declaration.** `.lossy()` on a transreptor's description, and a
+  planner that refuses a lossy hop without `lossy=allow`
+  ([Transreption](../building/transreption.md)).
+- **0.1.78 — the arrangement is a resource.** Spaces can carry a name, a hit reports which
+  space answered, and `urn:kernel:topology` renders the chain you are standing in as
+  Turtle, every node an IRI. No chapter teaches it yet.
 
 ## Exercises
 
