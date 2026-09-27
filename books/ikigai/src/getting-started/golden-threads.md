@@ -167,21 +167,24 @@ about 20 µs to about 1.0 s; and 68 tests stayed green, because the types are id
 either way. Nothing catches it but measuring the read — so when you add a source to a
 cached resource, measure the read before and after. That is the only signal there is.
 
-## Not yet
+## Two holes, closed
 
-Two holes in the mechanism, on the record so you build around them rather than into
-them. Both are the kernel's to close (its design notes track them as one arc, ledger item
-512); neither is closed at 0.1.72.
+Two holes in the mechanism were on the record here through core 0.1.72, so you would
+build around them rather than into them. Both closed in 0.1.73 (the kernel's design notes
+track them as one arc, ledger item 512), and the block that used to pin the *old*
+behaviour — it was written to fail the day the kernel closed the hole, and it did — now
+shows the new one.
 
-**A cacheable read does not automatically hang from its own name.** The kernel stores the
-threads an endpoint *declared* plus those of its sub-requests; it does not pair a
-cacheable `Source` with a thread named after its own canonical target. So the `Sink`'s
-auto-cut invalidates a cached read of the same name only if that read said
-`.depends_on(<its own name>)` — which `title` does, by hand, and which `ikigai-fs` does.
-Every other cacheable endpoint fronting mutable state is one forgotten line from serving
-stale bytes after a write through the same name. The block below **pins today's
-behaviour**: it will fail the day the kernel closes the hole, and that failure is the
-signal to rewrite this paragraph.
+**A cacheable read hangs from its own name, whether or not it says so.** The kernel adds
+the thread named after the request's canonical target to every cacheable `Source` and
+`Exists` representation — the same name the `Sink`'s auto-cut fires on — so a write
+through a name evicts the cached read through that name with no help from the endpoint.
+Before 0.1.73 the kernel stored only the threads an endpoint *declared* plus those of its
+sub-requests, and every cacheable endpoint fronting mutable state was one forgotten
+`.depends_on(<its own name>)` from serving stale bytes after a write. `title` in Part I
+still declares it, by hand, and that line is now harmless rather than load-bearing: a
+thread declared twice is one thread. Here is the endpoint that used to serve stale, minus
+the line, and the `Sink` invalidating it anyway:
 
 <!-- urn-gate: illustration urn:iki:tutorial:note — a mutable resource bound only inside
      the block below, written so its cacheable read declares no thread. -->
@@ -217,27 +220,101 @@ let kernel = Kernel::new(Arc::new(
 ));
 let root = Capability::root();
 let name = || Iri::parse("urn:iki:tutorial:note").unwrap();
+let read = || Request::new(Verb::Source, name());
 
-block_on(kernel.issue(Request::new(Verb::Source, name()), &root)).unwrap();
+// The read is cached — and what came back hangs from its own name, undeclared.
+let first = block_on(kernel.issue(read(), &root)).unwrap();
+assert!(first.threads().contains(&"urn:iki:tutorial:note".into()));
+assert!(kernel.is_cached(&read(), &root));
+
+// A Sink through the same name cuts that thread. The entry is gone…
 let write = Request::new(Verb::Sink, name())
     .with_arg("content", ArgRef::Inline(b"second".to_vec()));
 block_on(kernel.issue(write, &root)).unwrap();
+assert!(!kernel.is_cached(&read(), &root));
 
-// The write cut `urn:iki:tutorial:note` — and the cached read hangs from nothing.
-let stale = block_on(kernel.issue(Request::new(Verb::Source, name()), &root)).unwrap();
-assert_eq!(String::from_utf8_lossy(&stale.bytes), "first"); // today: stale, served
+// …and the next read is the new text, not the stale one.
+let after = block_on(kernel.issue(read(), &root)).unwrap();
+assert_eq!(String::from_utf8_lossy(&after.bytes), "second");
 ```
 
-Until that closes, the rule for your own endpoints is the one `title` follows: a
-cacheable read of mutable state declares the thread named after itself.
+The rule for your own endpoints is therefore shorter than it was: a cacheable read of
+mutable state needs no thread of its own. It still needs one for every *other* name whose
+state it reads outside the kernel — a file a watcher cuts, say — because the kernel can
+only name what it resolved.
 
-**A failed sub-request records no dependency.** An endpoint that catches an `Unresolved`
-and returns a cacheable fallback is cached with no thread on the missing name, so a
-`Sink` that later creates it cuts nothing the entry hangs from; and a result built on a
-*denial* is cached the same way, though a change of grant has no thread to cut. The fix
-is to record the failure as a dependency too — a thread on the missing name; no caching
-at all for a result built on a refusal — and it is not built. When in doubt, do not
-cache a fallback.
+**A failed sub-request is a dependency too.** An endpoint that catches an `Unresolved` or
+a `NotFound` and returns a cacheable fallback is now cached with a thread on the *missing*
+name, so the cut that fires when that name is written — or the watcher's cut by hand —
+evicts the fallback. And a result built on a *denial*, or on any other error, is pushed to
+`Always`: there is no thread to cut when a grant changes, so a fallback for a refusal is
+never kept at all. Before 0.1.73 both were cached with nothing hanging from the failure.
+
+<!-- urn-gate: illustration urn:iki:tutorial:footnote — a name the block below resolves
+     and never binds, on purpose: the missing sub-request. -->
+<!-- urn-gate: illustration urn:iki:tutorial:annotated — the composite that falls back
+     when `footnote` is missing; bound only inside the block below. -->
+
+```rust
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{
+    AsyncFnEndpoint, Capability, EndpointSpace, Error, Exact, Iri, Kernel, ReprType,
+    Representation, Request, Verb,
+};
+
+// Reads `footnote` if there is one, and falls back to a cacheable "(none)" if not.
+let annotated = AsyncFnEndpoint::new("annotated", |inv| {
+    Box::pin(async move {
+        let footnote = match inv.source(&Iri::parse("urn:iki:tutorial:footnote").unwrap()).await {
+            Ok(repr) => String::from_utf8_lossy(&repr.bytes).into_owned(),
+            Err(Error::Unresolved(_)) => "(none)".to_string(),
+            Err(other) => return Err(other),
+        };
+        Ok(Representation::new(ReprType::new("text/plain"), footnote.into_bytes()).cacheable())
+    })
+});
+let kernel = Kernel::new(Arc::new(
+    EndpointSpace::new().bind(Exact::new("urn:iki:tutorial:annotated"), annotated),
+));
+let root = Capability::root();
+let read = || Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:annotated").unwrap());
+
+// Nothing binds `footnote`: the fallback is served, cached, and it hangs from the
+// name that was missing.
+let fallback = block_on(kernel.issue(read(), &root)).unwrap();
+assert_eq!(String::from_utf8_lossy(&fallback.bytes), "(none)");
+assert!(fallback.threads().contains(&"urn:iki:tutorial:footnote".into()));
+assert!(kernel.is_cached(&read(), &root));
+
+// The day `footnote` appears, whatever bound it cuts that thread — here, by hand.
+kernel.cut("urn:iki:tutorial:footnote");
+assert!(!kernel.is_cached(&read(), &root));
+```
+
+## Not yet
+
+Two things the kernel still does not do, and is not going to, stated so you do not wait
+for them.
+
+<!-- urn-gate: illustration urn:kernel:bindings — a golden thread's name, not a resource:
+     nothing is bound at it; `urn:kernel:cut` cuts it and derived faces hang from it. -->
+
+**A stored read does not hang from `urn:kernel:bindings`.** That thread (0.1.74) means
+"the set of bindings this kernel resolves against changed", and every face *derived* from
+the bindings hangs from it — the catalog, `urn:kernel:actions`, validation, every `Meta`
+answer, `urn:kernel:topology`. A cached `Source` does not: the safe version would be one
+more edge on every entry and a cache only as warm as the binding set is stable. The kernel
+cannot cut the thread itself either — its root is fixed at construction and a space
+reports resolutions, not changes — so the party that rebinds a running kernel is the
+party that says so: `Kernel::bindings_changed()` from Rust, `sink urn:kernel:cut
+urn:kernel:bindings` from the REPL, and then it cuts the names it moved, by hand.
+
+**`Meta` and the `urn:kernel:*` intrinsics get no thread on their own name**, for the
+same reason: a description is a static contract, and what invalidates it is the binding
+set, above.
 
 [Why an endpoint describes itself](self-description.md) is next: the other half of what
 made the fourth demonstration in the previous chapter possible.

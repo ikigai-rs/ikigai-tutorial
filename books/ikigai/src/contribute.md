@@ -22,7 +22,7 @@ publish = false
 [dependencies]
 # The PUBLISHED kernel, at the version whose API you actually use. Never a path to a
 # sibling checkout: a path dependency only resolves on the machine that has both.
-ikigai-core = "0.1.72"
+ikigai-core = "0.1.78"
 ```
 
 No OS or platform API unless the module is about one — read files through the kernel

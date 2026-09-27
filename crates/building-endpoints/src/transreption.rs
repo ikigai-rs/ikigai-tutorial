@@ -105,7 +105,7 @@ pub fn markdown_impl(inv: &Invocation<'_>) -> Result<Representation> {
 // ANCHOR_END: impl
 
 // ANCHOR: endpoint
-/// `markdown`: a transreptor from `text/turtle` to `text/markdown`.
+/// `markdown`: a transreptor from `text/turtle` to `text/markdown` — declared **lossy**.
 ///
 /// The description is the interesting half. `.transreptor(from, to)` is what makes the
 /// kernel *select* this endpoint when something asks for Markdown and has Turtle; the
@@ -113,6 +113,14 @@ pub fn markdown_impl(inv: &Invocation<'_>) -> Result<Representation> {
 /// a step — an auto-invocable transreptor is one whose required inputs are exactly
 /// those. Declare a third required input and it is still a transreptor, but the kernel
 /// will not pick it up on its own.
+///
+/// `.lossy()` says what kind of conversion this is. A transreption proper changes form
+/// without changing what is represented — the Turtle could be recovered from the output.
+/// This one cannot be undone: it keeps a title, a summary and the inputs and drops the
+/// verbs, the capabilities, the output type and everything else, so it is a *rendering*
+/// of the description, a projection. Saying so is what lets the kernel refuse to route a
+/// `Meta` through it silently — the caller has to consent with `lossy=allow` — while a
+/// transreptor that says nothing claims, by default, to be lossless.
 pub fn markdown() -> FnEndpoint {
     FnEndpoint::new("markdown", markdown_impl).with_description(
         Description::new("markdown")
@@ -127,7 +135,8 @@ pub fn markdown() -> FnEndpoint {
                     .optional(),
             )
             .output("text/markdown;charset=utf-8")
-            .transreptor(["text/turtle"], ["text/markdown"]),
+            .transreptor(["text/turtle"], ["text/markdown"])
+            .lossy(),
     )
 }
 // ANCHOR_END: endpoint
@@ -136,30 +145,49 @@ pub fn markdown() -> FnEndpoint {
 mod tests {
     use crate::kernel_in;
     use futures::executor::block_on;
-    use ikigai_core::{ArgRef, Capability, Iri, Request, Verb};
+    use ikigai_core::{ArgRef, Capability, Error, Iri, Request, TransreptionPolicy, Verb};
 
     // ANCHOR: selected
-    /// The kernel finds the transreptor by its declaration, not by its name.
+    /// The kernel finds the transreptor by its declaration, not by its name — and reads
+    /// the whole declaration: a lossy edge is planned only with consent.
     #[test]
     fn the_kernel_selects_the_transreptor_from_its_declaration() {
         let kernel = kernel_in(None);
-        let plan = kernel
+
+        // The default policy plans through lossless edges only, and this one is lossy.
+        assert!(kernel
             .select_transreptor("text/turtle", "text/markdown")
-            .expect("a route from Turtle to Markdown exists now");
+            .is_none());
+
+        // With consent the route is one hop, and the step reports what it declared.
+        let plan = kernel
+            .select_transreptor_with(
+                "text/turtle",
+                "text/markdown",
+                &TransreptionPolicy::allow_lossy(),
+            )
+            .expect("a route from Turtle to Markdown exists, with consent");
         assert_eq!(plan.len(), 1, "one hop");
         assert_eq!(plan[0].endpoint, "urn:iki:tutorial:markdown");
         assert_eq!(plan[0].to, "text/markdown");
+        assert!(!plan[0].lossless);
 
-        // ...and no route to a type nothing produces.
+        // ...and no route to a type nothing produces, consent or not.
         assert!(kernel
-            .select_transreptor("text/turtle", "application/pdf")
+            .select_transreptor_with(
+                "text/turtle",
+                "application/pdf",
+                &TransreptionPolicy::allow_lossy()
+            )
             .is_none());
     }
     // ANCHOR_END: selected
 
     // ANCHOR: meta_as
-    /// `Meta … as=text/markdown` on an endpoint that knows nothing about Markdown. The
-    /// renderer emits Turtle; the kernel finds the route; the answer is Markdown.
+    /// `Meta … as=text/markdown lossy=allow` on an endpoint that knows nothing about
+    /// Markdown. The renderer emits Turtle; the kernel finds the route; the answer is
+    /// Markdown. The consent is there because the route is a projection — see the
+    /// refusal test below for what happens without it.
     #[test]
     fn meta_reaches_markdown_through_the_transreptor() {
         let kernel = kernel_in(None);
@@ -167,7 +195,8 @@ mod tests {
             Verb::Meta,
             Iri::parse("urn:iki:tutorial:camel-case").expect("iri"),
         )
-        .with_arg("as", ArgRef::Inline(b"text/markdown".to_vec()));
+        .with_arg("as", ArgRef::Inline(b"text/markdown".to_vec()))
+        .with_arg("lossy", ArgRef::Inline(b"allow".to_vec()));
 
         let repr = block_on(kernel.issue(request, &Capability::root())).expect("resolves");
         let markdown = String::from_utf8(repr.bytes).expect("utf-8");
@@ -183,6 +212,26 @@ mod tests {
         );
     }
     // ANCHOR_END: meta_as
+
+    /// Without consent the lossy route is refused — typed, naming the step and the
+    /// consent — rather than taken silently or substituted with Turtle. The type asked
+    /// for IS reachable, so it is not `NotFound`; no authority is at issue, so it is not
+    /// `Denied`; the arguments are well-formed, so it is not `InvalidArgument`.
+    #[test]
+    fn meta_refuses_the_lossy_route_without_consent() {
+        let kernel = kernel_in(None);
+        let request = Request::new(
+            Verb::Meta,
+            Iri::parse("urn:iki:tutorial:camel-case").expect("iri"),
+        )
+        .with_arg("as", ArgRef::Inline(b"text/markdown".to_vec()));
+
+        let error = block_on(kernel.issue(request, &Capability::root())).unwrap_err();
+        assert!(matches!(error, Error::Endpoint(_)), "{error:?}");
+        let message = error.to_string();
+        assert!(message.contains("`urn:iki:tutorial:markdown`"), "{message}");
+        assert!(message.contains("lossy=allow"), "{message}");
+    }
 
     #[test]
     fn a_document_that_is_not_turtle_is_refused_not_rendered() {

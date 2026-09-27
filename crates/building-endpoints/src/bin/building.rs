@@ -1,7 +1,7 @@
 //! The Building endpoints host, from a shell.
 //!
 //! ```text
-//! cargo run -p building-endpoints -- --markdown    # Meta on camel-case, as Markdown
+//! cargo run -p building-endpoints -- --markdown    # Meta on camel-case, as Markdown (lossy=allow)
 //! cargo run -p building-endpoints -- --strings     # SPARQL: which endpoints take a string?
 //! cargo run -p building-endpoints -- --banner      # the configured banner text
 //! ```
@@ -21,7 +21,9 @@ fn main() {
                 Verb::Meta,
                 Iri::parse("urn:iki:tutorial:camel-case").expect("valid IRI"),
             )
-            .with_arg("as", ArgRef::Inline(b"text/markdown".to_vec()));
+            .with_arg("as", ArgRef::Inline(b"text/markdown".to_vec()))
+            // The Markdown rendering is declared lossy, so the route needs consent.
+            .with_arg("lossy", ArgRef::Inline(b"allow".to_vec()));
             block_on(kernel.issue(request, &root))
                 .map(|repr| String::from_utf8_lossy(&repr.bytes).into_owned())
         }
