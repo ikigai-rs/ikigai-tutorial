@@ -8,7 +8,7 @@ Why is `urn:iki:fn:toUpper` so long? The function upper-cases a string. Its name
 scheme, the ecosystem, the library, and only then the thing — four segments to reach one
 word, and the reader who has just come from Python or a shell notices.
 
-Peter Rodgers, who co-designed NetKernel with Tony Butterfield, gives the reason in
+Peter Rodgers, who co-designed NetKernel, gives the reason in
 *Peter's Hotel: A Set-Theoretic Formalism*, and it is not a naming convention. A resource
 is a name *and* a context — [The shape of resolution](../getting-started/shape-of-resolution.md)
 wrote it as `ρ(name, context)` — so the information that picks out a resource can live in
