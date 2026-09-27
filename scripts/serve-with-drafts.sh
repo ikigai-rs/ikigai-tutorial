@@ -31,10 +31,11 @@
 # uploads.
 #
 # THE KERNEL NEEDS two things installed, and the script checks both before building
-# anything: the `wasm32-unknown-unknown` target, and `wasm-bindgen-cli` at EXACTLY the
-# version `crates/book-wasm/Cargo.toml` pins for the `wasm-bindgen` crate (read from that
-# manifest here) — a mismatch is not a build error, it is a page whose kernel silently
-# fails to load.
+# anything: the `wasm32-unknown-unknown` standard library IN THE RUSTC THE BUILD WILL USE
+# (`$RUSTC`, else the first `rustc` on PATH — which is not always rustup's; see the check),
+# and `wasm-bindgen-cli` at EXACTLY the version `crates/book-wasm/Cargo.toml` pins for the
+# `wasm-bindgen` crate (read from that manifest here) — a mismatch is not a build error, it
+# is a page whose kernel silently fails to load.
 #
 # drafts.txt: one chapter per line — `Title | relative/path.md` (relative to src/).
 # Blank lines and lines starting with `#` are ignored.
@@ -84,30 +85,128 @@ if [ ! -f "$drafts" ]; then
 fi
 
 # ── Check the kernel's toolchain FIRST, before minutes of building ────────────────────
+#
+# ASK THE COMPILER THE BUILD WILL USE, NOT RUSTUP. cargo compiles with `$RUSTC` when it is
+# set, else with the first `rustc` on PATH — and that need not be rustup's. On a Mac with
+# Homebrew's Rust ahead of `~/.cargo/bin` on PATH, rustup's toolchain has the wasm32
+# target (so `rustup target list --installed` says yes), while the build runs Homebrew's
+# rustc, which ships no wasm32 standard library: E0463 "can't find crate for `core`" on
+# every crate, minutes later, telling the reader to run a command they already ran
+# (ledger #590). So the check asks that rustc where its wasm32 libraries live and looks for
+# `core` there, which means the same thing under rustup, Homebrew or a distro Rust.
+wasm_target=wasm32-unknown-unknown
+wasm_libdir=""
+
+# Does compiler "$1" have a wasm32 `core` to link against? Sets `wasm_libdir` to where it
+# looked. Asked from the repository root, so a toolchain override there applies as it will
+# for the build. (`--print target-libdir` prints the path whether or not it exists.)
+has_wasm_core() {
+    wasm_libdir="$(cd "$here" && "$1" --print target-libdir --target "$wasm_target" 2>/dev/null)" ||
+        return 1
+    [ -n "$wasm_libdir" ] || return 1
+    for rlib in "$wasm_libdir"/libcore-*.rlib; do
+        [ -e "$rlib" ] && return 0
+    done
+    return 1
+}
+
+sysroot_of() {
+    (cd "$here" && "$1" --print sysroot 2>/dev/null) || true
+}
+
 if [ "$kernel" = 1 ]; then
     pin="$(sed -n 's/^wasm-bindgen *= *"=\{0,1\}\([0-9][0-9.]*\)".*/\1/p' "$here/crates/book-wasm/Cargo.toml")"
     if [ -z "$pin" ]; then
         echo "could not read the wasm-bindgen pin from crates/book-wasm/Cargo.toml" >&2
         exit 1
     fi
-    missing=()
-    if command -v rustup >/dev/null 2>&1 &&
-        ! rustup target list --installed | grep -qx wasm32-unknown-unknown; then
-        missing+=("rustup target add wasm32-unknown-unknown")
+    found=()    # what was found and why it is not enough, printed first
+    missing=()  # install commands
+
+    if [ -n "${RUSTC:-}" ]; then
+        rustc_cmd="$RUSTC"
+        rustc_via="\$RUSTC, which cargo uses in place of the rustc on PATH"
+    else
+        rustc_cmd=rustc
+        rustc_via="the first rustc on PATH"
     fi
+    rustc_path="$(command -v "$rustc_cmd" 2>/dev/null || true)"
+    rustup_rustc=""
+    if command -v rustup >/dev/null 2>&1; then
+        rustup_rustc="$(cd "$here" && rustup which rustc 2>/dev/null || true)"
+    fi
+
+    if [ -z "$rustc_path" ]; then
+        found+=("No rustc found (looked for $rustc_via: $rustc_cmd).")
+        if [ -z "$rustup_rustc" ]; then
+            missing+=("Rust, through rustup: https://rustup.rs")
+        fi
+        missing+=("rustup target add $wasm_target")
+    elif ! has_wasm_core "$rustc_path"; then
+        version="$(cd "$here" && "$rustc_path" --version 2>/dev/null || echo 'version unknown')"
+        found+=("The build compiles with $rustc_path ($version),")
+        found+=("$rustc_via. It has no $wasm_target standard library:")
+        found+=("no libcore in ${wasm_libdir:-its target-libdir (rustc would not say where)}.")
+        if [ -n "$rustup_rustc" ] &&
+            [ "$(sysroot_of "$rustup_rustc")" != "$(sysroot_of "$rustc_path")" ]; then
+            # rustup is installed, and the build's rustc is not the one it would choose.
+            if has_wasm_core "$rustup_rustc"; then
+                rustup_has="rustup's toolchain HAS the target, so \`rustup target add\` changes nothing"
+            else
+                rustup_has="rustup's toolchain lacks the target as well"
+                missing+=("rustup target add $wasm_target")
+            fi
+            if [ -n "${RUSTC:-}" ]; then
+                found+=("")
+                found+=("That is not rustup's rustc ($rustup_rustc), and $rustup_has.")
+                found+=("Unset RUSTC, or point it at a rustc that has the target.")
+            else
+                bin="$(dirname "$(command -v rustup)")"
+                case "$bin" in "${HOME:-/nonexistent}"/*) bin="\$HOME${bin#"$HOME"}" ;; esac
+                found+=("")
+                found+=("That is not rustup's rustc ($rustup_rustc): another Rust — Homebrew's,")
+                found+=("for example — comes before rustup's $bin on PATH and shadows it,")
+                found+=("and $rustup_has.")
+                found+=("Put $bin first on PATH, in fish:")
+                found+=("    fish_add_path --move $bin")
+                found+=("in bash or zsh (in the shell's startup file):")
+                found+=("    export PATH=\"$bin:\$PATH\"")
+                found+=("or remove the other Rust. For this one run only, in any of them:")
+                found+=("    env PATH=\"$bin:\$PATH\" ./scripts/serve-with-drafts.sh")
+            fi
+        elif [ -n "$rustup_rustc" ]; then
+            # rustup is in charge; the target is simply not installed.
+            missing+=("rustup target add $wasm_target")
+        else
+            found+=("rustup is not installed, and a Rust that did not come from rustup may not")
+            found+=("ship a wasm32 standard library at all (Homebrew's does not). Install rustup,")
+            found+=("put its bin directory first on PATH, then add the target.")
+            missing+=("Rust, through rustup: https://rustup.rs")
+            missing+=("rustup target add $wasm_target")
+        fi
+    fi
+
     have="$(wasm-bindgen --version 2>/dev/null | sed -n 's/^wasm-bindgen \([0-9][0-9.]*\).*/\1/p' || true)"
     if [ "$have" != "$pin" ]; then
         if [ -n "$have" ]; then
-            echo "wasm-bindgen is $have; the book's kernel is pinned to $pin" >&2
+            found+=("wasm-bindgen is $have; the book's kernel is pinned to $pin.")
         fi
         missing+=("cargo install --locked wasm-bindgen-cli --version $pin")
     fi
-    if [ "${#missing[@]}" -gt 0 ]; then
-        echo "The in-page kernel cannot be built here yet. Install:" >&2
-        for cmd in "${missing[@]}"; do
-            echo "    $cmd" >&2
-        done
-        echo "or pass --no-kernel to read the prose only (every Run disabled)." >&2
+
+    if [ "${#found[@]}" -gt 0 ] || [ "${#missing[@]}" -gt 0 ]; then
+        echo "The in-page kernel cannot be built here yet." >&2
+        if [ "${#found[@]}" -gt 0 ]; then
+            echo >&2
+            printf '%s\n' "${found[@]}" >&2
+        fi
+        if [ "${#missing[@]}" -gt 0 ]; then
+            echo >&2
+            echo "Install:" >&2
+            printf '    %s\n' "${missing[@]}" >&2
+        fi
+        echo >&2
+        echo "Or pass --no-kernel to read the prose only (every Run disabled)." >&2
         exit 1
     fi
 fi
