@@ -48,7 +48,11 @@ builds the book with the unpublished chapters linked in, builds the kernel the w
 `pages.yml` does, and serves the result statically (no live reload — run it again after an
 edit). It needs the `wasm32-unknown-unknown` target and `wasm-bindgen-cli` at the version
 `crates/book-wasm` pins, and prints the install commands if either is missing;
-`--no-kernel` skips it. It builds into `target/drafts-book/`, which `./scripts/test-books.sh`
+`--no-kernel` skips it. The target is checked in the `rustc` the build will actually use
+(`$RUSTC`, else the first on PATH), not by asking rustup: with Homebrew's Rust ahead of
+`~/.cargo/bin` on PATH, rustup can have the target while cargo builds with a compiler that
+does not (E0463, "can't find crate for `core`"). The script says so when it finds that,
+and the fix is PATH order, not `rustup target add`. It builds into `target/drafts-book/`, which `./scripts/test-books.sh`
 does not wipe.
 
 Each part ends in exercises, and each exercise names the file to open, the command to run,

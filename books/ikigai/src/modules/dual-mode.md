@@ -9,6 +9,12 @@ re-checked (2026-09-26) — and **none of them is module-only**. All three are o
 cargo build --release --lib --features module --target wasm32-unknown-unknown
 ```
 
+That needs the target's standard library (`rustup target add wasm32-unknown-unknown`) in
+the `rustc` cargo actually runs. If the build fails with E0463, "can't find crate for
+`core`", after you have added the target, another Rust is ahead of rustup's on PATH —
+Homebrew's, for example, which ships no wasm32 standard library. `command -v rustc` says
+which one you have; put `~/.cargo/bin` first on PATH.
+
 ## How it is wired
 
 The `module` feature turns on optional dependencies rather than changing the crate's
