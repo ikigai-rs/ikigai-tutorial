@@ -354,3 +354,68 @@ fn the_markup_names_no_game_and_no_host() {
         assert!(!text.contains("game:"), "{name} names a game");
     }
 }
+
+/// The template format's cases, as the README states them: this reads the README's
+/// `template-cases` block and checks every line against `slots` and `escape`, so the spec a
+/// Python or TypeScript filler is written from and the Rust filler cannot drift apart.
+#[test]
+fn the_template_format_cases_in_the_readme_hold() {
+    const README: &str = include_str!("../README.md");
+    let block = README
+        .split_once("<!-- template-cases: begin -->\n```text\n")
+        .and_then(|(_, rest)| rest.split_once("```\n<!-- template-cases: end -->"))
+        .expect("the README has a template-cases block")
+        .0;
+    // A line that does not start with a kind continues the case before it (a template
+    // with a newline in it).
+    let mut cases: Vec<(&str, String)> = Vec::new();
+    for line in block.lines() {
+        match ["slots", "refuse", "escape"]
+            .into_iter()
+            .find(|kind| line.starts_with(kind))
+        {
+            Some(kind) => cases.push((kind, line[kind.len()..].trim_start().to_string())),
+            None => {
+                let (_, text) = cases.last_mut().expect("a case to continue");
+                text.push('\n');
+                text.push_str(line);
+            }
+        }
+    }
+    assert!(cases.len() >= 20, "{} cases", cases.len());
+    for (kind, text) in &cases {
+        match *kind {
+            "refuse" => assert!(slots(text).is_err(), "should be refused: {text:?}"),
+            "slots" => {
+                let (template, expected) = text.split_once('\t').expect("a tab");
+                let read = slots(template).unwrap_or_else(|e| panic!("{template:?}: {e}"));
+                let shown: Vec<String> = read
+                    .iter()
+                    .map(|slot| {
+                        std::iter::once(slot.name.clone())
+                            .chain(slot.args.iter().map(i64::to_string))
+                            .collect::<Vec<_>>()
+                            .join(" ")
+                    })
+                    .collect();
+                let shown = if shown.is_empty() {
+                    "-".to_string()
+                } else {
+                    shown.join(" | ")
+                };
+                assert_eq!(shown, expected, "{template:?}");
+                // Filling what was read leaves no `{{` behind.
+                let filled = fill(template, |_| Ok(Fill::Text("v".into()))).expect("fills");
+                assert!(!filled.contains("{{"), "{filled}");
+            }
+            _ => {
+                let (raw, escaped) = text.split_once('\t').expect("a tab");
+                assert_eq!(escape(raw), escaped, "{raw:?}");
+                assert_eq!(
+                    fill("{{v}}", |_| Ok(Fill::Text(raw.into()))).expect("fills"),
+                    escaped
+                );
+            }
+        }
+    }
+}

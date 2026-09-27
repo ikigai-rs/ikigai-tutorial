@@ -310,3 +310,138 @@ fn the_command_line_says_what_to_serve() {
         );
     }
 }
+
+/// The games are listed in one order — sorted — whatever order `--game` named them: the
+/// startup list, every page's navigation, and the catalog's gateway names.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_games_are_listed_sorted_whatever_order_the_flags_came_in() {
+    let host = Arc::new(Host::build(&options(&["--game", "b", "--game", "a"])).expect("a host"));
+    assert_eq!(host.games().collect::<Vec<_>>(), ["a", "b"]);
+
+    let in_catalog: Vec<String> = host
+        .ipc_kernel()
+        .entries()
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|entry| {
+            let rest = entry.pattern.strip_prefix("urn:game:")?;
+            Some(rest.split_once(':')?.0.to_string())
+        })
+        .fold(Vec::new(), |mut seen, id| {
+            if seen.last() != Some(&id) {
+                seen.push(id);
+            }
+            seen
+        });
+    assert_eq!(in_catalog, ["a", "b"]);
+
+    let addr = serve_http(host).await;
+    let (_, page) = http(addr, "GET", "/game/b/").await;
+    let nav = &page[page.find("<nav").expect("a navigation")..];
+    let a = nav
+        .find("href=\"/game/a/\"")
+        .expect("game a in the navigation");
+    let b = nav
+        .find("href=\"/game/b/\"")
+        .expect("game b in the navigation");
+    assert!(a < b, "{nav}");
+}
+
+/// The root game has a gateway name too, so a client can spell every game one way:
+/// `urn:game:root:…` over the socket, `/game/root/…` over HTTP. The plain names still work.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_root_game_answers_at_its_gateway_name_too() {
+    let host = Arc::new(Host::build(&options(&["--game", "a"])).expect("a host"));
+    let socket = serve_peer(host.ipc_kernel());
+    let client = ikigai_ipc::connect(&socket).expect("the host");
+    let issue = |verb: Verb, name: &str| -> String {
+        let request = Request::new(verb, Iri::parse(name).unwrap())
+            .with_arg("content", ArgRef::Inline(Vec::new()));
+        let (answer, _) = client.issue(request).expect(name);
+        String::from_utf8_lossy(&answer.bytes).into_owned()
+    };
+    assert_eq!(
+        issue(Verb::Sink, "urn:game:root:iki:tutorial:ttt:move:1:1"),
+        "X plays 1,1"
+    );
+    assert_eq!(
+        issue(Verb::Source, "urn:iki:tutorial:ttt:board"),
+        "---\n-X-\n---"
+    );
+    assert_eq!(
+        issue(Verb::Source, "urn:game:root:iki:tutorial:ttt:board"),
+        "---\n-X-\n---"
+    );
+    assert_eq!(
+        issue(Verb::Exists, "urn:game:root:iki:tutorial:ttt:stored:1:1"),
+        "true"
+    );
+    assert_eq!(
+        issue(Verb::Source, "urn:game:a:iki:tutorial:ttt:board"),
+        "---\n---\n---"
+    );
+    // One entry per resource: the root's names are in the catalog under their plain names.
+    let entries = host.ipc_kernel().entries().unwrap_or_default();
+    assert!(entries
+        .iter()
+        .all(|e| !e.pattern.starts_with("urn:game:root:")));
+
+    let addr = serve_http(host).await;
+    let (status, board) = http(addr, "GET", "/game/root/iki/tutorial/ttt/view/board").await;
+    assert_eq!(status, 200);
+    assert!(board.contains("X at 1,1"), "{board}");
+    let (status, page) = http(addr, "GET", "/game/root").await;
+    assert_eq!(status, 200);
+    assert!(page.contains("<base href=\"/game/root/\">"), "{page}");
+    assert!(page.contains("aria-label=\"Game root\""), "{page}");
+    assert_eq!(
+        http(addr, "GET", "/game/root/iki/tutorial/ttt/stored/1/1")
+            .await
+            .0,
+        404
+    );
+    // `root` is the root game's, so no `--game` can take it.
+    assert!(parse_args(["--game".to_string(), "root".to_string()]).is_err());
+}
+
+/// `--http 127.0.0.1:0` binds a port the system chooses, and the startup line names THAT
+/// port, so a script can find the host it started.
+#[test]
+fn the_startup_line_names_the_port_it_bound() {
+    use std::io::{BufRead, BufReader, Read, Write};
+    let socket = socket_path();
+    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_ttt-host"))
+        .args(["--http", "127.0.0.1:0", "--socket"])
+        .arg(&socket)
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .expect("ttt-host starts");
+    let mut line = String::new();
+    BufReader::new(child.stderr.take().expect("stderr"))
+        .read_line(&mut line)
+        .expect("a startup line");
+    let addr = line
+        .strip_prefix("ttt-host: http://")
+        .and_then(|rest| rest.split_once('/'))
+        .map(|(addr, _)| addr.to_string())
+        .unwrap_or_default();
+    let port: u16 = addr
+        .rsplit_once(':')
+        .map_or(0, |(_, p)| p.parse().unwrap_or(0));
+    let answered = std::net::TcpStream::connect(("127.0.0.1", port)).and_then(|mut stream| {
+        stream.write_all(b"GET / HTTP/1.1\r\nHost: test\r\nConnection: close\r\n\r\n")?;
+        let mut out = String::new();
+        stream.read_to_string(&mut out)?;
+        Ok(out)
+    });
+    let _ = child.kill();
+    let _ = child.wait();
+    let _ = std::fs::remove_file(&socket);
+    assert_ne!(port, 0, "{line}");
+    assert!(
+        answered
+            .as_deref()
+            .is_ok_and(|out| out.starts_with("HTTP/1.1 200")),
+        "{line}: {answered:?}"
+    );
+}

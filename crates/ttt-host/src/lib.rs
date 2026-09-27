@@ -11,7 +11,9 @@
 //!   `urn:a:b:c`. `/` is the root game's page, and `/iki/tutorial/ttt/…` its names.
 //! * **IPC**, through `ikigai-ipc`: the same names for a client in another process or
 //!   language, the root game's under their own names and game `a`'s under
-//!   `urn:game:a:iki:tutorial:ttt:…` — the HTTP path, spelled as an IRI.
+//!   `urn:game:a:iki:tutorial:ttt:…` — the HTTP path, spelled as an IRI. The root game
+//!   answers at `urn:game:root:iki:tutorial:ttt:…` too, so a client can spell every game
+//!   one way; `root` is therefore not an id `--game` accepts.
 //!
 //! A game's store may be a PEER: another process serving `urn:iki:tutorial:ttt:stored:{x}:{y}`
 //! on a socket (the Python and Deno faces' `examples/tictactoe_store.*`, or a Rust one). The
@@ -54,6 +56,10 @@ const STORED_PREFIX: &str = "urn:iki:tutorial:ttt:stored:";
 /// The prefix a game's names have at the edge: `urn:game:{id}:iki:tutorial:ttt:…`.
 const EDGE_GAMES: &str = "urn:game:";
 
+/// The root game's id at the edge: `urn:game:root:…` is the root game's plain names, and
+/// `/game/root/` its page. Reserved, so `--game root` is refused.
+pub const ROOT_GAME: &str = "root";
+
 /// The vendored htmx, byte for byte the book's (`books/ikigai/src/vendor/`).
 const HTMX: &str = include_str!("../../../books/ikigai/src/vendor/htmx-2.0.4.min.js");
 
@@ -93,7 +99,7 @@ pub const USAGE: &str = "usage: ttt-host [--http <addr>] [--socket <path>] [--st
   --store <socket>       the ROOT game's store is the peer at <socket>\n\
   --game <id>            a game with its store in memory, at /game/<id>/\n\
   --game <id>=<socket>   a game whose store is the peer at <socket>\n\
-  with no --game, games a and b are served, in memory";
+  with no --game, games a and b are served, in memory; the id `root` is the root game's";
 
 /// Read the command line (without the program name).
 pub fn parse_args<I: IntoIterator<Item = String>>(args: I) -> std::result::Result<Options, String> {
@@ -126,6 +132,12 @@ pub fn parse_args<I: IntoIterator<Item = String>>(args: I) -> std::result::Resul
                     None => (text.clone(), None),
                 };
                 tic_tac_toe::game_name(&id).map_err(|e| format!("--game {text}: {e}"))?;
+                if id == ROOT_GAME {
+                    return Err(format!(
+                        "--game {text}: `{ROOT_GAME}` is the root game's own id \
+                         (`--store` sets its store)"
+                    ));
+                }
                 if options.games.iter().any(|(known, _)| *known == id) {
                     return Err(format!("--game {id} is given twice"));
                 }
@@ -197,7 +209,9 @@ impl Host {
         Ok(Host { kernel, games })
     }
 
-    /// The games, by id.
+    /// The games, by id, SORTED — not in the order `--game` named them, so every list of
+    /// them (the startup line, the pages' navigation, the catalog's gateway names) is the
+    /// same whatever order the flags came in. The root game is not among them.
     pub fn games(&self) -> impl Iterator<Item = &str> {
         self.games.keys().map(String::as_str)
     }
@@ -303,6 +317,9 @@ pub fn default_socket() -> std::result::Result<PathBuf, String> {
 /// `urn:game:{id}:iki:tutorial:ttt:{rest}` → `urn:iki:tutorial:ttt:{rest}`, issued in game
 /// `id`'s corridor on the game's kernel. The host's act, not the request's: the request
 /// names a game the host already has, and the host decides what that game's corridor holds.
+///
+/// `urn:game:root:…` is the root game, issued with no corridor: the same answers as its
+/// plain names, so a client can address every game with one prefix.
 struct Gateway {
     kernel: Arc<Kernel>,
     games: BTreeMap<String, Scope>,
@@ -317,13 +334,21 @@ impl Space for Gateway {
         let Some((id, name)) = rest.split_once(':') else {
             return Resolution::Miss;
         };
-        let (Some(scope), Some(target)) = (self.games.get(id), game_name(name, self.store_open))
-        else {
+        let scope = match id {
+            ROOT_GAME => Some(Scope::empty()),
+            id => self.games.get(id).cloned(),
+        };
+        let (Some(scope), Some(target)) = (scope, game_name(name, self.store_open)) else {
             return Resolution::Miss;
         };
-        forwarded(&self.kernel, target, scope.clone())
+        forwarded(&self.kernel, target, scope)
     }
 
+    /// Every game's names but the root's. `urn:game:root:…` is a second spelling of names
+    /// the catalog already lists plainly, and it is left out the way an alias is (core's
+    /// `Alias::entries` is transparent): one entry per resource. It also keeps the catalog's
+    /// gateway names a list of exactly the games `--game` named, which is how the Python
+    /// and Deno apps build their navigation.
     fn entries(&self) -> Option<Vec<SpaceEntry>> {
         let names = shown(&self.kernel, self.store_open);
         Some(
@@ -445,7 +470,9 @@ impl Space for Pages {
             "static:ttt-css" => Page::Static("text/css", TTT_CSS),
             "static:host-css" => Page::Static("text/css", HOST_CSS),
             other => match other.strip_prefix("page:game:") {
-                Some(id) if self.games.iter().any(|g| g == id) => Page::Game(Some(id.to_string())),
+                Some(id) if id == ROOT_GAME || self.games.iter().any(|g| g == id) => {
+                    Page::Game(Some(id.to_string()))
+                }
                 _ => return Resolution::Miss,
             },
         };

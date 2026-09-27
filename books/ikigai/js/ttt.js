@@ -84,12 +84,26 @@
         });
     }
 
-    // The template slot format, as every host of this markup fills it: `{{name}}` or
-    // `{{name 0 -2}}` — a lower-case name, then plain integers, one space before each. A
-    // value is text (escaped as it goes in) unless the caller hands back `{ html: … }`.
+    // The template slot format, as every host of this markup fills it (the tic-tac-toe
+    // crate's README states it, with the cases a filler must refuse): every `{{` opens a
+    // slot that ends at the first `}}`, and what is between must be `{{name}}` or
+    // `{{name 0 -2}}` — a lower-case name, then integers in their one plain spelling, one
+    // space before each — or the template is refused. A value is text (escaped as it goes
+    // in) unless the caller hands back `{ html: … }`. (Integers past 2^53 are refused here
+    // and not in Rust; no template comes near.)
+    var SLOT = /^([a-z][a-z-]*)((?: (?:0|-?[1-9][0-9]*))*)$/;
+    var INSIDE = /\{\{([\s\S]*?)\}\}/g;
     function fill(template, value) {
-        return template.replace(/\{\{([a-z][a-z-]*)((?: -?[0-9]+)*)\}\}/g, function (_, name, args) {
-            var filled = value(name, args ? args.trim().split(" ").map(Number) : []);
+        if (template.split(INSIDE).some(function (text, i) { return i % 2 === 0 && text.indexOf("{{") !== -1; })) {
+            throw new Error("a template: a `{{` is never closed");
+        }
+        return template.replace(INSIDE, function (_, inside) {
+            var slot = SLOT.exec(inside);
+            var args = slot && slot[2] ? slot[2].trim().split(" ").map(Number) : [];
+            if (!slot || !args.every(Number.isSafeInteger)) {
+                throw new Error("a template: `{{" + inside + "}}` is not a slot");
+            }
+            var filled = value(slot[1], args);
             return typeof filled === "object" ? filled.html : escape(filled);
         });
     }
