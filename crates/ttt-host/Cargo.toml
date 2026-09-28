@@ -20,19 +20,27 @@ name = "ttt-host"
 path = "src/main.rs"
 
 [dependencies]
-ikigai-core.workspace = true
+# Its own pin, above the workspace's 0.1.78 (the floor the BOOK teaches): 0.1.80 is what
+# the cli 0.1.30 crates below require, for `Error::Conflict` — the state refuses the
+# request, wire v8's typed Conflict and the edge's 409. The teaching crates stay on the
+# workspace floor; one lockfile means they build against the same resolved core.
+ikigai-core = "0.1.80"
 # The Meta renderer, so each served kernel answers `describe` and a peer's JSON Meta.
 ikigai-vocab.workspace = true
 tic-tac-toe = { path = "../tic-tac-toe" }
 # The HTTP edge: `serve_with_listener`, `EdgeConfig`, `RouteTable` / `Route`, `public_cap`.
-# All there by 0.1.28, the version the rest of this workspace's cli crates resolve to.
-ikigai-web = "0.1.28"
+# 0.1.30 is the hardened edge the tic-tac-toe README's path <-> IRI rule describes (ledger
+# #80, #591): the target decoded as bytes, a malformed escape a 400, `+` a space in the query
+# only, `%2F` data inside its segment, and header/body/write deadlines plus a connection cap.
+ikigai-web = "0.1.30"
 # The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
-# peer store). 0.1.28 speaks wire v7, which the Python and Deno faces speak.
-ikigai-ipc = "0.1.28"
+# peer store). 0.1.30 speaks wire v8 (a typed Conflict), backward compatible with the v7
+# the Python and Deno faces were built against; both speak v8 at their main.
+ikigai-ipc = "0.1.30"
 # `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
-# `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds.
-ikigai-resolve = "0.1.28"
+# `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds. 0.1.30 is the release
+# the two crates above belong to.
+ikigai-resolve = "0.1.30"
 # `-c <line>`: the REPL grammar (`source`, `sink`, `cache`, `trace`) run against the game's
 # own kernel in this process, so a line's verdict is that kernel's. 0.1.18 is the floor
 # book-wasm states for the same `Engine::new` / `eval` / `Action` surface.

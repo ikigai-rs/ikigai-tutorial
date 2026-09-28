@@ -387,14 +387,42 @@ host**: `iki/tutorial/ttt/view/board`, `iki/tutorial/ttt/view/play/1/1`,
 - **The game is where the page is.** The part of the URL in front of the relative path is
   the host's; the host turns it into the game's corridor. It is never read from the request
   body, a query parameter, or a header.
-- **How `ttt-host` really reads a path** (its HTTP face is `ikigai-web` 0.1.29's generic
-  edge, and an app that answers every path the way the host does must copy it): the path is
-  **percent-decoded before it is split**, so `%2F` separates segments; a literal **`+`
-  becomes a space** (form decoding applied to the path, ledger item 591), so
-  `…/play/+1/0` is `400 not a resource path` rather than a refused coordinate; **empty
-  segments are dropped** (`/game/a//iki/…` is `/game/a/iki/…`); and **`.` and `..` are
-  passed through** as segments like any other, where they name no game resource, so they
-  are 404. The markup only ever sends plain relative paths, so none of this reaches a board.
+- **How `ttt-host` really reads a path** — its HTTP face is `ikigai-web`'s generic edge, as
+  hardened in cli **0.1.30** (ledger items 80 and 591), and an app that answers every path the
+  way the host does must copy it. `the_edge_decodes_a_path_segment_by_segment_and_refuses_a_malformed_escape`
+  in `crates/ttt-host/tests/host.rs` pins each decoding line of this list over a real socket,
+  and the bounds as the host's config (they were measured by hand against the running host
+  on 2026-09-28):
+  - The target is decoded as **bytes**. A `%` must be followed by exactly two hex digits:
+    `%`, `%4`, `%zz`, `%+1` are **`400 malformed percent-escape`**, never guessed at, in the
+    path and in the query alike. Bytes that are not UTF-8 once decoded (`%FF`) are
+    **`400 not UTF-8 once decoded`**.
+  - The path is **split on `/` first**, and each segment is decoded on its own (RFC 3986),
+    so `%2F` is **data inside its segment**, never a separator: `…/play/1%2F1/0` asks for
+    the coordinate `1/1` (refused, `400`), and `/game%2Fa/…` is the IRI `urn:game/a:…`,
+    which is no game (`404`) — not game `a`.
+  - **`+` in the path is a `+`.** `…/play/+1/0` reaches the game, and the coordinate rule
+    refuses it as it refuses every second spelling of an integer: ``400 invalid argument
+    `x`: `+1` is not an integer in its plain form``. `%2B1` is the same request. Only the
+    **query** is form-encoded, so there `+` is a space; the views read no query.
+  - A well-formed escape of an ordinary character is that character: `…/play/%31/0` is a
+    play at `1,0`.
+  - **Empty segments are dropped** (`/game/a//iki/…` is `/game/a/iki/…`).
+  - **`.` and `..` are segments like any other** — nothing normalizes them — and they name
+    no game resource, so they are `404` (`…/view/../board` asks for
+    `urn:…:view:..:board`).
+  - ⚠ **A `:` inside a segment is not escaped on the way to the IRI**: the mechanical
+    mapping joins segments with `:`, so `/game/a/iki%3Atutorial/ttt/view/status` and
+    `/game/a/iki:tutorial/ttt/view/status` both answer as `/game/a/iki/tutorial/ttt/view/status`,
+    and `/game/a:b/…` is `urn:game:a:b:…` (no game, `404`). A client cannot add a PATH
+    segment by encoding `/`, but it can add an IRI segment with `:`.
+  - **Time and connections are bounded** (ikigai-web's defaults, which `ttt-host` keeps):
+    request line and headers within **10 s**, a declared body within **30 s** — each
+    **`408`** otherwise — the response written within **30 s**, and at most **256**
+    connections at once; the next is **`503` with `Retry-After: 1`**, sent before a
+    lingering close so it arrives instead of a reset.
+
+  The markup only ever sends plain relative paths, so none of this reaches a board.
 
 Hosts, as built or planned:
 
