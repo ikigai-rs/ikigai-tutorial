@@ -83,10 +83,83 @@
         }
     }
 
+    // A code block wider than the content column scrolls sideways — mdbook styles
+    // `pre > code` with `overflow-x: auto`, so the `code` is the scroller, not the `pre` —
+    // and a wide table does the same inside mdbook's `.table-wrapper`. Nothing inside
+    // either can take focus, so a keyboard user cannot reach the clipped part (WCAG 2.2
+    // SC 2.1.1 Keyboard; axe: scrollable-region-focusable). The repair is a tab stop on
+    // each one that actually overflows, applied here because both wrappers are mdbook's
+    // renderer output, which a forked page template would not reach anyway.
+    //
+    // Only while it overflows: every block focusable would put dozens of tab stops on a
+    // long chapter, most of them scrolling nothing. That makes it a property of the
+    // layout, not the markup, so it is re-evaluated whenever a block changes size — the
+    // viewport, the sidebar opening, the hidden-lines toggle. A tabindex this script did
+    // not add is never removed.
+    //
+    // No label. The rule asks only for focusability, and a label would cost more than it
+    // buys: `role="region"` makes each block a landmark (fourteen identically named on
+    // one chapter), and `aria-label` is prohibited on the `code` and generic roles these
+    // elements have. Focus lands on the block and a screen reader reads its text.
+    //
+    // Focus alone would satisfy axe and still fail the SC: mdbook binds ArrowLeft and
+    // ArrowRight on the document to the previous and next chapter, exempting only form
+    // fields, so the key that scrolls a focused block instead leaves the page. While the
+    // block itself has focus and overflows, those two keys stop at the block — the
+    // browser's own scroll still happens, since nothing prevents the default.
+    var SCROLLERS = "pre > code, .table-wrapper";
+    var ADDED = "data-a11y-scroll-tabindex";
+
+    function overflows(block) {
+        return block.scrollWidth > block.clientWidth;
+    }
+
+    function markScrollable(block) {
+        if (overflows(block) && !block.hasAttribute("tabindex")) {
+            block.setAttribute("tabindex", "0");
+            block.setAttribute(ADDED, "");
+        } else if (!overflows(block) && block.hasAttribute(ADDED)) {
+            block.removeAttribute("tabindex");
+            block.removeAttribute(ADDED);
+        }
+    }
+
+    function keepArrowsForScrolling(event) {
+        var sideways = event.key === "ArrowLeft" || event.key === "ArrowRight";
+        var modified = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
+        var block = event.currentTarget;
+        if (sideways && !modified && event.target === block && overflows(block)) {
+            event.stopPropagation();
+        }
+    }
+
+    function repairScrollers() {
+        var blocks = document.querySelectorAll(SCROLLERS);
+        Array.prototype.forEach.call(blocks, function (block) {
+            markScrollable(block);
+            block.addEventListener("keydown", keepArrowsForScrolling);
+        });
+        if (typeof ResizeObserver === "function") {
+            var observer = new ResizeObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    markScrollable(entry.target);
+                });
+            });
+            Array.prototype.forEach.call(blocks, function (block) {
+                observer.observe(block);
+            });
+        } else {
+            window.addEventListener("resize", function () {
+                Array.prototype.forEach.call(blocks, markScrollable);
+            });
+        }
+    }
+
     function install() {
         repairSearch();
         repairSidebarToggle();
         repairDuplicateNavLabels();
+        repairScrollers();
         if (document.querySelector(".skip-link")) {
             return;
         }
