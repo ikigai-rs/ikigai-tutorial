@@ -19,10 +19,11 @@ scalability in the process with virtually no effort.
 
 NetKernel is the brainchild of [1060
 Research](https://1060research.com) and I owe them entire credit for
-the ideas, terminology, and vision. Basically what I have done is take
-those ideas and expand their applicability beyond the JVM (and back
-onto it; more on that soon) across a dramatically wider footprint,
-with some personal design tweaks and additions.
+the ideas, terminology, and vision. Peter Rodgers and Tony Butterfield
+have produced an amazing body of work. Basically what I have done is
+take those ideas and expand their applicability beyond the JVM (and
+back onto it; more on that soon) across a dramatically wider
+footprint, with some personal design tweaks and additions.
 
 ## What's the point?
 
@@ -56,8 +57,28 @@ clearer and more true).
 
 These ideas are also of this time. I haven't been designing these
 things with AI in mind, but the synergy is natural and
-compelling. This, too, is part of the story I hope to continue to
-unveil in the coming weeks.
+compelling. There are several ways LLMs are invoked from ikigai, but
+only when they need to be. This, too, is part of the story I hope to
+continue to unveil in the coming weeks.
+
+## Rust
+
+ikigai is built in Rust for all of the reasons you would think. It is
+safe, fast, compiles to WebAssembly, well-supported by the crates
+ecosystem, and more. If you are unfamiliar with Rust, don't be put
+off. The goal is that you will be able to benefit from ikigai under a
+variety of deployments. A lot of that is still to be built, but you
+can start to get a sense of using [`Python`](../polyglot/python.md) or
+[`TypeScript`](../polyglot/typescript.md) as either the source of
+resources or a consumer of the ikigai engine. There will be other
+wrappers for other languages, WebAssembly-based jails with WASI,
+several scripting languages, and more. There's already support for
+Scheme as an embedded language. It can be digitally-signed,
+transrepted into RDF, queried, and other things that are likely to
+excite and blow your mind. There is also an emacs REPL that includes
+generated elisp aliases for the ikigai functionality your host
+projects to use within that environment. Additional Lisp variants and
+modalities.
 
 ## Next steps
 
