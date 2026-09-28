@@ -68,8 +68,8 @@ safe, fast, compiles to WebAssembly, well-supported by the crates
 ecosystem, and more. If you are unfamiliar with Rust, don't be put
 off. The goal is that you will be able to benefit from ikigai under a
 variety of deployments. A lot of that is still to be built, but you
-can start to get a sense of using [`Python`](../polyglot/python.md) or
-[`TypeScript`](../polyglot/typescript.md) as either the source of
+can start to get a sense of using [`Python`](polyglot/python.md) or
+[`TypeScript`](polyglot/typescript.md) as either the source of
 resources or a consumer of the ikigai engine. There will be other
 wrappers for other languages, WebAssembly-based jails with WASI,
 several scripting languages, and more. There's already support for
