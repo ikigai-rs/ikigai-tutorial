@@ -882,6 +882,21 @@ mod tests {
         assert_eq!(t[7], "The board is clear. X to play.\n[uncacheable]\n");
     }
 
+    /// Part VI's cells: the questions its transcripts ask a Python- and a TypeScript-held
+    /// store, asked of the page's own kernel, where the store is Rust.
+    #[test]
+    fn the_sixth_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("tic-tac-toe-6.md", 1);
+        // The same answers the peers give, and a trace one node shorter: no peer span.
+        assert!(t[0].starts_with("-\n[computed]\nX plays 1,1\n[uncacheable]\n"));
+        assert_eq!(t[0].matches("urn:iki:tutorial:ttt:stored:1:1 ").count(), 1);
+        assert!(
+            t[0].ends_with("The board is clear\n[uncacheable]\n"),
+            "{}",
+            t[0]
+        );
+    }
+
     /// A game's engine runs in that game; the root's does not; and a game id that is not
     /// one spelling of one segment is refused rather than made into a corridor.
     #[test]

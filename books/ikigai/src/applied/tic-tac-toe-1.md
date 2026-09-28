@@ -14,7 +14,7 @@ This part keeps its order and its main decisions. The names, the code and the se
 are ikigai's own, and where ikigai does something differently the text says so, because
 the differences are where the lessons are.
 
-It comes in five parts, one increment each. This one draws the whole model on paper and
+It comes in six parts, one increment each. This one draws the whole model on paper and
 then builds only the atom: a single cell.
 
 > **This is deliberately more machinery than tic-tac-toe needs.** A game this small could be forty lines of ordinary code, and the parts that follow will sometimes feel like overkill: a name for every cell, row and rule, templates that are resources, a game that is a corridor rather than an object. The game is the excuse, not the point. What these parts build is a way of working in which only the few things that have to *hold* something are code, and everything else is a name composed from other names. That is what pays for itself as a system grows. Because every intermediate result is a resource, the kernel caches it, knows what it was computed from, and recomputes what a change affects, with no caching code in the application. A new rule, view or question is a new name, not an edit to the code already there. The same composition answers whether the state lives in this page, in a host process, or in a Python or TypeScript peer, and a thousand games share one set of rules. Change the domain and the shape stays: the board becomes a portfolio, a line becomes a group of positions, "who won" becomes a risk figure, and resolution, caching, invalidation and authority work exactly as they do here. Tic-tac-toe is small enough to hold the whole model in your head while you watch that happen.

@@ -6,14 +6,15 @@ Rodgers (NetKernel News 3.34–3.42, August–October 2012). The prose is
 `books/ikigai/src/applied/tic-tac-toe-N.md`, one page per increment; the listings are
 included from this crate by anchor.
 
-The chapters are **drafts** until the whole arc is done: listed in
-`books/ikigai/drafts.txt`, not in `SUMMARY.md`, because a merge to main deploys the book.
-Read them with `./scripts/serve-with-drafts.sh`.
+The six chapters are **public**: the book's "Applied: tic-tac-toe" part in `SUMMARY.md`
+(linked with increment 6; until then they were drafts in `books/ikigai/drafts.txt`). A merge
+to main deploys them. Read them with runnable cells and live boards through
+`./scripts/serve-with-drafts.sh`, which builds the in-page kernel.
 
 ## The arc
 
-Each increment is its own satellite, its own PR, and its own page. Brian reviews each on
-the drafts server before the next is dispatched, and may reorder or cut what follows.
+Each increment was its own satellite, its own PR, and its own page, reviewed on the drafts
+server before the next was dispatched.
 
 | Increment | Chapter content | Series parallel | Status |
 |---|---|---|---|
@@ -22,6 +23,7 @@ the drafts server before the next is dispatched, and may reorder or cut what fol
 | **3** | Rules as resources: CheckSet (a representation that is a list of IRIs), winner, whose turn; constraint at the edge, model kept loose | Parts 6–7 | done — `tic-tac-toe-3.md` |
 | **4** | Many games: the game as context (a `Scope` corridor) versus the game in the name — argue it; the store as a swappable space | Part 8 | done — `tic-tac-toe-4.md` |
 | **5** | The views and templates as resources; a playable board in the page over the same kernel (htmx, answered by the wasm kernel); `ttt-host`; the wrap-up | Parts 5, 9 | done — `tic-tac-toe-5.md`, `crates/ttt-host` |
+| **6** | The same game in Python and TypeScript: the atom held by a peer (the store contract as the whole interface), and an app in each language that fills the templates from the host; the limits across the boundary | — | done — `tic-tac-toe-6.md`, `scripts/ttt-polyglot-demo.sh` |
 
 ## What increment 1 left for the next ones
 
@@ -385,7 +387,14 @@ host**: `iki/tutorial/ttt/view/board`, `iki/tutorial/ttt/view/play/1/1`,
 - **The game is where the page is.** The part of the URL in front of the relative path is
   the host's; the host turns it into the game's corridor. It is never read from the request
   body, a query parameter, or a header.
-- A path that is absolute, has an empty, `.` or `..` segment, or is a URL, is not answered.
+- **How `ttt-host` really reads a path** (its HTTP face is `ikigai-web` 0.1.29's generic
+  edge, and an app that answers every path the way the host does must copy it): the path is
+  **percent-decoded before it is split**, so `%2F` separates segments; a literal **`+`
+  becomes a space** (form decoding applied to the path, ledger item 591), so
+  `…/play/+1/0` is `400 not a resource path` rather than a refused coordinate; **empty
+  segments are dropped** (`/game/a//iki/…` is `/game/a/iki/…`); and **`.` and `..` are
+  passed through** as segments like any other, where they name no game resource, so they
+  are 404. The markup only ever sends plain relative paths, so none of this reaches a board.
 
 Hosts, as built or planned:
 
@@ -393,7 +402,7 @@ Hosts, as built or planned:
 |---|---|---|
 | the book page (`js/ttt.js`) | `data-game` on the `.ttt-play` element holding the board | done |
 | `ttt-host` over HTTP | the path prefix `/game/{id}/` (the page's `<base href>`); `/` is the root game | done |
-| Python / Deno apps | their own path prefix, same rule | increment 6 |
+| Python / Deno apps | their own path prefix, same rule (`/game/{id}/`, `/` the root) | done — `ikigai-python` / `ikigai-deno` `examples/tictactoe_app.*` |
 
 ### The in-page shim
 
@@ -424,19 +433,20 @@ re-render; the status line is `role="status"` and is the target of every play an
 what a move did is announced once. Its content is plain text on purpose: an element inside it
 would fire extra `htmx:afterSettle` events and re-trigger the board. Checked with axe-core in
 a real browser (light, rust, navy themes: no violations in the boards) and with jsdom
-`a11y/axe.mjs` + `book-a11y` over a with-drafts build. ⚠ CI does not see this page's board:
-drafts are not built for axe by `pages.yml`, and jsdom cannot load the wasm, so CI's axe only
-ever sees the fallback line. (`a11y/no-kernel.mjs` does build the drafts in CI, but only to
-check that a board with no kernel is a message with no squares.) Re-run the in-browser check
-when the page is linked.
+`a11y/axe.mjs` + `book-a11y`. ⚠ CI still never sees a LIVE board: the page is linked now, so
+`pages.yml`'s axe scans it, but jsdom cannot load the wasm, so it only ever sees the fallback
+line (`a11y/no-kernel.mjs` checks that a board with no kernel is a message with no squares).
+The in-browser check was re-run on parts I–VI when the arc was linked; re-run it after any
+change to the markup, `ttt.css` or `ttt.js`.
 
 ### `ttt-host` (`crates/ttt-host`)
 
 ```text
-ttt-host [--http <addr>] [--socket <path>] [--store <socket>] [--game <id>[=<socket>]]…
+ttt-host [--http <addr>] [--socket <path>] [--store <socket>] [--game <id>[=<socket>]]… [-c <line>]…
   --http 127.0.0.1:8070 (default)   --socket $TMPDIR/ttt-host.sock (default; must fit 104 bytes)
   --store <socket>   the ROOT game's store is a peer     --game <id>[=<socket>]   a game, in memory or a peer
   no --game → games a and b, in memory; `root` is the root game's id, so --game refuses it
+  -c <line>   run a REPL line in the root game on the game's own kernel, print it, exit (repeatable)
 ```
 
 The startup line names the address the listener BOUND (`--http 127.0.0.1:0` prints the port
@@ -510,3 +520,28 @@ the system chose), and lists the games sorted.
   board per page is fine; two need the ids namespaced (the book's shim prefixes the game).
 - ⚠ **ledger #575** will change the refusal TEXT the reply shows (the variant's Display), not
   the view code; the chapter's pinned refusal lines (they start `invalid argument`) will move with it.
+
+
+## What increment 6 left
+
+- **Linked.** Parts I–VI are the book's "Applied: tic-tac-toe" part, between "Beyond one
+  host" and the polyglot tracks. The track's families sections link to part VI and back.
+- **`ttt-host -c <line>`** (repeatable) runs REPL lines against the ROOT game on the game's
+  own kernel, prints them the way the book's cells do, and exits without serving. It exists
+  because the IPC face cannot show a verdict: its front kernel re-marks every forwarded
+  answer `Expiry::Always`, so a client of the socket sees `[uncacheable]` for everything.
+  `ikigai_ipc::serve` takes the `Kernel` by value, so ONE kernel cannot face both HTTP (which
+  takes an `Arc`) and IPC; an `Arc`-taking serve would let the root game's names be served
+  with their real verdicts. (Reported, not built.)
+- **`scripts/ttt-polyglot-demo.sh`** reruns part VI for real: clones `ikigai-python` and
+  `ikigai-deno` at main into `/tmp/ttt6demo/work`, builds `ttt-host`, starts the chapter's
+  processes from the chapter's own `<!-- demo: start -->` blocks, reruns every
+  `<!-- demo: run -->` block and diffs it, and checks each `<!-- excerpt: <repo> <path> @
+  <commit> -->` block is still verbatim at main. Not in CI (python3, deno, the ikigai CLI,
+  network, ports 8070–8072); it skips, exit 0, naming what is missing.
+- **The root game's gateway name** `urn:game:root:…` exists (increment 6, PR #47); the apps
+  still use their prefix switch. They can drop it, but they keep their `/` page special case
+  (the host's page for `/` has `<base href="/">` and the title "the root game").
+- ⚠ **ledger items 583 → 585**: when `Conflict` crosses the wire and the move uses it, part
+  VI's refusal transcript (today `invalid argument`, then `conflict:`) and parts III and V
+  move with it. The demo script will say so.
