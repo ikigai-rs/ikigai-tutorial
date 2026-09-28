@@ -168,6 +168,109 @@ async fn the_edge_serves_the_pages_and_only_the_games_names() {
     );
 }
 
+/// The path ↔ IRI rule as `ikigai-web` 0.1.30's edge applies it — what the tic-tac-toe
+/// README states and a Python or Deno app that answers every path the way this host does has
+/// to copy. The markup only ever sends plain relative paths; this is everything else.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_edge_decodes_a_path_segment_by_segment_and_refuses_a_malformed_escape() {
+    let host = Arc::new(Host::build(&options(&["--game", "a"])).expect("a host"));
+    let addr = serve_http(host).await;
+    let board = "/iki/tutorial/ttt/view/board";
+    let a = "/game/a";
+    let play = "/game/a/iki/tutorial/ttt/view/play";
+
+    for (method, path, status, says) in [
+        // `+` in the PATH is a `+`: it reaches the game and the coordinate rule refuses it,
+        // exactly as it refuses the escaped spelling.
+        (
+            "POST",
+            format!("{play}/+1/0"),
+            400,
+            "`+1` is not an integer",
+        ),
+        (
+            "POST",
+            format!("{play}/%2B1/0"),
+            400,
+            "`+1` is not an integer",
+        ),
+        // `%2F` is data inside its segment, never a separator: the coordinate is `1/1`, and
+        // `/game%2Fa/…` is the IRI `urn:game/a:…`, not game `a`.
+        (
+            "POST",
+            format!("{play}/1%2F1/0"),
+            400,
+            "`1/1` is not an integer",
+        ),
+        ("GET", format!("/game%2Fa{board}"), 404, "urn:game/a:iki"),
+        // A malformed escape is refused before anything resolves; so is a non-UTF-8 byte.
+        (
+            "GET",
+            format!("{play}/%zz/0"),
+            400,
+            "malformed percent-escape",
+        ),
+        (
+            "GET",
+            format!("{a}{board}%"),
+            400,
+            "malformed percent-escape",
+        ),
+        (
+            "GET",
+            format!("{a}{board}%4"),
+            400,
+            "malformed percent-escape",
+        ),
+        ("GET", format!("{a}{board}%FF"), 400, "not UTF-8"),
+        // Empty segments are dropped; `.` and `..` are segments like any other.
+        ("GET", format!("{a}/{board}"), 200, "ttt-grid"),
+        (
+            "GET",
+            format!("{a}/iki/tutorial/ttt/view/../board"),
+            404,
+            "view:..:board",
+        ),
+        // A `:` inside a segment is not escaped on the way to the IRI: segments are joined
+        // with `:`, so it adds an IRI segment whether it came escaped or literal.
+        (
+            "GET",
+            format!("{a}/iki%3Atutorial/ttt/view/board"),
+            200,
+            "ttt-grid",
+        ),
+        (
+            "GET",
+            format!("{a}/iki:tutorial/ttt/view/board"),
+            200,
+            "ttt-grid",
+        ),
+        ("GET", format!("/game/a:b{board}"), 404, "urn:game:a:b:iki"),
+        // A well-formed escape of an ordinary character is that character.
+        ("POST", format!("{play}/%31/0"), 200, "X plays 1,0."),
+        // The query is form-encoded (`+` is a space there) and a malformed escape in it is
+        // refused too; the views read no query.
+        ("GET", format!("{a}{board}?x=a+b"), 200, "ttt-grid"),
+        (
+            "GET",
+            format!("{a}{board}?x=%zz"),
+            400,
+            "malformed percent-escape",
+        ),
+    ] {
+        let (got, body) = http(addr, method, &path).await;
+        assert_eq!(got, status, "{method} {path}: {body}");
+        assert!(body.contains(says), "{method} {path}: {body}");
+    }
+
+    // The deadlines and the connection cap are ikigai-web's defaults; the host keeps them.
+    let edge = ttt_host::edge_config();
+    assert_eq!(edge.header_timeout, Duration::from_secs(10));
+    assert_eq!(edge.body_timeout, Duration::from_secs(30));
+    assert_eq!(edge.write_timeout, Duration::from_secs(30));
+    assert_eq!(edge.max_connections, 256);
+}
+
 // ANCHOR: peer_ok
 /// A Rust store served over a real socket keeps the contract, so the host accepts it, and a
 /// game played over HTTP lands in that other process's store.
@@ -422,10 +525,13 @@ fn the_startup_line_names_the_port_it_bound() {
         .stderr(std::process::Stdio::piped())
         .spawn()
         .expect("ttt-host starts");
+    // The reader is HELD until the child is killed. Dropped after the first line, it closes
+    // the pipe while the host still has its second line (`IPC on …`) to write; `eprintln!`
+    // then panics on EPIPE, the host dies, and the request below reads a connection reset —
+    // intermittently, since it depends on which side gets there first (seen 3 runs in 5).
+    let mut stderr = BufReader::new(child.stderr.take().expect("stderr"));
     let mut line = String::new();
-    BufReader::new(child.stderr.take().expect("stderr"))
-        .read_line(&mut line)
-        .expect("a startup line");
+    stderr.read_line(&mut line).expect("a startup line");
     let addr = line
         .strip_prefix("ttt-host: http://")
         .and_then(|rest| rest.split_once('/'))
@@ -442,6 +548,7 @@ fn the_startup_line_names_the_port_it_bound() {
     });
     let _ = child.kill();
     let _ = child.wait();
+    drop(stderr);
     let _ = std::fs::remove_file(&socket);
     assert_ne!(port, 0, "{line}");
     assert!(
