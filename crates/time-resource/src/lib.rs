@@ -28,7 +28,7 @@
 //! 2026-06-30; this is the book's own version of it, over the kernel's clock rather than
 //! the browser's `Date`.
 //!
-//! Read the book: `./scripts/serve-with-drafts.sh` while the chapter is still a draft.
+//! Read the book: <https://ikigai-rs.github.io/ikigai-tutorial/applied/time.html>.
 
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicU64, Ordering};
