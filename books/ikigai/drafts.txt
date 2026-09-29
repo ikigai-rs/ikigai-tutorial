@@ -10,3 +10,8 @@ Authority, three ways | drafts/authority-three-ways.md
 # The first step past composition: expiry, a clock, and a page that polls. The chapter after
 # tic-tac-toe, ahead of the spreadsheet arc; Brian links it once he has read it.
 Time is a resource | applied/time.md
+# The spreadsheet arc, parts I to III: cells as atoms, a formula as code that is a resource,
+# and recalculation as golden threads. Brian links them once he has read them.
+A spreadsheet, I: cells are atoms | applied/spreadsheet-1.md
+A spreadsheet, II: a formula is code as a resource | applied/spreadsheet-2.md
+A spreadsheet, III: recalculation is golden threads | applied/spreadsheet-3.md

@@ -114,6 +114,7 @@ dependencies = [
  "hello-camel",
  "ikigai-core",
  "loadable-module",
+ "spreadsheet",
  "tic-tac-toe",
  "time-resource",
  "your-endpoints",
@@ -133,6 +134,7 @@ dependencies = [
  "ikigai-vocab",
  "js-sys",
  "serde_json",
+ "spreadsheet",
  "tic-tac-toe",
  "time-resource",
  "wasm-bindgen",
@@ -1546,6 +1548,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3763264f6b73151db08c50ff20d7d8a0b8796e021cdea7ceedad07b80155fa0e"
 dependencies = [
  "lock_api",
+]
+
+[[package]]
+name = "spreadsheet"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "ikigai-fn",
+ "ikigai-vocab",
 ]
 
 [[package]]

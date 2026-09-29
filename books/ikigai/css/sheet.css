@@ -1,0 +1,118 @@
+/* A sheet you can type into — `js/sheet.js` builds it from
+ * `<div class="sheet-play" data-shell='…'>`, and the markup inside it is the sheet's own
+ * resources (`crates/spreadsheet/templates/`).
+ *
+ * As in run.css, ttt.css and view.css, every color is one of mdbook's theme variables, in
+ * pairs the contrast gate (`crates/book-a11y`) already measures: text on `--quote-bg` and on
+ * `--bg`, links on `--bg`. No new color is introduced.
+ */
+
+.sheet-play {
+    margin: 1.2em 0;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    background: var(--quote-bg);
+    color: var(--fg);
+}
+
+.sheet {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+}
+
+/* The grid scrolls sideways on a narrow page rather than widening it, and the region that
+ * scrolls takes focus (the template gives it `tabindex="0"`), so it scrolls by keyboard too. */
+.sheet-view {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.sheet-view:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+.sheet-grid {
+    margin: 0;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.sheet-grid caption {
+    text-align: left;
+    padding-bottom: 0.3rem;
+    font-size: 0.9em;
+}
+
+.sheet-grid th,
+.sheet-grid td {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--table-header-bg);
+}
+
+.sheet-grid th {
+    background: var(--quote-bg);
+    color: var(--fg);
+    font-weight: 600;
+    text-align: center;
+}
+
+.sheet-grid td {
+    min-width: 3rem;
+    background: var(--bg);
+    color: var(--fg);
+    text-align: right;
+}
+
+/* The formula bar: two labeled fields and a button, wrapping on a narrow page. */
+.sheet-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.8rem;
+}
+
+.sheet-bar input {
+    font: inherit;
+    font-family: var(--mono-font, "Source Code Pro", monospace);
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+}
+
+.sheet-bar button {
+    font: inherit;
+    font-size: 0.9em;
+    padding: 0.25rem 0.8rem;
+    border: 1px solid var(--links);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+}
+
+.sheet-bar input:focus-visible,
+.sheet-bar button:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+.sheet-reply,
+.sheet-recomputed {
+    margin: 0;
+    min-height: 1.5em;
+}
+
+.sheet-recomputed {
+    font-size: 0.9em;
+}
+
+.sheet-unavailable {
+    margin: 0;
+    font-style: italic;
+}

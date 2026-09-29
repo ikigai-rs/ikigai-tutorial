@@ -1,0 +1,28 @@
+[package]
+name = "spreadsheet"
+version = "0.1.0"
+description = "The code taught by the book's spreadsheet arc: cells as atoms, a formula as code that is a resource, and recalculation that is golden threads."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "spreadsheet"
+path = "src/lib.rs"
+
+# Compiled into the page (`crates/book-wasm`), so it stays wasm-clean: no std::fs, no
+# threads, no clock. The one piece of state is in memory behind an `Arc` the host holds.
+[dependencies]
+ikigai-core.workspace = true
+# `TurtleRenderer`, so this crate's own `kernel()` answers `Meta` the way the page's
+# kernel does, and the compiler is found by what its description declares.
+ikigai-vocab.workspace = true
+# `urn:iki:fn:compose`, the generic composer the grid view is made of. This crate binds
+# only its own names; the page gets compose from Part I's space, and `kernel()` mounts
+# the library beside this crate's space.
+ikigai-fn.workspace = true
+
+[dev-dependencies]
+futures.workspace = true

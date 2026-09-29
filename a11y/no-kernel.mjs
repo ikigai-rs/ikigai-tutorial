@@ -3,8 +3,8 @@
 //   node no-kernel.mjs ../books/ikigai/book [<another built book>…]   # exit 1 on any failure
 //
 // Every page of every book given that carries a runnable cell (`div.ikigai-run[data-cmd]`),
-// a playable board (`div.ttt-play[data-game]`) or a polling view
-// (`div.ikigai-view[data-shell]`) is loaded in jsdom, with the book's own scripts run and
+// a playable board (`div.ttt-play[data-game]`), a polling view (`div.ikigai-view[data-shell]`)
+// or a sheet you can type into (`div.sheet-play[data-shell]`) is loaded in jsdom, with the book's own scripts run and
 // the kernel ABSENT, and must come up like this:
 //
 //   cells    every result pane (`.ikigai-run-out`) empty; every Run button disabled, and
@@ -16,6 +16,7 @@
 //   status   the page's one kernel status line says the kernel did not load.
 //   boards   no squares, no grid, no buttons: one message saying what did not load.
 //   views    nothing that polls, no controls, no count: one message saying what did not load.
+//   sheets   no grid, no formula bar, no field: one message saying what did not load.
 //
 // WHY THIS EXISTS. `js/run.js` once filled every cell's result with the listing's expected
 // output whenever the wasm failed to load, and Brian met it on a drafts server that had lost
@@ -33,7 +34,8 @@
 //
 // A check that saw nothing is not a pass: with no cell, no board or no view across all the
 // books given, it exits 1. CI passes the public build and the drafts build (`serve-with-drafts.sh
-// build <dir>`), because the boards live in drafts until the applied arc is linked.
+// build <dir>`), because a chapter's widgets can live in drafts until it is linked (the sheets
+// do, while the spreadsheet arc is unlinked).
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { openPage, pages } from "./book-dom.mjs";
@@ -137,15 +139,31 @@ function checkViews(doc, fail) {
     return views.length;
 }
 
+function checkSheets(doc, fail) {
+    const sheets = doc.querySelectorAll("div.sheet-play[data-shell]");
+    sheets.forEach((sheet, i) => {
+        const n = `sheet ${i + 1}`;
+        if (sheet.querySelector("[hx-get], [hx-post], form, input, button, table, .sheet-recomputed")) {
+            fail(`${n}: shows a grid or a formula bar with no kernel to answer it`);
+        }
+        const notes = sheet.querySelectorAll(".sheet-unavailable");
+        if (notes.length !== 1 || !DID_NOT_LOAD.test(notes[0].textContent)) {
+            fail(`${n}: does not say what did not load: ${JSON.stringify(sheet.textContent.trim())}`);
+        }
+    });
+    return sheets.length;
+}
+
 let failures = 0;
 let cellsSeen = 0;
 let boardsSeen = 0;
 let viewsSeen = 0;
+let sheetsSeen = 0;
 let pagesSeen = 0;
 for (const book of books) {
     for (const path of pages(book)) {
         const raw = readFileSync(path, "utf8");
-        if (!/class="ikigai-run"|class="ttt-play"|class="ikigai-view"/.test(raw)) {
+        if (!/class="ikigai-run"|class="ttt-play"|class="ikigai-view"|class="sheet-play"/.test(raw)) {
             continue;
         }
         const label = relative(book, path);
@@ -163,7 +181,9 @@ for (const book of books) {
                 .every((b) => DID_NOT_LOAD.test(b.textContent));
             const viewsDone = [...d.querySelectorAll("div.ikigai-view[data-shell]")]
                 .every((v) => DID_NOT_LOAD.test(v.textContent));
-            return cellsDone && boardsDone && viewsDone;
+            const sheetsDone = [...d.querySelectorAll("div.sheet-play[data-shell]")]
+                .every((v) => DID_NOT_LOAD.test(v.textContent));
+            return cellsDone && boardsDone && viewsDone && sheetsDone;
         });
         if (!settled) {
             fail("never reached the no-kernel state within 3s (is the load still pending?)");
@@ -190,13 +210,14 @@ for (const book of books) {
         cellsSeen += checkCells(doc, (msg) => fail(`after Run: ${msg}`));
         boardsSeen += checkBoards(doc, fail);
         viewsSeen += checkViews(doc, fail);
+        sheetsSeen += checkSheets(doc, fail);
         pagesSeen += 1;
         window.close();
     }
 }
 
-if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0) {
-    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards and ${viewsSeen} views — ` +
+if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0) {
+    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views and ${sheetsSeen} sheets — ` +
         "a check that saw nothing is not a pass (pass the drafts build too; see the header)");
     process.exit(1);
 }
@@ -204,4 +225,4 @@ if (failures) {
     console.error(`\nno-kernel: ${failures} failure${failures === 1 ? "" : "s"} across ${pagesSeen} pages`);
     process.exit(1);
 }
-console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards and ${viewsSeen} views — nothing answered, every Run disabled`);
+console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views and ${sheetsSeen} sheets — nothing answered, every Run disabled`);

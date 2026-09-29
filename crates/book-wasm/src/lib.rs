@@ -40,8 +40,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use ikigai_core::{
-    Capability, Clock, Error, Expiry, Fallback, Iri, Kernel, Provenance, Representation, Request,
-    Scope, Space, SpaceEntry, Tracer, Verb,
+    ArgRef, Capability, Clock, Error, Expiry, Fallback, Iri, Kernel, Provenance, Representation,
+    Request, Scope, Space, SpaceEntry, Tracer, Verb,
 };
 use ikigai_engine::Engine;
 use ikigai_resolve::{CacheStatus, Resolver};
@@ -61,11 +61,11 @@ thread_local! {
 }
 
 /// Every name a cell may resolve: Part I's space first, then the applied chapter's game,
-/// then the time chapter's clock.
+/// then the time chapter's clock, then the spreadsheet.
 ///
 /// One space for the whole book rather than one per chapter, because the families are
 /// disjoint (`urn:iki:tutorial:{camel-case,title,camel-title}` and `urn:iki:fn:*` against
-/// `urn:iki:tutorial:ttt:*` against `urn:iki:tutorial:time:*`), so the order decides
+/// `urn:iki:tutorial:ttt:*`, `urn:iki:tutorial:time:*` and `urn:iki:tutorial:sheet:*`), so the order decides
 /// nothing and every cell Part I ships answers exactly as it did. What a cell *changes* is
 /// still per page: each page load instantiates the wasm afresh, so a game played on one
 /// chapter's page is not on the next one's. The URN gate asks this same space which names
@@ -75,6 +75,7 @@ pub fn page_space() -> Fallback {
         Arc::new(hello_camel::space()) as Arc<dyn Space>,
         Arc::new(tic_tac_toe::space()),
         Arc::new(time_resource::space()),
+        Arc::new(spreadsheet::space()),
     ])
 }
 
@@ -208,14 +209,17 @@ impl Page {
 
     // ANCHOR: page_issue
     /// One request, straight to the kernel — not a line of the REPL — in game `game`'s
-    /// chain, or the root's when it names none. What the page's htmx shim sends for a click:
-    /// `GET` a view is a `Source`, `POST` a play is a `Sink`, in the game the board's markup
-    /// names. Resolves to the representation, or the kernel's refusal as its message.
-    pub fn issue(
+    /// chain, or the root's when it names none. What the page's htmx shims send for a
+    /// click: `GET` a view is a `Source`, `POST` a play or an edit is a `Sink`, in the game
+    /// the markup names, with a form's fields (`args`) as named arguments, the way a server
+    /// reads a form body. Resolves to the representation, or the kernel's refusal as its
+    /// message.
+    pub fn issue_with_args(
         &self,
         game: Option<&str>,
         verb: Verb,
         target: &str,
+        args: Vec<(String, String)>,
     ) -> impl std::future::Future<Output = Result<Representation, String>> + 'static {
         let kernel = Arc::clone(&self.kernel);
         let scope = match game {
@@ -224,7 +228,11 @@ impl Page {
         };
         let target = Iri::parse(target).map_err(|e| format!("not a resource name: {e}"));
         async move {
-            let request = Request::new(verb, target?);
+            let request = args
+                .into_iter()
+                .fold(Request::new(verb, target?), |request, (name, value)| {
+                    request.with_arg(name, ArgRef::Inline(value.into_bytes()))
+                });
             kernel
                 .issue_in(request, &Capability::root(), scope?)
                 .await
@@ -232,6 +240,33 @@ impl Page {
         }
     }
     // ANCHOR_END: page_issue
+
+    /// [`issue_with_args`](Self::issue_with_args) with no arguments: every read, and a play,
+    /// whose square is in its name.
+    pub fn issue(
+        &self,
+        game: Option<&str>,
+        verb: Verb,
+        target: &str,
+    ) -> impl std::future::Future<Output = Result<Representation, String>> + 'static {
+        self.issue_with_args(game, verb, target, Vec::new())
+    }
+
+    /// Which of `names` a read would NOT be served from the cache for, right now, in the
+    /// root's chain: the page's cache viewer (`js/sheet.js`). A probe per name, which
+    /// resolves nothing and runs nothing.
+    ///
+    /// ⚠ This is host code, and it is the only place the answer can come from. The kernel's
+    /// own readout, `urn:kernel:cache`, lists what the cache HOLDS, and a cut is lazy: an
+    /// entry whose golden thread was cut stays resident, listed, until the next read finds it
+    /// stale. And no endpoint can ask the probe. So a resource could not say which cells an
+    /// edit cut, and the page asks the kernel directly.
+    pub fn uncached_among<'n>(&self, names: impl IntoIterator<Item = &'n str>) -> Vec<&'n str> {
+        names
+            .into_iter()
+            .filter(|name| !self.is_cached(None, Verb::Source, name))
+            .collect()
+    }
 
     /// Would [`issue`](Self::issue) be answered from the cache right now? A probe, which
     /// resolves nothing and runs nothing: what a page asks before a request so it can say
@@ -422,6 +457,46 @@ pub fn issue_async(game: String, verb: String, target: String) -> js_sys::Promis
             Err(refusal) => reply_to_json(Err(refusal), false),
         };
         Ok(JsValue::from_str(&json))
+    })
+}
+
+/// [`issue_async`] with a form's fields as named arguments: what `js/sheet.js` sends for
+/// the formula bar. `args` is JSON, an array of `[name, value]` pairs in form order.
+#[wasm_bindgen(js_name = issueWithArgsAsync)]
+pub fn issue_with_args_async(
+    game: String,
+    verb: String,
+    target: String,
+    args: String,
+) -> js_sys::Promise {
+    let reply = verb_named(&verb).and_then(|verb| {
+        let args: Vec<(String, String)> = serde_json::from_str(&args)
+            .map_err(|e| format!("the form's fields are not [name, value] pairs: {e}"))?;
+        let game = (!game.is_empty()).then_some(game);
+        Ok(PAGE.with(|page| {
+            let was_cached = page.is_cached(game.as_deref(), verb, &target);
+            (
+                was_cached,
+                page.issue_with_args(game.as_deref(), verb, &target, args),
+            )
+        }))
+    });
+    wasm_bindgen_futures::future_to_promise(async move {
+        let json = match reply {
+            Ok((was_cached, issued)) => reply_to_json(issued.await, was_cached),
+            Err(refusal) => reply_to_json(Err(refusal), false),
+        };
+        Ok(JsValue::from_str(&json))
+    })
+}
+
+/// Of the names given, one per line, those a read would not be served from the cache for
+/// right now, one per line: [`Page::uncached_among`], for the cache viewer.
+#[wasm_bindgen(js_name = uncachedAmong)]
+pub fn uncached_among(names: String) -> String {
+    PAGE.with(|page| {
+        page.uncached_among(names.lines().filter(|n| !n.is_empty()))
+            .join("\n")
     })
 }
 
@@ -641,6 +716,27 @@ mod tests {
             .collect()
     }
 
+    /// The whole sheet as a range: what the cache viewer probes (`js/sheet.js`).
+    const SHEET_RANGE: &str = "urn:iki:tutorial:sheet:range:A1:D6";
+
+    /// The sheets a chapter places, in page order: each one's shell, and whether it shows
+    /// the cache viewer (`data-cache`).
+    fn sheets(chapter: &str) -> Vec<(String, bool)> {
+        chapter
+            .split("<div class=\"sheet-play\"")
+            .skip(1)
+            .map(|rest| {
+                let tag = &rest[..rest.find('>').expect("a closed tag")];
+                let value = &tag[tag.find("data-shell='").expect("a sheet names its shell")
+                    + "data-shell='".len()..];
+                (
+                    value[..value.find('\'').expect("a closed data-shell")].to_string(),
+                    tag.contains("data-cache"),
+                )
+            })
+            .collect()
+    }
+
     /// [`run_chapter_in_page_order`] for a chapter whose page has a clock (`data-clock`): the
     /// page's kernel reads a clock this test holds, and before cell `i` runs, the clock is
     /// stopped at the time `times` gives for `i`, if it gives one. Index 0's time is also the
@@ -705,6 +801,31 @@ mod tests {
             .expect("the page shell");
             refresh(game);
         }
+        // A sheet you can type into (`<div class="sheet-play" data-shell='…'>`, the
+        // spreadsheet arc) loads the same way: `js/sheet.js` fetches its shell, and the shell's
+        // markup asks for the grid. After a cell runs in the root's chain, the shim redraws
+        // every sheet on the page — first, where the sheet shows the cache viewer
+        // (`data-cache`), reading the range it probes (the probes themselves change nothing) —
+        // so replay those reads too.
+        let sheets = sheets(&chapter);
+        let redraw = || {
+            for (_, viewer) in &sheets {
+                if *viewer {
+                    futures::executor::block_on(page.issue(None, Verb::Source, SHEET_RANGE))
+                        .expect("the sheet's range");
+                }
+                futures::executor::block_on(page.issue(None, Verb::Source, spreadsheet::VIEW_GRID))
+                    .unwrap_or_else(|e| panic!("the sheet's grid: {e}"));
+            }
+        };
+        // On load, a sheet reads its shell and then its grid, and nothing else: the viewer
+        // says nothing until something has changed.
+        for (shell, _) in &sheets {
+            for name in [shell.as_str(), spreadsheet::VIEW_GRID] {
+                futures::executor::block_on(page.issue(None, Verb::Source, name))
+                    .unwrap_or_else(|e| panic!("the sheet's {name}: {e}"));
+            }
+        }
         let mut transcript = Vec::new();
         for (i, (game, command, expected)) in cells.iter().enumerate() {
             at(i);
@@ -735,6 +856,9 @@ mod tests {
             }
             if let Some(game) = game.as_deref().filter(|g| boards.iter().any(|b| b == g)) {
                 refresh(game);
+            }
+            if game.is_none() {
+                redraw();
             }
             transcript.push(got);
         }
@@ -1074,6 +1198,183 @@ mod tests {
         );
         // The view, composed, expiring with now.
         assert!(t[6].starts_with("<time datetime=\"14:07\">14:07</time>\n[computed]\n"));
+    }
+
+    /// The spreadsheet's first part: its cells in page order, on a page whose sheet loaded
+    /// the grid before any cell ran and draws it again after each one.
+    #[test]
+    fn the_first_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("spreadsheet-1.md", 7);
+        // One spelling, on the sheet.
+        assert!(
+            t[0].starts_with("error: invalid argument `ref`: `a1` is not a cell"),
+            "{}",
+            t[0]
+        );
+        assert!(t[0].contains("E1 is off the sheet"), "{}", t[0]);
+        // The atom: written, computed, served; an untouched input is NotFound.
+        assert_eq!(
+            t[1],
+            "42\n[uncacheable]\n42\n[computed]\n42\n[cached]\n\
+             error: not found: nothing has been typed into B1\n"
+        );
+        assert_eq!(
+            t[2],
+            "Rent\n[uncacheable]\nRent\n[computed]\nRent\n[cached]\n"
+        );
+        // The grid read every value when the page loaded, the empty C5 included.
+        assert_eq!(t[3], "[cached]\n");
+        // The first write to C5 cut the value built on its emptiness.
+        assert_eq!(
+            t[4],
+            "cached\nhello\n[uncacheable]\nnot cached\nhello\n[computed]\n"
+        );
+        assert_eq!(t[5], "ok\n[uncacheable]\n[computed]\n");
+        assert!(
+            t[6].ends_with("&lt;b&gt;not bold&lt;/b&gt;\n[computed]\n"),
+            "{}",
+            t[6]
+        );
+    }
+
+    /// The spreadsheet's second part: formulas compiled, evaluated, and wrong five ways.
+    #[test]
+    fn the_second_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("spreadsheet-2.md", 9);
+        // The compiler says what it converts, and that it is lossy.
+        assert!(
+            t[0].contains("ik:transreptsFrom \"text/x-formula\""),
+            "{}",
+            t[0]
+        );
+        assert!(t[0].contains("ik:lossless false"), "{}", t[0]);
+        // Compiled once, then served.
+        assert!(
+            t[1].ends_with("(* A1 2)\n[computed]\n(* A1 2)\n[cached]\n"),
+            "{}",
+            t[1]
+        );
+        // A2 was read (and compiled) by the grid after the last cell; A3 is new.
+        assert!(t[2].ends_with("10\n[cached]\n11\n[computed]\n"), "{}", t[2]);
+        // A named cell's edit leaves the formula compiled; its own input's edit does not, and
+        // the other formula that names it stays compiled.
+        assert_eq!(
+            t[3],
+            "7\n[uncacheable]\ncached\n=A1*3\n[uncacheable]\nnot cached\ncached\n"
+        );
+        assert!(
+            t[4].contains("(* (sum (range A1 A3)) 2)\n[computed]\n"),
+            "{}",
+            t[4]
+        );
+        assert!(
+            t[4].ends_with("A3:A1 is spelled top-left first: A1:A3\n"),
+            "{}",
+            t[4]
+        );
+        assert!(
+            t[5].ends_with(
+                "#DIV/0\n[computed]\n#DIV/0\n[computed]\n#REF\n[computed]\n#VALUE\n[computed]\n"
+            ),
+            "{}",
+            t[5]
+        );
+        // A syntax error is a value, and it is cached.
+        assert!(
+            t[6].ends_with("#SYNTAX\n[computed]\n#SYNTAX\n[cached]\n"),
+            "{}",
+            t[6]
+        );
+        assert!(t[7].contains("#CYCLE\n[computed]\n"), "{}", t[7]);
+        assert!(
+            t[8].ends_with("urn:iki:tutorial:sheet:cell:D2\n[computed]\n5\n[computed]\n"),
+            "{}",
+            t[8]
+        );
+    }
+
+    /// The spreadsheet's third part: an edit, and exactly its dependents computed again.
+    #[test]
+    fn the_third_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("spreadsheet-3.md", 6);
+        assert!(
+            t[0].ends_with("26\n[computed]\n25\n[computed]\n"),
+            "{}",
+            t[0]
+        );
+        // Exactly the edited cell and its dependents are cut.
+        assert_eq!(
+            t[1],
+            "7\n[uncacheable]\nnot cached\nnot cached\nnot cached\ncached\nnot cached\ncached\n"
+        );
+        // The trace: the chain of values computed, the compiled formulas served.
+        let trace = &t[2];
+        let verdict = |node: &str| {
+            trace
+                .lines()
+                .find(|line| line.contains(node))
+                .unwrap_or_else(|| panic!("{node} is not a node of:\n{trace}"))
+                .to_string()
+        };
+        for node in ["cell:A3 ", "cell:A2 ", "cell:A1 ", "refs:A1 "] {
+            assert!(verdict(node).contains(" · computed · "), "{node}: {trace}");
+        }
+        for node in ["formula:A3 ", "formula:A2 ", "refs:A2 "] {
+            assert!(verdict(node).contains(" · cached · "), "{node}: {trace}");
+        }
+        assert!(
+            t[3].contains("urn:iki:tutorial:sheet:input:A1  gen 3\n"),
+            "{}",
+            t[3]
+        );
+        // A new formula re-wires C1 with nothing told: B1 no longer cuts it, A1 now does.
+        assert_eq!(
+            t[4],
+            "=A3/4\n[uncacheable]\n4.25\n[computed]\n200\n[uncacheable]\ncached\n\
+             9\n[uncacheable]\nnot cached\n"
+        );
+        // No early cutoff: the same input cuts everything that read it.
+        assert_eq!(t[5], "9\n[uncacheable]\nnot cached\n46\n[computed]\n");
+    }
+
+    /// The sheet's shim: a form's fields reach the kernel as named arguments, and the viewer's
+    /// probe names exactly what an edit cut.
+    #[test]
+    fn an_edit_with_args_writes_and_the_probe_names_what_it_cut() {
+        let page = Page::new();
+        let issue = |verb, target: &str, args: Vec<(&str, &str)>| {
+            let args = args
+                .into_iter()
+                .map(|(n, v)| (n.to_string(), v.to_string()))
+                .collect();
+            futures::executor::block_on(page.issue_with_args(None, verb, target, args))
+                .map(|r| String::from_utf8_lossy(&r.bytes).into_owned())
+        };
+        let edit = |cell: &str, typed: &str| {
+            issue(
+                Verb::Sink,
+                spreadsheet::VIEW_EDIT,
+                vec![("ref", cell), ("content", typed)],
+            )
+            .expect("an edit is answered")
+        };
+        assert_eq!(edit("a1", "5"), "A1 is now 5.");
+        assert_eq!(edit("A2", "=A1*2"), "A2 is now =A1*2.");
+        issue(Verb::Source, spreadsheet::VIEW_GRID, vec![]).expect("the grid");
+        let names: Vec<String> = spreadsheet::CellRef::all()
+            .map(spreadsheet::cell_name)
+            .collect();
+        assert!(page
+            .uncached_among(names.iter().map(String::as_str))
+            .is_empty());
+        edit("A1", "6");
+        assert_eq!(
+            page.uncached_among(names.iter().map(String::as_str)),
+            [
+                "urn:iki:tutorial:sheet:cell:A1",
+                "urn:iki:tutorial:sheet:cell:A2"
+            ]
+        );
     }
 
     /// Every other page's kernel has no clock, and the time chapter's names say so.

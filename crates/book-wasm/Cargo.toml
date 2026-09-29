@@ -28,6 +28,10 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 # overlap either family above. They answer only on a page whose kernel has a clock
 # (`useClock`), and refuse, saying so, everywhere else.
 time-resource = { path = "../time-resource" }
+# The spreadsheet arc: inputs, compiled formulas, values, the grid. `urn:iki:tutorial:sheet:*`
+# overlaps nothing above. Its grid view composes through `urn:iki:fn:compose`, which Part
+# I's space already binds on the page.
+spreadsheet = { path = "../spreadsheet" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true
