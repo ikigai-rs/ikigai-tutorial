@@ -42,6 +42,14 @@
 //! Every view but the edit is a template bound at a name with `ikigai_fn::compose_over`:
 //! a composition, with no code of its own.
 //!
+//! And two corridors, which serve `input:{ref}` in place of the atom (part VI):
+//!
+//! * `urn:iki:tutorial:sheet:scenario:{who}` — a person's **scenario**: the cells they
+//!   overrode, and nothing else, so every other cell falls through to the shared sheet.
+//!   Reading or writing an override needs `urn:cap:iki:tutorial:sheet:scenario:{who}`.
+//! * `urn:ctx:time:{instant}` — the sheet **as of** an instant: every input as it stood then,
+//!   read from the atom's history, and never written ([`as_of_doors`]).
+//!
 //! And two names the sheet reads but does not serve, from the time chapter's crate:
 //! `urn:iki:tutorial:time:instant` for `NOW()` and `urn:iki:tutorial:time:today` for `TODAY()`
 //! (part IV). A host that binds the sheet binds those beside it.
@@ -57,8 +65,8 @@ use std::sync::{Arc, Mutex};
 
 use ikigai_core::{
     ActionSpec, ArgRef, ArgSpec, AsyncFnEndpoint, Description, EndpointSpace, Error, Fallback,
-    FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Request, Result,
-    Space, TransreptionPolicy, UriTemplate, Verb,
+    FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Request,
+    Resolution, Result, Scope, Space, SpaceEntry, Topology, TransreptionPolicy, UriTemplate, Verb,
 };
 use ikigai_fn::ComposeOver;
 use ikigai_vocab::TurtleRenderer;
@@ -180,6 +188,11 @@ const ERRORS: [&str; 6] = [
 /// The most bytes one cell's input may hold.
 const MAX_INPUT: usize = 1000;
 
+/// The most writes one cell's history keeps. The sheet keeps every write (part VI reads the
+/// sheet as of an instant), and a bound that dropped the oldest would answer "as of" wrongly
+/// and silently, so the write past it is refused instead.
+const MAX_HISTORY: usize = 1000;
+
 /// The name of the input of `cell`.
 pub fn input_name(cell: CellRef) -> String {
     format!("urn:iki:tutorial:sheet:input:{cell}")
@@ -286,12 +299,90 @@ fn ref_input(summary: &str) -> ArgSpec {
 }
 
 // ANCHOR: store
-/// What has been typed into each cell. The sheet's one piece of state.
+/// What has been typed into each cell, and when: every write, oldest first. The sheet's one
+/// piece of state. A write is stamped with the kernel's clock (0 on a kernel with none), and a
+/// clear is a write of nothing.
 #[derive(Debug, Default)]
 pub struct InputStore {
-    inputs: Mutex<BTreeMap<CellRef, String>>,
+    inputs: Mutex<BTreeMap<CellRef, Vec<Write>>>,
+}
+
+/// One write to a cell: when, in milliseconds since 1970, and what was typed (`None` clears).
+#[derive(Clone, Debug)]
+struct Write {
+    at: u64,
+    typed: Option<String>,
 }
 // ANCHOR_END: store
+
+impl InputStore {
+    /// What the cell holds now.
+    fn latest(&self, cell: CellRef) -> Option<String> {
+        self.as_of(cell, u64::MAX)
+    }
+
+    /// What the cell held at `at`: the last write stamped at or before it.
+    fn as_of(&self, cell: CellRef, at: u64) -> Option<String> {
+        let inputs = self.inputs.lock().expect("the input store's lock");
+        inputs
+            .get(&cell)?
+            .iter()
+            .rev()
+            .find(|write| write.at <= at)
+            .and_then(|write| write.typed.clone())
+    }
+
+    /// Add a write to the cell's history.
+    fn write(&self, cell: CellRef, at: u64, typed: Option<String>) -> Result<()> {
+        let mut inputs = self.inputs.lock().expect("the input store's lock");
+        let history = inputs.entry(cell).or_default();
+        if history.last().is_none_or(|last| last.typed.is_none()) && typed.is_none() {
+            return Ok(()); // clearing an empty cell changes nothing, and is not history
+        }
+        if history.len() >= MAX_HISTORY {
+            return Err(Error::Conflict(format!(
+                "{cell} has been written {MAX_HISTORY} times, and the sheet keeps every write: \
+                 its history is full"
+            )));
+        }
+        history.push(Write { at, typed });
+        Ok(())
+    }
+}
+
+/// What a person typed, as the input serves it: a formula (it starts with `=`) is
+/// `text/x-formula`, anything else `text/plain`.
+fn typed_repr(typed: String) -> Representation {
+    let media = if typed.starts_with('=') {
+        ReprType::new(FORMULA_TYPE)
+    } else {
+        text_plain_utf8()
+    };
+    Representation::new(media, typed.into_bytes())
+}
+
+/// The `content` of a write to an input, trimmed, or a refusal saying what to fix.
+fn typed_content<'a>(inv: &'a Invocation<'_>) -> Result<&'a str> {
+    let typed = inv.inline_str("content")?.trim();
+    if typed.is_empty() {
+        return Err(Error::InvalidArgument {
+            name: "content".to_string(),
+            detail: "an empty input — to clear a cell, delete it".to_string(),
+        });
+    }
+    if typed.len() > MAX_INPUT {
+        return Err(Error::InvalidArgument {
+            name: "content".to_string(),
+            detail: format!("{} bytes; a cell holds at most {MAX_INPUT}", typed.len()),
+        });
+    }
+    Ok(typed)
+}
+
+/// The instant a write is stamped with: the kernel's clock, or 0 on a kernel with none.
+fn stamp(inv: &Invocation<'_>) -> u64 {
+    inv.now().map_or(0, |now| now.as_millis())
+}
 
 // ANCHOR: input
 /// `sheet-input`: what was typed into the cell `ref`, held in memory.
@@ -302,45 +393,26 @@ pub struct InputStore {
 /// anything else is `text/plain`. A cell nobody has typed into is `NotFound`.
 ///
 /// `Sink` stores `content`, trimmed, and answers what it stored; an empty input is refused,
-/// since "nothing" is what `Delete` says.
+/// since "nothing" is what `Delete` says. Every write is kept, stamped with the kernel's
+/// clock, so the sheet can be read as it stood at any instant (part VI).
 pub fn input(store: Arc<InputStore>) -> FnEndpoint {
     FnEndpoint::new("sheet-input", move |inv: &Invocation<'_>| {
         let at = cell_binding(inv, "ref")?;
-        let mut inputs = store.inputs.lock().expect("the input store's lock");
         match inv.request.verb {
             Verb::Sink => {
-                let typed = inv.inline_str("content")?.trim();
-                if typed.is_empty() {
-                    return Err(Error::InvalidArgument {
-                        name: "content".to_string(),
-                        detail: "an empty input — to clear a cell, delete it".to_string(),
-                    });
-                }
-                if typed.len() > MAX_INPUT {
-                    return Err(Error::InvalidArgument {
-                        name: "content".to_string(),
-                        detail: format!("{} bytes; a cell holds at most {MAX_INPUT}", typed.len()),
-                    });
-                }
-                inputs.insert(at, typed.to_string());
+                let typed = typed_content(inv)?;
+                store.write(at, stamp(inv), Some(typed.to_string()))?;
                 Ok(Representation::new(
                     text_plain_utf8(),
                     typed.as_bytes().to_vec(),
                 ))
             }
             Verb::Delete => {
-                inputs.remove(&at);
+                store.write(at, stamp(inv), None)?;
                 Ok(Representation::new(text_plain_utf8(), b"ok".to_vec()))
             }
-            _ => match inputs.get(&at) {
-                Some(typed) => {
-                    let media = if typed.starts_with('=') {
-                        ReprType::new(FORMULA_TYPE)
-                    } else {
-                        text_plain_utf8()
-                    };
-                    Ok(Representation::new(media, typed.clone().into_bytes()).cacheable())
-                }
+            _ => match store.latest(at) {
+                Some(typed) => Ok(typed_repr(typed).cacheable()),
                 None => Err(Error::NotFound(format!("nothing has been typed into {at}"))),
             },
         }
@@ -1224,6 +1296,219 @@ pub fn view_edit() -> AsyncFnEndpoint {
     )
 }
 // ANCHOR_END: view_edit
+
+// ANCHOR: as_of
+/// `sheet-input-as-of`: what was typed into the cell `ref` at the instant the request's chain
+/// is pinned to — the input read from the atom's history, not its latest write.
+///
+/// It is bound only inside a temporal corridor ([`as_of_doors`]), whose clock is that
+/// instant, so [`Invocation::now`] is "then". The answer is cacheable and names no thread:
+/// the kernel hangs it from its own name, `input:{ref}`, which every write to the cell cuts.
+/// For an instant in the past that is more than it needs (a write now cannot change what the
+/// cell held then), and never less.
+///
+/// The past is read-only: `Sink` and `Delete` are a `Conflict`, the state saying no.
+pub fn input_as_of(store: Arc<InputStore>) -> FnEndpoint {
+    FnEndpoint::new("sheet-input-as-of", move |inv: &Invocation<'_>| {
+        let at = cell_binding(inv, "ref")?;
+        let then = inv.now().ok_or_else(|| {
+            Error::Endpoint(
+                "an input as of an instant needs the instant: bind it in a temporal corridor \
+                 (Scope::with_named_at), whose clock says when"
+                    .to_string(),
+            )
+        })?;
+        match inv.request.verb {
+            Verb::Sink | Verb::Delete => Err(Error::Conflict(format!(
+                "the sheet in `{}` is the sheet as it was, and the past does not change: \
+                 write to the live sheet, or to a scenario",
+                inv.scope()
+            ))),
+            _ => match store.as_of(at, then.as_millis()) {
+                Some(typed) => Ok(typed_repr(typed).cacheable()),
+                None => Err(Error::NotFound(format!(
+                    "nothing had been typed into {at} by then"
+                ))),
+            },
+        }
+    })
+    .with_description(
+        Description::new("sheet-input-as-of")
+            .title("Input, as of an instant")
+            .summary(
+                "What was typed into a cell at the instant this corridor is pinned to, from \
+                 the input's history. Read-only.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .input(ref_input("the cell, A1 to D6"))
+            .output(TEXT_PLAIN_UTF8)
+            .output(FORMULA_TYPE),
+    )
+}
+
+/// The sheet's doors for a temporal corridor: `input:{ref}` answered from the history in
+/// `store` (the live sheet's own store) as of the corridor's instant. A host hands these, with
+/// the time chapter's, to whatever builds its `as-of=` corridors. Nothing else in the sheet
+/// changes: every other name reads the inputs, and in this corridor the inputs are "then".
+pub fn as_of_doors(store: Arc<InputStore>) -> EndpointSpace {
+    EndpointSpace::new().bind(template(INPUT), input_as_of(store))
+}
+// ANCHOR_END: as_of
+
+// ANCHOR: scenario_names
+/// The name a person's scenario corridor is injected under: `urn:iki:tutorial:sheet:scenario:`
+/// and who it is. Not a resource: nothing binds it, and the cache files every answer computed
+/// in the scenario under it.
+pub const SCENARIO: &str = "urn:iki:tutorial:sheet:scenario:{who}";
+
+/// The capability that reads and writes `who`'s overrides.
+pub const SCENARIO_CAP: &str = "urn:cap:iki:tutorial:sheet:scenario:{who}";
+// ANCHOR_END: scenario_names
+
+/// `who`'s scenario's name, or a refusal: a lower-case letter, then lower-case letters and
+/// digits, as a feed is named, so one person has one corridor and one capability.
+pub fn scenario_name(who: &str) -> Result<Iri> {
+    if !formula::feed_name(who) {
+        return Err(Error::InvalidArgument {
+            name: "who".to_string(),
+            detail: format!(
+                "`{who}` is not a scenario's owner: a lower-case letter, then lower-case letters \
+                 and digits (e.g. alice)"
+            ),
+        });
+    }
+    iri(&SCENARIO.replace("{who}", who))
+}
+
+/// The capability that reads and writes `who`'s overrides.
+pub fn scenario_cap(who: &str) -> String {
+    SCENARIO_CAP.replace("{who}", who)
+}
+
+// ANCHOR: overrides
+/// The cells one person has overridden, and what with: a scenario's one piece of state.
+#[derive(Debug, Default)]
+pub struct OverrideStore {
+    overrides: Mutex<BTreeMap<CellRef, String>>,
+}
+// ANCHOR_END: overrides
+
+impl OverrideStore {
+    fn holds(&self, cell: CellRef) -> bool {
+        self.overrides
+            .lock()
+            .expect("the override store's lock")
+            .contains_key(&cell)
+    }
+}
+
+// ANCHOR: override_input
+/// `sheet-scenario-input`: `who`'s override of the cell `ref`, the input as it reads in their
+/// scenario. The same three verbs as the shared input, over a store of the scenario's own, and
+/// every one of them needs `who`'s capability, declared so the kernel enforces it.
+pub fn override_input(who: &str, store: Arc<OverrideStore>) -> FnEndpoint {
+    let cap = scenario_cap(who);
+    let action = |verb: Verb, summary: &str| {
+        ActionSpec::new(verb)
+            .summary(summary)
+            .input(ref_input("the cell, A1 to D6"))
+            .requires(cap.clone())
+    };
+    FnEndpoint::new("sheet-scenario-input", move |inv: &Invocation<'_>| {
+        let at = cell_binding(inv, "ref")?;
+        let mut overrides = store.overrides.lock().expect("the override store's lock");
+        match inv.request.verb {
+            Verb::Sink => {
+                let typed = typed_content(inv)?;
+                overrides.insert(at, typed.to_string());
+                Ok(Representation::new(
+                    text_plain_utf8(),
+                    typed.as_bytes().to_vec(),
+                ))
+            }
+            Verb::Delete => {
+                overrides.remove(&at);
+                Ok(Representation::new(text_plain_utf8(), b"ok".to_vec()))
+            }
+            _ => match overrides.get(&at) {
+                Some(typed) => Ok(typed_repr(typed.clone()).cacheable()),
+                None => Err(Error::NotFound(format!("{at} is not overridden here"))),
+            },
+        }
+    })
+    .with_description(
+        Description::new("sheet-scenario-input")
+            .title("Input, in a scenario")
+            .summary("A person's override of a cell: read it, override it, or drop the override.")
+            .verb(Verb::Meta)
+            .action(
+                action(Verb::Source, "the override, as typed")
+                    .output(TEXT_PLAIN_UTF8)
+                    .output(FORMULA_TYPE),
+            )
+            .action(
+                action(Verb::Sink, "override the cell, and answer what was stored")
+                    .input(
+                        ArgSpec::new("content")
+                            .summary("a number, some text, or a formula starting with =")
+                            .class(XSD_STRING),
+                    )
+                    .output(TEXT_PLAIN_UTF8),
+            )
+            .action(
+                action(
+                    Verb::Delete,
+                    "drop the override, so the shared cell shows through",
+                )
+                .output(TEXT_PLAIN_UTF8),
+            ),
+    )
+}
+// ANCHOR_END: override_input
+
+// ANCHOR: scenario_space
+/// A scenario, as a space: `input:{ref}` for the cells the person overrode, and a miss for
+/// every other read, so the resolution falls through to whatever is outside the corridor (the
+/// shared sheet, or the sheet as of an instant). A write is always the scenario's: overriding
+/// a cell nobody overrode yet is how an override starts, and it must never reach the shared
+/// sheet.
+pub struct Scenario {
+    store: Arc<OverrideStore>,
+    doors: EndpointSpace,
+}
+
+impl Space for Scenario {
+    fn resolve(&self, request: &Request, scope: &Scope) -> Resolution {
+        let reads = matches!(request.verb, Verb::Source | Verb::Exists | Verb::Meta);
+        let overridden = request
+            .target
+            .as_str()
+            .strip_prefix("urn:iki:tutorial:sheet:input:")
+            .and_then(CellRef::parse)
+            .is_some_and(|cell| self.store.holds(cell));
+        if reads && !overridden {
+            return Resolution::Miss;
+        }
+        self.doors.resolve(request, scope)
+    }
+
+    fn entries(&self) -> Option<Vec<SpaceEntry>> {
+        self.doors.entries()
+    }
+
+    fn topology(&self) -> Topology {
+        self.doors.topology()
+    }
+}
+
+/// `who`'s scenario: a corridor named for them, binding their overrides in `store`.
+pub fn scenario(who: &str, store: Arc<OverrideStore>) -> Result<Scope> {
+    let name = scenario_name(who)?;
+    let doors = EndpointSpace::new().bind(template(INPUT), override_input(who, Arc::clone(&store)));
+    Ok(Scope::empty().with_named(name, Arc::new(Scenario { store, doors })))
+}
+// ANCHOR_END: scenario_space
 
 fn template(source: &str) -> UriTemplate {
     UriTemplate::parse(source).expect("a constant template parses")
