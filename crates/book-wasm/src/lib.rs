@@ -1337,6 +1337,106 @@ mod tests {
         assert_eq!(t[5], "9\n[uncacheable]\nnot cached\n46\n[computed]\n");
     }
 
+    /// The spreadsheet's fourth part: cells that read the clock, on a page whose kernel reads a
+    /// clock the test holds, and the lessons stated rather than only matched.
+    #[test]
+    fn the_fourth_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let at = |instant: &str, seconds: u64| time_resource::millis_at(instant, seconds);
+        let t = run_chapter_at(
+            "spreadsheet-4.md",
+            5,
+            &[
+                (0, at("2026-09-29T14:05Z", 20)),
+                (1, at("2026-09-29T14:05Z", 40)),
+                (2, at("2026-09-29T14:06Z", 5)),
+                (3, at("2026-09-29T14:07Z", 2)),
+                (4, at("2026-09-30T00:00Z", 10)),
+            ],
+        );
+        // The time, compiled once and read through a cell that never names it.
+        assert!(
+            t[0].ends_with("(now)\n[computed]\n2026-09-29T14:05Z\n[computed]\n"),
+            "{}",
+            t[0]
+        );
+        assert_eq!(t[1], "cached\ncached\n2026-09-29T14:05Z\n[cached]\n");
+        // The minute turns: the time and what read it go, the date, the arithmetic and the
+        // compiled formula stay, and the grid goes with the time.
+        assert_eq!(
+            t[2],
+            "not cached\nnot cached\ncached\ncached\ncached\nnot cached\n\
+             2026-09-29T14:06Z\n[computed]\n"
+        );
+        // The trace: the chain down to `now` computed, `today` served on both sides of it.
+        let trace = &t[3];
+        let verdict = |node: &str| {
+            trace
+                .lines()
+                .find(|line| line.contains(node))
+                .unwrap_or_else(|| panic!("{node} is not a node of:\n{trace}"))
+                .to_string()
+        };
+        for node in [
+            "sheet:cell:B1 ",
+            "sheet:cell:A1 ",
+            "time:instant ",
+            "time:now ",
+        ] {
+            assert!(verdict(node).contains(" · computed · "), "{node}: {trace}");
+        }
+        for node in ["formula:A1 ", "precedents:B1 ", "input:A1 "] {
+            assert!(verdict(node).contains(" · cached · "), "{node}: {trace}");
+        }
+        assert_eq!(
+            trace.matches("time:today   time-today · cached").count(),
+            2,
+            "{trace}"
+        );
+        // Midnight: the date goes; the arithmetic still does not.
+        assert_eq!(t[4], "not cached\ncached\n2026-09-30\n[computed]\n");
+    }
+
+    /// The spreadsheet's fifth part: a feed written from outside the sheet, and exactly its
+    /// readers computed again.
+    #[test]
+    fn the_fifth_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("spreadsheet-5.md", 5);
+        assert!(t[0].ends_with("1000\n[computed]\n"), "{}", t[0]);
+        // A write from outside: the feed's readers go, the rest stay.
+        assert_eq!(
+            t[1],
+            "101.5\n[uncacheable]\nnot cached\ncached\nnot cached\ncached\n1015\n[computed]\n"
+        );
+        // The market's write, traced: the feed and its readers computed, A2 served.
+        let trace = &t[2];
+        let verdict = |node: &str| {
+            trace
+                .lines()
+                .find(|line| line.contains(node))
+                .unwrap_or_else(|| panic!("{node} is not a node of:\n{trace}"))
+                .to_string()
+        };
+        for node in ["cell:A3 ", "cell:A1 ", "feed:acme "] {
+            assert!(verdict(node).contains(" · computed · "), "{node}: {trace}");
+        }
+        for node in ["cell:A2 ", "formula:A1 ", "formula:A3 "] {
+            assert!(verdict(node).contains(" · cached · "), "{node}: {trace}");
+        }
+        // An unwritten feed: #N/A, cached, and cut by the first write.
+        assert_eq!(
+            t[3],
+            "=FEED(globex)\n[uncacheable]\n#N/A\n[computed]\n#N/A\n[cached]\n\
+             55\n[uncacheable]\nnot cached\n55\n[computed]\n"
+        );
+        // Bad data is a value, and cached; the market's refusal is a Conflict.
+        assert!(
+            t[4].starts_with("halted\n[uncacheable]\n#VALUE\n[computed]\n#VALUE\n[cached]\n"),
+            "{}",
+            t[4]
+        );
+        assert!(t[4].contains("error: conflict: "), "{}", t[4]);
+    }
+
     /// The sheet's shim: a form's fields reach the kernel as named arguments, and the viewer's
     /// probe names exactly what an edit cut.
     #[test]

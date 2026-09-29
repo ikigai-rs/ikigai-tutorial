@@ -1558,6 +1558,7 @@ dependencies = [
  "ikigai-core",
  "ikigai-fn",
  "ikigai-vocab",
+ "time-resource",
 ]
 
 [[package]]

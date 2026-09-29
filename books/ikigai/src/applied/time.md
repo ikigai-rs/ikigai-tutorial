@@ -23,6 +23,7 @@ As in the [tic-tac-toe](tic-tac-toe-1.md) parts, the names come first:
 | **now** | `urn:iki:tutorial:time:now` | the time of day, `HH:MM`, read from the kernel's clock; good until the next minute |
 | **today** | `urn:iki:tutorial:time:today` | the date, `YYYY-MM-DD`; good until the next midnight |
 | an **event** | `urn:iki:tutorial:time:event:{name}` | a named instant, `YYYY-MM-DDTHH:MMZ`, set with `Sink` |
+| the **instant** | `urn:iki:tutorial:time:instant` | `today` and `now` as one reading, `YYYY-MM-DDTHH:MMZ`; good until the next minute |
 | a **countdown** | `urn:iki:tutorial:time:until:{name}` | minutes from now until the event |
 | a **template** | `urn:iki:tutorial:time:template:{name}` | the chapter's HTML |
 | the **clock view** | `urn:iki:tutorial:time:view:clock` | the time as HTML, for a page to show |
@@ -197,7 +198,9 @@ that a write cuts, and a deadline that a clock passes.
 There is one trap in reading the date and the time as two resources, and it is worth a
 paragraph because every composition over time meets it. They are read at two different
 instants. Read `today` at 23:59:59.999 and `now` a millisecond later, and you have
-yesterday's date with today's time: a countdown a whole day out, cached for a minute.
+yesterday's date with today's time: a countdown a whole day out. It is not *cached* a day
+out: the date it read expired at the midnight it straddled, so the kernel never serves that
+answer again. But it has already been served once, wrong.
 
 So the countdown reads the date on both sides of the time. If the date is the same both
 times, the time was read on that date:
@@ -210,6 +213,16 @@ The test for it starts a clock that moves on a millisecond every time anybody re
 just before midnight, two hundred times over, so that some resolution straddles the
 boundary. With the second read of the date taken out, it fails, a day out; with it, it
 passes.
+
+A guard that every composite has to remember is a guard some composite will forget, so the
+crate also gives the guarded reading a name of its own, `urn:iki:tutorial:time:instant`: the
+current minute as one instant, `YYYY-MM-DDTHH:MMZ`. Whatever wants the date and the time
+together reads that one name and cannot tear them. It declares no deadline of its own, and is
+cached until the next minute, which it inherits from `now`:
+
+```rust,ignore
+{{#include ../../../../crates/time-resource/src/lib.rs:instant}}
+```
 
 ## A page that polls
 
@@ -287,6 +300,7 @@ mark is text somebody else chose, which is why that board's views escape every s
 | the set | the name | what it is |
 |---|---|---|
 | now, today | `urn:iki:tutorial:time:now`, `…:time:today` | code: small functions of the kernel's clock, each with a deadline |
+| the instant | `urn:iki:tutorial:time:instant` | code: the guarded reading of `today` and `now`, with `now`'s deadline inherited |
 | an event | `urn:iki:tutorial:time:event:{name}` | code: the one atom |
 | a countdown | `urn:iki:tutorial:time:until:{name}` | code: a small function of three names, with its deadline inherited |
 | templates | `urn:iki:tutorial:time:template:{name}` | resources: HTML, one of which names what it shows |

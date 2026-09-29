@@ -1,0 +1,9 @@
+<section class="sheet" aria-label="A sheet you can type into, drawn again each time it polls" data-poll-label="Poll">
+<div class="sheet-view" role="region" aria-label="The grid" tabindex="0" hx-get="iki/tutorial/sheet/view/grid" hx-trigger="load, every 2s" data-poll></div>
+<form class="sheet-bar" hx-post="iki/tutorial/sheet/view/edit" hx-target="next .sheet-reply">
+<label>Cell <input name="ref" class="sheet-ref" size="3" maxlength="3" autocomplete="off" spellcheck="false" required></label>
+<label>Input <input name="content" class="sheet-content" size="18" autocomplete="off" spellcheck="false"></label>
+<button type="submit">Enter</button>
+</form>
+<p class="sheet-reply" role="status"></p>
+</section>

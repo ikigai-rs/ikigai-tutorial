@@ -16,7 +16,7 @@ use ikigai_core::{
     ArgRef, Capability, Clock, Error, Expiry, Iri, Kernel, Request, Result, Time, Verb,
 };
 use time_resource::{
-    event_name, kernel_with_clock, millis_at, space, until_name, ManualClock, NOW, TODAY,
+    event_name, kernel_with_clock, millis_at, space, until_name, ManualClock, INSTANT, NOW, TODAY,
     VIEW_CLOCK,
 };
 
@@ -232,6 +232,84 @@ fn a_countdown_read_across_midnight_is_never_a_day_out() {
     }
 }
 // ANCHOR_END: midnight
+
+/// `instant` is the guarded reading with a name: across midnight it is never a torn pair,
+/// and it is cached exactly as long as `now`.
+#[test]
+fn the_instant_is_one_reading_and_as_cacheable_as_now() {
+    let midnight = millis_at("2026-09-30T00:00Z", 0);
+    for before in 1..200 {
+        let clock = Arc::new(Ticking(AtomicU64::new(midnight - before)));
+        let kernel = kernel_with_clock(clock);
+        let instant = source(&kernel, INSTANT).unwrap();
+        assert!(
+            instant == "2026-09-29T23:59Z" || instant == "2026-09-30T00:00Z",
+            "{before}ms before midnight: {instant}"
+        );
+    }
+    let (kernel, clock) = host(millis_at("2026-09-29T14:05Z", 20));
+    assert_eq!(source(&kernel, INSTANT).unwrap(), "2026-09-29T14:05Z");
+    assert_eq!(expiry(&kernel, INSTANT), expiry(&kernel, NOW));
+    clock.set(millis_at("2026-09-29T14:06Z", 0));
+    assert!(!cached(&kernel, INSTANT));
+    assert_eq!(source(&kernel, INSTANT).unwrap(), "2026-09-29T14:06Z");
+}
+
+/// What the guard prevents, and what it does not need to: a composite that reads `today` and
+/// then `now` with no second look at the date, read across midnight, answers a day out — and
+/// is never served again, because the date it read expired at the midnight it straddled, and
+/// a composite is no fresher than what it read. A torn reading is wrong once, not for a minute.
+#[test]
+fn an_unguarded_reading_across_midnight_is_wrong_once_and_never_cached() {
+    use ikigai_core::{
+        AsyncFnEndpoint, EndpointSpace, Fallback, Invocation, InvokeFuture, Representation, Space,
+        UriTemplate,
+    };
+    use ikigai_vocab::TurtleRenderer;
+
+    let torn =
+        || {
+            AsyncFnEndpoint::new("torn", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+                Box::pin(async move {
+                    let date = inv.source(&iri(TODAY)).await?.bytes;
+                    let time = inv.source(&iri(NOW)).await?.bytes;
+                    let text = format!(
+                        "{}T{}Z",
+                        String::from_utf8_lossy(&date),
+                        String::from_utf8_lossy(&time)
+                    );
+                    Ok(Representation::new(
+                        ikigai_core::ReprType::new("text/plain"),
+                        text.into_bytes(),
+                    )
+                    .cacheable())
+                })
+            })
+        };
+    let midnight = millis_at("2026-09-30T00:00Z", 0);
+    let mut torn_seen = 0;
+    for before in 1..200 {
+        let clock = Arc::new(Ticking(AtomicU64::new(midnight - before)));
+        let space = Fallback::new(vec![
+            Arc::new(space()) as Arc<dyn Space>,
+            Arc::new(
+                EndpointSpace::new().bind(UriTemplate::parse("urn:test:torn").unwrap(), torn()),
+            ),
+        ]);
+        let kernel =
+            Kernel::with_meta_renderer(Arc::new(space), Arc::new(TurtleRenderer)).with_clock(clock);
+        let first = source(&kernel, "urn:test:torn").unwrap();
+        if first == "2026-09-29T00:00Z" {
+            torn_seen += 1;
+            assert!(!cached(&kernel, "urn:test:torn"), "a torn answer was kept");
+            assert_eq!(
+                source(&kernel, "urn:test:torn").unwrap(),
+                "2026-09-30T00:00Z"
+            );
+        }
+    }
+    assert!(torn_seen > 0, "no resolution straddled midnight");
+}
 
 #[test]
 fn the_clock_view_is_the_template_composed() {

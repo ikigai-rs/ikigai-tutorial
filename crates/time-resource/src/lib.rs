@@ -12,6 +12,10 @@
 //!   kernel's clock, cacheable until the next minute boundary.
 //! * `urn:iki:tutorial:time:today` — the date, `YYYY-MM-DD`, UTC. The same, cacheable until
 //!   the next midnight.
+//! * `urn:iki:tutorial:time:instant` — the current minute as one instant,
+//!   `YYYY-MM-DDTHH:MMZ`, read from `today` and `now` with the date read on both sides of the
+//!   time, so it is never a torn reading of the two. Cacheable until the next minute, which
+//!   it inherits from `now`. The spreadsheet's `NOW()` reads it.
 //! * `urn:iki:tutorial:time:event:{name}` — a named instant, `YYYY-MM-DDTHH:MMZ`. The one
 //!   **atom**: the only state in the chapter, set by `Sink`, cleared by `Delete`.
 //! * `urn:iki:tutorial:time:until:{name}` — minutes from now until the event. A composite
@@ -65,6 +69,10 @@ pub const NOW: &str = "urn:iki:tutorial:time:now";
 
 /// The date, `YYYY-MM-DD`, UTC — until the next midnight.
 pub const TODAY: &str = "urn:iki:tutorial:time:today";
+
+/// The current minute as one instant, `YYYY-MM-DDTHH:MMZ`, never a torn reading of `today`
+/// and `now` — until the next minute.
+pub const INSTANT: &str = "urn:iki:tutorial:time:instant";
 
 /// A named instant, `YYYY-MM-DDTHH:MMZ`: the chapter's one piece of state.
 pub const EVENT: &str = "urn:iki:tutorial:time:event:{name}";
@@ -290,6 +298,37 @@ async fn this_minute(inv: &Invocation<'_>) -> Result<i64> {
     ))
 }
 // ANCHOR_END: this_minute
+
+// ANCHOR: instant
+/// `time-instant`: the current minute as one instant, `YYYY-MM-DDTHH:MMZ`.
+///
+/// The guarded reading of `this_minute`, given a name, so that anything wanting "the date
+/// and the time" reads one resource rather than two and cannot tear them. Declared
+/// `.cacheable()` with no deadline; it read `now`, so the kernel caches it until the next
+/// minute, and not a millisecond longer.
+pub fn instant() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("time-instant", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+        Box::pin(async move {
+            let minute = this_minute(inv).await?;
+            Ok(
+                Representation::new(text_plain_utf8(), instant_text(minute).into_bytes())
+                    .cacheable(),
+            )
+        })
+    })
+    .with_description(
+        Description::new("time-instant")
+            .title("Instant")
+            .summary(
+                "The current minute as one instant, YYYY-MM-DDTHH:MMZ, UTC: the date and the \
+                 time read so that they agree. Cacheable until the next minute.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: instant
 
 // ANCHOR: store
 /// The events that have been set, by name, each at its minute.
@@ -541,6 +580,7 @@ pub fn space_over(store: Arc<EventStore>) -> EndpointSpace {
     EndpointSpace::new()
         .bind(template(NOW), now())
         .bind(template(TODAY), today())
+        .bind(template(INSTANT), instant())
         .bind(template(EVENT), event(store))
         .bind(template(UNTIL), until())
         .bind(template(TEMPLATE), templates())
