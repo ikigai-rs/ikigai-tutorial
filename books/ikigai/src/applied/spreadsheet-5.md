@@ -306,6 +306,6 @@ early cutoff, which Part III noted the kernel does not do.
 The sheet gained an atom and learned to read it, and nothing about recalculation changed. The
 market is the only new code that does anything, and it is not the sheet's: in a real deployment
 it is somebody else's system, writing a name. A cell's value is still a plain name,
-`cell:{ref}`, and so are an input and a feed, which is what the next part needs. A *personal*
+`cell:{ref}`, and so are an input and a feed, which is what [the next part](spreadsheet-6.md) needs. A *personal*
 scenario, my own numbers laid over the shared sheet's, is a corridor in front of `input:{ref}`,
 and the sheet reads the names it always read.

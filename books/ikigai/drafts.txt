@@ -7,8 +7,3 @@ The Web as an instance | drafts/web-instance.md
 The algebra of reach | drafts/algebra-of-reach.md
 Names and where you stand | drafts/names-and-context.md
 Authority, three ways | drafts/authority-three-ways.md
-# The spreadsheet arc, part VI: a sheet is a space (a person's scenario, the sheet as of an
-# instant, the two stacked in both orders). Brian links it once he has read the final version.
-# Its page keeps a STORY clock (`data-clock='<instant>'`); when it is linked, time.md's "almost
-# every page … runs a kernel with no clock" should name it beside spreadsheet IV.
-A spreadsheet, VI: a sheet is a space, and spaces stack | applied/spreadsheet-6.md

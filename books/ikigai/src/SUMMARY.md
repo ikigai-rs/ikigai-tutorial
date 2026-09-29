@@ -63,6 +63,7 @@
 - [A spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md)
 - [A spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md)
 - [A spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md)
+- [A spreadsheet, VI: a sheet is a space, and spaces stack](applied/spreadsheet-6.md)
 
 # Polyglot tracks
 

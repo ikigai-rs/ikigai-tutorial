@@ -50,8 +50,9 @@ still, and a replay answer it with the instant being replayed.
 
 Almost every page of this book runs a kernel with no clock. That is why a trace
 in [What resolution buys you](../getting-started/payoff.md) prints `—` where a duration
-would go. This page asks for one, and so does [A spreadsheet, IV](spreadsheet-4.md), whose
-cells read the time. Its markup carries a `data-clock` attribute, and when the
+would go. This page asks for one, and so do [A spreadsheet, IV](spreadsheet-4.md), whose
+cells read the time, and [A spreadsheet, VI](spreadsheet-6.md), which keeps a story clock so its
+week of history reads the same for every reader. This page's markup carries a `data-clock` attribute, and when the
 page sees it, it builds its kernel with the browser's clock before anything resolves:
 
 ```rust,ignore
