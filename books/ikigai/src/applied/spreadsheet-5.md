@@ -275,9 +275,8 @@ learns that it missed something rather than acting on half a history.
 changed, but the listener says that too: each cut comes with the cached answers it invalidated, the
 grid among them when the grid read the feed. So a host that hears a cut can push the views it has
 handed out that are on that list, or read them again straight away, so the recomputation is done
-before the reader asks: a recalculating golden thread, which NetKernel also had. What this book
-does not have yet is the host half: the page's kernel has no listener registered, and nothing in the
-page drains one. That is the next part to build.
+before the reader asks: a recalculating golden thread, which NetKernel also had. The host half is
+[Part VII](spreadsheet-7.md): there the page registers a listener with its kernel and drains it.
 
 **From the page: a channel.** In this book the host is the page, so being told is a function
 call. A sheet served by a real host needs a connection that the server can write to: server-sent
