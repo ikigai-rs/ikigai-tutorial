@@ -26,3 +26,7 @@ ikigai-fn.workspace = true
 
 [dev-dependencies]
 futures.workspace = true
+# The time chapter's names, which `NOW()` and `TODAY()` read (part IV). A dev-dependency only:
+# the sheet reads those names through the kernel and never calls the crate, so a host binds
+# them beside the sheet; the tests are such a host.
+time-resource = { path = "../time-resource" }

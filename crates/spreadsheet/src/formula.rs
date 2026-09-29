@@ -111,6 +111,14 @@ pub enum Expr {
     Binary(Op, Box<Expr>, Box<Expr>),
     /// The sum of its arguments, `(sum (range A1 A3) 10)`.
     Sum(Vec<Expr>),
+    /// The current instant, `(now)`: the date and the time, read from the time chapter's
+    /// `instant`.
+    Now,
+    /// Today's date, `(today)`.
+    Today,
+    /// The latest value written to a feed, `(feed acme)`: data that something other than the
+    /// sheet writes.
+    Feed(String),
     /// A formula that does not compile, and why: `(syntax-error "…")`. Its value is
     /// `#SYNTAX`. The compiler answers with this rather than refusing, so a formula with a
     /// mistake in it is still a representation the kernel can cache.
@@ -182,6 +190,8 @@ impl Expr {
 /// use spreadsheet::formula::compile;
 /// assert_eq!(compile("=A1 + b2*2").to_string(), "(+ A1 (* B2 2))");
 /// assert_eq!(compile("=SUM(A3:A1, 10)").to_string(), "(sum (range A1 A3) 10)");
+/// assert_eq!(compile("=now()").to_string(), "(now)");
+/// assert_eq!(compile("=FEED(Acme) * B1").to_string(), "(* (feed acme) B1)");
 /// ```
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -198,6 +208,9 @@ impl fmt::Display for Expr {
                 }
                 f.write_str(")")
             }
+            Expr::Now => f.write_str("(now)"),
+            Expr::Today => f.write_str("(today)"),
+            Expr::Feed(name) => write!(f, "(feed {name})"),
             Expr::SyntaxError(why) => {
                 let quoted = why.replace('\\', "\\\\").replace('"', "\\\"");
                 write!(f, "(syntax-error \"{quoted}\")")
@@ -246,6 +259,28 @@ pub fn parse_number(text: &str) -> Option<f64> {
     }
 }
 
+/// The most characters a feed's name may have.
+const MAX_FEED_NAME: usize = 32;
+
+/// A feed's name in its one spelling, if `text` is one: a lower-case letter, then lower-case
+/// letters and digits, at most 32 of them (`acme`, `fx2`). One spelling per feed, so one
+/// golden thread per feed.
+///
+/// ```
+/// use spreadsheet::formula::feed_name;
+/// assert!(feed_name("acme"));
+/// assert!(!feed_name("Acme"));
+/// assert!(!feed_name("2acme"));
+/// assert!(!feed_name("ac-me"));
+/// ```
+pub fn feed_name(text: &str) -> bool {
+    text.len() <= MAX_FEED_NAME
+        && text.starts_with(|c: char| c.is_ascii_lowercase())
+        && text
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
+}
+
 // ANCHOR: compile
 /// Compile a formula, `=A1*2`, into an expression.
 ///
@@ -275,7 +310,9 @@ pub fn compile(formula: &str) -> Expr {
 /// sum-expr := product (('+' | '-') product)*
 /// product  := unary (('*' | '/') unary)*
 /// unary    := '-' unary | primary
-/// primary  := number | cell | 'SUM' '(' arg (',' arg)* ')' | '(' sum-expr ')'
+/// primary  := number | cell | '(' sum-expr ')'
+///           | 'SUM' '(' arg (',' arg)* ')' | 'NOW' '(' ')' | 'TODAY' '(' ')'
+///           | 'FEED' '(' feed-name ')'
 /// arg      := cell ':' cell | sum-expr
 /// ```
 struct Parser<'t> {
@@ -446,10 +483,40 @@ impl Parser<'_> {
     }
 
     fn call(&mut self, name: &str) -> Parsed<Expr> {
-        if !name.eq_ignore_ascii_case("SUM") {
-            return Err(format!(
-                "`{name}` is not a function the sheet knows: it knows SUM"
-            ));
+        let upper = name.to_ascii_uppercase();
+        match upper.as_str() {
+            "SUM" => {}
+            "NOW" | "TODAY" => {
+                self.at += 1; // the `(`
+                if !self.eat(b')') {
+                    return Err(format!("{upper}() takes nothing between its parentheses"));
+                }
+                return Ok(if upper == "NOW" {
+                    Expr::Now
+                } else {
+                    Expr::Today
+                });
+            }
+            "FEED" => {
+                self.at += 1; // the `(`
+                self.skip_spaces();
+                let word = self.word().to_ascii_lowercase();
+                if !feed_name(&word) {
+                    return Err(
+                        "FEED takes a feed's name: a letter, then letters and digits (e.g. FEED(acme))"
+                            .to_string(),
+                    );
+                }
+                if !self.eat(b')') {
+                    return Err(self.expected(")"));
+                }
+                return Ok(Expr::Feed(word));
+            }
+            _ => {
+                return Err(format!(
+                    "`{name}` is not a function the sheet knows: it knows SUM, NOW, TODAY and FEED"
+                ))
+            }
         }
         self.at += 1; // the `(`
         self.nest()?;
@@ -565,7 +632,15 @@ fn read_form(tokens: &[Token], at: &mut usize, depth: usize) -> std::result::Res
                 _ => return Err("a list with no operator".to_string()),
             };
             *at += 1;
-            let form = if head == "syntax-error" {
+            let form = if head == "feed" {
+                match tokens.get(*at) {
+                    Some(Token::Atom(name)) if feed_name(name) => {
+                        *at += 1;
+                        Expr::Feed(name.clone())
+                    }
+                    _ => return Err("feed takes a feed's name".to_string()),
+                }
+            } else if head == "syntax-error" {
                 match tokens.get(*at) {
                     Some(Token::Str(why)) => {
                         *at += 1;
@@ -608,6 +683,8 @@ fn form_of(head: &str, mut args: Vec<Expr>) -> std::result::Result<Expr, String>
             _ => Err("range takes two cells".to_string()),
         },
         ("sum", n) if n > 0 => Ok(Expr::Sum(args)),
+        ("now", 0) => Ok(Expr::Now),
+        ("today", 0) => Ok(Expr::Today),
         _ => Err(format!(
             "`{head}` with {} arguments is not a form",
             args.len()
@@ -667,6 +744,10 @@ mod tests {
             ("=sum(a3:a1)", "(sum (range A1 A3))"),
             ("=SUM(B2:A1, 3, C1*2)", "(sum (range A1 B2) 3 (* C1 2))"),
             ("=E1", "E1"),
+            ("=NOW()", "(now)"),
+            ("=today( )", "(today)"),
+            ("=FEED( Acme )*2", "(* (feed acme) 2)"),
+            ("=SUM(FEED(a1), A1)", "(sum (feed a1) A1)"),
         ] {
             let expr = compile(formula);
             assert_eq!(expr.to_string(), compiled, "{formula}");
@@ -687,7 +768,7 @@ mod tests {
             ("=A1:A3", "a range (A1:…) only goes inside SUM(…)"),
             (
                 "=MAX(A1)",
-                "`MAX` is not a function the sheet knows: it knows SUM",
+                "`MAX` is not a function the sheet knows: it knows SUM, NOW, TODAY and FEED",
             ),
             (
                 "=A01",
@@ -698,6 +779,17 @@ mod tests {
                 "expected a digit after the point, and the formula ended",
             ),
             ("=SUM()", "expected a number, a cell or ( at `)`"),
+            ("=NOW(1)", "NOW() takes nothing between its parentheses"),
+            ("=FEED(ac-me)", "expected ) at `-me)`"),
+            (
+                "=FEED(2x)",
+                "FEED takes a feed's name: a letter, then letters and digits (e.g. FEED(acme))",
+            ),
+            (
+                "=FEED()",
+                "FEED takes a feed's name: a letter, then letters and digits (e.g. FEED(acme))",
+            ),
+            ("=FEED(acme", "expected ), and the formula ended"),
             (
                 "=1 € 2",
                 "expected an operator (+ - * /) or the end at `€ 2`",
@@ -733,6 +825,10 @@ mod tests {
             "x",
             "1 2",
             "(sum)",
+            "(now 1)",
+            "(feed)",
+            "(feed Acme)",
+            "(feed 1)",
         ] {
             assert!(read(refused).is_err(), "{refused}");
         }

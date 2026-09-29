@@ -19,7 +19,9 @@ which one without being told.
 The sheet's formulas are small on purpose: numbers, cells, `+ - * /`, parentheses, a minus
 sign in front of anything, and `SUM` over any mix of cells, numbers and ranges (`A1:B3`).
 That is enough to show a formula reading other cells, a range reading a rectangle of them,
-and every kind of error a formula can make.
+and every kind of error a formula can make. (Later parts add three functions, `NOW()` and
+`TODAY()` in [Part IV](spreadsheet-4.md) and `FEED(name)` in [Part V](spreadsheet-5.md); the
+listings below already show them.)
 
 A formula compiles to an expression:
 

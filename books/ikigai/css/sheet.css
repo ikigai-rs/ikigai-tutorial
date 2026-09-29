@@ -116,3 +116,37 @@
     margin: 0;
     font-style: italic;
 }
+
+/* Parts IV and V: the poll toggle and its count (view.css's controls, reused), and the market,
+ * whose button is styled like the formula bar's. */
+.sheet-controls {
+    margin: 0;
+}
+
+.sheet-market {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.sheet-ticker,
+.sheet-move {
+    margin: 0;
+}
+
+.sheet-move button {
+    font: inherit;
+    font-size: 0.9em;
+    padding: 0.25rem 0.8rem;
+    margin-right: 0.4rem;
+    border: 1px solid var(--links);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+}
+
+.sheet-move button:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}

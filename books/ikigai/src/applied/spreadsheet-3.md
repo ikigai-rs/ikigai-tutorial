@@ -225,7 +225,8 @@ is the golden threads the kernel already had, and the evaluator is a function th
 values by name.
 
 What comes next leans on that. A cell whose formula reads the time needs its value to expire
-as well as be cut, which is the [time chapter](time.md)'s other way for an answer to go. A cell
-that reads outside data needs something outside to cut it. And because a cell's value is a
+as well as be cut, which is the [time chapter](time.md)'s other way for an answer to go
+([Part IV](spreadsheet-4.md)). A cell that reads outside data needs something outside to cut it
+([Part V](spreadsheet-5.md)). And because a cell's value is a
 name, a *personal* sheet, my overrides layered over a shared one, is a corridor in front of the
 same names rather than a copy of the sheet.

@@ -30,6 +30,23 @@
 // more). It is plain text, not a live region: the reply above it is the status that is
 // announced, and this is there to read when you want it.
 //
+// A SHEET THAT POLLS (parts IV and V). A shell may mark elements `data-poll`: the grid, asked
+// again every two seconds (`hx-trigger="load, every 2s"`), and part V's ticker, which writes
+// the market's next price every three. Polling is what the markup asks for, and the page only
+// lets it through: it starts PAUSED, behind a toggle (`aria-pressed`, labeled by the shell's
+// `data-poll-label`), for the reasons `js/view.js` gives (WCAG 2.2 SC 2.2.2, and a page that
+// polled on load would fill the cache before the chapter's cells ran). While paused, a request
+// from a `data-poll` element is canceled before it reaches the kernel; the grid's first load,
+// and a redraw after an edit, still go through. Each poll of the grid is counted, as a view's
+// are: answered from the cache, or computed. That count is the in-page face of what an HTTP
+// host does with a conditional GET: an answer that has not changed is not made again.
+//
+// WHAT IS OUTSIDE THE SHEET (`data-outside`, part V) does not redraw it. A write from the
+// formula bar, or from a runnable cell, redraws every sheet at once: the page did it, so the
+// page knows. A write from inside `data-outside` (the market) is somebody else's, and the grid
+// finds out the only way a reader of a name ever finds out about a write it did not make: by
+// asking again. That is the poll.
+//
 // Without the kernel (or htmx), a sheet is one sentence saying what did not load, and nothing
 // that looks editable. `a11y/no-kernel.mjs` pins that in CI.
 //
@@ -124,6 +141,30 @@
         htmx.config.allowEval = false;
         htmx.config.historyEnabled = false;
 
+        // Each sheet's polling state: paused or not, whether its grid has been drawn once,
+        // whether the next grid request is a redraw the page asked for, and the poll count.
+        var states = new Map();
+
+        function stateOf(host) {
+            var state = states.get(host);
+            if (!state) {
+                state = { polling: false, drawn: false, force: false, asked: 0, cached: 0,
+                    computed: 0, tally: null };
+                states.set(host, state);
+            }
+            return state;
+        }
+
+        function tallyText(state) {
+            if (state.asked === 0) {
+                return state.polling ? "Polling: waiting for the first answer."
+                    : "Paused: the grid has not been polled.";
+            }
+            return (state.polling ? "Polling. " : "Paused. ") + "The grid was polled " +
+                state.asked + (state.asked === 1 ? " time: " : " times: ") + state.cached +
+                " answered from the cache, " + state.computed + " computed.";
+        }
+
         // Say which of the sheet's values a redraw is about to compute: those not cached now.
         function showRecomputed(host) {
             var out = host.querySelector(".sheet-recomputed");
@@ -147,15 +188,15 @@
             });
         }
 
-        // Draw a sheet's grid again, after the viewer (if it has one) has said what that costs.
+        // Draw a sheet's grid again. The request goes through the shim like any other, which
+        // lets the viewer (if the sheet has one) say first what the redraw is about to cost.
         function redraw(host) {
             var grid = host.querySelector(".sheet-view[hx-get]");
             if (!grid) {
                 return;
             }
-            showRecomputed(host).then(function () {
-                htmx.ajax("GET", grid.getAttribute("hx-get"), { source: grid, target: grid });
-            });
+            stateOf(host).force = true;
+            htmx.ajax("GET", grid.getAttribute("hx-get"), { source: grid, target: grid });
         }
 
         document.body.addEventListener("htmx:beforeRequest", function (event) {
@@ -166,6 +207,14 @@
                 return;
             }
             event.preventDefault();
+            var state = stateOf(host);
+            var elt = detail.elt;
+            var isGrid = elt.matches && elt.matches(".sheet-view[hx-get]");
+            // The first draw, and a redraw the page asked for, are not polls.
+            var poll = isGrid ? state.drawn && !state.force : elt.hasAttribute("data-poll");
+            if (poll && !state.polling) {
+                return;
+            }
             var config = detail.requestConfig;
             var verb = VERBS[String(config.verb).toLowerCase()];
             var iri = iriOf(config.path);
@@ -175,12 +224,29 @@
                     { swapStyle: "innerHTML" });
                 return;
             }
+            var outside = elt.closest && elt.closest("[data-outside]");
+            var before = isGrid && state.drawn ? showRecomputed(host) : Promise.resolve();
+            if (isGrid) {
+                state.drawn = true;
+                state.force = false;
+            }
             var args = verb === "source" ? [] : fields(config);
-            kernel.issueWithArgsAsync("", verb, iri, JSON.stringify(args)).then(function (json) {
+            before.then(function () {
+                return kernel.issueWithArgsAsync("", verb, iri, JSON.stringify(args));
+            }).then(function (json) {
                 var reply = JSON.parse(json);
+                if (poll && isGrid && reply.kind === "output" && state.tally) {
+                    state.asked += 1;
+                    if (reply.cache === "cached") {
+                        state.cached += 1;
+                    } else {
+                        state.computed += 1;
+                    }
+                    state.tally.textContent = tallyText(state);
+                }
                 var html = reply.kind === "output" ? reply.text : escape("error: " + reply.text);
                 htmx.swap(target, html, { swapStyle: "innerHTML" });
-                if (verb !== "source") {
+                if (verb !== "source" && !outside) {
                     redraw(host);
                 }
             }).catch(function (err) {
@@ -206,11 +272,35 @@
                         return;
                     }
                     host.innerHTML = reply.text;
+                    var state = stateOf(host);
+                    if (host.querySelector("[data-poll]")) {
+                        var labeled = host.querySelector("[data-poll-label]");
+                        var controls = document.createElement("div");
+                        controls.className = "ikigai-view-controls sheet-controls";
+                        var toggle = document.createElement("button");
+                        toggle.type = "button";
+                        toggle.className = "ikigai-run-secondary ikigai-view-toggle";
+                        toggle.textContent = labeled
+                            ? labeled.getAttribute("data-poll-label") : "Poll";
+                        toggle.setAttribute("aria-pressed", "false");
+                        var tally = document.createElement("p");
+                        tally.className = "ikigai-view-tally";
+                        state.tally = tally;
+                        tally.textContent = tallyText(state);
+                        toggle.addEventListener("click", function () {
+                            state.polling = !state.polling;
+                            toggle.setAttribute("aria-pressed", state.polling ? "true" : "false");
+                            tally.textContent = tallyText(state);
+                        });
+                        controls.appendChild(toggle);
+                        controls.appendChild(tally);
+                        host.appendChild(controls);
+                    }
                     if (host.hasAttribute("data-cache")) {
                         var out = document.createElement("p");
                         out.className = "sheet-recomputed";
-                        out.textContent = "Nothing has changed yet. After an edit, this says " +
-                            "which values the grid computed again.";
+                        out.textContent = "Nothing has changed yet. After an edit, or a poll, " +
+                            "this says which values the grid computed again.";
                         host.appendChild(out);
                     }
                     htmx.process(host);

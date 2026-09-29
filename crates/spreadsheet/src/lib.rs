@@ -23,11 +23,19 @@
 //!   line, for `SUM`.
 //! * `urn:iki:tutorial:sheet:cell:{ref}` — the cell's **value**: a literal passes through, a
 //!   formula is evaluated over the values of the cells it reads. Errors are values:
-//!   `#REF`, `#DIV/0`, `#CYCLE`, `#VALUE`, `#SYNTAX`.
+//!   `#REF`, `#DIV/0`, `#CYCLE`, `#VALUE`, `#SYNTAX`, `#N/A`.
+//! * `urn:iki:tutorial:sheet:feed:{name}` — the latest value written to a feed: the second
+//!   **atom**, written by something that is not the sheet (part V). `FEED(name)` reads it.
+//! * `urn:iki:tutorial:sheet:tick:{name}` — `Sink` only: the market moves. Reads the feed,
+//!   and writes the next price to it: the outside world, simulated.
 //! * `urn:iki:tutorial:sheet:html:{ref}` — the value, escaped for HTML: what the grid shows.
 //! * `urn:iki:tutorial:sheet:template:{name}` — the sheet's HTML.
 //! * `urn:iki:tutorial:sheet:view:grid` — the `grid` template, composed.
 //! * `urn:iki:tutorial:sheet:view:edit` — `Sink` only: the formula bar's write.
+//!
+//! And two names the sheet reads but does not serve, from the time chapter's crate:
+//! `urn:iki:tutorial:time:instant` for `NOW()` and `urn:iki:tutorial:time:today` for `TODAY()`
+//! (part IV). A host that binds the sheet binds those beside it.
 //!
 //! Read the book: `./scripts/serve-with-drafts.sh` while the chapters are still drafts.
 
@@ -100,6 +108,23 @@ pub const VIEW_GRID: &str = "urn:iki:tutorial:sheet:view:grid";
 pub const VIEW_EDIT: &str = "urn:iki:tutorial:sheet:view:edit";
 // ANCHOR_END: names
 
+// ANCHOR: feed_names
+/// The latest value written to a feed: an atom the sheet reads and never writes.
+pub const FEED: &str = "urn:iki:tutorial:sheet:feed:{name}";
+
+/// The market moves: `Sink` only. The next price, written to the feed.
+pub const TICK: &str = "urn:iki:tutorial:sheet:tick:{name}";
+// ANCHOR_END: feed_names
+
+// ANCHOR: time_names
+/// What `NOW()` reads: the time chapter's current minute, the date and the time as one
+/// reading.
+pub const TIME_INSTANT: &str = "urn:iki:tutorial:time:instant";
+
+/// What `TODAY()` reads: the time chapter's date.
+pub const TIME_TODAY: &str = "urn:iki:tutorial:time:today";
+// ANCHOR_END: time_names
+
 /// The media type of a formula as typed: `=A1*2`.
 pub const FORMULA_TYPE: &str = "text/x-formula";
 
@@ -120,9 +145,19 @@ pub const CYCLE_ERROR: &str = "#CYCLE";
 pub const VALUE_ERROR: &str = "#VALUE";
 /// A formula that does not compile.
 pub const SYNTAX_ERROR: &str = "#SYNTAX";
+/// A value that is not available: a feed nothing has written to, or the time on a kernel
+/// with no clock.
+pub const NA_ERROR: &str = "#N/A";
 // ANCHOR_END: errors
 
-const ERRORS: [&str; 5] = [REF_ERROR, DIV_ERROR, CYCLE_ERROR, VALUE_ERROR, SYNTAX_ERROR];
+const ERRORS: [&str; 6] = [
+    REF_ERROR,
+    DIV_ERROR,
+    CYCLE_ERROR,
+    VALUE_ERROR,
+    SYNTAX_ERROR,
+    NA_ERROR,
+];
 
 /// The most bytes one cell's input may hold.
 const MAX_INPUT: usize = 1000;
@@ -160,6 +195,16 @@ pub fn html_name(cell: CellRef) -> String {
 /// The name of the range from `top_left` to `bottom_right`.
 pub fn range_name(top_left: CellRef, bottom_right: CellRef) -> String {
     format!("urn:iki:tutorial:sheet:range:{top_left}:{bottom_right}")
+}
+
+/// The name of the feed `name`.
+pub fn feed_name(name: &str) -> String {
+    format!("urn:iki:tutorial:sheet:feed:{name}")
+}
+
+/// The name of the market's move on the feed `name`.
+pub fn tick_name(name: &str) -> String {
+    format!("urn:iki:tutorial:sheet:tick:{name}")
 }
 
 /// The name of the template `name`.
@@ -685,6 +730,9 @@ fn eval<'a>(inv: &'a Invocation<'_>, expr: &'a Expr) -> Evaluated<'a> {
                 }
                 arithmetic(Ok(total))
             }
+            Expr::Now => read_time(inv, TIME_INSTANT).await?,
+            Expr::Today => read_time(inv, TIME_TODAY).await?,
+            Expr::Feed(name) => read_feed(inv, name).await?,
             // A range means something only as an argument of SUM.
             Expr::Range(..) => Value::Error(VALUE_ERROR),
             Expr::SyntaxError(_) => Value::Error(SYNTAX_ERROR),
@@ -700,6 +748,35 @@ async fn read_cell(inv: &Invocation<'_>, cell: CellRef) -> Result<Value> {
     }
     Ok(Value::of(&text_of(inv, &cell_name(cell)).await?))
 }
+
+// ANCHOR: read_time
+/// `NOW()` or `TODAY()`: the text of the time chapter's `instant` or `today`, read through
+/// the kernel, so the value that asked inherits its deadline. A kernel with no clock has no
+/// time to give, and never will (its clock is fixed when it is built), so that is `#N/A`,
+/// and nothing is asked.
+async fn read_time(inv: &Invocation<'_>, name: &str) -> Result<Value> {
+    if inv.now().is_none() {
+        return Ok(Value::Error(NA_ERROR));
+    }
+    Ok(Value::Text(text_of(inv, name).await?))
+}
+// ANCHOR_END: read_time
+
+// ANCHOR: read_feed
+/// `FEED(name)`: the latest value written to the feed, read through the kernel.
+///
+/// A feed nothing has written to is `#N/A`. That fallback is safe to cache because the
+/// `NotFound` is the ATOM's own: the value that caught it hangs from the feed's golden thread,
+/// so the first write to the feed cuts it. A composite's `NotFound` would hang it from a
+/// thread nobody cuts.
+async fn read_feed(inv: &Invocation<'_>, name: &str) -> Result<Value> {
+    match inv.source(&iri(&feed_name(name))?).await {
+        Ok(latest) => Ok(Value::of(&String::from_utf8_lossy(&latest.bytes))),
+        Err(Error::NotFound(_)) => Ok(Value::Error(NA_ERROR)),
+        Err(other) => Err(other),
+    }
+}
+// ANCHOR_END: read_feed
 
 /// What one argument of SUM adds. A range, or a cell named on its own, adds its numbers
 /// and skips its empty cells and its text, as spreadsheets do; anything else is arithmetic.
@@ -770,7 +847,7 @@ pub fn cell() -> AsyncFnEndpoint {
             .title("Cell")
             .summary(
                 "A cell's value: a literal as typed, or its formula evaluated. Errors are \
-                 values: #REF, #DIV/0, #CYCLE, #VALUE, #SYNTAX.",
+                 values: #REF, #DIV/0, #CYCLE, #VALUE, #SYNTAX, #N/A.",
             )
             .verb(Verb::Source)
             .verb(Verb::Meta)
@@ -833,11 +910,206 @@ pub fn html() -> AsyncFnEndpoint {
 }
 // ANCHOR_END: html
 
+/// The feed a name's `{name}` names, in its one spelling.
+fn feed_binding(inv: &Invocation<'_>) -> Result<String> {
+    let name = inv
+        .bindings
+        .get("name")
+        .ok_or_else(|| Error::MissingArgument("name".to_string()))?;
+    if !formula::feed_name(name) {
+        return Err(Error::InvalidArgument {
+            name: "name".to_string(),
+            detail: format!(
+                "`{name}` is not a feed's name: a lower-case letter, then lower-case letters and digits (e.g. acme)"
+            ),
+        });
+    }
+    Ok(name.to_string())
+}
+
+fn feed_input() -> ArgSpec {
+    ArgSpec::new("name")
+        .summary("the feed's name: lower-case letters and digits, e.g. acme")
+        .class(XSD_STRING)
+        .binding()
+}
+
+// ANCHOR: feed_store
+/// The latest value written to each feed. The sheet's second piece of state, and the first
+/// the sheet itself never writes.
+#[derive(Debug, Default)]
+pub struct FeedStore {
+    latest: Mutex<BTreeMap<String, String>>,
+}
+// ANCHOR_END: feed_store
+
+// ANCHOR: feed
+/// `sheet-feed`: the latest value written to the feed `name`, held in memory.
+///
+/// The same shape as the input: `Source` answers what was written, `.cacheable()` with no
+/// thread named, so the kernel hangs it from the feed's own name and cuts that on every
+/// `Sink` or `Delete` here. A feed nothing has written to is `NotFound`. `Sink` stores
+/// `content`, trimmed, and answers it.
+///
+/// Nothing in the sheet writes here. A price service, a sensor, a person at a shell: whatever
+/// writes a feed is outside the sheet, and the sheet finds out the way it finds out about
+/// anything, by reading a name whose thread was cut.
+pub fn feed(store: Arc<FeedStore>) -> FnEndpoint {
+    FnEndpoint::new("sheet-feed", move |inv: &Invocation<'_>| {
+        let name = feed_binding(inv)?;
+        let mut latest = store.latest.lock().expect("the feed store's lock");
+        match inv.request.verb {
+            Verb::Sink => {
+                let written = inv.inline_str("content")?.trim();
+                if written.is_empty() || written.len() > MAX_INPUT {
+                    return Err(Error::InvalidArgument {
+                        name: "content".to_string(),
+                        detail: format!(
+                            "{} bytes; a feed holds 1 to {MAX_INPUT} (to clear it, delete it)",
+                            written.len()
+                        ),
+                    });
+                }
+                latest.insert(name, written.to_string());
+                Ok(Representation::new(
+                    text_plain_utf8(),
+                    written.as_bytes().to_vec(),
+                ))
+            }
+            Verb::Delete => {
+                latest.remove(&name);
+                Ok(Representation::new(text_plain_utf8(), b"ok".to_vec()))
+            }
+            _ => match latest.get(&name) {
+                Some(written) => Ok(Representation::new(
+                    text_plain_utf8(),
+                    written.clone().into_bytes(),
+                )
+                .cacheable()),
+                None => Err(Error::NotFound(format!(
+                    "nothing has been written to the feed `{name}`"
+                ))),
+            },
+        }
+    })
+    .with_description(
+        Description::new("sheet-feed")
+            .title("Feed")
+            .summary("The latest value written to a feed: read it, write it, or clear it.")
+            .verb(Verb::Meta)
+            .action(
+                ActionSpec::new(Verb::Source)
+                    .summary("the latest value written; NotFound if nothing has been")
+                    .input(feed_input())
+                    .output(TEXT_PLAIN_UTF8),
+            )
+            .action(
+                ActionSpec::new(Verb::Sink)
+                    .summary("write the feed's latest value, and answer it")
+                    .input(feed_input())
+                    .input(
+                        ArgSpec::new("content")
+                            .summary("the value: a number, or some text")
+                            .class(XSD_STRING),
+                    )
+                    .output(TEXT_PLAIN_UTF8),
+            )
+            .action(
+                ActionSpec::new(Verb::Delete)
+                    .summary("clear the feed")
+                    .input(feed_input())
+                    .output(TEXT_PLAIN_UTF8),
+            ),
+    )
+}
+// ANCHOR_END: feed
+
+/// Where a feed nothing has written to starts, in cents: 100.
+const OPENING_CENTS: u64 = 10_000;
+
+// ANCHOR: next_price
+/// The market, simulated: the price after `cents`, in cents, somewhere within 1.50 of it and
+/// never below one cent.
+///
+/// A pure function of the price, so the chapter's outputs are the same on every run: a
+/// generator seeded by the price, not by the time. The sheet never sees this; it sees only
+/// what gets written to the feed.
+///
+/// ```
+/// use spreadsheet::next_price;
+/// assert_eq!(next_price(10_000), next_price(10_000));
+/// assert!(next_price(10_000).abs_diff(10_000) <= 150);
+/// assert!(next_price(1) >= 1);
+/// ```
+pub fn next_price(cents: u64) -> u64 {
+    let mixed = cents
+        .wrapping_mul(6_364_136_223_846_793_005)
+        .wrapping_add(1_442_695_040_888_963_407);
+    let step = (mixed >> 33) % 301;
+    (cents.saturating_add(step)).saturating_sub(150).max(1)
+}
+// ANCHOR_END: next_price
+
+// ANCHOR: tick
+/// `sheet-tick`: the market moves. `Sink` only.
+///
+/// Reads the feed `name` through the kernel (a feed nothing has written to opens at 100),
+/// writes [`next_price`] to it through the kernel, and answers the new price. The write is an
+/// ordinary `Sink` on `feed:{name}`, so it cuts the feed's thread exactly as a price service
+/// writing the same name would; this endpoint is here only because the page has no price
+/// service. A feed holding something that is not a price is a `Conflict`: the market does not
+/// move a feed somebody has set to `halted`.
+pub fn tick() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("sheet-tick", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+        Box::pin(async move {
+            if inv.request.verb != Verb::Sink {
+                return Err(Error::Endpoint(
+                    "the market moves when it is sunk: `sink` it (and read the feed)".to_string(),
+                ));
+            }
+            let name = feed_binding(inv)?;
+            let target = iri(&feed_name(&name))?;
+            let cents = match inv.source(&target).await {
+                Ok(latest) => {
+                    let text = String::from_utf8_lossy(&latest.bytes).into_owned();
+                    formula::parse_number(&text)
+                        .filter(|n| *n > 0.0 && *n < 1e12)
+                        .map(|n| (n * 100.0).round() as u64)
+                        .ok_or_else(|| {
+                            Error::Conflict(format!(
+                                "the feed `{name}` holds `{text}`, which is not a price"
+                            ))
+                        })?
+                }
+                Err(Error::NotFound(_)) => OPENING_CENTS,
+                Err(other) => return Err(other),
+            };
+            let price = formula::number_text(next_price(cents) as f64 / 100.0);
+            let write = Request::new(Verb::Sink, target)
+                .with_arg("content", ArgRef::Inline(price.clone().into_bytes()));
+            inv.issue(write).await?;
+            Ok(Representation::new(text_plain_utf8(), price.into_bytes()))
+        })
+    })
+    .with_description(
+        Description::new("sheet-tick")
+            .title("The market moves")
+            .summary("Writes the feed's next price to it, and answers the price. Sink only.")
+            .verb(Verb::Sink)
+            .verb(Verb::Meta)
+            .input(feed_input())
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: tick
+
 /// Every template, by the name it is resolved at: `template:{name}`. A file's final
 /// newline is not part of the template.
 pub const TEMPLATES: &[(&str, &str)] = &[
     ("grid", include_str!("../templates/grid.html")),
     ("page", include_str!("../templates/page.html")),
+    ("live", include_str!("../templates/live.html")),
+    ("market", include_str!("../templates/market.html")),
 ];
 
 /// `sheet-template`: the template `name`, as `text/html`, computed once.
@@ -986,8 +1258,15 @@ pub fn space() -> EndpointSpace {
 
 /// [`space`], with the inputs in an [`InputStore`] the caller keeps.
 pub fn space_over(store: Arc<InputStore>) -> EndpointSpace {
+    space_with(store, Arc::default())
+}
+
+/// [`space`], with the inputs and the feeds in stores the caller keeps.
+pub fn space_with(inputs: Arc<InputStore>, feeds: Arc<FeedStore>) -> EndpointSpace {
     EndpointSpace::new()
-        .bind(template(INPUT), input(store))
+        .bind(template(INPUT), input(inputs))
+        .bind(template(FEED), feed(feeds))
+        .bind(template(TICK), tick())
         .bind(template(COMPILE), compile())
         .bind(template(FORMULA), formula())
         .bind(template(REFS), refs())
