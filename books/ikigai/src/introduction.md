@@ -61,10 +61,11 @@ the game from a model on paper to atoms, lines, rules, many games at once, a boa
 play in the page, and finally the same game held and served from Python and TypeScript. Then
 **Time is a resource** takes the first step past composition: an answer that goes out of date
 with nobody writing, a clock the host gives the kernel, and a page that polls it. A
-**spreadsheet**, in five more parts, builds something a little bigger the same way: cells as
+**spreadsheet**, in six more parts, builds something a little bigger the same way: cells as
 atoms, a formula as code that is itself a resource, compiled by a transreptor, recalculation that
-is nothing but golden threads, cells that read the clock, and a feed that something outside the
-sheet writes.
+is nothing but golden threads, cells that read the clock, a feed that something outside the
+sheet writes, and finally the sheet as a space: a person's scenario and the sheet as it was, each
+a corridor, stacked.
 
 **Polyglot tracks** mirror Part I chapter for chapter from Python and from TypeScript —
 a decorated function served on a socket, the signature as the contract, a mount as a
