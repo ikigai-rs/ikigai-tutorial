@@ -217,14 +217,12 @@ passes.
 A guard that every composite has to remember is a guard some composite will forget, so the
 crate also gives the guarded reading a name of its own, `urn:iki:tutorial:time:instant`: the
 current minute as one instant, `YYYY-MM-DDTHH:MMZ`. Whatever wants the date and the time
-together reads that one name and cannot tear them. It says nothing about time either, and is
+together reads that one name and cannot tear them. It declares no deadline of its own, and is
 cached until the next minute, which it inherits from `now`:
 
 ```rust,ignore
 {{#include ../../../../crates/time-resource/src/lib.rs:instant}}
 ```
-
-The spreadsheet's `NOW()` reads it, in [A spreadsheet, IV](spreadsheet-4.md).
 
 ## A page that polls
 
