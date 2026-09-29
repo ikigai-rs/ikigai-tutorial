@@ -49,7 +49,7 @@
 - [The machine client](beyond/agent.md)
 - [Exercises: beyond one host](beyond/exercises.md)
 
-# Applied: tic-tac-toe
+# Applied
 
 - [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md)
 - [Tic-tac-toe, II: lines, aliases and the board](applied/tic-tac-toe-2.md)
@@ -57,6 +57,7 @@
 - [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md)
 - [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
 - [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
+- [Time is a resource](applied/time.md)
 
 # Polyglot tracks
 

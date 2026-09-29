@@ -36,8 +36,8 @@ is not theirs.
 ```
 
 All the times in this chapter are UTC. A time zone is not part of what time it *is*; it is
-part of where the person asking is standing, which makes it context, the subject of a
-later chapter.
+part of where the person asking is standing, which makes it context rather than a name,
+and this chapter leaves it out.
 
 ## A kernel has a clock only if its host gives it one
 
@@ -47,7 +47,7 @@ and an endpoint asks for the time with `Invocation::now`. So "what time is it?" 
 question the host answers, which is what lets a test answer it with a clock that stands
 still, and a replay answer it with the instant being replayed.
 
-Every page of this book before this one runs a kernel with no clock. That is why a trace
+Every other page of this book runs a kernel with no clock. That is why a trace
 in [What resolution buys you](../getting-started/payoff.md) prints `—` where a duration
 would go. This page asks for one. Its markup carries a `data-clock` attribute, and when the
 page sees it, it builds its kernel with the browser's clock before anything resolves:
