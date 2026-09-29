@@ -64,6 +64,7 @@
 - [A spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md)
 - [A spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md)
 - [A spreadsheet, VI: a sheet is a space, and spaces stack](applied/spreadsheet-6.md)
+- [A spreadsheet, VII: push](applied/spreadsheet-7.md)
 
 # Polyglot tracks
 
