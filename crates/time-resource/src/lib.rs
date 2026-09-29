@@ -170,6 +170,48 @@ pub fn today() -> FnEndpoint {
 }
 // ANCHOR_END: today
 
+// ANCHOR: as_of_doors
+/// The time chapter's doors for a temporal corridor: `now` and `today` at the instant the
+/// corridor is pinned to, and cacheable for as long as the corridor, since a "then" does not
+/// change. (The live `now` and `today` would answer the same text, from the same pinned clock,
+/// but with the next minute and the next midnight as deadlines, and those have already passed
+/// by the kernel's own clock, so nothing built on them would ever be cached.)
+///
+/// ⚠ Bind these only in a corridor whose name is its instant (`Scope::with_named_at`). At the
+/// root they would cache the first minute they were asked forever.
+pub fn as_of_doors() -> EndpointSpace {
+    EndpointSpace::new()
+        .bind(
+            template(NOW),
+            pinned("time-now-then", |minute| {
+                format!("{:02}:{:02}", (minute / 60) % 24, minute % 60)
+            }),
+        )
+        .bind(
+            template(TODAY),
+            pinned("time-today-then", |minute| {
+                date_text(minute.div_euclid(MINUTES_PER_DAY))
+            }),
+        )
+}
+
+/// A door that answers `text` of the corridor's minute, cacheable with no deadline.
+fn pinned(id: &'static str, text: fn(i64) -> String) -> FnEndpoint {
+    FnEndpoint::new(id, move |inv: &Invocation<'_>| {
+        let minute = (clock(inv)?.as_millis() / MINUTE_MS) as i64;
+        Ok(Representation::new(text_plain_utf8(), text(minute).into_bytes()).cacheable())
+    })
+    .with_description(
+        Description::new(id)
+            .title("The time, pinned")
+            .summary("The time at the instant this corridor is pinned to; cacheable, since a then does not change.")
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN_UTF8),
+    )
+}
+// ANCHOR_END: as_of_doors
+
 // ---------------------------------------------------------------------------------------
 // The calendar: days since 1970-01-01 to a civil date and back, proleptic Gregorian.
 // Howard Hinnant's `civil_from_days` / `days_from_civil`, which are exact for every date

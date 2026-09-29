@@ -14,10 +14,11 @@
 //! the cache and the golden threads live in the kernel, and "cached the second time" is only
 //! demonstrable against state that persists between two runs.
 //!
-//! A cell may also name a **game** (`data-game='a'`, Part IV of the applied chapter). It then
-//! runs in that game's resolution chain — [`tic_tac_toe::game`], one corridor binding the
-//! stored cell to that game's own store — on the SAME kernel, through an engine whose
-//! resolver ([`InGame`]) issues every request in the chain. Choosing the game is the host's
+//! A cell may also name a **game** (`data-game='a'`, Part IV of the applied chapter) or a
+//! person's **scenario** (`data-scenario='alice'`, the spreadsheet's part VI). It then runs in
+//! that chain — [`tic_tac_toe::game`] or [`spreadsheet::scenario`], one corridor over a store
+//! of its own — on the SAME kernel, through an engine whose resolver ([`InChain`]) issues
+//! every request in the chain. Choosing the chain is the host's
 //! act, not the line's: the REPL grammar has no way to name a chain, and injecting one is
 //! authority (whoever may push a corridor chooses what the names mean), so the page's host
 //! code does it from markup the chapter wrote.
@@ -40,17 +41,22 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use ikigai_core::{
-    ArgRef, Capability, Clock, Error, Expiry, Fallback, Iri, Kernel, Provenance, Representation,
-    Request, Scope, Space, SpaceEntry, Tracer, Verb,
+    ArgRef, Capability, Clock, Error, Expiry, Fallback, FixedClock, Iri, Kernel, Provenance,
+    Representation, Request, Scope, Space, SpaceEntry, Tracer, Verb,
 };
 use ikigai_engine::Engine;
 use ikigai_resolve::{CacheStatus, Resolver};
+use spreadsheet::InputStore;
+use time_resource::ManualClock;
 use wasm_bindgen::prelude::*;
 
 thread_local! {
     // The clock the page's kernel is built with, if the page asked for one before the
-    // kernel was built (`useClock`), and whether it has been built yet.
+    // kernel was built (`useClock`, `useStoryClock`), and whether it has been built yet.
     static CLOCK: RefCell<Option<Arc<dyn Clock>>> = const { RefCell::new(None) };
+    // The story clock, when the page asked for one: the same clock as above, kept by its own
+    // type so a cell can set it (`setStoryClock`).
+    static STORY: RefCell<Option<Arc<ManualClock>>> = const { RefCell::new(None) };
     static BUILT: Cell<bool> = const { Cell::new(false) };
     // `Rc` so an async eval can own a handle across `.await` points — a thread-local
     // borrow cannot span an await.
@@ -71,13 +77,32 @@ thread_local! {
 /// chapter's page is not on the next one's. The URN gate asks this same space which names
 /// a cell may use.
 pub fn page_space() -> Fallback {
+    page_space_over(Arc::default())
+}
+
+/// [`page_space`], with the sheet's inputs in a store the caller keeps: the page keeps it,
+/// because its temporal corridors read the same store's history.
+pub fn page_space_over(inputs: Arc<InputStore>) -> Fallback {
     Fallback::new(vec![
         Arc::new(hello_camel::space()) as Arc<dyn Space>,
         Arc::new(tic_tac_toe::space()),
         Arc::new(time_resource::space()),
-        Arc::new(spreadsheet::space()),
+        Arc::new(spreadsheet::space_over(inputs)),
     ])
 }
+
+// ANCHOR: as_of_doors
+/// The doors a temporal corridor binds on this page, for every line that says `as-of=`: the
+/// sheet's inputs as of the instant, from the page's own store, and the time chapter's `now`
+/// and `today`, pinned. Which names a corridor rebinds is a fact about the host, so the host
+/// hands them to the engine; the engine builds the corridor, named for its instant.
+pub fn as_of_doors(inputs: Arc<InputStore>) -> Arc<dyn Space> {
+    Arc::new(Fallback::new(vec![
+        Arc::new(spreadsheet::as_of_doors(inputs)) as Arc<dyn Space>,
+        Arc::new(time_resource::as_of_doors()),
+    ]))
+}
+// ANCHOR_END: as_of_doors
 
 /// The page's kernel: [`page_space`] with the Meta renderer `hello_camel::kernel()` uses,
 /// so `describe` and `urn:kernel:catalog` answer in the page. No clock.
@@ -89,8 +114,14 @@ pub fn page_kernel() -> Kernel {
 /// [`page_kernel`], with `clock` if there is one: the browser's on a page that asked for
 /// it, a clock a test holds in a test.
 pub fn page_kernel_with_clock(clock: Option<Arc<dyn Clock>>) -> Kernel {
+    page_kernel_over(Arc::default(), clock)
+}
+// ANCHOR_END: page_kernel_with_clock
+
+/// [`page_kernel_with_clock`], over the sheet's inputs in `inputs`.
+fn page_kernel_over(inputs: Arc<InputStore>, clock: Option<Arc<dyn Clock>>) -> Kernel {
     let kernel = Kernel::with_meta_renderer(
-        Arc::new(page_space()),
+        Arc::new(page_space_over(inputs)),
         Arc::new(ikigai_vocab::TurtleRenderer),
     );
     match clock {
@@ -98,7 +129,6 @@ pub fn page_kernel_with_clock(clock: Option<Arc<dyn Clock>>) -> Kernel {
         None => kernel,
     }
 }
-// ANCHOR_END: page_kernel_with_clock
 
 // ANCHOR: browser_clock
 /// The browser's clock: `Date.now()`, milliseconds since 1970. `std::time` has no clock on
@@ -131,27 +161,79 @@ fn host_clock() -> Arc<dyn Clock> {
 /// a page that asked too late would otherwise get a kernel with no clock and no word why.
 #[wasm_bindgen(js_name = useClock)]
 pub fn use_clock() -> Result<(), JsValue> {
+    before_the_kernel()?;
+    CLOCK.with(|clock| *clock.borrow_mut() = Some(host_clock()));
+    Ok(())
+}
+
+// ANCHOR: story_clock
+/// Build this page's kernel with a STORY clock, stopped at `instant` (`YYYY-MM-DDTHH:MMZ`),
+/// which the page moves when a cell says when it runs (`data-at`, [`set_story_clock`]).
+///
+/// For a chapter about time as context, where a cell reads the sheet as of last Tuesday: with
+/// the browser's clock, "last Tuesday" would be a date before anything on the page was
+/// typed, and every such cell would answer an empty sheet. With the story's, every reader's
+/// page runs at the instants the chapter says, and answers what the chapter shows.
+#[wasm_bindgen(js_name = useStoryClock)]
+pub fn use_story_clock(instant: String) -> Result<(), JsValue> {
+    before_the_kernel()?;
+    let clock = Arc::new(ManualClock::at(story_millis(&instant)?));
+    STORY.with(|story| *story.borrow_mut() = Some(Arc::clone(&clock)));
+    CLOCK.with(|slot| *slot.borrow_mut() = Some(clock as Arc<dyn Clock>));
+    Ok(())
+}
+
+/// Move the story clock to `instant`: what `js/run.js` does before a cell that carries
+/// `data-at` runs. Refused on a page with no story clock.
+#[wasm_bindgen(js_name = setStoryClock)]
+pub fn set_story_clock(instant: String) -> Result<(), JsValue> {
+    let millis = story_millis(&instant)?;
+    STORY.with(|story| match story.borrow().as_ref() {
+        Some(clock) => {
+            clock.set(millis);
+            Ok(())
+        }
+        None => Err(JsValue::from_str(
+            "this page has no story clock: its markup does not carry data-clock='<instant>'",
+        )),
+    })
+}
+// ANCHOR_END: story_clock
+
+fn story_millis(instant: &str) -> Result<u64, JsValue> {
+    time_resource::parse_instant(instant)
+        .and_then(|minute| u64::try_from(minute).ok())
+        .map(|minute| minute * 60_000)
+        .ok_or_else(|| {
+            JsValue::from_str(&format!(
+                "`{instant}` is not an instant spelled YYYY-MM-DDTHH:MMZ, after 1970"
+            ))
+        })
+}
+
+fn before_the_kernel() -> Result<(), JsValue> {
     if BUILT.with(Cell::get) {
         return Err(JsValue::from_str(
             "the page's kernel is already built, without a clock",
         ));
     }
-    CLOCK.with(|clock| *clock.borrow_mut() = Some(host_clock()));
     Ok(())
 }
 
-/// The page: one kernel, the engine a cell with no game runs in, and one engine per game a
-/// cell has named — every engine over the SAME kernel, so one cache and one set of golden
-/// threads serve them all, partitioned by the chain each request carries.
+/// The page: one kernel, the engine a cell with no chain runs in, and one engine per chain a
+/// cell (or a board, or a sheet) has named — every engine over the SAME kernel, so one cache
+/// and one set of golden threads serve them all, partitioned by the chain each request
+/// carries.
 pub struct Page {
     kernel: Arc<Kernel>,
+    doors: Arc<dyn Space>,
     root: Rc<Engine>,
-    games: RefCell<BTreeMap<String, Game>>,
+    chains: RefCell<BTreeMap<String, Chain>>,
 }
 
-/// One game on the page: the engine its cells run in, and the chain it is played in — the
-/// same chain, cloned, so a cell and a click in one game are one game to the cache.
-struct Game {
+/// One chain on the page: the engine its cells run in, and the chain itself — the same
+/// chain, cloned, so a cell and a click in one game (or one scenario) are one to the cache.
+struct Chain {
     engine: Rc<Engine>,
     scope: Scope,
 }
@@ -163,69 +245,116 @@ impl Default for Page {
 }
 
 impl Page {
-    /// A fresh page: [`page_kernel`], and no game played yet.
+    /// A fresh page: [`page_kernel`], and no chain used yet.
     pub fn new() -> Self {
         Self::with_clock(None)
     }
 
     /// A fresh page whose kernel has `clock`, if there is one.
     pub fn with_clock(clock: Option<Arc<dyn Clock>>) -> Self {
-        let kernel = Arc::new(page_kernel_with_clock(clock));
+        let inputs = Arc::new(InputStore::default());
+        let kernel = Arc::new(page_kernel_over(Arc::clone(&inputs), clock));
+        let doors = as_of_doors(inputs);
         Self {
-            root: Rc::new(Engine::new(Arc::clone(&kernel))),
+            root: Rc::new(Engine::new(Arc::clone(&kernel)).with_as_of_doors(Arc::clone(&doors))),
             kernel,
-            games: RefCell::default(),
+            doors,
+            chains: RefCell::default(),
         }
     }
 
-    /// The engine for a cell: the root's when it names no game, else game `id`'s — created
-    /// on first use with an empty in-memory store, and kept for the life of the page, since
-    /// a game's corridor is built ONCE (its name is the cache's claim that it is one game).
-    pub fn engine(&self, game: Option<&str>) -> Result<Rc<Engine>, String> {
-        match game {
+    /// The engine for a cell: the root's when it names no chain, else that chain's — created
+    /// on first use and kept for the life of the page, since a corridor is built ONCE (its
+    /// name is the cache's claim that it is one game, one scenario).
+    pub fn engine(&self, chain: Option<&str>) -> Result<Rc<Engine>, String> {
+        match chain {
             None => Ok(Rc::clone(&self.root)),
-            Some(id) => self.game(id, |game| Rc::clone(&game.engine)),
+            Some(spec) => self.chain(spec, |chain| Rc::clone(&chain.engine)),
         }
     }
 
-    /// Game `id`, made on first use, handed to `with`.
-    fn game<T>(&self, id: &str, with: impl FnOnce(&Game) -> T) -> Result<T, String> {
-        if let Some(game) = self.games.borrow().get(id) {
-            return Ok(with(game));
+    // ANCHOR: chains
+    /// Chain `spec`, made on first use, handed to `with`. A spec is what the page's markup
+    /// says: `scenario:alice` is alice's scenario over the shared sheet;
+    /// `scenario:alice@2026-09-22T18:00Z` is her scenario inside the sheet as of that instant,
+    /// so her overrides win over the past; anything else is a tic-tac-toe game's id.
+    fn chain<T>(&self, spec: &str, with: impl FnOnce(&Chain) -> T) -> Result<T, String> {
+        self.build(spec)?;
+        Ok(with(self.chains.borrow().get(spec).expect("built above")))
+    }
+
+    /// Make chain `spec`, unless the page has it already.
+    fn build(&self, spec: &str) -> Result<(), String> {
+        if self.chains.borrow().contains_key(spec) {
+            return Ok(());
         }
-        let store = Arc::new(tic_tac_toe::stored_space(Arc::default()));
-        let scope = tic_tac_toe::game(id, store).map_err(|e| e.to_string())?;
-        let game = Game {
-            engine: Rc::new(Engine::new(InGame::new(
-                Arc::clone(&self.kernel),
-                scope.clone(),
-            ))),
+        let scope = match spec.strip_prefix("scenario:") {
+            // One person, one corridor: the scenario over an instant stacks the SAME scope
+            // (the same store, under the same name) as the scenario alone, since a name is a
+            // claim that its doors are one set.
+            Some(rest) => match rest.split_once('@') {
+                Some((who, at)) => {
+                    let alone = format!("scenario:{who}");
+                    self.build(&alone)?;
+                    let alone = self.chains.borrow()[&alone].scope.clone();
+                    self.as_of(at)?.stack(&alone)
+                }
+                None => spreadsheet::scenario(rest, Arc::default()).map_err(|e| e.to_string())?,
+            },
+            None => {
+                let store = Arc::new(tic_tac_toe::stored_space(Arc::default()));
+                tic_tac_toe::game(spec, store).map_err(|e| e.to_string())?
+            }
+        };
+        let chain = Chain {
+            engine: Rc::new(
+                Engine::new(InChain::new(Arc::clone(&self.kernel), scope.clone()))
+                    .with_as_of_doors(Arc::clone(&self.doors)),
+            ),
             scope,
         };
-        let answer = with(&game);
-        self.games.borrow_mut().insert(id.to_string(), game);
-        Ok(answer)
+        self.chains.borrow_mut().insert(spec.to_string(), chain);
+        Ok(())
+    }
+
+    /// The sheet as of `instant` (`YYYY-MM-DDTHH:MMZ`): the corridor a line's `as-of=` builds,
+    /// named the way the engine names it, over the same doors.
+    fn as_of(&self, instant: &str) -> Result<Scope, String> {
+        let millis =
+            story_millis(instant).map_err(|e| e.as_string().unwrap_or_else(|| format!("{e:?}")))?;
+        let canonical = format!("{}:00Z", instant.trim_end_matches('Z'));
+        let name = Iri::parse(format!("urn:ctx:time:{canonical}")).map_err(|e| e.to_string())?;
+        Ok(Scope::empty().with_named_at(
+            name,
+            Arc::clone(&self.doors),
+            Arc::new(FixedClock::at(millis)),
+        ))
+    }
+    // ANCHOR_END: chains
+
+    /// The scope of chain `spec`, or the empty chain for none.
+    fn scope_of(&self, chain: Option<&str>) -> Result<Scope, String> {
+        match chain {
+            None => Ok(Scope::empty()),
+            Some(spec) => self.chain(spec, |chain| chain.scope.clone()),
+        }
     }
 
     // ANCHOR: page_issue
-    /// One request, straight to the kernel — not a line of the REPL — in game `game`'s
-    /// chain, or the root's when it names none. What the page's htmx shims send for a
-    /// click: `GET` a view is a `Source`, `POST` a play or an edit is a `Sink`, in the game
-    /// the markup names, with a form's fields (`args`) as named arguments, the way a server
-    /// reads a form body. Resolves to the representation, or the kernel's refusal as its
-    /// message.
+    /// One request, straight to the kernel — not a line of the REPL — in chain `chain`, or
+    /// the root's when it names none. What the page's htmx shims send for a click: `GET` a
+    /// view is a `Source`, `POST` a play or an edit is a `Sink`, in the chain the markup
+    /// names, with a form's fields (`args`) as named arguments, the way a server reads a form
+    /// body. Resolves to the representation, or the kernel's refusal as its message.
     pub fn issue_with_args(
         &self,
-        game: Option<&str>,
+        chain: Option<&str>,
         verb: Verb,
         target: &str,
         args: Vec<(String, String)>,
     ) -> impl std::future::Future<Output = Result<Representation, String>> + 'static {
         let kernel = Arc::clone(&self.kernel);
-        let scope = match game {
-            None => Ok(Scope::empty()),
-            Some(id) => self.game(id, |game| game.scope.clone()),
-        };
+        let scope = self.scope_of(chain);
         let target = Iri::parse(target).map_err(|e| format!("not a resource name: {e}"));
         async move {
             let request = args
@@ -245,23 +374,19 @@ impl Page {
     /// whose square is in its name.
     pub fn issue(
         &self,
-        game: Option<&str>,
+        chain: Option<&str>,
         verb: Verb,
         target: &str,
     ) -> impl std::future::Future<Output = Result<Representation, String>> + 'static {
-        self.issue_with_args(game, verb, target, Vec::new())
+        self.issue_with_args(chain, verb, target, Vec::new())
     }
 
     /// Would [`issue`](Self::issue) be answered from the cache right now? A probe, which
     /// resolves nothing and runs nothing: what a page asks before a request so it can say
     /// afterwards whether the kernel did any work. A name that does not parse is not cached.
-    pub fn is_cached(&self, game: Option<&str>, verb: Verb, target: &str) -> bool {
-        let scope = match game {
-            None => Scope::empty(),
-            Some(id) => match self.game(id, |game| game.scope.clone()) {
-                Ok(scope) => scope,
-                Err(_) => return false,
-            },
+    pub fn is_cached(&self, chain: Option<&str>, verb: Verb, target: &str) -> bool {
+        let Ok(scope) = self.scope_of(chain) else {
+            return false;
         };
         Iri::parse(target).is_ok_and(|target| {
             self.kernel
@@ -270,22 +395,34 @@ impl Page {
     }
 }
 
-// ANCHOR: in_game
-/// A [`Resolver`] that issues every request in ONE resolution chain — a game's — on a shared
-/// kernel. The engine takes any resolver, so an engine over `InGame` is the whole REPL
-/// grammar (`source`, `sink`, `cache`, `trace`, pipes, maps) played in one game: every
-/// stage, every contract fetch and every cache probe carries the chain, and the kernel hands
-/// it on to every sub-request.
-pub struct InGame {
+// ANCHOR: in_chain
+/// A [`Resolver`] that issues every request in ONE resolution chain — a game's, a person's
+/// scenario — on a shared kernel. The engine takes any resolver, so an engine over `InChain`
+/// is the whole REPL grammar (`source`, `sink`, `cache`, `trace`, pipes, maps) in one chain:
+/// every stage, every contract fetch and every cache probe carries it, and the kernel hands it
+/// on to every sub-request.
+///
+/// A line may bring a chain of its own: `as-of=<instant>` resolves the line in a temporal
+/// corridor. The engine hands that chain to [`issue_as_async_in`](Resolver::issue_as_async_in),
+/// and `InChain` stacks it INSIDE its own (`Scope::stack`, core 0.1.82), so the line's corridor
+/// is the innermost, and the one that answers first.
+pub struct InChain {
     kernel: Arc<Kernel>,
     scope: Scope,
 }
 
-impl InGame {
+impl InChain {
     /// Resolve in `scope` on `kernel`.
     pub fn new(kernel: Arc<Kernel>, scope: Scope) -> Self {
         Self { kernel, scope }
     }
+
+    // ANCHOR: with_line
+    /// This chain with the line's inside it: the line's corridor innermost, answering first.
+    fn with_line(&self, line: &Scope) -> Scope {
+        self.scope.clone().stack(line)
+    }
+    // ANCHOR_END: with_line
 
     /// How the cache served a resolution, from a probe taken before it.
     fn status(was_cached: bool, representation: &Representation) -> CacheStatus {
@@ -298,7 +435,7 @@ impl InGame {
 }
 
 #[async_trait::async_trait]
-impl Resolver for InGame {
+impl Resolver for InChain {
     fn issue(&self, request: Request) -> Result<(Representation, CacheStatus), Error> {
         self.issue_as(request, &Capability::root())
     }
@@ -316,13 +453,8 @@ impl Resolver for InGame {
         request: Request,
         capability: &Capability,
     ) -> Result<(Representation, CacheStatus), Error> {
-        let was_cached = self.kernel.is_cached_in(&request, capability, &self.scope);
-        let representation = self
-            .kernel
-            .issue_in(request, capability, self.scope.clone())
-            .await?;
-        let status = Self::status(was_cached, &representation);
-        Ok((representation, status))
+        self.issue_as_async_in(request, capability, None, Scope::empty())
+            .await
     }
 
     async fn issue_as_async_with_incoming(
@@ -331,17 +463,38 @@ impl Resolver for InGame {
         capability: &Capability,
         incoming: Provenance,
     ) -> Result<(Representation, CacheStatus), Error> {
-        let was_cached = self.kernel.is_cached_in(&request, capability, &self.scope);
-        let representation = self
-            .kernel
-            .issue_with_incoming_in(request, capability, incoming, self.scope.clone())
-            .await?;
+        self.issue_as_async_in(request, capability, Some(incoming), Scope::empty())
+            .await
+    }
+
+    async fn issue_as_async_in(
+        &self,
+        request: Request,
+        capability: &Capability,
+        incoming: Option<Provenance>,
+        line: Scope,
+    ) -> Result<(Representation, CacheStatus), Error> {
+        let scope = self.with_line(&line);
+        let was_cached = self.kernel.is_cached_in(&request, capability, &scope);
+        let representation = match incoming {
+            Some(incoming) => {
+                self.kernel
+                    .issue_with_incoming_in(request, capability, incoming, scope)
+                    .await?
+            }
+            None => self.kernel.issue_in(request, capability, scope).await?,
+        };
         let status = Self::status(was_cached, &representation);
         Ok((representation, status))
     }
 
     fn is_cached(&self, request: &Request, capability: &Capability) -> bool {
         self.kernel.is_cached_in(request, capability, &self.scope)
+    }
+
+    fn is_cached_in(&self, request: &Request, capability: &Capability, line: &Scope) -> bool {
+        self.kernel
+            .is_cached_in(request, capability, &self.with_line(line))
     }
 
     fn set_tracer(&self, tracer: Arc<dyn Tracer>) {
@@ -356,12 +509,12 @@ impl Resolver for InGame {
         self.kernel.entries()
     }
 
-    /// What `trace` prints as the transport — so a traced line says which game it ran in.
+    /// What `trace` prints as the transport — so a traced line says which chain it ran in.
     fn transport(&self) -> String {
         format!("embedded · in-process · chain {}", self.scope)
     }
 }
-// ANCHOR_END: in_game
+// ANCHOR_END: in_chain
 
 /// One evaluated line as JSON for the page: `{ "kind", "text", "cache" }`.
 ///
@@ -406,6 +559,13 @@ pub fn eval_line_in_game_async(game: String, line: String) -> js_sys::Promise {
     eval_in(Some(game), line)
 }
 
+/// [`eval_line_async`] in chain `chain`, as [`Page::engine`] reads a chain's spec: what a cell
+/// carrying `data-scenario='…'` (and perhaps `data-as-of='…'`) sends.
+#[wasm_bindgen(js_name = evalLineInChainAsync)]
+pub fn eval_line_in_chain_async(chain: String, line: String) -> js_sys::Promise {
+    eval_in(Some(chain), line)
+}
+
 fn eval_in(game: Option<String>, line: String) -> js_sys::Promise {
     let engine = PAGE.with(|page| page.engine(game.as_deref()));
     wasm_bindgen_futures::future_to_promise(async move {
@@ -420,8 +580,8 @@ fn eval_in(game: Option<String>, line: String) -> js_sys::Promise {
 }
 
 /// One request to the page's kernel, as an htmx shim (`js/ttt.js`, `js/view.js`) sends it:
-/// `verb` is `source`, `sink`, `exists` or `delete`; `game` is the game the board's markup
-/// names, or empty for the root's. Resolves to the JSON of [`reply_to_json`], with the
+/// `verb` is `source`, `sink`, `exists` or `delete`; `game` is the chain the markup names (a
+/// board's game, a sheet's scenario), or empty for the root's. Resolves to the JSON of [`reply_to_json`], with the
 /// cache's verdict on the request, so a page can count what its polling cost.
 #[wasm_bindgen(js_name = issueAsync)]
 pub fn issue_async(game: String, verb: String, target: String) -> js_sys::Promise {
@@ -495,7 +655,7 @@ pub fn reply_to_json(reply: Result<Representation, String>, was_cached: bool) ->
             "kind": "output",
             "type": representation.repr_type.to_string(),
             "text": String::from_utf8_lossy(&representation.bytes),
-            "cache": match InGame::status(was_cached, &representation) {
+            "cache": match InChain::status(was_cached, &representation) {
                 CacheStatus::Uncacheable => "uncacheable",
                 CacheStatus::Hit => "cached",
                 _ => "computed",
@@ -624,10 +784,40 @@ mod tests {
         out
     }
 
-    /// The runnable cells of a chapter, in page order: the game each names (`data-game`, if
-    /// any), its command, and the text of its expected-output `<pre>`, with the HTML escapes
-    /// the markup needs undone.
-    fn cells(chapter: &str) -> Vec<(Option<String>, String, String)> {
+    /// One runnable cell of a chapter: the chain it runs in (`data-game`, or `data-scenario`
+    /// with any `data-as-of`, as `js/run.js` spells it for the page), the instant it runs at
+    /// on a page with a story clock (`data-at`), its command, and the text of its expected
+    /// output.
+    #[derive(Debug)]
+    struct RunCell {
+        chain: Option<String>,
+        at: Option<String>,
+        command: String,
+        expected: String,
+    }
+
+    /// The value of `attribute='…'` in `tag`, if it is there.
+    fn attribute(tag: &str, attribute: &str) -> Option<String> {
+        let open = format!("{attribute}='");
+        tag.find(&open).map(|at| {
+            let value = &tag[at + open.len()..];
+            value[..value.find('\'').expect("a closed attribute")].to_string()
+        })
+    }
+
+    /// The chain a tag names, spelled as the page spells it for [`Page::engine`].
+    fn chain_of(tag: &str) -> Option<String> {
+        attribute(tag, "data-game").or_else(|| {
+            attribute(tag, "data-scenario").map(|who| match attribute(tag, "data-as-of") {
+                Some(at) => format!("scenario:{who}@{at}"),
+                None => format!("scenario:{who}"),
+            })
+        })
+    }
+
+    /// The runnable cells of a chapter, in page order, with the HTML escapes the markup needs
+    /// undone in each expected output.
+    fn cells(chapter: &str) -> Vec<RunCell> {
         let unescape = |s: &str| {
             s.replace("&#32;", "")
                 .replace("&lt;", "<")
@@ -638,19 +828,21 @@ mod tests {
         let mut found = Vec::new();
         let mut rest = chapter;
         while let Some(at) = rest.find("data-cmd='") {
-            // `data-game='…'` sits in the same tag, before `data-cmd`.
+            // The cell's other attributes sit in the same tag, before `data-cmd`.
             let tag = &rest[rest[..at].rfind("<div").expect("a cell is a <div>")..at];
-            let game = tag.find("data-game='").map(|g| {
-                let value = &tag[g + "data-game='".len()..];
-                value[..value.find('\'').expect("a closed data-game")].to_string()
-            });
+            let chain = chain_of(tag);
             let after = &rest[at + "data-cmd='".len()..];
             let end = after.find('\'').expect("a closed data-cmd");
             let command = after[..end].to_string();
             let open = "<pre class=\"ikigai-run-expected\">";
             let pre = after.find(open).expect("an expected <pre> after the cell") + open.len();
             let close = after[pre..].find("</pre>").expect("a closed <pre>") + pre;
-            found.push((game, command, unescape(&after[pre..close])));
+            found.push(RunCell {
+                chain,
+                at: attribute(tag, "data-at"),
+                command,
+                expected: unescape(&after[pre..close]),
+            });
             rest = &after[close..];
         }
         found
@@ -698,10 +890,8 @@ mod tests {
             .skip(1)
             .map(|rest| {
                 let tag = &rest[..rest.find('>').expect("a closed tag")];
-                let value = &tag[tag.find("data-shell='").expect("a sheet names its shell")
-                    + "data-shell='".len()..];
                 (
-                    value[..value.find('\'').expect("a closed data-shell")].to_string(),
+                    attribute(tag, "data-shell").expect("a sheet names its shell"),
                     tag.contains("data-cache"),
                 )
             })
@@ -726,9 +916,21 @@ mod tests {
             "{file} has no data-clock, so its page has no clock to set"
         );
         let clock = Arc::new(time_resource::ManualClock::default());
+        // A story clock (`data-clock='<instant>'`) starts where the page says, and each cell
+        // that says when it runs (`data-at`) moves it there first, as `js/run.js` does.
+        let story = chapter
+            .split("data-clock='")
+            .nth(1)
+            .map(|rest| rest[..rest.find('\'').expect("a closed data-clock")].to_string());
+        if let Some(instant) = &story {
+            clock.set(time_resource::millis_at(instant, 0));
+        }
         let at = |i: usize| {
             if let Some((_, millis)) = times.iter().find(|(cell, _)| *cell == i) {
                 clock.set(*millis);
+            }
+            if let Some(instant) = cells[i].at.as_deref() {
+                clock.set(time_resource::millis_at(instant, 0));
             }
         };
         at(0);
@@ -740,7 +942,7 @@ mod tests {
             .name()
             .map(|name| format!(" · {name} · "));
 
-        // One page: one kernel, and an engine per game a cell names — as in the browser.
+        // One page: one kernel, and an engine per chain a cell names — as in the browser.
         let page = Page::with_clock(clocked.then(|| Arc::clone(&clock) as Arc<dyn Clock>));
         // A view host loads its shell when the kernel loads, before any cell can run; its
         // polling starts paused, so the shell is the only request it makes.
@@ -777,7 +979,8 @@ mod tests {
         // markup asks for the grid. After a cell runs in the root's chain, the shim redraws
         // every sheet on the page — first, where the sheet shows the cache viewer
         // (`data-cache`), reading the cost view (whose probes resolve no value, but whose
-        // templates are read and cached) — so replay those reads too.
+        // templates are read and cached) — so replay those reads too. A cell in any other
+        // chain (a game, a scenario) changes nothing a sheet shows, so it redraws none.
         let sheets = sheets(&chapter);
         let redraw = || {
             for (_, viewer) in &sheets {
@@ -802,9 +1005,10 @@ mod tests {
             }
         }
         let mut transcript = Vec::new();
-        for (i, (game, command, expected)) in cells.iter().enumerate() {
+        for (i, cell) in cells.iter().enumerate() {
+            let (chain, command, expected) = (&cell.chain, &cell.command, &cell.expected);
             at(i);
-            let engine = page.engine(game.as_deref()).expect("a valid game id");
+            let engine = page.engine(chain.as_deref()).expect("a valid chain");
             let mut got: String = command
                 .lines()
                 .map(|line| render(&action_to_json(engine.eval(line))))
@@ -821,7 +1025,7 @@ mod tests {
             // `BOOK_CELLS_PRINT=1 cargo test -p book-wasm --lib -- --nocapture` prints what
             // each cell answers instead of comparing: how a new chapter's outputs are read.
             if std::env::var_os("BOOK_CELLS_PRINT").is_some() {
-                println!("=== {game:?}\n{command}\n--- got\n{got}=== end");
+                println!("=== {chain:?}\n{command}\n--- got\n{got}=== end");
             } else {
                 assert_eq!(
                     tidy(&got),
@@ -829,10 +1033,10 @@ mod tests {
                     "{file}: the cell `{command}` answers differently from the chapter.\n--- got ---\n{got}"
                 );
             }
-            if let Some(game) = game.as_deref().filter(|g| boards.iter().any(|b| b == g)) {
+            if let Some(game) = chain.as_deref().filter(|g| boards.iter().any(|b| b == g)) {
                 refresh(game);
             }
-            if game.is_none() {
+            if chain.is_none() {
                 redraw();
             }
             transcript.push(got);
@@ -1411,6 +1615,38 @@ mod tests {
             t[4]
         );
         assert!(t[4].contains("error: conflict: "), "{}", t[4]);
+    }
+
+    /// The spreadsheet's sixth part: a person's scenario, the sheet as of an instant, and the
+    /// two stacked in both orders, on a page whose story clock the cells move.
+    #[test]
+    fn the_sixth_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_at("spreadsheet-6.md", 13, &[]);
+        // The week: 400 on Tuesday, 500 after the price rose.
+        assert!(t[0].ends_with("400\n[computed]\n"), "{}", t[0]);
+        assert_eq!(t[1], "110\n[uncacheable]\n500\n[computed]\n");
+        // As of Tuesday evening: the sheet as it was, cached; before noon, empty.
+        assert_eq!(t[2], "400\n[computed]\n400\n[cached]\n[computed]\n");
+        // One now inside the corridor, and a then that caches.
+        assert!(
+            t[3].starts_with("2026-09-22T18:00Z\n[computed]\n2026-09-22T18:00Z\n[cached]\n"),
+            "{}",
+            t[3]
+        );
+        // Alice's what-if, and the shared sheet unmoved but recomputed (ledger item 581).
+        assert_eq!(t[4], "12\n[uncacheable]\n720\n[computed]\n");
+        assert_eq!(t[5], "500\n[computed]\n10\n[cached]\n");
+        // A shared edit cuts both spaces' entries; a scenario edit cuts the shared one too.
+        assert!(t[6].ends_with("not cached\n"), "{}", t[6]);
+        assert_eq!(t[7], "not cached\n670\n[computed]\n");
+        assert_eq!(t[9], "not cached\n450\n[computed]\n");
+        // Both orders of one stack: Tuesday whole, and Alice's overrides over Tuesday.
+        assert_eq!(t[10], "400\n[computed]\n");
+        assert!(t[11].starts_with("900\n[computed]\n"), "{}", t[11]);
+        assert!(t[11].ends_with("825\n[computed]\n"), "{}", t[11]);
+        // Her cells need her capability; the shared cells need nothing.
+        assert!(t[12].contains("error: denied: "), "{}", t[12]);
+        assert!(t[12].contains("650\n[computed]\n"), "{}", t[12]);
     }
 
     /// The sheet's shim: a form's fields reach the kernel as named arguments, and the cost

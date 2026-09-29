@@ -81,7 +81,7 @@ gives it one that issues every request in one chain, on the same kernel every ot
 uses:
 
 ```rust,ignore
-{{#include ../../../../crates/book-wasm/src/lib.rs:in_game}}
+{{#include ../../../../crates/book-wasm/src/lib.rs:in_chain}}
 ```
 
 One engine per game, each built the first time a cell names that game and kept for the life

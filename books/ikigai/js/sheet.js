@@ -248,9 +248,10 @@
             });
         });
 
-        // A runnable cell with no game ran in the root's chain, which is the sheet's.
+        // A runnable cell with no chain ran in the root's, which is the sheet's. A cell in a
+        // game or a scenario changes nothing the shared sheet shows.
         document.addEventListener("ikigai:cell-ran", function (event) {
-            if (event.detail && event.detail.game) {
+            if (event.detail && (event.detail.game || event.detail.chain)) {
                 return;
             }
             hosts.forEach(redraw);

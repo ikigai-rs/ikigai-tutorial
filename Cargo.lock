@@ -612,10 +612,11 @@ dependencies = [
 
 [[package]]
 name = "ikigai-engine"
-version = "0.1.28"
+version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d31c603ec2b09fb044af47dea9fe9131c4449819e92ce6566628a485825e3d1f"
+checksum = "89e2711fbf78521158c3cc4aff14a4e30be16eda2b9339e08d0321f09c619ec5"
 dependencies = [
+ "chrono",
  "futures",
  "ikigai-core",
  "ikigai-resolve",

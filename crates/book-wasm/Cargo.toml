@@ -38,15 +38,16 @@ ikigai-vocab.workspace = true
 # The CLI's renderer-agnostic engine: the REPL grammar (`source a | b`, `cache`, `trace`,
 # `describe … text/turtle`) over any `Resolver`. Wasm-clean — ikigai-web-demo has driven
 # it in the browser since 0.1.4 — and `eval_async` is what lets a cell run on the JS event
-# loop rather than block the page. 0.1.18 is the version that compiles against the core
-# this workspace pins (it re-exports ikigai-resolve 0.1.18's `Resolver` seam).
-ikigai-engine = "0.1.18"
-# The `Resolver` seam the engine drives, implemented here by `InGame` so a cell can run in
-# ONE game's resolution chain (Part IV of the applied chapter). The engine takes any
-# `Resolver`; this is the trait it takes. 0.1.18 matches the engine's floor above: the
-# methods `InGame` overrides (`issue_as_async_with_incoming`, `is_cached`, the tracer pair)
-# are all there by then.
-ikigai-resolve = "0.1.18"
+# loop rather than block the page. 0.1.29 is the floor because the spreadsheet's part VI uses
+# what it added: `as-of=<instant>` on a line, which resolves the line in a temporal corridor
+# built from doors the host supplies (`Engine::with_as_of_doors`), and hands the resolver that
+# line's chain (`Resolver::issue_as_async_in`).
+ikigai-engine = "0.1.29"
+# The `Resolver` seam the engine drives, implemented here by `InChain` so a cell can run in
+# one chain (a game's, a person's scenario) on the page's kernel. 0.1.29 matches the engine:
+# it is where `issue_as_async_in` and `is_cached_in` arrived, which `InChain` overrides to
+# stack the line's chain inside its own (`Scope::stack`, core 0.1.82).
+ikigai-resolve = "0.1.29"
 # The trait is an `#[async_trait]`, so its implementor needs the macro.
 async-trait = "0.1"
 # `block_on` for the trait's one synchronous method, as the kernel's own impl does.

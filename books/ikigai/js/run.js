@@ -60,11 +60,22 @@
 // the order cells are run in matters, and that is the lesson, not a bug.
 //
 // A cell may name a GAME: `<div class="ikigai-run" data-game='a' data-cmd='…'>`. Its lines
-// then run in that game's resolution chain on the same kernel (`evalLineInGameAsync`; see
+// then run in that game's resolution chain on the same kernel (`evalLineInChainAsync`; see
 // `crates/book-wasm`). The game is markup, not something the reader types, because choosing
 // a chain is the host's authority: the REPL grammar has no way to name one, and a line that
 // could would let whoever writes it decide what every name in it means. The cell says which
 // game it plays in, beside its label.
+//
+// A cell may name a SCENARIO instead (the spreadsheet's part VI): `data-scenario='alice'` runs
+// its lines in alice's scenario, a corridor over the shared sheet (`evalLineInChainAsync`, chain
+// `scenario:alice`), and `data-as-of='2026-09-22T18:00Z'` beside it puts her scenario INSIDE the
+// sheet as of that instant (chain `scenario:alice@2026-09-22T18:00Z`). Markup, for the same
+// reason a game is.
+//
+// A page may keep a STORY CLOCK: `data-clock='2026-09-22T12:00Z'` (an instant, where a plain
+// `data-clock` asks for the browser's clock) builds the page's kernel with a clock stopped
+// there, and a cell carrying `data-at='…'` moves it before it runs. Every reader's page then
+// runs at the instants the chapter shows, which a chapter about "as of last Tuesday" needs.
 (function () {
     "use strict";
 
@@ -85,7 +96,10 @@
                     // say so with a `—`. This runs before anything can resolve, which is
                     // the only moment a kernel's clock can be chosen (`useClock` refuses
                     // later rather than quietly doing nothing).
-                    if (document.querySelector("[data-clock]")) {
+                    var clocked = document.querySelector("[data-clock]");
+                    if (clocked && clocked.getAttribute("data-clock")) {
+                        mod.useStoryClock(clocked.getAttribute("data-clock"));
+                    } else if (clocked) {
                         mod.useClock();
                     }
                     return mod;
@@ -162,6 +176,20 @@
     function install(cell) {
         var original = cell.getAttribute("data-cmd") || "";
         var game = cell.getAttribute("data-game");
+        var scenario = cell.getAttribute("data-scenario");
+        var asOf = cell.getAttribute("data-as-of");
+        var at = cell.getAttribute("data-at");
+        // The chain the cell runs in, spelled as the page's kernel reads it. (Not `chain`: the
+        // runner's `reduce` below names its promise that, and would shadow it.)
+        var chainSpec = game ||
+            (scenario ? "scenario:" + scenario + (asOf ? "@" + asOf : "") : null);
+        var where = game ? ", in game " + game
+            : scenario ? ", in " + scenario + "'s scenario" +
+                (asOf ? " over the sheet as of " + asOf : "")
+            : "";
+        if (at) {
+            where += ", at " + at;
+        }
         var expected = cell.querySelector(".ikigai-run-expected");
         var expectedText = expected ? expected.textContent : "";
         cellCount += 1;
@@ -173,7 +201,7 @@
         // A labeled textarea (SC 3.3.2 Labels or Instructions; SC 4.1.2), one row per
         // line, with the keys explained in a description the field points at.
         var form = el("form", "ikigai-run-head");
-        var label = el("label", "ikigai-run-label", game ? "Command, in game " + game : "Command");
+        var label = el("label", "ikigai-run-label", "Command" + where);
         label.htmlFor = id + "-cmd";
         var field = el("textarea", "ikigai-run-cmd");
         field.id = id + "-cmd";
@@ -293,13 +321,16 @@
             caption.textContent = "running…";
             var started = now();
             load().then(function (mod) {
+                if (at) {
+                    mod.setStoryClock(at);
+                }
                 var acc = "";
                 var verdicts = [];
                 // Sequential on purpose: a later line may depend on an earlier one's
                 // side effect (a Sink, a cut), so they run in order, one at a time.
                 return lines.reduce(function (chain, line) {
                     return chain.then(function () {
-                        var reply = game ? mod.evalLineInGameAsync(game, line)
+                        var reply = chainSpec ? mod.evalLineInChainAsync(chainSpec, line)
                             : mod.evalLineAsync(line);
                         return reply.then(function (json) {
                             var reply = JSON.parse(json);
@@ -321,7 +352,7 @@
                     // A cell may have changed a game a board on this page shows; the board
                     // is a copy the kernel cannot cut, so say that something ran (ttt.js).
                     document.dispatchEvent(new CustomEvent("ikigai:cell-ran", {
-                        detail: { game: game }
+                        detail: { game: game, chain: chainSpec }
                     }));
                 });
             }, markUnavailable).catch(function (err) {
