@@ -72,6 +72,35 @@ summary:focus-visible {
     outline-offset: 2px;
 }
 
+/* ── Links in running text ────────────────────────────────────────────────────
+ *
+ * WCAG 2.2 SC 1.4.1 (Use of Color): a link inside a sentence must be told apart from the
+ * words around it by something other than color, unless the two colors differ by at least
+ * 3:1. mdbook draws such links in `--links` with no underline, and no theme's `--links`
+ * clears 3:1 against its `--fg` (navy: 1.64:1, measured by axe-core in a real browser on
+ * 2026-09-29). CI's axe runs in jsdom, which has no layout and skips every color rule, so
+ * it never saw this. The repair is the underline, not a color: a color far enough from the
+ * text to pass would fall below the 4.5:1 a link needs against the background. The sidebar,
+ * the menu bar and the heading anchors are not running text, and keep the theme's look. */
+#mdbook-content main p a,
+#mdbook-content main li a,
+#mdbook-content main td a,
+#mdbook-content main blockquote a {
+    text-decoration: underline;
+}
+
+/* ── Comments in ayu's code blocks ─────────────────────────────────────────────
+ *
+ * mdbook's ayu highlight theme draws comments #5c6773 on #191f26: 2.88:1, under the 4.5:1
+ * floor (axe-core in a real browser, 2026-09-29). This is the one value in this file that
+ * `book-a11y` did not choose, because it does not read the highlight themes: #7e8790 is the
+ * original mixed toward white until the WCAG ratio clears the floor (4.55:1), by the same
+ * formula book-a11y uses. No other highlight color failed that run, in any of the five themes. */
+.ayu .hljs-comment,
+.ayu .hljs-quote {
+    color: #7e8790;
+}
+
 /* ── Motion ───────────────────────────────────────────────────────────────────
  *
  * mdbook already guards its footnote highlight with `prefers-reduced-motion`; the

@@ -211,7 +211,10 @@
 /* The listing's expected output, behind a disclosure so the page does not answer the
    question before the reader runs the cell. */
 .ikigai-run-expected-wrap { margin-top: .5rem; font-size: .85em; }
-.ikigai-run-expected-summary { cursor: pointer; color: var(--fg); opacity: .8; }
+/* No opacity: `--fg` at 80% over `--quote-bg` is a pair the contrast gate never measures, and
+   in coal it fell below 4.5:1 (axe-core in a real browser, 2026-09-29). Full `--fg` on
+   `--quote-bg` is one it does. */
+.ikigai-run-expected-summary { cursor: pointer; color: var(--fg); }
 .ikigai-run-expected-summary:focus-visible { outline: 2px solid var(--links); outline-offset: 2px; }
 .ikigai-run-expected-wrap[open] .ikigai-run-expected { margin-top: .35rem; }
 
