@@ -324,18 +324,30 @@ Templates are the files in `templates/` (`TEMPLATES` in `lib.rs`), served at
 that serves the views from the Rust kernel implements nothing. A host that fills them itself
 (the Python and Deno apps) implements the SUBSET these templates use, stated here:
 
+- **Trimmed**, everywhere below, means Rust's `str::trim`: characters with the Unicode
+  `White_Space` property removed from both ends. ⚠ Not Python's `str.strip()`, which also
+  strips U+001C to U+001F, and not JavaScript's `String.prototype.trim()`, which also strips
+  U+FEFF and keeps U+0085.
 - **Scan** left to right. `$$` is a literal `$`. `$a{`, `$r{` or `$h{` opens a MARKER, which
   ends at the matching `}`: count `{` and `}` inside it (an argument `{x}` nests), and skip
   any `"…"` span (where `\"` and `\\` are escapes). A marker that never closes is literal
-  text, `$` included. Any other `$`, `{` or `}` is literal. The marker's BODY is the text
-  between the braces, trimmed.
-- **Body.** `{name}` alone (a letter or `_`, then letters, digits, `_`, `-`) is an ARGUMENT:
-  splice its value, resolve nothing. Anything else is a REQUEST: `IRI` or `IRI?k=v&k=v`. In the
-  IRI, each `{name}` is replaced by the argument's value percent-encoded as RFC 6570 does a
-  simple variable (every byte outside `A-Z a-z 0-9 - . _ ~` as `%XX`, upper case). In an
-  unquoted value, each `{name}` is replaced verbatim (and the result is still ONE value); a
-  `"quoted"` value is literal. Every request is a `Source`. (`||` fallbacks exist in the
-  language; these templates use none, and a filler may refuse them.)
+  text: its `$` is literal and scanning resumes at the character after that `$`, so a marker
+  that closes inside the unclosed one still fires (`$h{urn:a $h{urn:b}` is the text
+  `$h{urn:a ` and then the marker `urn:b`). Any other `$`, `{` or `}` is literal. The
+  marker's BODY is the text between the braces, trimmed.
+- **Parse, then resolve.** A filler parses EVERY marker of a template (a level) before it
+  resolves any of them, and a marker that does not parse refuses the whole template, even
+  when a marker before it would have failed to resolve. The template is wrong whatever the
+  resources say. (`ikigai-fn` then resolves the level's markers concurrently.)
+- **Body.** An EMPTY body (`$h{}`, `$r{ }`) is refused: it is not a marker. `{name}` alone (a
+  letter or `_`, then letters, digits, `_`, `-`) is an ARGUMENT: splice its value, resolve
+  nothing. Anything else is a REQUEST: `IRI` or `IRI?k=v&k=v`, each part trimmed. In the IRI,
+  each `{name}` is replaced by the argument's value percent-encoded as RFC 6570 does a simple
+  variable (every byte outside `A-Z a-z 0-9 - . _ ~` as `%XX`, upper case). In an unquoted
+  value, each `{name}` is replaced verbatim (and the result is still ONE value); a `"quoted"`
+  value is literal. A `{` that does not open a `{name}` is refused. Every request is a
+  `Source`. (`||` fallbacks exist in the language; these templates use none, and a filler may
+  refuse them.)
 - **Splice.** `$h`: the answer as text, with `&` `<` `>` `"` `'` replaced by `&amp;` `&lt;`
   `&gt;` `&quot;` `&#39;` and nothing else changed. ⚠ `&#39;`, not Python's `&#x27;`.
   `$r`: the answer as it is. `$a`: the answer's own markers expanded, with the SAME
@@ -344,29 +356,54 @@ that serves the views from the Rust kernel implements nothing. A host that fills
   `$a{urn:…}` renders as those characters.
 - **Arguments** are the variables a view's name captures (`x`, `y` in `view:square:{x}:{y}`;
   `game` in `view:game:{game}`) and, failing that, the request's own arguments (`message` for
-  `view:reply`). A missing one fails the view.
-- **Failure.** A marker that fails fails the whole view.
-- **`urn:iki:fn:conditional?if=A&equals=V&then=B&else=C`** — the only function the
-  templates call. Source `A`; if its text, trimmed, is exactly `V`, source and answer `B`,
-  else `C`. Only the chosen side is sourced. It answers the chosen TEMPLATE, which the `$a`
-  around it then expands. A host that forwards only the game's names (as `ttt-host`'s
-  gateway does) will not answer `urn:iki:fn:conditional`, so a filler implements it itself.
+  `view:reply`). A captured variable wins over a request argument of the same name. A
+  missing one fails the view.
+- **A nested view gets only its OWN arguments.** A marker that names a view (the board's
+  `$r{…view:square:1:0}`) is a new request: the view sees what ITS name captures and the
+  arguments THAT marker passes, never its caller's. `view:status` inside `view:reply` has no
+  `message`; a view that needs a caller's value is passed it (`?message={message}`).
+- **Failure.** A marker that fails fails the whole view, with the marker's own error.
+- **`urn:iki:fn:conditional?if=A&then=B&else=C`**, optionally with `&equals=V` — the only
+  function the templates call. Its contract is checked before anything is sourced: `then` is
+  required whichever side is taken. Source `A`, then:
+  - with `equals`: the test is whether `A`'s text, trimmed, is exactly `V`;
+  - without it: `A`'s text, trimmed and in ASCII lower case, is a boolean — `true`, `1`,
+    `yes`, `on` are true; `false`, `0`, `no`, `off` and the empty text are false; anything
+    else is refused.
+
+  If the test holds, source and answer `B`, else `C`; a false test with no `else` answers
+  the EMPTY text. Only the chosen side is sourced. It answers the chosen TEMPLATE, which the
+  `$a` around it then expands. These templates use only the `equals` form. A host that
+  forwards only the game's names (as `ttt-host`'s gateway does) will not answer
+  `urn:iki:fn:conditional`, so a filler implements it itself.
 - **Views are names.** A `$r{urn:iki:tutorial:ttt:view:square:1:0}` inside the board is a
   view like the board. A filler either asks the host for it (it is bound in every game) or
   composes it itself, by the table above: `view:square:{x}:{y}` is `template:square` with
   those arguments.
 - **The game.** Every name in a template is spelled for the root game. A filler serving game
   `id` over `ttt-host`'s IPC face resolves `urn:iki:tutorial:ttt:{rest}` as
-  `urn:game:{id}:iki:tutorial:ttt:{rest}` (the root game is `urn:game:root:…`).
+  `urn:game:{id}:iki:tutorial:ttt:{rest}`. The root game has two spellings, as it has two
+  pages: `/` uses its plain `urn:iki:tutorial:ttt:{rest}` names, as `ttt-host`'s own `/`
+  does, and `/game/root/` uses `urn:game:root:iki:tutorial:ttt:{rest}`. The two answer
+  the same.
 
 The cases below are the spec, and `tests/templates.rs`
 (`the_template_language_cases_in_the_readme_hold`) reads THIS block and runs every line
 through `ikigai-fn`'s compose, so the spec and the language cannot drift. Each case is filled
 with the arguments `x` = `1`, `y` = `-2`, `message` = `it's <b>`, over these resources:
 `urn:t:mark` = `<b>"&'$a{urn:t:secret}`, `urn:t:html` = `<i>ok</i>`, `urn:t:dash` = ` -` and a
-newline, `urn:t:inner` = `[$h{{x}}]`, `urn:t:cell:{x}:{y}` = its two coordinates joined by
-`.`, and nothing else (`urn:t:secret` is not bound). `fill` gives a template and what it
-fills to, separated by a tab; `refuse` is a template whose filling fails.
+newline, `urn:t:on` = ` On` and a newline, `urn:t:empty` = the empty text, `urn:t:inner` =
+`[$h{{x}}]`, `urn:t:note` = `($h{{message}})`, `urn:t:cell:{x}:{y}` = its two coordinates
+joined by `.`, two VIEWS — `urn:t:view:inner:{x}` is `urn:t:inner` filled and
+`urn:t:view:note` is `urn:t:note` filled, bound as the game binds its own — and nothing else
+(`urn:t:secret` is not bound).
+
+`fill` gives a template and what it fills to, separated by a tab. `refuse` is a template
+whose filling fails; after a tab it may say how: `malformed` (the template itself is
+refused, before anything at its level resolves: in Rust, compose's own `compose: …` error) or
+`failed` (a marker's request or argument failed, and the fill fails with that error). A
+`\u{…}` in a case is the code point it names, so a case can hold a character that does not
+show; no other `\` is special.
 
 <!-- template-cases: begin -->
 ```text
@@ -376,6 +413,7 @@ fill    $r{urn:t:mark}	<b>"&'$a{urn:t:secret}
 fill    $h{urn:t:html}|$r{urn:t:html}	&lt;i&gt;ok&lt;/i&gt;|<i>ok</i>
 fill    $$h{urn:t:mark} $$$$ $$	$h{urn:t:mark} $$ $
 fill    $h{ urn:t:html }	&lt;i&gt;ok&lt;/i&gt;
+fill    $h{\u{3000}urn:t:html\u{85}}	&lt;i&gt;ok&lt;/i&gt;
 fill    $h{{x}},$h{{y}}	1,-2
 fill    $h{{message}}	it&#39;s &lt;b&gt;
 fill    $r{{message}}	it's <b>
@@ -385,11 +423,28 @@ fill    $a{urn:t:inner}	[1]
 fill    $a{urn:iki:fn:conditional?if=urn:t:dash&equals=-&then=urn:t:inner&else=urn:t:html}	[1]
 fill    $a{urn:iki:fn:conditional?if=urn:t:dash&equals=X&then=urn:t:inner&else=urn:t:html}	<i>ok</i>
 fill    $a{urn:iki:fn:conditional?if=urn:t:cell:{x}:{y}&equals=1.-2&then=urn:t:inner&else=urn:t:html}	[1]
+fill    $a{urn:iki:fn:conditional?if=urn:t:on&then=urn:t:inner&else=urn:t:html}	[1]
+fill    $a{urn:iki:fn:conditional?if=urn:t:empty&then=urn:t:inner&else=urn:t:html}	<i>ok</i>
+fill    <$a{urn:iki:fn:conditional?if=urn:t:empty&then=urn:t:inner}>	<>
+fill    $r{urn:t:view:inner:7}	[7]
+fill    $r{urn:t:view:inner:7?x=9}	[7]
+fill    $r{urn:t:view:note?message={message}}	(it&#39;s &lt;b&gt;)
 fill    $h{urn:t:mark	$h{urn:t:mark
-refuse  $h{urn:t:secret}
-refuse  $h{{nope}}
-refuse  $a{{x}}
-refuse  $h{urn:t:{nope}}
+fill    $h{urn:t:mark $h{urn:t:html}	$h{urn:t:mark &lt;i&gt;ok&lt;/i&gt;
+refuse  $h{urn:t:secret}	failed
+refuse  $h{{nope}}	failed
+refuse  $a{{x}}	malformed
+refuse  $h{urn:t:{nope}}	failed
+refuse  $h{urn:t:{9}}	malformed
+refuse  $h{}	malformed
+refuse  $r{  }	malformed
+refuse  $h{urn:t:secret}$h{urn:t:{9}}	malformed
+refuse  $h{urn:t:secret}$h{}	malformed
+refuse  $h{\u{FEFF}urn:t:html}
+refuse  $h{\u{1F}urn:t:html}
+refuse  $a{urn:iki:fn:conditional?if=urn:t:dash&then=urn:t:inner&else=urn:t:html}	failed
+refuse  $a{urn:iki:fn:conditional?if=urn:t:dash&equals=X&else=urn:t:html}	failed
+refuse  $r{urn:t:view:note}	failed
 ```
 <!-- template-cases: end -->
 
@@ -596,12 +651,17 @@ the system chose), and lists the games sorted.
   `<!-- demo: run -->` block and diffs it, and checks each `<!-- excerpt: <repo> <path> @
   <commit> -->` block is still verbatim at main. Not in CI (python3, deno, the ikigai CLI,
   network, ports 8070–8072); it skips, exit 0, naming what is missing.
-- **The root game's gateway name** `urn:game:root:…` exists (increment 6, PR #47); the apps
-  still use their prefix switch. They can drop it, but they keep their `/` page special case
-  (the host's page for `/` has `<base href="/">` and the title "the root game").
-- ⚠ **ledger items 583 → 585**: when `Conflict` crosses the wire and the move uses it, part
-  VI's refusal transcript (today `invalid argument`, then `conflict:`) and parts III and V
-  move with it. The demo script will say so.
+- **The root game's gateway name** `urn:game:root:…` exists (increment 6, PR #47). The spec
+  now says which spelling a filler uses where: `/` the plain names, as the host's own `/`
+  does, and `/game/root/` the gateway name. The Python app does exactly that; the Deno app
+  spells the root game `urn:game:root:…` at `/` as well, which answers the same. Both keep
+  their `/` page special case (the host's page for `/` has `<base href="/">` and the title
+  "the root game").
+- ⚠ **ledger items 583 → 585**: 583 has landed — `Conflict` is a typed wire error (wire v8)
+  in Rust, Python and Deno, with HTTP 409 at the web edges — and `ttt-host` already has it
+  (cli 0.1.30 speaks wire v8). When 585 makes the move refuse with it (a refused move answers 409, Brian's decision on 585),
+  part VI's refusal transcript (today `invalid argument`) and parts III and V move with it.
+  The demo script will say so.
 
 ## The views as templates (after increment 6)
 
@@ -619,8 +679,14 @@ the system chose), and lists the games sorted.
   requests across fresh, in-progress, won, drawn, refused and reset games, plus `-c` lines
   with a hostile mark), `cmp` equal; and the book's pinned outputs, which did not move except
   where a cell shows a template's own source.
-- ⚠ **The Python and Deno apps fill the OLD `{{slot}}` templates.** Against a `ttt-host`
-  built from this commit they pass the markers through as text, so part VI's app transcripts
-  and its three-digest board comparison fail until each app implements the template
-  language above ("The template language"). The chapter says so. The transcripts were NOT
-  changed to match stale apps.
+- **The Python and Deno apps fill the templates themselves** (ikigai-python PR #23,
+  `26e173a`; ikigai-deno PR #16, `d212d8c`): each implements the template language above,
+  with its own `conditional`, and composes the views by the table, byte-identical to a
+  `ttt-host` built from `89677bc`. Part VI describes and quotes them, and
+  `scripts/ttt-polyglot-demo.sh` checks its transcripts and excerpts against their main.
+  Their ambiguity reports tightened the spec: the boolean `conditional`, the empty marker,
+  what "trimmed" means, the unclosed marker, parse-then-resolve, a nested view's arguments
+  and the root game's two spellings are each stated now, most as a case. ⚠ Each app copies
+  the `template-cases` block into its own tests, so the cases added here (and the world's new
+  resources, the `\u{…}` notation and the refusal classes) reach the apps only when they
+  copy it again.

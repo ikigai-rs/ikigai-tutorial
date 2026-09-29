@@ -26,11 +26,24 @@ fn fixed(text: &'static str) -> FnEndpoint {
 /// `urn:t:case:{n}`, and `ikigai-fn` (for `compose` and `conditional`).
 fn kernel(cases: Arc<Vec<String>>) -> Kernel {
     let at = |pattern: &str| UriTemplate::parse(pattern).expect("a valid template");
+    let name = |iri: &str| Iri::parse(iri).expect("a name");
     let space = ikigai_fn::space()
         .bind(Exact::new("urn:t:mark"), fixed(r#"<b>"&'$a{urn:t:secret}"#))
         .bind(Exact::new("urn:t:html"), fixed("<i>ok</i>"))
         .bind(Exact::new("urn:t:dash"), fixed(" -\n"))
+        .bind(Exact::new("urn:t:on"), fixed(" On\n"))
+        .bind(Exact::new("urn:t:empty"), fixed(""))
         .bind(Exact::new("urn:t:inner"), fixed("[$h{{x}}]"))
+        .bind(Exact::new("urn:t:note"), fixed("($h{{message}})"))
+        // Two views, bound as the game binds its own: a template at a name.
+        .bind(
+            at("urn:t:view:inner:{x}"),
+            ikigai_fn::compose_over(name("urn:t:inner")),
+        )
+        .bind(
+            Exact::new("urn:t:view:note"),
+            ikigai_fn::compose_over(name("urn:t:note")),
+        )
         .bind(
             at("urn:t:cell:{x}:{y}"),
             FnEndpoint::new("cell", |inv: &Invocation<'_>| {
@@ -89,28 +102,64 @@ fn the_template_language_cases_in_the_readme_hold() {
             .find(|kind| line.starts_with(kind))
             .unwrap_or_else(|| panic!("a case is `fill` or `refuse`: {line:?}"));
         let rest = line[kind.len()..].trim_start();
-        match kind {
-            "fill" => {
-                let (template, filled) = rest.split_once('\t').expect("a tab");
-                cases.push((kind, template.to_string(), Some(filled.to_string())));
-            }
-            _ => cases.push((kind, rest.to_string(), None)),
+        let (template, after) = match rest.split_once('\t') {
+            Some((template, after)) => (template, Some(after)),
+            None => (rest, None),
+        };
+        if kind == "fill" {
+            assert!(after.is_some(), "a `fill` case has a tab: {line:?}");
         }
+        cases.push((kind, unescaped(template), after.map(unescaped)));
     }
-    assert!(cases.len() >= 20, "{} cases", cases.len());
+    assert!(cases.len() >= 38, "{} cases", cases.len());
     let templates = Arc::new(cases.iter().map(|(_, t, _)| t.clone()).collect::<Vec<_>>());
     let kernel = kernel(templates);
     for (n, (kind, template, expected)) in cases.iter().enumerate() {
         let got = fill(&kernel, n);
-        match (kind, expected) {
-            (&"fill", Some(expected)) => {
+        match (*kind, expected.as_deref()) {
+            ("fill", Some(expected)) => {
                 assert_eq!(
                     got.as_deref().map_err(ToString::to_string),
-                    Ok(expected.as_str()),
+                    Ok(expected),
                     "{template:?}"
                 );
             }
-            _ => assert!(got.is_err(), "should be refused: {template:?} gave {got:?}"),
+            ("refuse", class) => {
+                let Err(error) = got else {
+                    panic!("should be refused: {template:?} gave {got:?}");
+                };
+                // `malformed`: the template itself is refused — compose's own error, which
+                // it raises before a level's markers resolve. `failed`: a marker's request
+                // or argument failed, and the fill fails with THAT error.
+                let malformed =
+                    matches!(&error, Error::Endpoint(message) if message.starts_with("compose:"));
+                match class {
+                    None => {}
+                    Some("malformed") => assert!(malformed, "{template:?}: {error}"),
+                    Some("failed") => assert!(!malformed, "{template:?}: {error}"),
+                    Some(other) => {
+                        panic!("a refusal's class is `malformed` or `failed`: {other:?}")
+                    }
+                }
+            }
+            _ => unreachable!("a `fill` case has its expected text"),
         }
     }
+}
+
+/// A case as the README writes it, with each `\u{…}` the code point it names — so a case can
+/// hold a character that does not show (U+3000, U+0085, U+FEFF). No other `\` is special.
+fn unescaped(case: &str) -> String {
+    let mut out = String::with_capacity(case.len());
+    let mut rest = case;
+    while let Some(at) = rest.find("\\u{") {
+        out.push_str(&rest[..at]);
+        let after = &rest[at + 3..];
+        let close = after.find('}').expect("a `\\u{` closes");
+        let code = u32::from_str_radix(&after[..close], 16).expect("hex digits");
+        out.push(char::from_u32(code).expect("a code point"));
+        rest = &after[close + 1..];
+    }
+    out.push_str(rest);
+    out
 }

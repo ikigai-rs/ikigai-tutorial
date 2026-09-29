@@ -49,7 +49,7 @@ Both faces serve the stored cell with a **family**: one templated door answering
 verbs, which the language tracks introduce. In Python, `family(pattern)` gives a door, and
 each verb is a decorated function whose parameters include the template's variables.
 
-<!-- excerpt: ikigai-python examples/tictactoe_store.py @ 3318dce -->
+<!-- excerpt: ikigai-python examples/tictactoe_store.py @ 26e173a -->
 ```python
     cell = family(
         STORED,
@@ -71,7 +71,7 @@ each verb is a decorated function whose parameters include the template's variab
 
 In TypeScript, `family(pattern, options)` is a builder, with one chained call per verb:
 
-<!-- excerpt: ikigai-deno examples/tictactoe_store.ts @ f0b7f86 -->
+<!-- excerpt: ikigai-deno examples/tictactoe_store.ts @ d212d8c -->
 ```ts
   return family(STORED, {
     id: "ttt-stored",
@@ -232,17 +232,9 @@ above the atom could tell.
 
 The second shape keeps the whole game in the Rust host and moves the *face* instead. Part V
 made the markup resources, `urn:iki:tutorial:ttt:template:{name}`, and wrote down what a
-host of that markup implements: the templates' language, and the path rule that turns
-`iki/tutorial/ttt/view/board` into a name. The apps fill the same templates as the host, each
-in its own language, as a client of the host.
-
-> **This section is changing.** Part V's views became templates in `ikigai-fn`'s template
-> language, which the kernel fills, and the bytes they answer did not change. The apps were
-> written against the format the templates had before, `{{slot}}` placeholders that each app
-> filled with a few lines of its own, and the excerpts and transcripts below come from those
-> apps. Until each app learns the new markers, an app run against a host built from this book
-> does not match it, and `scripts/ttt-polyglot-demo.sh` says so. This section will be
-> rewritten when they have.
+host of that markup implements: the template language the views are written in, and the path
+rule that turns `iki/tutorial/ttt/view/board` into a name. Each app implements both in its
+own language, as a client of the host.
 
 Start the host with a game over each store, then the two apps. Each app is a client of the
 host's IPC socket and a web server of its own:
@@ -265,68 +257,191 @@ at once. Open `http://127.0.0.1:8072/game/py/` and you are playing game `py`, wh
 are in the Python store, on a board the Python app rendered from resources the Rust host
 computed. Open the same path on 8071 and it is the same game again.
 
-### Filling the template
+### Filling the templates
 
-The app's side of a view is short. Here is the status line in Python:
+In the Rust host a view is a template bound at a name, and `ikigai-fn` fills it. An app
+could ask the host for the finished view, but then it would only pass the host's HTML
+along, so each app composes the views itself. It reads the templates, `template:{name}`,
+and the game's raw resources, `cell:{x}:{y}`, `winner` and `turn`, from the host, and fills
+them with a small template engine of its own. The engine implements the part of the template language these templates
+use, as the tic-tac-toe crate's README states it: the three markers, the `{x}` arguments,
+the escape table and `conditional`.
 
-<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 3318dce -->
+It starts with a scan. In Python:
+
+<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 26e173a -->
 ```python
-def status(game: Game) -> str:
-    """``view:status``: ``X to play.``, ``O has won.`` or ``A draw.``."""
-    won = game.text("winner")
-    if won == "-":
-        kind, mark = "status-turn", game.text("turn")
-    elif won == "draw":
-        kind, mark = "status-draw", ""
-    else:
-        kind, mark = "status-won", won
-    return fill(game.text(f"template:{kind}"), lambda _: mark)
+def scan(template: str) -> list[str | tuple[str, str]]:
+    """``template`` as literal text and markers, each its letter and its trimmed body. `$$` is
+    a literal `$`; a marker that never closes is literal text, `$` included."""
+    out: list[str | tuple[str, str]] = []
+    text, i = [], 0
+    while i < len(template):
+        if template.startswith("$$", i):
+            text.append("$")
+            i += 2
+            continue
+        if template[i] == "$" and template[i + 1 : i + 2] in ("a", "r", "h"):
+            end = unquoted(template, i + 3) if template[i + 2 : i + 3] == "{" else -1
+            if end >= 0:
+                out += ["".join(text), (template[i + 1], template[i + 3 : end].strip(WHITESPACE))]
+                text, i = [], end + 1
+                continue
+        text.append(template[i])
+        i += 1
+    return [*out, "".join(text)]
 ```
 
-and in TypeScript:
+A template becomes literal text and markers, each marker its letter and its trimmed body.
+`$$` is a `$`, and a marker that never closes stays text. `unquoted` finds the `}` that
+closes the marker, counting the braces of any `{x}` inside it and skipping quoted values.
 
-<!-- excerpt: ikigai-deno examples/tictactoe_app.ts @ f0b7f86 -->
+Each marker is then spliced by its letter:
+
+<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 26e173a -->
+```python
+def splice(mode: str, body: str, args: dict[str, str], source: Source, depth: int) -> str:
+    """One marker: `$h` escapes what it names, `$r` splices it as it is, `$a` fills it."""
+    if len(split(body, "||")) > 1:
+        raise refused(f"marker `{body}`: this filler has no `||` fallbacks")
+    name = body[1:-1] if body[:1] == "{" and body[-1:] == "}" else ""
+    if ARG.fullmatch(name):
+        if mode == "a":
+            raise refused(f"marker `{body}`: an argument is a value and never a template")
+        value = argument(args, name)
+    else:
+        iri, _, query = body.partition("?")
+        given = {}
+        for pair in filter(None, (pair.strip(WHITESPACE) for pair in split(query, "&"))):
+            key, eq, word = pair.partition("=")
+            if not eq:
+                raise refused(f"marker argument `{pair}` is not key=value")
+            given[key.strip(WHITESPACE)] = value_of(word.strip(WHITESPACE), args)
+        request = substitute(iri.strip(WHITESPACE), args, encode=True)
+        value = conditional(given, source) if request == CONDITIONAL else source(request, given)
+        if mode == "a":
+            return fill(value, args, source, depth + 1)
+    return value.translate(ESCAPE) if mode == "h" else value
+```
+
+A body that is only an argument, `{x}`, is spliced as a value and resolves nothing. Anything
+else is a request, with its arguments filled in, and every request is a read of the host but
+one. `$a` fills what came back, `$r` splices it as it is, and `$h` escapes it through a
+five-entry table: `&`, `<`, `>`, `"` and `'`, the last one as `&#39;`, which is what
+`ikigai-fn` writes and not what Python's `html.escape` writes. That one character is the
+difference between the same bytes and nearly the same bytes.
+
+The one request the app answers itself is `conditional`, which the templates use to choose:
+a square asks whether its cell is `-`, the status whether the winner is. The host's gateway
+forwards only the game's names, so `urn:iki:fn:conditional` does not reach `ikigai-fn` from
+an app, and the app has its own:
+
+<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 26e173a -->
+```python
+#: ``conditional``'s reading of ``if`` when there is no ``equals``.
+BOOLEAN = {"true": True, "1": True, "yes": True, "on": True}
+BOOLEAN |= {"false": False, "0": False, "no": False, "off": False, "": False}
+
+
+def conditional(given: dict[str, str], source: Source) -> str:
+    """``urn:iki:fn:conditional``: source ``if``; if its trimmed text is ``equals`` (or, with
+    no ``equals``, a true boolean), source and answer ``then``, else ``else`` (or nothing).
+    Only the chosen side is sourced."""
+    test, then = argument(given, "if"), argument(given, "then")
+    verdict = source(test, {}).strip(WHITESPACE)
+    if "equals" in given:
+        taken = verdict == given["equals"]
+    elif (taken := BOOLEAN.get(verdict.lower())) is None:
+        raise refused(f"conditional: `{test}` returned {verdict!r}, not a boolean")
+    chosen = then if taken else given.get("else")
+    return "" if chosen is None else source(chosen, {})
+```
+
+Only the chosen side is read, as in `ikigai-fn`, and what comes back is a template, which
+the `$a` around the `conditional` then fills.
+
+The TypeScript engine is the same design. Here is its fill, which parses every marker of a
+template before it resolves any, so a malformed marker refuses the template whatever the
+resources say, and then resolves the markers together:
+
+<!-- excerpt: ikigai-deno examples/tictactoe_app.ts @ d212d8c -->
 ```ts
-export async function viewStatus(game: Game): Promise<string> {
-  const won = await game.text("winner");
-  const [kind, mark] = won === "-"
-    ? ["status-turn", await game.text("turn")]
-    : won === "draw"
-    ? ["status-draw", ""]
-    : ["status-won", won];
-  const template = await game.text(`template:${kind}`);
-  return fill(
-    template,
-    ({ name }) => name === "mark" ? { text: mark } : unfilled(kind, name),
+export async function compose(
+  template: string,
+  args: Args,
+  resolve: Resolve,
+  depth = 0,
+): Promise<string> {
+  if (depth >= MAX_DEPTH) {
+    throw new EndpointError(`compose: recursion limit (${MAX_DEPTH}) exceeded`);
+  }
+  const segments = scan(template);
+  // Every marker is parsed before any resolves: a malformed one fails the template.
+  const markers = segments.map((s) =>
+    typeof s === "string" ? null : parseMarker(s.mode, s.body)
   );
+  const filled = await Promise.all(segments.map(async (s, n) => {
+    const marker = markers[n];
+    if (typeof s === "string" || marker === null) return s as string;
+    let answer: string;
+    if ("arg" in marker) {
+      answer = argument(args, marker.arg);
+    } else {
+      const iri = fillArguments(marker.iri, args, true);
+      const query: Args = {};
+      for (const [key, { text, quoted }] of marker.args) {
+        query[key] = quoted ? text : fillArguments(text, args, false);
+      }
+      answer = iri === CONDITIONAL
+        ? await conditional(query, resolve)
+        : await resolve(iri, query);
+      if (s.mode === "a") {
+        return compose(answer, args, resolve, depth + 1);
+      }
+    }
+    return s.mode === "h" ? escapeHtml(answer) : answer;
+  }));
+  return filled.join("");
 }
 ```
 
-Each reads `winner` and `turn` from the host and one template, and fills a slot. The board
-is the same idea with nine squares: read the `board` template, and fill each `{{square x
-y}}` with the square template the cell calls for. In Python:
+A view the board names, such as `view:square:1:0`, is composed the same way: the app
+matches the name against the README's table of views and fills that view's template with
+what the name captured. Any other name goes to the host, in the right game:
 
-<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 3318dce -->
-```python
-def board(game: Game) -> str:
-    """``view:board``: the board template, each ``{{square x y}}`` the square the cell calls
-    for — taken if played, else open while the game is on, else closed."""
-    over = game.text("winner") != "-"
-
-    def square(_: str, x: int, y: int) -> Html:
-        mark = game.text(f"cell:{x}:{y}")
-        kind = "square-taken" if mark != "-" else "square-closed" if over else "square-open"
-        slots = {"x": str(x), "y": str(y), "mark": mark}
-        return Html(fill(game.text(f"template:{kind}"), lambda name: slots[name]))
-
-    return fill(game.text("template:board"), square)
+<!-- excerpt: ikigai-deno examples/tictactoe_app.ts @ d212d8c -->
+```ts
+  resolve: Resolve = (iri, args) => {
+    const name = iri.startsWith(GAME) ? iri.slice(GAME.length) : null;
+    for (const [pattern, template, vars] of VIEWS) {
+      const m = name === null ? null : pattern.exec(name);
+      if (m === null) continue;
+      const captured = Object.fromEntries(vars.map((v, n) => [v, m[n + 1]]));
+      return this.view(template, { ...args, ...captured });
+    }
+    const target = name === null ? iri : this.iri(name);
+    return this.client.source(target, args).then((r) => r.text);
+  };
 ```
 
-With `fill`, which reads a template into text and slots, refuses anything that is not a
-slot, and escapes text as it goes in, each app's views come to about thirty lines. The
-tic-tac-toe crate's README specifies what a filler implements as a list of cases, and a Rust
-test runs that list, so the spec cannot drift from the templates. It now states the template
-language rather than the slot format, and the apps will be checked against the new list.
+Which template a view shows is not in either app. It is in the templates, as `conditional`
+markers over `cell`, `winner` and `turn`, so the apps hold no rule of the game at all.
+
+This costs something, and it is worth saying how much. Before Part V's views became
+templates, each app filled simple `{{slot}}` placeholders, and its filler was about 70
+lines. Now the TypeScript engine is about 225 lines and the Python one about 175, most of
+it parsing: finding where a marker ends, splitting a request's arguments outside quotes,
+checking that every `{` opens an argument. Each whole app grew less, by a fifth to a
+quarter, because the view code that chose templates went away. And `conditional` now exists
+three times: in Rust, in `ikigai-fn`, where the host uses it, and again in Python and in
+TypeScript, because the gateway forwards only the game's names. The three copies are not
+even the same. The Python one also reads a boolean, as `ikigai-fn`'s does, and the
+TypeScript one implements only the `equals` form the templates use.
+
+The README states the language as a list of cases, and a Rust test runs every case through
+`ikigai-fn`, so the list cannot drift from the language. Each app copies the list into its
+own tests. Where the apps found the language ambiguous, and they found seven places, the
+README now says which way it goes, most of them as new cases.
 
 Two things the apps do *not* do. They never compute the game: the winner is `winner`, read
 from the host, not a function of the cells written again in Python. And they never write to
@@ -436,7 +551,7 @@ could never be cached safely or cut when a move changed it.
 So the peers hold state, and the kernel composes. The apps follow the same rule from the
 other side: they read `winner` rather than computing it, and render only what they read.
 
-### A refusal is not typed on the wire yet
+### A refusal is not typed yet
 
 A move the rules refuse is answered in the kernel's words, and today those words say
 `invalid argument`:
@@ -450,15 +565,13 @@ invalid argument `x, y`: 0,0 is taken — X played there. O to play.
 ```
 
 That is not really an invalid argument. The argument is well formed, and the refusal is
-about the state of the game. The kernel has a better error for this now, `Conflict`, but it
-cannot cross the wire yet: the wire protocol has no tag for it, so an app would receive it as
-an untyped endpoint error. The order of work is fixed. First the wire gains the variant, in
-Rust, Python and TypeScript together, with HTTP 409 at the web edges (ledger item 583).
-Then the move refuses with it (ledger item 585). When both land, the reply above will
-start with `conflict:` instead of `invalid argument`, the apps will render it with no change,
-because they render the refusal without inspecting it, and a client that wants to treat
-"that square is taken" differently from "that is not a coordinate" will be able to tell them
-apart by type.
+about the state of the game. The kernel has a better error for this now, `Conflict`, and the
+wire can carry it: version 8 of the wire protocol gives it a tag in Rust, Python and
+TypeScript together, and HTTP 409 at the web edges (ledger item 583). `ttt-host` and both
+apps already speak it. What remains is the move, which still refuses with `InvalidArgument`
+(ledger item 585). When it switches, a refused move will be answered with 409 and a message
+that starts with `conflict:`, and a client that wants to treat "that square is taken"
+differently from "that is not a coordinate" will be able to tell them apart by type.
 
 ## What was built
 
