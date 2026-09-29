@@ -12,9 +12,7 @@ millisecond longer.
 
 The chapter builds a clock, a date, a named event and a countdown to it, and ends with a
 clock on the page that asks for the time every second. The lesson is in how often the
-kernel actually does any work when it is asked that often. (The clock is borrowed from
-ikigai's browser demo, where Brian Sletten designed it in June 2026 to show that even the
-time can be cached, given an honest expiry.)
+kernel actually does any work when it is asked that often.
 
 ## The model, on paper
 
