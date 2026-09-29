@@ -115,6 +115,7 @@ dependencies = [
  "ikigai-core",
  "loadable-module",
  "tic-tac-toe",
+ "time-resource",
  "your-endpoints",
 ]
 
@@ -133,6 +134,7 @@ dependencies = [
  "js-sys",
  "serde_json",
  "tic-tac-toe",
+ "time-resource",
  "wasm-bindgen",
  "wasm-bindgen-futures",
 ]
@@ -1627,6 +1629,16 @@ name = "time-core"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1c906769ad99c88eaa54e728060edef082f8e358ff32030cb7c7d315e81109"
+
+[[package]]
+name = "time-resource"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "ikigai-fn",
+ "ikigai-vocab",
+]
 
 [[package]]
 name = "tinyvec"

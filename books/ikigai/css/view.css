@@ -1,0 +1,49 @@
+/* A view that polls — `js/view.js` builds it from `<div class="ikigai-view" data-shell='…'>`,
+ * and the markup inside it is the view's own resources (the clock's are in
+ * `crates/time-resource/templates/`).
+ *
+ * As in run.css and ttt.css, every color is one of mdbook's theme variables, in pairs the
+ * contrast gate (`crates/book-a11y`) already measures: text on `--quote-bg`.
+ */
+
+.ikigai-view {
+    margin: 1.2em 0;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    background: var(--quote-bg);
+    color: var(--fg);
+}
+
+.ikigai-view-unavailable {
+    margin: 0;
+}
+
+/* The clock itself: the time large enough to read at a glance, in tabular figures so the
+ * digits do not shift as they change. */
+.time-clock {
+    margin: 0 0 0.6rem;
+    font-size: 1.4em;
+}
+
+.time-clock-now {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* The pause and the count: a toggle, then the tally, wrapping on a narrow page. */
+.ikigai-view-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.8rem;
+}
+
+.ikigai-view-tally {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.ikigai-view-toggle[aria-pressed="true"] {
+    font-weight: 600;
+}

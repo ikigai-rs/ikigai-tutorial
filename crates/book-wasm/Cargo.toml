@@ -24,6 +24,10 @@ hello-camel = { path = "../hello-camel" }
 # kernel — see `page_space()`. Its names do not overlap Part I's, so every existing cell
 # answers exactly as it did.
 tic-tac-toe = { path = "../tic-tac-toe" }
+# "Time is a resource": the clock, the date, events and countdowns. Its names do not
+# overlap either family above. They answer only on a page whose kernel has a clock
+# (`useClock`), and refuse, saying so, everywhere else.
+time-resource = { path = "../time-resource" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

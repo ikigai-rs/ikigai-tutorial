@@ -1,0 +1,29 @@
+[package]
+name = "time-resource"
+version = "0.1.0"
+description = "The code taught by the book's chapter \"Time is a resource\": a clock, a date, a named event and a countdown, where expiry, not the caller, decides when work happens."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "time_resource"
+path = "src/lib.rs"
+
+# Compiled into the page (`crates/book-wasm`), so it stays wasm-clean: no std::fs, no
+# threads, and no clock of its own. It reads the time the kernel's host gave the kernel,
+# through `Invocation::now`, and nothing else.
+[dependencies]
+ikigai-core.workspace = true
+# `TurtleRenderer`, so this crate's own `kernel_with_clock()` answers `Meta` the way the
+# page's kernel does.
+ikigai-vocab.workspace = true
+# `urn:iki:fn:compose`, the generic composer the clock's view is made of. This crate
+# binds only its own names; the page gets compose from Part I's space, and this crate's
+# own test host mounts the library beside it.
+ikigai-fn.workspace = true
+
+[dev-dependencies]
+futures.workspace = true

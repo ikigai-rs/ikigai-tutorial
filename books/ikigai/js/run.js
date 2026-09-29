@@ -79,12 +79,23 @@
         }
         kernel = import(root + "wasm/book_wasm.js").then(function (mod) {
             return mod.default({ module_or_path: root + "wasm/book_wasm_bg.wasm" })
-                .then(function () { return mod; });
+                .then(function () {
+                    // A page that carries `data-clock` anywhere gets a kernel with the
+                    // browser's clock; every other page's kernel has none, and its traces
+                    // say so with a `—`. This runs before anything can resolve, which is
+                    // the only moment a kernel's clock can be chosen (`useClock` refuses
+                    // later rather than quietly doing nothing).
+                    if (document.querySelector("[data-clock]")) {
+                        mod.useClock();
+                    }
+                    return mod;
+                });
         });
         return kernel;
     }
-    // The ONE loader for the page, shared: `js/ttt.js` (the playable board) resolves in the
-    // same wasm instance, so a click on the board and a Run in a cell are one kernel.
+    // The ONE loader for the page, shared: `js/ttt.js` (the playable board) and `js/view.js`
+    // (a polling view) resolve in the same wasm instance, so a click, a poll and a Run in a
+    // cell are one kernel.
     window.ikigaiBookKernel = load;
 
     function el(tag, className, text) {

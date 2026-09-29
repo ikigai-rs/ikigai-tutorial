@@ -19,7 +19,7 @@ edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/book
 # Loaded after mdbook's own palette, which is what lets the contrast repairs in that file
 # win by cascade order rather than by forking the theme. `crates/book-a11y` measures the
 # result and CI runs it — see scripts/test-books.sh.
-additional-css = ["css/a11y.css", "css/run.css", "css/ttt.css"]
+additional-css = ["css/a11y.css", "css/run.css", "css/ttt.css", "css/view.css"]
 # run.js turns `<div class="ikigai-run" data-cmd='…'>` into a runnable cell backed by the
 # book's own kernel (`crates/book-wasm`, built by pages.yml into `wasm/` beside this
 # book's output). With the wasm absent the cell cannot run: Run is disabled, the result
@@ -27,7 +27,9 @@ additional-css = ["css/a11y.css", "css/run.css", "css/ttt.css"]
 # ttt.js turns `<div class="ttt-play" data-game='…'>` into a playable board: the game's own
 # htmx markup, with htmx's requests answered by that same kernel. It returns at once on a
 # page with no board, and loads the vendored htmx (`src/vendor/`) only on one that has.
-additional-js = ["js/a11y.js", "js/run.js", "js/ttt.js"]
+# view.js does the same for `<div class="ikigai-view" data-shell='…'>`, a view that polls
+# (the clock in "Time is a resource"), with a pause and a count of what the polling cost.
+additional-js = ["js/a11y.js", "js/run.js", "js/ttt.js", "js/view.js"]
 
 [output.html.fold]
 enable = true
