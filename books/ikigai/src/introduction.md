@@ -60,7 +60,11 @@ rest. The application is tic-tac-toe, in six parts numbered on their own, I to V
 the game from a model on paper to atoms, lines, rules, many games at once, a board you can
 play in the page, and finally the same game held and served from Python and TypeScript. Then
 **Time is a resource** takes the first step past composition: an answer that goes out of date
-with nobody writing, a clock the host gives the kernel, and a page that polls it.
+with nobody writing, a clock the host gives the kernel, and a page that polls it. A
+**spreadsheet**, in five more parts, builds something a little bigger the same way: cells as
+atoms, a formula as code that is itself a resource, compiled by a transreptor, recalculation that
+is nothing but golden threads, cells that read the clock, and a feed that something outside the
+sheet writes.
 
 **Polyglot tracks** mirror Part I chapter for chapter from Python and from TypeScript —
 a decorated function served on a socket, the signature as the contract, a mount as a
@@ -73,7 +77,8 @@ Read the front door if you have not run ikigai before, then Part I — or at lea
 Building endpoints assumes Part I and nothing else;
 Part II assumes you know what a `space()` is and why binding is separate from defining;
 Part III assumes both, and leans hardest on capabilities. The tic-tac-toe parts assume Part I,
-and its last part assumes the polyglot tracks as well.
+and its last part assumes the polyglot tracks as well. The spreadsheet assumes the tic-tac-toe
+parts, and its fourth part assumes *Time is a resource*.
 
 ## How to read this book
 
