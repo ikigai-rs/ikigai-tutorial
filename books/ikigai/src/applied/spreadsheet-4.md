@@ -202,9 +202,10 @@ time chapter's own test for this is `an_unguarded_reading_across_midnight_is_wro
 
 ## A kernel with no clock
 
-Every other page of this book runs a kernel with no clock, and the time chapter's names refuse
-there. The sheet does not pass the refusal on. A formula that reads the time on a kernel with no
-clock is `#N/A`, a value, like the sheet's other errors, and the evaluator does not even ask:
+Almost every other page of this book runs a kernel with no clock, and the time chapter's names
+refuse there. The sheet does not pass the refusal on. A formula that reads the time on a kernel
+with no clock is `#N/A`, a value, like the sheet's other errors, and the evaluator does not even
+ask:
 
 - A refusal is never cached. The kernel records every error except `NotFound` as already
   expired, so a value that caught one would be computed again on every read, and so would the

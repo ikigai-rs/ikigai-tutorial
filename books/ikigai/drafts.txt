@@ -7,12 +7,3 @@ The Web as an instance | drafts/web-instance.md
 The algebra of reach | drafts/algebra-of-reach.md
 Names and where you stand | drafts/names-and-context.md
 Authority, three ways | drafts/authority-three-ways.md
-# The spreadsheet arc, parts I to III: cells as atoms, a formula as code that is a resource,
-# and recalculation as golden threads. Brian links them once he has read them.
-A spreadsheet, I: cells are atoms | applied/spreadsheet-1.md
-A spreadsheet, II: a formula is code as a resource | applied/spreadsheet-2.md
-A spreadsheet, III: recalculation is golden threads | applied/spreadsheet-3.md
-# Parts IV and V: cells that read the clock (expiry on a sheet), and a feed written from outside
-# the sheet, found by polling. Brian links them once he has read them.
-A spreadsheet, IV: cells that read the clock | applied/spreadsheet-4.md
-A spreadsheet, V: data that changes outside the sheet | applied/spreadsheet-5.md

@@ -48,9 +48,10 @@ and an endpoint asks for the time with `Invocation::now`. So "what time is it?" 
 question the host answers, which is what lets a test answer it with a clock that stands
 still, and a replay answer it with the instant being replayed.
 
-Every other page of this book runs a kernel with no clock. That is why a trace
+Almost every page of this book runs a kernel with no clock. That is why a trace
 in [What resolution buys you](../getting-started/payoff.md) prints `—` where a duration
-would go. This page asks for one. Its markup carries a `data-clock` attribute, and when the
+would go. This page asks for one, and so does [A spreadsheet, IV](spreadsheet-4.md), whose
+cells read the time. Its markup carries a `data-clock` attribute, and when the
 page sees it, it builds its kernel with the browser's clock before anything resolves:
 
 ```rust,ignore
@@ -223,6 +224,8 @@ cached until the next minute, which it inherits from `now`:
 ```rust,ignore
 {{#include ../../../../crates/time-resource/src/lib.rs:instant}}
 ```
+
+The spreadsheet's `NOW()` reads it, in [A spreadsheet, IV](spreadsheet-4.md).
 
 ## A page that polls
 

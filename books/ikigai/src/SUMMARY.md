@@ -58,6 +58,11 @@
 - [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
 - [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
 - [Time is a resource](applied/time.md)
+- [A spreadsheet, I: cells are atoms](applied/spreadsheet-1.md)
+- [A spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md)
+- [A spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md)
+- [A spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md)
+- [A spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md)
 
 # Polyglot tracks
 
