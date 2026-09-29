@@ -28,7 +28,9 @@
 //!   **atom**, written by something that is not the sheet (part V). `FEED(name)` reads it.
 //! * `urn:iki:tutorial:sheet:tick:{name}` — `Sink` only: the market moves. Reads the feed,
 //!   and writes the next price to it: the outside world, simulated.
-//! * `urn:iki:tutorial:sheet:template:{name}` — the sheet's HTML.
+//! * `urn:iki:tutorial:sheet:template:{name}` — the sheet's HTML. `template:push` (part VII)
+//!   draws each cell as a view of its own, and each listens for `stale`, so a host that is told
+//!   about a cut can draw exactly the cells it touched; the sheet never learns who is listening.
 //! * `urn:iki:tutorial:sheet:view:cell:{ref}` — the value as HTML, escaped by the `$h{…}`
 //!   marker: the `cell` template, composed.
 //! * `urn:iki:tutorial:sheet:view:grid` — the `grid` template, composed: every cell's view.
@@ -1181,6 +1183,7 @@ pub const TEMPLATES: &[(&str, &str)] = &[
     ("page", include_str!("../templates/page.html")),
     ("live", include_str!("../templates/live.html")),
     ("market", include_str!("../templates/market.html")),
+    ("push", include_str!("../templates/push.html")),
 ];
 
 /// `sheet-template`: the template `name`, as `text/html`, computed once.

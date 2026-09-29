@@ -41,11 +41,12 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use ikigai_core::{
-    ArgRef, Capability, Clock, Error, Expiry, Fallback, FixedClock, Iri, Kernel, Provenance,
-    Representation, Request, Scope, Space, SpaceEntry, Tracer, Verb,
+    ArgRef, Capability, Clock, CutBatch, Error, Expiry, Fallback, FixedClock, Iri, Kernel,
+    Provenance, Representation, Request, Scope, Space, SpaceEntry, Tracer, Verb,
 };
 use ikigai_engine::Engine;
 use ikigai_resolve::{CacheStatus, Resolver};
+use push::{Drawn, Listening};
 use spreadsheet::InputStore;
 use time_resource::ManualClock;
 use wasm_bindgen::prelude::*;
@@ -67,7 +68,7 @@ thread_local! {
 }
 
 /// Every name a cell may resolve: Part I's space first, then the applied chapter's game,
-/// then the time chapter's clock, then the spreadsheet.
+/// then the time chapter's clock, then the spreadsheet, then push (the spreadsheet's part VII).
 ///
 /// One space for the whole book rather than one per chapter, because the families are
 /// disjoint (`urn:iki:tutorial:{camel-case,title,camel-title}` and `urn:iki:fn:*` against
@@ -77,17 +78,19 @@ thread_local! {
 /// chapter's page is not on the next one's. The URN gate asks this same space which names
 /// a cell may use.
 pub fn page_space() -> Fallback {
-    page_space_over(Arc::default())
+    page_space_over(Arc::default(), Arc::default())
 }
 
-/// [`page_space`], with the sheet's inputs in a store the caller keeps: the page keeps it,
-/// because its temporal corridors read the same store's history.
-pub fn page_space_over(inputs: Arc<InputStore>) -> Fallback {
+/// [`page_space`], with the sheet's inputs in a store the caller keeps (the page keeps it,
+/// because its temporal corridors read the same store's history), and push's listeners in a
+/// registry the caller keeps (the page keeps it, to await a listener and to attach the kernel).
+pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fallback {
     Fallback::new(vec![
         Arc::new(hello_camel::space()) as Arc<dyn Space>,
         Arc::new(tic_tac_toe::space()),
         Arc::new(time_resource::space()),
         Arc::new(spreadsheet::space_over(inputs)),
+        Arc::new(push::space(listening)),
     ])
 }
 
@@ -114,14 +117,19 @@ pub fn page_kernel() -> Kernel {
 /// [`page_kernel`], with `clock` if there is one: the browser's on a page that asked for
 /// it, a clock a test holds in a test.
 pub fn page_kernel_with_clock(clock: Option<Arc<dyn Clock>>) -> Kernel {
-    page_kernel_over(Arc::default(), clock)
+    page_kernel_over(Arc::default(), Arc::default(), clock)
 }
 // ANCHOR_END: page_kernel_with_clock
 
-/// [`page_kernel_with_clock`], over the sheet's inputs in `inputs`.
-fn page_kernel_over(inputs: Arc<InputStore>, clock: Option<Arc<dyn Clock>>) -> Kernel {
+/// [`page_kernel_with_clock`], over the sheet's inputs in `inputs` and push's registry in
+/// `listening`. The caller attaches the kernel to `listening` once it is in an `Arc`.
+fn page_kernel_over(
+    inputs: Arc<InputStore>,
+    listening: Arc<Listening>,
+    clock: Option<Arc<dyn Clock>>,
+) -> Kernel {
     let kernel = Kernel::with_meta_renderer(
-        Arc::new(page_space_over(inputs)),
+        Arc::new(page_space_over(inputs, listening)),
         Arc::new(ikigai_vocab::TurtleRenderer),
     );
     match clock {
@@ -229,6 +237,13 @@ pub struct Page {
     doors: Arc<dyn Space>,
     root: Rc<Engine>,
     chains: RefCell<BTreeMap<String, Chain>>,
+    /// The kernel's clock, if the page gave it one: what "now" is when the page asks which of
+    /// the views it drew have expired.
+    clock: Option<Arc<dyn Clock>>,
+    /// Push's listeners, by name (part VII).
+    listening: Arc<Listening>,
+    /// The views the page has drawn for a sheet that listens, and what each answer carried.
+    drawn: RefCell<Drawn>,
 }
 
 /// One chain on the page: the engine its cells run in, and the chain itself — the same
@@ -253,13 +268,22 @@ impl Page {
     /// A fresh page whose kernel has `clock`, if there is one.
     pub fn with_clock(clock: Option<Arc<dyn Clock>>) -> Self {
         let inputs = Arc::new(InputStore::default());
-        let kernel = Arc::new(page_kernel_over(Arc::clone(&inputs), clock));
+        let listening = Arc::new(Listening::default());
+        let kernel = Arc::new(page_kernel_over(
+            Arc::clone(&inputs),
+            Arc::clone(&listening),
+            clock.clone(),
+        ));
+        listening.attach(&kernel);
         let doors = as_of_doors(inputs);
         Self {
             root: Rc::new(Engine::new(Arc::clone(&kernel)).with_as_of_doors(Arc::clone(&doors))),
             kernel,
             doors,
             chains: RefCell::default(),
+            clock,
+            listening,
+            drawn: RefCell::default(),
         }
     }
 
@@ -380,6 +404,33 @@ impl Page {
     ) -> impl std::future::Future<Output = Result<Representation, String>> + 'static {
         self.issue_with_args(chain, verb, target, Vec::new())
     }
+
+    // ANCHOR: page_push
+    /// The page drew `view` from `answer`, for a sheet that listens: remember what the answer
+    /// carried, so a cut can be mapped to the views it makes stale.
+    pub fn drew(&self, view: &str, answer: &Representation) {
+        self.drawn.borrow_mut().drew(view, answer);
+    }
+
+    /// The views of the page's that a batch of cuts makes stale.
+    pub fn stale(&self, batch: &CutBatch) -> Vec<String> {
+        self.drawn.borrow().stale(batch)
+    }
+
+    /// The earliest deadline among the views the page drew, in milliseconds since 1970.
+    pub fn deadline(&self) -> Option<u64> {
+        self.drawn.borrow().deadline()
+    }
+
+    /// The views the page drew whose deadline has passed, by the kernel's clock. None on a
+    /// page with no clock, where nothing the kernel answers has a deadline it can honor.
+    pub fn expired(&self) -> Vec<String> {
+        match &self.clock {
+            Some(clock) => self.drawn.borrow().expired(clock.now().as_millis()),
+            None => Vec::new(),
+        }
+    }
+    // ANCHOR_END: page_push
 
     /// Would [`issue`](Self::issue) be answered from the cache right now? A probe, which
     /// resolves nothing and runs nothing: what a page asks before a request so it can say
@@ -634,6 +685,72 @@ pub fn issue_with_args_async(
     })
 }
 
+// ANCHOR: push_exports
+/// A read of `view` in the root's chain, as [`issue_async`] makes it, for a sheet that LISTENS
+/// (`data-push`, part VII): the page also remembers what the answer carried ([`Page::drew`]),
+/// so that a cut can be mapped to the views it makes stale, and an expiry can be timed.
+#[wasm_bindgen(js_name = drawAsync)]
+pub fn draw_async(view: String) -> js_sys::Promise {
+    let page = PAGE.with(Rc::clone);
+    let was_cached = page.is_cached(None, Verb::Source, &view);
+    let issued = page.issue(None, Verb::Source, &view);
+    wasm_bindgen_futures::future_to_promise(async move {
+        let answer = issued.await;
+        if let Ok(representation) = &answer {
+            page.drew(&view, representation);
+        }
+        Ok(JsValue::from_str(&reply_to_json(answer, was_cached)))
+    })
+}
+
+/// Wait for the next cuts the listener `name` hears (registered by a `Sink` to
+/// `urn:iki:tutorial:push:listener:{name}`), and resolve to what they mean for the page:
+/// `{ "cuts": [thread…], "dropped": n, "stale": [view…] }`. `stale` is every view the page drew
+/// whose answer carried a thread that was cut, or every view it drew when cuts were dropped.
+/// Resolves to `{ "error": … }` when nothing is listening under that name.
+///
+/// The kernel never calls the page: a cut appends to the listener's queue and wakes this
+/// future, and the page decides what to do, on its own turn of the event loop.
+#[wasm_bindgen(js_name = pushWaitAsync)]
+pub fn push_wait_async(name: String) -> js_sys::Promise {
+    let page = PAGE.with(Rc::clone);
+    let listener = page.listening.listener(&name);
+    wasm_bindgen_futures::future_to_promise(async move {
+        let Some(listener) = listener else {
+            let error = format!("nothing is listening as `{name}`");
+            return Ok(JsValue::from_str(
+                &serde_json::json!({ "error": error }).to_string(),
+            ));
+        };
+        let batch = listener.wait().await;
+        Ok(JsValue::from_str(&batch_to_json(
+            &batch,
+            &page.stale(&batch),
+        )))
+    })
+}
+
+/// The earliest deadline among the views the page drew, in milliseconds since 1970, or `-1`
+/// when none has one: when to set the page's one timer.
+#[wasm_bindgen(js_name = pushDeadline)]
+pub fn push_deadline() -> f64 {
+    PAGE.with(|page| page.deadline().map_or(-1.0, |at| at as f64))
+}
+
+/// The views the page drew whose deadline has passed, as a JSON array: what the timer draws
+/// again when it fires.
+#[wasm_bindgen(js_name = pushExpired)]
+pub fn push_expired() -> String {
+    PAGE.with(|page| serde_json::json!(page.expired()).to_string())
+}
+// ANCHOR_END: push_exports
+
+/// A batch of cuts as JSON for the page, with the views it makes stale.
+pub fn batch_to_json(batch: &CutBatch, stale: &[String]) -> String {
+    let cuts: Vec<&str> = batch.events.iter().map(|e| e.thread.as_str()).collect();
+    serde_json::json!({ "cuts": cuts, "dropped": batch.dropped, "stale": stale }).to_string()
+}
+
 /// A verb by the name the shim sends — the four an htmx request can map to.
 pub fn verb_named(name: &str) -> Result<Verb, String> {
     match name {
@@ -882,18 +999,26 @@ mod tests {
             .collect()
     }
 
-    /// The sheets a chapter places, in page order: each one's shell, and whether it shows
-    /// the cache viewer (`data-cache`).
-    fn sheets(chapter: &str) -> Vec<(String, bool)> {
+    /// A sheet a chapter places: its shell, whether it shows the cache viewer (`data-cache`),
+    /// and whether it listens (`data-push`, part VII).
+    struct Sheet {
+        shell: String,
+        viewer: bool,
+        listens: bool,
+    }
+
+    /// The sheets a chapter places, in page order.
+    fn sheets(chapter: &str) -> Vec<Sheet> {
         chapter
             .split("<div class=\"sheet-play\"")
             .skip(1)
             .map(|rest| {
                 let tag = &rest[..rest.find('>').expect("a closed tag")];
-                (
-                    attribute(tag, "data-shell").expect("a sheet names its shell"),
-                    tag.contains("data-cache"),
-                )
+                Sheet {
+                    shell: attribute(tag, "data-shell").expect("a sheet names its shell"),
+                    viewer: tag.contains("data-cache"),
+                    listens: tag.contains("data-push"),
+                }
             })
             .collect()
     }
@@ -982,8 +1107,10 @@ mod tests {
         // templates are read and cached) — so replay those reads too. A cell in any other
         // chain (a game, a scenario) changes nothing a sheet shows, so it redraws none.
         let sheets = sheets(&chapter);
+        // A sheet that listens (part VII) never redraws itself after a cell: while push is off,
+        // which is how the page starts, nothing tells it, and that is the point.
         let redraw = || {
-            for (_, viewer) in &sheets {
+            for Sheet { viewer, .. } in sheets.iter().filter(|sheet| !sheet.listens) {
                 if *viewer {
                     futures::executor::block_on(page.issue(
                         None,
@@ -997,11 +1124,23 @@ mod tests {
             }
         };
         // On load, a sheet reads its shell and then its grid, and nothing else: the viewer
-        // says nothing until something has changed.
-        for (shell, _) in &sheets {
-            for name in [shell.as_str(), spreadsheet::VIEW_GRID] {
-                futures::executor::block_on(page.issue(None, Verb::Source, name))
-                    .unwrap_or_else(|e| panic!("the sheet's {name}: {e}"));
+        // says nothing until something has changed. A sheet that listens draws each cell's view
+        // instead, in the shell's order (row by row), and the page remembers what each carried.
+        for sheet in &sheets {
+            futures::executor::block_on(page.issue(None, Verb::Source, &sheet.shell))
+                .unwrap_or_else(|e| panic!("the sheet's {}: {e}", sheet.shell));
+            if !sheet.listens {
+                futures::executor::block_on(page.issue(None, Verb::Source, spreadsheet::VIEW_GRID))
+                    .unwrap_or_else(|e| panic!("the sheet's grid: {e}"));
+                continue;
+            }
+            for row in 1..=6 {
+                for column in ["A", "B", "C", "D"] {
+                    let view = format!("urn:iki:tutorial:sheet:view:cell:{column}{row}");
+                    let answer = futures::executor::block_on(page.issue(None, Verb::Source, &view))
+                        .unwrap_or_else(|e| panic!("{view}: {e}"));
+                    page.drew(&view, &answer);
+                }
             }
         }
         let mut transcript = Vec::new();
@@ -1647,6 +1786,57 @@ mod tests {
         // Her cells need her capability; the shared cells need nothing.
         assert!(t[12].contains("error: denied: "), "{}", t[12]);
         assert!(t[12].contains("650\n[computed]\n"), "{}", t[12]);
+    }
+
+    /// The spreadsheet's seventh part: a listener, what a read carries, time that does not cut,
+    /// and a scenario's edit heard by everybody, on a page whose sheet listens.
+    #[test]
+    fn the_seventh_spreadsheet_chapters_cells_answer_as_it_says_in_page_order() {
+        let at = |instant: &str, seconds: u64| time_resource::millis_at(instant, seconds);
+        let t = run_chapter_at(
+            "spreadsheet-7.md",
+            9,
+            &[
+                (0, at("2026-09-29T14:05Z", 0)),
+                (4, at("2026-09-29T14:05Z", 20)),
+                (5, at("2026-09-29T14:06Z", 5)),
+            ],
+        );
+        // Listening is refused without the capability, and granted with it.
+        assert!(
+            t[0].contains("error: denied: capability does not grant `urn:cap:kernel:listen`"),
+            "{}",
+            t[0]
+        );
+        assert!(t[0].ends_with("heard nothing\n[uncacheable]\n"), "{}", t[0]);
+        // One write, one cut, and the two values that read the feed.
+        assert_eq!(
+            t[2],
+            "101.5\n[uncacheable]\nheard 1 cut\ncut urn:iki:tutorial:sheet:feed:acme\n  \
+             invalidated urn:iki:tutorial:sheet:cell:A1\n  \
+             invalidated urn:iki:tutorial:sheet:cell:A3\n  \
+             invalidated urn:iki:tutorial:sheet:feed:acme\n[uncacheable]\n"
+        );
+        // A3's view carries the feed's thread; C1's does not.
+        let (a3, c1) = t[3].split_at(t[3].find("urn:iki:tutorial:sheet:view:cell:C1\n").unwrap());
+        assert!(a3.contains("  urn:iki:tutorial:sheet:feed:acme\n"), "{a3}");
+        assert!(!c1.contains("feed:acme"), "{c1}");
+        // NOW() has a deadline; the minute turns and nobody hears anything.
+        assert!(t[4].contains("expires at 2026-09-29T14:06Z\n"), "{}", t[4]);
+        assert_eq!(t[5], "heard nothing\n[uncacheable]\nnot cached\n");
+        // Alice's write cuts the shared view of A3 (ledger item 581).
+        assert!(
+            t[7].contains("  invalidated urn:iki:tutorial:sheet:view:cell:A3\n"),
+            "{}",
+            t[7]
+        );
+        // A narrow listener hears the price its read rests on, and not B6.
+        assert!(t[8].contains("heard 1 cut\ncut urn:iki:tutorial:sheet:feed:acme\n"));
+        assert!(
+            !t[8].contains("cut urn:iki:tutorial:sheet:input:B6"),
+            "{}",
+            t[8]
+        );
     }
 
     /// The sheet's shim: a form's fields reach the kernel as named arguments, and the cost

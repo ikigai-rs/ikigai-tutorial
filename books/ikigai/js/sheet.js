@@ -47,6 +47,23 @@
 // finds out the only way a reader of a name ever finds out about a write it did not make: by
 // asking again. That is the poll.
 //
+// A SHEET THAT LISTENS (`data-push` on the host, part VII). Its shell draws each cell as a view
+// of its own (`iki/tutorial/sheet/view/cell/A1`, …), and each cell's trigger is
+// `load, stale, every 2s`: drawn once when the page loads, drawn again when the page says it
+// is stale, and asked again every two seconds only while polling is on. Three toggles, all
+// off to start (WCAG 2.2 SC 2.2.2): the market, polling, and PUSH. Push registers a cut
+// listener (`sink urn:iki:tutorial:push:listener:page0 urn:iki:tutorial:sheet:`, a resource,
+// refused like any resource when the page's capability does not grant `urn:cap:kernel:listen`)
+// and then waits on it (`pushWaitAsync`). The kernel never calls the page: a cut appends to the
+// listener's queue and wakes the wait, and the page, on its own turn, triggers `stale` on
+// exactly the cells whose last answer carried the thread that was cut (`book-wasm` remembers
+// what each answer carried: every cell of a listening sheet is drawn through `drawAsync`). And
+// since TIME DOES NOT CUT, the page keeps one timer, at the earliest deadline among the cells
+// it drew (`pushDeadline`), and draws again whatever has expired when it fires
+// (`pushExpired`). A listening sheet never redraws itself after an edit or a cell: a write is
+// a write, whoever made it, and the listener hears it. With push and polling both off, the
+// grid is the copy the page drew when it loaded, and the tally says so.
+//
 // Without the kernel (or htmx), a sheet is one sentence saying what did not load, and nothing
 // that looks editable. `a11y/no-kernel.mjs` pins that in CI.
 //
@@ -192,6 +209,267 @@
             htmx.ajax("GET", grid.getAttribute("hx-get"), { source: grid, target: grid });
         }
 
+        // ANCHOR: push_host
+        // A sheet that listens: its listener's name on this page, and the prefix it listens
+        // under (every name the sheet has).
+        var PREFIX = "urn:iki:tutorial:sheet:";
+        var LISTENER = "urn:iki:tutorial:push:listener:";
+
+        // The cells of `host` that show `views` (names like urn:iki:tutorial:sheet:view:cell:A1),
+        // found by the path each cell asks for.
+        function cellsShowing(host, views) {
+            var found = [];
+            views.forEach(function (view) {
+                var path = view.replace(/^urn:/, "").split(":").join("/");
+                host.querySelectorAll('td[hx-get="' + path + '"]').forEach(function (td) {
+                    found.push(td);
+                });
+            });
+            return found;
+        }
+
+        function cellName(td) {
+            return td.getAttribute("hx-get").split("/").pop();
+        }
+
+        // Draw `cells` again, and say why: htmx asks for each one (its `stale` trigger), and the
+        // shim below lets the request through because the page asked for it.
+        function drawAgain(host, state, cells, why) {
+            state.marked.forEach(function (td) {
+                td.classList.remove("sheet-pushed");
+            });
+            state.marked = cells;
+            cells.forEach(function (td) {
+                state.asked.set(td, why);
+                td.classList.add("sheet-pushed");
+                htmx.trigger(td, "stale");
+            });
+            state.redrew += cells.length;
+        }
+
+        // Wait for the next cuts, draw the cells they make stale, and wait again, for as long
+        // as push is on and this is still the listener it started.
+        function listen(host, state, generation) {
+            kernel.pushWaitAsync(state.listener).then(function (json) {
+                if (!state.push || generation !== state.generation) {
+                    return;
+                }
+                var batch = JSON.parse(json);
+                if (batch.error) {
+                    stopPush(host, state, "Push stopped: " + batch.error + ".");
+                    return;
+                }
+                state.heard += batch.cuts.length;
+                state.dropped += batch.dropped;
+                var cells = cellsShowing(host, batch.stale);
+                drawAgain(host, state, cells, "push");
+                var cut = batch.cuts.map(function (thread) {
+                    return thread.replace(PREFIX, "");
+                }).join(", ");
+                state.last = batch.dropped > 0
+                    ? "The page fell behind: " + batch.dropped + " cuts were dropped, so it drew " +
+                        "every cell again."
+                    : "Last: " + (batch.cuts.length === 1 ? "a cut of " : "cuts of ") + cut +
+                        (cells.length ? ", which drew " + cells.map(cellName).join(", ") + " again."
+                            : ", which no cell on the grid rests on.");
+                showPush(state);
+                listen(host, state, generation);
+            });
+        }
+
+        // One timer, at the earliest deadline among the cells drawn: an expiry is not a cut,
+        // so nobody announces it, and the page has to know when to look.
+        function schedule(host, state) {
+            clearTimeout(state.timer);
+            state.timer = null;
+            state.deadline = state.push ? kernel.pushDeadline() : -1;
+            if (state.deadline >= 0) {
+                state.timer = setTimeout(function () {
+                    state.timer = null;
+                    var cells = cellsShowing(host, JSON.parse(kernel.pushExpired()));
+                    if (cells.length === 0) {
+                        schedule(host, state);
+                        return;
+                    }
+                    state.expired += cells.length;
+                    drawAgain(host, state, cells, "expired");
+                    state.last = "Last: the deadline " + clockText(state.deadline) +
+                        " passed, which drew " + cells.map(cellName).join(", ") + " again.";
+                    showPush(state);
+                }, Math.max(0, state.deadline - Date.now()) + 5);
+            }
+            showPush(state);
+        }
+
+        function startPush(host, state) {
+            kernel.issueWithArgsAsync("", "sink", LISTENER + state.listener,
+                JSON.stringify([["content", PREFIX]])).then(function (json) {
+                var reply = JSON.parse(json);
+                if (reply.kind !== "output") {
+                    stopPush(host, state, "Push was refused: " + reply.text);
+                    return;
+                }
+                state.push = true;
+                state.generation += 1;
+                state.pushToggle.setAttribute("aria-pressed", "true");
+                listen(host, state, state.generation);
+                schedule(host, state);
+            });
+        }
+
+        function stopPush(host, state, why) {
+            var was = state.push;
+            state.push = false;
+            state.generation += 1;
+            state.pushToggle.setAttribute("aria-pressed", "false");
+            state.last = why || "";
+            schedule(host, state);
+            if (was) {
+                kernel.issueAsync("", "delete", LISTENER + state.listener);
+            }
+        }
+        // ANCHOR_END: push_host
+
+        function clockText(millis) {
+            return new Date(millis).toISOString().slice(11, 19) + "Z";
+        }
+
+        function showPush(state) {
+            var text;
+            if (!state.push) {
+                text = state.last ? state.last + " " : "";
+                text += "Not pushing: nothing tells the grid about a change.";
+            } else {
+                text = "Pushing: listening for cuts under " + PREFIX + ". ";
+                text += state.heard === 0 && state.expired === 0 ? "Nothing has been cut yet."
+                    : "Heard " + state.heard + (state.heard === 1 ? " cut" : " cuts") + "; drew " +
+                        state.redrew + (state.redrew === 1 ? " cell" : " cells") +
+                        " again. " + state.last;
+                if (state.deadline >= 0) {
+                    text += " The next deadline: " + clockText(state.deadline) + ".";
+                }
+            }
+            state.pushTally.textContent = text;
+        }
+
+        function showPoll(state) {
+            var polls = state.polls;
+            state.pollTally.textContent = polls.asked === 0
+                ? (state.polling ? "Polling: waiting for the first answer."
+                    : "Not polling: the cells have not been asked again.")
+                : (state.polling ? "Polling. " : "Not polling. ") + "The cells were asked " +
+                    polls.asked + (polls.asked === 1 ? " time: " : " times: ") + polls.cached +
+                    " answered from the cache, " + polls.computed + " computed.";
+        }
+
+        // A request from inside a sheet that listens. A cell's GET is drawn through `drawAsync`,
+        // so the page remembers what the answer carried: on load, when the page said it was
+        // stale, and on a poll (only while polling is on). The market's ticker runs only while
+        // the market does. Everything else (the formula bar, the market's button) goes straight
+        // to the kernel, and the grid is NOT drawn again after it: the listener hears the write.
+        function pushRequest(host, state, detail) {
+            var elt = detail.elt;
+            var config = detail.requestConfig;
+            var verb = VERBS[String(config.verb).toLowerCase()];
+            var iri = iriOf(config.path);
+            var target = detail.target;
+            if (!verb || !iri) {
+                htmx.swap(target, escape("the page cannot send " + config.verb + " " + config.path),
+                    { swapStyle: "innerHTML" });
+                return;
+            }
+            if (elt.matches && elt.matches("td[hx-get]")) {
+                var why = state.asked.get(elt);
+                state.asked.delete(elt);
+                var poll = !why && state.drawn.has(elt);
+                if (poll && !state.polling) {
+                    return;
+                }
+                state.drawn.add(elt);
+                kernel.drawAsync(iri).then(function (json) {
+                    var reply = JSON.parse(json);
+                    if (poll && reply.kind === "output") {
+                        state.polls.asked += 1;
+                        state.polls[reply.cache === "cached" ? "cached" : "computed"] += 1;
+                        showPoll(state);
+                    }
+                    htmx.swap(target, reply.kind === "output" ? reply.text
+                        : escape("error: " + reply.text), { swapStyle: "innerHTML" });
+                    if (state.push) {
+                        schedule(host, state);
+                    }
+                });
+                return;
+            }
+            if (elt.hasAttribute("data-market") && !state.market) {
+                return;
+            }
+            var args = verb === "source" ? [] : fields(config);
+            kernel.issueWithArgsAsync("", verb, iri, JSON.stringify(args)).then(function (json) {
+                var reply = JSON.parse(json);
+                htmx.swap(target, reply.kind === "output" ? reply.text
+                    : escape("error: " + reply.text), { swapStyle: "innerHTML" });
+            });
+        }
+
+        // The three toggles of a sheet that listens, and the two lines that say what each
+        // costs. Not live regions: they change on every cut and every poll.
+        function pushControls(host, state) {
+            state.listener = "page" + Array.prototype.indexOf.call(hosts, host);
+            state.push = false;
+            state.market = false;
+            state.generation = 0;
+            state.heard = 0;
+            state.dropped = 0;
+            state.redrew = 0;
+            state.expired = 0;
+            state.deadline = -1;
+            state.timer = null;
+            state.last = "";
+            state.marked = [];
+            state.asked = new Map();
+            state.drawn = new WeakSet();
+            state.polls = { asked: 0, cached: 0, computed: 0 };
+
+            var controls = document.createElement("div");
+            controls.className = "ikigai-view-controls sheet-controls";
+            function toggle(label, onClick) {
+                var button = document.createElement("button");
+                button.type = "button";
+                button.className = "ikigai-run-secondary ikigai-view-toggle";
+                button.textContent = label;
+                button.setAttribute("aria-pressed", "false");
+                button.addEventListener("click", onClick);
+                controls.appendChild(button);
+                return button;
+            }
+            var market = toggle("Run the market", function () {
+                state.market = !state.market;
+                market.setAttribute("aria-pressed", state.market ? "true" : "false");
+            });
+            state.pushToggle = toggle("Push", function () {
+                if (state.push) {
+                    stopPush(host, state);
+                } else {
+                    startPush(host, state);
+                }
+            });
+            var poll = toggle("Poll", function () {
+                state.polling = !state.polling;
+                poll.setAttribute("aria-pressed", state.polling ? "true" : "false");
+                showPoll(state);
+            });
+            state.pushTally = document.createElement("p");
+            state.pushTally.className = "ikigai-view-tally";
+            state.pollTally = document.createElement("p");
+            state.pollTally.className = "ikigai-view-tally";
+            host.appendChild(controls);
+            host.appendChild(state.pushTally);
+            host.appendChild(state.pollTally);
+            showPush(state);
+            showPoll(state);
+        }
+
         document.body.addEventListener("htmx:beforeRequest", function (event) {
             var detail = event.detail;
             var host = detail.elt && detail.elt.closest
@@ -201,6 +479,10 @@
             }
             event.preventDefault();
             var state = stateOf(host);
+            if (host.hasAttribute("data-push")) {
+                pushRequest(host, state, detail);
+                return;
+            }
             var elt = detail.elt;
             var isGrid = elt.matches && elt.matches(".sheet-view[hx-get]");
             // The first draw, and a redraw the page asked for, are not polls.
@@ -254,7 +536,13 @@
             if (event.detail && (event.detail.game || event.detail.chain)) {
                 return;
             }
-            hosts.forEach(redraw);
+            // A sheet that listens hears the cell's writes itself, or, while push is off, is
+            // meant not to know about them.
+            hosts.forEach(function (host) {
+                if (!host.hasAttribute("data-push")) {
+                    redraw(host);
+                }
+            });
         });
 
         hosts.forEach(function (host) {
@@ -267,7 +555,9 @@
                     }
                     host.innerHTML = reply.text;
                     var state = stateOf(host);
-                    if (host.querySelector("[data-poll]")) {
+                    if (host.hasAttribute("data-push")) {
+                        pushControls(host, state);
+                    } else if (host.querySelector("[data-poll]")) {
                         var labeled = host.querySelector("[data-poll-label]");
                         var controls = document.createElement("div");
                         controls.className = "ikigai-view-controls sheet-controls";

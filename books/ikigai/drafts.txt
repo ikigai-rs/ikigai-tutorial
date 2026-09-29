@@ -7,3 +7,5 @@ The Web as an instance | drafts/web-instance.md
 The algebra of reach | drafts/algebra-of-reach.md
 Names and where you stand | drafts/names-and-context.md
 Authority, three ways | drafts/authority-three-ways.md
+# The spreadsheet arc's part VII, unlinked until Brian has read it.
+A spreadsheet, VII: push | applied/spreadsheet-7.md

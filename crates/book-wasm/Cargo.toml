@@ -32,6 +32,9 @@ time-resource = { path = "../time-resource" }
 # overlaps nothing above. Its grid view composes through `urn:iki:fn:compose`, which Part
 # I's space already binds on the page.
 spreadsheet = { path = "../spreadsheet" }
+# Part VII's host half of push: a cut listener as a resource, what a read carries, and the
+# page's memory of the views it drew. `urn:iki:tutorial:push:*` overlaps nothing above.
+push = { path = "../push" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

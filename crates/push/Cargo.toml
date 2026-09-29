@@ -1,0 +1,29 @@
+[package]
+name = "push"
+version = "0.1.0"
+description = "The code taught by the spreadsheet arc's part VII: the host half of push. A cut listener as a resource, what a read carries as a resource, and the host's memory of the views it drew."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "push"
+path = "src/lib.rs"
+
+# Compiled into the page (`crates/book-wasm`), so it stays wasm-clean: no std::fs, no threads,
+# no clock of its own, and no runtime. The listener is core's (`Kernel::listen`, 0.1.82), which
+# needs none either: a cut appends to a queue, and the host drains it when it chooses.
+[dependencies]
+ikigai-core.workspace = true
+# `instant_text`, so a deadline prints the way the time chapter prints an instant.
+time-resource = { path = "../time-resource" }
+
+[dev-dependencies]
+futures.workspace = true
+# The chapter's tests push the sheet: the sheet is what the host draws, and the time chapter's
+# names are what `NOW()` reads. The sheet itself never learns that anybody is listening.
+spreadsheet = { path = "../spreadsheet" }
+ikigai-fn.workspace = true
+ikigai-vocab.workspace = true
