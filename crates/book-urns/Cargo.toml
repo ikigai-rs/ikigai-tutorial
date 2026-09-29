@@ -25,6 +25,7 @@ loadable-module = { path = "../loadable-module" }
 your-endpoints = { path = "../your-endpoints" }
 tic-tac-toe = { path = "../tic-tac-toe" }
 time-resource = { path = "../time-resource" }
+spreadsheet = { path = "../spreadsheet" }
 # The page's kernel, so "may a cell name this" is asked of the space the page really
 # runs (`book_wasm::page_space()`), not of a copy of its composition kept here.
 book-wasm = { path = "../book-wasm" }

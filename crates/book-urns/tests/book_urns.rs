@@ -87,6 +87,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             "time_resource::space()",
             Arc::new(time_resource::space()) as Arc<dyn Space>,
         ),
+        (
+            "spreadsheet::space()",
+            Arc::new(spreadsheet::space()) as Arc<dyn Space>,
+        ),
     ]
 }
 

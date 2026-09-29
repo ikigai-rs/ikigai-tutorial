@@ -76,7 +76,7 @@ jobs:
       # is disabled and each board is a sentence, so a deploy with a broken or renamed
       # export would publish a book that cannot run anything. Assert the names the page
       # imports are in the generated JS, by name, before anything is uploaded.
-      - name: smoke — the exports run.js, ttt.js and view.js import are present
+      - name: smoke — the exports run.js, ttt.js, view.js and sheet.js import are present
         run: |
           test -s books/ikigai/book/wasm/book_wasm_bg.wasm
           grep -q '^export function evalLineAsync' books/ikigai/book/wasm/book_wasm.js
@@ -84,6 +84,8 @@ jobs:
           grep -q '^export function issueAsync' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function boundNames' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function useClock' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function issueWithArgsAsync' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function uncachedAmong' books/ikigai/book/wasm/book_wasm.js
           grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
 
       # ── The second accessibility instrument ───────────────────────────────
