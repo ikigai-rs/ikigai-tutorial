@@ -203,7 +203,8 @@ marker names a resource; compose resolves it and splices the answer in, and ther
 to splice. `$h{…}` splices the answer as text, escaped for HTML. `$r{…}` splices it as it is, as
 trusted markup: here, a view the kernel has already composed. `$a{…}` splices it as it is and then
 expands any markers in it, which is how one template includes another. The [time
-chapter](time.md)'s clock is one marker of the first kind.
+chapter](time.md)'s clock is one marker of the first kind, and [Tic-tac-toe,
+V](tic-tac-toe-5.md#the-template-language) teaches the whole language.
 
 A view is a template bound at a name. `compose_over` makes the binding, and the variables the name
 captures are the template's arguments, so `view:cell:B2` is the `cell` template with `{ref}` = `B2`:

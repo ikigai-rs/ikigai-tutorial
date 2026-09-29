@@ -273,9 +273,10 @@ The view is the other template, and it has no view code of its own to speak of:
 ```
 
 A `$h{…}` marker names a resource, and the generic composer from `ikigai-fn` resolves every
-name it finds and splices the answer in, escaped for HTML. Tic-tac-toe's views filled slots from
-Rust, one view per template. This template names what it shows, so there is nothing to fill, and
-the view is the template bound at a name of its own with `compose_over`:
+name it finds and splices the answer in, escaped for HTML. That is the template language
+[Tic-tac-toe, V](tic-tac-toe-5.md#the-template-language) teaches, and the clock uses the smallest
+part of it. The template names what it shows, so nothing fills it from code, and the view is the
+template bound at a name of its own with `compose_over`, the way the game's board and squares are:
 
 ```rust,ignore
 {{#include ../../../../crates/time-resource/src/lib.rs:view_clock}}
