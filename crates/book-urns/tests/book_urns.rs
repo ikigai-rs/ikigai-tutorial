@@ -83,6 +83,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             "tic_tac_toe::space()",
             Arc::new(tic_tac_toe::space()) as Arc<dyn Space>,
         ),
+        (
+            "time_resource::space()",
+            Arc::new(time_resource::space()) as Arc<dyn Space>,
+        ),
     ]
 }
 
