@@ -289,90 +289,119 @@ game through the corridor with no wiring:
 | name | endpoint | verbs | answers |
 |---|---|---|---|
 | `template:{name}` | `ttt-template` | Source | a template, `text/html`, `Never`; unknown name → `NotFound` |
-| `view:board` | `ttt-view-board` | Source | the board as HTML, cacheable |
-| `view:status` | `ttt-view-status` | Source | `X to play.` / `O has won.` / `A draw.` — HTML text, cacheable |
-| `view:play:{x}:{y}` | `ttt-view-play` | **Sink only** | Sinks `move:{x}:{y}`; answers the `reply` template |
-| `view:reset` | `ttt-view-reset` | **Sink only** | Sinks `reset`; answers the `reply` template |
+| `view:board` | `composeOver` over `template:board` | Source | the board as HTML, cacheable |
+| `view:square:{x}:{y}` | `composeOver` over `template:square` | Source | one square: open, taken or closed |
+| `view:status` | `composeOver` over `template:status` | Source | `X to play.` / `O has won.` / `A draw.` — HTML text, cacheable |
+| `view:reply` | `composeOver` over `template:reply` | Source | the argument `message`, then the status |
+| `view:game:{game}` | `composeOver` over `template:game` | Source | game `{game}`'s page shell |
+| `view:play:{x}:{y}` | `ttt-view-play` | **Sink only** | Sinks `move:{x}:{y}`; answers `view:reply` |
+| `view:reset` | `ttt-view-reset` | **Sink only** | Sinks `reset`; answers `view:reply` |
 | `reset` | `ttt-reset` | **Sink only** | Deletes every square a `LINES` rule passes through; `The board is clear` |
 
-`view:board` reads the templates, the **winner** and the nine **cells** (not the board text:
-a cell's answer is the exact mark, and the board concatenates marks, which is ambiguous for a
-multi-character mark). `view:status` reads the winner and, while the game is on, the turn.
-Both are composites, so they are cached per game and a move recomputes them through what it
-touched. A view's Sink answer is not cacheable; the reply READS `view:status`, so after a
-play the status is cached again (the new one) and the board is not until someone asks.
+The views need one name the game does not bind, `urn:iki:fn:conditional` (`ikigai-fn`).
+`conditional_space()` binds it alone; `kernel()` and `ttt-host` mount it beside the game, and
+the book's page already has it from Part I's `ikigai_fn::space()`.
 
-### The template format — what every host of this markup implements
+`view:board` reads the templates and the nine square views; each square reads its cell and,
+while empty, the winner (not the board text: a cell's answer is the exact mark, and the board
+concatenates marks, which is ambiguous for a multi-character mark). `view:status` reads the
+winner and, while the game is on, the turn. All are composites, so they are cached per game
+and a move recomputes them through what it touched. A view's Sink answer is not cacheable; the
+reply READS `view:status`, so after a play the status is cached again (the new one) and the
+board is not until someone asks.
+
+Until the views were templates (2026-09-29), they were `{{slot}}` templates that Rust filled.
+The bytes did not change: `tests/parity.rs` plays fresh, in-progress, won, drawn and
+hostile-mark games through the views and through the old filler (kept in the test, over the
+old templates frozen in `tests/reference/`) and compares every board, status, reply and page
+shell.
+
+### The template language — what every host that fills these templates implements
 
 Templates are the files in `templates/` (`TEMPLATES` in `lib.rs`), served at
-`template:{name}`: `game`, `board`, `square-open`, `square-taken`, `square-closed`,
-`status-turn`, `status-won`, `status-draw`, `reply`. A file's final newline is not part of
-the template.
+`template:{name}`. A file's final newline is not part of the template. They are written in
+`ikigai-fn`'s template language (`ikigai_fn::Compose`'s docs are the full grammar); a host
+that serves the views from the Rust kernel implements nothing. A host that fills them itself
+(the Python and Deno apps) implements the SUBSET these templates use, stated here:
 
-- **Every `{{` opens a slot, and the slot ends at the first `}}` after it.** Read left to
-  right: find `{{`, then the first `}}` after it; the text between is the slot's INSIDE. A
-  `{{` with no `}}` after it is refused. A `}}` or a single `{` outside a slot is plain text.
-- **The inside must be a slot, or the template is refused** — never passed through, since
-  a slot nobody fills would reach the page as `{{…}}`. A slot is NAME (` ` INTEGER)*:
-  NAME is `[a-z][a-z-]*`, each INTEGER in its ONE plain spelling (`0|-?[1-9][0-9]*`, and
-  within a signed 64-bit range), exactly one space before each. The inside's full-match
-  regex is `([a-z][a-z-]*)((?: (?:0|-?[1-9][0-9]*))*)`.
-- ⚠ **So a filler is two steps, not one regex substitution.** The single pattern
-  `\{\{([a-z][a-z-]*)((?: -?[0-9]+)*)\}\}` this README used to give accepts `{{x 01}}` as a
-  slot and silently leaves `{{Mark}}` in the output. Tokenize with `\{\{(.*?)\}\}`
-  (non-greedy, `.` matching newlines — the same first-`}}` rule), refuse any inside that is
-  not a slot, and refuse any `{{` left in the text between the matches (an unclosed one).
-- A value is **text, HTML-escaped** — `&` `<` `>` `"` `'` become `&amp;` `&lt;` `&gt;`
-  `&quot;` `&#39;`, and nothing else changes — except the two slots that take another
-  template's output raw: `{{square X Y}}` and `{{status}}`. ⚠ The escape for `'` is
-  **`&#39;`**: Python's `html.escape` writes `&#x27;`, which a browser reads the same and a
-  byte-for-byte parity test does not.
-- The cases below are the spec, and `tests/views.rs`
-  (`the_template_format_cases_in_the_readme_hold`) reads THIS block and checks every line
-  against the Rust filler, so the two cannot drift. `refuse` is a template the filler must
-  refuse; `slots` lists what a template reads as, one `name args…` per slot joined by ` | `
-  (and `-` for none); `escape` gives a text and its escaped form, separated by a tab.
+- **Scan** left to right. `$$` is a literal `$`. `$a{`, `$r{` or `$h{` opens a MARKER, which
+  ends at the matching `}`: count `{` and `}` inside it (an argument `{x}` nests), and skip
+  any `"…"` span (where `\"` and `\\` are escapes). A marker that never closes is literal
+  text, `$` included. Any other `$`, `{` or `}` is literal. The marker's BODY is the text
+  between the braces, trimmed.
+- **Body.** `{name}` alone (a letter or `_`, then letters, digits, `_`, `-`) is an ARGUMENT:
+  splice its value, resolve nothing. Anything else is a REQUEST: `IRI` or `IRI?k=v&k=v`. In the
+  IRI, each `{name}` is replaced by the argument's value percent-encoded as RFC 6570 does a
+  simple variable (every byte outside `A-Z a-z 0-9 - . _ ~` as `%XX`, upper case). In an
+  unquoted value, each `{name}` is replaced verbatim (and the result is still ONE value); a
+  `"quoted"` value is literal. Every request is a `Source`. (`||` fallbacks exist in the
+  language; these templates use none, and a filler may refuse them.)
+- **Splice.** `$h`: the answer as text, with `&` `<` `>` `"` `'` replaced by `&amp;` `&lt;`
+  `&gt;` `&quot;` `&#39;` and nothing else changed. ⚠ `&#39;`, not Python's `&#x27;`.
+  `$r`: the answer as it is. `$a`: the answer's own markers expanded, with the SAME
+  arguments, then spliced. `$a{{name}}` is refused (an argument is never a template). Only
+  `$a` ever expands: a `$h` or `$r` value is never scanned, so a mark holding
+  `$a{urn:…}` renders as those characters.
+- **Arguments** are the variables a view's name captures (`x`, `y` in `view:square:{x}:{y}`;
+  `game` in `view:game:{game}`) and, failing that, the request's own arguments (`message` for
+  `view:reply`). A missing one fails the view.
+- **Failure.** A marker that fails fails the whole view.
+- **`urn:iki:fn:conditional?if=A&equals=V&then=B&else=C`** — the only function the
+  templates call. Source `A`; if its text, trimmed, is exactly `V`, source and answer `B`,
+  else `C`. Only the chosen side is sourced. It answers the chosen TEMPLATE, which the `$a`
+  around it then expands. A host that forwards only the game's names (as `ttt-host`'s
+  gateway does) will not answer `urn:iki:fn:conditional`, so a filler implements it itself.
+- **Views are names.** A `$r{urn:iki:tutorial:ttt:view:square:1:0}` inside the board is a
+  view like the board. A filler either asks the host for it (it is bound in every game) or
+  composes it itself, by the table above: `view:square:{x}:{y}` is `template:square` with
+  those arguments.
+- **The game.** Every name in a template is spelled for the root game. A filler serving game
+  `id` over `ttt-host`'s IPC face resolves `urn:iki:tutorial:ttt:{rest}` as
+  `urn:game:{id}:iki:tutorial:ttt:{rest}` (the root game is `urn:game:root:…`).
+
+The cases below are the spec, and `tests/templates.rs`
+(`the_template_language_cases_in_the_readme_hold`) reads THIS block and runs every line
+through `ikigai-fn`'s compose, so the spec and the language cannot drift. Each case is filled
+with the arguments `x` = `1`, `y` = `-2`, `message` = `it's <b>`, over these resources:
+`urn:t:mark` = `<b>"&'$a{urn:t:secret}`, `urn:t:html` = `<i>ok</i>`, `urn:t:dash` = ` -` and a
+newline, `urn:t:inner` = `[$h{{x}}]`, `urn:t:cell:{x}:{y}` = its two coordinates joined by
+`.`, and nothing else (`urn:t:secret` is not bound). `fill` gives a template and what it
+fills to, separated by a tab; `refuse` is a template whose filling fails.
 
 <!-- template-cases: begin -->
 ```text
-slots   a {{square 0 -2}} b {{mark}}	square 0 -2 | mark
-slots   {{x}}}	x
-slots   }} {x} { {x}	-
-slots   {{a-b 12 -345}}	a-b 12 -345
-refuse  {{x 01}}
-refuse  {{x -0}}
-refuse  {{x +1}}
-refuse  {{x 1 }}
-refuse  {{x  1}}
-refuse  {{ x}}
-refuse  {{Mark}}
-refuse  {{-x}}
-refuse  {{}}
-refuse  {{x}
-refuse  {{x}} {{
-refuse  {{{x}}}
-refuse  {{x 99999999999999999999}}
-refuse  {{x
-y}}
-escape  a&b<c>"d'e	a&amp;b&lt;c&gt;&quot;d&#39;e
-escape  it's	it&#39;s
-escape  ✓ 1,1	✓ 1,1
+fill    plain {x} } { $ $x{a} $	plain {x} } { $ $x{a} $
+fill    $h{urn:t:mark}	&lt;b&gt;&quot;&amp;&#39;$a{urn:t:secret}
+fill    $r{urn:t:mark}	<b>"&'$a{urn:t:secret}
+fill    $h{urn:t:html}|$r{urn:t:html}	&lt;i&gt;ok&lt;/i&gt;|<i>ok</i>
+fill    $$h{urn:t:mark} $$$$ $$	$h{urn:t:mark} $$ $
+fill    $h{ urn:t:html }	&lt;i&gt;ok&lt;/i&gt;
+fill    $h{{x}},$h{{y}}	1,-2
+fill    $h{{message}}	it&#39;s &lt;b&gt;
+fill    $r{{message}}	it's <b>
+fill    $h{urn:t:cell:{x}:{y}}	1.-2
+fill    $r{urn:t:inner}	[$h{{x}}]
+fill    $a{urn:t:inner}	[1]
+fill    $a{urn:iki:fn:conditional?if=urn:t:dash&equals=-&then=urn:t:inner&else=urn:t:html}	[1]
+fill    $a{urn:iki:fn:conditional?if=urn:t:dash&equals=X&then=urn:t:inner&else=urn:t:html}	<i>ok</i>
+fill    $a{urn:iki:fn:conditional?if=urn:t:cell:{x}:{y}&equals=1.-2&then=urn:t:inner&else=urn:t:html}	[1]
+fill    $h{urn:t:mark	$h{urn:t:mark
+refuse  $h{urn:t:secret}
+refuse  $h{{nope}}
+refuse  $a{{x}}
+refuse  $h{urn:t:{nope}}
 ```
 <!-- template-cases: end -->
 
-- No loops, no conditions. Which template to use is chosen by the filler:
-  - `board`: each `{{square X Y}}` is the square template for the cell at (X, Y), filled with
-    `{{x}}`, `{{y}}`, `{{mark}}`: **`square-taken`** if the cell is not `-`; else
-    **`square-open`** while the winner is `-`; else **`square-closed`**. The template, not the
-    code, decides which squares exist (a test pins them to the `LINES` squares).
-  - status: winner `-` → **`status-turn`** with `{{mark}}` = the turn; `draw` →
-    **`status-draw`**; `X`/`O` → **`status-won`** with `{{mark}}` = the winner.
-  - `reply` (a play's or reset's answer): `{{message}}` = what the write answered, **or the
-    error's Display on a refusal** (the view never looks inside an error — so ledger #575's
-    typed precondition variant will render with no view change), `{{status}}` = the status.
-  - `game`: the page shell; `{{game}}` = the game's id as the host names it (text).
-- The JS filler in `books/ikigai/js/ttt.js` (`fill`) is the reference in a dozen lines; a
-  Python one is `re.sub` over the tokenizer above with a callback that checks the inside.
+Which template a view shows is no longer a rule a filler knows: it is in the templates.
+`square` asks whether the cell is `-` (then `square-empty`, else `square-taken`), and
+`square-empty` asks whether the winner is `-` (then `square-open`, else `square-closed`);
+`status` asks whether the winner is `-` (then `status-turn`, else `status-over`), and
+`status-over` whether it is `draw` (then `status-draw`, else `status-won`). The reply's
+`message` is what the write answered, **or the error's Display on a refusal** (the view never
+looks inside an error — so ledger #575's typed precondition variant will render with no view
+change). The page shell's `game` is the game's id as the host names it (`root` for the root
+game).
 
 ### The path ↔ IRI rule — what every host of this markup implements
 
@@ -436,8 +465,8 @@ Hosts, as built or planned:
 
 - `js/ttt.js` loads the vendored htmx (`books/ikigai/src/vendor/htmx-2.0.4.min.js`, byte-
   identical to `ikigai-web/assets/htmx.min.js`, sha256 `e209dda5…fb447`, 0BSD) only on a
-  page with a board, fills `template:game` into each `.ttt-play[data-game]`, and
-  `htmx.process`es it.
+  page with a board, puts the page shell `view:game:{game}` into each
+  `.ttt-play[data-game]`, and `htmx.process`es it. It fills no template.
 - **Mechanism:** `htmx:beforeRequest` → `preventDefault()` for requests from inside a board
   → path → IRI → `issueAsync(game, verb, iri)` (a new wasm export over `Page::issue`, which
   issues in the SAME `Scope` the game's cells run in) → `htmx.swap(target, html,
@@ -503,7 +532,7 @@ the system chose), and lists the games sorted.
     (`ikigai-web` then says `Cache-Control: no-store`, which is right for a live board.)
   - **HTTP does not serve `stored:`** (404): a browser reaches the store through the rules.
     **IPC does** (a socket client is the host's own user). Unknown game → 404 / Unresolved.
-- **Pages**: routes `/` (root game) and `/game/{id}` → a document around `template:game` with
+- **Pages**: routes `/` (root game) and `/game/{id}` → a document around `view:game:{id}` with
   `<base href="/game/{id}/">`, `/static/htmx-2.0.4.min.js` (the book's vendored copy,
   `include_str!`), `/static/ttt.css` (the book's `css/ttt.css`, the ONE stylesheet for the
   markup), `/static/host.css` (the color variables mdbook gives the book). Page routes set
@@ -573,3 +602,25 @@ the system chose), and lists the games sorted.
 - ⚠ **ledger items 583 → 585**: when `Conflict` crosses the wire and the move uses it, part
   VI's refusal transcript (today `invalid argument`, then `conflict:`) and parts III and V
   move with it. The demo script will say so.
+
+## The views as templates (after increment 6)
+
+- **No view code.** `ikigai-fn` 0.3.0 made compose a view template language, and ikigai-fn
+  PR #7 proved the board could be pure composition byte for byte. Every view that READS is
+  now a template bound at a name (`view`, `compose_over`): `view:board`,
+  `view:square:{x}:{y}`, `view:status`, `view:reply`, `view:game:{game}`. The `{{slot}}`
+  format, `fill`, `slots`, `escape`, `Slot` and `Fill` are gone from the crate; the
+  JS shim and `ttt-host` fill nothing (each sources `view:game:{game}`).
+- **What stays code, and why.** `view:play:{x}:{y}` and `view:reset` are a write and then
+  a read of `view:reply`, in that order. A template's markers are all `Source`, so a
+  sequence cannot be one. The move, the reset and the rest of the game are unchanged.
+- **Byte-identical**, three ways: `tests/parity.rs` (every state, against the old filler
+  over `tests/reference/`); `ttt-host`'s whole HTTP face captured before and after (68
+  requests across fresh, in-progress, won, drawn, refused and reset games, plus `-c` lines
+  with a hostile mark), `cmp` equal; and the book's pinned outputs, which did not move except
+  where a cell shows a template's own source.
+- ⚠ **The Python and Deno apps fill the OLD `{{slot}}` templates.** Against a `ttt-host`
+  built from this commit they pass the markers through as text, so part VI's app transcripts
+  and its three-digest board comparison fail until each app implements the template
+  language above ("The template language"). The chapter says so. The transcripts were NOT
+  changed to match stale apps.

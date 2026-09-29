@@ -19,6 +19,10 @@ ikigai-core.workspace = true
 # `TurtleRenderer`, so the game's own `kernel()` answers `Meta` and `describe` the way
 # the page's kernel does.
 ikigai-vocab.workspace = true
+# The views are templates in `ikigai-fn`'s template language, bound at names with
+# `compose_over`; a square and the status choose their template with `conditional`, which
+# `conditional_space()` binds for a host that does not mount the library itself.
+ikigai-fn.workspace = true
 
 [dev-dependencies]
 futures.workspace = true

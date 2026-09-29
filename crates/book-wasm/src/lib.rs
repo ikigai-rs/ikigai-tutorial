@@ -1076,10 +1076,11 @@ mod tests {
                 .unwrap_or_else(|e| panic!("the view shell {shell}: {e}"));
         }
         // A playable board (`<div class="ttt-play" data-game='…'>`, Part V) loads when the
-        // kernel does, before any cell can run: `js/ttt.js` fetches the page shell, and the
-        // shell's markup asks for the status and then the board. And after a cell runs in a
-        // board's game, the shim refreshes that board the same way. Both are reads that fill
-        // the cache, so the chapter's cells see them — replay them here, in the same order.
+        // kernel does, before any cell can run: `js/ttt.js` fetches the page shell
+        // (`view:game:{game}`), and the shell's markup asks for the status and then the
+        // board. And after a cell runs in a board's game, the shim refreshes that board the
+        // same way. Both are reads that fill the cache, so the chapter's cells see them —
+        // replay them here, in the same order.
         let boards = boards(&chapter);
         let refresh = |game: &str| {
             for view in [
@@ -1094,7 +1095,7 @@ mod tests {
             futures::executor::block_on(page.issue(
                 Some(game),
                 Verb::Source,
-                "urn:iki:tutorial:ttt:template:game",
+                &tic_tac_toe::view_game_name(game),
             ))
             .expect("the page shell");
             refresh(game);
@@ -1406,15 +1407,23 @@ mod tests {
     /// them, and each refreshed after a cell runs in its game.
     #[test]
     fn the_fifth_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
-        let t = run_chapter_in_page_order("tic-tac-toe-5.md", 8);
+        let t = run_chapter_in_page_order("tic-tac-toe-5.md", 9);
 
-        // A template is served as written, slots and all.
-        assert!(t[0].contains("aria-label=\"{{mark}} at {{x}},{{y}}\">{{mark}}</button>"));
+        // A template is served as written, markers and all.
+        assert!(t[0]
+            .contains("aria-label=\"$h{urn:iki:tutorial:ttt:cell:{x}:{y}} at $h{{x}},$h{{y}}\">"));
         assert!(
-            t[0].ends_with("{{mark}} to play.\n[computed]\n"),
+            t[0].ends_with("$h{urn:iki:tutorial:ttt:turn} to play.\n[computed]\n"),
             "{}",
             t[0]
         );
+        // A square's view is the square template filled for its name, cached by the board.
+        assert!(
+            t[1].contains("aria-label=\"2,0: empty, play here\"></button>\n[cached]"),
+            "{}",
+            t[1]
+        );
+        let t = &t[1..];
         // The boards loaded both views in game a before any cell ran.
         assert_eq!(t[1], "cached\nX to play.\n[cached]\n");
         // A play through the view: the move cut both views, the reply re-read the status.
@@ -1447,6 +1456,8 @@ mod tests {
                 .to_string()
         };
         assert!(verdict("view:status ").contains(" · computed · "));
+        // The status template's conditional asked the winner, which the move changed.
+        assert!(verdict("urn:iki:fn:conditional ").contains(" · computed · "));
         for line in [
             "cells:0.0,1.0,2.0 ",
             "cells:0.0,0.1,0.2 ",
@@ -1461,6 +1472,7 @@ mod tests {
             "cells:2.0,2.1,2.2 ",
             "cells:2.0,1.1,0.2 ",
             "template:status-turn ",
+            "template:status ",
         ] {
             assert!(verdict(line).contains(" · cached · "), "{line}");
         }

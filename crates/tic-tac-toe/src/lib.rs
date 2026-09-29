@@ -49,15 +49,16 @@
 //!
 //! Increment 5 gives the game a face, and it is resources too:
 //!
-//! * `urn:iki:tutorial:ttt:template:{name}` — the game's HTML, in pieces, with `{{…}}`
-//!   slots ([`TEMPLATES`], [`fill`]). The same bytes for every host: the page, `ttt-host`,
-//!   and apps in other languages that fill the slots themselves.
-//! * `urn:iki:tutorial:ttt:view:board` and `view:status` — the templates filled from the
-//!   cells, the winner and the turn: composites like the rest, so cached, recomputed by the
-//!   move that touches them, and per game through the corridor.
+//! * `urn:iki:tutorial:ttt:template:{name}` — the game's HTML, in pieces, written in
+//!   `ikigai-fn`'s template language ([`TEMPLATES`]): `$h{…}` for a value, `$r{…}` for a
+//!   view, `{x}` for an argument. The same bytes for every host.
+//! * `urn:iki:tutorial:ttt:view:board`, `view:square:{x}:{y}`, `view:status`,
+//!   `view:reply` and `view:game:{game}` — each a template bound at a name
+//!   ([`view`], `ikigai_fn::compose_over`), with no view code: which square or status to
+//!   show is `urn:iki:fn:conditional` in a template. Composites like the rest, so cached,
+//!   recomputed by the move that touches them, and per game through the corridor.
 //! * `urn:iki:tutorial:ttt:view:play:{x}:{y}` and `view:reset` — the view's writes, `Sink`
-//!   only: a move (or [`RESET`]) through the kernel, answered with what happened and the
-//!   status, as HTML text.
+//!   only: a move (or [`RESET`]) through the kernel, answered with `view:reply`.
 //!
 //! Read the book: `mdbook serve books/ikigai`, or `./scripts/serve-with-drafts.sh` while
 //! the chapters are still drafts.
@@ -68,9 +69,10 @@ use std::sync::{Arc, Mutex};
 
 use ikigai_core::{
     ActionSpec, Alias, AliasTable, ArgRef, ArgSpec, AsyncFnEndpoint, Capability, Description,
-    EndpointSpace, Error, Expiry, Fallback, FnEndpoint, Invocation, InvokeFuture, Iri, Kernel,
-    ReprType, Representation, Request, Result, Scope, Space, UriTemplate, Verb,
+    EndpointSpace, Error, Exact, Expiry, Fallback, FnEndpoint, Invocation, InvokeFuture, Iri,
+    Kernel, ReprType, Representation, Request, Result, Scope, Space, UriTemplate, Verb,
 };
+use ikigai_fn::ComposeOver;
 use ikigai_vocab::TurtleRenderer;
 
 /// `text/plain; charset=utf-8` as a [`ReprType`] — a local helper, as in `hello-camel`.
@@ -715,14 +717,23 @@ pub fn play_move() -> AsyncFnEndpoint {
 // ANCHOR_END: move
 
 // ANCHOR: view_names
-/// A template: HTML with `{{…}}` slots, the same bytes for every host that renders the game.
+/// A template: HTML in `ikigai-fn`'s template language, the same bytes for every host.
 pub const TEMPLATE: &str = "urn:iki:tutorial:ttt:template:{name}";
 
 /// The board as HTML: one button per square, each empty one a move.
 pub const VIEW_BOARD: &str = "urn:iki:tutorial:ttt:view:board";
 
+/// One square as HTML: open, taken or closed, as the cell and the winner say.
+pub const VIEW_SQUARE: &str = "urn:iki:tutorial:ttt:view:square:{x}:{y}";
+
 /// Whose turn it is, or who won, as one line of text.
 pub const VIEW_STATUS: &str = "urn:iki:tutorial:ttt:view:status";
+
+/// What a write answers: its `message` argument, then the status.
+pub const VIEW_REPLY: &str = "urn:iki:tutorial:ttt:view:reply";
+
+/// The page shell of game `{game}`: the status line, the board and the New game button.
+pub const VIEW_GAME: &str = "urn:iki:tutorial:ttt:view:game:{game}";
 
 /// Play the side to move at `(x, y)`, and answer with what happened and the status —
 /// `Sink` only.
@@ -733,6 +744,10 @@ pub const VIEW_RESET: &str = "urn:iki:tutorial:ttt:view:reset";
 
 /// Clear every square of the board — `Sink` only.
 pub const RESET: &str = "urn:iki:tutorial:ttt:reset";
+
+/// The one resource the views use that the game does not bind: `ikigai-fn`'s
+/// `conditional`, at its conventional name. A host binds it ([`conditional_space`]).
+pub const CONDITIONAL: &str = "urn:iki:fn:conditional";
 // ANCHOR_END: view_names
 
 /// Every template, by the name it is resolved at: `template:{name}`.
@@ -742,6 +757,11 @@ pub const RESET: &str = "urn:iki:tutorial:ttt:reset";
 pub const TEMPLATES: &[(&str, &str)] = &[
     ("game", include_str!("../templates/game.html")),
     ("board", include_str!("../templates/board.html")),
+    ("square", include_str!("../templates/square.html")),
+    (
+        "square-empty",
+        include_str!("../templates/square-empty.html"),
+    ),
     ("square-open", include_str!("../templates/square-open.html")),
     (
         "square-taken",
@@ -751,6 +771,8 @@ pub const TEMPLATES: &[(&str, &str)] = &[
         "square-closed",
         include_str!("../templates/square-closed.html"),
     ),
+    ("status", include_str!("../templates/status.html")),
+    ("status-over", include_str!("../templates/status-over.html")),
     ("status-turn", include_str!("../templates/status-turn.html")),
     ("status-won", include_str!("../templates/status-won.html")),
     ("status-draw", include_str!("../templates/status-draw.html")),
@@ -767,6 +789,16 @@ pub fn view_play_name(x: i64, y: i64) -> String {
     format!("urn:iki:tutorial:ttt:view:play:{x}:{y}")
 }
 
+/// The name of the view of the square at `(x, y)`.
+pub fn view_square_name(x: i64, y: i64) -> String {
+    format!("urn:iki:tutorial:ttt:view:square:{x}:{y}")
+}
+
+/// The name of game `id`'s page shell.
+pub fn view_game_name(id: &str) -> String {
+    format!("urn:iki:tutorial:ttt:view:game:{id}")
+}
+
 /// `text/html; charset=utf-8` as a [`ReprType`].
 fn text_html_utf8() -> ReprType {
     ReprType::new("text/html").with_param("charset", "utf-8")
@@ -774,119 +806,6 @@ fn text_html_utf8() -> ReprType {
 
 /// The same media type as a string, for a [`Description`].
 const TEXT_HTML_UTF8: &str = "text/html;charset=utf-8";
-
-// ANCHOR: slots
-/// One slot of a template, `{{name}}` or `{{name 1 -2}}`: a name, and any integers after it.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Slot {
-    /// A lower-case letter, then lower-case letters and `-`, e.g. `square`.
-    pub name: String,
-    /// Plain integers, each after one space, e.g. `[0, 2]` for `{{square 0 2}}`.
-    pub args: Vec<i64>,
-}
-
-/// What fills a slot.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Fill {
-    /// Text, HTML-escaped as it goes in: a mark, a coordinate, a message.
-    Text(String),
-    /// HTML that goes in as it is — the output of another template.
-    Html(String),
-}
-
-/// The pieces of a template: text between slots, and the slots.
-enum Piece<'t> {
-    Literal(&'t str),
-    Slot(Slot),
-}
-
-/// Read `template` into pieces. Every `{{` opens a slot, so one that does not — an unclosed
-/// `{{`, a name in capitals, an argument that is not a plain integer — is refused rather than
-/// passed through, since a slot nobody fills would reach a page as `{{…}}`.
-fn pieces(template: &str) -> Result<Vec<Piece<'_>>> {
-    let refuse = |detail: String| Error::Endpoint(format!("a template: {detail}"));
-    let mut out = Vec::new();
-    let mut rest = template;
-    while let Some(open) = rest.find("{{") {
-        out.push(Piece::Literal(&rest[..open]));
-        let after = &rest[open + 2..];
-        let close = after
-            .find("}}")
-            .ok_or_else(|| refuse("a `{{` is never closed".to_string()))?;
-        let inner = &after[..close];
-        let mut words = inner.split(' ');
-        let name = words.next().unwrap_or_default();
-        let named = name.starts_with(|c: char| c.is_ascii_lowercase())
-            && name.chars().all(|c| c.is_ascii_lowercase() || c == '-');
-        if !named {
-            return Err(refuse(format!("`{{{{{inner}}}}}` is not a slot")));
-        }
-        let args = words
-            .map(|word| {
-                plain_integer("slot", word)
-                    .map_err(|_| refuse(format!("`{{{{{inner}}}}}` has an argument `{word}`")))
-            })
-            .collect::<Result<Vec<i64>>>()?;
-        out.push(Piece::Slot(Slot {
-            name: name.to_string(),
-            args,
-        }));
-        rest = &after[close + 2..];
-    }
-    out.push(Piece::Literal(rest));
-    Ok(out)
-}
-
-/// The slots of `template`, in order.
-pub fn slots(template: &str) -> Result<Vec<Slot>> {
-    Ok(pieces(template)?
-        .into_iter()
-        .filter_map(|piece| match piece {
-            Piece::Slot(slot) => Some(slot),
-            Piece::Literal(_) => None,
-        })
-        .collect())
-}
-
-/// `template`, every slot replaced by what `value` says fills it.
-pub fn fill(template: &str, mut value: impl FnMut(&Slot) -> Result<Fill>) -> Result<String> {
-    let mut out = String::with_capacity(template.len());
-    for piece in pieces(template)? {
-        match piece {
-            Piece::Literal(text) => out.push_str(text),
-            Piece::Slot(slot) => match value(&slot)? {
-                Fill::Text(text) => out.push_str(&escape(&text)),
-                Fill::Html(html) => out.push_str(&html),
-            },
-        }
-    }
-    Ok(out)
-}
-
-/// `text`, safe to put in HTML text or a quoted attribute.
-pub fn escape(text: &str) -> String {
-    let mut out = String::with_capacity(text.len());
-    for c in text.chars() {
-        match c {
-            '&' => out.push_str("&amp;"),
-            '<' => out.push_str("&lt;"),
-            '>' => out.push_str("&gt;"),
-            '"' => out.push_str("&quot;"),
-            '\'' => out.push_str("&#39;"),
-            c => out.push(c),
-        }
-    }
-    out
-}
-// ANCHOR_END: slots
-
-/// The refusal for a slot a template has that its view does not fill.
-fn unfilled(template: &str, slot: &Slot) -> Error {
-    Error::Endpoint(format!(
-        "the template `{template}` has a slot `{}` this view does not fill",
-        slot.name
-    ))
-}
 
 /// `ttt-template`: the template `name`, as `text/html`, computed once.
 pub fn templates() -> FnEndpoint {
@@ -905,7 +824,10 @@ pub fn templates() -> FnEndpoint {
     .with_description(
         Description::new("ttt-template")
             .title("Template")
-            .summary("A piece of the game's HTML, with {{…}} slots for a host to fill.")
+            .summary(
+                "A piece of the game's HTML, with $h{…}, $r{…} and $a{…} markers that \
+                 ikigai-fn's compose fills.",
+            )
             .verb(Verb::Source)
             .verb(Verb::Meta)
             .input(
@@ -919,125 +841,47 @@ pub fn templates() -> FnEndpoint {
     )
 }
 
-// ANCHOR: view_board
-/// `ttt-view-board`: the board as HTML — the `board` template with each `{{square x y}}`
-/// filled by the square template the cell calls for.
+// ANCHOR: view
+/// A view: the template `name`, filled by `ikigai-fn`'s template language and bound at a
+/// name of its own. The variables the name captures (`{x}`, `{y}`, `{game}`) and the
+/// request's arguments (`message`) are the template's arguments.
 ///
-/// A played square is `square-taken`; an empty one is `square-open` while the game goes on
-/// and `square-closed` once it is over. Which squares there are is the template's business:
-/// this code has no 3×3 in it, only "a slot names a cell". A composite over the cells, the
-/// winner and the templates, all sourced through the kernel, so it is cacheable and a move
-/// recomputes it through the cell it played.
-pub fn view_board() -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new(
-        "ttt-view-board",
-        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
-            Box::pin(async move {
-                let board = text_of(inv, &template_name("board")).await?;
-                let over = text_of(inv, WINNER).await? != EMPTY;
-                let mut squares: BTreeMap<(i64, i64), String> = BTreeMap::new();
-                for slot in slots(&board)? {
-                    let (x, y) = match (slot.name.as_str(), slot.args.as_slice()) {
-                        ("square", &[x, y]) => (x, y),
-                        _ => return Err(unfilled("board", &slot)),
-                    };
-                    if squares.contains_key(&(x, y)) {
-                        continue;
-                    }
-                    let mark = text_of(inv, &cell_name(x, y)).await?;
-                    let kind = match (mark != EMPTY, over) {
-                        (true, _) => "square-taken",
-                        (false, false) => "square-open",
-                        (false, true) => "square-closed",
-                    };
-                    let square = text_of(inv, &template_name(kind)).await?;
-                    let html = fill(&square, |slot| match slot.name.as_str() {
-                        "x" => Ok(Fill::Text(x.to_string())),
-                        "y" => Ok(Fill::Text(y.to_string())),
-                        "mark" => Ok(Fill::Text(mark.clone())),
-                        _ => Err(unfilled(kind, slot)),
-                    })?;
-                    squares.insert((x, y), html);
-                }
-                let html = fill(&board, |slot| match slot.args.as_slice() {
-                    &[x, y] => Ok(Fill::Html(squares[&(x, y)].clone())),
-                    _ => Err(unfilled("board", slot)),
-                })?;
-                Ok(Representation::new(text_html_utf8(), html.into_bytes()).cacheable())
-            })
-        },
-    )
-    .with_description(
-        Description::new("ttt-view-board")
-            .title("Board view")
-            .summary("The board as HTML: a button per square, each empty one a move.")
-            .verb(Verb::Source)
-            .verb(Verb::Meta)
-            .output(TEXT_HTML_UTF8),
-    )
+/// There is no view code. The template names what it shows — a cell, the winner, another
+/// view — and `urn:iki:fn:conditional` inside it chooses between templates. Every one of
+/// those is sourced through the kernel, so a view is a composite like the rest: cacheable,
+/// recomputed by the move that touches what it read, and per game through the corridor.
+pub fn view(name: &str) -> ComposeOver {
+    ikigai_fn::compose_over(Iri::parse(template_name(name)).expect("a template's name parses"))
 }
-// ANCHOR_END: view_board
-
-// ANCHOR: view_status
-/// `ttt-view-status`: `X to play.`, `O has won.`, `A draw.` — one of the three status
-/// templates, filled with the mark. A composite over the winner and (while the game goes on)
-/// the turn; cacheable.
-pub fn view_status() -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new(
-        "ttt-view-status",
-        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
-            Box::pin(async move {
-                let won = text_of(inv, WINNER).await?;
-                let (kind, mark) = match won.as_str() {
-                    w if w == EMPTY => ("status-turn", text_of(inv, TURN).await?),
-                    DRAW => ("status-draw", String::new()),
-                    _ => ("status-won", won.clone()),
-                };
-                let template = text_of(inv, &template_name(kind)).await?;
-                let text = fill(&template, |slot| match slot.name.as_str() {
-                    "mark" => Ok(Fill::Text(mark.clone())),
-                    _ => Err(unfilled(kind, slot)),
-                })?;
-                Ok(Representation::new(text_html_utf8(), text.into_bytes()).cacheable())
-            })
-        },
-    )
-    .with_description(
-        Description::new("ttt-view-status")
-            .title("Status view")
-            .summary("Whose turn it is, or who won, as one line of HTML text.")
-            .verb(Verb::Source)
-            .verb(Verb::Meta)
-            .output(TEXT_HTML_UTF8),
-    )
-}
-// ANCHOR_END: view_status
+// ANCHOR_END: view
 
 // ANCHOR: view_play
-/// What a view's `Sink` answers: the `reply` template — what happened, then the status.
+/// What a view's `Sink` answers: `view:reply`, the `reply` template filled with `message`
+/// — what the write said — and the status.
 ///
 /// `message` is whatever the write said, success or refusal alike, as text: the view does
 /// not look inside an error to decide how to show it, so a refusal of any kind reaches the
-/// player in the kernel's own words.
+/// player in the kernel's own words. It is an ARGUMENT of the reply, and the template
+/// splices it with `$h`, so it is escaped and never expanded, whatever the error says.
 async fn reply(inv: &Invocation<'_>, outcome: Result<Representation>) -> Result<Representation> {
     let message = match outcome {
         Ok(said) => String::from_utf8_lossy(&said.bytes).into_owned(),
         Err(refused) => refused.to_string(),
     };
-    let status = text_of(inv, VIEW_STATUS).await?;
-    let template = text_of(inv, &template_name("reply")).await?;
-    let html = fill(&template, |slot| match slot.name.as_str() {
-        "message" => Ok(Fill::Text(message.clone())),
-        "status" => Ok(Fill::Html(status.clone())),
-        _ => Err(unfilled("reply", slot)),
-    })?;
-    Ok(Representation::new(text_html_utf8(), html.into_bytes()))
+    let reply = Request::new(Verb::Source, name_iri(VIEW_REPLY)?)
+        .with_arg("message", ArgRef::Inline(message.into_bytes()));
+    let answer = inv.issue(reply).await?;
+    // A write's answer is not cacheable: it says what THIS write did.
+    Ok(Representation::new(answer.repr_type, answer.bytes))
 }
 
 /// `ttt-view-play`: play the side to move at `(x, y)` — a `Sink` to the move, through the
 /// kernel — and answer the reply: `X plays 1,1. O to play.` A refused move is answered, not
 /// failed: `…1,1 is taken — X played there. O to play.` This is the view's one write, and it
 /// changes nothing about the move: the rules are still the move's.
+///
+/// It stays code because it is a SEQUENCE — write, then read the reply — and composition
+/// only reads: a template's markers are all `Source` requests.
 pub fn view_play() -> AsyncFnEndpoint {
     AsyncFnEndpoint::new(
         "ttt-view-play",
@@ -1185,8 +1029,13 @@ pub fn space_with_store(store: Arc<dyn Space>) -> Alias {
         .bind(template(MOVE), play_move())
         .bind(template(RESET), reset(Arc::clone(&table)))
         .bind(template(TEMPLATE), templates())
-        .bind(template(VIEW_BOARD), view_board())
-        .bind(template(VIEW_STATUS), view_status())
+        // ANCHOR: views
+        .bind(template(VIEW_BOARD), view("board"))
+        .bind(template(VIEW_SQUARE), view("square"))
+        .bind(template(VIEW_STATUS), view("status"))
+        .bind(template(VIEW_REPLY), view("reply"))
+        .bind(template(VIEW_GAME), view("game"))
+        // ANCHOR_END: views
         .bind(template(VIEW_PLAY), view_play())
         .bind(template(VIEW_RESET), view_reset());
     Alias::new(
@@ -1375,15 +1224,26 @@ fn template(source: &str) -> UriTemplate {
     UriTemplate::parse(source).expect("a constant template parses")
 }
 
-/// A host for the game alone: a kernel over [`space`], with the Meta renderer that lets
-/// it describe itself.
+/// What the views need that the game does not bind: `ikigai-fn`'s `conditional`, at
+/// [`CONDITIONAL`], and nothing else from the library. A host that already mounts
+/// `ikigai_fn::space()` (the book's page does) has it.
+pub fn conditional_space() -> EndpointSpace {
+    EndpointSpace::new().bind(Exact::new(CONDITIONAL), ikigai_fn::conditional())
+}
+
+/// A host for the game alone: a kernel over [`space`] and [`conditional_space`], with the
+/// Meta renderer that lets it describe itself.
 pub fn kernel() -> Kernel {
     kernel_over(Arc::default())
 }
 
 /// [`kernel`] over [`space_over`].
 pub fn kernel_over(store: Arc<CellStore>) -> Kernel {
-    Kernel::with_meta_renderer(Arc::new(space_over(store)), Arc::new(TurtleRenderer))
+    let space = Fallback::new(vec![
+        Arc::new(space_over(store)) as Arc<dyn Space>,
+        Arc::new(conditional_space()),
+    ]);
+    Kernel::with_meta_renderer(Arc::new(space), Arc::new(TurtleRenderer))
 }
 
 #[cfg(test)]

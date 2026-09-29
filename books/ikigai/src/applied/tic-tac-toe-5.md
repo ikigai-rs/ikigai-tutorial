@@ -26,61 +26,133 @@ the chapter's.
 ## The markup is a resource
 
 The game's HTML lives in templates, and each template is a resource,
-`urn:iki:tutorial:ttt:template:{name}`. There are nine, all small. Here is the one for a
+`urn:iki:tutorial:ttt:template:{name}`. There are thirteen, all small. Here is the one for a
 square that has been played:
 
 ```text
 {{#include ../../../../crates/tic-tac-toe/templates/square-taken.html}}
 ```
 
-A template is HTML with slots in it. A slot is `{{name}}`, or `{{name 0 2}}` with integers
-after the name, and whoever fills the template replaces each slot with a value. That is the
-whole format. It has no loops and no conditions, on purpose: every host that shows this
-game has to fill these templates, some of them in Python or TypeScript with no library, and
-a dozen lines of any language can do what this format asks. The board's template is the
-grid, with a `{{square x y}}` slot for each square; three square templates cover a square
-that is taken, open, or closed because the game is over; the status templates are single
-lines of text.
+It is HTML with markers in it, and each marker is a request. `$h{urn:iki:tutorial:ttt:cell:{x}:{y}}`
+asks the kernel for the cell at `(x, y)` and puts the answer into the page. No Rust fills this
+template. It is written in the template language of `ikigai-fn`, the function library Part I's
+host mounts, and that library fills it through the kernel, as it fills any composition.
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:ttt:template:square-taken
 source urn:iki:tutorial:ttt:template:status-turn'>
-<pre class="ikigai-run-expected">&lt;button type=&quot;button&quot; class=&quot;ttt-square&quot; id=&quot;ttt-square-{{x}}-{{y}}&quot; aria-disabled=&quot;true&quot; aria-label=&quot;{{mark}} at {{x}},{{y}}&quot;&gt;{{mark}}&lt;/button&gt;
+<pre class="ikigai-run-expected">&lt;button type=&quot;button&quot; class=&quot;ttt-square&quot; id=&quot;ttt-square-$h{{x}}-$h{{y}}&quot; aria-disabled=&quot;true&quot; aria-label=&quot;$h{urn:iki:tutorial:ttt:cell:{x}:{y}} at $h{{x}},$h{{y}}&quot;&gt;$h{urn:iki:tutorial:ttt:cell:{x}:{y}}&lt;/button&gt;
 [computed]
-{{mark}} to play.
+$h{urn:iki:tutorial:ttt:turn} to play.
 [computed]</pre>
 </div>
 
-The Rust side reads a template into slots and fills them. A value is either text, which is
-escaped on its way in, or HTML from another template, which goes in as it is:
+A template is served as it is written, markers and all. It is filled only when a *view* asks
+for it, and the next section is the whole language a view speaks.
 
-```rust,ignore
-{{#include ../../../../crates/tic-tac-toe/src/lib.rs:slots}}
+## The template language
+
+A marker is `$`, a letter, and a resource name in braces. The letter says how the answer goes
+in:
+
+| marker | puts in | markers in what it puts in |
+|---|---|---|
+| `$h{name}` | the answer as text, escaped for HTML | left alone |
+| `$r{name}` | the answer as it is | left alone |
+| `$a{name}` | the answer as it is | expanded, as part of this template |
+
+`$$` is a literal `$`, so `$$h{…}` is the text `$h{…}`. Everything that is not a marker is
+copied as it is.
+
+**Why `$h` never expands.** The stored cell keeps any mark at all, and a mark written straight
+into the store is text somebody else chose. `$h` escapes it: `&`, `<`, `>`, `"` and `'` become
+`&amp;`, `&lt;`, `&gt;`, `&quot;` and `&#39;`, so the mark cannot become markup. And `$h` does
+not look for markers in it, so the mark cannot become a request either. If it did, a player
+could play a mark that is itself a marker, and the page would resolve whatever name they wrote
+in it, with the view's authority. That is template injection, the same hole as SQL injection in
+another language. So a value from an atom goes in with `$h`. `$r` is for markup that is trusted
+and finished, such as another view, which goes in as it is and is not read again. Only `$a`
+expands what it splices, and a template uses it only over templates of its own.
+
+**Arguments.** `{x}` inside a marker is an argument: a variable the view's name captured, or an
+argument of the request. In a resource name its value is percent-encoded, so an argument can
+never add a segment or a query to the name it sits in. A marker that is only an argument,
+`$h{{x}}`, splices the value and asks the kernel for nothing. The open square has no resource
+in it but its own coordinates:
+
+```text
+{{#include ../../../../crates/tic-tac-toe/templates/square-open.html}}
 ```
 
-Escaping is not optional here. The stored cell keeps any mark at all, `X`, `O`, or a
-Connect-Four `R`, and a mark written straight into the store is text somebody else chose.
-It reaches the page as text.
+**Fallbacks.** `$h{a || b}` tries `a`, and if `a` fails, `b`, and `$h{{title} || b}` stands in
+for a missing argument. The game needs none, because a cell already answers `-` for an empty
+square. The spreadsheet arc uses them, and its part V shows what the cache makes of one.
+
+**A template bound at a name.** A view is a template bound at a name of its own.
+`ikigai_fn::compose_over(src)` is the composer with its template fixed, and the variables the
+name captures are the template's arguments:
+
+```rust,ignore
+{{#include ../../../../crates/tic-tac-toe/src/lib.rs:view}}
+```
+
+```rust,ignore
+{{#include ../../../../crates/tic-tac-toe/src/lib.rs:views}}
+```
+
+**The branch.** `urn:iki:fn:conditional` sources its `if` resource and returns only `then` or
+only `else`. With `equals=`, the test is whether `if`'s text is that value. The side it does not
+take is never asked for, so neither its work nor its golden threads enter the answer. A square
+is two branches:
+
+```text
+{{#include ../../../../crates/tic-tac-toe/templates/square.html}}
+{{#include ../../../../crates/tic-tac-toe/templates/square-empty.html}}
+```
+
+A square asks its cell whether it is `-`. If not, the square is `square-taken`. If it is,
+`square-empty` asks the winner whether *it* is `-`: the square is `square-open` while the game
+goes on, and `square-closed` once it is over. Each branch is a template rather than HTML, and
+the square splices it with `$a`, so its markers are expanded as part of the square: the `{x}`
+and `{y}` in `square-open` are the square view's own. This is the one place the game uses `$a`,
+and what it expands is always one of its own templates, never a value.
+
+**What stays code.** Every marker is a `Source`. A template can read and cannot write, so the
+two views that write, a play and **New game**, are Rust, and a later section shows why.
 
 ## The board as a view
 
-The view of the board is a resource, `urn:iki:tutorial:ttt:view:board`. It fills the board
-template, and it fills each square from the cell at that square:
+The board is a resource, `urn:iki:tutorial:ttt:view:board`: the `board` template bound at that
+name. The template is the grid, with a square's view at each place:
 
-```rust,ignore
-{{#include ../../../../crates/tic-tac-toe/src/lib.rs:view_board}}
+```text
+{{#include ../../../../crates/tic-tac-toe/templates/board.html}}
 ```
 
-It is a composite like every other resource above the store. It reads the templates, the
-winner and the nine cells through the kernel, so it is cacheable, it recomputes only when a
-move touches something it read, and it shows whichever game it is asked in, because the
-corridor carries into every one of those reads. Its code has no three-by-three in it. The
-template decides which squares there are; the view only knows that a slot names a cell.
+Each square's view is a resource too, `urn:iki:tutorial:ttt:view:square:{x}:{y}`, the `square`
+template bound at a name with two variables. So `view:square:2:0` is the square template with
+`x` = `2` and `y` = `0`:
 
-The status line is the same kind of thing, `urn:iki:tutorial:ttt:view:status`: one of the
-status templates, filled from the winner and the turn.
+<div class="ikigai-run" data-game='a' data-cmd='source urn:iki:tutorial:ttt:view:square:2:0'>
+<pre class="ikigai-run-expected">&lt;button type=&quot;button&quot; class=&quot;ttt-square&quot; id=&quot;ttt-square-2-0&quot; hx-post=&quot;iki/tutorial/ttt/view/play/2/0&quot; hx-target=&quot;previous .ttt-status&quot; aria-label=&quot;2,0: empty, play here&quot;&gt;&lt;/button&gt;
+[cached]</pre>
+</div>
 
-```rust,ignore
-{{#include ../../../../crates/tic-tac-toe/src/lib.rs:view_status}}
+It was already cached: the board above drew it when the page loaded.
+
+The board is a composite like every other resource above the store. Every marker is a request
+through the kernel, so the board is cacheable, it recomputes only when a move touches something
+it read, and it shows whichever game it is asked in, because the corridor carries into every
+one of those reads. And it has no code. The template decides which squares there are, and the
+conditional in `square` decides which of three kinds each one is.
+
+The status line is the same kind of thing, `urn:iki:tutorial:ttt:view:status`. The winner
+chooses between `status-turn` and `status-over`, a second choice between `status-draw` and
+`status-won`:
+
+```text
+{{#include ../../../../crates/tic-tac-toe/templates/status.html}}
+{{#include ../../../../crates/tic-tac-toe/templates/status-over.html}}
+{{#include ../../../../crates/tic-tac-toe/templates/status-turn.html}}
 ```
 
 When this page loaded, the boards above asked for both views, in their own games. So in
@@ -111,10 +183,23 @@ htmx, a small library that turns attributes into requests: pressing the button s
 
 `urn:iki:tutorial:ttt:view:play:{x}:{y}` is a `Sink` and nothing else. It sinks the move,
 the same resource Part III built, through the kernel, so the rules are still the move's and
-only the move's. Then it answers with what happened and the new status, and that answer is
-what the button's `hx-target` receives: the status line, which is a live region, so a
-screen reader says what the move did. The board re-renders when the status has settled,
-because its own markup asks it to (`hx-trigger` on the board, in the `game` template).
+only the move's. Then it answers with `urn:iki:tutorial:ttt:view:reply`, a view like the
+others, whose template puts what the write said, as the argument `message`, in front of the
+status:
+
+```text
+{{#include ../../../../crates/tic-tac-toe/templates/reply.html}}
+```
+
+That answer is what the button's `hx-target` receives: the status line, which is a live
+region, so a screen reader says what the move did. The board re-renders when the status has
+settled, because its own markup asks it to (`hx-trigger` on the board, in the `game`
+template).
+
+This view is code, and it has to be. A template's markers are all reads, and a play is a write
+and then a read, in that order: the reply must not be read until the move has been made.
+Composition has no way to say "first", so a sequence stays a few lines of Rust. Everything it
+shows is still a template.
 
 <div class="ikigai-run" data-game='a' data-cmd='sink urn:iki:tutorial:ttt:view:play:1:1
 cache urn:iki:tutorial:ttt:view:board
@@ -154,9 +239,11 @@ when two people play one game from two screens, and the board one of them is loo
 out of date.
 
 A move made without the view recomputes the view the same way, because the view is only a
-reader of what the move changed. Traced, the status shows exactly which parts of the game
-were recomputed: the three lines through the corner, the winner, the turn and the board,
-while the other five lines and the template were served from cache.
+reader of what the move changed. Traced, the status shows the template language at work: the
+`status` template, served from cache; the conditional, recomputed because the winner it asked
+was; the `status-turn` template it chose, from cache; and the turn that template splices.
+Under the winner and the turn, exactly the three lines through the corner and the board were
+recomputed, and the other five lines were served from cache.
 
 <div class="ikigai-run" data-game='a' data-cmd='sink urn:iki:tutorial:ttt:move:0:0
 trace urn:iki:tutorial:ttt:view:status'>
@@ -166,33 +253,35 @@ trace  urn:iki:tutorial:ttt:view:status
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process · chain urn:iki:tutorial:ttt:game:a root
 &#32;
-urn:iki:tutorial:ttt:view:status   ttt-view-status · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root   → 10b  X to play.
-├─ urn:iki:tutorial:ttt:winner   ttt-winner · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:0.0,1.1,2.2   ttt-cells · computed · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:diagonal:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,1.1,2.2 scope=urn:iki:tutorial:ttt:game:a root
-│  │  ├─ urn:iki:tutorial:ttt:cell:0:0   ttt-cell · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  │  │  └─ urn:iki:tutorial:ttt:stored:0:0   ttt-stored · computed · ThreadId(1) · — · answered-by=urn:iki:tutorial:ttt:game:a scope=urn:iki:tutorial:ttt:game:a root
-│  │  ├─ urn:iki:tutorial:ttt:cell:1:1   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  │  └─ urn:iki:tutorial:ttt:cell:2:2   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:2.0,1.1,0.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:diagonal:1 -&gt; urn:iki:tutorial:ttt:cells:2.0,1.1,0.2 scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:0.0,0.1,0.2   ttt-cells · computed · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:column:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,0.1,0.2 scope=urn:iki:tutorial:ttt:game:a root
-│  │  ├─ urn:iki:tutorial:ttt:cell:0:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  │  ├─ urn:iki:tutorial:ttt:cell:0:1   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  │  └─ urn:iki:tutorial:ttt:cell:0:2   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:1.0,1.1,1.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:column:1 -&gt; urn:iki:tutorial:ttt:cells:1.0,1.1,1.2 scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:2.0,2.1,2.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:column:2 -&gt; urn:iki:tutorial:ttt:cells:2.0,2.1,2.2 scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:0.0,1.0,2.0   ttt-cells · computed · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,1.0,2.0 scope=urn:iki:tutorial:ttt:game:a root
-│  │  ├─ urn:iki:tutorial:ttt:cell:0:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  │  ├─ urn:iki:tutorial:ttt:cell:1:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  │  └─ urn:iki:tutorial:ttt:cell:2:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:cells:0.1,1.1,2.1   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:1 -&gt; urn:iki:tutorial:ttt:cells:0.1,1.1,2.1 scope=urn:iki:tutorial:ttt:game:a root
-│  └─ urn:iki:tutorial:ttt:cells:0.2,1.2,2.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:2 -&gt; urn:iki:tutorial:ttt:cells:0.2,1.2,2.2 scope=urn:iki:tutorial:ttt:game:a root
-├─ urn:iki:tutorial:ttt:turn   ttt-turn · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  ├─ urn:iki:tutorial:ttt:winner   ttt-winner · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│  └─ urn:iki:tutorial:ttt:board   ttt-board · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
-│     ├─ urn:iki:tutorial:ttt:cells:0.0,1.0,2.0   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,1.0,2.0 scope=urn:iki:tutorial:ttt:game:a root
-│     ├─ urn:iki:tutorial:ttt:cells:0.1,1.1,2.1   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:1 -&gt; urn:iki:tutorial:ttt:cells:0.1,1.1,2.1 scope=urn:iki:tutorial:ttt:game:a root
-│     └─ urn:iki:tutorial:ttt:cells:0.2,1.2,2.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:2 -&gt; urn:iki:tutorial:ttt:cells:0.2,1.2,2.2 scope=urn:iki:tutorial:ttt:game:a root
-└─ urn:iki:tutorial:ttt:template:status-turn   ttt-template · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root</pre>
+urn:iki:tutorial:ttt:view:status   composeOver · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root   → 10b  X to play.
+├─ urn:iki:tutorial:ttt:template:status   ttt-template · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+├─ urn:iki:fn:conditional   conditional · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  ├─ urn:iki:tutorial:ttt:winner   ttt-winner · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:0.0,1.1,2.2   ttt-cells · computed · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:diagonal:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,1.1,2.2 scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  ├─ urn:iki:tutorial:ttt:cell:0:0   ttt-cell · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  │  └─ urn:iki:tutorial:ttt:stored:0:0   ttt-stored · computed · ThreadId(1) · — · answered-by=urn:iki:tutorial:ttt:game:a scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  ├─ urn:iki:tutorial:ttt:cell:1:1   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  └─ urn:iki:tutorial:ttt:cell:2:2   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:2.0,1.1,0.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:diagonal:1 -&gt; urn:iki:tutorial:ttt:cells:2.0,1.1,0.2 scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:0.0,0.1,0.2   ttt-cells · computed · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:column:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,0.1,0.2 scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  ├─ urn:iki:tutorial:ttt:cell:0:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  ├─ urn:iki:tutorial:ttt:cell:0:1   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  └─ urn:iki:tutorial:ttt:cell:0:2   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:1.0,1.1,1.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:column:1 -&gt; urn:iki:tutorial:ttt:cells:1.0,1.1,1.2 scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:2.0,2.1,2.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:column:2 -&gt; urn:iki:tutorial:ttt:cells:2.0,2.1,2.2 scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:0.0,1.0,2.0   ttt-cells · computed · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,1.0,2.0 scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  ├─ urn:iki:tutorial:ttt:cell:0:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  ├─ urn:iki:tutorial:ttt:cell:1:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  │  └─ urn:iki:tutorial:ttt:cell:2:0   ttt-cell · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+│  │  ├─ urn:iki:tutorial:ttt:cells:0.1,1.1,2.1   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:1 -&gt; urn:iki:tutorial:ttt:cells:0.1,1.1,2.1 scope=urn:iki:tutorial:ttt:game:a root
+│  │  └─ urn:iki:tutorial:ttt:cells:0.2,1.2,2.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:2 -&gt; urn:iki:tutorial:ttt:cells:0.2,1.2,2.2 scope=urn:iki:tutorial:ttt:game:a root
+│  └─ urn:iki:tutorial:ttt:template:status-turn   ttt-template · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+└─ urn:iki:tutorial:ttt:turn   ttt-turn · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+   ├─ urn:iki:tutorial:ttt:winner   ttt-winner · cached · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+   └─ urn:iki:tutorial:ttt:board   ttt-board · computed · ThreadId(1) · — · scope=urn:iki:tutorial:ttt:game:a root
+      ├─ urn:iki:tutorial:ttt:cells:0.0,1.0,2.0   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:0 -&gt; urn:iki:tutorial:ttt:cells:0.0,1.0,2.0 scope=urn:iki:tutorial:ttt:game:a root
+      ├─ urn:iki:tutorial:ttt:cells:0.1,1.1,2.1   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:1 -&gt; urn:iki:tutorial:ttt:cells:0.1,1.1,2.1 scope=urn:iki:tutorial:ttt:game:a root
+      └─ urn:iki:tutorial:ttt:cells:0.2,1.2,2.2   ttt-cells · cached · ThreadId(1) · — · alias=urn:iki:tutorial:ttt:row:2 -&gt; urn:iki:tutorial:ttt:cells:0.2,1.2,2.2 scope=urn:iki:tutorial:ttt:game:a root</pre>
 </div>
 
 Game `b` has not been touched. Its status still says X is to play, but it was computed
@@ -265,8 +354,9 @@ socket, and can take a game's store from another process. The next section is ab
 
 **Other languages.** The Python and TypeScript faces of ikigai can serve the stored cell
 already, under the contract Part IV wrote. They can also serve this markup: the templates are
-resources they can read, the slot format is a dozen lines to fill, and the path rule is one
-line. That is the next part of the arc, and the markup will not change for it.
+resources they can read, the part of the template language these templates use is small
+enough to write again in any language, and the path rule is one line. That is the next part
+of the arc.
 
 ## The same board from a server
 
@@ -275,7 +365,8 @@ kernel, `space_with_store` as the root game, with one corridor per game named on
 line, and it serves that kernel two ways.
 
 Over HTTP, through `ikigai-web`, it serves a page per game, `/game/a/` for game `a`. The
-page is a document around the game's own `game` template, the same bytes this page fills,
+page is a document around the game's own page shell, `urn:iki:tutorial:ttt:view:game:a`,
+the same bytes this page shows,
 with a `<base href="/game/a/">` so that the markup's relative paths arrive under the game.
 The host does the rest: it takes `/game/a/` off the front of a request and turns it into
 game `a`'s corridor, and maps what is left by the rule above.
@@ -383,9 +474,9 @@ game a corridor around the names rather than a part of them, and it turned the s
 seam any process in any language can fill.
 
 **And this part** put a face on it without moving any of that. The views are more resources
-of the same kind: composites, cached, per game, recomputed by the moves that touch them. The
-markup is resources too, so a page, a server and a program in another language show the same
-game from the same bytes.
+of the same kind: composites, cached, per game, recomputed by the moves that touch them, and
+written as templates with no view code at all. The markup is resources too, so a page, a
+server and a program in another language show the same game from the same bytes.
 
 Next, the arc crosses languages: the stored cell served from Python and from TypeScript, a
 host that mounts it, and apps in both languages that serve this same board.

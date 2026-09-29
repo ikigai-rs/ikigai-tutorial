@@ -45,7 +45,6 @@ use ikigai_core::{
 use ikigai_resolve::MountedRemote;
 use ikigai_vocab::TurtleRenderer;
 use ikigai_web::{EdgeConfig, Route, RouteTable};
-use tic_tac_toe::{fill, Fill};
 
 /// The game's names, as the root game has them.
 const GAME_NAMES: &str = "urn:iki:tutorial:ttt:";
@@ -199,8 +198,14 @@ impl Host {
             Some(socket) => peer_store(socket)?,
             None => Arc::new(tic_tac_toe::stored_space(Arc::default())),
         };
+        // The game, and the one resource its views use that it does not bind itself:
+        // `ikigai-fn`'s `conditional`, which a square and the status line choose with.
+        let space = Fallback::new(vec![
+            Arc::new(tic_tac_toe::space_with_store(root_store)) as Arc<dyn Space>,
+            Arc::new(tic_tac_toe::conditional_space()),
+        ]);
         let kernel = Arc::new(Kernel::with_meta_renderer(
-            Arc::new(tic_tac_toe::space_with_store(root_store)),
+            Arc::new(space),
             Arc::new(TurtleRenderer),
         ));
         let mut games = BTreeMap::new();
@@ -585,27 +590,20 @@ impl Endpoint for PageEndpoint {
 
 impl PageEndpoint {
     // ANCHOR: page
-    /// A game's page: the document around the game's own `game` template, with a `<base>`
-    /// at the game's path so the markup's relative paths arrive under it.
+    /// A game's page: the document around the game's own page shell, `view:game:{id}`, with
+    /// a `<base>` at the game's path so the markup's relative paths arrive under it.
     async fn game_page(&self, id: Option<&str>) -> Result<String> {
+        let label = id.unwrap_or("root");
         let request = Request::new(
             Verb::Source,
-            Iri::parse(tic_tac_toe::template_name("game"))
-                .map_err(|e| Error::Endpoint(format!("the game template's name: {e}")))?,
+            Iri::parse(tic_tac_toe::view_game_name(label))
+                .map_err(|e| Error::Endpoint(format!("the game shell's name: {e}")))?,
         );
         let shell = self
             .kernel
             .issue(request, &ikigai_core::Capability::root())
             .await?;
-        let label = id.unwrap_or("root");
-        let game = fill(&String::from_utf8_lossy(&shell.bytes), |slot| {
-            match slot.name.as_str() {
-                "game" => Ok(Fill::Text(label.to_string())),
-                other => Err(Error::Endpoint(format!(
-                    "the game template has a slot `{other}` the host does not fill"
-                ))),
-            }
-        })?;
+        let game = String::from_utf8_lossy(&shell.bytes);
         let base = id.map_or_else(|| "/".to_string(), |id| format!("/game/{id}/"));
         let mut links = vec!["<li><a href=\"/\">the root game</a></li>".to_string()];
         for other in &self.games {
@@ -623,7 +621,7 @@ impl PageEndpoint {
              <script src=\"/static/htmx-2.0.4.min.js\"></script>\n</head>\n<body>\n<main>\n\
              <h1>Tic-tac-toe: {title}</h1>\n<div class=\"ttt-boards\"><div class=\"ttt-play\">\n{game}\n</div></div>\n\
              <nav aria-label=\"Games\"><h2>Games on this host</h2><ul>{links}</ul></nav>\n</main>\n</body>\n</html>\n",
-            title = tic_tac_toe::escape(&if id.is_some() {
+            title = escape(&if id.is_some() {
                 format!("game {label}")
             } else {
                 "the root game".to_string()
@@ -632,4 +630,21 @@ impl PageEndpoint {
         ))
     }
     // ANCHOR_END: page
+}
+
+/// `text`, safe in HTML text and in a quoted attribute: the page's title is the host's own
+/// markup, not a template, so the host escapes the one value it puts there.
+fn escape(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for c in text.chars() {
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            '\'' => out.push_str("&#39;"),
+            c => out.push(c),
+        }
+    }
+    out
 }
