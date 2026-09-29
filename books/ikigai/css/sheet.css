@@ -170,3 +170,11 @@
     outline: 3px solid var(--links);
     outline-offset: 2px;
 }
+
+/* Part VII: a cell the page drew again because it was told (a cut) or because its deadline
+ * passed, marked until the next time the page draws anything. An outline in the link color,
+ * which the contrast gate measures against `--bg`; the value itself is unchanged text. */
+.sheet-grid td.sheet-pushed {
+    outline: 2px dashed var(--links);
+    outline-offset: -3px;
+}

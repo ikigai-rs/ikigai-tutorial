@@ -95,10 +95,36 @@ summary:focus-visible {
  * floor (axe-core in a real browser, 2026-09-29). This is the one value in this file that
  * `book-a11y` did not choose, because it does not read the highlight themes: #7e8790 is the
  * original mixed toward white until the WCAG ratio clears the floor (4.55:1), by the same
- * formula book-a11y uses. No other highlight color failed that run, in any of the five themes. */
+ * formula book-a11y uses. No other highlight color failed that run, in any of the five themes,
+ * until the listings below arrived. */
 .ayu .hljs-comment,
 .ayu .hljs-quote {
     color: #7e8790;
+}
+
+/* ── Markup and script in the dark themes' code blocks ──────────────────────────
+ *
+ * The first HTML and JavaScript listings (the spreadsheet's part VII) brought token classes no
+ * Rust listing uses, and two of them fall under the floor (axe-core in a real browser,
+ * 2026-09-29, with the page's sheet pushing): tomorrow-night's red, #cc6666 on #1d1f21, is
+ * 4.46:1 in coal and navy (tags, attributes, regular expressions, variables all share it), and
+ * ayu's tag punctuation, #00568d on #191f26, is 2.15:1. Each is the original mixed toward white
+ * until it clears 4.5:1, by the formula above: #cd6969 (4.58:1) and #538db2 (4.60:1). */
+.coal .hljs-variable,
+.coal .hljs-attribute,
+.coal .hljs-attr,
+.coal .hljs-tag,
+.coal .hljs-regexp,
+.navy .hljs-variable,
+.navy .hljs-attribute,
+.navy .hljs-attr,
+.navy .hljs-tag,
+.navy .hljs-regexp {
+    color: #cd6969;
+}
+
+.ayu .hljs-tag {
+    color: #538db2;
 }
 
 /* ── Motion ───────────────────────────────────────────────────────────────────

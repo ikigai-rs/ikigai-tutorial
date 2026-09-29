@@ -88,6 +88,10 @@ jobs:
           grep -q '^export function useStoryClock' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function setStoryClock' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function issueWithArgsAsync' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function drawAsync' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function pushWaitAsync' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function pushDeadline' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function pushExpired' books/ikigai/book/wasm/book_wasm.js
           grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
 
       # ── The second accessibility instrument ───────────────────────────────
