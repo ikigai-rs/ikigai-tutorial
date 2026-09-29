@@ -4,8 +4,8 @@
 //! cargo test -p tic-tac-toe --test views -- --nocapture --test-threads 1
 //! ```
 //!
-//! The views are resources like the rest: templates filled from the cells, the winner and
-//! the turn, sourced through the kernel. So each test here is a kernel, a few requests, and
+//! The views are resources like the rest: templates bound at names, whose markers name the
+//! cells, the winner and the turn, all sourced through the kernel. So each test here is a kernel, a few requests, and
 //! a look at the HTML — and at the cache, by the VIEW's name, which no alias rewrites, so
 //! `is_cached` answers truly for it (ledger #561 bites only alias names).
 
@@ -14,9 +14,8 @@ use std::sync::Arc;
 use futures::executor::block_on;
 use ikigai_core::{ArgRef, Capability, Error, Iri, Kernel, Request, Result, Scope, Verb};
 use tic_tac_toe::{
-    escape, fill, game, kernel_over, lines, move_name, slots, stored_name, stored_space,
-    template_name, view_play_name, CellStore, Fill, Slot, CELLS, RESET, TEMPLATES, VIEW_BOARD,
-    VIEW_RESET, VIEW_STATUS,
+    game, kernel_over, lines, move_name, stored_name, stored_space, template_name, view_play_name,
+    view_square_name, CellStore, CELLS, RESET, TEMPLATES, VIEW_BOARD, VIEW_RESET, VIEW_STATUS,
 };
 
 fn iri(name: &str) -> Iri {
@@ -265,45 +264,6 @@ fn a_play_is_made_not_read() {
     assert!(matches!(source(&kernel, RESET), Err(Error::Endpoint(_))));
 }
 
-// ANCHOR: slot_format
-/// The slot format, as every host that fills a template must read it.
-#[test]
-fn the_slot_format_is_a_name_and_plain_integers() -> Result<()> {
-    assert_eq!(
-        slots("a {{square 0 -2}} b {{mark}}")?,
-        [
-            Slot {
-                name: "square".into(),
-                args: vec![0, -2]
-            },
-            Slot {
-                name: "mark".into(),
-                args: vec![]
-            }
-        ]
-    );
-    let filled = fill("<p>{{mark}}</p>{{status}}", |slot| {
-        Ok(match slot.name.as_str() {
-            "mark" => Fill::Text("<X>".into()),
-            _ => Fill::Html("<em>ok</em>".into()),
-        })
-    })?;
-    assert_eq!(filled, "<p>&lt;X&gt;</p><em>ok</em>");
-    for bad in [
-        "{{",
-        "{{Mark}}",
-        "{{-a}}",
-        "{{square 01}}",
-        "{{square  1}}",
-        "{{}}",
-    ] {
-        assert!(slots(bad).is_err(), "{bad}");
-    }
-    assert_eq!(escape("a&b"), "a&amp;b");
-    Ok(())
-}
-// ANCHOR_END: slot_format
-
 /// The board template's squares are exactly the squares the line table's lines pass
 /// through — the geometry lives in two places (the table for the rules, the template for
 /// the face), so this is the check that they agree.
@@ -314,10 +274,22 @@ fn the_board_template_shows_exactly_the_squares_of_the_lines() -> Result<()> {
         .find(|(name, _)| *name == "board")
         .expect("a board template")
         .1;
-    let mut shown: Vec<(i64, i64)> = slots(board)?
-        .into_iter()
-        .map(|slot| (slot.args[0], slot.args[1]))
+    // Every marker in the board is `$r{…:view:square:X:Y}`, and nothing else.
+    let square = view_square_name(0, 0);
+    let square = square.trim_end_matches("0:0");
+    let mut shown: Vec<(i64, i64)> = board
+        .split("$r{")
+        .skip(1)
+        .map(|marker| {
+            let (at, _) = marker.split_once('}').expect("a closed marker");
+            let (x, y) = at
+                .strip_prefix(square)
+                .and_then(|xy| xy.split_once(':'))
+                .unwrap_or_else(|| panic!("`{at}` is not a square's view"));
+            (x.parse().expect("x"), y.parse().expect("y"))
+        })
         .collect();
+    assert!(!board.contains("$h{") && !board.contains("$a{"));
     shown.sort_unstable();
     let line = CELLS.trim_end_matches("{list}");
     let mut on_lines: Vec<(i64, i64)> = lines()
@@ -337,7 +309,8 @@ fn the_board_template_shows_exactly_the_squares_of_the_lines() -> Result<()> {
 }
 
 /// The game shell's paths are relative and game-free, so the host that serves the page
-/// decides the game by where the page is.
+/// decides the game by where the page is. A template names resources only inside its
+/// markers, and never a game: the game is the corridor a view is asked in.
 #[test]
 fn the_markup_names_no_game_and_no_host() {
     for (name, text) in TEMPLATES {
@@ -350,72 +323,33 @@ fn the_markup_names_no_game_and_no_host() {
                 );
             }
         }
-        assert!(!text.contains("urn:"), "{name} names a resource by IRI");
+        let outside: String = text
+            .split('$')
+            .enumerate()
+            .map(|(i, piece)| match (i, piece.find('{')) {
+                (0, _) | (_, None) => piece,
+                // Skip the marker: up to its closing brace, counting `{x}` inside it.
+                (_, Some(_)) => {
+                    let mut depth = 0;
+                    let end = piece
+                        .char_indices()
+                        .find(|&(_, c)| {
+                            depth += match c {
+                                '{' => 1,
+                                '}' => -1,
+                                _ => 0,
+                            };
+                            c == '}' && depth == 0
+                        })
+                        .map_or(piece.len(), |(at, _)| at + 1);
+                    &piece[end..]
+                }
+            })
+            .collect();
+        assert!(
+            !outside.contains("urn:"),
+            "{name} names a resource outside a marker"
+        );
         assert!(!text.contains("game:"), "{name} names a game");
-    }
-}
-
-/// The template format's cases, as the README states them: this reads the README's
-/// `template-cases` block and checks every line against `slots` and `escape`, so the spec a
-/// Python or TypeScript filler is written from and the Rust filler cannot drift apart.
-#[test]
-fn the_template_format_cases_in_the_readme_hold() {
-    const README: &str = include_str!("../README.md");
-    let block = README
-        .split_once("<!-- template-cases: begin -->\n```text\n")
-        .and_then(|(_, rest)| rest.split_once("```\n<!-- template-cases: end -->"))
-        .expect("the README has a template-cases block")
-        .0;
-    // A line that does not start with a kind continues the case before it (a template
-    // with a newline in it).
-    let mut cases: Vec<(&str, String)> = Vec::new();
-    for line in block.lines() {
-        match ["slots", "refuse", "escape"]
-            .into_iter()
-            .find(|kind| line.starts_with(kind))
-        {
-            Some(kind) => cases.push((kind, line[kind.len()..].trim_start().to_string())),
-            None => {
-                let (_, text) = cases.last_mut().expect("a case to continue");
-                text.push('\n');
-                text.push_str(line);
-            }
-        }
-    }
-    assert!(cases.len() >= 20, "{} cases", cases.len());
-    for (kind, text) in &cases {
-        match *kind {
-            "refuse" => assert!(slots(text).is_err(), "should be refused: {text:?}"),
-            "slots" => {
-                let (template, expected) = text.split_once('\t').expect("a tab");
-                let read = slots(template).unwrap_or_else(|e| panic!("{template:?}: {e}"));
-                let shown: Vec<String> = read
-                    .iter()
-                    .map(|slot| {
-                        std::iter::once(slot.name.clone())
-                            .chain(slot.args.iter().map(i64::to_string))
-                            .collect::<Vec<_>>()
-                            .join(" ")
-                    })
-                    .collect();
-                let shown = if shown.is_empty() {
-                    "-".to_string()
-                } else {
-                    shown.join(" | ")
-                };
-                assert_eq!(shown, expected, "{template:?}");
-                // Filling what was read leaves no `{{` behind.
-                let filled = fill(template, |_| Ok(Fill::Text("v".into()))).expect("fills");
-                assert!(!filled.contains("{{"), "{filled}");
-            }
-            _ => {
-                let (raw, escaped) = text.split_once('\t').expect("a tab");
-                assert_eq!(escape(raw), escaped, "{raw:?}");
-                assert_eq!(
-                    fill("{{v}}", |_| Ok(Fill::Text(raw.into()))).expect("fills"),
-                    escaped
-                );
-            }
-        }
     }
 }

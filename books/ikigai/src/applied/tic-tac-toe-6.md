@@ -232,9 +232,17 @@ above the atom could tell.
 
 The second shape keeps the whole game in the Rust host and moves the *face* instead. Part V
 made the markup resources, `urn:iki:tutorial:ttt:template:{name}`, and wrote down what a
-host of that markup implements: the slot format, the rule that chooses a template, and the
-path rule that turns `iki/tutorial/ttt/view/board` into a name. `ttt-host` implements it in
-Rust. Each app implements it again, in its own language, as a client of the host.
+host of that markup implements: the templates' language, and the path rule that turns
+`iki/tutorial/ttt/view/board` into a name. The apps fill the same templates as the host, each
+in its own language, as a client of the host.
+
+> **This section is changing.** Part V's views became templates in `ikigai-fn`'s template
+> language, which the kernel fills, and the bytes they answer did not change. The apps were
+> written against the format the templates had before, `{{slot}}` placeholders that each app
+> filled with a few lines of its own, and the excerpts and transcripts below come from those
+> apps. Until each app learns the new markers, an app run against a host built from this book
+> does not match it, and `scripts/ttt-polyglot-demo.sh` says so. This section will be
+> rewritten when they have.
 
 Start the host with a game over each store, then the two apps. Each app is a client of the
 host's IPC socket and a web server of its own:
@@ -316,9 +324,9 @@ def board(game: Game) -> str:
 
 With `fill`, which reads a template into text and slots, refuses anything that is not a
 slot, and escapes text as it goes in, each app's views come to about thirty lines. The
-refusal cases and the escape are specified in the tic-tac-toe crate's README as a list of
-cases. A Rust test reads that list and checks it against the Rust filler, and the Python
-app's tests check a copy of it.
+tic-tac-toe crate's README specifies what a filler implements as a list of cases, and a Rust
+test runs that list, so the spec cannot drift from the templates. It now states the template
+language rather than the slot format, and the apps will be checked against the new list.
 
 Two things the apps do *not* do. They never compute the game: the winner is `winner`, read
 from the host, not a function of the cells written again in Python. And they never write to

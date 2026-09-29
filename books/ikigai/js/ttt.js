@@ -5,7 +5,7 @@
 //     <div class="ttt-play" data-game='a'>…a line for readers without the kernel…</div>
 //
 // and this script fills it with the game's page shell — the resource
-// `urn:iki:tutorial:ttt:template:game`, the same bytes `ttt-host` serves over HTTP — and
+// `urn:iki:tutorial:ttt:view:game:a`, the same bytes `ttt-host` serves over HTTP — and
 // lets htmx run it. Nothing here renders a board: the markup is the game's own resources
 // (`view:board`, `view:status`), and htmx asks for them by the relative paths in that
 // markup (`iki/tutorial/ttt/view/board`), exactly as it would of a server.
@@ -81,30 +81,6 @@
     function escape(text) {
         return String(text).replace(/[&<>"']/g, function (c) {
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
-        });
-    }
-
-    // The template slot format, as every host of this markup fills it (the tic-tac-toe
-    // crate's README states it, with the cases a filler must refuse): every `{{` opens a
-    // slot that ends at the first `}}`, and what is between must be `{{name}}` or
-    // `{{name 0 -2}}` — a lower-case name, then integers in their one plain spelling, one
-    // space before each — or the template is refused. A value is text (escaped as it goes
-    // in) unless the caller hands back `{ html: … }`. (Integers past 2^53 are refused here
-    // and not in Rust; no template comes near.)
-    var SLOT = /^([a-z][a-z-]*)((?: (?:0|-?[1-9][0-9]*))*)$/;
-    var INSIDE = /\{\{([\s\S]*?)\}\}/g;
-    function fill(template, value) {
-        if (template.split(INSIDE).some(function (text, i) { return i % 2 === 0 && text.indexOf("{{") !== -1; })) {
-            throw new Error("a template: a `{{` is never closed");
-        }
-        return template.replace(INSIDE, function (_, inside) {
-            var slot = SLOT.exec(inside);
-            var args = slot && slot[2] ? slot[2].trim().split(" ").map(Number) : [];
-            if (!slot || !args.every(Number.isSafeInteger)) {
-                throw new Error("a template: `{{" + inside + "}}` is not a slot");
-            }
-            var filled = value(slot[1], args);
-            return typeof filled === "object" ? filled.html : escape(filled);
         });
     }
 
@@ -208,16 +184,16 @@
 
         boards.forEach(function (board) {
             var game = board.getAttribute("data-game");
-            kernel.issueAsync(game, "source", "urn:iki:tutorial:ttt:template:game")
+            // The shell is a view like the others: the `game` template, with the game's
+            // id as its argument, filled by the kernel. Nothing here fills a template.
+            kernel.issueAsync(game, "source", "urn:iki:tutorial:ttt:view:game:" + game)
                 .then(function (json) {
                     var reply = JSON.parse(json);
                     if (reply.kind !== "output") {
                         unavailable(board, "its page shell from the kernel", reply.text);
                         return;
                     }
-                    board.innerHTML = fill(reply.text, function (name) {
-                        return name === "game" ? game : "";
-                    });
+                    board.innerHTML = reply.text;
                     htmx.process(board);
                 }).catch(function (err) {
                     unavailable(board, "its page shell from the kernel", err);
