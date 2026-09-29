@@ -25,35 +25,42 @@
 
 /* The grid scrolls sideways on a narrow page rather than widening it, and the region that
  * scrolls takes focus (the template gives it `tabindex="0"`), so it scrolls by keyboard too. */
-.sheet-view {
+.sheet-view,
+.sheet-recomputed {
     max-width: 100%;
     overflow-x: auto;
 }
 
-.sheet-view:focus-visible {
+.sheet-view:focus-visible,
+.sheet-recomputed:focus-visible {
     outline: 3px solid var(--links);
     outline-offset: 2px;
 }
 
-.sheet-grid {
+.sheet-grid,
+.sheet-cost {
     margin: 0;
     border-collapse: collapse;
     font-variant-numeric: tabular-nums;
 }
 
-.sheet-grid caption {
+.sheet-grid caption,
+.sheet-cost caption {
     text-align: left;
     padding-bottom: 0.3rem;
     font-size: 0.9em;
 }
 
 .sheet-grid th,
-.sheet-grid td {
+.sheet-grid td,
+.sheet-cost th,
+.sheet-cost td {
     padding: 0.2rem 0.5rem;
     border: 1px solid var(--table-header-bg);
 }
 
-.sheet-grid th {
+.sheet-grid th,
+.sheet-cost th {
     background: var(--quote-bg);
     color: var(--fg);
     font-weight: 600;
@@ -65,6 +72,19 @@
     background: var(--bg);
     color: var(--fg);
     text-align: right;
+}
+
+/* Part III's cost view: the grid's shape, a word per cell. Smaller and tighter than the grid,
+ * so four columns of "computed" fit a phone's width. */
+.sheet-cost th,
+.sheet-cost td {
+    padding: 0.15rem 0.35rem;
+}
+
+.sheet-cost td {
+    background: var(--bg);
+    color: var(--fg);
+    text-align: center;
 }
 
 /* The formula bar: two labeled fields and a button, wrapping on a narrow page. */

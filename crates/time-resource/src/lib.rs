@@ -39,10 +39,11 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use ikigai_core::{
-    ActionSpec, ArgRef, ArgSpec, AsyncFnEndpoint, Clock, Description, EndpointSpace, Error,
-    Fallback, FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Request,
-    Result, Space, Time, UriTemplate, Verb,
+    ActionSpec, ArgSpec, AsyncFnEndpoint, Clock, Description, EndpointSpace, Error, Fallback,
+    FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Result, Space,
+    Time, UriTemplate, Verb,
 };
+use ikigai_fn::ComposeOver;
 use ikigai_vocab::TurtleRenderer;
 
 /// `text/plain; charset=utf-8` as a [`ReprType`].
@@ -86,9 +87,6 @@ pub const TEMPLATE: &str = "urn:iki:tutorial:time:template:{name}";
 /// The clock as HTML: the `clock` template, composed.
 pub const VIEW_CLOCK: &str = "urn:iki:tutorial:time:view:clock";
 // ANCHOR_END: names
-
-/// The generic composer the clock's view is made of (`ikigai-fn`).
-pub const COMPOSE: &str = "urn:iki:fn:compose";
 
 /// The name of the event `name`.
 pub fn event_name(name: &str) -> String {
@@ -535,32 +533,14 @@ pub fn templates() -> FnEndpoint {
 }
 
 // ANCHOR: view_clock
-/// `time-view-clock`: the `clock` template, composed by `urn:iki:fn:compose`.
+/// `urn:iki:tutorial:time:view:clock`: the `clock` template, bound at a name of its own.
 ///
-/// The template names the resource it shows (`$a{urn:iki:tutorial:time:now}`), and compose
-/// resolves every name it finds and splices the answer in. So the only code here is the
-/// request: a name cannot carry an argument, and compose needs one, `src`, to know which
-/// template to expand.
-pub fn view_clock() -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new(
-        "time-view-clock",
-        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
-            Box::pin(async move {
-                let compose = Iri::parse(COMPOSE).map_err(|e| Error::Endpoint(e.to_string()))?;
-                let request = Request::new(Verb::Source, compose)
-                    .with_arg("src", ArgRef::Inline(template_name("clock").into_bytes()));
-                let html = inv.issue(request).await?.bytes;
-                Ok(Representation::new(text_html_utf8(), html).cacheable())
-            })
-        },
-    )
-    .with_description(
-        Description::new("time-view-clock")
-            .title("Clock view")
-            .summary("The time as HTML, composed from the clock template.")
-            .verb(Verb::Source)
-            .verb(Verb::Meta)
-            .output(TEXT_HTML_UTF8),
+/// The template names the resource it shows (`$h{urn:iki:tutorial:time:now}`), and compose
+/// resolves every name it finds and splices the answer in. `compose_over` is compose with
+/// the template fixed, bound at the view's name, so the view has no code of its own.
+pub fn view_clock() -> ComposeOver {
+    ikigai_fn::compose_over(
+        Iri::parse(template_name("clock")).expect("a template's name is a name"),
     )
 }
 // ANCHOR_END: view_clock
@@ -587,8 +567,7 @@ pub fn space_over(store: Arc<EventStore>) -> EndpointSpace {
         .bind(template(VIEW_CLOCK), view_clock())
 }
 
-/// A host for the chapter alone: its names and `ikigai-fn`'s (for compose), in a kernel
-/// that reads `clock`.
+/// A host for the chapter alone: its names and `ikigai-fn`'s, in a kernel that reads `clock`.
 pub fn kernel_with_clock(clock: Arc<dyn Clock>) -> Kernel {
     let space = Fallback::new(vec![
         Arc::new(space()) as Arc<dyn Space>,

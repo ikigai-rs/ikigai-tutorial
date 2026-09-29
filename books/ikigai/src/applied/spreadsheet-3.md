@@ -166,21 +166,51 @@ depend only on the one it read, each time.
 ## The sheet, and what an edit computed again
 
 Here is the sheet, with one thing added under it: after each edit, before the grid is drawn
-again, the page asks the kernel which of the sheet's values are not in its cache, and says so.
-Those are the values the redraw computes; the rest it is served. Type into `A1` and watch the
-chain; type into `D6`, which nothing reads, and watch one cell.
+again, the page asks the kernel what drawing it will cost, and shows the answer as a table the
+shape of the grid. A cell marked **computed** is a value the redraw will compute; the rest it will
+be served. Type into `A1` and watch the chain; type into `D6`, which nothing reads, and watch one
+cell.
 
 <div class="sheet-play" data-cache data-shell='urn:iki:tutorial:sheet:template:page'><p class="sheet-unavailable">The sheet appears here when the in-page kernel has loaded.</p></div>
 
-The list under the grid is the page's own code, not a resource, and that is a finding rather
-than a choice. The kernel's cache readout, `urn:kernel:cache`, lists what the cache *holds*,
-and a cut is lazy: an answer whose thread was cut stays in the cache, listed, until the next
-read of it finds it stale and drops it. Right after an edit, the readout lists every value the
-edit invalidated exactly as it did before. The probe that knows the difference is the one the
-REPL's `cache` command uses, and it belongs to the host, which holds the kernel; an endpoint
-cannot ask it. So a resource composed from `urn:kernel:cache` would say that nothing had been
-cut, and the page asks the kernel directly. The crate's tests pin this, so the day the readout
-learns to tell a live entry from a stale one, a test fails and the list can become a resource.
+The table is a resource, `view:cost`, and it is composed like the grid, from templates and names,
+with no code of its own. The question it asks of each cell is the one the `cache` command asks: if
+somebody read this value right now, would the cache serve it? The kernel answers that question as a
+resource, `urn:kernel:cached`, which resolves nothing and computes nothing: it looks up the key a
+read by the asker would use, under the asker's own capability and chain, and says `true` or
+`false`. A one-marker template gives it a name for each cell:
+
+```text
+{{#include ../../../../crates/spreadsheet/templates/cached.html}}
+```
+
+and each cell of the table branches on it with `urn:iki:fn:conditional`, which reads the name in
+`if`, compares it with `equals`, and resolves only the branch it takes:
+
+```text
+{{#include ../../../../crates/spreadsheet/templates/cost-cell.html}}
+```
+
+```rust,ignore
+{{#include ../../../../crates/spreadsheet/src/lib.rs:cost_names}}
+```
+
+The view has to be read before the redraw, since the redraw is what computes the values again, and
+it is never cached itself: `urn:kernel:cached` is a live question, so everything built on it is
+asked again every time. The crate's test pins what it says:
+
+```rust,ignore
+{{#include ../../../../crates/spreadsheet/tests/sheet.rs:cost}}
+```
+
+Before core 0.1.82 this table was the page's own code, and that was a finding rather than a
+choice. The kernel's cache readout, `urn:kernel:cache`, lists what the cache *holds*, and a cut is
+lazy: an answer whose thread was cut stays in the cache until the next read of it finds it stale
+and drops it. So right after an edit the readout listed every value the edit had invalidated
+exactly as it did before, and the probe that knew the difference belonged to the host; no endpoint
+could ask it. Now the readout marks each row `live`, `cut` or `expired`, and the probe is a
+resource anybody holding `urn:cap:kernel:inspect` can read, so the viewer could become a
+composition, and did.
 
 ## What it costs, and what it does not do
 

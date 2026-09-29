@@ -316,7 +316,7 @@ fn the_clock_view_is_the_template_composed() {
     let (kernel, _clock) = host(millis_at("2026-09-29T09:41Z", 0));
     assert_eq!(
         source(&kernel, "urn:iki:tutorial:time:template:clock").unwrap(),
-        "<time datetime=\"$a{urn:iki:tutorial:time:now}\">$a{urn:iki:tutorial:time:now}</time>"
+        "<time datetime=\"$h{urn:iki:tutorial:time:now}\">$h{urn:iki:tutorial:time:now}</time>"
     );
     assert_eq!(
         source(&kernel, VIEW_CLOCK).unwrap(),

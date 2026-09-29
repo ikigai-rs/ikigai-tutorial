@@ -376,9 +376,11 @@ Try a formula of your own, a range, and a mistake.
 | precedents | `urn:iki:tutorial:sheet:precedents:{ref}` | code: a walk over `refs`, the question "is this a cycle?" |
 | a value | `urn:iki:tutorial:sheet:cell:{ref}` | code: the evaluator, reading every value it needs by name |
 
-`formula:{ref}` is glue for the same reason the time chapter's view was: a name cannot carry
-an argument. If a name could mean "this resource, transrepted to that type", the compiled
-formula would be a rule, `formula:{ref}` = `input:{ref}` as `text/x-sexpr`, and no code at all.
+`formula:{ref}` is glue for the reason the time chapter's view used to be: a name cannot carry
+an argument. A view no longer needs one, since `compose_over` fixes the template when it is bound
+(Part I's grid is built that way), but nothing fixes a transreption's target type. If a name could
+mean "this resource, transrepted to that type", the compiled formula would be a rule,
+`formula:{ref}` = `input:{ref}` as `text/x-sexpr`, and no code at all.
 
 Every one of these is cacheable, and not one names a golden thread or lists a dependency. The
 next part edits a cell and asks what that cost.

@@ -268,10 +268,10 @@ The view is the other template, and it has no view code of its own to speak of:
 {{#include ../../../../crates/time-resource/templates/clock.html}}
 ```
 
-A `$a{…}` marker names a resource, and the generic composer `urn:iki:fn:compose`, from
-`ikigai-fn`, resolves every name it finds and splices the answer in. Tic-tac-toe's views
-filled slots from Rust, one view per template. This template names what it shows, so
-there is nothing to fill. The view is only the request that points compose at it:
+A `$h{…}` marker names a resource, and the generic composer from `ikigai-fn` resolves every
+name it finds and splices the answer in, escaped for HTML. Tic-tac-toe's views filled slots from
+Rust, one view per template. This template names what it shows, so there is nothing to fill, and
+the view is the template bound at a name of its own with `compose_over`:
 
 ```rust,ignore
 {{#include ../../../../crates/time-resource/src/lib.rs:view_clock}}
@@ -287,13 +287,14 @@ cached</pre>
 Compose knows nothing about time. It declares its answer cacheable and lets the kernel
 meet that with what it read, so the view expires with `now`, like the countdown.
 
-That glue exists for one reason: a name cannot carry an argument, and compose needs one,
-`src`, to know which template to expand. A name that means "this request, with these
-arguments" would let the view be a rule rather than code.
+There is no view code: `compose_over` is the composer with its template fixed, so binding it at
+`view:clock` makes the view a resource like any other, with nothing of its own to run. (Before
+`ikigai-fn` 0.3.0 the view was one request of glue, because a name could not carry the argument
+that tells compose which template to fill.)
 
-Compose does not escape what it splices in. That is right here, because the only thing
-spliced is the kernel's own clock, and it would be wrong for the tic-tac-toe board, where a
-mark is text somebody else chose, which is why that board's views escape every slot.
+`$h` escapes what it splices. Here that changes nothing, since the only thing spliced is the
+kernel's own clock, but it is the marker to reach for by default: a value that is text somebody
+else chose, a tic-tac-toe mark or a spreadsheet cell, must never be spliced in as markup.
 
 ## What was built
 
@@ -304,7 +305,7 @@ mark is text somebody else chose, which is why that board's views escape every s
 | an event | `urn:iki:tutorial:time:event:{name}` | code: the one atom |
 | a countdown | `urn:iki:tutorial:time:until:{name}` | code: a small function of three names, with its deadline inherited |
 | templates | `urn:iki:tutorial:time:template:{name}` | resources: HTML, one of which names what it shows |
-| the clock view | `urn:iki:tutorial:time:view:clock` | a generic composer over a template, and one request of glue |
+| the clock view | `urn:iki:tutorial:time:view:clock` | a template bound at a name: no code |
 
 Nothing here polls on the server side, nothing sets a timer, and nothing invalidates a
 cache. The page asks as often as it likes; each answer says how long it is good for; the

@@ -21,14 +21,14 @@
 // runs in the root's chain, every sheet on the page draws its grid again. That is cheap, and
 // that is the lesson: every value the change did not touch is served from the cache.
 //
-// THE CACHE VIEWER (`data-cache` on the host). Before the grid is drawn again, the page asks the
-// kernel which of the sheet's values are not in its cache (`uncachedAmong`, a probe per name
-// that resolves nothing), and says so under the sheet: those are the values the redraw
-// computes. The names come from the resource `range:A1:D6`. It is host code, not a resource,
-// because no resource can say it: `urn:kernel:cache` lists entries whose threads were cut until
-// something reads them again, and an endpoint cannot ask the probe (spreadsheet-3.md says
-// more). It is plain text, not a live region: the reply above it is the status that is
-// announced, and this is there to read when you want it.
+// THE CACHE VIEWER (`data-cache` on the host). Before the grid is drawn again, the page reads
+// one more resource, `iki/tutorial/sheet/view/cost`, and puts it under the sheet: a table the
+// shape of the grid saying, cell by cell, whether the redraw computes that value or the cache
+// serves it. The table is a composition over the kernel's own probe (`urn:kernel:cached`, a
+// question that resolves nothing), so this script only asks for it, and asks FIRST, since the
+// redraw is what computes the values again. It is not a live region: the reply above it is the
+// status that is announced, and this is there to read when you want it. (Until core 0.1.82
+// this was the page's own code, probing names the kernel handed it; spreadsheet-3.md says why.)
 //
 // A SHEET THAT POLLS (parts IV and V). A shell may mark elements `data-poll`: the grid, asked
 // again every two seconds (`hx-trigger="load, every 2s"`), and part V's ticker, which writes
@@ -60,7 +60,7 @@
         return;
     }
     var root = typeof path_to_root === "string" ? path_to_root : "./";
-    var WHOLE_SHEET = "urn:iki:tutorial:sheet:range:A1:D6";
+    var COST = "urn:iki:tutorial:sheet:view:cost";
 
     function loadHtmx() {
         if (window.htmx) {
@@ -165,26 +165,19 @@
                 " answered from the cache, " + state.computed + " computed.";
         }
 
-        // Say which of the sheet's values a redraw is about to compute: those not cached now.
+        // Show what a redraw is about to cost: the cost view, read before the redraw.
         function showRecomputed(host) {
             var out = host.querySelector(".sheet-recomputed");
             if (!out) {
                 return Promise.resolve();
             }
-            return kernel.issueAsync("", "source", WHOLE_SHEET).then(function (json) {
+            return kernel.issueAsync("", "source", COST).then(function (json) {
                 var reply = JSON.parse(json);
                 if (reply.kind !== "output") {
-                    out.textContent = "The page could not list the sheet's cells: " + reply.text;
+                    out.textContent = "The page could not ask what the redraw costs: " + reply.text;
                     return;
                 }
-                var names = reply.text.split("\n").filter(Boolean);
-                var cells = kernel.uncachedAmong(names.join("\n")).split("\n").filter(Boolean)
-                    .map(function (name) { return name.slice(name.lastIndexOf(":") + 1); });
-                out.textContent = cells.length === 0
-                    ? "The grid was drawn again entirely from the cache: no value was computed."
-                    : "Computed again when the grid was drawn: " + cells.join(", ") + " (" +
-                        cells.length + " of " + names.length + "). Every other value was " +
-                        "served from the cache.";
+                out.innerHTML = reply.text;
             });
         }
 
@@ -297,10 +290,15 @@
                         host.appendChild(controls);
                     }
                     if (host.hasAttribute("data-cache")) {
-                        var out = document.createElement("p");
+                        var out = document.createElement("div");
                         out.className = "sheet-recomputed";
+                        // Like the grid's region: it may scroll sideways on a narrow page, so
+                        // it takes focus and scrolls by keyboard too.
+                        out.setAttribute("role", "region");
+                        out.setAttribute("aria-label", "What drawing the grid again cost");
+                        out.setAttribute("tabindex", "0");
                         out.textContent = "Nothing has changed yet. After an edit, or a poll, " +
-                            "this says which values the grid computed again.";
+                            "this shows which values drawing the grid again computed.";
                         host.appendChild(out);
                     }
                     htmx.process(host);

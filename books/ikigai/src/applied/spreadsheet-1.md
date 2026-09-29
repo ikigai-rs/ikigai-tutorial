@@ -31,7 +31,7 @@ to see all of it at once.
 | a cell's **references** | `urn:iki:tutorial:sheet:refs:{ref}` | the cells its formula reads, by name | part II |
 | a **range** | `urn:iki:tutorial:sheet:range:{from}:{to}` | the cells in a rectangle, by name, for `SUM` | part II |
 | a cell's **precedents** | `urn:iki:tutorial:sheet:precedents:{ref}` | every cell its value depends on, however far back | part II |
-| what an edit **recomputed** | beside the grid, on the page | the cells whose values were not cached when the grid was drawn again | part III |
+| what a redraw **costs** | `urn:iki:tutorial:sheet:view:cost` | which values drawing the grid again will compute, and which the cache will serve | part III |
 
 Only the input holds state. Everything below it in the table is a question about inputs:
 what does this one compile to, which cells does it read, what is its value. That is the
@@ -183,47 +183,61 @@ source urn:iki:tutorial:sheet:cell:C5'>
 
 ## The grid
 
-The grid is HTML, and it is resources in the way tic-tac-toe's board was: a template, and a
-view that fills it. The template is a table with a marker in each cell:
+The grid is HTML, and it is resources in the way tic-tac-toe's board was: templates, and views
+that fill them. The grid's template is a table with a marker in each cell:
 
-```html
+```text
 {{#include ../../../../crates/spreadsheet/templates/grid.html:1:6}}
 …
 ```
 
-`$a{…}` is the marker the [time chapter](time.md)'s clock used. The generic composer,
-`urn:iki:fn:compose` from `ikigai-fn`, reads the template, resolves every name it finds a
-marker for, and splices the answer in. The template says which cells there are and where they
-go, so the view has no four and no six in it:
+Each marker names one cell's **view**, `view:cell:{ref}`, and that view is a template too, of one
+marker:
 
-```rust,ignore
-{{#include ../../../../crates/spreadsheet/src/lib.rs:view_grid}}
+```text
+{{#include ../../../../crates/spreadsheet/templates/cell.html}}
 ```
 
-The names in the markers are not the values. They are `html:{ref}`, one more small resource:
+The markers are the language of `urn:iki:fn:compose`, the generic composer from `ikigai-fn`. A
+marker names a resource; compose resolves it and splices the answer in, and there are three ways
+to splice. `$h{…}` splices the answer as text, escaped for HTML. `$r{…}` splices it as it is, as
+trusted markup: here, a view the kernel has already composed. `$a{…}` splices it as it is and then
+expands any markers in it, which is how one template includes another. The [time
+chapter](time.md)'s clock is one marker of the first kind.
+
+A view is a template bound at a name. `compose_over` makes the binding, and the variables the name
+captures are the template's arguments, so `view:cell:B2` is the `cell` template with `{ref}` = `B2`:
 
 ```rust,ignore
-{{#include ../../../../crates/spreadsheet/src/lib.rs:html}}
+{{#include ../../../../crates/spreadsheet/src/lib.rs:view}}
 ```
 
-A value is text a person typed, and the released compose splices what it resolves exactly as
-it comes back. A cell holding `<b>` would be markup on the page, and one holding a `$a{…}`
-marker would be *resolved*, since compose expands markers in what it splices as well as in
-the template. So `html:{ref}` reads the value and escapes it, `$` included. It is a pure
-function of the value, so it is cached with it and cut with it.
+```rust,ignore
+{{#include ../../../../crates/spreadsheet/src/lib.rs:views}}
+```
 
-<div class="ikigai-run" data-cmd='sink urn:iki:tutorial:sheet:input:B2 <b>not bold</b>
-source urn:iki:tutorial:sheet:html:B2'>
-<pre class="ikigai-run-expected">&lt;b&gt;not bold&lt;/b&gt;
+That is all the code the grid has. The template says which cells there are and where they go, and
+each cell's view says how a value is shown, so there is no four and no six in any code, and no
+code that reads a cell.
+
+How a value is shown is the part that matters, because a value is text a person typed. `$h`
+escapes what it splices, so a cell holding `<b>` shows `<b>` rather than turning the rest of the
+row bold. And `$h` never expands what it splices, so a cell holding a marker shows the marker as
+typed. If it did, anybody who could type into a cell could make the page resolve any name they
+liked, and show the answer: `$a{urn:kernel:cache}` in a cell would print the kernel's cache into
+the grid. Only `$a` expands what it splices, and the sheet never uses it: every marker in its
+templates is `$h` or `$r`.
+
+<div class="ikigai-run" data-cmd='sink urn:iki:tutorial:sheet:input:B2 <b>not bold</b> $a{urn:kernel:cache}
+source urn:iki:tutorial:sheet:view:cell:B2'>
+<pre class="ikigai-run-expected">&lt;b&gt;not bold&lt;/b&gt; $a{urn:kernel:cache}
 [uncacheable]
-&amp;lt;b&amp;gt;not bold&amp;lt;/b&amp;gt;
+&amp;lt;b&amp;gt;not bold&amp;lt;/b&amp;gt; $a{urn:kernel:cache}
 [computed]</pre>
 </div>
 
-`html:{ref}` is a stopgap, and it says so. `ikigai-fn` has merged an escaping marker,
-`$h{…}`, that splices a name's answer escaped; once it is released, the template names
-`cell:{ref}` directly with it and this resource goes away. Until then the escape is a few
-lines of code rather than a hole.
+A view reads a value and nothing else, so it is cached with the value and cut with it, like any
+other composite.
 
 ## A sheet you can type into
 
@@ -256,8 +270,8 @@ is the next part.
 |---|---|---|
 | an input | `urn:iki:tutorial:sheet:input:{ref}` | code: the one atom |
 | a value | `urn:iki:tutorial:sheet:cell:{ref}` | code: a small function of the input (and, in Part II, of other values) |
-| an escaped value | `urn:iki:tutorial:sheet:html:{ref}` | code: a stopgap until compose escapes |
-| the grid | `urn:iki:tutorial:sheet:view:grid` | a template composed by a generic composer, and one request of glue |
+| a value, as HTML | `urn:iki:tutorial:sheet:view:cell:{ref}` | a template bound at a name: no code |
+| the grid | `urn:iki:tutorial:sheet:view:grid` | a template bound at a name: no code |
 | the formula bar's write | `urn:iki:tutorial:sheet:view:edit` | code: the human edge, a write through the kernel |
 
 No part of it caches anything or invalidates anything, and the empty cell went stale and

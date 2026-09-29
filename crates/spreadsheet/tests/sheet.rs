@@ -4,7 +4,10 @@
 use std::sync::Arc;
 
 use futures::executor::block_on;
-use ikigai_core::{ArgRef, Capability, Error, Iri, Kernel, Request, Verb};
+use ikigai_core::{
+    ArgRef, AsyncFnEndpoint, Capability, EndpointSpace, Error, Fallback, Invocation, InvokeFuture,
+    Iri, Kernel, ReprType, Representation, Request, Space, UriTemplate, Verb,
+};
 use spreadsheet::{kernel, kernel_over, InputStore};
 
 fn request(verb: Verb, name: &str) -> Request {
@@ -346,7 +349,7 @@ fn typing_into_an_empty_cell_cuts_what_was_built_on_its_emptiness() {
 }
 
 #[test]
-fn the_grid_escapes_what_was_typed_and_resolves_none_of_it() {
+fn the_grid_escapes_what_was_typed_and_expands_none_of_it() {
     let kernel = kernel();
     type_into(&kernel, "A1", "<b>bold</b> & \"quoted\"");
     type_into(&kernel, "B1", "$a{urn:iki:tutorial:sheet:input:A1}");
@@ -356,15 +359,21 @@ fn the_grid_escapes_what_was_typed_and_resolves_none_of_it() {
         grid.contains("<td>&lt;b&gt;bold&lt;/b&gt; &amp; &quot;quoted&quot;</td>"),
         "{grid}"
     );
+    // A marker a person typed is shown as typed, and resolved by nobody: `$h` escapes what
+    // it splices and never expands it, and `$r` splices a view without expanding it again.
     assert!(
-        grid.contains("<td>&#36;a{urn:iki:tutorial:sheet:input:A1}</td>"),
+        grid.contains("<td>$a{urn:iki:tutorial:sheet:input:A1}</td>"),
         "{grid}"
     );
     assert!(grid.contains("<th scope=\"row\">1</th><td>"), "{grid}");
     assert!(grid.contains("<td>6</td>"), "{grid}");
     // Twenty-four cells, and the empty corner above the row numbers.
     assert_eq!(grid.matches("<td>").count(), 25, "{grid}");
-    assert!(!grid.contains("$a{"), "{grid}");
+    // One cell's view is the same text the grid shows for it.
+    assert_eq!(
+        source(&kernel, "urn:iki:tutorial:sheet:view:cell:A1").unwrap(),
+        "&lt;b&gt;bold&lt;/b&gt; &amp; &quot;quoted&quot;"
+    );
 }
 
 fn edit(kernel: &Kernel, cell: &str, typed: &str) -> String {
@@ -392,24 +401,110 @@ fn the_formula_bar_types_clears_and_refuses_in_words() {
     assert!(source(&kernel, spreadsheet::VIEW_EDIT).is_err());
 }
 
-/// Why the cache viewer beside the page's grid is the page's own code and not a composition
-/// over `urn:kernel:cache`: the readout lists what the cache HOLDS, and a cut is lazy. An
-/// entry whose thread was cut stays resident until the next read of it finds it stale, so
-/// right after an edit the readout still lists every value the edit invalidated, exactly
-/// as it did before. The kernel's probe (`Kernel::is_cached`, the REPL's `cache`) is what
-/// knows; no endpoint can ask it. When this test fails, the readout has learned to tell
-/// the two apart, and the viewer can become a resource.
+/// The row of `urn:kernel:cache` for `name`, split into words: the name, then its state.
+fn readout_row(kernel: &Kernel, name: &str) -> Vec<String> {
+    let readout = source(kernel, "urn:kernel:cache").unwrap();
+    readout
+        .lines()
+        .find(|line| line.split_whitespace().next() == Some(name))
+        .unwrap_or_else(|| panic!("no row for {name}:\n{readout}"))
+        .split_whitespace()
+        .map(str::to_string)
+        .collect()
+}
+
+/// Until core 0.1.82 the cache viewer beside the page's grid was the page's own code: the
+/// readout listed what the cache HOLDS, a cut is lazy, and so right after an edit it listed
+/// every value the edit had invalidated exactly as before, and no endpoint could ask the
+/// probe that knew. Now the readout marks the row `cut`, and `urn:kernel:cached` answers the
+/// probe for whoever asks, so the viewer is a composition.
 #[test]
-fn the_cache_readout_still_lists_what_an_edit_has_cut() {
+fn the_cache_readout_marks_what_an_edit_has_cut() {
     let kernel = kernel();
     type_into(&kernel, "A1", "5");
     type_into(&kernel, "A2", "=A1*2");
     assert_eq!(value(&kernel, "A2"), "10");
+    assert_eq!(
+        readout_row(&kernel, "urn:iki:tutorial:sheet:cell:A2")[1],
+        "live"
+    );
     type_into(&kernel, "A1", "6");
     assert!(!value_cached(&kernel, "A2"), "the probe knows A2 was cut");
-    let readout = source(&kernel, "urn:kernel:cache").unwrap();
-    assert!(
-        readout.contains("urn:iki:tutorial:sheet:cell:A2 "),
-        "the readout still lists it:\n{readout}"
+    // Still resident, and now marked.
+    assert_eq!(
+        readout_row(&kernel, "urn:iki:tutorial:sheet:cell:A2")[1],
+        "cut"
     );
+}
+
+// ANCHOR: cost
+/// The cost view: a composition over `urn:kernel:cached` that names exactly the values a
+/// redraw of the grid will compute, and resolves none of them.
+#[test]
+fn the_cost_view_names_exactly_what_an_edit_cut() {
+    let kernel = kernel();
+    type_into(&kernel, "A1", "5");
+    type_into(&kernel, "A2", "=A1*2");
+    type_into(&kernel, "B1", "7");
+    source(&kernel, spreadsheet::VIEW_GRID).unwrap();
+    let computed = |kernel: &Kernel| {
+        let cost = source(kernel, spreadsheet::VIEW_COST).unwrap();
+        assert_eq!(cost.matches("<td>").count(), 25, "{cost}");
+        cost.matches("<strong>computed</strong>").count()
+    };
+    assert_eq!(computed(&kernel), 0, "every value is cached after the grid");
+    type_into(&kernel, "A1", "6");
+    assert_eq!(computed(&kernel), 2, "A1 and A2");
+    assert_eq!(
+        source(&kernel, "urn:iki:tutorial:sheet:view:cost:A2").unwrap(),
+        "<strong>computed</strong>"
+    );
+    assert_eq!(
+        source(&kernel, "urn:iki:tutorial:sheet:view:cost:B1").unwrap(),
+        "cached"
+    );
+    // Asking cost nothing: the probe resolved no value, so both are still not cached.
+    assert!(!value_cached(&kernel, "A1") && !value_cached(&kernel, "A2"));
+    source(&kernel, spreadsheet::VIEW_GRID).unwrap();
+    assert_eq!(computed(&kernel), 0);
+}
+// ANCHOR_END: cost
+
+/// Before core 0.1.82, a fallback over a COMPOSITE's `NotFound` went stale: the failure was
+/// recorded under the composite's name, `formula:A1`, which no write cuts, so typing a formula
+/// into A1 left "no formula" cached (ledger item 611, found by this arc). Now a failure carries
+/// the threads it read on its way to failing, and the write to the input cuts the fallback.
+#[test]
+fn a_fallback_over_a_composites_not_found_is_cut_when_the_atom_changes() {
+    let has_formula =
+        AsyncFnEndpoint::new("has-formula", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
+            Box::pin(async move {
+                let at = inv.bindings.get("ref").unwrap_or_default().to_string();
+                let name = Iri::parse(format!("urn:iki:tutorial:sheet:formula:{at}")).unwrap();
+                let answer = match inv.source(&name).await {
+                    Ok(_) => "yes",
+                    Err(Error::NotFound(_)) => "no",
+                    Err(other) => return Err(other),
+                };
+                Ok(Representation::new(ReprType::new("text/plain"), answer).cacheable())
+            })
+        });
+    let space = Fallback::new(vec![
+        Arc::new(EndpointSpace::new().bind(
+            UriTemplate::parse("urn:test:has-formula:{ref}").unwrap(),
+            has_formula,
+        )) as Arc<dyn Space>,
+        Arc::new(spreadsheet::space()),
+        Arc::new(ikigai_fn::space()),
+    ]);
+    let kernel =
+        Kernel::with_meta_renderer(Arc::new(space), Arc::new(ikigai_vocab::TurtleRenderer));
+    assert_eq!(source(&kernel, "urn:test:has-formula:A1").unwrap(), "no");
+    assert!(cached(&kernel, "urn:test:has-formula:A1"));
+    type_into(&kernel, "A1", "=1+1");
+    assert!(
+        !cached(&kernel, "urn:test:has-formula:A1"),
+        "the write cut the fallback"
+    );
+    assert_eq!(source(&kernel, "urn:test:has-formula:A1").unwrap(), "yes");
 }

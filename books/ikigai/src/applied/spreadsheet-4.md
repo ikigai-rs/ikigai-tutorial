@@ -218,8 +218,8 @@ clock is `#N/A`, a value, like the sheet's other errors, and the evaluator does 
 Here is the sheet again, with one difference from Part III's: it can poll. Press **Poll** and
 the grid is asked for again every two seconds, as the time chapter's clock was. Each poll is
 counted: answered from the cache, or computed. Type `=NOW()` into a cell and watch the count.
-The grid is computed once a minute, on the first poll after the minute turns, and the list under
-the grid names exactly the values that read the time.
+The grid is computed once a minute, on the first poll after the minute turns, and the table under
+the grid marks exactly the values that read the time.
 
 <div class="sheet-play" data-clock data-cache data-shell='urn:iki:tutorial:sheet:template:live'><p class="sheet-unavailable">The sheet appears here when the in-page kernel has loaded.</p></div>
 
