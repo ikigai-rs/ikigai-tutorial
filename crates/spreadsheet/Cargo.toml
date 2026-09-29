@@ -19,9 +19,10 @@ ikigai-core.workspace = true
 # `TurtleRenderer`, so this crate's own `kernel()` answers `Meta` the way the page's
 # kernel does, and the compiler is found by what its description declares.
 ikigai-vocab.workspace = true
-# `urn:iki:fn:compose`, the generic composer the grid view is made of. This crate binds
-# only its own names; the page gets compose from Part I's space, and `kernel()` mounts
-# the library beside this crate's space.
+# `compose_over`, which binds each of the sheet's views (a template) at a name of its own,
+# and `urn:iki:fn:conditional`, which the cost view names. This crate binds only its own
+# names; the page gets `conditional` from Part I's space, and `kernel()` mounts the library
+# beside this crate's space.
 ikigai-fn.workspace = true
 
 [dev-dependencies]

@@ -252,22 +252,6 @@ impl Page {
         self.issue_with_args(game, verb, target, Vec::new())
     }
 
-    /// Which of `names` a read would NOT be served from the cache for, right now, in the
-    /// root's chain: the page's cache viewer (`js/sheet.js`). A probe per name, which
-    /// resolves nothing and runs nothing.
-    ///
-    /// ⚠ This is host code, and it is the only place the answer can come from. The kernel's
-    /// own readout, `urn:kernel:cache`, lists what the cache HOLDS, and a cut is lazy: an
-    /// entry whose golden thread was cut stays resident, listed, until the next read finds it
-    /// stale. And no endpoint can ask the probe. So a resource could not say which cells an
-    /// edit cut, and the page asks the kernel directly.
-    pub fn uncached_among<'n>(&self, names: impl IntoIterator<Item = &'n str>) -> Vec<&'n str> {
-        names
-            .into_iter()
-            .filter(|name| !self.is_cached(None, Verb::Source, name))
-            .collect()
-    }
-
     /// Would [`issue`](Self::issue) be answered from the cache right now? A probe, which
     /// resolves nothing and runs nothing: what a page asks before a request so it can say
     /// afterwards whether the kernel did any work. A name that does not parse is not cached.
@@ -490,16 +474,6 @@ pub fn issue_with_args_async(
     })
 }
 
-/// Of the names given, one per line, those a read would not be served from the cache for
-/// right now, one per line: [`Page::uncached_among`], for the cache viewer.
-#[wasm_bindgen(js_name = uncachedAmong)]
-pub fn uncached_among(names: String) -> String {
-    PAGE.with(|page| {
-        page.uncached_among(names.lines().filter(|n| !n.is_empty()))
-            .join("\n")
-    })
-}
-
 /// A verb by the name the shim sends — the four an htmx request can map to.
 pub fn verb_named(name: &str) -> Result<Verb, String> {
     match name {
@@ -716,9 +690,6 @@ mod tests {
             .collect()
     }
 
-    /// The whole sheet as a range: what the cache viewer probes (`js/sheet.js`).
-    const SHEET_RANGE: &str = "urn:iki:tutorial:sheet:range:A1:D6";
-
     /// The sheets a chapter places, in page order: each one's shell, and whether it shows
     /// the cache viewer (`data-cache`).
     fn sheets(chapter: &str) -> Vec<(String, bool)> {
@@ -805,14 +776,18 @@ mod tests {
         // spreadsheet arc) loads the same way: `js/sheet.js` fetches its shell, and the shell's
         // markup asks for the grid. After a cell runs in the root's chain, the shim redraws
         // every sheet on the page — first, where the sheet shows the cache viewer
-        // (`data-cache`), reading the range it probes (the probes themselves change nothing) —
-        // so replay those reads too.
+        // (`data-cache`), reading the cost view (whose probes resolve no value, but whose
+        // templates are read and cached) — so replay those reads too.
         let sheets = sheets(&chapter);
         let redraw = || {
             for (_, viewer) in &sheets {
                 if *viewer {
-                    futures::executor::block_on(page.issue(None, Verb::Source, SHEET_RANGE))
-                        .expect("the sheet's range");
+                    futures::executor::block_on(page.issue(
+                        None,
+                        Verb::Source,
+                        spreadsheet::VIEW_COST,
+                    ))
+                    .expect("the sheet's cost view");
                 }
                 futures::executor::block_on(page.issue(None, Verb::Source, spreadsheet::VIEW_GRID))
                     .unwrap_or_else(|e| panic!("the sheet's grid: {e}"));
@@ -1230,8 +1205,9 @@ mod tests {
             "cached\nhello\n[uncacheable]\nnot cached\nhello\n[computed]\n"
         );
         assert_eq!(t[5], "ok\n[uncacheable]\n[computed]\n");
+        // `$h` escapes a value and never expands a marker in it.
         assert!(
-            t[6].ends_with("&lt;b&gt;not bold&lt;/b&gt;\n[computed]\n"),
+            t[6].ends_with("&lt;b&gt;not bold&lt;/b&gt; $a{urn:kernel:cache}\n[computed]\n"),
             "{}",
             t[6]
         );
@@ -1437,10 +1413,10 @@ mod tests {
         assert!(t[4].contains("error: conflict: "), "{}", t[4]);
     }
 
-    /// The sheet's shim: a form's fields reach the kernel as named arguments, and the viewer's
-    /// probe names exactly what an edit cut.
+    /// The sheet's shim: a form's fields reach the kernel as named arguments, and the cost
+    /// view the viewer shows names exactly what an edit cut.
     #[test]
-    fn an_edit_with_args_writes_and_the_probe_names_what_it_cut() {
+    fn an_edit_with_args_writes_and_the_cost_view_names_what_it_cut() {
         let page = Page::new();
         let issue = |verb, target: &str, args: Vec<(&str, &str)>| {
             let args = args
@@ -1458,23 +1434,29 @@ mod tests {
             )
             .expect("an edit is answered")
         };
+        let computed = || {
+            let cost = issue(Verb::Source, spreadsheet::VIEW_COST, vec![]).expect("the cost");
+            spreadsheet::CellRef::all()
+                .filter(|cell| {
+                    issue(
+                        Verb::Source,
+                        &format!("urn:iki:tutorial:sheet:view:cost:{cell}"),
+                        vec![],
+                    )
+                    .expect("a cell's cost")
+                    .contains("computed")
+                })
+                .map(|cell| cell.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+                + &format!(" ({})", cost.matches("computed").count())
+        };
         assert_eq!(edit("a1", "5"), "A1 is now 5.");
         assert_eq!(edit("A2", "=A1*2"), "A2 is now =A1*2.");
         issue(Verb::Source, spreadsheet::VIEW_GRID, vec![]).expect("the grid");
-        let names: Vec<String> = spreadsheet::CellRef::all()
-            .map(spreadsheet::cell_name)
-            .collect();
-        assert!(page
-            .uncached_among(names.iter().map(String::as_str))
-            .is_empty());
+        assert_eq!(computed(), " (0)");
         edit("A1", "6");
-        assert_eq!(
-            page.uncached_among(names.iter().map(String::as_str)),
-            [
-                "urn:iki:tutorial:sheet:cell:A1",
-                "urn:iki:tutorial:sheet:cell:A2"
-            ]
-        );
+        assert_eq!(computed(), "A1 A2 (2)");
     }
 
     /// Every other page's kernel has no clock, and the time chapter's names say so.

@@ -160,15 +160,25 @@ not cached
 [computed]</pre>
 </div>
 
-`#N/A` was cached, and the first write to the feed cut it. That second part is not automatic,
-and the reason is a trap worth knowing about. When a request fails, the kernel records the
-failure as a dependency of whatever asked, under the thread of the name that was *asked for*.
-`B1` asked for `feed:globex` itself, the atom, and the atom's own thread is exactly what a write
-to it cuts. Had `B1` asked for some composite that read the feed, and fallen back on *that*
-composite's `NotFound`, the `#N/A` would hang from the composite's thread, which no write ever
-cuts, and it would stay `#N/A` after the feed was written. Part II's evaluator is careful about
-the same thing for formulas: it reads a cell's input before its compiled formula, never falling
-back on the formula's `NotFound`. **Fall back only on an atom's own `NotFound`.**
+`#N/A` was cached, and the first write to the feed cut it. When a request fails, the kernel
+records the failure as a dependency of whatever asked, so an answer built on a feed's absence
+hangs from the feed's thread, and the first write to the feed cuts it.
+
+That has only been true all the way down since core 0.1.82, and the story of the gap is worth
+knowing. Before it, a failure was recorded under the thread of the name that was *asked for*, and
+nothing else. `B1` asked for `feed:globex` itself, the atom, and the atom's own thread is exactly
+what a write to it cuts, so `B1` was safe. Had it asked for some composite that read the feed, and
+fallen back on *that* composite's `NotFound`, the `#N/A` would have hung from the composite's
+thread, which no write ever cuts, and stayed `#N/A` after the feed was written. The sheet was built
+around the gap: Part II's evaluator reads a cell's input before its compiled formula, never falling
+back on the formula's `NotFound`. Building it is how the gap was found (ledger item 611), and
+0.1.82 closed it: a failed request now carries the dependencies it recorded on its way to failing,
+so a fallback hangs from the atom's thread however far down the `NotFound` came from.
+
+The rule the sheet follows is still a good one, for a different reason: **fall back on an atom's own
+`NotFound`**, because that is the one that says exactly what is missing. A composite's `NotFound`
+may mean the atom is empty, or that it holds the wrong kind of thing (a cell holding a number has no
+compiled formula), and a fallback cannot tell which.
 
 ```rust,ignore
 {{#include ../../../../crates/spreadsheet/tests/live.rs:unwritten}}
@@ -216,7 +226,7 @@ grid asks for itself again every two. Neither knows about the other. The market 
 the grid; it only writes the feed. The grid finds out the way anything that reads a name finds
 out about a write it did not make: it asks again.
 
-Put `=FEED(acme)` somewhere, and something that reads it, and watch the count and the list
+Put `=FEED(acme)` somewhere, and something that reads it, and watch the count and the table
 under the grid. Most polls are answered entirely from the cache, and cost a lookup. The poll
 after each write computes exactly the values that read the feed, and serves the rest.
 
@@ -246,27 +256,28 @@ the kernel tells the page.
 
 ## Next: push
 
-This part stops at polling on purpose. Push needs something the kernel does not have yet, and it
-is worth saying exactly what.
+This part stops at polling on purpose. Push needs pieces this book does not have yet, and it is
+worth saying exactly what they are, and which of them the kernel already provides.
 
-**From the kernel: somebody to tell.** A cut today moves a counter on and tells nobody; that
-laziness is what makes an edit cost nothing until somebody reads (Part III). Push needs a host to
-be able to say "tell me when this thread is cut", for an exact name or for a prefix like
+**From the kernel: somebody to tell.** A cut moves a counter on, and by default tells nobody;
+that laziness is what makes an edit cost nothing until somebody reads (Part III). Push needs a host
+to be able to say "tell me when this thread is cut", for an exact name or for a prefix like
 `urn:iki:tutorial:sheet:feed:`, and to be told, with the thread's name, when it is. This is
-NetKernel's golden-thread listener, and a design for it is under way in ikigai's core. It has
-constraints of its own. The kernel runs in this page and has no runtime, so it cannot call anyone
-back on a task of its own: it records the cut and the host collects it, or it calls a function
-the host registered, and either way it issues no request from inside a cut. Listening is an
-authority, so it is a capability, and a listener hears only the names it could have read. And a
-slow listener must not make the kernel's memory grow without end: a bound that drops a
-notification has to say that it did.
+NetKernel's golden-thread listener, and since core 0.1.82 the kernel has one, `Kernel::listen`,
+built to the constraints a kernel with no runtime puts on it. It cannot call anyone back on a task
+of its own, and a cut runs inside the write that caused it, so it calls nobody: it appends the cut to
+a queue the host drains when it chooses, and issues no request from inside a cut. Listening is an
+authority, so it is a capability, and a listener hears only the names its own reads were already
+given. And the queue is bounded: a cut that finds it full is counted as dropped, so a slow host
+learns that it missed something rather than acting on half a history.
 
-**From the host: what to redraw.** Hearing that `feed:acme` was cut is not the same as knowing
-the grid changed. The kernel keeps no list of dependents, only the threads each cached answer
-hangs from, and those are checked when the answer is next read. So a host that hears a cut asks
-whether each view it has handed out is still cached (the probe the page's viewer already uses)
-and pushes the ones that are not. Or it reads them again straight away, so the recomputation is
-done before the reader asks: a recalculating golden thread, which NetKernel also had.
+**From the host: what to redraw.** Hearing that `feed:acme` was cut is not yet knowing that the grid
+changed, but the listener says that too: each cut comes with the cached answers it invalidated, the
+grid among them when the grid read the feed. So a host that hears a cut can push the views it has
+handed out that are on that list, or read them again straight away, so the recomputation is done
+before the reader asks: a recalculating golden thread, which NetKernel also had. What this book
+does not have yet is the host half: the page's kernel has no listener registered, and nothing in the
+page drains one. That is the next part to build.
 
 **From the page: a channel.** In this book the host is the page, so being told is a function
 call. A sheet served by a real host needs a connection that the server can write to: server-sent

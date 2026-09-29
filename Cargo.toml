@@ -27,18 +27,25 @@ lto = true
 # Published crates, deliberately — NOT path refs to sibling checkouts. A reader who
 # clones only this repo must be able to `cargo run` immediately; path refs would
 # require them to have the whole ecosystem laid out beside it.
-# 0.1.78 is the floor because the book teaches API that arrived in the six releases
-# 0.1.73–0.1.78, and states each: a cacheable read hangs from its own name (0.1.73),
-# `Scope::with_named_at` + `Kernel::is_cached_in` for as-of resolution (0.1.75),
-# `Limit` (0.1.76), `.lossy()` and the `lossy=allow` consent (0.1.77), and
-# `urn:kernel:topology` (0.1.78). (Before that the floor was 0.1.72, where the
-# resolution chain — `Scope::with_named` and `Kernel::issue_in` — arrived; before that
-# 0.1.66, which `ikigai-vocab` 0.1.66 requires.)
-ikigai-core = "0.1.78"
+# 0.1.82 is the floor because the spreadsheet arc teaches what it added: the cache readout
+# marks a row `live`, `cut` or `expired`, and `urn:kernel:cached target=` answers for the
+# asker (ledger #612), which is what lets the page's cache viewer be a composition; and a
+# fallback over a composite's NotFound is cut when the atom changes (ledger #611), which
+# turns part V's trap into history. (Before that the floor was 0.1.78, for the six releases
+# 0.1.73–0.1.78: a cacheable read hangs from its own name (0.1.73), `Scope::with_named_at` +
+# `Kernel::is_cached_in` for as-of resolution (0.1.75), `Limit` (0.1.76), `.lossy()` and the
+# `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
+# where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
+# requires.)
+ikigai-core = "0.1.82"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
 # kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host.
 ikigai-vocab = "0.1.66"
-ikigai-fn = "0.2.0"
+# 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
+# never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
+# template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
+# ceiling too: "0.3.0" admits nothing from 0.4.
+ikigai-fn = "0.3.0"
 # 0.3.1 is what the book's status chapter stamps its claims at (`book_claims` re-checks them
 # against that published crate), so it is the pin; 0.3.1 over 0.3.0 is a constructor form,
 # no new surface. 0.3.0 is the version where the module wire carries the error TYPE both ways, a result's

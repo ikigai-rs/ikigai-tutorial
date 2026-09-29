@@ -28,10 +28,19 @@
 //!   **atom**, written by something that is not the sheet (part V). `FEED(name)` reads it.
 //! * `urn:iki:tutorial:sheet:tick:{name}` — `Sink` only: the market moves. Reads the feed,
 //!   and writes the next price to it: the outside world, simulated.
-//! * `urn:iki:tutorial:sheet:html:{ref}` — the value, escaped for HTML: what the grid shows.
 //! * `urn:iki:tutorial:sheet:template:{name}` — the sheet's HTML.
-//! * `urn:iki:tutorial:sheet:view:grid` — the `grid` template, composed.
+//! * `urn:iki:tutorial:sheet:view:cell:{ref}` — the value as HTML, escaped by the `$h{…}`
+//!   marker: the `cell` template, composed.
+//! * `urn:iki:tutorial:sheet:view:grid` — the `grid` template, composed: every cell's view.
+//! * `urn:iki:tutorial:sheet:view:cached:{ref}` — `true` or `false`: would a read of the
+//!   cell's value be served from the cache right now? The kernel's probe,
+//!   `urn:kernel:cached`, given a name by a one-marker template.
+//! * `urn:iki:tutorial:sheet:view:cost:{ref}` and `urn:iki:tutorial:sheet:view:cost` —
+//!   what drawing the grid again will cost, cell by cell: `computed` or `cached`.
 //! * `urn:iki:tutorial:sheet:view:edit` — `Sink` only: the formula bar's write.
+//!
+//! Every view but the edit is a template bound at a name with `ikigai_fn::compose_over`:
+//! a composition, with no code of its own.
 //!
 //! And two names the sheet reads but does not serve, from the time chapter's crate:
 //! `urn:iki:tutorial:time:instant` for `NOW()` and `urn:iki:tutorial:time:today` for `TODAY()`
@@ -51,6 +60,7 @@ use ikigai_core::{
     FnEndpoint, Invocation, InvokeFuture, Iri, Kernel, ReprType, Representation, Request, Result,
     Space, TransreptionPolicy, UriTemplate, Verb,
 };
+use ikigai_fn::ComposeOver;
 use ikigai_vocab::TurtleRenderer;
 
 pub use formula::{CellRef, Expr};
@@ -95,11 +105,11 @@ pub const RANGE: &str = "urn:iki:tutorial:sheet:range:{from}:{to}";
 /// A cell's value.
 pub const CELL: &str = "urn:iki:tutorial:sheet:cell:{ref}";
 
-/// A cell's value, escaped for HTML.
-pub const HTML: &str = "urn:iki:tutorial:sheet:html:{ref}";
-
 /// A piece of the sheet's HTML.
 pub const TEMPLATE: &str = "urn:iki:tutorial:sheet:template:{name}";
+
+/// A cell's value, as HTML.
+pub const VIEW_CELL: &str = "urn:iki:tutorial:sheet:view:cell:{ref}";
 
 /// The grid, as HTML.
 pub const VIEW_GRID: &str = "urn:iki:tutorial:sheet:view:grid";
@@ -107,6 +117,17 @@ pub const VIEW_GRID: &str = "urn:iki:tutorial:sheet:view:grid";
 /// The formula bar's write: set or clear one cell's input.
 pub const VIEW_EDIT: &str = "urn:iki:tutorial:sheet:view:edit";
 // ANCHOR_END: names
+
+// ANCHOR: cost_names
+/// `true` or `false`: would a read of the cell's value be served from the cache right now?
+pub const VIEW_CACHED: &str = "urn:iki:tutorial:sheet:view:cached:{ref}";
+
+/// One cell of the cost of drawing the grid again: `computed` or `cached`.
+pub const VIEW_COST_CELL: &str = "urn:iki:tutorial:sheet:view:cost:{ref}";
+
+/// The cost of drawing the grid again, as a table the shape of the grid.
+pub const VIEW_COST: &str = "urn:iki:tutorial:sheet:view:cost";
+// ANCHOR_END: cost_names
 
 // ANCHOR: feed_names
 /// The latest value written to a feed: an atom the sheet reads and never writes.
@@ -130,9 +151,6 @@ pub const FORMULA_TYPE: &str = "text/x-formula";
 
 /// The media type of a compiled formula, an s-expression — the type `ikigai-sexpr` reads.
 pub const SEXPR_TYPE: &str = "text/x-sexpr";
-
-/// The generic composer the grid view is made of (`ikigai-fn`).
-pub const COMPOSE: &str = "urn:iki:fn:compose";
 
 // ANCHOR: errors
 /// A reference to a cell that is not on the sheet.
@@ -187,9 +205,9 @@ pub fn cell_name(cell: CellRef) -> String {
     format!("urn:iki:tutorial:sheet:cell:{cell}")
 }
 
-/// The name of the escaped value of `cell`.
-pub fn html_name(cell: CellRef) -> String {
-    format!("urn:iki:tutorial:sheet:html:{cell}")
+/// The name of the view of `cell`: its value, as HTML.
+pub fn view_cell_name(cell: CellRef) -> String {
+    format!("urn:iki:tutorial:sheet:view:cell:{cell}")
 }
 
 /// The name of the range from `top_left` to `bottom_right`.
@@ -471,9 +489,11 @@ async fn typed_into(inv: &Invocation<'_>, at: CellRef) -> Result<Option<Represen
 /// The cell's formula, compiled and read back, or `None` if `typed` (the cell's input, as
 /// [`typed_into`] read it) is not a formula.
 ///
-/// ⚠ The input is read FIRST, and the formula only when the input is one. A composite may
-/// only fall back on a `NotFound` from the atom itself: a `NotFound` from `formula:{ref}`
-/// hangs whatever caught it from a thread named `formula:{ref}`, which no `Sink` ever cuts.
+/// The input is read FIRST, and the formula only when the input is one: a fallback on the
+/// atom's own `NotFound` says exactly what is missing. (Before core 0.1.82 it was also the only
+/// safe order: a `NotFound` from `formula:{ref}` hung whatever caught it from a thread named
+/// `formula:{ref}`, which no `Sink` cuts. Since then a failure carries the threads it read on
+/// its way to failing, ledger item 611.)
 async fn compiled(
     inv: &Invocation<'_>,
     at: CellRef,
@@ -765,10 +785,11 @@ async fn read_time(inv: &Invocation<'_>, name: &str) -> Result<Value> {
 // ANCHOR: read_feed
 /// `FEED(name)`: the latest value written to the feed, read through the kernel.
 ///
-/// A feed nothing has written to is `#N/A`. That fallback is safe to cache because the
-/// `NotFound` is the ATOM's own: the value that caught it hangs from the feed's golden thread,
-/// so the first write to the feed cuts it. A composite's `NotFound` would hang it from a
-/// thread nobody cuts.
+/// A feed nothing has written to is `#N/A`. That fallback is safe to cache: the value that
+/// caught the `NotFound` hangs from the feed's golden thread, so the first write to the feed
+/// cuts it. It catches the ATOM's own `NotFound`, which says exactly what is missing; before
+/// core 0.1.82 that was also the only safe choice, since a composite's `NotFound` hung the
+/// fallback from a thread nobody cuts.
 async fn read_feed(inv: &Invocation<'_>, name: &str) -> Result<Value> {
     match inv.source(&iri(&feed_name(name))?).await {
         Ok(latest) => Ok(Value::of(&String::from_utf8_lossy(&latest.bytes))),
@@ -857,14 +878,14 @@ pub fn cell() -> AsyncFnEndpoint {
 }
 // ANCHOR_END: cell
 
-// ANCHOR: html
-/// `text`, safe to put in HTML text or a quoted attribute, and inert to `compose`: a `$` is
-/// written `&#36;`, so a value spelled like a `$a{…}` marker is shown, never resolved.
+/// `text`, safe to put in HTML text or a quoted attribute: what the formula bar's reply is
+/// written with. (The grid needs nothing of the kind: its template splices each value with
+/// compose's `$h{…}` marker, which escapes it and never expands it.)
 ///
 /// ```
 /// assert_eq!(
-///     spreadsheet::escape("<b>$a{urn:kernel:cache}</b>"),
-///     "&lt;b&gt;&#36;a{urn:kernel:cache}&lt;/b&gt;"
+///     spreadsheet::escape("<b>\"it's\" & more</b>"),
+///     "&lt;b&gt;&quot;it&#39;s&quot; &amp; more&lt;/b&gt;"
 /// );
 /// ```
 pub fn escape(text: &str) -> String {
@@ -876,39 +897,11 @@ pub fn escape(text: &str) -> String {
             '>' => out.push_str("&gt;"),
             '"' => out.push_str("&quot;"),
             '\'' => out.push_str("&#39;"),
-            '$' => out.push_str("&#36;"),
             c => out.push(c),
         }
     }
     out
 }
-
-/// `sheet-html`: the cell's value, escaped for HTML. A pure function of the value, so it is
-/// cached with it and cut with it.
-///
-/// It exists because the released `urn:iki:fn:compose` splices what it resolves in as it is,
-/// and a value is text a person typed. Compose's escaping marker (`$h{…}`, merged into
-/// `ikigai-fn` but not yet released) makes this resource unnecessary: the grid template would
-/// name `cell:{ref}` itself.
-pub fn html() -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new("sheet-html", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
-        Box::pin(async move {
-            let at = cell_binding(inv, "ref")?;
-            let value = text_of(inv, &cell_name(at)).await?;
-            Ok(Representation::new(text_html_utf8(), escape(&value).into_bytes()).cacheable())
-        })
-    })
-    .with_description(
-        Description::new("sheet-html")
-            .title("Cell, as HTML")
-            .summary("A cell's value, escaped for HTML: what the grid shows.")
-            .verb(Verb::Source)
-            .verb(Verb::Meta)
-            .input(ref_input("the cell, A1 to D6"))
-            .output(TEXT_HTML_UTF8),
-    )
-}
-// ANCHOR_END: html
 
 /// The feed a name's `{name}` names, in its one spelling.
 fn feed_binding(inv: &Invocation<'_>) -> Result<String> {
@@ -1107,6 +1100,12 @@ pub fn tick() -> AsyncFnEndpoint {
 /// newline is not part of the template.
 pub const TEMPLATES: &[(&str, &str)] = &[
     ("grid", include_str!("../templates/grid.html")),
+    ("cell", include_str!("../templates/cell.html")),
+    ("cached", include_str!("../templates/cached.html")),
+    ("cost", include_str!("../templates/cost.html")),
+    ("cost-cell", include_str!("../templates/cost-cell.html")),
+    ("served", include_str!("../templates/served.html")),
+    ("computed", include_str!("../templates/computed.html")),
     ("page", include_str!("../templates/page.html")),
     ("live", include_str!("../templates/live.html")),
     ("market", include_str!("../templates/market.html")),
@@ -1143,34 +1142,14 @@ pub fn templates() -> FnEndpoint {
     )
 }
 
-// ANCHOR: view_grid
-/// `sheet-view-grid`: the `grid` template, composed by `urn:iki:fn:compose`.
-///
-/// The template names every cell it shows (`$a{urn:iki:tutorial:sheet:html:A1}`), so the
-/// only code here is the request, as in the time chapter's clock: a name cannot carry an
-/// argument, and compose needs one, `src`.
-pub fn view_grid() -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new(
-        "sheet-view-grid",
-        |inv: &Invocation<'_>| -> InvokeFuture<'_> {
-            Box::pin(async move {
-                let request = Request::new(Verb::Source, iri(COMPOSE)?)
-                    .with_arg("src", ArgRef::Inline(template_name("grid").into_bytes()));
-                let html = inv.issue(request).await?.bytes;
-                Ok(Representation::new(text_html_utf8(), html).cacheable())
-            })
-        },
-    )
-    .with_description(
-        Description::new("sheet-view-grid")
-            .title("Grid view")
-            .summary("The sheet as an HTML table of values, composed from the grid template.")
-            .verb(Verb::Source)
-            .verb(Verb::Meta)
-            .output(TEXT_HTML_UTF8),
-    )
+// ANCHOR: view
+/// A view: the template `name`, filled by `urn:iki:fn:compose`'s rules and bound at a name
+/// of its own. The variables the name captures (`{ref}`) are the template's arguments.
+/// There is no code here that reads a cell: the template names what it shows.
+pub fn view(name: &str) -> ComposeOver {
+    ikigai_fn::compose_over(iri(&template_name(name)).expect("a template's name is a name"))
 }
-// ANCHOR_END: view_grid
+// ANCHOR_END: view
 
 // ANCHOR: view_edit
 /// `sheet-view-edit`: the formula bar's write. `Sink` only.
@@ -1273,13 +1252,18 @@ pub fn space_with(inputs: Arc<InputStore>, feeds: Arc<FeedStore>) -> EndpointSpa
         .bind(template(PRECEDENTS), precedents())
         .bind(template(RANGE), range())
         .bind(template(CELL), cell())
-        .bind(template(HTML), html())
         .bind(template(TEMPLATE), templates())
-        .bind(template(VIEW_GRID), view_grid())
+        // ANCHOR: views
+        .bind(template(VIEW_CELL), view("cell"))
+        .bind(template(VIEW_GRID), view("grid"))
+        .bind(template(VIEW_CACHED), view("cached"))
+        .bind(template(VIEW_COST_CELL), view("cost-cell"))
+        .bind(template(VIEW_COST), view("cost"))
+        // ANCHOR_END: views
         .bind(template(VIEW_EDIT), view_edit())
 }
 
-/// A host for the sheet alone: its names and `ikigai-fn`'s (for compose), with the Meta
+/// A host for the sheet alone: its names and `ikigai-fn`'s (for `conditional`), with the Meta
 /// renderer that lets the kernel read what the compiler declares.
 pub fn kernel() -> Kernel {
     kernel_over(Arc::default())

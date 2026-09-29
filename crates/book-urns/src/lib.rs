@@ -168,7 +168,15 @@ fn urns_in_line(line: &str) -> Vec<String> {
             }
             if !preceded_by_word {
                 let token: String = bytes[i..j].iter().collect();
-                let token = token.trim_end_matches(['.', ',', ';']).to_string();
+                let mut token = token.trim_end_matches(['.', ',', ';']).to_string();
+                // A name inside a compose marker (`$h{urn:x:y}`) ends at the marker's closing
+                // brace, which is not part of it: trim every `}` that closes nothing the
+                // name opened, so `{ref}` in a template name survives and `$h{…}` does not.
+                while token.ends_with('}')
+                    && token.matches('}').count() > token.matches('{').count()
+                {
+                    token.pop();
+                }
                 if token.len() > "urn:".len() {
                     found.push(token);
                 }
@@ -455,6 +463,14 @@ impl Vocabulary {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_name_in_a_marker_ends_at_the_marker_and_a_template_keeps_its_braces() {
+        assert_eq!(
+            urns_in_line("`$h{urn:iki:tutorial:sheet:cell:{ref}}` and $a{urn:kernel:cache}."),
+            ["urn:iki:tutorial:sheet:cell:{ref}", "urn:kernel:cache"]
+        );
+    }
 
     #[test]
     fn a_shell_line_that_runs_the_cli_answers_to_the_cli() {

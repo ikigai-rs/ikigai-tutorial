@@ -20,9 +20,8 @@ ikigai-core.workspace = true
 # `TurtleRenderer`, so this crate's own `kernel_with_clock()` answers `Meta` the way the
 # page's kernel does.
 ikigai-vocab.workspace = true
-# `urn:iki:fn:compose`, the generic composer the clock's view is made of. This crate
-# binds only its own names; the page gets compose from Part I's space, and this crate's
-# own test host mounts the library beside it.
+# `compose_over`: the clock's view is the `clock` template bound at a name of its own, and
+# filled by the library's composer, so the view is a composition with no code.
 ikigai-fn.workspace = true
 
 [dev-dependencies]
