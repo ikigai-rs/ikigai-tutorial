@@ -68,7 +68,8 @@ thread_local! {
 }
 
 /// Every name a cell may resolve: Part I's space first, then the applied chapter's game,
-/// then the time chapter's clock, then the spreadsheet, then push (the spreadsheet's part VII).
+/// then the time chapter's clock, then the spreadsheet, then push (the spreadsheet's part VII),
+/// then the game's declarations and the build that reads them (tic-tac-toe's part VII).
 ///
 /// One space for the whole book rather than one per chapter, because the families are
 /// disjoint (`urn:iki:tutorial:{camel-case,title,camel-title}` and `urn:iki:fn:*` against
@@ -91,6 +92,11 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         Arc::new(time_resource::space()),
         Arc::new(spreadsheet::space_over(inputs)),
         Arc::new(push::space(listening)),
+        // Tic-tac-toe's part VII: the game's declarations as resources, the build that reads
+        // one through this kernel, and ikigai-sexpr's transreptors, which read an
+        // `.arrangement` as Turtle. `urn:iki:tutorial:ttt:arrangement:*`,
+        // `urn:iki:tutorial:ttt:build` and `urn:sexpr:*` overlap nothing above.
+        Arc::new(tic_tac_toe::declared::declaration_space()),
     ])
 }
 
@@ -293,8 +299,34 @@ impl Page {
     pub fn engine(&self, chain: Option<&str>) -> Result<Rc<Engine>, String> {
         match chain {
             None => Ok(Rc::clone(&self.root)),
-            Some(spec) => self.chain(spec, |chain| Rc::clone(&chain.engine)),
+            Some(spec) => {
+                self.declared(spec)?;
+                self.chain(spec, |chain| Rc::clone(&chain.engine))
+            }
         }
+    }
+
+    /// Make chain `spec` if it names a game built from `tic-tac-toe.arrangement`
+    /// (`declared:a`, tic-tac-toe's part VII) and the page does not have it yet: one corridor
+    /// holding the whole declared game, ahead of the root's coded one. Any other spec is left
+    /// to [`chain`](Self::chain).
+    fn declared(&self, spec: &str) -> Result<(), String> {
+        let Some(id) = spec.strip_prefix("declared:") else {
+            return Ok(());
+        };
+        if self.chains.borrow().contains_key(spec) {
+            return Ok(());
+        }
+        let scope = tic_tac_toe::declared::game(id).map_err(|e| e.to_string())?;
+        let chain = Chain {
+            engine: Rc::new(
+                Engine::new(InChain::new(Arc::clone(&self.kernel), scope.clone()))
+                    .with_as_of_doors(Arc::clone(&self.doors)),
+            ),
+            scope,
+        };
+        self.chains.borrow_mut().insert(spec.to_string(), chain);
+        Ok(())
     }
 
     // ANCHOR: chains
@@ -360,7 +392,10 @@ impl Page {
     fn scope_of(&self, chain: Option<&str>) -> Result<Scope, String> {
         match chain {
             None => Ok(Scope::empty()),
-            Some(spec) => self.chain(spec, |chain| chain.scope.clone()),
+            Some(spec) => {
+                self.declared(spec)?;
+                self.chain(spec, |chain| chain.scope.clone())
+            }
         }
     }
 
@@ -924,12 +959,14 @@ mod tests {
 
     /// The chain a tag names, spelled as the page spells it for [`Page::engine`].
     fn chain_of(tag: &str) -> Option<String> {
-        attribute(tag, "data-game").or_else(|| {
-            attribute(tag, "data-scenario").map(|who| match attribute(tag, "data-as-of") {
-                Some(at) => format!("scenario:{who}@{at}"),
-                None => format!("scenario:{who}"),
+        attribute(tag, "data-game")
+            .or_else(|| attribute(tag, "data-declared").map(|id| format!("declared:{id}")))
+            .or_else(|| {
+                attribute(tag, "data-scenario").map(|who| match attribute(tag, "data-as-of") {
+                    Some(at) => format!("scenario:{who}@{at}"),
+                    None => format!("scenario:{who}"),
+                })
             })
-        })
     }
 
     /// The runnable cells of a chapter, in page order, with the HTML escapes the markup needs
@@ -1493,6 +1530,45 @@ mod tests {
             t[0].ends_with("The board is clear\n[uncacheable]\n"),
             "{}",
             t[0]
+        );
+    }
+
+    /// Part VII: the game built from its file answers every cell exactly as the coded game
+    /// does, in a corridor of its own, and a declaration that names an endpoint nobody
+    /// registered is refused at build.
+    #[test]
+    fn the_seventh_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("tic-tac-toe-7.md", 5);
+        // The build answers the file's own arrangement, printed without its comments, and
+        // the second read is served: it hangs from the file's thread.
+        let tree = tic_tac_toe::declared::topology().expect("the file reads");
+        let printed = ikigai_sexpr::topology_to_arrangement(&tree).expect("it prints");
+        let printed = printed.trim_end();
+        assert_eq!(
+            t[0],
+            format!("{printed}\n[computed]\n{printed}\n[cached]\n")
+        );
+        // The coded game and the declared one answer the same moves identically.
+        assert_eq!(t[1], t[2]);
+        assert!(t[1].contains("1,1 is taken"), "{}", t[1]);
+        // Every node of the trace was answered by the declared game's corridor.
+        let nodes: Vec<&str> = t[3]
+            .lines()
+            .filter(|l| l.contains("answered-by="))
+            .collect();
+        assert_eq!(nodes.len(), 2, "the cell and its stored cell: {}", t[3]);
+        assert!(
+            nodes
+                .iter()
+                .all(|n| n.contains("answered-by=urn:iki:tutorial:ttt:declared:a")),
+            "{}",
+            t[3]
+        );
+        // And a declaration that names an endpoint nobody registered is refused at build.
+        assert!(
+            t[4].contains("binds `ttt-undo`, which the host did not register"),
+            "{}",
+            t[4]
         );
     }
 

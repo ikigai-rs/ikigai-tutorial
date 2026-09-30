@@ -57,6 +57,7 @@
 - [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md)
 - [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
 - [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
+- [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
 - [Time is a resource](applied/time.md)
 - [A spreadsheet, I: cells are atoms](applied/spreadsheet-1.md)
 - [A spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md)

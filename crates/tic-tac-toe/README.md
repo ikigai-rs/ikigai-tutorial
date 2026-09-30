@@ -24,6 +24,7 @@ server before the next was dispatched.
 | **4** | Many games: the game as context (a `Scope` corridor) versus the game in the name — argue it; the store as a swappable space | Part 8 | done — `tic-tac-toe-4.md` |
 | **5** | The views and templates as resources; a playable board in the page over the same kernel (htmx, answered by the wasm kernel); `ttt-host`; the wrap-up | Parts 5, 9 | done — `tic-tac-toe-5.md`, `crates/ttt-host` |
 | **6** | The same game in Python and TypeScript: the atom held by a peer (the store contract as the whole interface), and an app in each language that fills the templates from the host; the limits across the boundary | — | done — `tic-tac-toe-6.md`, `scripts/ttt-polyglot-demo.sh` |
+| **7** | The game's space is a file: the arrangement (doors, order, the eight aliases, `conditional`) as `tic-tac-toe.arrangement`, built with core's `build` against a registry of the same endpoints; played beside the coded game in the page; the picture drawn from the file | — | done — `tic-tac-toe-7.md`, `src/declared.rs` |
 
 ## What increment 1 left for the next ones
 
@@ -690,3 +691,30 @@ the system chose), and lists the games sorted.
   the `template-cases` block into its own tests, so the cases added here (and the world's new
   resources, the `\u{…}` notation and the refusal classes) reach the apps only when they
   copy it again.
+
+## The space as a file (increment 7)
+
+- **`tic-tac-toe.arrangement`** is the root of `kernel()` as data: the alias of eight lines
+  over the composites and the store, then `conditional`. `src/declared.rs` registers the 18
+  endpoints by name (`registry`), reads the file with ikigai-sexpr and builds it with core's
+  `build`. No endpoint changed; nothing in parts I–VI changed.
+- **Views are named at registration** (`ttt-view-board`, …), because a registry holds one
+  endpoint per name and five unnamed views are all `composeOver`. The coded game's views stay
+  unnamed, so the two topologies differ in exactly those five names; `tests/declared.rs`
+  checks that, and pins the declared game by BEHAVIOR against the coded one (a whole game,
+  nineteen reads after every step, and equal reads of the atom).
+- **The rules read the lines from the file** (`lines_of`): the CheckSet, the winner and the
+  reset take a table, and in the declared game it is the file's alias, not `LINES`. This is a
+  hand-rolled instance of a factory registry (an endpoint configured from the declaration),
+  which core deliberately does not have yet (ledger item 631).
+- **`:match template` on eight doors** (board, winner, turn, reset, view:board, view:status,
+  view:reply, view:reset): the code binds every door through `UriTemplate::parse`, and a
+  braceless pattern reads as exact. Dropping the eight annotations would answer the same and
+  be a different arrangement.
+- **In the page**, `data-declared='a'` runs a cell in chain `declared:a`: one corridor
+  holding the whole declared game with its own store, ahead of the root's coded one.
+  `urn:iki:tutorial:ttt:arrangement:{name}` and `urn:iki:tutorial:ttt:build` are bound on the
+  page with ikigai-sexpr's transreptors (`declaration_space`).
+- **The picture** is `books/ikigai/src/applied/tic-tac-toe-arrangement.svg`,
+  `ikigai_diagram::render` of the file, held to it by a test that writes the new drawing
+  beside the build and names the `cp` that commits it.

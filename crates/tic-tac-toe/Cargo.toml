@@ -15,7 +15,12 @@ path = "src/lib.rs"
 # Compiled into the page (`crates/book-wasm`), so it stays wasm-clean: no std::fs, no
 # threads, no clock. State is in memory behind an `Arc` the host holds.
 [dependencies]
-ikigai-core.workspace = true
+# `declare` (core 0.1.83): `Topology::from_turtle`, which part VII's declared game reads its
+# arrangement with. It brings `oxttl`/`oxrdf` into the page's wasm too. Their `getrandom` 0.3
+# needs its `wasm_js` backend there, which core and ikigai-sexpr enable on that target; with
+# getrandom 0.3.4 the feature alone selects it (measured: `cargo check --target
+# wasm32-unknown-unknown -p book-wasm` passes with no `--cfg getrandom_backend` rustflag).
+ikigai-core = { workspace = true, features = ["declare"] }
 # `TurtleRenderer`, so the game's own `kernel()` answers `Meta` and `describe` the way
 # the page's kernel does.
 ikigai-vocab.workspace = true
@@ -23,6 +28,13 @@ ikigai-vocab.workspace = true
 # `compose_over`; a square and the status choose their template with `conditional`, which
 # `conditional_space()` binds for a host that does not mount the library itself.
 ikigai-fn.workspace = true
+# Part VII: the game's arrangement is a file, `tic-tac-toe.arrangement`, an s-expression the
+# kernel reads as Turtle through this crate's lossless transreptor
+# (`text/x-ikigai-arrangement` -> `text/turtle`), and prints back after a build.
+ikigai-sexpr.workspace = true
 
 [dev-dependencies]
 futures.workspace = true
+# Part VII's picture: the committed `tic-tac-toe.svg` is `ikigai_diagram::render` of the
+# file's arrangement, and a test fails when they differ.
+ikigai-diagram.workspace = true

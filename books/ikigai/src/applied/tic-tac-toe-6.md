@@ -585,3 +585,7 @@ for a store in *some* process. Two stores in other languages kept it on the firs
 *some* host. Two apps in other languages serve it byte for byte, and their tests check
 that. What stayed in one place was everything that needed to know what depended on what:
 the composition, the cache and the rules, in the kernel.
+
+One thing in all six parts is still Rust that need not be: the arrangement, which doors exist
+and in what order. [Tic-tac-toe, VII: the game's space is a file](tic-tac-toe-7.md) moves it
+into a file.
