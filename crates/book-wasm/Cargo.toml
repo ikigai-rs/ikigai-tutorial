@@ -63,3 +63,8 @@ wasm-bindgen = "=0.2.108"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 console_error_panic_hook = "0.1"
+
+[dev-dependencies]
+# Tic-tac-toe's part VII: its page test prints the file's arrangement the way the build
+# resource does, to check the cell's answer is the file and not a copy of it.
+ikigai-sexpr.workspace = true

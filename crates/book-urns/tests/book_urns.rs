@@ -95,6 +95,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             "push::space()",
             Arc::new(push::space(Arc::default())) as Arc<dyn Space>,
         ),
+        (
+            "tic_tac_toe::declared::declaration_space()",
+            Arc::new(tic_tac_toe::declared::declaration_space()) as Arc<dyn Space>,
+        ),
     ]
 }
 

@@ -60,6 +60,13 @@
 //! * `urn:iki:tutorial:ttt:view:play:{x}:{y}` and `view:reset` — the view's writes, `Sink`
 //!   only: a move (or [`RESET`]) through the kernel, answered with `view:reply`.
 //!
+//! Increment 7 moves the ARRANGEMENT out of Rust, and changes no endpoint to do it:
+//!
+//! * `tic-tac-toe.arrangement`, beside this crate's source, declares the space
+//!   [`space_with_store`] and [`kernel`] build in code: the doors, their order, the eight
+//!   line aliases. [`declared`] registers the endpoints by name and builds the game from the
+//!   file with core's `build`.
+//!
 //! Read the book: `mdbook serve books/ikigai`, or `./scripts/serve-with-drafts.sh` while
 //! the chapters are still drafts.
 
@@ -74,6 +81,8 @@ use ikigai_core::{
 };
 use ikigai_fn::ComposeOver;
 use ikigai_vocab::TurtleRenderer;
+
+pub mod declared;
 
 /// `text/plain; charset=utf-8` as a [`ReprType`] — a local helper, as in `hello-camel`.
 fn text_plain_utf8() -> ReprType {

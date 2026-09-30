@@ -1,0 +1,39 @@
+; Tic-tac-toe's space: which doors exist, in what order, and which names are only other
+; names. Every endpoint named here is Rust, registered by the host under that name. This
+; file arranges them and cannot make one.
+(fallback
+  (alias
+    ; The board's eight lines, each an exact alias onto the line of cells it holds.
+    (exact "urn:iki:tutorial:ttt:row:0"      "urn:iki:tutorial:ttt:cells:0.0,1.0,2.0")
+    (exact "urn:iki:tutorial:ttt:row:1"      "urn:iki:tutorial:ttt:cells:0.1,1.1,2.1")
+    (exact "urn:iki:tutorial:ttt:row:2"      "urn:iki:tutorial:ttt:cells:0.2,1.2,2.2")
+    (exact "urn:iki:tutorial:ttt:column:0"   "urn:iki:tutorial:ttt:cells:0.0,0.1,0.2")
+    (exact "urn:iki:tutorial:ttt:column:1"   "urn:iki:tutorial:ttt:cells:1.0,1.1,1.2")
+    (exact "urn:iki:tutorial:ttt:column:2"   "urn:iki:tutorial:ttt:cells:2.0,2.1,2.2")
+    (exact "urn:iki:tutorial:ttt:diagonal:0" "urn:iki:tutorial:ttt:cells:0.0,1.1,2.2")
+    (exact "urn:iki:tutorial:ttt:diagonal:1" "urn:iki:tutorial:ttt:cells:2.0,1.1,0.2")
+    (fallback
+      ; Everything above the atom: the cell, the lines, the rules, the templates and views.
+      (endpoints
+        (door "urn:iki:tutorial:ttt:cell:{x}:{y}"        ttt-cell)
+        (door "urn:iki:tutorial:ttt:cells:{list}"        ttt-cells)
+        (door "urn:iki:tutorial:ttt:board"               ttt-board :match template)
+        (door "urn:iki:tutorial:ttt:checkset:{x}:{y}"    ttt-checkset)
+        (door "urn:iki:tutorial:ttt:winner"              ttt-winner :match template)
+        (door "urn:iki:tutorial:ttt:turn"                ttt-turn :match template)
+        (door "urn:iki:tutorial:ttt:move:{x}:{y}"        ttt-move)
+        (door "urn:iki:tutorial:ttt:reset"               ttt-reset :match template)
+        (door "urn:iki:tutorial:ttt:template:{name}"     ttt-template)
+        (door "urn:iki:tutorial:ttt:view:board"          ttt-view-board :match template)
+        (door "urn:iki:tutorial:ttt:view:square:{x}:{y}" ttt-view-square)
+        (door "urn:iki:tutorial:ttt:view:status"         ttt-view-status :match template)
+        (door "urn:iki:tutorial:ttt:view:reply"          ttt-view-reply :match template)
+        (door "urn:iki:tutorial:ttt:view:game:{game}"    ttt-view-game)
+        (door "urn:iki:tutorial:ttt:view:play:{x}:{y}"   ttt-view-play)
+        (door "urn:iki:tutorial:ttt:view:reset"          ttt-view-reset :match template))
+      ; The one atom: the stored cell, the only state a game has.
+      (endpoints
+        (door "urn:iki:tutorial:ttt:stored:{x}:{y}" ttt-stored))))
+  ; The one resource the views use that the game does not bind.
+  (endpoints
+    (door "urn:iki:fn:conditional" conditional)))

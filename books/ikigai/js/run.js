@@ -72,6 +72,10 @@
 // sheet as of that instant (chain `scenario:alice@2026-09-22T18:00Z`). Markup, for the same
 // reason a game is.
 //
+// Or a DECLARED game (tic-tac-toe's part VII): `data-declared='a'` runs its lines in game `a`
+// built from `tic-tac-toe.arrangement` rather than from Rust (chain `declared:a`), one corridor
+// holding the whole declared game ahead of the root's coded one.
+//
 // A page may keep a STORY CLOCK: `data-clock='2026-09-22T12:00Z'` (an instant, where a plain
 // `data-clock` asks for the browser's clock) builds the page's kernel with a clock stopped
 // there, and a cell carrying `data-at='…'` moves it before it runs. Every reader's page then
@@ -177,13 +181,16 @@
         var original = cell.getAttribute("data-cmd") || "";
         var game = cell.getAttribute("data-game");
         var scenario = cell.getAttribute("data-scenario");
+        var declared = cell.getAttribute("data-declared");
         var asOf = cell.getAttribute("data-as-of");
         var at = cell.getAttribute("data-at");
         // The chain the cell runs in, spelled as the page's kernel reads it. (Not `chain`: the
         // runner's `reduce` below names its promise that, and would shadow it.)
         var chainSpec = game ||
+            (declared ? "declared:" + declared : null) ||
             (scenario ? "scenario:" + scenario + (asOf ? "@" + asOf : "") : null);
         var where = game ? ", in game " + game
+            : declared ? ", in game " + declared + " built from the file"
             : scenario ? ", in " + scenario + "'s scenario" +
                 (asOf ? " over the sheet as of " + asOf : "")
             : "";

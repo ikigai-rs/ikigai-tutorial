@@ -1,0 +1,4 @@
+; A declaration that tries to add a feature by naming it: an undo that nobody wrote.
+(endpoints
+  (door "urn:iki:tutorial:ttt:board" ttt-board :match template)
+  (door "urn:iki:tutorial:ttt:undo"  ttt-undo))
