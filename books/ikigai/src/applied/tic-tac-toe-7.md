@@ -356,9 +356,25 @@ draw, diff or check.
 
 ## Where this goes
 
-A host can read an arrangement too. The `ikigai` host gains an option to build its root from
-an arrangement file in its next release, and this chapter will show the command once that
-release is out.
+A host can read an arrangement too. Since `ikigai-cli` 0.1.33 the `ikigai` host prints the
+root it is running as a declaration, draws it, and starts its local root from one:
+
+```bash
+ikigai --plain -c 'source urn:iki:host:arrangement as=text/x-ikigai-arrangement' > host.arrangement
+ikigai --plain -c 'source urn:diagram:kernel' > host.svg
+ikigai --arrangement mine.arrangement
+```
+
+The first line is the s-expression face; without `as=` the same root comes back as Turtle. The
+second is an SVG, and needs `urn:cap:kernel:inspect`, which the local REPL holds. The third
+reads a declaration, Turtle or `*.arrangement`, relative to the working directory, and
+`arrangement = "<path>"` in the host's config does the same. A file that does not build stops
+the start and names the node that failed. One thing to know before you try it: a host arranges
+only the endpoints *it* registered. This chapter's `tic-tac-toe.arrangement` names `ttt-cell`
+and the rest, which only the game registers, so it is not a host arrangement and
+`--arrangement` refuses it. Start from the host's own printed root instead, and edit that. As
+printed, it does not yet start unchanged, because a few of the host's endpoints share a name
+(ledger item 639); its header says which.
 
 This part declared one space, the game's root. A *game* is still a corridor built in Rust
 (Part IV's `game`), and so are the temporal and personal corridors of the spreadsheet arc.
