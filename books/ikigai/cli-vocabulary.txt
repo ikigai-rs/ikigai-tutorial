@@ -126,3 +126,11 @@ urn:kernel:validate
 # which is exactly what the trace line in that chapter says.
 urn:kernel:aliases
 urn:fn:toUpper
+
+# Tic-tac-toe VII's closing section: the host's own arrangement, as a declaration to save and
+# start from (`urn:iki:host:arrangement`, s-expression with `as=text/x-ikigai-arrangement`,
+# Turtle without), and the same arrangement drawn as SVG (`urn:diagram:kernel`, which needs
+# `urn:cap:kernel:inspect`, held by the local REPL). Both new in ikigai-cli 0.1.33, and probed
+# against that release on 2026-09-30 with a scratch HOME.
+urn:iki:host:arrangement
+urn:diagram:kernel
