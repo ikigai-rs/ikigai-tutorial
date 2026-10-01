@@ -601,9 +601,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-core"
-version = "0.1.83"
+version = "0.1.84"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe678ab31895914e348e6163432905c239fb7bc23a6da12a6b0506a8f15008ce"
+checksum = "904d0b3703e28aaf76c9a235413a432512a7eede5c12fe605d67fa56173edd9a"
 dependencies = [
  "async-trait",
  "blake3",
@@ -710,16 +710,13 @@ dependencies = [
 
 [[package]]
 name = "ikigai-sexpr"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ed82c8de4c7324ed12bd31be27ef2823ecd788dec9dbb5b7b16214653d60e12"
+checksum = "c6aef390be745623d7d4144777a228b06a78f4b6c5d3024d4b034dde9ff486b7"
 dependencies = [
  "async-trait",
  "getrandom 0.3.4",
  "ikigai-core",
- "oxrdf",
- "oxrdfio",
- "sha2",
 ]
 
 [[package]]

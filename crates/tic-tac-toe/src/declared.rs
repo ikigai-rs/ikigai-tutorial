@@ -329,7 +329,8 @@ async fn turtle_of(inv: &Invocation<'_>, of: &Iri) -> Result<String> {
 // ANCHOR_END: build_endpoint
 
 /// What a host binds to read and build declarations: the declarations, the build, and
-/// ikigai-sexpr's transreptors (an arrangement's Turtle face, and back).
+/// ikigai-sexpr's arrangement transreptors (an arrangement's Turtle face, and back) — that
+/// surface alone, so a page that mounts this pays for nothing else in the crate.
 pub fn declaration_space() -> Fallback {
     Fallback::new(vec![
         Arc::new(
@@ -337,7 +338,7 @@ pub fn declaration_space() -> Fallback {
                 .bind(template(ARRANGEMENT), arrangements())
                 .bind(Exact::new(BUILD), build_endpoint()),
         ) as Arc<dyn Space>,
-        Arc::new(ikigai_sexpr::space()),
+        Arc::new(ikigai_sexpr::arrangement_space()),
     ])
 }
 
