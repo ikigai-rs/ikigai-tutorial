@@ -93,9 +93,9 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         Arc::new(spreadsheet::space_over(inputs)),
         Arc::new(push::space(listening)),
         // Tic-tac-toe's part VII: the game's declarations as resources, the build that reads
-        // one through this kernel, and ikigai-sexpr's transreptors, which read an
+        // one through this kernel, and ikigai-sexpr's arrangement transreptors, which read an
         // `.arrangement` as Turtle. `urn:iki:tutorial:ttt:arrangement:*`,
-        // `urn:iki:tutorial:ttt:build` and `urn:sexpr:*` overlap nothing above.
+        // `urn:iki:tutorial:ttt:build` and `urn:sexpr:arrangement-*` overlap nothing above.
         Arc::new(tic_tac_toe::declared::declaration_space()),
     ])
 }

@@ -155,13 +155,9 @@ fn a_taken_square_is_refused_in_the_same_words() {
 /// tree once those five names are put back to the one every unnamed view answers.
 #[test]
 fn the_file_is_the_coded_arrangement_with_its_views_named() {
-    // A kernel reports its root inside the chain a request with no corridor carries.
-    let chain = kernel_over(Arc::default()).topology();
-    assert!(matches!(chain.kind, SpaceKind::Chain { .. }));
-    let [coded] = chain.children.as_slice() else {
-        panic!("the root chain holds the root: {chain:?}")
-    };
-    let coded = coded.clone();
+    // The root space's own arrangement, the tree a declaration states (not the chain a
+    // request with no corridor carries, which holds it).
+    let coded = kernel_over(Arc::default()).root_topology();
     let mut declared = declared::topology().expect("the file reads");
     let mut renamed = Vec::new();
     fn unname(node: &mut Topology, renamed: &mut Vec<String>) {

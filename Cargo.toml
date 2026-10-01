@@ -27,10 +27,13 @@ lto = true
 # Published crates, deliberately — NOT path refs to sibling checkouts. A reader who
 # clones only this repo must be able to `cargo run` immediately; path refs would
 # require them to have the whole ecosystem laid out beside it.
-# 0.1.83 is the floor because tic-tac-toe's part VII teaches what it added: a space BUILT from
-# its declaration (`Topology::from_turtle` behind the `declare` feature, `Registry`, `build`),
-# the inverse of `urn:kernel:topology`, with every door naming the endpoint that answers it.
-# Before that the floor was 0.1.82, because the spreadsheet arc teaches what it added: the
+# 0.1.84 is the floor because part VII's test compares the coded game with the declared one
+# through `Kernel::root_topology()`, the root space's own arrangement, instead of unwrapping the
+# chain a request carries by hand; and because ikigai-sexpr 0.1.5 requires it (declarations are
+# bounded in core's units). Before that the floor was 0.1.83, because tic-tac-toe's part VII
+# teaches what it added: a space BUILT from its declaration (`Topology::from_turtle` behind the
+# `declare` feature, `Registry`, `build`), the inverse of `urn:kernel:topology`, with every door
+# naming the endpoint that answers it. Before that the floor was 0.1.82, because the spreadsheet arc teaches what it added: the
 # cache readout marks a row `live`, `cut` or `expired`, and `urn:kernel:cached target=` answers for the
 # asker (ledger #612), which is what lets the page's cache viewer be a composition; and a
 # fallback over a composite's NotFound is cut when the atom changes (ledger #611), which
@@ -40,7 +43,7 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.83"
+ikigai-core = "0.1.84"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
 # kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host.
 ikigai-vocab = "0.1.66"
@@ -52,9 +55,12 @@ ikigai-vocab = "0.1.66"
 # is what a declared door binds it by (an unnamed one is `composeOver`, like every other).
 ikigai-fn = "0.3.1"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
-# transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.4 is the
-# release that added the arrangement surface at all. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-sexpr = "0.1.4"
+# transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the
+# floor because it added `arrangement_space()`, which mounts the arrangement surface alone, and
+# the `full` feature, off here: nothing in the tutorial mounts the query or graph compilers or
+# the code-graph codec, so the page compiles neither `sha2` nor `oxrdfio` (ledger #649). 0.1.4
+# added the arrangement surface at all. A 0.x caret: also a ceiling (<0.2.0).
+ikigai-sexpr = { version = "0.1.5", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Only
 # part VII's picture test uses it (a dev-dependency), so the page pays nothing for it. 0.1.0 is
 # the first release; a 0.x caret, so also a ceiling (<0.2.0).
