@@ -20,10 +20,10 @@
 //!   `close`.
 //! * **Views.** The mapping's vocabulary over the union of those graphs, asked with
 //!   `urn:iki:store:graph-select` ([`select`]); the ledger's `next`.
-//! * **Code that is not a composition, and why.** [`sync_ledger`] decides WHICH tasks need an
-//!   item and which items are finished. That decision is a SPARQL query over the spec graphs and
-//!   the ledger's graph together; acting on its rows is one `append` or `close` each, and there is
-//!   no resource that turns a result set into ledger writes. [`lift_tree`] walks a directory,
+//! * **Code that is not a composition, and why.** [`sync_ledger`] decides WHICH tasks are open and
+//!   which items are finished. That decision is a SPARQL query over the spec graphs and the
+//!   ledger's graph together; acting on its rows is one keyed `append` or one `close` each, and
+//!   there is no resource that turns a result set into ledger writes. [`lift_tree`] walks a directory,
 //!   which is reading files outside the kernel; in a host they would be `urn:file:` resources.
 //!
 //! Resource ratio: no endpoint written; the store's, the ledger's and the lift's resources
@@ -191,16 +191,15 @@ fn plain(term: &str) -> String {
 }
 
 // ANCHOR: queries
-/// Open tasks of unarchived changes that no ledger item is about yet, with the requirement each
-/// names (if it names one the change adds or modifies).
-pub const UNFILED: &str = r#"
+/// Every open task of an unarchived change, with the requirement each names (if it names one the
+/// change adds or modifies). Whether a task already HAS an item is not asked here: the ledger
+/// answers that itself, when the task's IRI is the append's key.
+pub const OPEN_TASKS: &str = r#"
 PREFIX os: <http://example.org/openspec#>
-PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
 SELECT DISTINCT ?task ?id ?number ?title ?requirement WHERE {
   ?task a os:Task ; os:change ?change ; os:number ?number ; os:title ?title ; os:done false .
   ?change os:id ?id .
   FILTER NOT EXISTS { ?change os:archivedOn ?archived }
-  FILTER NOT EXISTS { ?item ledger:about ?task }
   OPTIONAL {
     ?task os:cites ?name .
     ?change os:adds|os:modifies ?requirement .
@@ -229,21 +228,22 @@ ORDER BY ?number
 // ANCHOR_END: queries
 
 // ANCHOR: sync
-/// Bring the ledger in line with the tree: file an item for every open task nobody has filed,
-/// about the task and the requirement it names; close every item whose task is checked off or
-/// whose change is archived. Idempotent: a second run with nothing changed does nothing.
+/// Bring the ledger in line with the tree: file an item for every open task, keyed by the task's
+/// IRI and about the task and the requirement it names; close every item whose task is checked
+/// off or whose change is archived. Idempotent, and safe to run twice at once: the key lets the
+/// ledger file at most one item per task, in the same store update that checks for one.
 /// Returns one line per write, in the ledger's own words.
 pub fn sync_ledger(kernel: &Kernel) -> Result<Vec<String>> {
     let mut done = Vec::new();
-    for row in rows(&select(kernel, UNFILED)?) {
+    for row in rows(&select(kernel, OPEN_TASKS)?) {
         let [task, id, number, title, requirement] = &row[..] else {
             return Err(Error::Endpoint(format!(
-                "an UNFILED row of {} columns",
+                "an OPEN_TASKS row of {} columns",
                 row.len()
             )));
         };
         let about = format!("{requirement} {task}");
-        let filed = ask(
+        let answer = ask(
             kernel,
             Verb::Sink,
             "urn:iki:ledger:append",
@@ -251,9 +251,21 @@ pub fn sync_ledger(kernel: &Kernel) -> Result<Vec<String>> {
                 ("content", &format!("{id} {number}: {title}")),
                 ("about", about.trim()),
                 ("labels", &format!("openspec,{id}")),
+                ("key", task),
             ],
         )?;
-        done.push(format!("{} — {id} {number}", filed.trim()));
+        // `#4 <iri>` when it filed; `#4 <iri> existing open` when an item already carries the
+        // key, and nothing was written. Only a filing is a write.
+        match answer.split_whitespace().nth(2) {
+            None => done.push(format!("{} — {id} {number}", answer.trim())),
+            Some("existing") => {}
+            Some(other) => {
+                return Err(Error::Endpoint(format!(
+                    "an append answered `{}`: neither filed nor existing ({other})",
+                    answer.trim()
+                )))
+            }
+        }
     }
     for row in rows(&select(kernel, FINISHED)?) {
         let [number, _id, _task, why] = &row[..] else {
@@ -356,5 +368,39 @@ mod tests {
         let filed = sync_ledger(&kernel).unwrap();
         assert_eq!(filed.len(), 3, "{filed:?}");
         assert!(sync_ledger(&kernel).unwrap().is_empty());
+    }
+
+    /// ★ The claim the chapter makes: syncs running at once file each task ONCE. With 0.3.0's
+    /// check-then-append (a query for tasks no item is `about`, then an append) every thread
+    /// could see a task unfiled before any of them filed it; the key makes the check and the
+    /// filing one store update.
+    #[test]
+    fn concurrent_syncs_file_each_task_once() {
+        let kernel = kernel();
+        lift_tree(&kernel, &read_tree(&crate_dir())).unwrap();
+        let barrier = std::sync::Barrier::new(4);
+        let filed: usize = std::thread::scope(|scope| {
+            let threads: Vec<_> = (0..4)
+                .map(|_| {
+                    scope.spawn(|| {
+                        barrier.wait();
+                        sync_ledger(&kernel).unwrap().len()
+                    })
+                })
+                .collect();
+            threads.into_iter().map(|t| t.join().unwrap()).sum()
+        });
+        assert_eq!(
+            filed, 3,
+            "three open tasks, filed once each across four syncs"
+        );
+        let all = ask(
+            &kernel,
+            Verb::Source,
+            "urn:iki:ledger:items",
+            &[("status", "all")],
+        )
+        .unwrap();
+        assert!(all.contains("3 item(s)"), "{all}");
     }
 }
