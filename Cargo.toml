@@ -86,6 +86,19 @@ ikigai-sparql = "0.1.7"
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"
 oxrdf = "0.3"
+# The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a
+# git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
+# `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
+# built from, at the versions that rev takes (its Cargo.toml, 2026-10-06):
+# 0.3.0 is the floor because it is what gonk links, and because it fixed the unled audit's
+# findings on 0.2.1 that the first chapter walks straight through — two appends in one
+# millisecond minting the same id, and `next` cached across the clock. A 0.x caret, so also a
+# ceiling (<0.4.0): read it as a RANGE when gonk moves.
+ikigai-ledger = "0.3.0"
+# The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
+# stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
+# RocksDB at all. 0.2.6 is what gonk links. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-store = { version = "0.2.6", default-features = false }
 # The config file "Configuration" reads through `layered_paths`.
 toml = "0.8"
 futures = "0.3"

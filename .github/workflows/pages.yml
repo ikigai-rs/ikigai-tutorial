@@ -1,8 +1,11 @@
-name: Build, test and deploy the book
+name: Build, test and deploy the books
 
-# The book's gate and its deploy, in one workflow, so that the tree which reaches
-# https://ikigai-rs.github.io/ikigai-tutorial/ is the tree that just passed `mdbook test`
-# and the contrast gate — not a second `mdbook build` that could drift from the first.
+# The books' gates and their deploy, in one workflow, so that the tree which reaches
+# https://ikigai-rs.github.io/ikigai-tutorial/ (The ikigai Book) and
+# https://ikigai-rs.github.io/ikigai-tutorial/gonk/ (The gonk Book) is the tree that just passed
+# `mdbook test`, the contrast gate, axe, the no-kernel check, the link check and the transcript
+# check — not a second `mdbook build` that could drift from the first. Every gate runs on EVERY
+# book under `books/`, so a second book cannot be held to less than the first.
 #
 # It ALSO runs on pull requests, without deploying: `books` is a gate every PR needs
 # whether or not a deploy follows it (it used to live in ci.yml; it moved here so the
@@ -33,8 +36,9 @@ jobs:
   # This runs the same script a contributor runs (`./scripts/test-books.sh`), so the
   # local and CI incantations cannot drift — including the isolated target directory
   # the script uses to dodge E0464. See the comment at the top of that script. The
-  # script builds `books/ikigai/book` on the way, and that directory — the same bytes
-  # the tests just ran against — is what the deploy below publishes.
+  # script builds `books/<name>/book` for every book on the way, and those directories —
+  # the same bytes the tests just ran against — are what the deploy below publishes, put
+  # where each book's `site-url` says by `scripts/assemble-site.sh`.
   books:
     runs-on: ubuntu-latest
     steps:
@@ -59,18 +63,18 @@ jobs:
       - name: build and test every book
         run: ./scripts/test-books.sh
 
-      # ── The book's own kernel, in the page ───────────────────────────────────
+      # ── Each book's own kernel, in its pages ─────────────────────────────────
       #
       # After the gate, never before it: `test-books.sh` wipes and rebuilds
-      # `books/ikigai/book`, so anything copied in earlier would be gone. The wasm is a
-      # face over `book_wasm::page_kernel()` — Part I's space and the tic-tac-toe game,
-      # the crates the book's listings are included from — bound with `wasm-bindgen --target web` into `wasm/` beside the book, same
-      # origin as the pages that load it. Generated output; never committed.
-      - name: build the in-page kernel (crates/book-wasm) into the book
-        run: |
-          cargo build --release -p book-wasm --lib --target wasm32-unknown-unknown
-          wasm-bindgen --target web --out-dir books/ikigai/book/wasm \
-            target/wasm32-unknown-unknown/release/book_wasm.wasm
+      # `books/<name>/book`, so anything copied in earlier would be gone. The ikigai book's
+      # wasm is a face over `book_wasm::page_kernel()` — Part I's space and the tic-tac-toe
+      # game, the crates the book's listings are included from; the gonk book's is
+      # `gonk_book_wasm` — the ledger over an in-memory store. Each is bound with
+      # `wasm-bindgen --target web` into `wasm/` beside its book, same origin as the pages
+      # that load it, under the one name `js/run.js` imports (`scripts/build-kernels.sh`
+      # holds the table of which crate is which book's). Generated output; never committed.
+      - name: build the in-page kernels (crates/book-wasm, crates/gonk-book-wasm) into the books
+        run: ./scripts/build-kernels.sh
 
       # A silent load failure is the failure: with the module absent every cell's Run
       # is disabled and each board is a sentence, so a deploy with a broken or renamed
@@ -94,6 +98,13 @@ jobs:
           grep -q '^export function pushExpired' books/ikigai/book/wasm/book_wasm.js
           grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
 
+      - name: smoke — the exports run.js imports are present in the gonk book's kernel
+        run: |
+          test -s books/gonk/book/wasm/book_wasm_bg.wasm
+          grep -q '^export function evalLineAsync' books/gonk/book/wasm/book_wasm.js
+          grep -q '^export function boundNames' books/gonk/book/wasm/book_wasm.js
+          grep -q 'as default' books/gonk/book/wasm/book_wasm.js
+
       # ── The second accessibility instrument ───────────────────────────────
       #
       # `book-a11y` (inside test-books.sh) measures contrast and checks the STATIC
@@ -110,11 +121,16 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: a11y/package-lock.json
-      - name: axe-core over the built book (a11y/axe.mjs)
+      - name: axe-core over every built book (a11y/axe.mjs)
         working-directory: a11y
         run: |
           npm ci
-          node axe.mjs ../books/ikigai/book
+          status=0
+          for book in ../books/*/book; do
+            echo "── $book"
+            node axe.mjs "$book" || status=1
+          done
+          exit "$status"
 
       # ── Without the kernel, nothing is answered ───────────────────────────
       #
@@ -125,20 +141,57 @@ jobs:
       # described Run buttons, and boards with no squares. The boards are still drafts, so
       # the drafts are built too — with --no-kernel, into `target/` (ignored, and a path
       # that means the same thing locally, where `just gates` runs this step), never into
-      # the uploaded `books/ikigai/book`: drafts must not deploy.
+      # the uploaded `books/ikigai/book`: drafts must not deploy. Every built book is
+      # checked; only the ikigai book has drafts.
       - name: no kernel, no answers (a11y/no-kernel.mjs)
         run: |
           ./scripts/serve-with-drafts.sh build target/drafts-no-kernel --no-kernel
           cd a11y
-          node no-kernel.mjs ../books/ikigai/book ../target/drafts-no-kernel
+          node no-kernel.mjs ../books/*/book ../target/drafts-no-kernel
+
+      # ── One site, two books ──────────────────────────────────────────────────
+      #
+      # Each built book goes where its `book.toml`'s `site-url` says (the ikigai book at the
+      # root, the gonk book at `gonk/`), into ONE directory, which is what is uploaded. Then
+      # every relative link in that directory must land on a file in it: mdbook checks a
+      # link between two chapters of one book, and nothing checks a link between the books
+      # (`gonk/` from the ikigai book's "Where to go next", `../index.html` back) except this.
+      - name: assemble the site, and check every relative link in it (a11y/links.mjs)
+        run: |
+          ./scripts/assemble-site.sh target/site
+          cd a11y
+          node links.mjs ../target/site
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: books/ikigai/book
+          path: target/site
+
+  # ── Every shell transcript, against the gonk the book pins ─────────────────
+  #
+  # A `console` block in the gonk book is the page saying "type this, see that", and
+  # `scripts/test-transcripts.sh` types it: it installs gonk at the revision in
+  # `books/gonk/gonk.rev` (`cargo install --locked --git … --rev`), runs each page's commands
+  # in a scratch home, and compares what they print with what the page says (ledger #165).
+  # A job of its own because building gonk compiles RocksDB; the build is cached by that
+  # revision, so it is paid once per pin. The deploy needs it like it needs `books`.
+  transcripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      # Only the installed binary is cached, not the build tree (RocksDB's objects are most of
+      # a gigabyte and are never needed again for the same revision).
+      - name: the pinned gonk, cached by its revision
+        uses: actions/cache@v4
+        with:
+          path: target/gonk/*/bin
+          key: gonk-${{ runner.os }}-${{ hashFiles('books/gonk/gonk.rev') }}
+      - name: replay every transcript (scripts/test-transcripts.sh)
+        run: ./scripts/test-transcripts.sh
 
   deploy:
     # A pull request builds and tests; only main (and a manual dispatch) publishes.
-    needs: books
+    needs: [books, transcripts]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # One deploy at a time, and a deploy in flight is never canceled: Pages would be

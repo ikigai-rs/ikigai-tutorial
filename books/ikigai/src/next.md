@@ -6,6 +6,13 @@ repository](repositories.md) in the organization, and [how to contribute a
 module](contribute.md) of your own. The short list below is the handful this book leaned
 on.
 
+## The gonk Book
+
+gonk is the work-ledger and repository-browser host built from the pieces this book teaches:
+a durable store, the work ledger, the repository browser and ikigai's own transports, composed
+into one server. Its book walks through each way to use it on its own, starting with a ledger
+of your own that runs in the page: [The gonk Book](gonk/index.html).
+
 ## The repositories
 
 - [`ikigai-core`](https://github.com/ikigai-rs/ikigai-core) — the kernel,

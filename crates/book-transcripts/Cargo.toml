@@ -1,0 +1,21 @@
+[package]
+name = "book-transcripts"
+version = "0.1.0"
+description = "The books' transcript gate. Not a lesson: a check. A shell block that says \"type this, see that\" is run, in a scratch home, and its output compared with what the page says."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "book_transcripts"
+path = "src/lib.rs"
+
+[[bin]]
+name = "book-transcripts"
+path = "src/main.rs"
+
+[dependencies]
+# Deliberately none, like book-urns: the scanner and the matcher are text in, verdict out, and
+# the runner is std::process. Keeping it dependency-free keeps the fiddly rules unit-testable.
