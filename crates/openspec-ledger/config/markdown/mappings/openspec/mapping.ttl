@@ -1,0 +1,193 @@
+# The OpenSpec mapping for ikigai-markdown: what The gonk Book's chapter "An openspec/ tree as a
+# graph" installs at `urn:markdown:mapping:openspec`. The lifter knows no OpenSpec; every word of
+# it is here.
+#
+# Install it by name: copy this directory to <config home>/markdown/mappings/openspec/ (the config
+# home is $XDG_CONFIG_HOME/ikigai, else ~/.config/ikigai), and lift with
+#   mapping=urn:markdown:mapping:openspec path=openspec/…
+# `path=` is what every construct below reads: a document is a spec, a delta, a proposal or a task
+# list BECAUSE of where it sits in the tree, which is OpenSpec's own rule.
+#
+# The layout it reads (OpenSpec 1.x, single-segment capability names):
+#   openspec/specs/<capability>/spec.md                      the current requirements
+#   openspec/changes/<id>/proposal.md, tasks.md              a change in flight
+#   openspec/changes/<id>/specs/<capability>/spec.md         its delta (ADDED/MODIFIED/REMOVED)
+#   openspec/changes/archive/<YYYY-MM-DD>-<id>/…             a change once archived
+#
+# The vocabulary `os:` is made up for the book (example.org is reserved for examples). Every IRI
+# is minted from names in the tree, so two lifts of the same bytes give the same graph:
+#   urn:openspec:spec:<capability>
+#   urn:openspec:spec:<capability>:requirement:<slug>
+#   urn:openspec:spec:<capability>:requirement:<slug>:scenario:<slug>
+#   urn:openspec:change:<id>          urn:openspec:change:<id>:task:<number>
+#
+# Every regex is written without a backslash ([.], not \.): one inside a SPARQL string inside a
+# Turtle string would have to be written four times.
+
+@prefix md: <https://ikigai-rs.dev/ns/md#> .
+
+<urn:markdown:mapping:openspec> a md:Mapping ;
+
+    # ANCHOR: profile
+    # --- the lift profile --------------------------------------------------------------------
+    # One md:Match per RFC 2119 keyword, wherever it is. SPARQL's REPLACE gives one value per
+    # row, so "MUST refuse … and MUST NOT change" would be one keyword to a construct; the
+    # profile makes it two rows. Longest alternatives first: the regex takes the first that fits.
+    md:citation <urn:markdown:mapping:openspec:citation:keyword> ;
+
+    # ANCHOR_END: profile
+    # --- the constructs ----------------------------------------------------------------------
+    # Each runs alone over ONE document's structural graph. Anything that joins two documents
+    # (a task to the requirement it names, which lives in a delta spec) is a query over the
+    # union, not a construct here.
+
+    # ANCHOR: requirements
+    # 1. A capability and its requirements, from a current spec.
+    md:construct """
+PREFIX md: <https://ikigai-rs.dev/ns/md#>
+PREFIX os: <http://example.org/openspec#>
+CONSTRUCT {
+  ?cap a os:Capability ; os:name ?capName ; os:requirement ?req .
+  ?req a os:Requirement ; os:name ?reqName ; os:capability ?cap ; os:line ?line .
+}
+WHERE {
+  ?doc a md:Document ; md:path ?path .
+  FILTER(REGEX(?path, "(^|/)openspec/specs/[^/]+/spec[.]md$"))
+  BIND(REPLACE(?path, "^(.*/)?openspec/specs/([^/]+)/spec[.]md$", "$2") AS ?capName)
+  BIND(IRI(CONCAT("urn:openspec:spec:", ?capName)) AS ?cap)
+  # OPTIONAL, so a capability with no requirements is still a capability. Its BINDs come AFTER
+  # it: a group inside OPTIONAL is evaluated on its own, where ?cap is not bound yet.
+  OPTIONAL {
+    ?h a md:Heading ; md:document ?doc ; md:level 3 ; md:text ?text ; md:line ?line .
+    FILTER(STRSTARTS(?text, "Requirement: "))
+  }
+  BIND(SUBSTR(?text, 14) AS ?reqName)
+  BIND(IRI(CONCAT(STR(?cap), ":requirement:",
+       REPLACE(REPLACE(LCASE(?reqName), "[^a-z0-9]+", "-"), "^-+|-+$", ""))) AS ?req)
+}
+""" ;
+
+    # ANCHOR_END: requirements
+    # 2. Each requirement's scenarios and their steps, from a current spec.
+    md:construct """
+PREFIX md: <https://ikigai-rs.dev/ns/md#>
+PREFIX os: <http://example.org/openspec#>
+CONSTRUCT {
+  ?req os:scenario ?scenario .
+  ?scenario a os:Scenario ; os:name ?scenarioName ; os:step ?step .
+}
+WHERE {
+  ?doc a md:Document ; md:path ?path .
+  FILTER(REGEX(?path, "(^|/)openspec/specs/[^/]+/spec[.]md$"))
+  BIND(REPLACE(?path, "^(.*/)?openspec/specs/([^/]+)/spec[.]md$", "$2") AS ?capName)
+  ?h a md:Heading ; md:document ?doc ; md:level 3 ; md:text ?text .
+  FILTER(STRSTARTS(?text, "Requirement: "))
+  ?s a md:Heading ; md:document ?doc ; md:level 4 ; md:section ?h ; md:text ?sText .
+  FILTER(STRSTARTS(?sText, "Scenario: "))
+  BIND(IRI(CONCAT("urn:openspec:spec:", ?capName, ":requirement:",
+       REPLACE(REPLACE(LCASE(SUBSTR(?text, 14)), "[^a-z0-9]+", "-"), "^-+|-+$", ""))) AS ?req)
+  BIND(SUBSTR(?sText, 11) AS ?scenarioName)
+  BIND(IRI(CONCAT(STR(?req), ":scenario:",
+       REPLACE(REPLACE(LCASE(?scenarioName), "[^a-z0-9]+", "-"), "^-+|-+$", ""))) AS ?scenario)
+  OPTIONAL { ?item a md:ListItem ; md:section ?s ; md:text ?step }
+}
+""" ;
+
+    # 3. The strength of each requirement: the keywords the profile matched in its section.
+    md:construct """
+PREFIX md: <https://ikigai-rs.dev/ns/md#>
+PREFIX os: <http://example.org/openspec#>
+CONSTRUCT { ?req os:keyword ?keyword . }
+WHERE {
+  ?doc a md:Document ; md:path ?path .
+  FILTER(REGEX(?path, "(^|/)openspec/specs/[^/]+/spec[.]md$"))
+  BIND(REPLACE(?path, "^(.*/)?openspec/specs/([^/]+)/spec[.]md$", "$2") AS ?capName)
+  ?m a md:Match ; md:document ?doc ; md:matchedBy "keyword" ; md:value ?keyword ; md:section ?h .
+  ?h a md:Heading ; md:level 3 ; md:text ?text .
+  FILTER(STRSTARTS(?text, "Requirement: "))
+  BIND(IRI(CONCAT("urn:openspec:spec:", ?capName, ":requirement:",
+       REPLACE(REPLACE(LCASE(SUBSTR(?text, 14)), "[^a-z0-9]+", "-"), "^-+|-+$", ""))) AS ?req)
+}
+""" ;
+
+    # 4. A change, from any document in its folder; archived if the folder is under archive/.
+    md:construct """
+PREFIX md: <https://ikigai-rs.dev/ns/md#>
+PREFIX os: <http://example.org/openspec#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT { ?change a os:Change ; os:id ?id ; os:archivedOn ?date . }
+WHERE {
+  ?doc a md:Document ; md:path ?path .
+  FILTER(REGEX(?path, "(^|/)openspec/changes/"))
+  BIND(REGEX(?path, "(^|/)openspec/changes/archive/") AS ?archived)
+  BIND(IF(?archived,
+          REPLACE(?path, "^(.*/)?openspec/changes/archive/[0-9]{4}-[0-9]{2}-[0-9]{2}-([^/]+)/.*$", "$2"),
+          REPLACE(?path, "^(.*/)?openspec/changes/([^/]+)/.*$", "$2")) AS ?id)
+  BIND(IF(?archived,
+          xsd:date(REPLACE(?path, "^(.*/)?openspec/changes/archive/([0-9]{4}-[0-9]{2}-[0-9]{2})-.*$", "$2")),
+          ?unbound) AS ?date)
+  BIND(IRI(CONCAT("urn:openspec:change:", ?id)) AS ?change)
+}
+""" ;
+
+    # 5. What a change's delta does to a capability's requirements.
+    md:construct """
+PREFIX md: <https://ikigai-rs.dev/ns/md#>
+PREFIX os: <http://example.org/openspec#>
+CONSTRUCT {
+  ?change os:adds ?added ; os:modifies ?modified ; os:removes ?removed .
+  ?req a os:Requirement ; os:name ?reqName ; os:capability ?cap .
+}
+WHERE {
+  ?doc a md:Document ; md:path ?path .
+  FILTER(REGEX(?path, "(^|/)openspec/changes/(archive/)?[^/]+/specs/[^/]+/spec[.]md$"))
+  BIND(REPLACE(?path, "^(.*/)?openspec/changes/(archive/[0-9]{4}-[0-9]{2}-[0-9]{2}-)?([^/]+)/specs/.*$", "$3") AS ?id)
+  BIND(REPLACE(?path, "^.*/specs/([^/]+)/spec[.]md$", "$1") AS ?capName)
+  BIND(IRI(CONCAT("urn:openspec:change:", ?id)) AS ?change)
+  BIND(IRI(CONCAT("urn:openspec:spec:", ?capName)) AS ?cap)
+  ?h a md:Heading ; md:document ?doc ; md:level 3 ; md:text ?text ; md:section ?op .
+  FILTER(STRSTARTS(?text, "Requirement: "))
+  ?op md:level 2 ; md:text ?opText .
+  BIND(SUBSTR(?text, 14) AS ?reqName)
+  BIND(IRI(CONCAT(STR(?cap), ":requirement:",
+       REPLACE(REPLACE(LCASE(?reqName), "[^a-z0-9]+", "-"), "^-+|-+$", ""))) AS ?req)
+  BIND(IF(?opText = "ADDED Requirements", ?req, ?unbound) AS ?added)
+  BIND(IF(?opText = "MODIFIED Requirements", ?req, ?unbound) AS ?modified)
+  BIND(IF(?opText = "REMOVED Requirements", ?req, ?unbound) AS ?removed)
+}
+""" ;
+
+    # ANCHOR: tasks
+    # 6. A change's tasks: every checkbox in its tasks.md. A task that ends in "(Requirement
+    #    name)" cites that requirement BY NAME; which capability it belongs to is the change's
+    #    delta, another document, so resolving the name is a query over the union.
+    md:construct """
+PREFIX md: <https://ikigai-rs.dev/ns/md#>
+PREFIX os: <http://example.org/openspec#>
+CONSTRUCT {
+  ?change os:task ?task .
+  ?task a os:Task ; os:change ?change ; os:number ?number ; os:title ?title ;
+        os:done ?done ; os:group ?group ; os:cites ?cites .
+}
+WHERE {
+  ?doc a md:Document ; md:path ?path .
+  FILTER(REGEX(?path, "(^|/)openspec/changes/(archive/)?[^/]+/tasks[.]md$"))
+  BIND(REPLACE(?path, "^(.*/)?openspec/changes/(archive/[0-9]{4}-[0-9]{2}-[0-9]{2}-)?([^/]+)/tasks[.]md$", "$3") AS ?id)
+  BIND(IRI(CONCAT("urn:openspec:change:", ?id)) AS ?change)
+  ?item a md:ListItem ; md:document ?doc ; md:checked ?done ; md:text ?text .
+  FILTER(REGEX(?text, "^[0-9]+([.][0-9]+)* "))
+  BIND(REPLACE(?text, "^([0-9]+([.][0-9]+)*) .*$", "$1") AS ?number)
+  BIND(REPLACE(?text, "^[0-9.]+ +", "") AS ?rest)
+  BIND(REPLACE(?rest, " *[(][^()]+[)]$", "") AS ?title)
+  BIND(IF(REGEX(?rest, "[(][^()]+[)]$"), REPLACE(?rest, "^.*[(]([^()]+)[)]$", "$1"), ?unbound) AS ?cites)
+  BIND(IRI(CONCAT(STR(?change), ":task:", ?number)) AS ?task)
+  OPTIONAL { ?item md:section ?g . ?g md:text ?group }
+}
+""" .
+
+    # ANCHOR_END: tasks
+# ANCHOR: keyword
+<urn:markdown:mapping:openspec:citation:keyword>
+    md:name "keyword" ;
+    md:pattern "(?P<v>MUST NOT|SHALL NOT|SHOULD NOT|MUST|SHALL|SHOULD|MAY)" .
+# ANCHOR_END: keyword

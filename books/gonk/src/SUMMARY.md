@@ -24,9 +24,9 @@
 
 # A spec in the repository
 
-- [OpenSpec in one chapter]()
-- [An openspec/ tree as a graph]()
-- [Changes and tasks as ledger items, and next over them]()
+- [OpenSpec in one chapter](spec/openspec.md)
+- [An openspec/ tree as a graph](spec/graph.md)
+- [Changes and tasks as ledger items, and next over them](spec/ledger.md)
 
 # Bridges
 
