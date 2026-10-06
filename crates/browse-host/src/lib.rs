@@ -56,6 +56,7 @@ pub const MODEL: &str = "stub-1";
 pub const EXPLANATION: &str = "Defines `initials`, which joins the first letter of each \
 space-separated word of a name into one string.";
 
+// ANCHOR: review
 /// The stub's review, in the grammar browse parses: three lines per finding, and a note that
 /// ends in a period (without one, the last finding reads as cut off and is dropped).
 pub const REVIEW: &str = "\
@@ -66,6 +67,7 @@ QUOTE: pub fn initials(name: &str) -> String {
 SEVERITY: minor
 NOTE: Returning a String allocates on every call; return a &str instead.
 ";
+// ANCHOR_END: review
 
 /// A model that is not a model: a space binding [`PROVIDER`] and its `:model` name, answering
 /// [`REVIEW`] when browse asks for a review and [`EXPLANATION`] otherwise, and counting every
