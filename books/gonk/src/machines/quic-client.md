@@ -57,7 +57,7 @@ $ cat .config/ikigai/gonk/grants.json
 
 Six tokens: the four-token ledger writer from [the first chapter](../ledger/your-own.md), reading
 the `notes` root, and reading browse's graph through the store's narrow door (so the client can
-join its items to what browse knows, as in [the embedding chapter](../embedding/own-kernel.md)).
+join its items to what browse knows; the embedding chapter does exactly that).
 `clients.json`, beside it, maps the fingerprint to the grant's name. Two files, re-read on every
 connection: editing either changes what a client may do, or revokes it, without a restart. The
 **certificates** gonk trusts are read once, at startup — so start it now:
