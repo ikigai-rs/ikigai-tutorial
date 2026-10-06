@@ -80,8 +80,12 @@ speaks the wire the server does:
 
 <!-- transcript: manual — the check installs this version itself (scripts/test-transcripts.sh), reading the same file -->
 ```console
-$ cargo install --locked ikigai-cli --version {{#include ../ikigai-cli.version}}
+$ cargo install --locked ikigai-cli --version {{#include ../ikigai-cli.version}} --features quic
 ```
+
+`--features quic` is for [A QUIC client](machines/quic-client.md), where `ikigai` reaches gonk
+from "another machine"; without it the command line refuses a `quic://` address, and everything
+before that chapter works either way.
 
 ## How to read this book
 

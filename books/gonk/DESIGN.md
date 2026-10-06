@@ -32,8 +32,8 @@ used stand alone."
 | | Importing a kata ledger | transcripts: a fixture export (gonk's test fixture) into a ledger of its own, `--dry-run`, the import, `next` over the imported links, a re-run, a later export converging, what is lost (ledger #774) | **written** |
 | | Checkout | transcripts: `file://` scratch remotes, clone, `--write-config`, an update, `--all` with its coverage report, a refusal on a dirty checkout; the timer (manual) | **written** |
 | | A fresh machine, end to end | transcripts: checkout → roots → start → kata import → the roborev hook → `next`, in one session | **written** |
-| Several machines | The three doors | transcripts: what each door grants, refusals included | outline |
-| | A QUIC client | transcripts: `client add`, then a second scratch process connecting with `--cert-dir`; two scratch homes on one machine | outline |
+| Several machines | The three doors | transcripts: `client add` (the QUIC door opens only with a certificate enrolled), gonk with `--quic-bind 127.0.0.1:1070` (the default QUIC bind is UDP 1060 on every interface, a real gonk's), one request through each door, the access log read back from a `tee`d file (`door=`, `principal=`: `anon`/`owner`/`-`, and `-` on QUIC even for a write), a refusal at the door's floor that writes no line | **written** |
+| | A QUIC client | transcripts: `client add laptop --ledger default=write --browse read --root notes`, `grants.json`, the bundle copied to a second home (`laptop/`), `ikigai --connect quic://… --cert-dir`, refusals outside the grant (delete at the floor, another ledger at the ledger), a stranger's certificate refused in the handshake (the client is told only "connection lost"), the server's log; a real second machine is manual | **written** |
 | Embedding | The ledger, store and browse in your own kernel | Rust: the whole composition gonk makes, minus the doors | outline |
 
 Unwritten chapters are mdbook DRAFT entries (`- [Title]()`), listed in the sidebar without a
@@ -86,7 +86,9 @@ the pin from 5050879 to 9b182ff with one shared build directory, `cargo install 
 called the new revision `Fresh` and installed the previous binary, so the check would have gone
 on testing the old gonk under the new pin's name.
 
-**`ikigai-cli` is pinned the same way, in `books/gonk/ikigai-cli.version`** (arc 2). It IS on
+**`ikigai-cli` is pinned the same way, in `books/gonk/ikigai-cli.version`** (arc 2), and since
+arc 3 it is installed **with its `quic` feature** (not a default; without it `--connect quic://…`
+is refused), into `target/ikigai-cli/<version>+quic/`, under a CI cache key ending `-quic`. It IS on
 crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --version =X`),
 and the file is one line read by the introduction's install line, the script and CI's cache
 key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and

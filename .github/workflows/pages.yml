@@ -191,7 +191,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: target/ikigai-cli/*/bin
-          key: ikigai-cli-${{ runner.os }}-${{ hashFiles('books/gonk/ikigai-cli.version') }}
+          # `-quic`: the cli is built with its `quic` feature (see the script); a cache of a build
+          # without it must not be restored under the same key.
+          key: ikigai-cli-${{ runner.os }}-${{ hashFiles('books/gonk/ikigai-cli.version') }}-quic
       - name: replay every transcript (scripts/test-transcripts.sh)
         run: ./scripts/test-transcripts.sh
 
