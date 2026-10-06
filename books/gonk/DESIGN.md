@@ -21,16 +21,17 @@ used stand alone."
 | | The ledger in a browser | transcripts (curl of the pages, the form as `/act`, the cross-site refusal, `passkey invite --ledger --browse read`, the access log read back from a `tee`d file) · manual (the passkey ceremony, a browser) | **written** |
 | An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:gk:=…/gonk.sock" -c …` (alias), the config-home `prefer` line, `cap seal` to a `grants` list, the socket's access lines; `ikigai-cli` pinned beside gonk | **written** |
 | | Over MCP | transcripts once gonk projects MCP (ledger item 782); *coming* until then | coming |
-| The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a file, `--browse-root`) | outline |
+| The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a commit, a `file`-block `config.toml` root); tree/file/hash/state over the socket, a commit picked up by the watcher without a restart, the signed-out `/browse` notice | **written** |
 | | Explain, with a mounted model | Rust: browse in a kernel with a STUB `urn:llm:` space (a deterministic model), so the archive and the version tag are testable; transcript of the banner with `--mount`; manual for a real model | outline |
 | Review without a reviewer | One-off review, what a finding is | Rust with the stub model: a review pass minting pending findings, a publish | outline |
 | | The audit protocol | prose: why per-commit review is off (`ikigai-devtools/claude/research/review-exp2-2026-10-05/README.md`: frontier per-commit review 0.72 serious bugs per 100k tokens against 1.49–1.99 for unled audits, two auditors per repo) | outline |
 | A spec in the repository | OpenSpec in one chapter | prose + an `openspec/` tree committed under `crates/` | outline |
 | | An openspec/ tree as a graph | Rust: `ikigai-markdown`'s generic lift plus a MAPPING for OpenSpec (a SPARQL CONSTRUCT + lift profile, found at `urn:markdown:mapping:openspec`), over that tree | outline |
 | | Changes and tasks as ledger items | Rust: tasks (`- [ ] 1.1 …`) become ledger items `about` their requirement; `next` over them; cells if the page kernel can carry the markdown lift | outline |
-| Bridges | Filing roborev findings | transcripts: `ikigai-gonk roborev file --dry-run` and for real, from a fixture review | outline |
-| | Importing a kata ledger | transcripts, as `kata import` lands | coming |
-| | Checkout | transcripts, as `checkout` lands (a gonk satellite is building it, 2026-10-06) | coming |
+| Bridges | Filing roborev findings | transcripts: a fixture review (gonk's own test fixture, as a `file` block), `--dry-run`, for real, the hook's own invocation filing nothing, a fix-job's prose, a refused ledger; the `[[hooks]]` block | **written** |
+| | Importing a kata ledger | transcripts: a fixture export (gonk's test fixture) into a ledger of its own, `--dry-run`, the import, `next` over the imported links, a re-run, a later export converging, what is lost (ledger #774) | **written** |
+| | Checkout | transcripts: `file://` scratch remotes, clone, `--write-config`, an update, `--all` with its coverage report, a refusal on a dirty checkout; the timer (manual) | **written** |
+| | A fresh machine, end to end | transcripts: checkout → roots → start → kata import → the roborev hook → `next`, in one session | **written** |
 | Several machines | The three doors | transcripts: what each door grants, refusals included | outline |
 | | A QUIC client | transcripts: `client add`, then a second scratch process connecting with `--cert-dir`; two scratch homes on one machine | outline |
 | Embedding | The ledger, store and browse in your own kernel | Rust: the whole composition gonk makes, minus the doors | outline |
@@ -89,7 +90,7 @@ on testing the old gonk under the new pin's name.
 crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --version =X`),
 and the file is one line read by the introduction's install line, the script and CI's cache
 key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and
-`ikigai-web` share the cli's version: 0.1.38 at 9b182ff), so the client speaks the server's
+`ikigai-web` share the cli's version: 0.1.38 at both 9b182ff and 60cf306), so the client speaks the server's
 wire; moving gonk is a reason to look at this file too.
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:

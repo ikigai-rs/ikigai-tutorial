@@ -29,7 +29,9 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
 - **A spec in the repository.** [OpenSpec](https://github.com/Fission-AI/OpenSpec) keeps
   requirements, scenarios, changes and tasks as Markdown in an `openspec/` tree. Lifted to RDF
   with an `ikigai-markdown` mapping, a change's tasks become ledger items and `next` ranks them.
-- **Bridges.** Filing roborev findings as ledger items; importing a kata ledger; checkout.
+- **Bridges.** Filing roborev findings as ledger items; importing a kata ledger; checking out
+  the repositories gonk browses and keeping them current; and all three in order on a fresh
+  machine.
 - **Several machines.** The three doors, the grant each runs under, and a QUIC client.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
