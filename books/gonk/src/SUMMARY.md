@@ -19,8 +19,8 @@
 
 # Review without a reviewer
 
-- [One-off review, and what a finding is]()
-- [The audit protocol, and why per-commit review is off]()
+- [One-off review, and what a finding is](review/one-off.md)
+- [The audit protocol, and why per-commit review is off](review/audit.md)
 
 # A spec in the repository
 
