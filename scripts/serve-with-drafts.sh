@@ -5,7 +5,7 @@
 # A chapter that is written but not yet public lives in `books/ikigai/src/` like any
 # other, but is left OUT of `SUMMARY.md`, so `mdbook` neither builds nor deploys it.
 # This script copies the book to a temporary directory, appends the drafts listed in
-# `books/ikigai/drafts.txt` to that copy's SUMMARY under a "Drafts" part, builds it, then
+# `books/<book>/drafts.txt` (`books/ikigai/drafts.txt` by default) to that copy's SUMMARY under a "Drafts" part, builds it, then
 # builds the in-page kernel (`crates/book-wasm`) into `wasm/` beside it the way pages.yml
 # does — the working tree and the deployed site are untouched.
 #
@@ -14,6 +14,7 @@
 #   ./scripts/serve-with-drafts.sh build           # build only, into target/drafts-book/
 #   ./scripts/serve-with-drafts.sh build DIR       # build only, into DIR (replaced)
 #   … --no-kernel                                  # skip the kernel: prose only, Run disabled
+#   … --book gonk                                  # another book (default: ikigai)
 #
 # WHY NOT `mdbook serve`. It never builds `crates/book-wasm`, so under it the kernel can
 # never load and every Run is disabled — honest, but not reviewable. And it rebuilds (and
@@ -38,15 +39,16 @@
 # is a page whose kernel silently fails to load.
 #
 # drafts.txt: one chapter per line — `Title | relative/path.md` (relative to src/).
-# Blank lines and lines starting with `#` are ignored.
+# Blank lines and lines starting with `#` are ignored. A book other than the default may have
+# none (The gonk Book does not, yet): it is then built with its kernel and no Drafts part, which
+# is still the only local way to press its Run buttons.
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")/.." && pwd)"
-book="$here/books/ikigai"
-drafts="$book/drafts.txt"
+name=ikigai
 
 usage() {
-    sed -n '12,16p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '12,17p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 mode=serve
@@ -54,8 +56,15 @@ kernel=1
 port=3000
 out=""
 positional=()
+want_book=0
 for arg in "$@"; do
+    if [ "$want_book" = 1 ]; then
+        name="$arg"
+        want_book=0
+        continue
+    fi
     case "$arg" in
+        --book) want_book=1 ;;
         serve|build) mode="$arg" ;;
         --no-kernel) kernel=0 ;;
         -h|--help) usage; exit 0 ;;
@@ -75,11 +84,19 @@ if [ "${#positional[@]}" -eq 1 ]; then
         out="${positional[0]}"
     fi
 fi
+book="$here/books/$name"
+drafts="$book/drafts.txt"
+if [ ! -f "$book/book.toml" ]; then
+    echo "no book called $name (no $book/book.toml)" >&2
+    exit 2
+fi
 out="${out:-$here/target/drafts-book}"
 # An absolute path, so the `mv` below and the server agree whatever the caller's cwd.
 case "$out" in /*) ;; *) out="$PWD/$out" ;; esac
 
-if [ ! -f "$drafts" ]; then
+# The default book always has a drafts list, so its absence there is a broken checkout rather
+# than a book with nothing in draft.
+if [ ! -f "$drafts" ] && [ "$name" = ikigai ]; then
     echo "no $drafts — nothing is in draft" >&2
     exit 1
 fi
@@ -220,31 +237,41 @@ trap 'rm -rf "$tmp"' EXIT
 cp -R "$book/." "$tmp/"
 rm -rf "$tmp/book"
 
-partfile="$tmp/drafts-part.md"
-{
-    printf '\n# Drafts (not yet public)\n\n'
+# The book's own list came with the copy; a book with none gets no Drafts part at all.
+drafts="$tmp/drafts.txt"
+entries="$tmp/drafts-entries.md"
+: > "$entries"
+if [ -f "$drafts" ]; then
     while IFS='|' read -r title path; do
         title="$(printf '%s' "${title:-}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
         path="$(printf '%s' "${path:-}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
         case "$title" in ''|'#'*) continue ;; esac
         if [ -z "$path" ] || [ ! -f "$tmp/src/$path" ]; then
-            echo "draft chapter not found: src/$path (from $drafts)" >&2
+            echo "draft chapter not found: src/$path (from $book/drafts.txt)" >&2
             exit 1
         fi
         printf -- '- [%s](%s)\n' "$title" "$path"
-    done < "$drafts"
-} > "$partfile"
+    done < "$drafts" > "$entries"
+fi
 
-# mdbook refuses a numbered part AFTER the suffix chapters (the `---` block at the end of
-# SUMMARY.md: "Where to go next", the glossary), so the drafts part goes in front of that
-# separator; a summary with no suffix block gets it appended.
-summary="$tmp/src/SUMMARY.md"
-if grep -qx -- '---' "$summary"; then
-    awk -v partfile="$partfile" 'BEGIN { done = 0 }
-        /^---$/ && !done { while ((getline l < partfile) > 0) print l; print ""; done = 1 }
-        { print }' "$summary" > "$summary.new" && mv "$summary.new" "$summary"
-else
-    cat "$partfile" >> "$summary"
+if [ -s "$entries" ]; then
+    partfile="$tmp/drafts-part.md"
+    {
+        printf '\n# Drafts (not yet public)\n\n'
+        cat "$entries"
+    } > "$partfile"
+
+    # mdbook refuses a numbered part AFTER the suffix chapters (the `---` block at the end of
+    # SUMMARY.md: "Where to go next", the glossary), so the drafts part goes in front of that
+    # separator; a summary with no suffix block gets it appended.
+    summary="$tmp/src/SUMMARY.md"
+    if grep -qx -- '---' "$summary"; then
+        awk -v partfile="$partfile" 'BEGIN { done = 0 }
+            /^---$/ && !done { while ((getline l < partfile) > 0) print l; print ""; done = 1 }
+            { print }' "$summary" > "$summary.new" && mv "$summary.new" "$summary"
+    else
+        cat "$partfile" >> "$summary"
+    fi
 fi
 
 mdbook build "$tmp"
@@ -255,9 +282,7 @@ rm -rf "$tmp"
 
 # ── The in-page kernel, exactly as pages.yml builds it ───────────────────────────────
 if [ "$kernel" = 1 ]; then
-    (cd "$here" && cargo build --release -p book-wasm --lib --target wasm32-unknown-unknown)
-    wasm-bindgen --target web --out-dir "$out/wasm" \
-        "$here/target/wasm32-unknown-unknown/release/book_wasm.wasm"
+    "$here/scripts/build-kernels.sh" "$name" "$out/wasm"
     if [ ! -s "$out/wasm/book_wasm_bg.wasm" ]; then
         echo "the kernel build produced no $out/wasm/book_wasm_bg.wasm" >&2
         exit 1

@@ -1,0 +1,31 @@
+[book]
+title = "The gonk Book"
+authors = ["Brian Sletten"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+# The second book of this repository, published BESIDE the first: The ikigai Book is the site's
+# root (https://ikigai-rs.github.io/ikigai-tutorial/) and this one lives under it, at `gonk/`.
+# The 404 page's assets are found from this absolute base, exactly as in books/ikigai/book.toml;
+# and `scripts/assemble-site.sh` reads THIS value to decide where the built book goes in the one
+# Pages artifact, so the layout is stated once, here.
+site-url = "/ikigai-tutorial/gonk/"
+git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
+edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/gonk/{path}"
+# The SAME files as The ikigai Book's, by symlink (`css/a11y.css -> ../../ikigai/css/a11y.css`):
+# one contrast repair and one runnable-cell script for both books, so the two cannot drift apart.
+# `crates/book-a11y` measures the cascade this book really loads, as it does for the first.
+additional-css = ["css/a11y.css", "css/run.css"]
+# run.js loads `wasm/book_wasm.js` beside this book's root. Here that is the gonk book's OWN
+# kernel (`crates/gonk-book-wasm`: the ledger over an in-memory store), bound by wasm-bindgen
+# under the same file name, so the one script serves both books unchanged.
+additional-js = ["js/a11y.js", "js/run.js"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[rust]
+edition = "2021"

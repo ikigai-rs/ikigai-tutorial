@@ -12,4 +12,4 @@ jobs:
       test-args: "--all-targets"
       wasm-lib: true
 
-      wasm-packages: book-wasm   # the one wasm face; two-hosts (quinn/mio) cannot build on wasm32
+      wasm-packages: book-wasm gonk-book-wasm   # the books' wasm faces; two-hosts (quinn/mio) cannot build on wasm32

@@ -1,0 +1,20 @@
+[package]
+name = "ledger-host"
+version = "0.1.0"
+description = "The code taught by The gonk Book's first chapter, \"A ledger of your own\": the work ledger and the store it is written in, composed in a kernel the reader builds. No endpoint of its own: a composition and a clock."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "ledger_host"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-ledger.workspace = true
+ikigai-store.workspace = true
+futures.workspace = true

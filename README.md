@@ -97,6 +97,29 @@ four things Part I promises (a cache hit, a golden thread cut, a traced sub-reso
 description that is a graph) are tests in `crates/hello-camel/tests/payoff.rs`, included
 into the chapter that makes the promise.
 
+## The second book: The gonk Book
+
+**[The gonk Book](books/gonk)** — gonk, the work-ledger and repository-browser host, one
+part per way it is used on its own: a ledger of your own, an agent's ledger, the repository
+browser, review without a reviewer, a spec in the repository (OpenSpec), bridges, several
+machines, and embedding. Published at **<https://ikigai-rs.github.io/ikigai-tutorial/gonk/>**,
+by the same run as the first book and through the same gates. Its design, outline and the
+check each kind of example is under are in [`books/gonk/DESIGN.md`](books/gonk/DESIGN.md);
+the first chapter, *A ledger of your own*, is written, and the rest are listed as drafts.
+
+Its examples come in three kinds, and the third is new here: cells that run in the page
+(`crates/gonk-book-wasm`, the ledger over an in-memory store), Rust that `mdbook test` runs
+(`crates/ledger-host`), and **shell transcripts** of the gonk binary, which
+`./scripts/test-transcripts.sh` replays against a scratch gonk built from the revision the
+book pins (`books/gonk/gonk.rev`; gonk is not on crates.io yet), in a scratch home, comparing
+what each command prints with what the page says (`crates/book-transcripts`).
+
+```bash
+mdbook serve books/gonk --open                     # the prose; Run is disabled (no kernel)
+./scripts/serve-with-drafts.sh --book gonk         # with its in-page kernel, on 127.0.0.1:3000
+./scripts/test-transcripts.sh                      # every transcript, against the pinned gonk
+```
+
 ## The book is tested
 
 There is no separate "keep the docs up to date" chore, because there is a gate:
@@ -314,6 +337,11 @@ examples/              the polyglot tracks' listings (Python, Deno, a notebook),
                        against a served kernel — not compiled here, not on PyPI/JSR yet
 crates/book-urns       not a lesson: the prose gates above, and "never quoted" itself
 crates/book-a11y       likewise: the contrast gate and the skip link's target
+crates/ledger-host     The gonk Book's first chapter: the ledger and its store in a kernel
+crates/gonk-book-wasm  The gonk Book's in-page kernel (the ikigai book's is book-wasm)
+crates/book-transcripts  not a lesson: the shell-transcript gate (scripts/test-transcripts.sh)
+scripts/               test-books.sh (every book), build-kernels.sh, assemble-site.sh (one
+                       Pages artifact, each book where its site-url says), serve-with-drafts.sh
 ```
 
 ## Dependencies are published crates, deliberately
@@ -331,8 +359,10 @@ beside it. Put the code it teaches in a crate under `crates/` so it is compiled 
 like anything else, and include that code into chapters by anchor rather than pasting it —
 paraphrase is how a tutorial starts lying.
 
-Start a genuinely separate book under `books/` only when it shares no cross-references
-with this one; the script and CI already build every book they find.
+Start a genuinely separate book under `books/` only when it is about something else (The
+gonk Book is the second); `test-books.sh`, axe, the no-kernel check and the link check run
+over every book they find, `assemble-site.sh` places each by its `site-url`, and a book with
+an in-page kernel adds one line to `scripts/build-kernels.sh`.
 
 Planned:
 

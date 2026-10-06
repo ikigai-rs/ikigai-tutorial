@@ -1,0 +1,35 @@
+[package]
+name = "gonk-book-wasm"
+version = "0.1.0"
+description = "The gonk Book's own kernel, in the page: a wasm-bindgen face over the ledger and the store it is written in (crates/ledger-host) and the CLI's engine, so a chapter's runnable cells file, list and rank work for real."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "gonk_book_wasm"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ikigai-core.workspace = true
+ledger-host = { path = "../ledger-host" }
+# The CLI's engine, as `crates/book-wasm` takes it: the same REPL grammar a reader types at
+# `ikigai`, so a cell's line means what it means at a shell.
+ikigai-engine = "0.1.29"
+futures.workspace = true
+serde_json = "1"
+# ⚠ Pinned EXACTLY, to the version `crates/book-wasm` pins and pages.yml installs the
+# `wasm-bindgen-cli` for: the generated JS and the wasm must agree on their ABI, and a
+# mismatch is a page whose cells silently fail to load. Bump all three or none.
+wasm-bindgen = "=0.2.108"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+console_error_panic_hook = "0.1"
+
+[dev-dependencies]
+# The matcher the transcript gate uses, so a cell's expected output can say `…` where an id
+# is minted, exactly as a transcript does.
+book-transcripts = { path = "../book-transcripts" }

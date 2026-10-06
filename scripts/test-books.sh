@@ -30,7 +30,13 @@ for book in books/*/; do
     # additional-css, in cascade order — so it has to run here, after the build, rather
     # than as a `cargo test`. A table of hex values in a test file would go stale the
     # first time mdbook changed a theme, and stay green while doing it.
-    if ! CARGO_TARGET_DIR="$TARGET" cargo run --quiet -p book-a11y -- "$book"; then
+    #
+    # The binary the workspace build above made, run directly — NOT `cargo run -p book-a11y`.
+    # That re-resolves features for book-a11y ALONE, rebuilds shared dependencies with that
+    # narrower set into the same `deps/`, and leaves a second `ikigai_core` rlib there: the
+    # next book's `mdbook test` then fails with E0464. With one book it never showed, because
+    # nothing ran after the last contrast check; the second book is what exposed it.
+    if ! "$TARGET/debug/book-a11y" "$book"; then
         echo "FAILED: $name (contrast)"
         status=1
     fi

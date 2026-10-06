@@ -10,7 +10,8 @@
 //! the two guards read the same. What differs is only what is scanned, and one short
 //! list of words this repository has had to refuse ([`LOCAL_EXACT`]).
 //!
-//! Scanned: the book's pages, scripts and styles (`books/ikigai/{src,css,js}`), every
+//! Scanned: the books' pages, scripts and styles (`books/ikigai/{src,css,js}`, and
+//! `books/gonk/src` with that book's `DESIGN.md`), every
 //! crate's sources, READMEs, templates and static files, the root `README.md`, and
 //! `docs/`, `scripts/`, `a11y/` and `.github/`. The scripts and styles are in scope
 //! because that is where half of the first sweep's hits were (`a11y.css`, `run.js`);
@@ -88,9 +89,13 @@ const LOCAL_EXACT: [&str; 4] = ["noughts", "licence", "enrolment", "whilst"];
 const QUOTE_MARKER: &str = "spelling: quote";
 
 /// Where we write, relative to the repository root. A file is scanned as itself.
-const ROOTS: [&str; 9] = [
+const ROOTS: [&str; 11] = [
     "README.md",
     "books/ikigai/src",
+    // The gonk Book's own pages and its design note. Its css/ and js/ are symlinks to the
+    // ikigai book's, scanned above.
+    "books/gonk/src",
+    "books/gonk/DESIGN.md",
     "books/ikigai/css",
     "books/ikigai/js",
     "crates",

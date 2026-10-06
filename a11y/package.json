@@ -4,7 +4,7 @@
   "description": "The book's second accessibility instrument: axe-core over a jsdom of every built page, with the book's scripts run. See a11y/axe.mjs.",
   "type": "module",
   "scripts": {
-    "check": "node axe.mjs ../books/ikigai/book"
+    "check": "for book in ../books/*/book; do node axe.mjs \"$book\" || exit 1; done"
   },
   "devDependencies": {
     "axe-core": "4.10.3",
