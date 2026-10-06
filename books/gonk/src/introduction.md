@@ -35,8 +35,8 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
 - **Several machines.** The three doors, the grant each runs under, and a QUIC client.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
-Chapters not yet written are listed in the sidebar without a link, so the shape of the book
-is visible before all of it is.
+One chapter is not written yet, *Over MCP*, because gonk does not project MCP yet; it is listed
+in the sidebar without a link, so the shape of the book is visible before all of it is.
 
 ## Three kinds of example, and how each is checked
 
