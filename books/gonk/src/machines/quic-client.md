@@ -135,14 +135,16 @@ client `stranger`  …/.config/ikigai/gonk/quic/clients/stranger
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1060 --cert-dir <the moved directory>
 $ env HOME="$PWD/laptop" XDG_CONFIG_HOME="$PWD/laptop/.config" ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/stranger -c 'source urn:iki:ledger:items'
-error: unavailable: quic transport: read error: connection lost
+error: unavailable: quic transport: …
 ```
 
 Refused twice over: the running server does not trust the certificate (it was not there at
-startup), and if it did, a trusted certificate with no grant is refused anyway. ⚠ What the client is
-told is only that the connection was lost. That is safe — a stranger learns nothing about why — but
-it is also all an *honest* client with a stale bundle is told, so when a connection is lost
-straight away, check the bundle against the server's `clients.json` first.
+startup), and if it did, a trusted certificate with no grant is refused anyway. What the client is
+told depends on timing, which is why the page prints `…` there: either that the TLS handshake
+failed because its certificate `does not match the pinned certificate`, or, if the connection is
+torn down first, only `read error: connection lost`. ⚠ The second is all an *honest* client with a
+stale bundle may hear, so when a connection is lost straight away, check the bundle against the
+server's `clients.json` and restart the server if the certificate was enrolled after it started.
 
 ## What the server saw
 
