@@ -201,8 +201,12 @@ assert!(matches!(publish, Err(Error::Denied(ref why)) if why.contains("urn:cap:a
 ```
 
 A reader can read the archive; a deriver can run a pass and read its findings; only a holder of
-`urn:cap:annotate` can publish. In gonk those are the `--browse read` and `--browse derive` client
-grants, and the person at the browser.
+`urn:cap:annotate` can publish. gonk uses the split both ways. Its client roles are cumulative:
+`--browse read` reads, and `--browse derive` is read **plus** `urn:cap:annotate` **plus** the
+network grant, because a person at a client who may spend the model is also trusted to decide.
+Its *headless* reviewer — the one a commit hook would trigger — is the opposite case: gonk refuses
+to arm it with any grant that can publish, so a machine that spends the model can never also
+promote what it produced.
 
 ## In gonk
 
