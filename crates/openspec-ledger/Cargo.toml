@@ -1,0 +1,23 @@
+[package]
+name = "openspec-ledger"
+version = "0.1.0"
+description = "The code taught by The gonk Book's OpenSpec part: an openspec/ tree lifted to RDF by ikigai-markdown's generic lift and an OpenSpec mapping resource, queried with SPARQL, and its changes' tasks kept as ledger items about their requirements."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "openspec_ledger"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-ledger.workspace = true
+ikigai-store.workspace = true
+ikigai-markdown.workspace = true
+futures.workspace = true
+# `ask` and the story clock, as every gonk-book host uses them.
+ledger-host = { path = "../ledger-host" }

@@ -109,6 +109,12 @@ ikigai-browse = "0.18.0"
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
 oxigraph = { version = "0.5.11", default-features = false }
+# Markdown as a graph, for the OpenSpec part: one generic structural lift plus a MAPPING resource
+# (a lift profile and SPARQL CONSTRUCTs), found by name at `urn:markdown:mapping:{name}` under a
+# config home. ⚠ NOT ON CRATES.IO (2026-10-06), so it is pinned the way DESIGN.md pins the other
+# unpublished piece, gonk: to one full git revision of its public repository — never a path, and
+# never a branch. When it is published this line becomes a version and nothing else moves.
+ikigai-markdown = { git = "https://github.com/ikigai-rs/ikigai-markdown", rev = "89aa9dcdf1a4074aabf37811314307757dc3533b" }
 # The config file "Configuration" reads through `layered_paths`.
 toml = "0.8"
 futures = "0.3"

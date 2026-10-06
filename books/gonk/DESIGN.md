@@ -25,9 +25,9 @@ used stand alone."
 | | Explain, with a mounted model | Rust (`crates/browse-host`): browse over a scratch directory with a STUB model at `urn:llm:stub:{ask,model}` that counts its calls, so "derive once, then from the archive", the version tag, the content-keyed archive and the cost line are asserted; transcripts: the banner with `--mount` (a socket nothing listens on), `explain-status` answering and `explain` refused `unavailable` over the socket; manual for a real model | **written** |
 | Review without a reviewer | One-off review, what a finding is | Rust (`crates/browse-host`, the same stub model): a pass minting two pending findings with stable ids, the archive (no second model call), decline with a reason from the closed set, a `should_panic` reproduction, publish with `reproduced=yes` → an annotation `derived_from` the finding, a decision refused without `revises=`, and the capability split (read / derive / annotate) | **written** |
 | | The audit protocol | prose with numbers, cited: round 1 (`claude/research/review-exp-2026-10-03/README.md`: led 0.79 vs unled 1.68 serious per 100k tokens) and round 2 (`review-exp2-2026-10-05/README.md`: frontier per-commit review 0.72 against 1.49–1.99 for unled audits, two auditors per repo), the protocol from `claude/audits/README.md`, and a section on what the evidence is NOT. Both in the private `ikigai-devtools`; the chapter says so | **written** |
-| A spec in the repository | OpenSpec in one chapter | prose + an `openspec/` tree committed under `crates/` | outline |
-| | An openspec/ tree as a graph | Rust: `ikigai-markdown`'s generic lift plus a MAPPING for OpenSpec (a SPARQL CONSTRUCT + lift profile, found at `urn:markdown:mapping:openspec`), over that tree | outline |
-| | Changes and tasks as ledger items | Rust: tasks (`- [ ] 1.1 …`) become ledger items `about` their requirement; `next` over them; cells if the page kernel can carry the markdown lift | outline |
+| A spec in the repository | OpenSpec in one chapter | prose + the committed tree `crates/openspec-ledger/openspec/` (two capabilities, `board` and `moves`; one change, `add-undo`, with a proposal, a delta spec and tasks), included verbatim; the book's one convention beyond OpenSpec (a task cites its requirement by name in a trailing parenthesis) is stated as the book's | **written** |
+| | An openspec/ tree as a graph | Rust (`crates/openspec-ledger`): `ikigai-markdown`'s generic lift plus the mapping at `urn:markdown:mapping:openspec` (`config/markdown/mappings/openspec/mapping.ttl`, a config-home layout: one citation in the lift profile for RFC 2119 keywords, six CONSTRUCTs), lifted per document into the store, asked with `graph-select` over the set of document graphs | **written** |
+| | Changes and tasks as ledger items | Rust: two queries over the spec graphs ∪ the ledger graph (`UNFILED`, `FINISHED`) and `sync_ledger` acting on them; items `about` the task and its requirement; check a box → close; archive (a real directory move) → close the rest. No cells: `urn:markdown:mapping:{name}` is not built for wasm, and the page would replay a frozen tree | **written** |
 | Bridges | Filing roborev findings | transcripts: a fixture review (gonk's own test fixture, as a `file` block), `--dry-run`, for real, the hook's own invocation filing nothing, a fix-job's prose, a refused ledger; the `[[hooks]]` block | **written** |
 | | Importing a kata ledger | transcripts: a fixture export (gonk's test fixture) into a ledger of its own, `--dry-run`, the import, `next` over the imported links, a re-run, a later export converging, what is lost (ledger #774) | **written** |
 | | Checkout | transcripts: `file://` scratch remotes, clone, `--write-config`, an update, `--all` with its coverage report, a refusal on a dirty checkout; the timer (manual) | **written** |
@@ -96,6 +96,15 @@ wire; moving gonk is a reason to look at this file too.
 The book's crates link the PUBLISHED modules at the versions that revision takes:
 `ikigai-ledger` 0.3.0, `ikigai-store` 0.2.6 (in-memory, `persistent` off), and `ikigai-browse`
 0.18.0, with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
+
+**`ikigai-markdown` is not on crates.io** (2026-10-06), so the OpenSpec part takes it the way this
+book takes gonk: from its public repository at ONE full git revision, in the workspace
+`Cargo.toml` (`git = …, rev = …`), never a path or a branch. When it is published that line
+becomes a version. **`ikigai-ledger` 0.4.0** (the keyed append) was not published when part 5 was
+written either, so part 5 runs on 0.3.0 and makes the sync idempotent with a query
+(`FILTER NOT EXISTS { ?item ledger:about ?task }`) instead of a key; the chapter says what that
+costs (two concurrent syncs could file a task twice). Moving to 0.4.0 is: bump the workspace pin,
+pass `key=<task IRI>` in `sync_ledger`, and rewrite that paragraph.
 
 **No real model, anywhere checked.** A chapter that needs one binds a stub at `urn:llm:` (see
 `crates/browse-host`): two names, `urn:llm:stub:ask` and `urn:llm:stub:model`, answering a fixed
