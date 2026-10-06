@@ -9,6 +9,16 @@
 #         its install line from and CI keys its cache on, so moving gonk is a one-line change.
 #         It is installed here, `--locked`, into `target/gonk/<rev>/` (ignored by git) unless
 #         that build is already there. The first install compiles RocksDB: minutes, once.
+#         ⚠ Each revision builds in its OWN target directory (`target/gonk/<rev>/build`). With
+#         one build directory shared across revisions, `cargo install --git --rev <new>` reported
+#         the new revision "Fresh" and installed the OLD binary (seen moving 5050879 → 9b182ff,
+#         2026-10-06): the pin moved and the check went on testing the previous gonk.
+#
+#   ikigai is `ikigai-cli` from crates.io, pinned to ONE version in `books/gonk/ikigai-cli.version`
+#         (the same one-file shape: the book prints its install line from it, CI keys its cache
+#         on it). Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `-wire`,
+#         `-web` share the cli's version), so the client a page runs speaks the wire the pinned
+#         gonk serves. Installed `--locked` into `target/ikigai-cli/<version>/`.
 #
 # ⚠ Every page runs in a SCRATCH home (`HOME` and `XDG_CONFIG_HOME` point into a temporary
 # directory), so nothing here reads or writes a real gonk's store, socket or grants; and a
@@ -16,8 +26,8 @@
 #
 # The ikigai book is not checked this way yet: its REPL transcripts are replayed by
 # `crates/book-urns/tests/book_transcripts.rs` against an installed `ikigai`, `#[ignore]`d
-# because CI has none. Adopting this check is a pin of `ikigai-cli` beside gonk's and one more
-# line below; its `ikigai> ` blocks would become `console` blocks of `$ ikigai -c …`.
+# because CI has none. Adopting this check is one more line below (the cli is pinned already);
+# its `ikigai> ` blocks would become `console` blocks of `$ ikigai -c …`.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -35,8 +45,20 @@ root="target/gonk/$rev"
 if [ ! -x "$root/bin/ikigai-gonk" ]; then
     echo "installing ikigai-gonk at $rev into $root (once per revision)"
     cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev "$rev" \
-        --root "$root" --target-dir target/gonk/build ikigai-gonk
+        --root "$root" --target-dir "$root/build" ikigai-gonk
 fi
 
-echo "── gonk (ikigai-gonk $rev) ──────────────────"
-cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin"
+cli="$(tr -d '[:space:]' < books/gonk/ikigai-cli.version)"
+case "$cli" in
+    [0-9]*.[0-9]*.[0-9]*) ;;
+    *) echo "books/gonk/ikigai-cli.version is not a version: '$cli'" >&2; exit 2 ;;
+esac
+cli_root="target/ikigai-cli/$cli"
+if [ ! -x "$cli_root/bin/ikigai" ]; then
+    echo "installing ikigai-cli $cli into $cli_root (once per version)"
+    cargo install --locked ikigai-cli --version "=$cli" \
+        --root "$cli_root" --target-dir "$cli_root/build"
+fi
+
+echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli) ──────────────────"
+cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin"

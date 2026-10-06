@@ -5,11 +5,11 @@
 # A ledger of your own
 
 - [A ledger of your own](ledger/your-own.md)
-- [The ledger in a browser]()
+- [The ledger in a browser](ledger/browser.md)
 
 # An agent's ledger
 
-- [Over the socket]()
+- [Over the socket](agent/socket.md)
 - [Over MCP (coming)]()
 
 # The repository browser

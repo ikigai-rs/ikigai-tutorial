@@ -45,3 +45,42 @@ fn the_book_installs_gonk_from_the_pin_and_spells_no_revision_itself() {
         "no page installs gonk from books/gonk/gonk.rev"
     );
 }
+
+/// The `ikigai` the transcripts run is pinned the same way: one version in one file,
+/// `books/gonk/ikigai-cli.version`, which the script installs and CI keys its cache on.
+fn cli_version() -> String {
+    std::fs::read_to_string(book().join("ikigai-cli.version"))
+        .expect("books/gonk/ikigai-cli.version")
+}
+
+#[test]
+fn the_cli_pin_is_one_exact_version_on_one_line() {
+    let text = cli_version();
+    let lines: Vec<&str> = text.lines().collect();
+    assert_eq!(lines.len(), 1, "one line: {text:?}");
+    let parts: Vec<&str> = lines[0].split('.').collect();
+    assert_eq!(parts.len(), 3, "MAJOR.MINOR.PATCH, nothing else: {text:?}");
+    assert!(
+        parts
+            .iter()
+            .all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit())),
+        "an exact version, not a requirement: {text:?}"
+    );
+}
+
+#[test]
+fn the_book_installs_the_cli_from_the_pin() {
+    let mut includes = 0;
+    for page in book_transcripts::pages(&book().join("src")).expect("the book's pages") {
+        let text = std::fs::read_to_string(&page).expect("a readable page");
+        includes += text
+            .matches(
+                "cargo install --locked ikigai-cli --version {{#include ../ikigai-cli.version}}",
+            )
+            .count();
+    }
+    assert!(
+        includes >= 1,
+        "no page installs ikigai-cli from books/gonk/ikigai-cli.version"
+    );
+}

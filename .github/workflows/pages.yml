@@ -170,7 +170,8 @@ jobs:
   #
   # A `console` block in the gonk book is the page saying "type this, see that", and
   # `scripts/test-transcripts.sh` types it: it installs gonk at the revision in
-  # `books/gonk/gonk.rev` (`cargo install --locked --git … --rev`), runs each page's commands
+  # `books/gonk/gonk.rev` (`cargo install --locked --git … --rev`) and `ikigai-cli` at the version
+  # in `books/gonk/ikigai-cli.version`, runs each page's commands
   # in a scratch home, and compares what they print with what the page says (ledger #165).
   # A job of its own because building gonk compiles RocksDB; the build is cached by that
   # revision, so it is paid once per pin. The deploy needs it like it needs `books`.
@@ -186,6 +187,11 @@ jobs:
         with:
           path: target/gonk/*/bin
           key: gonk-${{ runner.os }}-${{ hashFiles('books/gonk/gonk.rev') }}
+      - name: the pinned ikigai-cli, cached by its version
+        uses: actions/cache@v4
+        with:
+          path: target/ikigai-cli/*/bin
+          key: ikigai-cli-${{ runner.os }}-${{ hashFiles('books/gonk/ikigai-cli.version') }}
       - name: replay every transcript (scripts/test-transcripts.sh)
         run: ./scripts/test-transcripts.sh
 
