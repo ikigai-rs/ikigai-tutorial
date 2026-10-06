@@ -37,8 +37,8 @@
 
 # Several machines
 
-- [The three doors, and who is asking]()
-- [A QUIC client, and the grant it runs under]()
+- [The three doors, and who is asking](machines/doors.md)
+- [A QUIC client, and the grant it runs under](machines/quic-client.md)
 
 # Embedding
 

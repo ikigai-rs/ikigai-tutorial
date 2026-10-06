@@ -53,10 +53,13 @@ case "$cli" in
     [0-9]*.[0-9]*.[0-9]*) ;;
     *) echo "books/gonk/ikigai-cli.version is not a version: '$cli'" >&2; exit 2 ;;
 esac
-cli_root="target/ikigai-cli/$cli"
+# With the `quic` feature, which is not a default: "A QUIC client" connects to gonk's QUIC door
+# with `ikigai --connect quic://…`, and a cli built without it refuses `quic://` targets. The
+# feature is part of the directory name, so a build without it is never mistaken for one with.
+cli_root="target/ikigai-cli/$cli+quic"
 if [ ! -x "$cli_root/bin/ikigai" ]; then
-    echo "installing ikigai-cli $cli into $cli_root (once per version)"
-    cargo install --locked ikigai-cli --version "=$cli" \
+    echo "installing ikigai-cli $cli (features: quic) into $cli_root (once per version)"
+    cargo install --locked ikigai-cli --version "=$cli" --features quic \
         --root "$cli_root" --target-dir "$cli_root/build"
 fi
 
