@@ -1,0 +1,22 @@
+[package]
+name = "browse-host"
+version = "0.1.0"
+description = "The code taught by The gonk Book's \"Explain, with a mounted model\" and \"One-off review\": ikigai-browse over a scratch repository, with a STUB urn:llm: model, so the archive, the version tag and the findings can be shown without a network."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "browse_host"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-browse.workspace = true
+oxigraph.workspace = true
+# `ask`, `ask_as` and the story clock: one request, issued, and the same deterministic time as
+# the ledger chapters.
+ledger-host = { path = "../ledger-host" }

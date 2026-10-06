@@ -22,7 +22,7 @@ used stand alone."
 | An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:gk:=…/gonk.sock" -c …` (alias), the config-home `prefer` line, `cap seal` to a `grants` list, the socket's access lines; `ikigai-cli` pinned beside gonk | **written** |
 | | Over MCP | transcripts once gonk projects MCP (ledger item 782); *coming* until then | coming |
 | The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a commit, a `file`-block `config.toml` root); tree/file/hash/state over the socket, a commit picked up by the watcher without a restart, the signed-out `/browse` notice | **written** |
-| | Explain, with a mounted model | Rust: browse in a kernel with a STUB `urn:llm:` space (a deterministic model), so the archive and the version tag are testable; transcript of the banner with `--mount`; manual for a real model | outline |
+| | Explain, with a mounted model | Rust (`crates/browse-host`): browse over a scratch directory with a STUB model at `urn:llm:stub:{ask,model}` that counts its calls, so "derive once, then from the archive", the version tag, the content-keyed archive and the cost line are asserted; transcripts: the banner with `--mount` (a socket nothing listens on), `explain-status` answering and `explain` refused `unavailable` over the socket; manual for a real model | **written** |
 | Review without a reviewer | One-off review, what a finding is | Rust with the stub model: a review pass minting pending findings, a publish | outline |
 | | The audit protocol | prose: why per-commit review is off (`ikigai-devtools/claude/research/review-exp2-2026-10-05/README.md`: frontier per-commit review 0.72 serious bugs per 100k tokens against 1.49–1.99 for unled audits, two auditors per repo) | outline |
 | A spec in the repository | OpenSpec in one chapter | prose + an `openspec/` tree committed under `crates/` | outline |
@@ -95,7 +95,13 @@ wire; moving gonk is a reason to look at this file too.
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
 `ikigai-ledger` 0.3.0, `ikigai-store` 0.2.6 (in-memory, `persistent` off), and `ikigai-browse`
-0.18.0 when the browser part is written.
+0.18.0, with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
+
+**No real model, anywhere checked.** A chapter that needs one binds a stub at `urn:llm:` (see
+`crates/browse-host`): two names, `urn:llm:stub:ask` and `urn:llm:stub:model`, answering a fixed
+explanation or a fixed review by the system prompt. browse cannot tell a stub from a mount, so
+everything about the archive and the findings is shown for real; what a real model would SAY is
+the one thing not shown, and the chapters mark it `manual`.
 
 ## Layout of the site
 

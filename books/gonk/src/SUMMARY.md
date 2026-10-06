@@ -15,7 +15,7 @@
 # The repository browser
 
 - [Browse roots: a repository as resources](browse/roots.md)
-- [Explain, with a mounted model]()
+- [Explain, with a mounted model](browse/explain.md)
 
 # Review without a reviewer
 

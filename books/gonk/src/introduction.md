@@ -68,8 +68,9 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 ```
 
 The modules it links are the published crates, and the book's own crates use the same
-versions: `ikigai-ledger` 0.3.0 and `ikigai-store` 0.2.6, with `ikigai-browse` 0.18.0 when
-the repository browser arrives.
+versions: `ikigai-ledger` 0.3.0, `ikigai-store` 0.2.6 and `ikigai-browse` 0.18.0. Where a
+chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
+every time: no example in this book calls a real model or the network.
 
 From [Over the socket](agent/socket.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact

@@ -99,6 +99,16 @@ ikigai-ledger = "0.3.0"
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.6 is what gonk links. A 0.x caret: also a ceiling (<0.3.0).
 ikigai-store = { version = "0.2.6", default-features = false }
+# The repository browser and its model-derived layers (explain, review, findings), for The gonk
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk 60cf306 links,
+# and it is the release that added the explain-status cost line the chapter shows ("opens
+# instantly from the archive"). A 0.x caret: also a ceiling (<0.19.0); read it as a RANGE when
+# gonk moves.
+ikigai-browse = "0.18.0"
+# The RDF store browse keeps its archive, findings and annotations in. browse takes an
+# `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
+# memory: default features off, as every other oxigraph line in this workspace's graph.
+oxigraph = { version = "0.5.11", default-features = false }
 # The config file "Configuration" reads through `layered_paths`.
 toml = "0.8"
 futures = "0.3"
