@@ -14,7 +14,7 @@
 
 # The repository browser
 
-- [Browse roots: a repository as resources]()
+- [Browse roots: a repository as resources](browse/roots.md)
 - [Explain, with a mounted model]()
 
 # Review without a reviewer
@@ -30,9 +30,10 @@
 
 # Bridges
 
-- [Filing roborev findings]()
-- [Importing a kata ledger (coming)]()
-- [Checkout (coming)]()
+- [Filing roborev findings](bridges/roborev.md)
+- [Importing a kata ledger](bridges/kata.md)
+- [Checkout](bridges/checkout.md)
+- [A fresh machine, end to end](bridges/fresh-machine.md)
 
 # Several machines
 

@@ -174,7 +174,7 @@ $ cat .config/ikigai/gonk/grants.json
 read every browse root (`--root <name>` names one instead), and the browse graph's quads. Its
 stronger sibling, `--browse derive`, adds minting annotations and spending a mounted model's
 inference; it is one word on purpose, and it is refused on a server with no model to spend.
-The repositories arrive in the repository browser part of this book.
+The repositories arrive in [Browse roots](../browse/roots.md).
 
 Two rules sit behind the command. An identity must be **strictly stronger** than anonymous, so
 `passkey invite ada --ledger default=write` is refused: signing in would change nothing. And
