@@ -68,7 +68,10 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 ```
 
 The modules it links are the published crates, and the book's own crates use the same
-versions: `ikigai-ledger` 0.3.0, `ikigai-store` 0.2.6 and `ikigai-browse` 0.18.0. Where a
+versions — `ikigai-store` 0.2.6 and `ikigai-browse` 0.18.0 — with one exception: the book's
+crates take `ikigai-ledger` 0.4.0, for the keyed append [part 5](spec/ledger.md) syncs with,
+while this revision of gonk still links 0.3.0. Nothing a transcript runs against gonk uses the
+key. Where a
 chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.
 

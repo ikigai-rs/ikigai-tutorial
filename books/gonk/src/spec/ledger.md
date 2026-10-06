@@ -15,11 +15,11 @@ graph — the join gonk's single store exists to make cheap:
 {{#include ../../../../crates/openspec-ledger/src/lib.rs:queries}}
 ```
 
-`UNFILED` is an open task of an unarchived change that nothing in the ledger is `ledger:about`
-yet, with the requirement its parenthesis names *if the change adds or modifies one by that
-name* — so a typo in a task files an item about the task alone rather than about the wrong
-requirement. `FINISHED` is an open item about a task that is checked off, or whose change has
-been archived. Acting on the rows is one ledger request each:
+`OPEN_TASKS` is every open task of an unarchived change, with the requirement its parenthesis
+names *if the change adds or modifies one by that name* — so a typo in a task files an item about
+the task alone rather than about the wrong requirement. It does not ask whether a task already has
+an item; the ledger answers that. `FINISHED` is an open item about a task that is checked off, or
+whose change has been archived. Acting on the rows is one ledger request each:
 
 ```rust,ignore
 {{#include ../../../../crates/openspec-ledger/src/lib.rs:sync}}
@@ -27,17 +27,28 @@ been archived. Acting on the rows is one ledger request each:
 
 That function is the one piece of real code in this part, and it is code for a reason: there is
 no resource that turns a result set into ledger writes. Everything it *decides* is in the two
-queries; everything it *does* is the ledger's `append` and `close`. And it is idempotent by
-construction — a task with an item is not `UNFILED`, an item that is closed is not `FINISHED` — so
-a host can run it on every commit, or on a file watcher, and a second run with nothing changed
-does nothing.
+queries and the key; everything it *does* is the ledger's `append` and `close`. And it is
+idempotent by construction — a task with an item answers `existing`, an item that is closed is not
+`FINISHED` — so a host can run it on every commit, or on a file watcher, and a second run with
+nothing changed writes nothing.
 
-⚠ **Why `about` and not a key.** The idempotence above is a query, `FILTER NOT EXISTS { ?item
-ledger:about ?task }`. `ikigai-ledger` 0.4.0 adds a keyed append — file *at most one* item per
-key, enforced by the ledger itself, so two hosts syncing at once cannot both file task 1.2 — and
-the task's IRI would be the key. 0.4.0 was not on crates.io when this chapter was written, so the
-book uses 0.3.0, and two concurrent syncs could file a task twice. One host syncing, as here, is
-safe.
+## The task's IRI is the key
+
+Each append carries `key=<the task's IRI>`. A key is the caller's own name for an item, unique in
+its ledger: if an item already carries it (or carried it and was deleted), **nothing is filed**,
+and the answer names that item with a third word a filing never has — `#1 <iri> existing open`
+instead of `#1 <iri>`. `sync_ledger` reads that word and reports only real filings.
+
+The key is checked by the ledger itself, in the same store update that files the item, and that is
+what makes the sync safe to run *twice at once*. The other way to be idempotent is to ask first —
+"which open tasks does no item point at?", a `FILTER NOT EXISTS { ?item ledger:about ?task }` in
+the query — and then append. That is a check followed by an act, and two syncs started together
+both see every task unfiled and both file it. Four syncs started together over this tree, with the
+query instead of the key, filed twelve items for three tasks — every one of them filed every task.
+With the key the same four file three, and `concurrent_syncs_file_each_task_once`, in the crate's
+tests, holds it to that. The keyed append
+arrived in `ikigai-ledger` 0.4.0; this part was first written against 0.3.0 with the query, and
+carried that cost as a warning.
 
 ## The walk
 
@@ -61,8 +72,17 @@ assert!(filed[0].starts_with("#1 urn:iki:ledger:default:item:") && filed[0].ends
 assert!(filed[2].ends_with("add-undo 2.1"));
 assert!(sync_ledger(&host).unwrap().is_empty(), "a second sync files nothing");
 
+// What the second sync was told, for each task: the key is taken, and nothing was filed.
+let again = ask(&host, Verb::Sink, "urn:iki:ledger:append", &[
+    ("content", "add-undo 1.2: Empty the last move's square and return the turn"),
+    ("key", "urn:openspec:change:add-undo:task:1.2"),
+]).unwrap();
+let first = filed[0].split(" — ").next().unwrap();
+assert_eq!(again, format!("{first} existing open\n"));
+
 // Each is about its task and the requirement it implements.
 let item = ask(&host, Verb::Source, "urn:iki:ledger:item:1", &[]).unwrap();
+assert!(item.contains("key:      urn:openspec:change:add-undo:task:1.2"), "{item}");
 assert!(item.contains("about:    urn:openspec:change:add-undo:task:1.2"), "{item}");
 assert!(item.contains("about:    urn:openspec:spec:moves:requirement:the-last-move-can-be-undone"));
 
@@ -114,7 +134,9 @@ through it. So the split is the natural one. A host of your own links the lift a
 (as in [Over the socket](../agent/socket.md), where `urn:gk:iki:store:load`,
 `urn:gk:iki:store:graph-select` and `urn:gk:iki:ledger:append` are all served to the owner).
 The graphs then live in gonk's durable store beside the ledger, and gonk's own pages show the
-items. (This book's checks run the in-process host above, not that arrangement.) gonk does not
+items. ⚠ The key needs a gonk whose ledger knows it: `ikigai-ledger` 0.4.0 or later. The gonk this
+book pins ([`gonk.rev`](../introduction.md#which-gonk)) still links 0.3.0, which does not declare
+`key` and so cannot keep its promise; pointed at that gonk, a sync is not idempotent. (This book's checks run the in-process host above, not that arrangement.) gonk does not
 run the sync itself; doing that on a watcher over a browse root's
 `openspec/` directory would be a separate piece of work.
 
@@ -129,6 +151,6 @@ showing something this chapter does not teach, so the Rust above is the runnable
 
 The **atoms** are the tree's files and the ledger's graph. The spec graphs are derived from the
 files and the items are derived from the spec graphs, each by a composition the host did not write;
-`UNFILED` and `FINISHED` are **views** that span both; `sync_ledger` is the glue that acts on
+`OPEN_TASKS` and `FINISHED` are **views** that span both; `sync_ledger` is the glue that acts on
 them. Close an item by hand and it stays closed; delete the tree and the items still say what they
 were about, by name.

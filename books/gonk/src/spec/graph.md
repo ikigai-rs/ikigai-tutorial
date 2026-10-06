@@ -14,9 +14,7 @@ two stages that are worth keeping apart:
    queries that turn that structure into a domain — here, OpenSpec's. The lifter has never heard
    of a requirement. Every word of OpenSpec in this chapter is in the mapping.
 
-⚠ `ikigai-markdown` is not on crates.io yet, so this book's workspace takes it from its public
-repository at one pinned git revision, the way it pins gonk. That is the only difference a reader
-will notice.
+`ikigai-markdown` is on crates.io; this book's workspace takes 0.1.0, its first release.
 
 ## The mapping, by name
 

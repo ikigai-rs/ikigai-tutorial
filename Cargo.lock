@@ -866,9 +866,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-ledger"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bb3d72b675c5d2cbc9ffeb95fd85cf3104c153f623fd3b02b5e8d3eb3019654"
+checksum = "be5719cf137cd1a07fc3c5645f437af03ad6e40645e3e342b5516129df78b977"
 dependencies = [
  "async-trait",
  "ikigai-core",
@@ -883,7 +883,8 @@ dependencies = [
 [[package]]
 name = "ikigai-markdown"
 version = "0.1.0"
-source = "git+https://github.com/ikigai-rs/ikigai-markdown?rev=89aa9dcdf1a4074aabf37811314307757dc3533b#89aa9dcdf1a4074aabf37811314307757dc3533b"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c336e44e9dd81cf1e9bdb71367d71c9703e3292baac4d8adeff3b1f2dff3368"
 dependencies = [
  "async-trait",
  "ikigai-core",

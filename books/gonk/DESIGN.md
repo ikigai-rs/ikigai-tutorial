@@ -27,7 +27,7 @@ used stand alone."
 | | The audit protocol | prose with numbers, cited: round 1 (`claude/research/review-exp-2026-10-03/README.md`: led 0.79 vs unled 1.68 serious per 100k tokens) and round 2 (`review-exp2-2026-10-05/README.md`: frontier per-commit review 0.72 against 1.49–1.99 for unled audits, two auditors per repo), the protocol from `claude/audits/README.md`, and a section on what the evidence is NOT. Both in the private `ikigai-devtools`; the chapter says so | **written** |
 | A spec in the repository | OpenSpec in one chapter | prose + the committed tree `crates/openspec-ledger/openspec/` (two capabilities, `board` and `moves`; one change, `add-undo`, with a proposal, a delta spec and tasks), included verbatim; the book's one convention beyond OpenSpec (a task cites its requirement by name in a trailing parenthesis) is stated as the book's | **written** |
 | | An openspec/ tree as a graph | Rust (`crates/openspec-ledger`): `ikigai-markdown`'s generic lift plus the mapping at `urn:markdown:mapping:openspec` (`config/markdown/mappings/openspec/mapping.ttl`, a config-home layout: one citation in the lift profile for RFC 2119 keywords, six CONSTRUCTs), lifted per document into the store, asked with `graph-select` over the set of document graphs | **written** |
-| | Changes and tasks as ledger items | Rust: two queries over the spec graphs ∪ the ledger graph (`UNFILED`, `FINISHED`) and `sync_ledger` acting on them; items `about` the task and its requirement; check a box → close; archive (a real directory move) → close the rest. No cells: `urn:markdown:mapping:{name}` is not built for wasm, and the page would replay a frozen tree | **written** |
+| | Changes and tasks as ledger items | Rust: two queries over the spec graphs ∪ the ledger graph (`OPEN_TASKS`, `FINISHED`) and `sync_ledger` acting on them, filing each task with `key=<task IRI>` (the `existing` answer on a re-run shown; four concurrent syncs filing three items is a test); items `about` the task and its requirement; check a box → close; archive (a real directory move) → close the rest. No cells: `urn:markdown:mapping:{name}` is not built for wasm, and the page would replay a frozen tree | **written** |
 | Bridges | Filing roborev findings | transcripts: a fixture review (gonk's own test fixture, as a `file` block), `--dry-run`, for real, the hook's own invocation filing nothing, a fix-job's prose, a refused ledger; the `[[hooks]]` block | **written** |
 | | Importing a kata ledger | transcripts: a fixture export (gonk's test fixture) into a ledger of its own, `--dry-run`, the import, `next` over the imported links, a re-run, a later export converging, what is lost (ledger #774) | **written** |
 | | Checkout | transcripts: `file://` scratch remotes, clone, `--write-config`, an update, `--all` with its coverage report, a refusal on a dirty checkout; the timer (manual) | **written** |
@@ -96,17 +96,20 @@ key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikiga
 wire; moving gonk is a reason to look at this file too.
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
-`ikigai-ledger` 0.3.0, `ikigai-store` 0.2.6 (in-memory, `persistent` off), and `ikigai-browse`
-0.18.0, with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
+`ikigai-store` 0.2.6 (in-memory, `persistent` off) and `ikigai-browse` 0.18.0, with `oxigraph`
+0.5 named directly because browse takes an `oxigraph::store::Store`. ⚠ **One exception, on
+purpose:** `ikigai-ledger` is 0.4.0 in the book's crates (part 5's keyed append) while the gonk in
+`gonk.rev` links 0.3.0. The introduction says so. When the gonk pin moves to a revision that
+links 0.4.0, the exception goes away; until then no transcript may use `key=` against gonk, and
+part 5's "In gonk" section warns that its sync needs a gonk with 0.4.0.
 
-**`ikigai-markdown` is not on crates.io** (2026-10-06), so the OpenSpec part takes it the way this
-book takes gonk: from its public repository at ONE full git revision, in the workspace
-`Cargo.toml` (`git = …, rev = …`), never a path or a branch. When it is published that line
-becomes a version. **`ikigai-ledger` 0.4.0** (the keyed append) was not published when part 5 was
-written either, so part 5 runs on 0.3.0 and makes the sync idempotent with a query
-(`FILTER NOT EXISTS { ?item ledger:about ?task }`) instead of a key; the chapter says what that
-costs (two concurrent syncs could file a task twice). Moving to 0.4.0 is: bump the workspace pin,
-pass `key=<task IRI>` in `sync_ledger`, and rewrite that paragraph.
+**`ikigai-markdown`** is taken at 0.1.0 from crates.io. Until it was published (2026-10-06) it was
+pinned the way this book pins gonk, to one full git revision of its public repository, never a
+path or a branch; that is the rule for any dependency the book needs before it is published.
+**`ikigai-ledger` 0.4.0** (the keyed append) arrived the same day. Part 5 was first written on
+0.3.0 and made its sync idempotent with a query (`FILTER NOT EXISTS { ?item ledger:about ?task }`),
+which two concurrent syncs defeat; it now passes `key=<task IRI>` to `append`, branches on the
+`existing` answer, and the chapter says what the key fixed.
 
 **No real model, anywhere checked.** A chapter that needs one binds a stub at `urn:llm:` (see
 `crates/browse-host`): two names, `urn:llm:stub:ask` and `urn:llm:stub:model`, answering a fixed
