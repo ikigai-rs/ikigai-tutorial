@@ -21,13 +21,16 @@
 //! reader types it, and the runner decides which build that means.
 
 use std::io::{BufRead, BufReader, Read};
+use std::os::unix::process::CommandExt;
 use std::path::PathBuf;
 use std::process::{Child, Command, ExitCode, Stdio};
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use book_transcripts::{matches, normalize, pages, refused, scan_page, Block, Kind, ANY};
+use book_transcripts::{
+    matches, normalize, pages, refused, safe_file_name, scan_page, Block, Kind, ANY,
+};
 
 /// How long one `run` command may take before it is a failure.
 const RUN_PATIENCE: Duration = Duration::from_secs(60);
@@ -167,6 +170,13 @@ fn run_page(options: &Options, blocks: &[Block]) -> (usize, Vec<String>) {
                 println!("skip {at} — undeclared (not --strict)");
                 continue;
             }
+            Kind::File(name) => {
+                match scratch.write(name, &block.content) {
+                    Ok(()) => println!("file {at} → {name}"),
+                    Err(e) => failures.push(format!("{at}: file {name}: {e}")),
+                }
+                continue;
+            }
             Kind::Run | Kind::Serve => {}
         }
         if !block.orphans.is_empty() {
@@ -258,6 +268,25 @@ impl Scratch {
         }
     }
 
+    /// Write a `file` block: its lines, each ending in a newline, at `name` under the scratch
+    /// directory, creating the directories on the way.
+    fn write(&self, name: &str, lines: &[String]) -> Result<(), String> {
+        if !safe_file_name(name) {
+            return Err(
+                "a file block's name must be relative and stay in the scratch \
+                        directory (no `..`, no leading `/`)"
+                    .to_string(),
+            );
+        }
+        let path = self.dir.join(name);
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        let mut text = lines.join("\n");
+        text.push('\n');
+        std::fs::write(&path, text).map_err(|e| e.to_string())
+    }
+
     fn command(&self, paths: &[PathBuf], text: &str) -> Command {
         let mut path = std::env::join_paths(paths).unwrap_or_default();
         if let Some(rest) = std::env::var_os("PATH") {
@@ -277,10 +306,16 @@ impl Scratch {
         command
     }
 
-    /// Run one command to completion; its stdout then its stderr, as lines, normalized.
+    /// Run one command to completion; what it printed, as lines, normalized.
+    ///
+    /// Standard error is sent to the SAME pipe as standard output (`exec 2>&1` before the
+    /// command, so the command's own redirections still apply after it), so the lines come
+    /// back in the order a terminal shows them. Read from two pipes, a command that writes
+    /// results to stdout and status lines to stderr (`ikigai -c a -c b` does) came back with
+    /// every status line at the end, which is not what a reader sees.
     fn run(&self, paths: &[PathBuf], text: &str) -> Result<Vec<String>, String> {
         let mut child = self
-            .command(paths, text)
+            .command(paths, &format!("exec 2>&1\n{text}"))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
@@ -330,9 +365,13 @@ impl Server {
         command: &book_transcripts::Command,
     ) -> Result<Server, String> {
         // `exec`, so the process this holds IS the server: killing a shell that forked it
-        // would leave the server running, holding its port, after the page is done.
+        // would leave the server running, holding its port, after the page is done. And its
+        // own process GROUP, which is what `stop` signals: a serve line that is a pipeline
+        // (`ikigai-gonk … 2>&1 | tee gonk.log`, so a page can read the log back) is several
+        // processes, and `exec` replaces only the first.
         let mut child = scratch
             .command(paths, &format!("exec {}", command.text))
+            .process_group(0)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
@@ -371,7 +410,26 @@ impl Server {
         }
     }
 
+    /// Stop the server and everything in its process group, then reap it.
     fn stop(mut self) {
+        let group = format!("-{}", self.child.id());
+        let _ = Command::new("kill")
+            .args(["-TERM", "--", &group])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while Instant::now() < deadline {
+            if let Ok(Some(_)) = self.child.try_wait() {
+                break;
+            }
+            thread::sleep(Duration::from_millis(50));
+        }
+        let _ = Command::new("kill")
+            .args(["-KILL", "--", &group])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
         let _ = self.child.kill();
         let _ = self.child.wait();
     }

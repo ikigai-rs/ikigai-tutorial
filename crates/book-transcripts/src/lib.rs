@@ -17,7 +17,16 @@
 //! <!-- transcript: serve -->      ONE `$ ` line, started and left running for the rest of
 //!                                 the page; what it prints at startup is the expected output
 //! <!-- transcript: manual — why --> not run, and the reason is said where an editor reads it
+//! <!-- transcript: file NAME -->  ANY fence (toml, markdown, json…): its lines are written to
+//!                                 NAME in the page's scratch directory, at that point in the
+//!                                 page, creating directories — the page saying "save this as
+//!                                 NAME", which the check then does
 //! ```
+//!
+//! A `file` block is how a page gives its commands an input (a config file, a fixture) without
+//! a heredoc: each command is one `sh -c` line, so a multi-line file cannot be typed into one,
+//! and the reader sees the file's whole content where they would copy it from. Its NAME must be
+//! relative and stay inside the scratch directory (no `..`), or the block fails.
 //!
 //! Under `--strict` (how the gonk book is checked) a `console` block with a `$ ` line and no
 //! declaration is a FAILURE, not a skip: a transcript nobody runs is the thing this exists to
@@ -54,6 +63,8 @@ pub enum Kind {
     Serve,
     /// Not run, for the reason given.
     Manual(String),
+    /// Write the block's lines to this path, relative to the page's scratch directory.
+    File(String),
     /// Nothing declared. A skip normally, a failure under `--strict`.
     Undeclared,
 }
@@ -80,15 +91,19 @@ pub struct Block {
     pub commands: Vec<Command>,
     /// Lines before the first command: output with nothing to have printed it.
     pub orphans: Vec<String>,
+    /// A `file` block's lines, verbatim; empty for every other kind.
+    pub content: Vec<String>,
 }
 
-/// Every transcript block in one page's markdown.
+/// Every transcript block in one page's markdown: each `console` fence with a `$ ` line, and
+/// each fence of any language declared `file`, in page order.
 pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
     let lines: Vec<&str> = text.lines().collect();
     let mut out = Vec::new();
     let mut i = 0;
     while i < lines.len() {
-        if lines[i].trim() != "```console" {
+        let fence = lines[i].trim();
+        if !fence.starts_with("```") {
             i += 1;
             continue;
         }
@@ -98,12 +113,22 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
             end += 1;
         }
         let body = &lines[start..end];
-        if body.iter().any(|l| l.starts_with(PROMPT)) {
-            let above = &lines[i.saturating_sub(5)..i];
+        let above = &lines[i.saturating_sub(5)..i];
+        let kind = declared(above);
+        if let Kind::File(_) = kind {
             out.push(Block {
                 file: file.to_string(),
                 line: start + 1,
-                kind: declared(above),
+                kind,
+                commands: Vec::new(),
+                orphans: Vec::new(),
+                content: body.iter().map(|l| l.to_string()).collect(),
+            });
+        } else if fence == "```console" && body.iter().any(|l| l.starts_with(PROMPT)) {
+            out.push(Block {
+                file: file.to_string(),
+                line: start + 1,
+                kind,
                 commands: commands(body),
                 orphans: body
                     .iter()
@@ -111,11 +136,23 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
                     .filter(|l| !l.trim().is_empty())
                     .map(|l| l.to_string())
                     .collect(),
+                content: Vec::new(),
             });
         }
         i = end + 1;
     }
     out
+}
+
+/// Is `name` a path a `file` block may write: relative, and with no `..` to leave the scratch
+/// directory by?
+pub fn safe_file_name(name: &str) -> bool {
+    let path = Path::new(name);
+    !name.is_empty()
+        && path.is_relative()
+        && path
+            .components()
+            .all(|c| matches!(c, std::path::Component::Normal(_)))
 }
 
 /// The declaration in the lines above a fence, the nearest one winning. The search stops at
@@ -130,6 +167,9 @@ fn declared(above: &[&str]) -> Kind {
             continue;
         };
         let rest = rest.trim().trim_end_matches("-->").trim();
+        if let Some(name) = rest.strip_prefix("file ") {
+            return Kind::File(name.trim().to_string());
+        }
         if let Some(reason) = rest.strip_prefix("manual") {
             let reason = reason.trim().trim_start_matches(['—', '-', ':']).trim();
             return Kind::Manual(reason.to_string());
@@ -350,6 +390,49 @@ $ not a console fence, not a transcript
             Kind::Manual("it opens a browser".to_string())
         );
         assert_eq!(blocks[3].kind, Kind::Undeclared);
+    }
+
+    #[test]
+    fn a_file_declaration_takes_any_fence_and_keeps_its_lines_verbatim() {
+        let page = "\
+<!-- transcript: file .config/ikigai/config.toml -->
+```toml
+gonk.port = 1070
+  # indented, kept
+```
+
+```toml
+not = \"declared, so not a block\"
+```
+
+<!-- transcript: run -->
+```console
+$ cat .config/ikigai/config.toml
+gonk.port = 1070
+```
+";
+        let blocks = scan_page("p.md", page);
+        assert_eq!(blocks.len(), 2, "{blocks:#?}");
+        assert_eq!(
+            blocks[0].kind,
+            Kind::File(".config/ikigai/config.toml".to_string())
+        );
+        assert_eq!(
+            blocks[0].content,
+            s(&["gonk.port = 1070", "  # indented, kept"])
+        );
+        assert!(blocks[0].commands.is_empty());
+        assert_eq!(blocks[1].kind, Kind::Run);
+    }
+
+    #[test]
+    fn a_file_block_may_not_leave_the_scratch_directory() {
+        assert!(safe_file_name("review.md"));
+        assert!(safe_file_name(".config/ikigai/config.toml"));
+        assert!(!safe_file_name("../escape"));
+        assert!(!safe_file_name("a/../../b"));
+        assert!(!safe_file_name("/etc/passwd"));
+        assert!(!safe_file_name(""));
     }
 
     #[test]

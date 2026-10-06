@@ -18,8 +18,8 @@ used stand alone."
 | part | chapter | kind of example | status |
 | --- | --- | --- | --- |
 | A ledger of your own | A ledger of your own | cells (wasm) · Rust (`crates/ledger-host`) · transcripts | **written** |
-| | The ledger in a browser | transcripts (curl of the pages, `passkey invite`) · manual (the passkey ceremony, a browser) | outline |
-| An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:iki:ledger:=…/gonk.sock" -c …` against the scratch gonk; needs a pinned `ikigai-cli` beside gonk | outline |
+| | The ledger in a browser | transcripts (curl of the pages, the form as `/act`, the cross-site refusal, `passkey invite --ledger --browse read`, the access log read back from a `tee`d file) · manual (the passkey ceremony, a browser) | **written** |
+| An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:gk:=…/gonk.sock" -c …` (alias), the config-home `prefer` line, `cap seal` to a `grants` list, the socket's access lines; `ikigai-cli` pinned beside gonk | **written** |
 | | Over MCP | transcripts once gonk projects MCP (ledger item 782); *coming* until then | coming |
 | The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a file, `--browse-root`) | outline |
 | | Explain, with a mounted model | Rust: browse in a kernel with a STUB `urn:llm:` space (a deterministic model), so the archive and the version tag are testable; transcript of the banner with `--mount`; manual for a real model | outline |
@@ -56,7 +56,14 @@ link, so the outline is visible on the published site and nothing 404s.
   in page order. A `serve` block's one command is started and left running; its expected lines
   are its startup banner. A command naming 1060 is refused before it runs. pages.yml runs it in
   a `transcripts` job the deploy needs, with the gonk build cached by revision.
-  To adopt it for the ikigai book: pin `ikigai-cli` the same way, rewrite its `ikigai> ` text
+  Since arc 2 two more things: a fence of ANY language declared `file NAME` is written to
+  `NAME` in the scratch directory at that point in the page (how a page hands its commands a
+  config file or a fixture, since one `sh -c` line cannot hold a heredoc), and a `run`
+  command's standard error goes to the same pipe as its standard output, so lines come back in
+  the order a terminal shows them. A `serve` command runs in its own process group, which is
+  what is stopped at the end of the page, so a serve line may be a pipeline
+  (`ikigai-gonk … 2>&1 | tee gonk.log`, which is how a page reads the access log back).
+  To adopt it for the ikigai book: rewrite its `ikigai> ` text
   blocks as `console` blocks of `$ ikigai -c …`, and add the book to the script. The matcher is
   a superset of the old replay's (whole-line `…` as before, plus `…` inside a line).
 
@@ -72,6 +79,18 @@ Apache-2.0, every dependency a published crate, `version = "0.1.0"`), so it is a
 ikigai-gonk` preflight, then a decision about whether a server binary with a launchd story
 belongs on crates.io at all (`cargo install ikigai-gonk` would then replace the git line, and
 the pin would become a version in the same file).
+
+⚠ Each revision installs from its OWN target directory (`target/gonk/<rev>/build`). Moving
+the pin from 5050879 to 9b182ff with one shared build directory, `cargo install --git --rev`
+called the new revision `Fresh` and installed the previous binary, so the check would have gone
+on testing the old gonk under the new pin's name.
+
+**`ikigai-cli` is pinned the same way, in `books/gonk/ikigai-cli.version`** (arc 2). It IS on
+crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --version =X`),
+and the file is one line read by the introduction's install line, the script and CI's cache
+key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and
+`ikigai-web` share the cli's version: 0.1.38 at 9b182ff), so the client speaks the server's
+wire; moving gonk is a reason to look at this file too.
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
 `ikigai-ledger` 0.3.0, `ikigai-store` 0.2.6 (in-memory, `persistent` off), and `ikigai-browse`

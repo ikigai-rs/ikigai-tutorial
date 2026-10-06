@@ -69,6 +69,17 @@ The modules it links are the published crates, and the book's own crates use the
 versions: `ikigai-ledger` 0.3.0 and `ikigai-store` 0.2.6, with `ikigai-browse` 0.18.0 when
 the repository browser arrives.
 
+From [Over the socket](agent/socket.md) on, a page also runs `ikigai`, the command-line host,
+as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
+version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
+way. The version is the release whose transports the pinned gonk was built with, so the client
+speaks the wire the server does:
+
+<!-- transcript: manual — the check installs this version itself (scripts/test-transcripts.sh), reading the same file -->
+```console
+$ cargo install --locked ikigai-cli --version {{#include ../ikigai-cli.version}}
+```
+
 ## How to read this book
 
 The published copy is at <https://ikigai-rs.github.io/ikigai-tutorial/gonk/>, rebuilt from
