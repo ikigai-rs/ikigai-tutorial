@@ -1,0 +1,25 @@
+[package]
+name = "embed-host"
+version = "0.1.0"
+description = "The code taught by The gonk Book's \"The ledger, the store and browse in your own kernel\": the composition gonk makes, minus its doors, with each caller's capability narrowed to what it needs."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "embed_host"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-ledger.workspace = true
+ikigai-store.workspace = true
+ikigai-browse.workspace = true
+oxigraph.workspace = true
+# The stub model and the scratch repository of the explain and review chapters.
+browse-host = { path = "../browse-host" }
+# `ask_as`, the story clock and the ledger's four-token writer grant.
+ledger-host = { path = "../ledger-host" }

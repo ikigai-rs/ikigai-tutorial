@@ -42,7 +42,7 @@
 
 # Embedding
 
-- [The ledger, the store and browse in your own kernel]()
+- [The ledger, the store and browse in your own kernel](embedding/own-kernel.md)
 
 ---
 
