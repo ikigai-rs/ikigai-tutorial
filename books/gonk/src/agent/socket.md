@@ -72,11 +72,16 @@ $ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.i
 <urn:ikigai:endpoint:ledger-append:action:sink:input:about> ik:inputName "about" ;
 <urn:ikigai:endpoint:ledger-append:action:sink:input:revision> ik:inputName "revision" ;
 <urn:ikigai:endpoint:ledger-append:action:sink:input:author> ik:inputName "author" ;
+<urn:ikigai:endpoint:ledger-append:action:sink:input:key> ik:inputName "key" ;
+<urn:ikigai:endpoint:ledger-append:action:sink:input:as> ik:inputName "as" ;
 ```
 
 (`[computed]` comes first because the cli writes its status line to standard error, which does
 not go through `grep`.) Each input is declared with a summary, whether it is required, and its
-type; `content` is the one a value or a pipe lands in. An agent's tool schema is this graph,
+type; `content` is the one a value or a pipe lands in. `key` is the caller's own name for the
+item: an append whose key is already taken files nothing and answers the item that holds it,
+which is how [part 5's sync](../spec/ledger.md) and the [bridges](../bridges/roborev.md) file
+each thing once. `as=application/json` asks for the answer in the ledger's JSON face. An agent's tool schema is this graph,
 read from the ledger itself, so it cannot drift from what the ledger accepts.
 
 ## The same names, from the config home
