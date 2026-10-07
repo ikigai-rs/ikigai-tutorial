@@ -96,10 +96,13 @@ resolve on GitHub, the list moved before this page did — the organization is t
   capability-gated resources.
 - [`ikigai-browse`](https://github.com/ikigai-rs/ikigai-browse) — repository browsing
   as resources, with text, HTML and Turtle faces.
-- [`ikigai-dev-server`](https://github.com/ikigai-rs/ikigai-dev-server) — the standalone
-  IPC server for those, whose `Cargo.toml` is its manifest.
-- [`ikigai-gonk`](https://github.com/ikigai-rs/ikigai-gonk) — a standalone host for the
-  ledger: items, comments, links and a next-item ranking, over HTTP and QUIC.
+- [`ikigai-gonk`](https://github.com/ikigai-rs/ikigai-gonk) — the work-ledger and
+  repository-browser host: the ledger (items, comments, links and a next-item ranking), the
+  browse family over every repository it is given and SPARQL over its store, through a
+  socket, HTTP and QUIC. [The gonk Book](gonk/index.html) teaches it.
+- [`ikigai-dev-server`](https://github.com/ikigai-rs/ikigai-dev-server) — **retired.** The
+  standalone IPC server that served the browse family before gonk did, whose `Cargo.toml`
+  was its manifest; its repository stays readable for that history.
 - [`ikigai-web`](https://github.com/ikigai-rs/ikigai-web) — the standalone HTTP and
   SPARQL face (published as `ikigai-web-server`).
 - [`ikigai-runbook`](https://github.com/ikigai-rs/ikigai-runbook) — guided, runnable

@@ -143,16 +143,19 @@ that machine — the REPL, one-shot commands, the daemon, the MCP server — com
 topology:
 
 ```toml
-mount = "prefer urn:repo:=/Users/brian/.ikigai/dev.sock"
+mount = "prefer urn:repo:=/Users/brian/.ikigai/gonk.sock"
 ```
 
-That line points at the development server from
-[A kernel behind a socket](socket.md), which owns an archive held under an exclusive lock —
-exactly one process may have it open, so every other process on the machine reaches it
-through the socket. `prefer` is what keeps the machine working when that server is stopped
-for an upgrade, and it is also how a topology can name a peer that is normally *not*
-running: one started on demand is absent most of the time, and a prefer-mount is not
-broken while it is.
+That line points at gonk, the server from [A kernel behind a socket](socket.md), which owns
+a durable store held under an exclusive lock — exactly one process may have it open, so
+every other process on the machine reaches it through the socket. Until it was retired, the
+same line named the dev server's `dev.sock`, and moving a whole machine from one server to
+the other was a change to lines like this one and a restart, not a data migration. (The gonk
+Book teaches the same line [from gonk's
+side](../gonk/browse/roots.html#in-a-browser-and-from-your-own-config).) `prefer` is what
+keeps the machine working when that server is stopped for an upgrade, and it is also how a
+topology can name a peer that is normally *not* running: one started on demand is absent
+most of the time, and a prefer-mount is not broken while it is.
 
 Across machines the target is an address or a discovered name rather than a path —
 `--prefer urn:llm:=peer:plasma` puts a heavier machine's inference behind the same resource
@@ -183,7 +186,7 @@ use two_hosts::mounts::{compose, prefer};
 use two_hosts::socket::connect;
 
 // A peer is a Resolver — this one over a Unix socket, but the type is what matters.
-let peer: Arc<dyn Resolver> = Arc::new(connect(Path::new("/tmp/dev.sock"))?);
+let peer: Arc<dyn Resolver> = Arc::new(connect(Path::new("/tmp/gonk.sock"))?);
 
 // Everything this machine serves itself.
 let local: Arc<dyn Space> = Arc::new(hello_camel::space());
@@ -192,7 +195,7 @@ let local: Arc<dyn Space> = Arc::new(hello_camel::space());
 let root = compose(
     vec![(
         "urn:repo:".to_string(),
-        prefer("urn:repo:", "/tmp/dev.sock", peer, Arc::clone(&local)),
+        prefer("urn:repo:", "/tmp/gonk.sock", peer, Arc::clone(&local)),
     )],
     local,
 );

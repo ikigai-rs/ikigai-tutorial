@@ -23,8 +23,9 @@ of your own that runs in the page: [The gonk Book](gonk/index.html).
   engine grammar, MCP projection
 - [`ikigai-xslt`](https://github.com/ikigai-rs/ikigai-xslt) — one crate showing both the
   linked and the loadable shape side by side
-- [`ikigai-dev-server`](https://github.com/ikigai-rs/ikigai-dev-server) — the linkage-gated
-  server from Part III, whose `Cargo.toml` is its manifest
+- [`ikigai-gonk`](https://github.com/ikigai-rs/ikigai-gonk) — the linkage-gated server from
+  Part III, whose `Cargo.toml` is its manifest (it took over from the retired
+  `ikigai-dev-server`)
 - [`ikigai-emacs`](https://github.com/ikigai-rs/ikigai-emacs) — the client whose command
   surface is generated from the manifold
 - [`ikigai-llm`](https://github.com/ikigai-rs/ikigai-llm) — one front grammar over

@@ -68,25 +68,31 @@ chapter is what happens when that sentence stops being true.
 
 ## A second boundary, underneath the capability model
 
-The one thing in the ecosystem that exists purely to be a server on a socket is
-`ikigai-dev-server`, which offers development tooling — git, `gh` and cargo as resources,
-graph operations, SPARQL, and an archive of explanations and annotations over a set of
-repositories:
+The one thing in the ecosystem that exists purely to be a server on a socket is gonk
+(`ikigai-gonk`), the work-ledger and repository-browser host: a durable RDF store, the work
+ledger, repositories browsed as resources and SPARQL over all of it, behind a socket, QUIC and
+HTTP. It took that job over from `ikigai-dev-server`, which this chapter used to show here and
+which is now retired. [The gonk Book](../gonk/index.html) teaches it door by door; from this
+chapter's side it is one more socket:
 
 ```bash
-ikigai-dev                       # default socket: ~/.ikigai/dev.sock
-ikigai --connect ~/.ikigai/dev.sock
-ikigai --connect ~/.ikigai/dev.sock -c 'source urn:repo:status'
+ikigai-gonk                      # its socket: ~/.ikigai/gonk.sock
+ikigai --connect ~/.ikigai/gonk.sock
+ikigai --connect ~/.ikigai/gonk.sock -c 'source urn:kernel:catalog'
 ```
 
-Its interesting property is not in any of its code. It is in its `Cargo.toml`, which its
-own README calls the module manifest: **the binary links only what it serves.** There is no
-calendar in it, no contacts, no EventKit — not disabled, not hidden behind a flag,
-*absent*. A flaw in code that was never compiled in cannot be reached from this process
-whatever any capability says.
+Its interesting property is not in any of its code. It is in its `Cargo.toml`, which says
+in its first comment that it is the module manifest: **the binary links only what it
+serves.** There is no calendar in it, no contacts, no EventKit, not even an HTTP client —
+not disabled, not hidden behind a flag, *absent*. A flaw in code that was never compiled in
+cannot be reached from this process whatever any capability says. The catalog that last
+line reads is the proof you can run: the store, the ledger, compression, backup and render
+rules, the kernel's own resources, and (once repositories are configured) the browse and
+repository families. Nothing else — and gonk's tests pin that list id by id, so a
+dependency bump that widens it fails the build.
 
 That is a second boundary, and it sits *underneath* the capability model rather than
-inside it. The contrast the README draws is with the same omnibus binary run as
+inside it. The contrast is with the omnibus `ikigai` binary run as
 `ikigai mcp --grant dev`, which **config-gates**: it hides the calendar tools from the tool
 list, and the calendar code is still linked, still in the address space, still one bug away
 from being reachable. Linkage gating removes the option.
@@ -98,11 +104,13 @@ not have:
   can say "this binary has no calendar in it"; it cannot say "this client may read
   free/busy and nothing else". That is what capabilities are for, and neither replaces the
   other.
-- **It is a judgment, not a rule.** That same server *does* link `ikigai-llm`, deliberately,
-  and its manifest argues the case: an outbound HTTP client to local inference is not the
-  platform-authority class the gating exists to exclude, and the rejected alternative —
-  mounting `urn:llm:` from the main host — would have coupled every fresh explanation to
-  the uptime of the very process the dev seam exists to stand apart from.
+- **It is a judgment, not a rule.** The dev server gonk replaced *did* link `ikigai-llm`,
+  deliberately, and its manifest argued the case: an outbound HTTP client to local inference
+  is not the platform-authority class the gating exists to exclude. gonk made the other
+  call. The model it explains with is *mounted* — one `gonk.mount` line, one prefix,
+  `urn:llm:` — so the only outbound connection it can make is to one configured peer, over
+  ikigai's own transports, at an address no caller can choose. Two defensible answers to
+  the same question; what matters is that each manifest argues its own.
 
 ## What a broken connection is allowed to do
 
