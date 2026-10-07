@@ -81,26 +81,31 @@ ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
 …
 ```
 
-`--dry-run` asks the ledger what is already filed, prints what it would file, and files
-nothing:
+`--dry-run` prints what it would file, each append's arguments with the key among them, and
+touches nothing. It does not ask gonk anything, so it says `would file` for a finding that is
+already there, and it does not check that the door grants the ledger; the real run is the one
+that finds out both:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root demo --repo-path /work/demo --job 42 --sha 1a2b3c4 --agent codex --findings - --dry-run < review.md
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
 would file critical: `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…
+    key=urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
     labels=roborev,critical
     priority=0
     about=urn:repo:demo:file:src/retry.rs urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
     author=roborev
     revision=1a2b3c4
 would file high: On the final attempt the error is logged and `Ok(())` is returned.
+    key=urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
     labels=roborev,high
     priority=1
     about=urn:repo:demo:file:src/retry.rs urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
     author=roborev
     revision=1a2b3c4
 would file medium: The retry delay is a fixed 100 ms, so two writers retrying together collide on every attempt.
+    key=urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
     labels=roborev,medium
     priority=2
     about=urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
@@ -121,7 +126,8 @@ Each line of that is a decision the command made, and each is worth reading once
   beside the file. The medium finding named no file, so it gets no file `about` rather than a
   guessed one.
 - **Every finding gets a key**, `urn:roborev:finding:{hash}`, over the root, the file and the
-  problem's words. It is how the command knows a finding is already filed.
+  problem's words with their whitespace collapsed. It is filed as the append's `key` and again
+  as an `about`, and it is how the ledger knows a finding is already filed.
 
 Now for real:
 
@@ -135,6 +141,7 @@ filed    medium   #3 The retry delay is a fixed 100 ms, so two writers retrying 
 $ curl -s http://127.0.0.1:1070/iki/ledger/item/1
    #1  open    p0  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…  [critical roborev]
   iri:      urn:iki:ledger:default:item:…
+  key:      urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
   filed:    … by roborev
   updated:  …
   revision: 1a2b3c4
@@ -183,16 +190,20 @@ handed gonk the same review, and it files nothing:
 ```console
 $ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root 'demo' --repo-path '/work/demo' --job '42' --sha '1a2b3c4' --agent 'codex' --findings "$(cat review.md)"
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
-already  critical #1 urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
-already  high     #2 urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
-already  medium   #3 urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
+already  critical #1 (open) urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
+already  high     #2 (open) urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
+already  medium   #3 (open) urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
 ```
 
-Before filing, the ledger is asked for an item, open or closed, about each finding's key. So a
-payload run twice files once, and a later review that carries a finding forward word for word
-files nothing new. Two limits, both stated rather than discovered: the same defect in
-**different words** is a new key and a second item, and the check and the append are two
-requests, so two hooks filing the same finding at the same instant can both file it.
+Each finding is **one** request, a keyed append (`append key=…`): the ledger checks the key and
+files the item in the same store update, and a key that is already taken, by an open, closed or
+deleted item, answers that item and files nothing. The command reads that answer through the
+ledger's JSON face, not its plain text, and prints `already` with the item's status. So a payload
+run twice files once, a later review that carries a finding forward word for word files nothing
+new, and two hooks filing the same finding at the same instant file it once. roborev runs every
+hook in its own goroutine, so that last one is not hypothetical; gonk's own tests race eight
+hooks on one finding and get one item. One limit, stated rather than discovered: the same defect
+in **different words** is a new key and a second item.
 
 A roborev `fix` or `task` job fires the same event, and its output is prose, not a review. The
 command says so and files nothing, with exit status 0, so roborev's log stays quiet:
@@ -206,15 +217,16 @@ not a structured review (a fix or task job?): nothing to file
 ## Whose ledger it files into
 
 The command speaks to gonk's HTTP door as its anonymous loopback caller, which holds the read
-and write tokens of the ledgers in `gonk.http.ledger` and nothing else. Filing needs both:
-write to append, read to check for the key first. A ledger the door does not grant is refused,
-and the command stops with exit status 1 and names the setting:
+and write tokens of the ledgers in `gonk.http.ledger` and nothing else. The keyed append is a
+write, and the door grants a listed ledger's read and write together. A ledger the door does not
+grant is refused at that first append, and the command stops with exit status 1 and names the
+setting:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger reviews --root demo --findings - < review.md
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
-ikigai-gonk: gonk refused GET /iki/ledger/reviews/items (403): denied: this capability does not hold `urn:cap:ledger:read:reviews`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:read:*` but not this resource, which is the point of naming them. The HTTP door grants an anonymous loopback caller the read and write tokens of the ledgers in `gonk.http.ledger` and nothing else; filing needs both (`ikigai-gonk grants <ledger> write` prints them, and listing the ledger there grants them)
+ikigai-gonk: gonk refused POST /iki/ledger/reviews/append (403): denied: this capability does not hold `urn:cap:ledger:write:reviews`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them. The HTTP door grants an anonymous loopback caller the read and write tokens of the ledgers in `gonk.http.ledger` and nothing else; filing needs both (`ikigai-gonk grants <ledger> write` prints them, and listing the ledger there grants them)
 ```
 
 To keep findings in a ledger of their own, list it beside `default` in the config home's

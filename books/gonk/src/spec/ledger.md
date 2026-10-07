@@ -43,12 +43,20 @@ The key is checked by the ledger itself, in the same store update that files the
 what makes the sync safe to run *twice at once*. The other way to be idempotent is to ask first —
 "which open tasks does no item point at?", a `FILTER NOT EXISTS { ?item ledger:about ?task }` in
 the query — and then append. That is a check followed by an act, and two syncs started together
-both see every task unfiled and both file it. Four syncs started together over this tree, with the
-query instead of the key, filed twelve items for three tasks — every one of them filed every task.
-With the key the same four file three, and `concurrent_syncs_file_each_task_once`, in the crate's
-tests, holds it to that. The keyed append
-arrived in `ikigai-ledger` 0.4.0; this part was first written against 0.3.0 with the query, and
-carried that cost as a warning.
+both see every task unfiled and both file it. Four syncs over this tree, with the query instead of
+the key and each one's question answered before any of them appended, file twelve items for three
+tasks: every one of them files every task. That is the worst interleaving the race allows, made
+certain by a barrier between the question and the appends, and
+`check_then_append_syncs_file_every_task_once_per_sync`, in the crate's tests, holds the figure to
+it. With the key the same four file three, and `concurrent_syncs_file_each_task_once` holds that.
+The keyed append arrived in `ikigai-ledger` 0.4.0; this part was first written against 0.3.0 with
+the query, and carried that cost as a warning.
+
+⚠ What the sync recognizes is the **key**, not `about`. An item a person files by hand *about* a
+task, without the task's IRI as its key, is not that task's item to the sync: the next sync files
+a second one beside it (`an_item_filed_about_a_task_without_its_key_is_filed_again`). To file a
+task's item by hand, file it as the sync would, with `key=<the task's IRI>`; the sync then answers
+`existing` for it.
 
 ## The walk
 
@@ -134,11 +142,10 @@ through it. So the split is the natural one. A host of your own links the lift a
 (as in [Over the socket](../agent/socket.md), where `urn:gk:iki:store:load`,
 `urn:gk:iki:store:graph-select` and `urn:gk:iki:ledger:append` are all served to the owner).
 The graphs then live in gonk's durable store beside the ledger, and gonk's own pages show the
-items. ⚠ The key needs a gonk whose ledger knows it: `ikigai-ledger` 0.4.0 or later. The gonk this
-book pins ([`gonk.rev`](../introduction.md#which-gonk)) still links 0.3.0, which does not declare
-`key` and so cannot keep its promise; pointed at that gonk, a sync is not idempotent. (This book's checks run the in-process host above, not that arrangement.) gonk does not
-run the sync itself; doing that on a watcher over a browse root's
-`openspec/` directory would be a separate piece of work.
+items. The key needs a gonk whose ledger knows it, `ikigai-ledger` 0.4.0 or later, and the gonk
+this book pins ([`gonk.rev`](../introduction.md#which-gonk)) links 0.4.0. (This book's checks run
+the in-process host above, not that arrangement.) gonk does not run the sync itself; doing that
+on a watcher over a browse root's `openspec/` directory would be a separate piece of work.
 
 There are no Run cells in this part, on purpose. The page's kernel is the ledger over an in-memory
 store, compiled to wasm, and the lift could join it — but `urn:markdown:mapping:{name}`, the name

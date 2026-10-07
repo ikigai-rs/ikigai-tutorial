@@ -403,4 +403,95 @@ mod tests {
         .unwrap();
         assert!(all.contains("3 item(s)"), "{all}");
     }
+
+    /// Part 5's sync as it was first written, before the key: ask which open tasks no item is
+    /// `about`, then append each one with no key.
+    fn check_then_append(kernel: &Kernel, between: impl FnOnce()) -> usize {
+        let unfiled = OPEN_TASKS
+            .replace(
+                "PREFIX os: <http://example.org/openspec#>",
+                "PREFIX os: <http://example.org/openspec#>\n\
+                 PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>",
+            )
+            .replace(
+                "FILTER NOT EXISTS { ?change os:archivedOn ?archived }",
+                "FILTER NOT EXISTS { ?change os:archivedOn ?archived }\n  \
+                 FILTER NOT EXISTS { ?item ledger:about ?task }",
+            );
+        let rows = rows(&select(kernel, &unfiled).unwrap());
+        between();
+        for row in &rows {
+            let [task, id, number, title, _requirement] = &row[..] else {
+                panic!("an unfiled-task row of {} columns", row.len());
+            };
+            ask(
+                kernel,
+                Verb::Sink,
+                "urn:iki:ledger:append",
+                &[
+                    ("content", &format!("{id} {number}: {title}")),
+                    ("about", task),
+                ],
+            )
+            .unwrap();
+        }
+        rows.len()
+    }
+
+    /// ★ The chapter's figure for the sync without the key: four syncs started together, each
+    /// asking first and appending after, file TWELVE items for three tasks. The barrier sits
+    /// between every sync's question and its first append, which makes certain the interleaving
+    /// the race only allows: every sync has seen every task unfiled before any of them files.
+    /// The ledger pins the same shape for two callers and one key
+    /// (`check_then_append_files_twice_when_two_callers_race`, in `ikigai-ledger`'s tests).
+    #[test]
+    fn check_then_append_syncs_file_every_task_once_per_sync() {
+        let kernel = kernel();
+        lift_tree(&kernel, &read_tree(&crate_dir())).unwrap();
+        let barrier = std::sync::Barrier::new(4);
+        std::thread::scope(|scope| {
+            for _ in 0..4 {
+                scope.spawn(|| {
+                    check_then_append(&kernel, || {
+                        barrier.wait();
+                    })
+                });
+            }
+        });
+        let all = ask(
+            &kernel,
+            Verb::Source,
+            "urn:iki:ledger:items",
+            &[("status", "all")],
+        )
+        .unwrap();
+        assert!(all.contains("12 item(s)"), "{all}");
+    }
+
+    /// The key is what the sync recognizes, not `about`: an item filed by hand ABOUT a task,
+    /// without the task's IRI as its key, is not that task's item to the keyed sync, which files
+    /// a second one.
+    #[test]
+    fn an_item_filed_about_a_task_without_its_key_is_filed_again() {
+        let kernel = kernel();
+        lift_tree(&kernel, &read_tree(&crate_dir())).unwrap();
+        let task = "urn:openspec:change:add-undo:task:1.2";
+        ask(
+            &kernel,
+            Verb::Sink,
+            "urn:iki:ledger:append",
+            &[("content", "Undo, filed by hand"), ("about", task)],
+        )
+        .unwrap();
+        let filed = sync_ledger(&kernel).unwrap();
+        assert_eq!(filed.len(), 3, "{filed:?}");
+        let about = ask(
+            &kernel,
+            Verb::Source,
+            "urn:iki:ledger:items",
+            &[("about", task)],
+        )
+        .unwrap();
+        assert!(about.contains("2 item(s)"), "{about}");
+    }
 }
