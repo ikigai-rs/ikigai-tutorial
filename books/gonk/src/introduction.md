@@ -68,8 +68,9 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 ```
 
 The modules it links are the published crates, and the book's own crates use the same
-versions: `ikigai-ledger` 0.4.0 (the keyed append [part 5](spec/ledger.md) syncs with and the
-[bridges](bridges/roborev.md) file through), `ikigai-store` 0.2.6 and `ikigai-browse` 0.18.0.
+versions: `ikigai-ledger` 0.4.2 (0.4.0 added the keyed append [part 5](spec/ledger.md) syncs
+with and the [bridges](bridges/roborev.md) file through), `ikigai-store` 0.2.6 and
+`ikigai-browse` 0.18.0.
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.
 
@@ -105,5 +106,6 @@ mdbook serve books/gonk --open
 ```
 
 ⚠ **Nothing in this book touches a gonk you already run.** Every transcript runs a scratch gonk
-on port 1070 with its own home directory, and the check refuses any command that names 1060, a
-real gonk's port, before it runs.
+on port 1070 whose config and data homes are inside the page's own directory (`--config-home`,
+`--data-home`), and the check refuses any command that names 1060, a real gonk's port, before it
+runs.

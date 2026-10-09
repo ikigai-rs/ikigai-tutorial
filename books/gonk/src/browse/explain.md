@@ -172,14 +172,15 @@ pub fn initials(name: &str) -> String {
 }
 ```
 
-<!-- transcript: file .config/ikigai/config.toml -->
-```toml
-gonk.browse.root = "demo=~/demo"
+<!-- transcript: run -->
+```console
+$ mkdir -p .config/ikigai
+$ printf 'gonk.browse.root = "demo=%s/demo"\n' "$PWD" > .config/ikigai/config.toml
 ```
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --no-quic --no-backup --mount "prefer urn:llm:=$PWD/model.sock"
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup --mount "prefer urn:llm:=$PWD/model.sock"
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
   browse  urn:repo:{demo (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
@@ -199,7 +200,7 @@ Ask over the socket, as in the previous chapter:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:demo:explain-status:src/lib.rs' -c 'source urn:gk:repo:demo:explain:src/lib.rs'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:demo:explain-status:src/lib.rs' -c 'source urn:gk:repo:demo:explain:src/lib.rs'
 derive	code-v1@coder	coder
 [uncacheable]
 error: unavailable: the mounted peer at …/model.sock is not reachable (last dial failed; the next is held off for up to 30s)

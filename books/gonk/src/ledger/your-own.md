@@ -219,11 +219,11 @@ confused in one sentence. The ledger called `default` is the one whose name may 
 gonk is that same composition in a process that keeps it: a durable store on disk instead of
 an in-memory one, and doors for other processes to reach it by. Install it at the revision
 this book pins (see [Which gonk](../introduction.md#which-gonk)), then start one **of your
-own** in an empty directory, with that directory as its home:
+own** in an empty directory, with its two homes inside that directory:
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --no-quic --no-backup
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
 …
@@ -232,11 +232,17 @@ ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
 …
 ```
 
-⚠ **The home directory is the point of that line.** gonk keeps its store in `~/.ikigai/store`
-and its socket beside it, and has no flag for either: they follow `HOME`. Started without it,
-this would open — or, if one is running, be refused by — the store a real gonk on your machine
-holds. Port 1070 keeps it off a real gonk's 1060; `--no-quic` and `--no-backup` keep it from
-opening a network door or writing archives this chapter does not need.
+⚠ **The two homes are the point of that line.** gonk keeps its files in two places. The
+**config home** (`~/.config/ikigai` unless told otherwise) holds `config.toml` and gonk's
+`gonk/` directory of clients, grants and certificates; the **data home** (`~/.ikigai`) holds the
+store, the socket, backups and the review queue. `--config-home` and `--data-home` move them,
+so this gonk keeps everything in the directory you started it in. Started without them, it
+would open — or, if one is running, be refused by — the store a real gonk on your machine holds.
+(`--store` names the dataset's directory outright, and `--socket` the socket, when only one of
+them should move.) The paths are written with `$PWD` because gonk prints and hands on the
+paths it was given: a relative one would reach the banner's `mount` line as relative too.
+Port 1070 keeps it off a real gonk's 1060; `--no-quic` and `--no-backup` keep it from opening a
+network door or writing archives this chapter does not need.
 
 The banner is the server describing itself, a line per door and per family it did or did not
 compose. Leave it running and use another terminal. Every ledger resource is reachable over
@@ -317,7 +323,7 @@ the next chapter.
 
 | | the page | your kernel | gonk |
 | --- | --- | --- | --- |
-| store | in memory, per page load | in memory, per process | RocksDB, `~/.ikigai/store` |
+| store | in memory, per page load | in memory, per process | RocksDB, in the data home (`~/.ikigai/store` by default) |
 | clock | the story clock | the story clock, or yours | the system's |
 | caller | root | root, or a grant | per door: loopback HTTP holds `default`'s read and write |
 | reached by | Run | `ask` | HTTP, the socket, QUIC |

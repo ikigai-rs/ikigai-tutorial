@@ -9,7 +9,7 @@ There are three, and each authenticates something different.
 | --- | --- | --- | --- |
 | HTTP | a browser, `curl`, on **loopback only** | that the request is from this machine and not cross-site (the `Host`, and for a write the `Origin`); a passkey session if there is one | the anonymous grant (read and write of the ledgers `gonk.http.ledger` names, `default` unless told otherwise), plus a signed-in passkey's grant |
 | socket | another process of **the same user** (`ikigai --mount`) | the socket file's owner-only mode, and the peer's user id | root: the owner can read the store's files anyway |
-| QUIC | another **machine** (`ikigai --connect quic://…`) | a client certificate, pinned by fingerprint, over mutual TLS — no certificate authority | the grant its fingerprint is enrolled under |
+| QUIC | another **machine** (`ikigai --connect quic://…`) | a client certificate, pinned by fingerprint, over mutual TLS — no certificate authority | the grant its fingerprint is enrolled under, and a name for the client, `urn:iki:gonk:client:<fingerprint>` |
 
 This page opens all three on one scratch gonk and sends a request through each, then reads gonk's
 access log to see what gonk knew about each caller. The [next chapter](quic-client.md) is the QUIC
@@ -19,39 +19,46 @@ door in depth.
 
 The QUIC door does not open until a certificate is enrolled: a door that every client is refused at
 is not worth a listening port. So the first command enrolls one, under the grant name `laptop`, as
-a writer of the `default` ledger:
+a writer of the `default` ledger. Like the server below, it is told which config home to write
+into, and `--port` says which port the server will listen on, so the `--connect` line it prints
+is right:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk client add laptop --ledger default=write
+$ ikigai-gonk client add laptop --ledger default=write --port 1070 --config-home "$PWD/.config/ikigai"
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
+  principal    urn:iki:gonk:client:…
   enrolled     grant `laptop` (4 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
-    ikigai --connect quic://<gonk host>:1060 --cert-dir <the moved directory>
+    ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 ```
 
-Then start gonk with the QUIC door on loopback, and with its standard error — where the access
-lines go — copied to a file this page can read back:
+`principal` is the name gonk will give this client on every request it makes: the certificate's
+fingerprint, as an IRI. It is a name, not authority; what the client may do is the grant. Then
+start gonk, with its standard error — where the access lines go — copied to a file this page can
+read back:
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --quic-bind 127.0.0.1:1070 --no-backup 2>&1 | tee gonk.log
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
 …
   socket  …/.ikigai/gonk.sock — owner only
-  quic    udp 127.0.0.1:1070 — 1 trusted certificate(s), 1 enrolled
+  quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
   log     one `gonk:Access` line per request at each door, on stderr (`gonk.log.access = false` turns it off)
 …
 ```
 
-⚠ `--quic-bind` is not optional here. `--port` moves only the HTTP door; with nothing named, the
-QUIC door binds UDP port 1060 on every interface, which is a real gonk's, and a scratch gonk that
-collides with it exits. Naming a bind also changes its meaning from "if you can" to "must": gonk
-refuses to start with a bind named and no certificate enrolled, rather than run with the door
-silently shut. TCP 1070 and UDP 1070 are different ports, so the two doors can share the number.
+`--port` moves both network doors: HTTP on TCP 1070, loopback only, and QUIC on UDP 1070, every
+interface, because a QUIC door is for other machines. TCP 1070 and UDP 1070 are different ports,
+so the two doors share the number. (Through gonk's audit round 4 the QUIC door stayed on UDP 1060
+whatever `--port` said, so a scratch gonk with an enrolled client collided with a real one.)
+`--quic-bind IP:PORT` still names a bind outright, and naming one changes its meaning from "if
+you can" to "must": gonk refuses to start with a bind named and no certificate enrolled, rather
+than run with the door silently shut.
 
 ## One request through each door
 
@@ -61,11 +68,11 @@ $ curl -s http://127.0.0.1:1070/iki/ledger/items
 no items match
 $ curl -s -X POST --data-binary 'From the HTTP door' http://127.0.0.1:1070/iki/ledger/append
 #1 urn:iki:ledger:default:item:…
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append From the socket'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append From the socket'
 #2 urn:iki:ledger:default:item:…
 
 [uncacheable]
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'sink urn:iki:ledger:append From QUIC' -c 'source urn:iki:ledger:items'
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'sink urn:iki:ledger:append From QUIC' -c 'source urn:iki:ledger:items'
 #3 urn:iki:ledger:default:item:…
 
 [uncacheable]
@@ -75,8 +82,8 @@ $ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --connect quic://127.0.0
 
 3 item(s)
 
-[computed]
-— batch: 2 commands · 1 computed · 1 uncacheable
+[uncacheable]
+— batch: 2 commands · 2 uncacheable
 ```
 
 Three doors, one ledger. The socket and QUIC clients are the same program, `ikigai`, in its two
@@ -95,21 +102,43 @@ $ grep ' gonk:Access ' gonk.log
 … gonk:Access urn:iki:ledger:items door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
 … gonk:Access urn:iki:ledger:append door=http verb=sink outcome=ok bytes=… dur=… principal=anon q=-
 … gonk:Access urn:iki:ledger:append door=socket verb=sink outcome=ok bytes=… dur=… principal=owner q=-
-… gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=- q=-
-… gonk:Access urn:iki:ledger:items door=quic verb=source outcome=ok bytes=… dur=… principal=- q=-
+… gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:items door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
 $ grep 'quic client' gonk.log
 ikigai-gonk: quic client … → grant "laptop"
 ```
 
 `door=` is which door, and `principal=` is who the door could say was asking:
 
-- **HTTP**: `anon` on an anonymous write, a passkey's IRI on a signed-in one, and `-` on any read
-  (a read is not attributed, on any door).
+- **HTTP**: `anon` on an anonymous write, a passkey's IRI on a signed-in one, and `-` on any read:
+  the HTTP library tells the door who a write is from, never a read.
 - **socket**: `owner`, always — there is exactly one user it lets in.
-- **QUIC**: `-`, even on a write. The door *does* know: the connection line below the access lines
-  names the certificate's fingerprint (its first sixteen hex digits) and the grant it mapped to.
-  What the access line records today is only that the request came in over QUIC; to say *which*
-  client wrote, read the connection line, or file under a named author.
+- **QUIC**: the client's name, `urn:iki:gonk:client:<fingerprint>`, on **every** request, reads
+  included. The certificate authenticated the connection, so the door knows which client is
+  asking whatever it asks. The connection line below the access lines says the same thing in
+  short (the fingerprint's first sixteen hex digits) with the grant it mapped to.
+
+The QUIC name is not only in the log. `ikigai-quic` stamps it on each request as an argument
+called `principal`, after removing any the client sent, so it cannot be forged from the client
+side; and it is not part of the capability, so a client that narrows its own capability (an
+agent's grant carried with the request) is named all the same. A write that names no `author`
+is filed with this name as its author, and a write that names a *different* principal as its
+author is refused:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'source urn:iki:ledger:item:3' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not mine to sign'
+   #3  open    p-  From QUIC
+  iri:      urn:iki:ledger:default:item:…
+  filed:    … by urn:iki:gonk:client:…
+  updated:  …
+[uncacheable]
+error: denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:gonk:client:….
+— batch: 2 commands · uncacheable
+```
+
+A plain-text author (`author=agent-7`, as in [Over the socket](../agent/socket.md)) is still
+kept: it renders as text, and claims nothing a door could check.
 
 `outcome=` is what the resource answered (`ok`, `denied`, `not-found`, …). One kind of refusal
 writes **no** line: a request the door's own kernel refuses before dispatching it, because the
@@ -118,7 +147,7 @@ returned to the caller, with the token it wanted:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'source urn:iki:store:select'
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'source urn:iki:store:select'
 error: denied: capability does not grant `urn:cap:store:read` (declared by `urn:iki:store:select`)
 ```
 
@@ -126,3 +155,8 @@ The `laptop` grant holds a ledger's tokens, and the store's broad query door wan
 grant, which no QUIC grant may carry (gonk refuses a session whose grant holds it, rather than
 serve the whole dataset to a certificate). So the request ends
 at the door, and the log stays a record of what was *served*.
+
+The grant's narrower store tokens are there for the ledger, which writes under the caller's
+capability; they do not let the client write the ledger's graph through the store instead. That
+raw write is refused at this door and at HTTP unless the grant was minted with `--ledger-graph`,
+which [the next chapter](quic-client.md#writing-the-graph-raw) shows.

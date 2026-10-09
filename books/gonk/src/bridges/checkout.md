@@ -44,7 +44,9 @@ not written: add the lines above to …/.config/ikigai/config.toml, or run again
 Each URL is cloned into `~/.ikigai/checkouts/<name>`, where `<name>` is the URL's last path
 segment without `.git`, and it is also the browse root's name. `name=url` sets a different one
 (`kata=git@github.com:kenn-io/kata.git`), and `--dir` puts the clones somewhere else.
-(`HOME` is this page's directory again, so `~` here is the page's.)
+(`HOME` is this page's directory, so `~` here is the page's. Unlike the server and `client`,
+`checkout` has no `--config-home` or `--data-home` at the gonk this book pins: it reads the
+process's homes, so a scratch run still sets `HOME` and `XDG_CONFIG_HOME`.)
 
 Without `--write-config` the lines are only printed. With it, the missing ones are appended to
 the config home's `config.toml`:

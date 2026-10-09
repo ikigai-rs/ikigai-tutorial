@@ -90,22 +90,23 @@ oxrdf = "0.3"
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
 # built from.
-# 0.4.0 is the floor because part 5's `sync_ledger` files each task with the keyed append it
+# 0.4.0 is the API floor because part 5's `sync_ledger` files each task with the keyed append it
 # added (`append key=<task IRI>`: at most one item per key, enforced by the ledger in the same
 # store update that files it, answering `existing` when the key is taken), which is what makes two
 # concurrent syncs safe. It also made `Item` and `Filter` `#[non_exhaustive]`; no crate here
-# builds either. It is what the gonk in `gonk.rev` links (ad0653b, whose roborev and kata bridges
-# file through the same keyed append). Before this the floor was 0.3.0, which fixed the unled audit's
-# findings on 0.2.1 that the first chapter walks straight through — two appends in one
-# millisecond minting the same id, and `next` cached across the clock. A 0.x caret, so also a
-# ceiling (<0.5.0): read it as a RANGE when gonk moves.
-ikigai-ledger = "0.4.0"
+# builds either. The pin is 0.4.2 because that is what the gonk in `gonk.rev` links (ed43af3, whose
+# roborev and kata bridges file through the same keyed append): a malformed timestamp no longer
+# drops an item from `items`/`next` (ledger #866). Before 0.4.0 the floor was 0.3.0, which
+# fixed the unled audit's findings on 0.2.1 that the first chapter walks straight through — two
+# appends in one millisecond minting the same id, and `next` cached across the clock. A 0.x
+# caret, so also a ceiling (<0.5.0): read it as a RANGE when gonk moves.
+ikigai-ledger = "0.4.2"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.6 is what gonk links. A 0.x caret: also a ceiling (<0.3.0).
 ikigai-store = { version = "0.2.6", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk ad0653b links,
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk ed43af3 links,
 # and it is the release that added the explain-status cost line the chapter shows ("opens
 # instantly from the archive"). A 0.x caret: also a ceiling (<0.19.0); read it as a RANGE when
 # gonk moves.
