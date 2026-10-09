@@ -8,12 +8,12 @@ passkey ceremony, which needs a browser and an authenticator; it is marked, and 
 
 ## Start one, and keep what it says
 
-Start a scratch gonk as before, in an empty directory that is its home, and this time keep
+Start a scratch gonk as before, with both its homes in an empty directory, and this time keep
 what it prints in a file as well as on the screen:
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
 …
@@ -64,7 +64,7 @@ $ curl -s http://localhost:1070/l/default/item/1 | grep -o "<h1 class='item-titl
 | `/` | the first ledger you may read |
 | `/l/{ledger}` | one ledger, with the status filters and the search |
 | `/l/{ledger}/item/{n}` | one item: body, metadata, labels, links, comments, and the forms that work on it |
-| `/sparql` | a query over one ledger's graph, rendered as a table |
+| `/sparql` | a query over one ledger's graph, rendered as a table; asked for a results format, the SPARQL 1.1 Protocol |
 
 Every one of those pages is a **transform of a graph face**. The ledger page is
 `urn:iki:ledger:default:items` asked for as Turtle and rendered by one XSLT stylesheet,
@@ -77,8 +77,9 @@ $ curl -s -H 'Accept: text/turtle' http://127.0.0.1:1070/iki/ledger/items | grep
 	dcterms:title "Write the gonk book" ;
 ```
 
-and so is a query over it. The SPARQL page answers a program in the store's own formats
-when it is asked for one, CSV among them:
+and so is a query over it. Asked for a results format rather than HTML, CSV among them,
+`/sparql` answers a program instead of a person: it is the SPARQL 1.1 Protocol, run under your
+grant.
 
 <!-- transcript: run -->
 ```console
@@ -87,9 +88,30 @@ title
 Write the gonk book
 ```
 
-The query runs over the default ledger's graph and nothing else. The page sets that graph as
-the query's whole dataset, under your grant, so a grant naming one ledger cannot read another
-through it, and `FROM` is refused rather than quietly ignored.
+Naming no ledger, the query's dataset is the union of every graph your grant may read. For an
+anonymous caller that is the ledgers the HTTP door grants, here `default`'s graph alone:
+
+<!-- transcript: run -->
+```console
+$ curl -s -G -H 'Accept: text/csv' --data-urlencode 'query=SELECT ?g (COUNT(*) AS ?n) WHERE { GRAPH ?g { ?s ?p ?o } } GROUP BY ?g' http://127.0.0.1:1070/sparql
+g,n
+urn:iki:ledger:graph:default,…
+```
+
+`ledger=` narrows the dataset to one ledger's graph and `graph=` to the graphs named. A graph
+the grant holds no token for refuses the whole query rather than answering over the part it
+can see, and `FROM` is refused rather than quietly ignored, so a grant naming one ledger cannot
+read another through this door:
+
+<!-- transcript: run -->
+```console
+$ curl -s -w '\n%{http_code}\n' -G -H 'Accept: text/csv' --data-urlencode 'ledger=book' --data-urlencode 'query=SELECT ?s WHERE { ?s ?p ?o }' http://127.0.0.1:1070/sparql
+denied: this capability does not hold `urn:cap:store:read:graph:urn:iki:ledger:graph:book`, so it cannot query `urn:iki:ledger:graph:book`
+403
+```
+
+The HTML page is the same resource for a person: an editor over one ledger's graph, with the
+answer rendered as a table.
 
 ## A form is a ledger action
 
@@ -110,17 +132,33 @@ the server renders, the browser shows.
 
 A door that lets anything on this machine write the ledger also lets any web page open on
 this machine try to: a page on any site can post a form to `localhost`. So the browser's own
-signals take the grant away. A write whose `Origin` names another site gets **nothing**:
+signals are a **refusal**. A write whose `Origin` (or `Sec-Fetch-Site`) names another site is
+answered `403` at the edge, before it reaches anything it names:
 
 <!-- transcript: run -->
 ```console
-$ curl -s -H 'Origin: https://elsewhere.example' -d _action=append -d _ledger=default -d _then=items --data-urlencode 'content=Not from here' http://localhost:1070/act
-denied: capability does not grant `urn:cap:store:read:graph:*` (declared by `urn:iki:gonk:act`)
+$ curl -s -w '\n%{http_code}\n' -H 'Origin: https://elsewhere.example' -d _action=append -d _ledger=default -d _then=items --data-urlencode 'content=Not from here' http://localhost:1070/act
+a write from another site is refused: its Origin or Sec-Fetch-Site names a page that is not this server's own
+403
 ```
 
 `curl` sends no `Origin` unless told to, and neither does a script, which is why the requests
 before it were unaffected. A request whose `Host` is anything but `localhost`, `127.0.0.1` or
-`[::1]` gets nothing too, reads included; that is the defense against DNS rebinding.
+`[::1]` (with this port) is refused the same way, reads included, and the front page is no
+exception; that is the defense against DNS rebinding, where a page on another site reaches a
+loopback server under its own name:
+
+<!-- transcript: run -->
+```console
+$ curl -s -w '\n%{http_code}\n' -H 'Host: elsewhere.example' http://127.0.0.1:1070/
+this server answers only to its own loopback name (localhost, 127.0.0.1 or [::1], with its port); a request under another Host is refused — it is how a DNS rebinding page reaches a loopback server
+403
+```
+
+Refused, rather than served with an empty grant: an empty grant is still offered everything
+that needs no grant (the pages, the passkey ceremonies, a resource's description), and gonk's
+audit showed another site filling the passkey ceremony's table that way. A refused request
+learns nothing, not even which methods a path accepts.
 
 ## Who you are, and what that grants
 
@@ -143,15 +181,15 @@ browses, belongs to an **identity**, and an identity is given by invitation:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk passkey invite ada --ledger book=write --browse read --port 1070
+$ ikigai-gonk passkey invite ada --ledger book=write --browse read --port 1070 --config-home "$PWD/.config/ikigai"
 passkey invite for `ada` — grant `ada` (6 scopes) in …/.config/ikigai/gonk/grants.json
   valid for 30 minutes, once
   open  http://localhost:1070/#invite=…
   in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json
 ```
 
-The same `HOME` again, so the invite is written into this gonk's config home rather than a
-real one; and `--port 1070`, so the link it prints points at this gonk. Each flag is a
+The same `--config-home` again, so the invite is written into this gonk's config home rather
+than a real one; and `--port 1070`, so the link it prints points at this gonk. Each flag is a
 **role**, and the command writes the tokens the role means:
 
 <!-- transcript: run -->
@@ -181,6 +219,14 @@ Two rules sit behind the command. An identity must be **strictly stronger** than
 a grant name is shared by every passkey and certificate enrolled under it, so writing
 different scopes under an existing name is refused unless `--force`, naming each scope the
 rewrite would remove and add.
+
+One role is deliberately missing from that grant. `ada` may write `book` through the ledger,
+and the grant holds the store's write token for `book`'s graph because the ledger makes its own
+writes under the caller's capability. That token is **not** authority to write the graph's
+triples directly: gonk's HTTP and QUIC doors refuse a raw store write to a ledger graph, because
+that is how an `author` naming somebody else would get in. An identity that really must write
+raw (a repair tool, say) is given it by name, with `--ledger-graph book`, which the
+[QUIC chapter](../machines/quic-client.md#writing-the-graph-raw) shows.
 
 ### The ceremony
 
@@ -226,8 +272,8 @@ Read them with three things in mind:
   because the HTTP library tells a door who a write is from and never a read. A signed-in
   write would name the passkey's IRI.
 - **`outcome` is the kernel's, not HTTP's.** A refusal the resource makes (the `/l/book`
-  page) is a line with `outcome=denied`. A refusal the door makes before it dispatches
-  anything (the cross-site form) is no line at all: there was no request to log.
+  page) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
+  cross-site form, the foreign `Host`), is no line at all: there was no request to log.
 
 <!-- transcript: run -->
 ```console

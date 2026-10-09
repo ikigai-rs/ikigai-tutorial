@@ -14,14 +14,14 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.38
+ikigai 0.1.41
 ```
 
 ## Start a gonk, and find its socket
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
 …
   socket  …/.ikigai/gonk.sock — owner only
@@ -43,17 +43,24 @@ here:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append priority=1 Filed over the socket'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append priority=1 Filed over the socket'
 #1 urn:iki:ledger:default:item:…
 [uncacheable]
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:items'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:items'
    #1  open    p1  Filed over the socket
 1 item(s)
-[computed]
+[uncacheable]
 ```
 
-The `env` prefix is this book's habit, not the socket's: it gives `ikigai` this directory as
-its home as well, so it reads the configuration this page writes below and never yours.
+A `--mount` on the command line is the whole topology of that command: `ikigai` composes it
+INSTEAD of the `mount` lines in your own config home, so nothing you have configured is involved.
+
+The client's status line says `[uncacheable]` for a read as well as a write, and that is gonk's
+choice, not the ledger's. An answer gonk caches hangs from golden threads that live in gonk's
+kernel, and a thread does not cross a wire; an answer that left the socket cacheable would arrive
+with nothing that could ever invalidate it, and a long-lived client would go on serving it. So
+every answer crosses the socket (and the QUIC door) uncacheable, and gonk keeps its own cache
+behind it: a mounted read costs one round trip to gonk's cache, never a recompute.
 
 `priority=1` was routed by name because the cli asked the remote for the resource's contract
 first, over the same socket, and the contract declares `priority`. That contract is the
@@ -61,7 +68,7 @@ agent's tool description, and it is the ledger's own:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'describe urn:gk:iki:ledger:append' | grep -E 'ik:title|ik:inputName'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'describe urn:gk:iki:ledger:append' | grep -E 'ik:title|ik:inputName'
 [computed]
     ik:title "File a ledger item" ;
 <urn:ikigai:endpoint:ledger-append:action:sink:input:ledger> ik:inputName "ledger" ;
@@ -95,7 +102,7 @@ falls back to a local binding only when the socket is unreachable.
 ```console
 $ mkdir -p .config/ikigai
 $ printf 'mount = "prefer urn:iki:ledger:=%s/.ikigai/gonk.sock"\n' "$PWD" >> .config/ikigai/config.toml
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:ledger:append Filed by its own name' -c 'source urn:iki:ledger:next'
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:ledger:append Filed by its own name' -c 'source urn:iki:ledger:next'
 #2 urn:iki:ledger:default:item:…
 [uncacheable]
  1.    #1  open    p1  Filed over the socket
@@ -104,12 +111,16 @@ $ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:ledger:
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
-[computed]
-— batch: 2 commands · 1 computed · 1 uncacheable
+[uncacheable]
+— batch: 2 commands · 2 uncacheable
 ```
 
+Here the config home IS the lesson, so the page names its own: `XDG_CONFIG_HOME` is where
+`ikigai` looks for it, and `ikigai-cli` 0.1.41 has no flag that says it instead. Without that
+prefix the command reads yours.
+
 ⚠ **Write the socket's path out in full.** The mount line is read as it is written, and
-`ikigai-cli` 0.1.38 does not expand a leading `~` in it: `mount = "prefer
+`ikigai-cli` 0.1.41 does not expand a leading `~` in it: `mount = "prefer
 urn:iki:ledger:=~/.ikigai/gonk.sock"` fails with *No such file or directory*, naming the
 unexpanded path. That is why the line above is written with `printf` and `$PWD`; in your own
 config home, write your home directory's path.
@@ -124,7 +135,7 @@ The socket's caller is the owner, and the owner holds everything gonk serves. De
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'delete urn:iki:ledger:item:2'
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'delete urn:iki:ledger:item:2'
 deleted #2 urn:iki:ledger:default:item:…
   6 quad(s) moved to <urn:iki:ledger:graph:default:deleted> and recoverable
   tombstone: urn:iki:ledger:default:tombstone:…
@@ -149,11 +160,12 @@ $ ikigai-gonk grants default write
 ```
 
 `cap seal` narrows the session to those scopes and makes that the floor, which nothing later in
-the session can rise above. Then the agent's work, and two things it was not given:
+the session can rise above. Then the agent's work, and two things it was not given (what the
+seal does and does not keep it from beyond these is [below](#what-the-seal-does-not-bound)):
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:ledger:append author=agent-7 Filed under a narrowed grant' -c 'delete urn:iki:ledger:item:1' -c 'source urn:iki:ledger:book:items'
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:ledger:append author=agent-7 Filed under a narrowed grant' -c 'delete urn:iki:ledger:item:1' -c 'source urn:iki:ledger:book:items'
 sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
@@ -188,6 +200,55 @@ $ grep ' urn:iki:ledger:book:items ' gonk.log
 - The read of `book` reached gonk and was refused there, so it has a line. The delete has none:
   the declared family `urn:cap:ledger:delete:*` was not held, so it was refused before it was
   dispatched to the ledger at all.
+
+## What the seal does not bound
+
+Look at the fourth token again: `urn:cap:store:write:graph:urn:iki:ledger:graph:default`. The
+ledger needs it, because it writes every append and close as a store update under the
+*caller's* capability ([Whose ledger](../ledger/your-own.md#whose-ledger)). But it is the
+store's token, so on its own it would also let the holder write the ledger's graph directly,
+through the store, without the ledger seeing it, and that is how an item could be given an
+`author` naming somebody else. So gonk refuses a raw store write to a ledger graph, at every
+door, unless the caller is root or holds a separate raw grant for that graph. Mount the store's
+names as well, as the banner suggested, and try it from a sealed session; then once more at
+root:
+
+<!-- transcript: run -->
+```console
+$ printf 'mount = "prefer urn:iki:store:=%s/.ikigai/gonk.sock"\n' "$PWD" >> .config/ikigai/config.toml
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
+sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+error: denied: a raw store write to the ledger graph <urn:iki:ledger:graph:default> is refused at this door. A ledger grant carries that graph's store token for the ledger's OWN writes, which it issues itself; it is not authority to write the graph's triples directly — that is how an `author` naming someone else would get in. Write through the ledger's endpoints (`urn:iki:ledger:*`). Raw writes are the owner's, at root over the socket, or an identity's whose grant an operator minted with `--ledger-graph <ledger>` (`urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default`)
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
+updated <urn:iki:ledger:graph:default>: +1 -0 quads
+[uncacheable]
+```
+
+The owner at root still writes raw over the socket, which is where migrations and repairs run;
+a session that sealed itself to a ledger grant is held to the same rule as a network client.
+(That is new at the gonk this book pins: through gonk ed43af3 the socket checked nothing, and
+the sealed write above succeeded. The [QUIC chapter](../machines/quic-client.md#writing-the-graph-raw)
+shows how an operator gives a raw grant by name, `--ledger-graph`.)
+
+What the seal does **not** bound is the `author` argument on the session's own new items. The
+network doors refuse a write whose `author` is shaped like a principal and is not the caller's
+own; but the socket names no principal (every request is `owner`), so it cannot run that rule,
+and a sealed session may still file an item that claims to be from a passkey:
+
+<!-- transcript: run -->
+```console
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not really Ada'
+sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+#4 urn:iki:ledger:default:item:…
+[uncacheable]
+— batch: 2 commands · uncacheable
+```
+
+It is the same kind of claim as `author=agent-7`, on an item the session filed itself, never a
+change to someone else's; but gonk's item page renders a passkey-shaped author as that
+passkey's label, so it would read as Ada's. gonk's README states this residual rather than
+hiding it. An agent that must not be able to claim a person needs an identity of its own on the
+QUIC door, where the author rule runs ([The three doors](../machines/doors.md)).
 
 ## Over MCP (coming)
 

@@ -18,9 +18,11 @@ ikigai-core.workspace = true
 # signatures rather than a paraphrase of them. Both are cheap in dependency terms
 # except `ikigai-quic`, which brings quinn/rustls/tokio — paid deliberately, because
 # the `Minter` signature IS the lesson of "Who is asking" and a prose copy of it
-# would rot silently.
+# would rot silently. 0.1.41 because that release added `Session.principal`, a public field, so
+# the `Session { … }` literal in `src/identity.rs` names it: under the old "0.1.18" a fresh resolve
+# took 0.1.41 and the listing the book prints no longer compiled.
 ikigai-ipc = "0.1.18"
-ikigai-quic = "0.1.18"
+ikigai-quic = "0.1.41"
 # `MountedRemote` (the alias/override composition) and the `Resolver` surface a
 # connected peer presents.
 ikigai-resolve = "0.1.18"

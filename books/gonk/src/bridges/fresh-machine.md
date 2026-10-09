@@ -56,7 +56,11 @@ way the checkout said:
 $ launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
 ```
 
-Here it starts for the first time, with this page as its home:
+Here it starts for the first time, with this page as its home. This is the one page where the
+server still gets its homes from `HOME` and `XDG_CONFIG_HOME` rather than from `--config-home`
+and `--data-home`: `checkout` reads the process's homes and has no flag for either at the gonk
+this book pins, and the roots it wrote are `~/.ikigai/checkouts/…`, which mean whatever `HOME`
+says to the server that reads them. So the server has to see the same `HOME` the checkout did:
 
 <!-- transcript: serve -->
 ```console
@@ -71,9 +75,9 @@ Both roots, both watched. A read through the socket says they are what was clone
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:flight:file:README.md'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:flight:file:README.md'
 # Flight
-[computed]
+[uncacheable]
 ```
 
 ## 3. The work already tracked

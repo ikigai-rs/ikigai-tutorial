@@ -62,6 +62,13 @@ connection is bounded by — or refuses the connection outright:
 {{#include ../../../../crates/two-hosts/src/identity.rs:minter}}
 ```
 
+The session's `principal` is a NAME the transport stamps on every request the connection
+carries (gonk puts each client's `urn:iki:gonk:client:<fingerprint>` there, for its log and its
+authors), never authority: what a call may do is `capability` alone. This minter names no one.
+
+<!-- urn-gate: unbound urn:iki:gonk:client: — a principal's NAME, which gonk mints per
+     certificate fingerprint; nothing binds it as a resource, here or in gonk. -->
+
 The signature is `Arc<dyn Fn(&PeerIdentity) -> Option<Session>>`, and **`None` refuses**.
 The server closes the connection with a distinct application code, `UNAUTHORIZED`, whose
 message says exactly what happened: the certificate authenticated, and no authority is

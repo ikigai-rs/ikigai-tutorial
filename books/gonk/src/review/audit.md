@@ -122,3 +122,11 @@ None of the machinery went away, only the trigger:
 - **The hook is still installed**, and `gonk.review.arm = true` in the config home turns it
   back on. Nothing about this decision is enforced by deleting code; it is a configuration
   that can be reversed by the same evidence that set it.
+- **What an armed queue fires is gonk's decision, not the queue directory's.** The review
+  space keeps a `handler` file naming what to fire for each request, and by default the
+  reactor underneath would fire whatever that file names, under the reviewer's authority.
+  gonk fires its own review pass and nothing else: a `handler` file retargeted at any other
+  resource gets the request refused, dead-lettered into the space's `error/` directory with a
+  note naming that target, rather than run. Dropping a
+  request is open to anything that can write the directory, so the directory must not be able
+  to choose what runs.

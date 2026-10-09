@@ -25,12 +25,16 @@ $ git -C notes commit -qm 'Start the notes'
 ```
 
 A **browse root** gives a directory a name, and the name is the `{root}` in every resource
-gonk serves for it. Roots live in the config home's `config.toml`, one line each; a `~` there
-is the home directory, which on this page is the page's own directory:
+gonk serves for it. Roots live in the config home's `config.toml`, one line each, as
+`name=path`. A path may start with `~`, which is the home directory of whoever runs gonk; this
+page's root is not in yours, so it writes the path out in full:
 
-<!-- transcript: file .config/ikigai/config.toml -->
-```toml
-gonk.browse.root = "notes=~/notes"
+<!-- transcript: run -->
+```console
+$ mkdir -p .config/ikigai
+$ printf 'gonk.browse.root = "notes=%s/notes"\n' "$PWD" > .config/ikigai/config.toml
+$ cat .config/ikigai/config.toml
+gonk.browse.root = "notes=…/notes"
 ```
 
 `--browse-root notes=PATH` on the command line does the same for one run. gonk reads its roots
@@ -39,7 +43,7 @@ root is the shape of a typo, not something to serve as empty.
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --no-quic --no-backup
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
   browse  urn:repo:{notes (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
@@ -58,15 +62,15 @@ is `urn:gk:repo:notes:tree`:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:tree'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:tree'
 .git	dir	-
 README.md	file	41
-[computed]
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:file:README.md'
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:file:README.md'
 # Notes
 
 A repository this book creates.
-[computed]
+[uncacheable]
 ```
 
 A listing line is `name`, `kind` and `size`, tab-separated. The file resource answers the
@@ -76,14 +80,14 @@ anything changed*:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:hash:README.md'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:hash:README.md'
 sha256:6140d9c09fbe92774e6cf987758c63e9b4cba8638ee23b6c6c66999c6274de72
-[computed]
+[uncacheable]
 $ shasum -a 256 notes/README.md
 6140d9c09fbe92774e6cf987758c63e9b4cba8638ee23b6c6c66999c6274de72  notes/README.md
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:state'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:state'
 … clean
-[computed]
+[uncacheable]
 ```
 
 `hash` is the sha256 of the file's bytes, so it is the same number `shasum` gives; on a
@@ -97,7 +101,7 @@ or joined:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:tree as=text/turtle'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:tree as=text/turtle'
 @prefix ik: <https://ikigai-rs.dev/ns#> .
 
 <urn:repo:notes:tree> a ik:Directory ;
@@ -125,15 +129,15 @@ Commit a change, without touching gonk:
 $ printf 'Read through gonk, without a restart.\n' >> notes/README.md
 $ git -C notes commit -qam 'Say how it is read'
 $ sleep 1
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:file:README.md' -c 'source urn:gk:repo:notes:hash:README.md'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:file:README.md' -c 'source urn:gk:repo:notes:hash:README.md'
 # Notes
 
 A repository this book creates.
 Read through gonk, without a restart.
-[computed]
+[uncacheable]
 sha256:…
-[computed]
-— batch: 2 commands · 2 computed
+[uncacheable]
+— batch: 2 commands · 2 uncacheable
 ```
 
 The new content, at once, from a server that was never restarted. Here is what made that
@@ -148,6 +152,13 @@ both fast and right:
   cache hit, and the first read after a change recomputes. That is what `(watched)` on the
   banner promised. A root whose watcher cannot start is named as unwatched there, and its reads
   are served live, never cached and unwatched.
+- The cache is **gonk's**, behind the socket. The `[uncacheable]` this client prints is about
+  its own cache: golden threads live in one kernel and do not cross a wire, so an answer that
+  left gonk cacheable would arrive with nothing that could ever cut it, and a long-lived client
+  (an agent's `ikigai mcp`, say) would go on serving the old file. So gonk sends every answer
+  across the socket and the QUIC door uncacheable, and keeps the cache entry, and the thread it
+  hangs from, on its own side: a repeated read is one round trip to gonk's cache, never a
+  recompute.
 - The `sleep 1` is honest, not decoration. The notification arrives with the platform's own
   latency, well under a second, so a read issued in the same instant as the write can still
   see the previous version once.

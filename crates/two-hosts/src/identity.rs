@@ -29,6 +29,10 @@ pub fn minter(enrolled: BTreeMap<String, Vec<String>>) -> Minter {
             // The peer's own namespace segment: its `urn:file:` names land inside it, so
             // one client cannot address another's workspace even by guessing the path.
             file_segment: peer.segment_id.clone(),
+            // Who the server says is asking, stamped on every request as a NAME — never
+            // authority, which is `capability` alone. This minter names no one; gonk names
+            // each client `urn:iki:gonk:client:<fingerprint>` here.
+            principal: None,
         })
     })
 }
