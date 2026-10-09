@@ -108,6 +108,15 @@ urn:repo:status
 # and what makes an editor's command surface unable to drift.
 urn:lisp:aliases
 
+# The resources "The aliases, day to day" uses to show how a name becomes an elisp function
+# (one per verb: Source and Sink on `history`, Exists on `httpHead`, Delete on `httpDelete`)
+# and how a refusal reads in Emacs (`posture`, routed to a narrower peer). All bound by the
+# CLI's own host; probed with `describe` in a scratch home against 0.1.41 on 2026-10-09.
+urn:host:history
+urn:host:posture
+urn:httpHead
+urn:httpDelete
+
 # The LLM face: one front grammar over pluggable backends. `urn:llm:{provider}:ask`
 # is deliberately NOT listed — which providers exist is the reader's own llm.json,
 # so the book declares that name an illustration rather than claiming it.

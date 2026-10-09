@@ -98,3 +98,6 @@ interesting thing in this chapter is happening on the other side of that subproc
 That is the claim, though: the client is small **because** the manifold is machine-legible.
 An editor integration that has to know what your system offers is a project; one that asks
 is an afternoon.
+
+The next page, [The aliases, day to day](emacs-aliases.md), is the practical half: setting
+the package up, finding the functions you have, calling them, and knowing when to refresh.
