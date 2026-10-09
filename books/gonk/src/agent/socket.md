@@ -160,8 +160,8 @@ $ ikigai-gonk grants default write
 ```
 
 `cap seal` narrows the session to those scopes and makes that the floor, which nothing later in
-the session can rise above. Then the agent's work, and two things it was not given (one thing
-the seal does NOT keep it from is [below](#what-the-seal-does-not-bound)):
+the session can rise above. Then the agent's work, and two things it was not given (what the
+seal does and does not keep it from beyond these is [below](#what-the-seal-does-not-bound)):
 
 <!-- transcript: run -->
 ```console
@@ -206,30 +206,49 @@ $ grep ' urn:iki:ledger:book:items ' gonk.log
 Look at the fourth token again: `urn:cap:store:write:graph:urn:iki:ledger:graph:default`. The
 ledger needs it, because it writes every append and close as a store update under the
 *caller's* capability ([Whose ledger](../ledger/your-own.md#whose-ledger)). But it is the
-store's token, so it also lets the holder write the ledger's graph directly, through the store,
-without the ledger seeing it. Mount the store's names as well, as the banner suggested, and the
-sealed session can write any triple it likes into the ledger's graph:
+store's token, so on its own it would also let the holder write the ledger's graph directly,
+through the store, without the ledger seeing it, and that is how an item could be given an
+`author` naming somebody else. So gonk refuses a raw store write to a ledger graph, at every
+door, unless the caller is root or holds a separate raw grant for that graph. Mount the store's
+names as well, as the banner suggested, and try it from a sealed session; then once more at
+root:
 
 <!-- transcript: run -->
 ```console
 $ printf 'mount = "prefer urn:iki:store:=%s/.ikigai/gonk.sock"\n' "$PWD" >> .config/ikigai/config.toml
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
 sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+error: denied: a raw store write to the ledger graph <urn:iki:ledger:graph:default> is refused at this door. A ledger grant carries that graph's store token for the ledger's OWN writes, which it issues itself; it is not authority to write the graph's triples directly — that is how an `author` naming someone else would get in. Write through the ledger's endpoints (`urn:iki:ledger:*`). Raw writes are the owner's, at root over the socket, or an identity's whose grant an operator minted with `--ledger-graph <ledger>` (`urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default`)
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
 updated <urn:iki:ledger:graph:default>: +1 -0 quads
+[uncacheable]
+```
+
+The owner at root still writes raw over the socket, which is where migrations and repairs run;
+a session that sealed itself to a ledger grant is held to the same rule as a network client.
+(That is new at the gonk this book pins: through gonk ed43af3 the socket checked nothing, and
+the sealed write above succeeded. The [QUIC chapter](../machines/quic-client.md#writing-the-graph-raw)
+shows how an operator gives a raw grant by name, `--ledger-graph`.)
+
+What the seal does **not** bound is the `author` argument on the session's own new items. The
+network doors refuse a write whose `author` is shaped like a principal and is not the caller's
+own; but the socket names no principal (every request is `owner`), so it cannot run that rule,
+and a sealed session may still file an item that claims to be from a passkey:
+
+<!-- transcript: run -->
+```console
+$ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not really Ada'
+sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+#4 urn:iki:ledger:default:item:…
 [uncacheable]
 — batch: 2 commands · uncacheable
 ```
 
-A harmless triple here, but the same write could give an item an `author` that names somebody
-else, which gonk's network doors refuse when it arrives as the ledger's `author` argument. Those
-doors close the raw route too: HTTP and QUIC refuse a raw store write to a ledger graph unless
-the caller's grant names it with a separate token, as [the QUIC chapter](../machines/quic-client.md#writing-the-graph-raw)
-shows. **The socket does not, at the gonk this book pins.** The socket door has no admission
-layer, so every process on it can write a ledger's graph raw: the owner, which is right for
-migrations and repairs, and also a process of the owner's that sealed itself to a ledger
-grant, which is not. gonk's README lists it as open (ledger item 878). So read `cap seal` on
-the socket as bounding which ledgers and which of the ledger's actions an agent reaches, and not
-as bounding what it can write into the ledger it was given.
+It is the same kind of claim as `author=agent-7`, on an item the session filed itself, never a
+change to someone else's; but gonk's item page renders a passkey-shaped author as that
+passkey's label, so it would read as Ada's. gonk's README states this residual rather than
+hiding it. An agent that must not be able to claim a person needs an identity of its own on the
+QUIC door, where the author rule runs ([The three doors](../machines/doors.md)).
 
 ## Over MCP (coming)
 

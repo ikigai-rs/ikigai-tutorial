@@ -180,7 +180,7 @@ check; so a network door refuses that raw write, and says what to do instead:
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
-error: denied: a raw store write to the ledger graph <urn:iki:ledger:graph:default> is refused at this door. A ledger grant carries that graph's store token for the ledger's OWN writes, which it issues itself; it is not authority to write the graph's triples directly — that is how an `author` naming someone else would get in. Write through the ledger's endpoints (`urn:iki:ledger:*`). Raw writes are the owner's, over the socket, or an identity's whose grant an operator minted with `--ledger-graph <ledger>` (`urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default`)
+error: denied: a raw store write to the ledger graph <urn:iki:ledger:graph:default> is refused at this door. A ledger grant carries that graph's store token for the ledger's OWN writes, which it issues itself; it is not authority to write the graph's triples directly — that is how an `author` naming someone else would get in. Write through the ledger's endpoints (`urn:iki:ledger:*`). Raw writes are the owner's, at root over the socket, or an identity's whose grant an operator minted with `--ledger-graph <ledger>` (`urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default`)
 ```
 
 An identity that really does need to write raw (a repair or migration tool on another machine)
@@ -207,7 +207,8 @@ updated <urn:iki:ledger:graph:default>: +1 -0 quads
 The bundle in `laptop/` was not touched, and the same certificate now holds the new grant, with
 no restart: `--force` replaces a client's **grant** and never its key pair. (`ikigai-gonk grants
 --ledger-graph default` prints the tokens it adds, for writing a grant by hand.) The raw grant
-covers that ledger's graph and not its graveyard of deleted items, which stays the socket's.
+covers that ledger's graph and not its graveyard of deleted items, which stays the owner's, at
+root over the socket.
 
 ## A client's lifecycle
 

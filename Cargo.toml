@@ -94,7 +94,7 @@ oxrdf = "0.3"
 # added (`append key=<task IRI>`: at most one item per key, enforced by the ledger in the same
 # store update that files it, answering `existing` when the key is taken), which is what makes two
 # concurrent syncs safe. It also made `Item` and `Filter` `#[non_exhaustive]`; no crate here
-# builds either. The pin is 0.4.2 because that is what the gonk in `gonk.rev` links (ed43af3, whose
+# builds either. The pin is 0.4.2 because that is what the gonk in `gonk.rev` links (77ac767, whose
 # roborev and kata bridges file through the same keyed append): a malformed timestamp no longer
 # drops an item from `items`/`next` (ledger #866). Before 0.4.0 the floor was 0.3.0, which
 # fixed the unled audit's findings on 0.2.1 that the first chapter walks straight through — two
@@ -106,7 +106,7 @@ ikigai-ledger = "0.4.2"
 # RocksDB at all. 0.2.6 is what gonk links. A 0.x caret: also a ceiling (<0.3.0).
 ikigai-store = { version = "0.2.6", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk ed43af3 links,
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk 77ac767 links,
 # and it is the release that added the explain-status cost line the chapter shows ("opens
 # instantly from the archive"). A 0.x caret: also a ceiling (<0.19.0); read it as a RANGE when
 # gonk moves.

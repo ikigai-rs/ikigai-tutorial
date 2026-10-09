@@ -8,7 +8,7 @@ There are three, and each authenticates something different.
 | door | reached by | authenticates | the capability it grants |
 | --- | --- | --- | --- |
 | HTTP | a browser, `curl`, on **loopback only** | that the request is from this machine and not cross-site (the `Host`, and for a write the `Origin`); a passkey session if there is one | the anonymous grant (read and write of the ledgers `gonk.http.ledger` names, `default` unless told otherwise), plus a signed-in passkey's grant |
-| socket | another process of **the same user** (`ikigai --mount`) | the socket file's owner-only mode, and the peer's user id | root: the owner can read the store's files anyway |
+| socket | another process of **the same user** (`ikigai --mount`) | the socket file's owner-only mode, and the peer's user id | root (the owner can read the store's files anyway), or what an owner process narrowed itself to with `cap seal` |
 | QUIC | another **machine** (`ikigai --connect quic://…`) | a client certificate, pinned by fingerprint, over mutual TLS — no certificate authority | the grant its fingerprint is enrolled under, and a name for the client, `urn:iki:gonk:client:<fingerprint>` |
 
 This page opens all three on one scratch gonk and sends a request through each, then reads gonk's
