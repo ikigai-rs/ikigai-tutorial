@@ -22,11 +22,18 @@
 //! <!-- transcript: serve -->      ONE `$ ` line, started and left running for the rest of
 //!                                 the page; what it prints at startup is the expected output
 //! <!-- transcript: manual — why --> not run, and the reason is said where an editor reads it
+//! <!-- transcript: continues -->  the ikigai book's REPL replay: this block is the next part of
+//!                                 the block before it (here a page is one session already,
+//!                                 so it runs like `run`)
 //! <!-- transcript: file NAME -->  ANY fence (toml, markdown, json…): its lines are written to
 //!                                 NAME in the page's scratch directory, at that point in the
 //!                                 page, creating directories — the page saying "save this as
 //!                                 NAME", which the check then does
 //! ```
+//!
+//! A declaration may run over several lines of its comment; everything up to the `-->` is read,
+//! joined by single spaces, so a reason wrapped to the page's width is kept whole. Every check
+//! that reads one, here and in the ikigai book's REPL replay, reads it with [`declared`].
 //!
 //! A `file` block is how a page gives its commands an input (a config file, a fixture) without
 //! a heredoc: each command is one `sh -c` line, so a multi-line file cannot be typed into one,
@@ -88,6 +95,10 @@ pub enum Kind {
     Manual(String),
     /// Write the block's lines to this path, relative to the page's scratch directory.
     File(String),
+    /// The next part of the block before it, one session with it. The REPL replay merges the
+    /// two; the console runner already runs a page as one session, so it runs this like
+    /// [`Kind::Run`].
+    Continues,
     /// Nothing declared. A skip normally, a failure under `--strict`.
     Undeclared,
 }
@@ -220,16 +231,45 @@ pub fn safe_file_name(name: &str) -> bool {
 
 /// The declaration in the lines above a fence, the nearest one winning. The search stops at
 /// the end of an earlier fence: a declaration belongs to the first block after it, never to
-/// the next one as well.
-pub(crate) fn declared(above: &[&str]) -> Kind {
-    for line in above.iter().rev() {
+/// the next one as well. A comment that does not close on its first line runs on to the line
+/// that does, so a reason wrapped over several lines is kept whole.
+///
+/// The one parser for `<!-- transcript: … -->`: the console runner, the `cargo run` check
+/// ([`runs`]) and the ikigai book's REPL replay all call it, so a marker cannot mean one thing
+/// to one check and another to the next (ledger #1075).
+///
+/// ```
+/// use book_transcripts::{declared, Kind};
+///
+/// // A program run declared manual, its output, then a REPL block: the marker is the run's.
+/// let page = [
+///     "<!-- transcript: manual — the reader's own crate -->",
+///     "```bash",
+///     "cargo run -p your-endpoints",
+///     "```",
+///     "",
+/// ];
+/// assert_eq!(declared(&page), Kind::Undeclared);
+///
+/// let wrapped = [
+///     "<!-- transcript: manual — a server, over two stores another process holds",
+///     "     on sockets. -->",
+/// ];
+/// assert_eq!(
+///     declared(&wrapped),
+///     Kind::Manual("a server, over two stores another process holds on sockets.".into())
+/// );
+/// ```
+pub fn declared(above: &[&str]) -> Kind {
+    for (at, line) in above.iter().enumerate().rev() {
         if line.trim_start().starts_with("```") {
             break;
         }
         let Some((_, rest)) = line.split_once("transcript:") else {
             continue;
         };
-        let rest = rest.trim().trim_end_matches("-->").trim();
+        let text = comment_text(rest, &above[at + 1..]);
+        let rest = text.as_str();
         if let Some(name) = rest.strip_prefix("file ") {
             return Kind::File(name.trim().to_string());
         }
@@ -239,10 +279,35 @@ pub(crate) fn declared(above: &[&str]) -> Kind {
         }
         return match rest {
             "serve" => Kind::Serve,
+            "continues" => Kind::Continues,
             _ => Kind::Run,
         };
     }
     Kind::Undeclared
+}
+
+/// A declaration's text: the rest of its first line and, when the comment does not close
+/// there, each line after it up to the one that closes it, trimmed and joined by single
+/// spaces, without the `-->` or anything after it. No fence can sit between the two:
+/// [`declared`] searches upward and stops at the first one, so `after` holds none.
+fn comment_text(first: &str, after: &[&str]) -> String {
+    let mut text = first.trim().to_string();
+    if !first.contains("-->") {
+        for line in after {
+            let line = line.trim();
+            if !line.is_empty() {
+                text.push(' ');
+                text.push_str(line);
+            }
+            if line.contains("-->") {
+                break;
+            }
+        }
+    }
+    let text = text
+        .split_once("-->")
+        .map_or(text.as_str(), |(head, _)| head);
+    text.trim().to_string()
 }
 
 /// A block's commands, each with the output lines that follow it.
@@ -536,6 +601,85 @@ gonk.port = 1070
             vec![PathBuf::from(".config/ikigai/config.toml")]
         );
         fs::remove_dir_all(&home).unwrap();
+    }
+
+    #[test]
+    fn a_declaration_belongs_to_its_own_fence_and_never_reaches_past_an_earlier_one() {
+        // Ledger #1075: a program run declared manual, its output fence, then a later block
+        // whose five lines above still hold the marker. The marker is the run's alone.
+        let above = [
+            "<!-- transcript: manual — the reader's own crate -->",
+            "```bash",
+            "cargo run -p your-endpoints",
+            "```",
+            "",
+        ];
+        assert_eq!(declared(&above), Kind::Undeclared);
+        assert_eq!(
+            declared(&above[..1]),
+            Kind::Manual("the reader's own crate".into())
+        );
+        // The nearest declaration wins.
+        assert_eq!(
+            declared(&[
+                "<!-- transcript: manual — x -->",
+                "<!-- transcript: serve -->"
+            ]),
+            Kind::Serve
+        );
+    }
+
+    #[test]
+    fn a_reason_wrapped_over_several_lines_is_kept_whole() {
+        let above = [
+            "prose",
+            "<!-- transcript: manual — a server, over two stores another repository's process holds on",
+            "     sockets; crates/ttt-host/tests/host.rs tests the host itself. -->",
+        ];
+        assert_eq!(
+            declared(&above),
+            Kind::Manual(
+                "a server, over two stores another repository's process holds on sockets; \
+                 crates/ttt-host/tests/host.rs tests the host itself."
+                    .into()
+            )
+        );
+        assert_eq!(
+            declared(&[
+                "<!-- transcript: manual —",
+                "",
+                "   one",
+                "   two",
+                "-->",
+                "x"
+            ]),
+            Kind::Manual("one two".into()),
+            "blank lines inside the comment add nothing, and the search ends at its close"
+        );
+        assert_eq!(
+            declared(&["<!-- transcript: manual — closed --> trailing words"]),
+            Kind::Manual("closed".into())
+        );
+    }
+
+    #[test]
+    fn every_declaration_word_is_read() {
+        let kind = |text: &str| declared(&[text]);
+        assert_eq!(kind("<!-- transcript: run -->"), Kind::Run);
+        assert_eq!(kind("<!-- transcript: serve -->"), Kind::Serve);
+        assert_eq!(kind("<!-- transcript: continues -->"), Kind::Continues);
+        assert_eq!(
+            kind("<!-- transcript: file a/b.toml -->"),
+            Kind::File("a/b.toml".into())
+        );
+        assert_eq!(
+            kind("<!-- transcript: manual -->"),
+            Kind::Manual(String::new())
+        );
+        assert_eq!(
+            kind("<!-- transcripts: home — a page's -->"),
+            Kind::Undeclared
+        );
     }
 
     #[test]

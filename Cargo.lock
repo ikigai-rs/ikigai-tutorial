@@ -160,6 +160,7 @@ version = "0.1.0"
 name = "book-urns"
 version = "0.1.0"
 dependencies = [
+ "book-transcripts",
  "book-wasm",
  "building-endpoints",
  "futures",

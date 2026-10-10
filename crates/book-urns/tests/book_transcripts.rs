@@ -54,6 +54,8 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use book_transcripts::{declared, Kind};
+
 fn book_src() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../books/ikigai/src")
@@ -101,70 +103,74 @@ fn transcripts() -> Vec<Transcript> {
             .to_string_lossy()
             .into_owned();
         let text = std::fs::read_to_string(&path).expect("readable");
-        let lines: Vec<&str> = text.lines().collect();
-        let mut i = 0;
-        while i < lines.len() {
-            if lines[i].trim_start() != "```text" {
-                i += 1;
-                continue;
-            }
-            let start = i + 1;
-            let mut end = start;
-            while end < lines.len() && !lines[end].trim_start().starts_with("```") {
-                end += 1;
-            }
-            let block: Vec<&str> = lines[start..end].to_vec();
-            if !block.iter().any(|l| l.starts_with("ikigai> ")) {
-                i = end + 1;
-                continue;
-            }
-            // A declaration is an HTML comment within the five lines above the fence —
-            // close enough to be read as belonging to the block.
-            let above = &lines[i.saturating_sub(5)..i];
-            let manual = above.iter().find_map(|l| {
-                l.split_once("transcript: manual").map(|(_, reason)| {
-                    reason
-                        .trim()
-                        .trim_start_matches(['—', '-', ':'])
-                        .trim()
-                        .trim_end_matches("-->")
-                        .trim()
-                        .to_string()
-                })
-            });
-            let continues = above.iter().any(|l| l.contains("transcript: continues"));
-            let commands: Vec<String> = block
-                .iter()
-                .filter_map(|l| l.strip_prefix("ikigai> "))
-                .map(str::to_string)
-                .collect();
-            let expected: Vec<String> = block
-                .iter()
-                .filter(|l| !l.starts_with("ikigai> "))
-                .map(|l| l.to_string())
-                .collect();
-            match (continues, out.last_mut()) {
-                // The same sitting: the earlier block's commands come first, and its
-                // output is expected first. The merged transcript keeps the first
-                // block's line, and the report names every block it spans.
-                (true, Some(previous)) if previous.file == file => {
-                    previous.commands.extend(commands);
-                    previous.expected.extend(expected);
-                    previous.spans.push(start);
-                }
-                _ => out.push(Transcript {
-                    file: file.clone(),
-                    line: start,
-                    spans: vec![start],
-                    commands,
-                    expected,
-                    manual,
-                }),
-            }
-            i = end + 1;
-        }
+        scan_page(&file, &text, &mut out);
     }
     out
+}
+
+/// One page's transcripts, appended to `out` (a `continues` block merges into the one before).
+///
+/// What a block declares is read by `book_transcripts::declared`, the parser every transcript
+/// check shares (ledger #1075). This file used to read its own: any line in the five above the
+/// fence, with no stop at an earlier fence, so a program run declared manual a few lines above a
+/// REPL block exempted the REPL block too, and that block passed without being replayed. And a
+/// reason wrapped over two lines lost its second.
+fn scan_page(file: &str, text: &str, out: &mut Vec<Transcript>) {
+    let lines: Vec<&str> = text.lines().collect();
+    let mut i = 0;
+    while i < lines.len() {
+        if lines[i].trim_start() != "```text" {
+            i += 1;
+            continue;
+        }
+        let start = i + 1;
+        let mut end = start;
+        while end < lines.len() && !lines[end].trim_start().starts_with("```") {
+            end += 1;
+        }
+        let block: Vec<&str> = lines[start..end].to_vec();
+        if !block.iter().any(|l| l.starts_with("ikigai> ")) {
+            i = end + 1;
+            continue;
+        }
+        // A declaration is an HTML comment within the five lines above the fence — close
+        // enough to be read as belonging to the block, and never past an earlier fence.
+        let kind = declared(&lines[i.saturating_sub(5)..i]);
+        let manual = match &kind {
+            Kind::Manual(reason) => Some(reason.clone()),
+            _ => None,
+        };
+        let continues = kind == Kind::Continues;
+        let commands: Vec<String> = block
+            .iter()
+            .filter_map(|l| l.strip_prefix("ikigai> "))
+            .map(str::to_string)
+            .collect();
+        let expected: Vec<String> = block
+            .iter()
+            .filter(|l| !l.starts_with("ikigai> "))
+            .map(|l| l.to_string())
+            .collect();
+        match (continues, out.last_mut()) {
+            // The same sitting: the earlier block's commands come first, and its
+            // output is expected first. The merged transcript keeps the first
+            // block's line, and the report names every block it spans.
+            (true, Some(previous)) if previous.file == file => {
+                previous.commands.extend(commands);
+                previous.expected.extend(expected);
+                previous.spans.push(start);
+            }
+            _ => out.push(Transcript {
+                file: file.to_string(),
+                line: start,
+                spans: vec![start],
+                commands,
+                expected,
+                manual,
+            }),
+        }
+        i = end + 1;
+    }
 }
 
 /// A transcript's own home, removed when the transcript is done.
@@ -492,6 +498,71 @@ mod unit {
         assert!(
             !matches(&s(&["a"]), &s(&["a", "b"])),
             "nothing may follow without a trailing …"
+        );
+    }
+
+    fn scan(text: &str) -> Vec<Transcript> {
+        let mut out = Vec::new();
+        scan_page("p.md", text, &mut out);
+        out
+    }
+
+    #[test]
+    fn a_program_runs_manual_marker_does_not_exempt_a_repl_block_after_it() {
+        // Ledger #1075: the marker is within five lines of the REPL fence, but an earlier
+        // fence sits between them, so it is the run's and the REPL block is replayed.
+        let found = scan(
+            "<!-- transcript: manual — the reader's own crate -->\n\
+             ```bash\n\
+             cargo run -p your-endpoints\n\
+             ```\n\
+             \n\
+             ```text\n\
+             ikigai> source urn:iki:fn:toUpper hello\n\
+             HELLO\n\
+             ```\n",
+        );
+        assert_eq!(found.len(), 1, "{found:?}");
+        assert_eq!(found[0].manual, None, "the REPL block must be replayed");
+        assert_eq!(found[0].commands, s(&["source urn:iki:fn:toUpper hello"]));
+    }
+
+    #[test]
+    fn a_manual_reason_over_several_lines_is_kept_whole() {
+        let found = scan(
+            "<!-- transcript: manual — the capability line prints this machine's\n\
+             \x20    home directory -->\n\
+             ```text\n\
+             ikigai> source urn:kernel:capability\n\
+             ```\n",
+        );
+        assert_eq!(
+            found[0].manual.as_deref(),
+            Some("the capability line prints this machine's home directory")
+        );
+    }
+
+    #[test]
+    fn continues_merges_only_when_it_is_the_blocks_own_declaration() {
+        let found = scan(
+            "```text\n\
+             ikigai> a\n\
+             ```\n\
+             <!-- transcript: continues -->\n\
+             ```text\n\
+             ikigai> b\n\
+             ```\n\
+             \n\
+             ```text\n\
+             ikigai> c\n\
+             ```\n",
+        );
+        assert_eq!(found.len(), 2, "{found:?}");
+        assert_eq!(found[0].commands, s(&["a", "b"]));
+        assert_eq!(
+            found[1].commands,
+            s(&["c"]),
+            "the marker above `b` is not `c`'s"
         );
     }
 
