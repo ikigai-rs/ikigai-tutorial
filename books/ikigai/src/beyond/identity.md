@@ -105,6 +105,17 @@ taking away is the point. A client that holds broad authority and is about to ha
 an agent, a script, or a mount can spend a narrow slice of what it holds and know the
 server will enforce the narrowing even if its own process is compromised a second later.
 
+A **mount** carries it for you. When a resolution in your kernel crosses a mount into a
+peer, the request goes with the capability it was issued under, and the peer clamps that
+against your session like any other carried capability: a sealed or narrowed session stays
+narrow on the far side of a mount. That was not always so. The `Resolver` trait's
+`issue_as` had a default that dropped the capability and resolved as the peer's own
+principal, so a mount whose wrapper forgot to override it ran every narrowed request at
+the peer's full authority, while the scopes the local kernel checked still looked enforced
+(ledger item 849). Since `ikigai-resolve` 0.1.40 that default **refuses** any capability
+but root, naming the type that did not override it, so a forgetful wrapper fails closed;
+`a_mount_carries_a_narrowed_capability_to_its_peer` is the test that pins it.
+
 The book's tests state both halves: an unenrolled fingerprint gets `None`, and a carried
 capability naming a scope the session does not hold comes back not holding it.
 
@@ -308,6 +319,45 @@ assert!(sink.requires.is_empty());
 ```
 
 Restate on each explicit action whatever it still needs, and no more.
+
+The other half of a module's contract is the **grant list it publishes**: the scopes an
+operator should hand a caller who is meant to use it. That list is prose until something
+checks it against the declaration, and the check should not be a copy of the kernel's
+rule, which has a subtlety (a `…:*` family scope is satisfied by holding *any* grant under
+its prefix) that a copy gets wrong. `Description::unsatisfied_scopes(verb, &capability)` is
+the kernel's own predicate, the one its floor, `urn:kernel:actions` and `urn:kernel:validate`
+share: the scopes that capability would be refused for, empty exactly when the floor would
+admit it. So a module can test, per verb, that what it publishes covers what it declares.
+Here it is for `counter` from [Multi-verb endpoints](../building/multi-verb.md):
+
+```rust
+# extern crate building_endpoints;
+# extern crate ikigai_core;
+use building_endpoints::multi_verb::{counter, WRITE};
+use ikigai_core::{Capability, Endpoint, Verb};
+
+// What the module tells operators to grant a caller who may set the counter.
+const PUBLISHED: &[&str] = &["urn:cap:tutorial:counter:write"];
+
+let contract = counter().describe();
+let granted = Capability::scoped(PUBLISHED.iter().copied());
+for verb in [Verb::Source, Verb::Sink, Verb::Delete] {
+    assert!(
+        contract.unsatisfied_scopes(verb, &granted).is_empty(),
+        "the published grant does not cover {verb:?}"
+    );
+}
+
+// A grant that never mentions the counter covers the read, and is refused both writes
+// for the one scope it lacks.
+let reader = Capability::scoped(["urn:cap:kernel:inspect"]);
+assert!(contract.unsatisfied_scopes(Verb::Source, &reader).is_empty());
+assert_eq!(contract.unsatisfied_scopes(Verb::Sink, &reader), [WRITE]);
+assert_eq!(contract.unsatisfied_scopes(Verb::Delete, &reader), [WRITE]);
+```
+
+When a declaration gains a scope and nobody updates the published list, this is the test
+that goes red, before an operator's caller is refused in production.
 
 The reader-facing consequence: the tool list an agent is handed is exactly what it may
 invoke — `urn:kernel:actions` computes reach intersected with authority from the same

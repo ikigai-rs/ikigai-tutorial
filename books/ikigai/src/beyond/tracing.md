@@ -114,6 +114,121 @@ The `cap ✗` is the authority dimension made visible; the message names the sco
 and the resource that declared it. The denial *event* exists in the kernel either way —
 the REPL simply does not draw it.
 
+## Before it runs: the dry run
+
+A trace is an autopsy: it tells you what happened to a request you already sent, and for a
+write that means the write has happened (or has been refused) by the time you read it.
+`urn:kernel:explain` asks the same question **without sending anything**. Give it a
+`target` and a `verb`, and it walks the chain a real request would walk, asking each space
+whether it would answer, and stops short of invoking the endpoint: no endpoint runs, no
+cache entry is touched, no alias counter moves. What comes back is the route and the
+verdict: which space answered, which endpoint at which door, the scopes its declaration
+requires for that verb, and which of them the capability lacks.
+
+Here is the denial above, asked about first, by the same narrow reader:
+
+<!-- urn-gate: unbound urn:iki:tutorial:countr — a deliberately misspelled name, to show
+     how explain reports a miss. -->
+
+```rust
+# extern crate building_endpoints;
+# extern crate ikigai_core;
+# extern crate futures;
+use futures::executor::block_on;
+use ikigai_core::{ArgRef, Capability, Iri, Request, Verb};
+
+let kernel = building_endpoints::kernel_in(None);
+let reader = Capability::root().attenuate(["urn:cap:kernel:inspect"]);
+let explain = |args: &[(&str, &str)], cap: &Capability| {
+    let mut ask = Request::new(Verb::Source, Iri::parse("urn:kernel:explain").unwrap());
+    for (name, value) in args {
+        ask = ask.with_arg(*name, ArgRef::Inline(value.as_bytes().to_vec()));
+    }
+    String::from_utf8(block_on(kernel.issue(ask, cap)).unwrap().bytes).unwrap()
+};
+
+let would = explain(&[("target", "urn:iki:tutorial:counter"), ("verb", "sink")], &reader);
+assert_eq!(
+    would,
+    "\
+explain sink urn:iki:tutorial:counter
+  capability  urn:cap:kernel:inspect
+  chain       root
+  spaces, in the order they are consulted:
+    1. root  fallback        answered
+  endpoint    counter (urn:ikigai:endpoint:counter)
+  door        urn:iki:tutorial:counter (exact)
+  bindings    (none)
+  requires    urn:cap:tutorial:counter:write
+  denied      yes: the capability lacks urn:cap:tutorial:counter:write — a real request is refused before the endpoint is entered
+  cacheable   never: a sink is never stored
+"
+);
+
+// An operator holding more can ask on someone else's behalf: `scopes=` answers for a
+// capability ATTENUATED from the asker's, so root sees what the reader would see…
+let for_reader = explain(
+    &[("target", "urn:iki:tutorial:counter"), ("verb", "sink"), ("scopes", "urn:cap:kernel:inspect")],
+    &Capability::root(),
+);
+assert!(for_reader.contains("  capability  attenuated to urn:cap:kernel:inspect\n"));
+assert!(for_reader.contains("  denied      yes: the capability lacks urn:cap:tutorial:counter:write"));
+
+// …and never more: a reader cannot ask what root would be allowed to do.
+let mut wider = Request::new(Verb::Source, Iri::parse("urn:kernel:explain").unwrap());
+for (name, value) in [("target", "urn:iki:tutorial:counter"), ("scopes", "urn:cap:tutorial:counter:write")] {
+    wider = wider.with_arg(name, ArgRef::Inline(value.as_bytes().to_vec()));
+}
+assert!(block_on(kernel.issue(wider, &reader)).is_err());
+
+// A name nothing answers says so, member by member.
+let typo = explain(&[("target", "urn:iki:tutorial:countr")], &Capability::root());
+assert!(typo.contains("    1. root  fallback        declined\n"));
+assert!(typo.ends_with("  verdict     unresolved: nothing in the chain answers this name\n"));
+```
+
+Read the answer as three questions. *Where would it go?* The root space answers, with
+`counter` at its exact door, and no grammar bindings. *Would it be let in?* No: the Sink's
+declaration requires the write scope and the reader lacks it. *Would the answer be kept?*
+A Sink never is; for a read, the line says the endpoint decides per answer, and points at
+`urn:kernel:cached` and `urn:kernel:uncached`, which say after the fact.
+
+Three things to know about it, so it is not mistaken for more than it is:
+
+- **It reports what each space did, not why it declined.** A space that reports no
+  structure of its own is marked *opaque*: explain can say it was consulted, not what
+  happened inside it.
+- **It needs `urn:cap:kernel:inspect`**, like every other look inside the kernel, and it
+  is cacheable under `urn:kernel:bindings`, per capability and chain, so rebinding
+  anything recomputes it.
+- **The name of the narrowing argument is `scopes=`, not `as=`.** `as=` stays what it is
+  everywhere else, the face: `as=text/turtle` gives the same answer as a graph.
+
+From the REPL (`ikigai-cli` 0.1.43 and later), the same question is a command,
+`explain <iri> [verb]`, a thin view over this resource that works the same in process and
+over `--connect`. Ask it about the old spelling from the alias section below, and it shows
+the rewrite before any space is consulted:
+
+```text
+ikigai> explain urn:fn:toUpper
+explain source urn:fn:toUpper
+  capability  root
+  chain       root
+  rewrite     prefix urn:fn: -> urn:iki:fn:   (urn:fn:toUpper => urn:iki:fn:toUpper)
+  resolves as urn:iki:fn:toUpper
+  spaces, in the order they are consulted:
+    1. root  alias           answered — encloses 2 opaque spaces: past them, the chain cannot be inspected
+  endpoint    toUpper (urn:ikigai:endpoint:toUpper)
+…
+  cached now  no   (urn:kernel:cached, live)
+```
+
+The `opaque` line is the first limit above, in a real host: the CLI's root is an alias
+table over spaces that report no structure, so explain can say the root answered and which
+endpoint, and not what the spaces inside it did. The REPL adds the last line itself, from
+`urn:kernel:cached`: explain reports the route, and whether an answer is in the cache right
+now is a separate, live question.
+
 ## What an alias hop looks like
 
 A request whose target arrived through a logical rewrite — [Scope and

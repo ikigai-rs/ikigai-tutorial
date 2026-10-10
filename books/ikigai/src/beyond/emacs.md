@@ -25,9 +25,12 @@ ikigai -c 'source urn:lisp:aliases as=text/x-emacs-lisp'
 Read that line for what it is not. There is no code-generation tool, no schema file, no
 build step, and nothing in the editor that knows what a calendar or a repository is. There
 is a resource whose representation happens to be a program, and `as=` picks which language
-it comes out in — the same projection has a Scheme face for the kernel's own Lisp. Two
-representations of one resource, which is the oldest idea in this book applied to
-tooling.
+it comes out in — the same projection has a Scheme face (`text/x-scheme`, its default) for
+the kernel's own Lisp. That Lisp is the sandboxed one [the front door](../front-door/grammar.md)
+describes, and the Scheme face is written for it: each definition is a `define` that conses
+its arguments into a list and hands them to the verbs' own primitive, `%verb-args`, which
+the allowlist carries for exactly this. Two representations of one resource, which is the
+oldest idea in this book applied to tooling.
 
 ## Why it cannot drift
 

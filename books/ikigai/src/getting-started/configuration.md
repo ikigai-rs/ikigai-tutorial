@@ -122,9 +122,12 @@ inherited silently by children, undiffable. A system whose thesis is that behavi
 be nameable and inspectable is not comfortable taking instructions that way.
 
 They are not absent, and a book that said so would be lying on your first day. The CLI
-(`ikigai-cli` 0.1.28) reads a set of `IKIGAI_*` variables — `IKIGAI_FILES`, the one you
+(`ikigai-cli` 0.1.43) reads a set of `IKIGAI_*` variables — `IKIGAI_FILES`, the one you
 meet first, in [The file workspace](file-workspace.md), and `IKIGAI_GRANTS`,
-`IKIGAI_SMTP_HOST`, `IKIGAI_PASSKEY_ORIGIN` and others carrying *deployment* facts. It
+`IKIGAI_SMTP_HOST` and others carrying *deployment* facts. The set shrinks: the passkey
+relying party was a variable until `ikigai-cli` 0.1.39, and is now two flags on `serve`,
+`--passkey-rp-id <domain>` and `--passkey-origin <url>`, with no default, so an edge
+started without them enrolls nothing. It
 picks its scheduler through a three-way precedence, `decide(flag, config, env)`, and then
 *says which one won*:
 
