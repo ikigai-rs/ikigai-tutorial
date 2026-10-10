@@ -17,8 +17,9 @@ crate-type = ["cdylib", "rlib"]
 ikigai-core.workspace = true
 ledger-host = { path = "../ledger-host" }
 # The CLI's engine, as `crates/book-wasm` takes it: the same REPL grammar a reader types at
-# `ikigai`, so a cell's line means what it means at a shell.
-ikigai-engine = "0.1.29"
+# `ikigai`, so a cell's line means what it means at a shell. 0.1.44, the cli crates' published
+# head, with `crates/book-wasm`.
+ikigai-engine = "0.1.44"
 futures.workspace = true
 serde_json = "1"
 # ⚠ Pinned EXACTLY, to the version `crates/book-wasm` pins and pages.yml installs the

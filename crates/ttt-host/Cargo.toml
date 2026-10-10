@@ -20,11 +20,11 @@ name = "ttt-host"
 path = "src/main.rs"
 
 [dependencies]
-# Its own pin, above the workspace's 0.1.78 (the floor the BOOK teaches): 0.1.80 is what
-# the cli 0.1.30 crates below require, for `Error::Conflict` — the state refuses the
-# request, wire v8's typed Conflict and the edge's 409. The teaching crates stay on the
-# workspace floor; one lockfile means they build against the same resolved core.
-ikigai-core = "0.1.80"
+# The workspace's core. This crate once pinned its own, 0.1.80, above the workspace's floor of
+# the day, because the cli 0.1.30 crates below required it for `Error::Conflict` (the state
+# refuses the request, wire v8's typed Conflict and the edge's 409); the workspace has long
+# passed it, and the cli 0.1.44 crates require 0.1.91.
+ikigai-core.workspace = true
 # The Meta renderer, so each served kernel answers `describe` and a peer's JSON Meta.
 ikigai-vocab.workspace = true
 tic-tac-toe = { path = "../tic-tac-toe" }
@@ -32,19 +32,21 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 # 0.1.30 is the hardened edge the tic-tac-toe README's path <-> IRI rule describes (ledger
 # #80, #591): the target decoded as bytes, a malformed escape a 400, `+` a space in the query
 # only, `%2F` data inside its segment, and header/body/write deadlines plus a connection cap.
-ikigai-web = "0.1.30"
+# 0.1.44 is the pin for this crate and the three below: the cli crates' published head, and one
+# release for all four, as 0.1.30 was.
+ikigai-web = "0.1.44"
 # The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
 # peer store). 0.1.30 speaks wire v8 (a typed Conflict), backward compatible with the v7
 # the Python and Deno faces were built against; both speak v8 at their main.
-ikigai-ipc = "0.1.30"
+ikigai-ipc = "0.1.44"
 # `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
 # `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds. 0.1.30 is the release
 # the two crates above belong to.
-ikigai-resolve = "0.1.30"
+ikigai-resolve = "0.1.44"
 # `-c <line>`: the REPL grammar (`source`, `sink`, `cache`, `trace`) run against the game's
 # own kernel in this process, so a line's verdict is that kernel's. 0.1.18 is the floor
 # book-wasm states for the same `Engine::new` / `eval` / `Action` surface.
-ikigai-engine = "0.1.18"
+ikigai-engine = "0.1.44"
 async-trait = "0.1"
 futures.workspace = true
 # The runtime ikigai-web's server runs on.
