@@ -175,11 +175,16 @@ threads (cut generations)
   urn:iki:fn:toUpper  gen 1
 ```
 
-Every thread ever cut in this kernel, with its generation — the file's twice (once by the
-`sink` that wrote it, once by hand), `toUpper`'s once. A generation bumps whether or not
-anything depended on the thread: cutting is cheap and blind, and validity is decided
-lazily, when an entry is next looked up, by comparing the generation it was made at with
-the one now.
+Every thread ever cut in this kernel, with its generation: `toUpper`'s once, by hand, and
+the file's at least twice, once by the `sink` that wrote it and once by hand. The CLI also
+watches its workspace and cuts a file's thread for every change event the operating system
+reports, its own writes included, and how many events one write produces, and whether they
+arrive before your next command, depends on the platform. So the file's count varies: a Mac
+printed the `gen 2` above, and a Linux machine running the same lines printed `gen 5`.
+
+A generation bumps whether or not anything depended on the thread: cutting is cheap and
+blind, and validity is decided lazily, when an entry is next looked up, by comparing the
+generation it was made at with the one now.
 
 ## 8. A trace
 
@@ -210,8 +215,8 @@ describes, and Part I is where you build an endpoint that gets every one of thes
 properties for free.
 
 Every name printed on this page is checked, on every commit, against a written-down
-claim about the CLI (`books/ikigai/cli-vocabulary.txt`) — and that file is checked against
-a real binary by a test that has to be run by hand. Every transcript on this page is
+claim about the CLI (`books/ikigai/cli-vocabulary.txt`) — and that file is checked, on
+every commit too, against the pinned binary named below. Every transcript on this page is
 replayed, on every commit, against a real binary: `ikigai-cli`
 {{#include ../../ikigai-cli.version}}, the version pinned in `books/ikigai/ikigai-cli.version`
 (`./scripts/test-transcripts.sh` runs it locally). That replay did not always run in CI, and

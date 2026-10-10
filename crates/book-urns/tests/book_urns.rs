@@ -500,24 +500,39 @@ fn no_chapter_includes_a_listing_from_the_readers_crate() {
     );
 }
 
-/// The instrument, not the gate: probe a real `ikigai` for every exact manifest entry.
+/// The instrument behind the gate: probe a real `ikigai` for every exact manifest entry.
 ///
-/// This cannot be a gate. CI has no `ikigai` binary, and a check that silently does not
-/// run is the failure mode the gate above exists to avoid — so rather than skipping
-/// quietly it is `#[ignore]`d, which says so out loud in the test output.
+/// It needs a binary, which `cargo test` does not build, and a check that silently does not
+/// run is the failure mode the gate above exists to avoid — so rather than skipping quietly
+/// it is `#[ignore]`d, which says so out loud in the test output. CI runs it (ledger #1031):
+/// `scripts/test-transcripts.sh`, in `pages.yml`'s `transcripts` job, runs it right after
+/// the transcript replay with the same pinned `ikigai-cli` (`books/ikigai/ikigai-cli.version`)
+/// first on PATH. By hand, against whatever `ikigai` you have:
 ///
-///     cargo install ikigai-cli --locked
-///     cargo test -p book-urns -- --ignored --nocapture
+///     cargo test -p book-urns --test book_urns -- --ignored --nocapture
+///
+/// Every probe runs in a scratch home, as the replay does: a name that resolves only
+/// because of the prober's own config home (a mount, a peer) is not a name the book's
+/// reader has, and a probe must not read or reach the prober's live services.
 #[test]
-#[ignore = "needs an `ikigai` binary on PATH; run it by hand when the manifest or the CLI changes"]
+#[ignore = "needs an `ikigai` binary on PATH; CI runs it via scripts/test-transcripts.sh"]
 fn the_cli_vocabulary_matches_an_installed_binary() {
     let vocabulary = vocabulary();
 
-    let version = Command::new("ikigai")
-        .arg("--plain")
-        .arg("-c")
-        .arg("help")
-        .output();
+    let home = std::env::temp_dir().join(format!("book-urns-probe-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&home);
+    std::fs::create_dir_all(home.join(".config")).expect("a scratch home");
+    let ikigai = || {
+        let mut cmd = Command::new("ikigai");
+        cmd.current_dir(&home)
+            .env("HOME", &home)
+            .env("XDG_CONFIG_HOME", home.join(".config"))
+            .arg("--plain")
+            .arg("-c");
+        cmd
+    };
+
+    let version = ikigai().arg("help").output();
     let Ok(probe) = version else {
         panic!(
             "no `ikigai` on PATH. Install it with `cargo install ikigai-cli --locked`; \
@@ -540,9 +555,7 @@ fn the_cli_vocabulary_matches_an_installed_binary() {
             commands.push(format!("sink {entry} urn-gate-probe"));
         }
         let reachable = commands.iter().any(|command| {
-            Command::new("ikigai")
-                .arg("--plain")
-                .arg("-c")
+            ikigai()
                 .arg(command)
                 .output()
                 .map(|o| o.status.success())
@@ -558,6 +571,7 @@ fn the_cli_vocabulary_matches_an_installed_binary() {
         println!("skip {prefix}* — a templated family; probe a concrete name by hand");
     }
 
+    let _ = std::fs::remove_dir_all(&home);
     assert!(
         missing.is_empty(),
         "books/ikigai/cli-vocabulary.txt claims names this binary does not resolve: {}",

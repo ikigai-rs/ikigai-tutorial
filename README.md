@@ -181,32 +181,41 @@ A name that is *supposed* not to resolve declares itself next to the claim it qu
 `unbound` is checked in the other direction, so a paragraph saying "this used to be called
 X" goes red if somebody binds X again.
 
-> ⚠ What it cannot do is confirm that `cli-vocabulary.txt` is still true of a newer CLI —
-> CI has no `ikigai` binary. The test that can is in the same file and marked `#[ignore]`,
-> so it announces itself in the test output rather than skipping quietly:
+> ⚠ What it cannot do is confirm that `cli-vocabulary.txt` is still true of a newer CLI:
+> that takes an `ikigai` binary, which `cargo test` does not build. The test that can is in
+> the same file and marked `#[ignore]`, so it announces itself in the test output rather than
+> skipping quietly. CI runs it (ledger #1031) in the same step as the transcripts below,
+> against the same pinned binary, so the file is checked against `ikigai-cli` at the version
+> in `books/ikigai/ikigai-cli.version` on every commit. Against whatever `ikigai` you have:
 >
 > ```bash
-> cargo install ikigai-cli --locked
-> cargo test -p book-urns -- --ignored --nocapture
+> cargo test -p book-urns --test book_urns -- --ignored --nocapture
 > ```
 
 ### And the transcripts
 
 A ```` ```text ```` block whose lines start with `ikigai> ` is the book saying "type this,
-see that", and nothing compiles one — so one was written to fit its prose. The front
-door's "Cut a thread" showed a cut of `urn:iki:fn:toUpper` followed by `not cached`; the
-real CLI says `cached`, because a pure function declares no golden thread and a cut has
-nothing of its own to invalidate. `crates/book-urns/tests/book_transcripts.rs` replays
-every transcript through one `ikigai --plain -c … -c …` process and diffs the output
-(cache verdicts and durations normalized; `…` matches any run of lines). A block that is
-the next part of the same sitting says `<!-- transcript: continues -->` and is replayed
-with everything before it — replayed alone, "cut, then probe" says `not cached` in a
-fresh process, which is exactly what the wrong block claimed. A block that cannot be
-replayed says `<!-- transcript: manual — why -->`. Like the vocabulary probe it needs a
-binary, so it is `#[ignore]`d — but unlike the probe, CI runs it: `scripts/test-transcripts.sh`
-(the `transcripts` job in `pages.yml`) installs `ikigai-cli` at the version in
-`books/ikigai/ikigai-cli.version` and replays every block with that binary first on PATH. To
-replay against whatever `ikigai` you have instead:
+see that", and nothing compiles one, so one was written to fit its prose. The front door's
+"Cut a thread" first showed a cut of `urn:iki:fn:toUpper` followed by `not cached`, while
+the CLI of the day said `cached`: a cut reached only the threads an endpoint declared, and a
+pure function declares none. `crates/book-urns/tests/book_transcripts.rs` was written to
+catch exactly that, and the block was corrected to `cached`. Then core 0.1.73 began hanging
+every cacheable read from a thread named after its own target, the real CLI went back to
+saying `not cached`, and the corrected block went stale in turn, because nothing ran the
+replay in CI (ledger #998). The page says `not cached` again now, for the new reason, and the
+replay is a CI step (below).
+
+The test replays every transcript through one `ikigai --plain -c … -c …` process and diffs
+the output (cache verdicts, durations and a file thread's generation normalized; `…` matches
+any run of lines). A block that is the next part of the same sitting says
+`<!-- transcript: continues -->` and is replayed with everything before it: replayed alone,
+"cut, then probe" says `not cached` in a fresh process whatever the cut does, because
+nothing was ever cached there. A block that cannot be replayed says
+`<!-- transcript: manual — why -->`. Like the vocabulary probe it needs a binary, so it is
+`#[ignore]`d, and CI runs both: `scripts/test-transcripts.sh` (the `transcripts` job in
+`pages.yml`) installs `ikigai-cli` at the version in `books/ikigai/ikigai-cli.version` and
+runs the replay and the probe with that binary first on PATH. To replay against whatever
+`ikigai` you have instead:
 
 ```bash
 cargo test -p book-urns --test book_transcripts -- --ignored --nocapture

@@ -15,20 +15,22 @@
 # prefix — `urn:file:*` covers `urn:file:{path}`, `urn:file:notes.txt` and the rest of a
 # templated family whose tail is caller-supplied.
 #
-# ⚠ HOW TO VERIFY, and why the gate cannot do it for you. CI has no `ikigai` binary and
-# no way to get a trustworthy one, so the always-on test only checks that every shell
-# name in the book appears below. That catches a typo and an invented name; it CANNOT
-# catch this file having gone stale against a newer CLI. The check that can is a probe,
-# and it is a test in this workspace marked `#[ignore]` because it needs a binary:
+# ⚠ HOW TO VERIFY, and why the always-on gate cannot do it for you. `cargo test` builds no
+# `ikigai` binary, so the always-on test only checks that every shell name in the book
+# appears below. That catches a typo and an invented name; it CANNOT catch this file having
+# gone stale against a newer CLI. The check that can is a probe, a test in this workspace
+# marked `#[ignore]` because it needs a binary. CI runs it on every commit (ledger #1031):
+# `scripts/test-transcripts.sh` installs `ikigai-cli` at the version in
+# `books/ikigai/ikigai-cli.version` and runs the probe right after the transcript replay,
+# with that binary first on PATH and a scratch home. So moving that pin re-checks this file.
+# Against whatever `ikigai` you have:
 #
-#     cargo install ikigai-cli --locked          # or have one on PATH already
-#     cargo test -p book-urns -- --ignored --nocapture
+#     cargo test -p book-urns --test book_urns -- --ignored --nocapture
 #
-# Run it when you change this file, and when the CLI releases. Verified against
-# ikigai-cli 0.1.26 on 2026-09-26 (0.1.27 was on crates.io that day), the front-door and
-# tracing entries included: every exact entry below resolved. The probe SKIPS the two prefix entries (`urn:text:*`, `urn:file:*`)
-# because a templated family has no one name to ask for; those were probed by hand the
-# same day, as `urn:text:wc`, `urn:text:head`, `urn:text:sort` and `urn:file:probe.txt`.
+# The probe SKIPS the two prefix entries (`urn:text:*`, `urn:file:*`) because a templated
+# family has no one name to ask for; those were probed by hand against ikigai-cli 0.1.43 on
+# 2026-10-10, as `describe` of `urn:text:wc`, `urn:text:head`, `urn:text:sort` and
+# `urn:file:probe.txt` in a scratch home.
 
 # The function library, `ikigai-fn` 0.2.2, bound into the CLI's base space.
 # (`toUpper` and `reverseList` are verb phrases and break the naming convention the book
