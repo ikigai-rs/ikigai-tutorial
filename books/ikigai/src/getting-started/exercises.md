@@ -44,12 +44,15 @@ the IRI, and you have a way to ask your endpoint a question and assert the answe
 **To see it from a shell**, `crates/your-endpoints/src/bin/yours.rs` resolves one name
 and prints the result. Point its `NAME` at yours and run:
 
+<!-- transcript: manual — the reader's crate: what it prints is whatever the reader made it,
+     and the page shows no output to check. -->
 ```bash
 cargo run -p your-endpoints -- "a few words here"
 ```
 
 **To watch the host describe itself**, ask for the catalog:
 
+<!-- transcript: manual — the reader's crate: its catalog is whatever the reader bound. -->
 ```bash
 cargo run -p your-endpoints -- --catalog
 ```

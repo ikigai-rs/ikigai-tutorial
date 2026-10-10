@@ -211,6 +211,7 @@ dependencies = [
 name = "building-endpoints"
 version = "0.1.0"
 dependencies = [
+ "book-transcripts",
  "futures",
  "hello-camel",
  "ikigai-core",
@@ -733,6 +734,7 @@ dependencies = [
 name = "hello-camel"
 version = "0.1.0"
 dependencies = [
+ "book-transcripts",
  "futures",
  "ikigai-core",
  "ikigai-fn",
@@ -1126,6 +1128,7 @@ checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
 name = "loadable-module"
 version = "0.1.0"
 dependencies = [
+ "book-transcripts",
  "futures",
  "ikigai-core",
  "ikigai-module",

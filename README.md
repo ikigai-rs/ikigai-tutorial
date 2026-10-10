@@ -77,13 +77,16 @@ cargo run -p hello-camel -- "resource oriented computing"
 cargo run -p hello-camel -- --catalog
 ```
 
+<!-- Checked by crates/hello-camel/tests/book_runs.rs: a line of `…` stands for any lines. -->
 ```
 in  resource oriented computing
 out resourceOrientedComputing
 
 @prefix ik: <https://ikigai-rs.dev/ns#> .
-<urn:ikigai:endpoint:toUpper> a ik:Endpoint ;
-    …
+…
+<urn:ikigai:endpoint:camel-case> a ik:Endpoint ;
+    ik:id "camel-case" ;
+…
 ```
 
 The tutorial host is built with `ikigai-vocab`'s `TurtleRenderer`, which is what lets it
@@ -230,6 +233,22 @@ runs the replay and the probe with that binary first on PATH. To replay against 
 cargo test -p book-urns --test book_transcripts -- --ignored --nocapture
 ```
 
+### And what the programs print
+
+A page that says `cargo run -p hello-camel` and shows a block of output is making the same
+promise, for a program. Each program's crate has a test that runs its binary and compares
+what it prints with every copy on every page: `hello-camel` (README, "Running it", "What
+resolution buys you"), `building-endpoints` (one flag each in "The graph face",
+"Transreption" and "Configuration", whose setup lines run too, in a scratch config home) and
+`loadable-module` (README and Part II). The scanner they share is
+`crates/book-transcripts/src/runs.rs`, which says how a page writes a run. Its own test,
+`program_runs.rs`, scans every page and fails on any `cargo run` that no test checks and that
+does not say `<!-- transcript: manual — why -->` above its fence (the exercises crate, the
+tic-tac-toe host's sockets, the contrast survey), so a new run block cannot go unchecked by
+being new (ledger #165, #1072). Two blocks were wrong when it landed: the README's catalog
+began with an endpoint it does not begin with, and "The graph face" listed two of the
+thirteen endpoints its query returns.
+
 ### And the claims about other repositories
 
 The status chapters say things about `ikigai-module`, `ikigai-cli` and the browser demo
@@ -308,6 +327,8 @@ inside a blockquote, and inline code — which this book uses in nearly every se
 from in a comment, and the gate is what says they worked. The tool prints the nearest
 passing color along with the fault, so a repair starts from a number rather than a guess:
 
+<!-- transcript: manual — a report on every color pair of every theme, which moves with mdbook's
+     themes; the gate is `test-books.sh` running the same crate without `--survey`. -->
 ```bash
 cargo run -p book-a11y -- books/ikigai --survey   # every pair, pass or fail
 ```

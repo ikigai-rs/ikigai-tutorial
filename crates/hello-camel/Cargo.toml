@@ -21,3 +21,7 @@ ikigai-core.workspace = true
 ikigai-vocab.workspace = true
 ikigai-fn.workspace = true
 futures.workspace = true
+
+[dev-dependencies]
+# The scanner behind tests/book_runs.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }

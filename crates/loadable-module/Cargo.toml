@@ -20,3 +20,7 @@ path = "src/bin/module-demo.rs"
 ikigai-core.workspace = true
 ikigai-module.workspace = true
 futures.workspace = true
+
+[dev-dependencies]
+# The scanner behind tests/demo_transcript.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }
