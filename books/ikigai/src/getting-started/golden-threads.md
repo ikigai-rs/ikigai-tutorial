@@ -89,6 +89,62 @@ assert_eq!(state.reads.load(Ordering::SeqCst), 2);
 Ten thousand readers of a value that changes once an hour cost one recompute an hour,
 and a composite over ten such values costs ten lookups when any one of them moves.
 
+## Before you cut: what would it recompute?
+
+A cut is blind, so the question an operator asks before making one (by hand, or by
+editing the file a watcher follows) is *what hangs from this?* `urn:kernel:dependents`
+answers it with `thread=`: every cached entry a read would be served from right now that
+hangs from that thread, which is exactly what the cut would make stale. It evicts nothing
+and counts no hit, so asking is free; and it is live, so it is never cached itself. Part
+I's `camel-title` reads `title`, so after one read of it both hang from `title`'s thread:
+
+```rust
+# extern crate hello_camel;
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{ArgRef, Capability, Iri, Request, Verb};
+
+let kernel = hello_camel::kernel_over(Arc::new(hello_camel::TitleState::default()));
+let root = Capability::root();
+let dependents = |thread: &str| {
+    let ask = Request::new(Verb::Source, Iri::parse("urn:kernel:dependents").unwrap())
+        .with_arg("thread", ArgRef::Inline(thread.as_bytes().to_vec()));
+    String::from_utf8(block_on(kernel.issue(ask, &root)).unwrap().bytes).unwrap()
+};
+
+// Nothing read yet: a cut now would cost nothing.
+assert!(dependents(hello_camel::TITLE)
+    .ends_with("  (no live cached entry hangs from it: a cut would recompute nothing)\n"));
+
+let camel_title = Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:camel-title").unwrap());
+block_on(kernel.issue(camel_title, &root)).unwrap();
+
+assert_eq!(
+    dependents(hello_camel::TITLE),
+    "\
+dependents of urn:iki:tutorial:title  (cut 0 times)
+  2 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
+  urn:iki:tutorial:camel-title  text/plain                     25 B  2 threads   root
+  urn:iki:tutorial:title        text/plain                     27 B  1 thread    root
+"
+);
+
+// Cut it, and the same question has a new answer: nothing live is left to go stale.
+kernel.cut(hello_camel::TITLE);
+assert!(dependents(hello_camel::TITLE).starts_with("dependents of urn:iki:tutorial:title  (cut 1 time)\n"));
+assert!(dependents(hello_camel::TITLE).contains("a cut would recompute nothing"));
+```
+
+`camel-title` hangs from two threads, `title`'s and its own name's (every cacheable read
+hangs from its own name, below), so cutting either would rebuild it. An entry that is
+already stale, cut by another thread or past its expiry, is not listed: it recomputes
+whatever happens to this one. The last column is the chain the entry was computed in
+(`root`: no corridor), because the cache files an answer under its chain as well as its
+request and its authority, the third slot of rule 1 below.
+In the REPL (`ikigai-cli` 0.1.43 and later) the same question is `dependents <thread>`.
+
 ## What bounds the cache
 
 The cache is a resource with a **policy**, installed at construction beside the clock

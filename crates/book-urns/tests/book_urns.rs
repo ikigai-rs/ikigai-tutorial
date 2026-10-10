@@ -170,7 +170,7 @@ fn is_capability_scope(urn: &str) -> bool {
 /// name too, and the prose quotes several. Nothing *resolves* one: it is the skolem IRI
 /// `ikigai-vocab` mints for an endpoint, an input or an action so the catalog has no
 /// blank nodes. The authority for such a name is the catalog itself, so the check is
-/// that the tutorial host's catalog really contains it, verbatim, in angle brackets.
+/// that a tutorial host's catalog really contains it, verbatim, in angle brackets.
 /// A renamed skolem prefix or a renamed endpoint then fails here rather than leaving
 /// the book quoting a graph that no longer exists.
 fn is_graph_node(urn: &str) -> bool {
@@ -179,20 +179,28 @@ fn is_graph_node(urn: &str) -> bool {
 
 fn the_catalog_contains(node: &str) -> bool {
     use std::sync::OnceLock;
-    static CATALOG: OnceLock<String> = OnceLock::new();
-    let catalog = CATALOG.get_or_init(|| {
-        // The page's kernel: Part I's space and the applied chapter's game, so a node the
-        // game's `describe` cell prints is checked against a catalog that has it.
-        let kernel = book_wasm::page_kernel();
-        let request = Request::new(
-            Verb::Source,
-            Iri::parse("urn:kernel:catalog").expect("a constant IRI"),
-        );
-        let repr = block_on(kernel.issue(request, &Capability::root()))
-            .expect("the tutorial host renders its catalog");
-        String::from_utf8(repr.bytes).expect("Turtle is UTF-8")
+    static CATALOGS: OnceLock<Vec<String>> = OnceLock::new();
+    let catalogs = CATALOGS.get_or_init(|| {
+        let render = |kernel: ikigai_core::Kernel| {
+            let request = Request::new(
+                Verb::Source,
+                Iri::parse("urn:kernel:catalog").expect("a constant IRI"),
+            );
+            let repr = block_on(kernel.issue(request, &Capability::root()))
+                .expect("the tutorial host renders its catalog");
+            String::from_utf8(repr.bytes).expect("Turtle is UTF-8")
+        };
+        vec![
+            // The page's kernel: Part I's space and the applied chapter's game, so a node the
+            // game's `describe` cell prints is checked against a catalog that has it.
+            render(book_wasm::page_kernel()),
+            // Building endpoints' kernel, which Part II's Rust examples run against, so a node
+            // a `urn:kernel:explain` answer prints there (`counter`'s) is checked too.
+            render(building_endpoints::kernel()),
+        ]
     });
-    catalog.contains(&format!("<{node}>"))
+    let quoted = format!("<{node}>");
+    catalogs.iter().any(|catalog| catalog.contains(&quoted))
 }
 
 /// The kernel the page runs: `book_wasm::page_kernel()` compiled to wasm. A cell may name
@@ -232,8 +240,7 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
         if is_graph_node(&mention.urn) {
             if !the_catalog_contains(&mention.urn) {
                 failures.push(format!(
-                    "{}: quotes a catalog node the tutorial host's catalog does not \
-                     contain.",
+                    "{}: quotes a catalog node no tutorial host's catalog contains.",
                     describe(mention)
                 ));
             }

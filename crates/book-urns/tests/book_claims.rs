@@ -89,9 +89,19 @@ const CLI: Source = Source::Crate {
     name: "ikigai-cli",
     version: "0.1.28",
 };
-const EMBEDDED: Source = Source::Crate {
+/// The CLI the configuration chapter is stamped at: re-stamped from 0.1.28 when the passkey
+/// relying party stopped being an environment variable (ledger #926).
+const EMBEDDED_043: Source = Source::Crate {
     name: "ikigai-embedded",
-    version: "0.1.28",
+    version: "0.1.43",
+};
+const CLI_043: Source = Source::Crate {
+    name: "ikigai-cli",
+    version: "0.1.43",
+};
+const LISP: Source = Source::Crate {
+    name: "ikigai-lisp",
+    version: "0.2.0",
 };
 const WEB_DEMO: Source = Source::GitHub {
     repo: "ikigai-web-demo",
@@ -210,9 +220,9 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "getting-started/configuration.md",
-        stamp: "(`ikigai-cli` 0.1.28) reads a set of `IKIGAI_*` variables",
+        stamp: "(`ikigai-cli` 0.1.43) reads a set of `IKIGAI_*` variables",
         says: "IKIGAI_FILES is read by the embedded host",
-        source: EMBEDDED,
+        source: EMBEDDED_043,
         file: "src/lib.rs",
         needle: "IKIGAI_FILES",
         present: true,
@@ -223,9 +233,70 @@ const CLAIMS: &[Claim] = &[
         says: "the scheduler is chosen by a three-way precedence function",
         // In the embedded host crate, not the binary's — the first run of this probe
         // said so, which is the probe doing its job on its own author.
-        source: EMBEDDED,
+        source: EMBEDDED_043,
         file: "src/scheduling.rs",
         needle: "fn decide(flag: Option<&str>, config: Option<&str>, env: Option<&str>)",
+        present: true,
+    },
+    Claim {
+        chapter: "getting-started/configuration.md",
+        stamp: "relying party was a variable until `ikigai-cli` 0.1.39",
+        says: "the passkey origin is no longer read from the environment",
+        // Where it was read until ikigai-cli PR 401 removed it.
+        source: EMBEDDED_043,
+        file: "src/passkey.rs",
+        needle: "IKIGAI_PASSKEY_ORIGIN",
+        present: false,
+    },
+    Claim {
+        chapter: "getting-started/configuration.md",
+        stamp: "`--passkey-rp-id <domain>` and `--passkey-origin <url>`",
+        says: "serve takes the passkey relying party as flags",
+        source: CLI_043,
+        file: "src/main.rs",
+        needle: "--passkey-rp-id <domain> [--passkey-origin <url>]",
+        present: true,
+    },
+    Claim {
+        chapter: "beyond/identity.md",
+        stamp: "Since `ikigai-resolve` 0.1.40 that default **refuses** any capability",
+        says: "a mount carries a narrowed capability to its peer, and the default refuses one",
+        source: Source::Crate {
+            name: "ikigai-resolve",
+            version: "0.1.40",
+        },
+        file: "src/lib.rs",
+        needle: "fn a_mount_carries_a_narrowed_capability_to_its_peer",
+        present: true,
+    },
+    Claim {
+        chapter: "getting-started/golden-threads.md",
+        stamp: "In the REPL (`ikigai-cli` 0.1.43 and later) the same question is",
+        says: "the REPL has a `dependents <thread>` command",
+        source: Source::Crate {
+            name: "ikigai-engine",
+            version: "0.1.43",
+        },
+        file: "src/engine.rs",
+        needle: r#""dependents" => output(self, self.run_dependents(rest).await),"#,
+        present: true,
+    },
+    Claim {
+        chapter: "front-door/grammar.md",
+        stamp: "(`ikigai-lisp` 0.2.0)",
+        says: "a program sees an allowlist, and every other global is refused",
+        source: LISP,
+        file: "src/sandbox.rs",
+        needle: "pub(crate) const PROGRAM_NAMES: &[&str] = &[",
+        present: true,
+    },
+    Claim {
+        chapter: "front-door/grammar.md",
+        stamp: "`require`, `defmacro`",
+        says: "require and defmacro are refused before compiling",
+        source: LISP,
+        file: "src/sandbox.rs",
+        needle: r#"const REFUSED_FORMS: &[&str] = &["require", "require-builtin", "defmacro", "begin-for-syntax"];"#,
         present: true,
     },
     Claim {

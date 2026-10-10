@@ -244,9 +244,16 @@ process — which is [Part III](../beyond/socket.md).
 
 ## And one more: `(`
 
-A line that starts with `(` is a Lisp form, evaluated by `urn:lisp:eval` — a full
-language whose builtins are the five verbs. Out of scope for this book, and worth
-knowing exists.
+A line that starts with `(` is a Lisp form, evaluated by `urn:lisp:eval`, whose builtins
+are the five verbs. It is a Scheme (Steel underneath), but not the whole of one: a program
+sees an **allowlist** (`ikigai-lisp` 0.2.0), and the verbs are its only way out. On the
+list are `lambda`, `define`, `let` and `if`; numbers, lists and strings; `read` on a string
+port the program is handed; `with-handler`; and the verbs with their general form
+`invoke`. Every other global is rebound to a refusal, so `display`, the environment and
+the host's own stdin are out of reach, and the forms that would leave the evaluation,
+`require`, `defmacro`, are refused before compiling. A refusal is an error the program can
+catch, and a typed `Denied` if it does not. Out of scope for this book, and worth knowing
+exists.
 
 <!-- urn-gate: illustration urn:demo:echo/{message} — a URI template printed in the
      in-page `list` output above; the family is bound (ikigai-fn's echo), the braces are
