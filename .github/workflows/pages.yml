@@ -177,8 +177,11 @@ jobs:
   # (`crates/book-urns/tests/book_transcripts.rs`, `--ignored` because it needs a binary)
   # against `ikigai-cli` at the version in `books/ikigai/ikigai-cli.version`, first on PATH.
   # Until ledger #1023 nothing ran that test in CI, and a page the kernel had moved under
-  # stayed red on main where nobody saw it (ledger #998). Every PR runs it, whatever it
-  # touches: a cli the pin did not move can still disagree with a page someone edited.
+  # stayed red on main where nobody saw it (ledger #998). The same binary then runs the
+  # CLI-vocabulary probe (`crates/book-urns/tests/book_urns.rs`, also `--ignored`), which asks
+  # it for every exact name in `books/ikigai/cli-vocabulary.txt` (ledger #1031). Every PR runs
+  # both, whatever it touches: a cli the pin did not move can still disagree with a page
+  # someone edited.
   # A job of its own because building gonk compiles RocksDB; each build is cached by its
   # pin, so it is paid once per pin. The deploy needs it like it needs `books`.
   transcripts:
@@ -208,7 +211,7 @@ jobs:
         with:
           path: target/ikigai-book-cli/*/bin
           key: ikigai-book-cli-${{ runner.os }}-${{ hashFiles('books/ikigai/ikigai-cli.version') }}
-      - name: replay every transcript in both books (scripts/test-transcripts.sh)
+      - name: replay every transcript in both books, and probe the CLI vocabulary (scripts/test-transcripts.sh)
         run: ./scripts/test-transcripts.sh
 
   deploy:

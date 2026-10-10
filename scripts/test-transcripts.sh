@@ -35,7 +35,12 @@
 #         into `target/ikigai-book-cli/<version>/`, a root of its own so neither book's cache
 #         key can restore or save the other's binary, and put FIRST on PATH for the test.
 #
-# Both checks run whatever the first one says, and the script fails if either does.
+# The same binary then runs `crates/book-urns/tests/book_urns.rs`'s CLI-vocabulary probe
+# (ledger #1031), `#[ignore]`d for the same reason: it asks that `ikigai` for every exact name in
+# `books/ikigai/cli-vocabulary.txt`, the book's written-down claim about the CLI, so the claim is
+# checked against the pinned release on every commit and moving the pin re-checks it.
+#
+# Every check runs whatever the ones before it say, and the script fails if any does.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -95,5 +100,8 @@ echo "── ikigai (ikigai-cli $book_cli) ────────────�
 PATH="$PWD/$book_cli_root/bin:$PATH"
 ikigai --version
 cargo test -p book-urns --test book_transcripts -- --ignored --nocapture || status=1
+
+echo "── ikigai CLI vocabulary (ikigai-cli $book_cli) ──────────────────"
+cargo test -p book-urns --test book_urns -- --ignored --nocapture || status=1
 
 exit "$status"

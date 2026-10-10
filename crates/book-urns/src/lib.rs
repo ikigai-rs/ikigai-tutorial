@@ -17,10 +17,11 @@
 //!   (`hello_camel::space()`, `loadable_module::host_space()`). That is checkable by
 //!   construction: build the space and ask it.
 //! * A name in an **`ikigai …` shell example** resolves in the CLI, a different crate on
-//!   a different release schedule. Nothing here can build it, and CI has no trustworthy
-//!   binary. Those check against `books/ikigai/cli-vocabulary.txt`, the book's written-
-//!   down belief about somebody else's host, which a separate `#[ignore]`d test probes
-//!   against a real binary when a human has one.
+//!   a different release schedule. Nothing here can build it. Those check against
+//!   `books/ikigai/cli-vocabulary.txt`, the book's written-down belief about somebody
+//!   else's host, which a separate `#[ignore]`d test probes against a real binary: CI's
+//!   `transcripts` job runs it with the `ikigai-cli` pinned in
+//!   `books/ikigai/ikigai-cli.version` (ledger #1031).
 //!
 //! Getting that distinction wrong in either direction would be worse than no gate: it
 //! would go red on a line that is correct, and the fix a reader would reach for is to
