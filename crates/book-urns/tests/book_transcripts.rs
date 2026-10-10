@@ -186,7 +186,7 @@ impl Drop for ScratchHome {
 }
 
 /// Drop the lines that legitimately differ between the book and a replay: cache verdicts
-/// and the batch summary; blank lines; and rewrite durations.
+/// and the batch summary; blank lines; and rewrite durations and a file thread's generation.
 fn normalize(lines: impl IntoIterator<Item = String>) -> Vec<String> {
     let lines = lines
         .into_iter()
@@ -222,8 +222,30 @@ fn normalize(lines: impl IntoIterator<Item = String>) -> Vec<String> {
             out.push_str(rest);
             out
         })
+        .map(file_generation)
         .collect();
     unorder_cache_ties(lines)
+}
+
+/// `urn:file:notes.txt  gen 2` → `urn:file:notes.txt  gen <n>`.
+///
+/// The CLI watches its file root and cuts `urn:file:<path>` on every change event, its own
+/// writes included, on the watcher's schedule rather than the command's. macOS delivers
+/// those events after a short replay has exited, so the book's `gen 2` (the `sink`, then the
+/// cut by hand) is what a Mac prints; Linux delivers them at once, and the same block printed
+/// `gen 5` on CI's runner while the front door's printed `gen 2` in the same job (ledger
+/// #1023). How many times a FILE thread was cut is a race, so it is not compared. Every
+/// other thread's generation is: nothing but a command cuts those.
+fn file_generation(line: String) -> String {
+    let mut words = line.split_whitespace().rev();
+    let (Some(n), Some("gen"), Some(name)) = (words.next(), words.next(), words.next()) else {
+        return line;
+    };
+    if !name.starts_with("urn:file:") || !n.bytes().all(|b| b.is_ascii_digit()) {
+        return line;
+    }
+    let cut = line.len() - line.trim_end().len() + n.len();
+    format!("{}<n>", &line[..line.len() - cut])
 }
 
 /// Sort, on both sides, the rows of a `cache` readout that name the same resource.
@@ -403,6 +425,22 @@ mod unit {
             "— batch: 2 commands",
         ]));
         assert_eq!(n, s(&["A B", "x · <verdict> · main · <ms>   → 3b"]));
+    }
+
+    #[test]
+    fn a_file_threads_generation_is_not_compared_and_any_other_is() {
+        assert_eq!(
+            normalize(s(&["  urn:file:notes.txt  gen 2"])),
+            normalize(s(&["  urn:file:notes.txt  gen 5"]))
+        );
+        assert_ne!(
+            normalize(s(&["  urn:iki:fn:toUpper  gen 1"])),
+            normalize(s(&["  urn:iki:fn:toUpper  gen 2"]))
+        );
+        assert_eq!(
+            normalize(s(&["  urn:file:a  gen 12"])),
+            s(&["  urn:file:a  gen <n>"])
+        );
     }
 
     #[test]
