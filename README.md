@@ -75,7 +75,6 @@ Run the worked example:
 ```bash
 cargo run -p hello-camel -- "resource oriented computing"
 cargo run -p hello-camel -- --catalog
-cargo run -p loadable-module
 ```
 
 ```
@@ -85,10 +84,6 @@ out resourceOrientedComputing
 @prefix ik: <https://ikigai-rs.dev/ns#> .
 <urn:ikigai:endpoint:toUpper> a ik:Endpoint ;
     …
-
-host    resolves urn:iki:tutorial:module:greeting name=urn:host:name
-module  asks the host for urn:host:name
-out     Hello, Peter!
 ```
 
 The tutorial host is built with `ikigai-vocab`'s `TurtleRenderer`, which is what lets it
@@ -96,6 +91,20 @@ print that catalog — and answer `Meta` — rather than `no Meta renderer confi
 four things Part I promises (a cache hit, a golden thread cut, a traced sub-resolution, a
 description that is a graph) are tests in `crates/hello-camel/tests/payoff.rs`, included
 into the chapter that makes the promise.
+
+Part II's module answers by asking its host a question in the middle of its own invocation:
+
+```bash
+cargo run -p loadable-module
+```
+
+<!-- A literal copy, because GitHub has no includes: crates/loadable-module/tests/demo_transcript.rs
+     runs the demo and fails if this block, or the book's shared copy, says anything else. -->
+```
+host    resolves urn:iki:tutorial:module:greeting name=urn:host:name
+module  asks the host for urn:host:name
+out     Hello, Peter!
+```
 
 ## The second book: The gonk Book
 

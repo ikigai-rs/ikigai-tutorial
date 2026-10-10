@@ -9,9 +9,7 @@ cargo run -p loadable-module
 ```
 
 ```text
-host    resolves urn:iki:tutorial:module:greeting name=urn:host:name
-module  asks the host for urn:host:name
-out     Hello, Peter!
+{{#include ../../../../crates/loadable-module/module-demo.stdout}}
 ```
 
 Three resolutions happened, in this order:
