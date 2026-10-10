@@ -7,8 +7,11 @@
 //! with no `alt`, a link with no text or with text that says nothing out of context, a
 //! duplicate `id`, an ARIA reference to an `id` that does not exist, a table with no
 //! header cell, a button or an input with no accessible name, a runnable cell that is
-//! not the shape `js/run.js` expects. Each fault names the WCAG 2.2 success criterion it
-//! fails, so the message is the citation.
+//! not the shape `js/run.js` expects — including one whose expected output holds markup,
+//! one that never closes, and a page with a different number of cells from its chapter's
+//! source, the three ways a blank line inside a cell shows up once built (ledger #614).
+//! Each fault names the WCAG 2.2 success criterion it fails, so the message is the
+//! citation.
 //!
 //! ## What this parser is, and is not
 //!
@@ -251,11 +254,32 @@ pub fn check_page(label: &str, html: &str) -> Vec<Fault> {
     let mut cell: Option<Tag> = None; // open <div class="ikigai-run">
     let mut cell_has_expected = false;
     let mut cell_depth = 0usize;
+    // Inside the open cell's <pre class="ikigai-run-expected">, and whether this cell has
+    // already been reported as broken (one fault per cell, not one per stray tag).
+    let mut expected_open = false;
+    let mut cell_broken = false;
     let mut inputs: Vec<Tag> = Vec::new();
 
     for token in &tokens {
         match token {
             Token::Start(tag) => {
+                // An expected output is text: run.js reads it with textContent, and the
+                // source escapes every `<` in it. An element in there is markdown that mdbook
+                // rendered, because a blank line ended the cell's HTML block (ledger #614).
+                if expected_open && !cell_broken {
+                    cell_broken = true;
+                    faults.push(Fault::new(
+                        "1.3.1",
+                        "Info and Relationships",
+                        format!(
+                            "{label}: <{}> inside a runnable cell's expected output — mdbook \
+                             rendered the rest of the cell as markdown, which a blank line inside \
+                             the cell's source does (write `&#32;` on an empty output line; \
+                             book-urns' book_cells test names the line)",
+                            tag.name
+                        ),
+                    ));
+                }
                 if let Some(id) = tag.attrs.get("id") {
                     *ids.entry(id.clone()).or_default() += 1;
                 }
@@ -326,9 +350,22 @@ pub fn check_page(label: &str, html: &str) -> Vec<Fault> {
                             .get("class")
                             .is_some_and(|c| c.split_whitespace().any(|c| c == "ikigai-run")) =>
                     {
+                        if cell.is_some() && !cell_broken {
+                            faults.push(Fault::new(
+                                "1.3.1",
+                                "Info and Relationships",
+                                format!(
+                                    "{label}: a runnable cell opens before the one above it \
+                                     closed — mdbook dropped that cell's </div>, which a blank \
+                                     line inside its source does"
+                                ),
+                            ));
+                        }
                         cell = Some(tag.clone());
                         cell_has_expected = false;
                         cell_depth = 0;
+                        expected_open = false;
+                        cell_broken = false;
                     }
                     "div" if cell.is_some() => cell_depth += 1,
                     "pre"
@@ -338,6 +375,7 @@ pub fn check_page(label: &str, html: &str) -> Vec<Fault> {
                             }) =>
                     {
                         cell_has_expected = true;
+                        expected_open = true;
                     }
                     _ => {}
                 }
@@ -358,6 +396,7 @@ pub fn check_page(label: &str, html: &str) -> Vec<Fault> {
             }
             Token::End(name) => match name.as_str() {
                 "main" => in_main = false,
+                "pre" if expected_open => expected_open = false,
                 "a" => {
                     if let Some((tag, text)) = link.take() {
                         let text = decode(text.trim());
@@ -468,6 +507,21 @@ pub fn check_page(label: &str, html: &str) -> Vec<Fault> {
         }
     }
 
+    // ── a runnable cell that never closes (SC 1.3.1) ────────────────────────
+    //
+    // Everything after it on the page is inside it, so js/run.js builds one cell where the
+    // chapter wrote several. Reported once, and not again for a cell already reported.
+    if cell.is_some() && !cell_broken {
+        faults.push(Fault::new(
+            "1.3.1",
+            "Info and Relationships",
+            format!(
+                "{label}: a runnable cell never closes — mdbook dropped its </div>, which a \
+                 blank line inside its source does"
+            ),
+        ));
+    }
+
     // ── one h1 in the content (SC 1.3.1 / 2.4.6) ────────────────────────────
     //
     // Counted inside <main> only: mdbook puts the book's title in an <h1> in the menu
@@ -552,6 +606,103 @@ fn title_of(tokens: &[Token]) -> Option<String> {
 /// The `<title>` of a page as a string — for the cross-page uniqueness check.
 pub fn page_title(html: &str) -> Option<String> {
     title_of(&tokenize(html))
+}
+
+/// The runnable cells a built page has at the top level: a `<div class="ikigai-run">` that is
+/// not inside another one. A cell nested in another's output is not one a reader can run.
+pub fn runnable_cells(html: &str) -> usize {
+    let mut count = 0usize;
+    // Depth of <div> nesting inside the open cell; None outside every cell.
+    let mut depth: Option<usize> = None;
+    for token in tokenize(html) {
+        match token {
+            Token::Start(tag) if tag.name == "div" => match depth.as_mut() {
+                Some(d) => *d += 1,
+                None if is_cell(&tag) => {
+                    count += 1;
+                    depth = Some(0);
+                }
+                None => {}
+            },
+            Token::End(name) if name == "div" => {
+                depth = match depth {
+                    Some(0) | None => None,
+                    Some(d) => Some(d - 1),
+                };
+            }
+            _ => {}
+        }
+    }
+    count
+}
+
+fn is_cell(tag: &Tag) -> bool {
+    tag.attrs
+        .get("class")
+        .is_some_and(|c| c.split_whitespace().any(|c| c == "ikigai-run"))
+}
+
+/// The runnable cells a chapter's markdown writes: `<div class="ikigai-run"` outside fenced
+/// code and HTML comments.
+pub fn source_cells(markdown: &str) -> usize {
+    let mut count = 0usize;
+    let mut fence = false;
+    let mut comment = false;
+    for line in markdown.lines() {
+        let mut rest = line;
+        if !comment && rest.trim_start().starts_with("```") {
+            fence = !fence;
+            continue;
+        }
+        if fence {
+            continue;
+        }
+        loop {
+            if comment {
+                match rest.find("-->") {
+                    Some(at) => {
+                        comment = false;
+                        rest = &rest[at + 3..];
+                    }
+                    None => break,
+                }
+            } else {
+                let open = rest.find("<!--");
+                let visible = &rest[..open.unwrap_or(rest.len())];
+                count += visible.matches("<div class=\"ikigai-run\"").count();
+                match open {
+                    Some(at) => {
+                        comment = true;
+                        rest = &rest[at + 4..];
+                    }
+                    None => break,
+                }
+            }
+        }
+    }
+    count
+}
+
+/// A built page with fewer (or more) runnable cells than its chapter's source writes.
+///
+/// The structural checks above see a cell that swallowed the rest of the page; this sees
+/// the other way a blank line breaks one (ledger #614): inside `data-cmd` it makes mdbook
+/// drop the cell outright, which leaves nothing on the page to be malformed.
+pub fn check_cell_count(label: &str, html: &str, source: &str, markdown: &str) -> Option<Fault> {
+    let built = runnable_cells(html);
+    let written = source_cells(markdown);
+    (built != written).then(|| {
+        Fault::new(
+            "1.3.1",
+            "Info and Relationships",
+            format!(
+                "{label}: {built} runnable cell{} on the built page, {written} in {source} — \
+                 mdbook dropped or nested a cell, which a blank line inside one does \
+                 (book-urns' book_cells test names the line)",
+                if built == 1 { "" } else { "s" }
+            ),
+        )
+    })
 }
 
 /// Faults across pages: two pages with the same title (SC 2.4.2 asks that a title
@@ -737,6 +888,63 @@ mod tests {
         assert!(check_page("p", &no_cmd)
             .iter()
             .any(|f| f.detail.contains("data-cmd")));
+    }
+
+    // The three shapes a blank line inside a cell's source took on mdbook 0.5.4 (ledger
+    // #614), cut down from the built pages.
+    const CELL: &str = "<div class=\"ikigai-run\" data-cmd='source urn:x'><pre class=\"ikigai-run-expected\">x</pre></div>";
+
+    #[test]
+    fn markdown_rendered_inside_expected_output_is_a_fault() {
+        // The rest of the output became a paragraph, with curly quotes and no indentation.
+        let html = GOOD.replace(
+            CELL,
+            "<div class=\"ikigai-run\" data-cmd='source urn:x'><pre class=\"ikigai-run-expected\">a\n<p>b “c”</p>\n</pre>\n</div>",
+        );
+        let faults = check_page("p", &html);
+        assert_eq!(faults.len(), 1, "{faults:?}");
+        assert!(faults[0]
+            .detail
+            .contains("<p> inside a runnable cell's expected output"));
+    }
+
+    #[test]
+    fn a_cell_that_swallows_the_rest_of_the_page_is_one_fault() {
+        // The </pre></div> was dropped, so the next cell opens inside this one's output and
+        // this one never closes: reported once, for the cell, not three times.
+        let html = GOOD.replace(
+            CELL,
+            &format!(
+                "<div class=\"ikigai-run\" data-cmd='source urn:x'><pre class=\"ikigai-run-expected\">a\n<p>b</p>\n{CELL}"
+            ),
+        );
+        let faults = check_page("p", &html);
+        assert_eq!(faults.len(), 1, "{faults:?}");
+        assert_eq!(runnable_cells(&html), 1);
+    }
+
+    #[test]
+    fn a_cell_that_never_closes_is_a_fault() {
+        let html = GOOD.replace(CELL, "<div class=\"ikigai-run\" data-cmd='source urn:x'><pre class=\"ikigai-run-expected\">x</pre>");
+        assert!(check_page("p", &html)
+            .iter()
+            .any(|f| f.detail.contains("never closes")));
+    }
+
+    #[test]
+    fn a_dropped_cell_is_caught_by_counting_against_the_source() {
+        let markdown = "prose\n\n<div class=\"ikigai-run\" data-cmd='a'>\n<pre class=\"ikigai-run-expected\">x</pre>\n</div>\n\n\
+                        <div class=\"ikigai-run\" data-cmd='b'>\n<pre class=\"ikigai-run-expected\">y</pre>\n</div>\n\n\
+                        ```html\n<div class=\"ikigai-run\" data-cmd='in a listing'>\n```\n\
+                        <!-- <div class=\"ikigai-run\" data-cmd='in a comment'> -->\n";
+        assert_eq!(source_cells(markdown), 2);
+        // GOOD has one cell: the page lost one.
+        let fault = check_cell_count("p.html", GOOD, "src/p.md", markdown).expect("a fault");
+        assert!(fault
+            .detail
+            .contains("1 runnable cell on the built page, 2 in src/p.md"));
+        let two = GOOD.replace(CELL, &format!("{CELL}\n{CELL}"));
+        assert_eq!(check_cell_count("p.html", &two, "src/p.md", markdown), None);
     }
 
     #[test]

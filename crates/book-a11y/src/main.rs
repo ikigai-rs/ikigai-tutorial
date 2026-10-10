@@ -154,6 +154,7 @@ fn check_structure(book: &Path, survey: bool) -> Result<Vec<book_a11y::structure
     let mut faults = Vec::new();
     let mut titles = Vec::new();
     let mut checked = 0usize;
+    let mut counted = 0usize;
     for relative in &pages {
         if relative == "print.html" || relative == "toc.html" {
             continue;
@@ -179,10 +180,32 @@ fn check_structure(book: &Path, survey: bool) -> Result<Vec<book_a11y::structure
         }
         faults.extend(page_faults);
         checked += 1;
+
+        // The page's cells against its chapter's. A page with no chapter of the same name
+        // (`index.html`, the 404, the search and print pages) has nothing to compare with.
+        let chapter = Path::new("src").join(relative).with_extension("md");
+        if let Ok(markdown) = std::fs::read_to_string(book.join(&chapter)) {
+            let source = chapter.to_string_lossy();
+            faults.extend(book_a11y::structure::check_cell_count(
+                relative, &html, &source, &markdown,
+            ));
+            counted += 1;
+        }
+    }
+    // A comparison that found no chapters compared nothing, and would pass forever.
+    if counted == 0 {
+        return Err(format!(
+            "no built page under {} has a chapter of the same name under src/ — the cell \
+             count compared nothing",
+            root.display()
+        ));
     }
     faults.extend(book_a11y::structure::check_titles(&titles));
     if faults.is_empty() {
-        println!("book-a11y: {checked} pages pass the structural checks");
+        println!(
+            "book-a11y: {checked} pages pass the structural checks ({counted} with their \
+             chapter's runnable cells)"
+        );
     }
     Ok(faults)
 }
