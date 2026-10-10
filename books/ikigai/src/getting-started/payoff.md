@@ -221,7 +221,7 @@ tutorial host's renderer, the answer is a graph:
     ik:verb "Source", "Meta" ;
     ik:output "text/plain;charset=utf-8" ;
     ik:input <urn:ikigai:endpoint:camel-case:input:in> ;
-    ik:action <urn:ikigai:endpoint:camel-case:action:source> .
+    ik:action <urn:ikigai:contract:camel-case:source:b3:…> .
 
 <urn:ikigai:endpoint:camel-case:input:in> ik:inputName "in" ;
     ik:source "argument" ;
@@ -229,6 +229,9 @@ tutorial host's renderer, the answer is a graph:
     ik:summary "the text to camel-case" ;
     ik:class <http://www.w3.org/2001/XMLSchema#string> .
 ```
+
+(The graph goes on: the contract that `ik:action` points at, and the input again under it. The
+run below prints all of it.)
 
 Three triples are worth reading slowly, and the test asserts all three so this page cannot
 quietly drift from the code:
@@ -251,6 +254,18 @@ that per-verb view, not the endpoint, is the unit an agent's tool list is built 
 [Why an endpoint describes itself](self-description.md) is about why this is
 load-bearing rather than decorative.
 
+<!-- urn-gate: illustration urn:ikigai:contract:{id}:{verb}:b3:{hex} — the shape of a contract IRI, not one. -->
+Each contract node is named by its content: `urn:ikigai:contract:{id}:{verb}:b3:{hex}`, where
+the hex is a BLAKE3 digest of the id, the verb and everything the catalog says about that
+verb's contract. An id is
+not unique in a kernel (a peer's endpoint mounted beside yours can carry the same one, and one
+endpoint can sit at two doors), so two copies with the same contract share a node and a copy
+with a different contract gets its own. This book writes `…` where the digest goes: it changes
+whenever the contract does, down to the wording of a summary, and Run prints the real one. The
+tool list, `urn:kernel:actions`, names each of its rows by door and verb instead, which stays
+put for as long as the door does: `title`'s read is `urn:ikigai:match:source:urn:iki:tutorial:title`,
+and `ik:contract` joins it to the contract it satisfies.
+
 <div class="ikigai-run" data-cmd='describe urn:iki:tutorial:camel-case text/turtle'>
 <pre class="ikigai-run-expected">@prefix ik: &lt;https://ikigai-rs.dev/ns#&gt; .
 &#32;
@@ -261,7 +276,7 @@ load-bearing rather than decorative.
     ik:verb "Source", "Meta" ;
     ik:output "text/plain;charset=utf-8" ;
     ik:input &lt;urn:ikigai:endpoint:camel-case:input:in&gt; ;
-    ik:action &lt;urn:ikigai:endpoint:camel-case:action:source&gt; .
+    ik:action &lt;urn:ikigai:contract:camel-case:source:b3:…&gt; .
 &#32;
 &lt;urn:ikigai:endpoint:camel-case:input:in&gt; ik:inputName "in" ;
     ik:source "argument" ;
@@ -269,10 +284,16 @@ load-bearing rather than decorative.
     ik:summary "the text to camel-case" ;
     ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; .
 &#32;
-&lt;urn:ikigai:endpoint:camel-case:action:source&gt; a ik:Action ;
+&lt;urn:ikigai:contract:camel-case:source:b3:…:input:in&gt; ik:inputName "in" ;
+    ik:source "argument" ;
+    ik:required true ;
+    ik:summary "the text to camel-case" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; .
+&#32;
+&lt;urn:ikigai:contract:camel-case:source:b3:…&gt; a ik:Action ;
     ik:verb "Source" ;
     ik:output "text/plain;charset=utf-8" ;
-    ik:input &lt;urn:ikigai:endpoint:camel-case:input:in&gt; .
+    ik:input &lt;urn:ikigai:contract:camel-case:source:b3:…:input:in&gt; .
 [computed]</pre>
 </div>
 

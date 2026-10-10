@@ -182,9 +182,27 @@ fn the_catalog_is_one_graph_over_every_binding() -> Result<()> {
     assert!(catalog.contains("<urn:ikigai:endpoint:camel-case> a ik:Endpoint"));
     assert!(catalog.contains("<urn:ikigai:endpoint:title> a ik:Endpoint"));
     assert!(catalog.contains("<urn:ikigai:endpoint:toUpper> a ik:Endpoint"));
-    // The two-verb endpoint shows up as two actions, one per verb.
-    assert!(catalog.contains("<urn:ikigai:endpoint:title:action:source> a ik:Action"));
-    assert!(catalog.contains("<urn:ikigai:endpoint:title:action:sink> a ik:Action"));
+    // The two-verb endpoint shows up as two actions, one per verb. Each is named by its
+    // CONTENT, `urn:ikigai:contract:{id}:{verb}:b3:{hex}`, so the test checks the shape and
+    // leaves the 64 hex digits to the kernel: they change whenever the contract does.
+    let contract = |verb: &str| {
+        let node = format!("<urn:ikigai:contract:title:{verb}:b3:");
+        catalog
+            .lines()
+            .any(|line| line.starts_with(&node) && line.contains("> a ik:Action"))
+    };
+    assert!(contract("source"));
+    assert!(contract("sink"));
+
+    // The agent's tool list names each row by its door and verb instead, which is stable for
+    // as long as the door is, and joins it to the contract above by `ik:contract`.
+    let request = Request::new(Verb::Source, iri("urn:kernel:actions"))
+        .with_arg("as", ArgRef::Inline(b"text/turtle".to_vec()));
+    let repr = block_on(kernel.issue(request, &Capability::root()))?;
+    let actions = String::from_utf8_lossy(&repr.bytes);
+    assert!(actions.contains(&format!("<urn:ikigai:match:source:{TITLE}>")));
+    assert!(actions.contains(&format!("<urn:ikigai:match:sink:{TITLE}>")));
+    assert!(actions.contains("ik:contract <urn:ikigai:contract:title:sink:b3:"));
     Ok(())
 }
 // ANCHOR_END: catalog

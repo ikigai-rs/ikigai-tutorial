@@ -79,7 +79,7 @@ the lines to look for are `ik:transreptsFrom`, `ik:transreptsTo` and `ik:lossles
     ik:lossless false ;
     ik:input &lt;urn:ikigai:endpoint:sheet-compile:input:content&gt; ;
     ik:input &lt;urn:ikigai:endpoint:sheet-compile:input:as&gt; ;
-    ik:action &lt;urn:ikigai:endpoint:sheet-compile:action:source&gt; .
+    ik:action &lt;urn:ikigai:contract:sheet-compile:source:b3:…&gt; .
 &#32;
 &lt;urn:ikigai:endpoint:sheet-compile:input:content&gt; ik:inputName &quot;content&quot; ;
     ik:source &quot;argument&quot; ;
@@ -93,11 +93,23 @@ the lines to look for are `ik:transreptsFrom`, `ik:transreptsTo` and `ik:lossles
     ik:summary &quot;the target type; only text/x-sexpr&quot; ;
     ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; .
 &#32;
-&lt;urn:ikigai:endpoint:sheet-compile:action:source&gt; a ik:Action ;
+&lt;urn:ikigai:contract:sheet-compile:source:b3:…:input:content&gt; ik:inputName &quot;content&quot; ;
+    ik:source &quot;argument&quot; ;
+    ik:required true ;
+    ik:summary &quot;the formula, starting with =&quot; ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; .
+&#32;
+&lt;urn:ikigai:contract:sheet-compile:source:b3:…:input:as&gt; ik:inputName &quot;as&quot; ;
+    ik:source &quot;argument&quot; ;
+    ik:required false ;
+    ik:summary &quot;the target type; only text/x-sexpr&quot; ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; .
+&#32;
+&lt;urn:ikigai:contract:sheet-compile:source:b3:…&gt; a ik:Action ;
     ik:verb &quot;Source&quot; ;
     ik:output &quot;text/x-sexpr&quot; ;
-    ik:input &lt;urn:ikigai:endpoint:sheet-compile:input:content&gt; ;
-    ik:input &lt;urn:ikigai:endpoint:sheet-compile:input:as&gt; .
+    ik:input &lt;urn:ikigai:contract:sheet-compile:source:b3:…:input:content&gt; ;
+    ik:input &lt;urn:ikigai:contract:sheet-compile:source:b3:…:input:as&gt; .
 [computed]</pre>
 </div>
 
