@@ -44,10 +44,12 @@
 //! the book's.
 //!
 //! Like the CLI vocabulary probe, this needs a binary and is `#[ignore]`d rather than
-//! silently skipped:
+//! silently skipped. CI runs it (ledger #1023): `scripts/test-transcripts.sh`, in
+//! `pages.yml`'s `transcripts` job, installs `ikigai-cli` at the version in
+//! `books/ikigai/ikigai-cli.version` and runs this with that binary first on PATH. By hand:
 //!
-//!     cargo install ikigai-cli --locked
-//!     cargo test -p book-urns --test book_transcripts -- --ignored --nocapture
+//!     ./scripts/test-transcripts.sh          # the pinned cli, and the gonk Book's check too
+//!     cargo test -p book-urns --test book_transcripts -- --ignored --nocapture   # whatever `ikigai` is on PATH
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -184,9 +186,9 @@ impl Drop for ScratchHome {
 }
 
 /// Drop the lines that legitimately differ between the book and a replay: cache verdicts
-/// and the batch summary; blank lines; and rewrite durations.
+/// and the batch summary; blank lines; and rewrite durations and a file thread's generation.
 fn normalize(lines: impl IntoIterator<Item = String>) -> Vec<String> {
-    lines
+    let lines = lines
         .into_iter()
         .map(|l| l.trim_end().to_string())
         .filter(|l| !l.is_empty())
@@ -220,7 +222,78 @@ fn normalize(lines: impl IntoIterator<Item = String>) -> Vec<String> {
             out.push_str(rest);
             out
         })
-        .collect()
+        .map(file_generation)
+        .collect();
+    unorder_cache_ties(lines)
+}
+
+/// `urn:file:notes.txt  gen 2` → `urn:file:notes.txt  gen <n>`.
+///
+/// The CLI watches its file root and cuts `urn:file:<path>` on every change event, its own
+/// writes included, on the watcher's schedule rather than the command's. macOS delivers
+/// those events after a short replay has exited, so the book's `gen 2` (the `sink`, then the
+/// cut by hand) is what a Mac prints; Linux delivers them at once, and the same block printed
+/// `gen 5` on CI's runner while the front door's printed `gen 2` in the same job (ledger
+/// #1023). How many times a FILE thread was cut is a race, so it is not compared. Every
+/// other thread's generation is: nothing but a command cuts those.
+fn file_generation(line: String) -> String {
+    let mut words = line.split_whitespace().rev();
+    let (Some(n), Some("gen"), Some(name)) = (words.next(), words.next(), words.next()) else {
+        return line;
+    };
+    if !name.starts_with("urn:file:") || !n.bytes().all(|b| b.is_ascii_digit()) {
+        return line;
+    }
+    let cut = line.len() - line.trim_end().len() + n.len();
+    format!("{}<n>", &line[..line.len() - cut])
+}
+
+/// Sort, on both sides, the rows of a `cache` readout that name the same resource.
+///
+/// `urn:kernel:cache` orders its rows by name (and resolution chain), and that is all it
+/// orders by: two entries for one name — `toUpper`'s answer and its description, in the
+/// front door — come out in the cache's hash order, which changes from one process to the
+/// next (ledger #1023: the front door's block replayed green or red at random against one
+/// binary). The order of a tie is not something the book can claim, so it is not compared;
+/// the rows themselves still are, every column of each.
+fn unorder_cache_ties(lines: Vec<String>) -> Vec<String> {
+    fn name(line: &str) -> Option<&str> {
+        let first = line.split_whitespace().next()?;
+        (line.starts_with(' ') && first.starts_with("urn:")).then_some(first)
+    }
+    let mut out = Vec::with_capacity(lines.len());
+    let mut in_cache = false;
+    let mut run: Vec<String> = Vec::new();
+    let flush = |run: &mut Vec<String>, out: &mut Vec<String>| {
+        run.sort();
+        out.append(run);
+    };
+    for line in lines {
+        if in_cache && !line.starts_with(' ') {
+            in_cache = false;
+        }
+        if !in_cache {
+            flush(&mut run, &mut out);
+            in_cache = line == "cache";
+            out.push(line);
+            continue;
+        }
+        if run
+            .last()
+            .and_then(|l| name(l))
+            .is_some_and(|n| Some(n) != name(&line))
+        {
+            flush(&mut run, &mut out);
+        }
+        if name(&line).is_some() {
+            run.push(line);
+        } else {
+            flush(&mut run, &mut out);
+            out.push(line);
+        }
+    }
+    flush(&mut run, &mut out);
+    out
 }
 
 /// Does `actual` match `expected`, where an expected line of `…` matches any run of lines?
@@ -352,6 +425,49 @@ mod unit {
             "— batch: 2 commands",
         ]));
         assert_eq!(n, s(&["A B", "x · <verdict> · main · <ms>   → 3b"]));
+    }
+
+    #[test]
+    fn a_file_threads_generation_is_not_compared_and_any_other_is() {
+        assert_eq!(
+            normalize(s(&["  urn:file:notes.txt  gen 2"])),
+            normalize(s(&["  urn:file:notes.txt  gen 5"]))
+        );
+        assert_ne!(
+            normalize(s(&["  urn:iki:fn:toUpper  gen 1"])),
+            normalize(s(&["  urn:iki:fn:toUpper  gen 2"]))
+        );
+        assert_eq!(
+            normalize(s(&["  urn:file:a  gen 12"])),
+            s(&["  urn:file:a  gen <n>"])
+        );
+    }
+
+    #[test]
+    fn rows_of_one_name_in_a_cache_readout_compare_in_any_order() {
+        let book = s(&[
+            "cache",
+            "  entries  3 / 4096 (2 stale)",
+            "  urn:a  cut   text/plain  1 thread",
+            "  urn:b  live  application/json  1 thread",
+            "  urn:b  cut   text/plain  1 thread",
+            "threads (cut generations)",
+            "  urn:b  gen 1",
+        ]);
+        let mut cli = book.clone();
+        cli.swap(3, 4);
+        assert_eq!(normalize(book.clone()), normalize(cli));
+        // Only a tie is unordered: rows of different names keep the CLI's order...
+        let mut renamed = book.clone();
+        renamed.swap(2, 3);
+        assert_ne!(normalize(book.clone()), normalize(renamed));
+        // ...a row's columns are still compared...
+        let mut changed = book.clone();
+        changed[4] = "  urn:b  live  text/plain  1 thread".into();
+        assert_ne!(normalize(book.clone()), normalize(changed));
+        // ...and nothing outside a `cache` readout is reordered.
+        let lines = s(&["  urn:b  x", "  urn:b  a"]);
+        assert_eq!(normalize(lines.clone()), lines);
     }
 
     #[test]

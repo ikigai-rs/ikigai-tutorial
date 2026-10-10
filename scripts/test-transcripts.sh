@@ -24,10 +24,18 @@
 # directory), so nothing here reads or writes a real gonk's store, socket or grants; and a
 # command naming port 1060, a real gonk's, is refused before it runs.
 #
-# The ikigai book is not checked this way yet: its REPL transcripts are replayed by
-# `crates/book-urns/tests/book_transcripts.rs` against an installed `ikigai`, `#[ignore]`d
-# because CI has none. Adopting this check is one more line below (the cli is pinned already);
-# its `ikigai> ` blocks would become `console` blocks of `$ ikigai -c …`.
+# The ikigai book's transcripts are REPL blocks (`ikigai> …`), not `console` blocks, and are
+# replayed by `crates/book-urns/tests/book_transcripts.rs`, which is `#[ignore]`d because it
+# needs an `ikigai` on PATH. This script supplies one and runs it (ledger #1023):
+#
+#   ikigai (for the ikigai Book) is `ikigai-cli` pinned SEPARATELY, in
+#         `books/ikigai/ikigai-cli.version`: the gonk Book's pin follows gonk's lock, and the
+#         ikigai Book's follows the release its pages were last replayed against, so they move
+#         for different reasons. Default features (no page needs QUIC). Installed `--locked`
+#         into `target/ikigai-book-cli/<version>/`, a root of its own so neither book's cache
+#         key can restore or save the other's binary, and put FIRST on PATH for the test.
+#
+# Both checks run whatever the first one says, and the script fails if either does.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -63,5 +71,29 @@ if [ ! -x "$cli_root/bin/ikigai" ]; then
         --root "$cli_root" --target-dir "$cli_root/build"
 fi
 
+book_cli="$(tr -d '[:space:]' < books/ikigai/ikigai-cli.version)"
+case "$book_cli" in
+    [0-9]*.[0-9]*.[0-9]*) ;;
+    *) echo "books/ikigai/ikigai-cli.version is not a version: '$book_cli'" >&2; exit 2 ;;
+esac
+book_cli_root="target/ikigai-book-cli/$book_cli"
+if [ ! -x "$book_cli_root/bin/ikigai" ]; then
+    echo "installing ikigai-cli $book_cli into $book_cli_root (once per version)"
+    cargo install --locked ikigai-cli --version "=$book_cli" \
+        --root "$book_cli_root" --target-dir "$book_cli_root/build"
+fi
+
+status=0
+
 echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli) ──────────────────"
-cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin"
+cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
+    || status=1
+
+# The test runs `ikigai` by name, so the pinned one goes first on PATH; `--version` is printed
+# so the log says which binary the pages were replayed against.
+echo "── ikigai (ikigai-cli $book_cli) ──────────────────"
+PATH="$PWD/$book_cli_root/bin:$PATH"
+ikigai --version
+cargo test -p book-urns --test book_transcripts -- --ignored --nocapture || status=1
+
+exit "$status"
