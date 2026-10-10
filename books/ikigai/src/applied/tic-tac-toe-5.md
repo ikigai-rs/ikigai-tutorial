@@ -423,6 +423,8 @@ deno run -A examples/tictactoe_store.ts /tmp/ttt-ts.sock
 
 and then, from this repository:
 
+<!-- transcript: manual — a server, over two stores another repository's process holds on
+     sockets; crates/ttt-host/tests/host.rs tests the host itself. -->
 ```sh
 cargo run -p ttt-host -- --game a --game py=/tmp/ttt-py.sock --game ts=/tmp/ttt-ts.sock
 ```

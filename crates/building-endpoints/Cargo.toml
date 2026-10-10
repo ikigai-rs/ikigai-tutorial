@@ -36,3 +36,7 @@ futures.workspace = true
 # Part I's space, chained onto: the endpoints these chapters describe, query and
 # transrept are the ones the reader already has.
 hello-camel = { path = "../hello-camel" }
+
+[dev-dependencies]
+# The scanner behind tests/book_runs.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }

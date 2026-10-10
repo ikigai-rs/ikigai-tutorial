@@ -31,13 +31,19 @@ cargo run -p hello-camel -- --catalog
 ```text
 in  resource oriented computing
 out resourceOrientedComputing
+
+@prefix ik: <https://ikigai-rs.dev/ns#> .
+…
+<urn:ikigai:endpoint:camel-case> a ik:Endpoint ;
+    ik:id "camel-case" ;
+…
 ```
 
 That is a complete ikigai host: a root space, a kernel around it, one resolution. It is
 about thirty lines and you will have read all of them by the end of
 [Binding, and a host of your own](binding.md). The second form prints the host's catalog
-— every endpoint it binds, describing itself — which [What resolution buys you](payoff.md)
-reads through the same kernel.
+— every endpoint it binds, describing itself, several hundred lines of which a `…` here stands
+for most — which [What resolution buys you](payoff.md) reads through the same kernel.
 
 ## The CLI
 

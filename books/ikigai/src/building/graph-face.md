@@ -37,8 +37,23 @@ cargo run -p building-endpoints -- --strings
 
 ```text
 camel-case
+conditional
+echo
+greet
+reverseList
+sparql-ask
+sparql-construct
+sparql-describe
+sparql-select
+split
 title
+toUpper
+wrap
 ```
+
+The host asked is the whole of this part's space: its own endpoints, Part I's (and the
+`ikigai-fn` functions Part I chains in), and the SPARQL face. Every one of them that declared a
+string input is in the answer, and that is the question working, not noise.
 
 Three things that test pins down are the chapter.
 

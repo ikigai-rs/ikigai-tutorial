@@ -298,13 +298,33 @@ and `ik:contract` joins it to the contract it satisfies.
 </div>
 
 `describe … text/turtle` is `Meta` with `as=text/turtle`, and the graph it prints is the
-one the test above asserts three triples of.
+one the test above asserts three triples of. The tutorial binary prints the same description,
+inside its whole catalog (a `…` line stands for the other endpoints, and a `…` in an IRI for
+the digest):
 
 ```bash
 cargo run -p hello-camel -- --catalog
 ```
 
-prints the same graph from the tutorial binary.
+```text
+@prefix ik: <https://ikigai-rs.dev/ns#> .
+…
+<urn:ikigai:endpoint:camel-case> a ik:Endpoint ;
+    ik:id "camel-case" ;
+    ik:title "Camel-case" ;
+    ik:summary "Camel-cases the UTF-8 text supplied in the `in` argument." ;
+    ik:verb "Source", "Meta" ;
+    ik:output "text/plain;charset=utf-8" ;
+    ik:input <urn:ikigai:endpoint:camel-case:input:in> ;
+    ik:action <urn:ikigai:contract:camel-case:source:b3:…> .
+
+<urn:ikigai:endpoint:camel-case:input:in> ik:inputName "in" ;
+    ik:source "argument" ;
+    ik:required true ;
+    ik:summary "the text to camel-case" ;
+    ik:class <http://www.w3.org/2001/XMLSchema#string> .
+…
+```
 
 ## The same four things from a shell
 

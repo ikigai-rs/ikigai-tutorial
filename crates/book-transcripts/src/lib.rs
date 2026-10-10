@@ -8,6 +8,11 @@
 //! runner (`src/main.rs`) runs what the scanner found, in a scratch home, against the binaries
 //! it is pointed at, and asks the matcher.
 //!
+//! [`runs`] is the same check for the tutorial's own programs: a shell fence that says
+//! `cargo run -p <package>` and the output fence after it, checked by a test in that package's
+//! crate (the only place Cargo hands a test the binary) with the scanner and matcher shared
+//! from here.
+//!
 //! ## What a block declares
 //!
 //! An HTML comment within the five lines above the fence, so it is read as belonging to it:
@@ -66,6 +71,8 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
+
+pub mod runs;
 
 /// The line prefix a transcript's commands carry.
 pub const PROMPT: &str = "$ ";
@@ -214,7 +221,7 @@ pub fn safe_file_name(name: &str) -> bool {
 /// The declaration in the lines above a fence, the nearest one winning. The search stops at
 /// the end of an earlier fence: a declaration belongs to the first block after it, never to
 /// the next one as well.
-fn declared(above: &[&str]) -> Kind {
+pub(crate) fn declared(above: &[&str]) -> Kind {
     for line in above.iter().rev() {
         if line.trim_start().starts_with("```") {
             break;
