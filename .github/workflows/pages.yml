@@ -3,9 +3,10 @@ name: Build, test and deploy the books
 # The books' gates and their deploy, in one workflow, so that the tree which reaches
 # https://ikigai-rs.github.io/ikigai-tutorial/ (The ikigai Book) and
 # https://ikigai-rs.github.io/ikigai-tutorial/gonk/ (The gonk Book) is the tree that just passed
-# `mdbook test`, the contrast gate, axe, the no-kernel check, the link check and the transcript
-# check — not a second `mdbook build` that could drift from the first. Every gate runs on EVERY
-# book under `books/`, so a second book cannot be held to less than the first.
+# `mdbook test`, the contrast gate, axe (in jsdom, and in a real browser), the no-kernel check,
+# the link check and the transcript check — not a second `mdbook build` that could drift from the
+# first. Every gate runs on EVERY book under `books/`, so a second book cannot be held to less
+# than the first.
 #
 # It ALSO runs on pull requests, without deploying: `books` is a gate every PR needs
 # whether or not a deploy follows it (it used to live in ci.yml; it moved here so the
@@ -112,10 +113,10 @@ jobs:
       # load — mdbook's copy buttons, the Run cells `js/run.js` builds, the repairs
       # `js/a11y.js` makes to the search box. axe-core over a jsdom of each built page,
       # with the book's scripts run, sees exactly that. No browser: jsdom has no layout,
-      # so axe's color-contrast rule is skipped here — that is book-a11y's job — and the
-      # dynamic `import()` of the wasm fails in jsdom, which exercises the cells' no-kernel
-      # path (Run disabled, the reason said) rather than the kernel. Both instruments gate
-      # the deploy.
+      # so axe's color rules are skipped here — the real-browser run below is where they
+      # live — and the dynamic `import()` of the wasm fails in jsdom, which exercises the
+      # cells' no-kernel path (Run disabled, the reason said) rather than the kernel. Every
+      # instrument gates the deploy.
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -161,6 +162,26 @@ jobs:
           ./scripts/assemble-site.sh target/site
           cd a11y
           node links.mjs ../target/site
+
+      # ── The third accessibility instrument: color, in a real browser ─────────
+      #
+      # `book-a11y` measures the theme's VARIABLE pairs and jsdom has no layout, so neither
+      # sees a color that is not a theme variable: a highlight.js token, an `opacity`, a
+      # link told apart from its sentence by hue alone. A real-browser axe run found three
+      # such failures book-wide that both gates had passed for weeks (PR #56; ledger #616).
+      # `a11y/axe-browser.mjs` drives the runner's installed Google Chrome through
+      # `playwright-core` (pinned exactly in a11y/package.json, installed by the `npm ci`
+      # above, and it downloads no browser) over the ASSEMBLED site, the directory uploaded
+      # below: every page, in each of mdbook's five themes, with the in-page kernel loaded
+      # (required — it was built above), every cell run once, every "Expected output"
+      # opened and every polling view started. Requests are answered from `target/site`
+      # in-process; nothing leaves the runner. It gates on WCAG 2.x A/AA, which here
+      # includes `color-contrast`, `link-in-text-block` and `target-size`. The Chrome
+      # version is the runner image's, not a pin (pinning one means a CDN download), so
+      # the step prints it first.
+      - name: axe-core in a real browser over the assembled site, five themes (a11y/axe-browser.mjs)
+        working-directory: a11y
+        run: node axe-browser.mjs ../target/site
 
       - uses: actions/upload-pages-artifact@v3
         with:
