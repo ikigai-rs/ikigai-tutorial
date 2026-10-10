@@ -211,9 +211,10 @@ properties for free.
 
 Every name printed on this page is checked, on every commit, against a written-down
 claim about the CLI (`books/ikigai/cli-vocabulary.txt`) — and that file is checked against
-a real binary by a test that has to be run by hand, because CI has no `ikigai`. Every
-transcript on this page is replayed against a real binary by another
-(`cargo test -p book-urns --test book_transcripts -- --ignored`). Neither runs in CI, so
-both are only as current as the last time someone ran them: section 6 went on saying a cut
-left a pure function's answer `cached` long after core 0.1.73 changed it. If a
-command here fails on a newer CLI, those two are where to look first.
+a real binary by a test that has to be run by hand. Every transcript on this page is
+replayed, on every commit, against a real binary: `ikigai-cli`
+{{#include ../../ikigai-cli.version}}, the version pinned in `books/ikigai/ikigai-cli.version`
+(`./scripts/test-transcripts.sh` runs it locally). That replay did not always run in CI, and
+while it did not, section 6 went on saying a cut left a pure function's answer `cached` long
+after core 0.1.73 changed it. If a command here fails on a newer CLI than the pinned one,
+the replay is where to look first.

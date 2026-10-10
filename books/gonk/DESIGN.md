@@ -114,7 +114,10 @@ key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikiga
 77ac767 and edb9a3d), so the client speaks the server's wire; moving gonk is a reason to look at
 this file too. (0.1.42 and 0.1.43 were already on crates.io when the pin moved to edb9a3d; the rule
 takes 0.1.41 because that is what gonk links. The ikigai Book's REPL transcripts are a
-separate, hand-run check against whatever `ikigai` is on `PATH`: `crates/book-urns/tests/book_transcripts.rs`.)
+separate check, `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
+`books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
+under its own key: this pin follows gonk's lock, that one follows the release the ikigai Book's
+pages were last replayed against.)
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
 `ikigai-ledger` 0.5.0, `ikigai-store` 0.2.8 (in-memory, `persistent` off; 0.2.7 is a security

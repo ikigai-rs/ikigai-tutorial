@@ -117,7 +117,7 @@ what each command prints with what the page says (`crates/book-transcripts`).
 ```bash
 mdbook serve books/gonk --open                     # the prose; Run is disabled (no kernel)
 ./scripts/serve-with-drafts.sh --book gonk         # with its in-page kernel, on 127.0.0.1:3000
-./scripts/test-transcripts.sh                      # every transcript, against the pinned gonk
+./scripts/test-transcripts.sh                      # every transcript in both books, against their pins
 ```
 
 ## The book is tested
@@ -203,7 +203,10 @@ the next part of the same sitting says `<!-- transcript: continues -->` and is r
 with everything before it — replayed alone, "cut, then probe" says `not cached` in a
 fresh process, which is exactly what the wrong block claimed. A block that cannot be
 replayed says `<!-- transcript: manual — why -->`. Like the vocabulary probe it needs a
-binary, so it is `#[ignore]`d:
+binary, so it is `#[ignore]`d — but unlike the probe, CI runs it: `scripts/test-transcripts.sh`
+(the `transcripts` job in `pages.yml`) installs `ikigai-cli` at the version in
+`books/ikigai/ikigai-cli.version` and replays every block with that binary first on PATH. To
+replay against whatever `ikigai` you have instead:
 
 ```bash
 cargo test -p book-urns --test book_transcripts -- --ignored --nocapture

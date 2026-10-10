@@ -166,15 +166,21 @@ jobs:
         with:
           path: target/site
 
-  # ── Every shell transcript, against the gonk the book pins ─────────────────
+  # ── Every transcript, in both books, against the binaries each book pins ───
   #
   # A `console` block in the gonk book is the page saying "type this, see that", and
   # `scripts/test-transcripts.sh` types it: it installs gonk at the revision in
   # `books/gonk/gonk.rev` (`cargo install --locked --git … --rev`) and `ikigai-cli` at the version
   # in `books/gonk/ikigai-cli.version`, runs each page's commands
   # in a scratch home, and compares what they print with what the page says (ledger #165).
-  # A job of its own because building gonk compiles RocksDB; the build is cached by that
-  # revision, so it is paid once per pin. The deploy needs it like it needs `books`.
+  # The same script then replays every `ikigai> ` REPL block in the ikigai book
+  # (`crates/book-urns/tests/book_transcripts.rs`, `--ignored` because it needs a binary)
+  # against `ikigai-cli` at the version in `books/ikigai/ikigai-cli.version`, first on PATH.
+  # Until ledger #1023 nothing ran that test in CI, and a page the kernel had moved under
+  # stayed red on main where nobody saw it (ledger #998). Every PR runs it, whatever it
+  # touches: a cli the pin did not move can still disagree with a page someone edited.
+  # A job of its own because building gonk compiles RocksDB; each build is cached by its
+  # pin, so it is paid once per pin. The deploy needs it like it needs `books`.
   transcripts:
     runs-on: ubuntu-latest
     steps:
@@ -194,7 +200,15 @@ jobs:
           # `-quic`: the cli is built with its `quic` feature (see the script); a cache of a build
           # without it must not be restored under the same key.
           key: ikigai-cli-${{ runner.os }}-${{ hashFiles('books/gonk/ikigai-cli.version') }}-quic
-      - name: replay every transcript (scripts/test-transcripts.sh)
+      # The ikigai book's own pin, in its own root (`target/ikigai-book-cli/`) under its own key:
+      # the two pins move for different reasons, and a shared root would let either key save or
+      # restore the other's binary.
+      - name: the ikigai book's pinned ikigai-cli, cached by its version
+        uses: actions/cache@v4
+        with:
+          path: target/ikigai-book-cli/*/bin
+          key: ikigai-book-cli-${{ runner.os }}-${{ hashFiles('books/ikigai/ikigai-cli.version') }}
+      - name: replay every transcript in both books (scripts/test-transcripts.sh)
         run: ./scripts/test-transcripts.sh
 
   deploy:
