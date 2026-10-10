@@ -9,11 +9,16 @@
 //!
 //! ## The scratch home, and why it is not optional
 //!
-//! Every page runs in a fresh directory, and every command is given that directory as its
-//! working directory AND as `HOME`, with `XDG_CONFIG_HOME` under it — whatever the page says.
-//! So a gonk a page starts holds its store, socket, certificates and grants in scratch, and an
-//! `ikigai` a page runs reads a config home with nothing in it. That is not a convenience: the
-//! machine this runs on may have a real gonk, whose store is one writer's and whose ledger is
+//! Every page runs in a fresh directory, its commands' working directory. `HOME` and
+//! `XDG_CONFIG_HOME` are NEVER the reader's: by default they point into a second, empty TRAP
+//! directory, and a page that leaves a file there fails, naming it — a command that forgot its
+//! `--config-home` or `--data-home` writes exactly there, and on a reader's machine it would
+//! have written into their real homes. A page that declares
+//! `<!-- transcripts: home — why -->` gets its own directory as `HOME` instead (the crate docs,
+//! `src/lib.rs`, say more). Either way a gonk a page starts holds its store, socket,
+//! certificates and grants in scratch, and an `ikigai` a page runs reads a config home with
+//! nothing in it unless the page put something there. That is not a convenience: the machine
+//! this runs on may have a real gonk, whose store is one writer's and whose ledger is
 //! somebody's work. The one thing a scratch home cannot redirect is a TCP port, which is why a
 //! command naming 1060 is refused before it runs (`book_transcripts::refused`).
 //!
@@ -29,7 +34,8 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use book_transcripts::{
-    matches, normalize, pages, refused, safe_file_name, scan_page, Block, Kind, ANY,
+    home_declared, matches, normalize, pages, refused, safe_file_name, scan_page, stray_writes,
+    Block, Kind, ANY,
 };
 
 /// How long one `run` command may take before it is a failure.
@@ -113,7 +119,7 @@ fn main() -> ExitCode {
             }
             continue;
         }
-        let (n, mut failed) = run_page(&options, &blocks);
+        let (n, mut failed) = run_page(&options, &blocks, home_declared(&text));
         ran += n;
         failures.append(&mut failed);
     }
@@ -143,12 +149,21 @@ fn main() -> ExitCode {
     ExitCode::FAILURE
 }
 
-/// One page, one session: its blocks in order, in one scratch home. Returns the number of
-/// commands run and the failures.
-fn run_page(options: &Options, blocks: &[Block]) -> (usize, Vec<String>) {
+/// One page, one session: its blocks in order, in one scratch directory. `home` is the
+/// page's `transcripts: home` reason, if it declared one. Returns the number of commands run
+/// and the failures.
+fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize, Vec<String>) {
     let mut failures = Vec::new();
     let mut ran = 0;
-    let scratch = Scratch::new();
+    let page = blocks.first().map(|b| b.file.as_str()).unwrap_or("?");
+    if home.as_deref() == Some("") {
+        failures.push(format!(
+            "{page}: declares `transcripts: home` without a reason. Say what reads `~` and why \
+             no flag can name it: <!-- transcripts: home — why -->"
+        ));
+        return (ran, failures);
+    }
+    let scratch = Scratch::new(home.is_some());
     let mut servers: Vec<Server> = Vec::new();
 
     for block in blocks {
@@ -236,6 +251,22 @@ fn run_page(options: &Options, blocks: &[Block]) -> (usize, Vec<String>) {
     for server in servers {
         server.stop();
     }
+    if let Some(trap) = &scratch.trap {
+        let stray = stray_writes(trap);
+        if !stray.is_empty() {
+            failures.push(format!(
+                "{page}: wrote into a HOME it did not declare: {}. A command here is missing \
+                 its homes (`--config-home`, `--data-home`); run by a reader, it would write \
+                 into theirs. If the page truly needs `HOME`, declare it once: \
+                 <!-- transcripts: home — why -->",
+                stray
+                    .iter()
+                    .map(|p| format!("~/{}", p.display()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
+        }
+    }
     (ran, failures)
 }
 
@@ -247,24 +278,44 @@ fn report(at: &str, command: &str, expected: &[String], actual: &[String]) -> St
     )
 }
 
-/// A page's scratch directory: its working directory, its `HOME`, and its config home.
+/// A page's scratch directory (its working directory), and the `HOME` its commands get: the
+/// directory itself when the page declared `transcripts: home`, else an empty trap beside it.
 struct Scratch {
     dir: PathBuf,
+    home: PathBuf,
+    /// The trap, when `home` is one: anything left in it is a write the page did not declare.
+    trap: Option<PathBuf>,
 }
 
 impl Scratch {
     /// A fresh directory under the system temp directory, with a SHORT name: a page's server
     /// may put a Unix socket in it, and a socket path is capped at 104 bytes on macOS.
-    fn new() -> Scratch {
+    fn new(home_is_the_page: bool) -> Scratch {
         let base = std::env::temp_dir();
         let stamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos())
             .unwrap_or_default();
-        let dir = base.join(format!("bt{}-{}", std::process::id(), stamp % 1_000_000));
+        let name = format!("bt{}-{}", std::process::id(), stamp % 1_000_000);
+        let dir = base.join(&name);
         std::fs::create_dir_all(dir.join(".config")).expect("a scratch directory");
+        let dir = dir.canonicalize().expect("the scratch directory exists");
+        if home_is_the_page {
+            return Scratch {
+                home: dir.clone(),
+                dir,
+                trap: None,
+            };
+        }
+        // Empty, and NOT given a `.config`: the config home inside it is named, never made, so
+        // whatever appears in the trap was written by a command.
+        let trap = base.join(format!("{name}-home"));
+        std::fs::create_dir_all(&trap).expect("a trap home");
+        let trap = trap.canonicalize().expect("the trap exists");
         Scratch {
-            dir: dir.canonicalize().expect("the scratch directory exists"),
+            dir,
+            home: trap.clone(),
+            trap: Some(trap),
         }
     }
 
@@ -299,8 +350,8 @@ impl Scratch {
             .arg("-c")
             .arg(text)
             .current_dir(&self.dir)
-            .env("HOME", &self.dir)
-            .env("XDG_CONFIG_HOME", self.dir.join(".config"))
+            .env("HOME", &self.home)
+            .env("XDG_CONFIG_HOME", self.home.join(".config"))
             .env("PATH", path)
             .stdin(Stdio::null());
         command
@@ -343,6 +394,9 @@ impl Scratch {
 impl Drop for Scratch {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.dir);
+        if let Some(trap) = &self.trap {
+            let _ = std::fs::remove_dir_all(trap);
+        }
     }
 }
 
@@ -393,8 +447,12 @@ impl Server {
                 Ok(line) => seen.push(line),
                 Err(_) => {
                     let exited = child.try_wait().ok().flatten();
-                    let _ = child.kill();
-                    let _ = child.wait();
+                    // The whole GROUP, as `stop` does: with only `child.kill()`, a serve line
+                    // that is a pipeline (`… | tee gonk.log`) left the server running after
+                    // its banner failed to match, holding the port, and every later page's
+                    // server failed to bind — one changed banner line read as a dozen pages
+                    // broken (seen moving the pin to edb9a3d).
+                    Server { child }.stop();
                     expected.pop();
                     return Err(format!(
                         "    {}\n    the page says it starts with:\n      {}\n    it printed:\n      {}",

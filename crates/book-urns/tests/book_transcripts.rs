@@ -3,9 +3,12 @@
 //! A ```` ```text ```` block whose lines start with `ikigai> ` is a transcript: the book
 //! saying "type this, see that". Nothing compiles one, so one was written to fit its
 //! prose — the front door's "Cut a thread" showed `sink urn:kernel:cut urn:iki:fn:toUpper`
-//! followed by `not cached`, and the real CLI says `cached`: a pure function declares no
-//! golden thread, so a cut has nothing of its own to invalidate. The prose was wrong and
-//! the transcript agreed with it, which is the failure mode this file exists for.
+//! followed by `not cached` when the real CLI said `cached` (before core 0.1.73 a cut
+//! reached only threads an endpoint declared, and a pure function declares none). The prose
+//! was wrong and the transcript agreed with it, which is the failure mode this file exists
+//! for. ⚠ And then the kernel changed: since 0.1.73 every cacheable read hangs from a thread
+//! named after its own target, the CLI says `not cached`, and the corrected block went stale
+//! in turn, red here and invisible, because CI does not run this file (ledger #998).
 //!
 //! The replay sends every `ikigai> ` line of a block to ONE `ikigai --plain` process, as
 //! repeated `-c` arguments, so the cache carries across the lines the way it does in a
@@ -25,13 +28,20 @@
 //! ```
 //!
 //! That is not a convenience. Replayed alone, "cut the thread, then probe" says
-//! `not cached` because a fresh process has nothing cached — which is exactly what the
-//! wrong block claimed, so isolation would have passed the bug. A block that cannot be
-//! replayed at all declares itself with a reason:
+//! `not cached` because a fresh process has nothing cached, whatever the cut did, so
+//! isolation would pass the block whether the kernel honored the cut or not. A block that
+//! cannot be replayed at all declares itself with a reason:
 //!
 //! ```text
 //! <!-- transcript: manual — the capability line prints this machine's home directory -->
 //! ```
+//!
+//! Every transcript runs in a SCRATCH home: a fresh directory that is the working
+//! directory, `HOME` and (under `.config`) the config home of its one `ikigai` process. The
+//! front door writes `urn:file:notes.txt`, which lands in `~/.ikigai/workspace/`, and a
+//! replay under the reader's real home wrote it there, and read whatever config home the
+//! reader had, so a host configured differently could fail or pass for reasons that are not
+//! the book's.
 //!
 //! Like the CLI vocabulary probe, this needs a binary and is `#[ignore]`d rather than
 //! silently skipped:
@@ -155,6 +165,24 @@ fn transcripts() -> Vec<Transcript> {
     out
 }
 
+/// A transcript's own home, removed when the transcript is done.
+struct ScratchHome(PathBuf);
+
+impl ScratchHome {
+    fn new(n: usize) -> ScratchHome {
+        let dir = std::env::temp_dir().join(format!("book-transcripts-{}-{n}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join(".config")).expect("a scratch home");
+        ScratchHome(dir)
+    }
+}
+
+impl Drop for ScratchHome {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
 /// Drop the lines that legitimately differ between the book and a replay: cache verdicts
 /// and the batch summary; blank lines; and rewrite durations.
 fn normalize(lines: impl IntoIterator<Item = String>) -> Vec<String> {
@@ -238,12 +266,16 @@ fn every_transcript_in_the_book_replays_against_the_installed_cli() {
     );
 
     let mut failures = Vec::new();
-    for t in &found {
+    for (n, t) in found.iter().enumerate() {
         if let Some(reason) = &t.manual {
             println!("skip {}:{} — manual: {reason}", t.file, t.line);
             continue;
         }
+        let home = ScratchHome::new(n);
         let mut cmd = Command::new("ikigai");
+        cmd.current_dir(&home.0)
+            .env("HOME", &home.0)
+            .env("XDG_CONFIG_HOME", home.0.join(".config"));
         cmd.arg("--plain");
         for c in &t.commands {
             cmd.arg("-c").arg(c);

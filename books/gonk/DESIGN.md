@@ -18,9 +18,9 @@ used stand alone."
 | part | chapter | kind of example | status |
 | --- | --- | --- | --- |
 | A ledger of your own | A ledger of your own | cells (wasm) · Rust (`crates/ledger-host`) · transcripts | **written** |
-| | The ledger in a browser | transcripts (curl of the pages, the form as `/act`, the SPARQL 1.1 Protocol face of `/sparql` over the union of the caller's graphs and its refusal of a ledger outside the grant, the cross-site write and the foreign `Host` each a `403` at the edge, `passkey invite --ledger --browse read`, the access log read back from a `tee`d file) · manual (the passkey ceremony, a browser) | **written** |
+| | The ledger in a browser | transcripts (curl of the pages, the form as `/act`, the SPARQL 1.1 Protocol face of `/sparql` over the union of the caller's graphs and its refusal of a ledger outside the grant, the cross-site write, the foreign `Host` and a read another page LOADS (an image) each a `403` at the edge while a read it NAVIGATES to is answered (gonk PR 100, ledger #880), the anonymous SPARQL budget in the banner, `passkey invite --ledger --browse read`, the access log read back from a `tee`d file) · manual (the passkey ceremony, a browser) | **written** |
 | An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:gk:=…/gonk.sock" -c …` (alias), why a mounted read is `[uncacheable]` at the client, the config-home `prefer` line (`XDG_CONFIG_HOME`: the cli has no config-home flag), `cap seal` to a `grants` list, the socket's access lines, and what the seal does and does not bound — a sealed ledger grant's raw `urn:iki:store:graph-update` to its graph refused over the socket since 77ac767 (gonk PR 98, ledger #899; ed43af3 admitted it) while root still writes raw, and a sealed session still filing an item whose `author` names a passkey (the socket runs no author rule); `ikigai-cli` pinned beside gonk | **written** |
-| | Over MCP | transcripts: `client add agent --ledger default=write`, gonk serving the QUIC door on 1070, the bundle and a client-side `grants.json` ceiling (`show: ["ledger-*"]`) in `agent/`, `ikigai mcp --override urn:iki:ledger:=quic://… --cert-dir agent/gonk --grant agent` fed JSON-RPC from `file` blocks (stdin is null for a `run` command): the 20 tool names, sorted with `LC_ALL=C`; a keyed append twice (`existing`), the item read by `key:`, its `author` the client's principal; a passkey-shaped `author`, a hidden `ledger-item__delete` and another ledger refused; the access log naming the client, and a ledger-less call logged as `default` (ledger #927, from ledger #782's verified path) | **written** |
+| | Over MCP | transcripts: `client add agent --ledger default=write`, gonk serving the QUIC door on 1070, the bundle and a client-side `grants.json` ceiling (`show: ["ledger-*"]`) in `agent/`, `ikigai mcp --override urn:iki:ledger:=quic://… --cert-dir agent/gonk --grant agent` fed JSON-RPC from `file` blocks (stdin is null for a `run` command): the 28 tool names (eight new with `ikigai-ledger` 0.5.0: item state, the assertions, lifecycles, the doctor), sorted with `LC_ALL=C`; a keyed append twice (`existing`), the item read by `key:`, its `author` the client's principal; a passkey-shaped `author`, a hidden `ledger-item__delete` and another ledger refused; the access log naming the client, and a ledger-less call logged as `default` (ledger #927, from ledger #782's verified path) | **written** |
 | The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a commit, a `file`-block `config.toml` root); tree/file/hash/state over the socket, a commit picked up by the watcher without a restart, the signed-out `/browse` notice | **written** |
 | | Explain, with a mounted model | Rust (`crates/browse-host`): browse over a scratch directory with a STUB model at `urn:llm:stub:{ask,model}` that counts its calls, so "derive once, then from the archive", the version tag, the content-keyed archive and the cost line are asserted; transcripts: the banner with `--mount` (a socket nothing listens on), `explain-status` answering and `explain` refused `unavailable` over the socket; manual for a real model | **written** |
 | Review without a reviewer | One-off review, what a finding is | Rust (`crates/browse-host`, the same stub model): a pass minting two pending findings with stable ids, the archive (no second model call), decline with a reason from the closed set, a `should_panic` reproduction, publish with `reproduced=yes` → an annotation `derived_from` the finding, a decision refused without `revises=`, and the capability split (read / derive / annotate) | **written** |
@@ -33,7 +33,7 @@ used stand alone."
 | | Checkout | transcripts: `file://` scratch remotes, clone, `--write-config`, an update, `--all` with its coverage report, a refusal on a dirty checkout; the timer (manual) | **written** |
 | | A fresh machine, end to end | transcripts: checkout → roots → start → kata import → the roborev hook → `next`, in one session | **written** |
 | Several machines | The three doors | transcripts: `client add --port 1070` (the QUIC door opens only with a certificate enrolled; `--port` makes the printed `--connect` line right), gonk with `--port 1070` (which moves the QUIC door to UDP 1070 too, since gonk PR 93), one request through each door, the access log read back from a `tee`d file (`door=`, `principal=`: `anon`/`owner`/`-` on HTTP and the socket, and the client's `urn:iki:gonk:client:<fingerprint>` on every QUIC request), a QUIC write's author filled with that name and a write naming another principal refused, a refusal at the door's floor that writes no line | **written** |
-| | A QUIC client | transcripts: `client add laptop --ledger default=write --browse read --root notes`, `grants.json`, the bundle copied to a second directory (`laptop/`), `ikigai --connect quic://… --cert-dir`, refusals outside the grant (delete at the floor, another ledger at the ledger), a stranger's certificate refused in the handshake (the client is told only "connection lost"), the server's log naming the client; a raw store write to the ledger graph refused at the door, then allowed after `--ledger-graph default --force` (the identity kept); `client list`, `--rotate` (repeating the grant, or the new certificate is unenrolled) with the old bundle refused, `client remove`; a real second machine is manual | **written** |
+| | A QUIC client | transcripts: `client add laptop --ledger default=write --browse read --root notes`, `grants.json`, the bundle copied to a second directory (`laptop/`), `ikigai --connect quic://… --cert-dir`, refusals outside the grant (delete at the floor, another ledger at the ledger), a stranger's certificate refused in the handshake (the client is told only "connection lost"), the server's log naming the client; a raw store write to the ledger graph refused at the door, then allowed after `--ledger-graph default --force` (the identity kept); `client list`, `--rotate` with no scope flags (the enrollment moves to the new certificate, same grant, since gonk PR 106) with the old bundle refused, `client remove`; a real second machine is manual | **written** |
 | Embedding | The ledger, store and browse in your own kernel | Rust (`crates/embed-host`): one dataset handed to the store and to browse with a `SharerWrites` promise (`in_memory_shared_declaring`) and browse confined to that graph; the stub model; three callers' capabilities (agent, headless reviewer, person) each refused outside its lines; the ledger↔browse join through `graph-select` over both graphs; a cached ledger read asserted with `Kernel::is_cached` | **written** |
 
 Unwritten chapters are mdbook DRAFT entries (`- [Title]()`), listed in the sidebar without a
@@ -53,22 +53,28 @@ link, so the outline is visible on the published site and nothing 404s.
 - **Shell transcripts.** `crates/book-transcripts` + `scripts/test-transcripts.sh` (ledger
   #165). A `console` fence of `$ ` lines is declared `run`, `serve` or `manual — why` in a
   comment above it; under `--strict` an undeclared one FAILS. One page is one session: a fresh
-  scratch directory that is the working directory, `HOME` and the config home of every command,
-  in page order. A `serve` block's one command is started and left running; its expected lines
+  scratch directory that is the working directory of every command, in page order. A `serve` block's one command is started and left running; its expected lines
   are its startup banner. A command naming 1060 is refused before it runs. pages.yml runs it in
   a `transcripts` job the deploy needs, with the gonk build cached by revision.
   **How a page names a scratch gonk** (gonk PR 94, ledger #799; in the pin since ed43af3):
   by flags, `ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" …`, and
-  `--config-home` on `client` and `passkey invite`; never `env HOME=…`. `$PWD`, because gonk
-  prints and hands on the paths it is given (a relative `--data-home` puts a relative socket path
-  in the banner's `mount` line). A browse root is written with `$PWD` too (`printf … "$PWD"`),
-  because a `~` in `config.toml` is the home of whoever runs gonk. Two exceptions, each said on
-  its page: `checkout` has no home flags at 77ac767, so `checkout.md` and `fresh-machine.md` keep
-  `env HOME=… XDG_CONFIG_HOME=…` (and fresh-machine's server too, since the roots checkout wrote
-  are `~/…`); and `ikigai` has no config-home flag, so `socket.md`'s config-home section sets
-  `XDG_CONFIG_HOME`. ⚠ **The check cannot see a missing flag**: the runner still sets `HOME`
-  and `XDG_CONFIG_HOME` to the page's directory for every command, so a page that forgot
-  `--config-home` passes here and writes into the reader's real config home. Review it by eye.
+  `--config-home` on `client` and `passkey invite`, and both on `checkout` (since gonk PR 106,
+  ledger #918, in the pin since edb9a3d); never `env HOME=…`. `$PWD`, so a path means the same
+  directory in every command (gonk makes a relative home absolute since PR 106, but leaves
+  `--socket` as given). A browse root is written with `$PWD` too (`printf … "$PWD"`), because a
+  `~` in `config.toml` is the home of whoever runs gonk. One exception, said on its page:
+  `ikigai` has no config-home flag, so `socket.md`'s config-home section and `mcp.md` set
+  `XDG_CONFIG_HOME` on the command (the checkout pages used to set `HOME` too, until checkout
+  took the flags).
+  **The check sees a missing flag** (ledger #917, part 2): `HOME` and `XDG_CONFIG_HOME` are NOT
+  the page's directory but an empty TRAP beside it, and a page that leaves any file in the trap
+  fails, naming the files — which is what a command that forgot `--config-home` or
+  `--data-home` does, and what would have landed in a reader's real homes. An empty directory is
+  not a write (`ikigai` makes `~/.ikigai/workspace` on every start). A page that truly needs
+  `HOME` as its own directory declares it once, with its reason:
+  `<!-- transcripts: home — why -->` (plural, a PAGE's declaration; none needs it at edb9a3d).
+  Through 77ac767 the runner set `HOME` to the page's directory for every command, so a forgotten
+  flag passed here and was reviewed by eye.
   Since arc 2 two more things: a fence of ANY language declared `file NAME` is written to
   `NAME` in the scratch directory at that point in the page (how a page hands its commands a
   config file or a fixture, since one `sh -c` line cannot hold a heredoc), and a `run`
@@ -104,14 +110,15 @@ is refused), into `target/ikigai-cli/<version>+quic/`, under a CI cache key endi
 crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --version =X`),
 and the file is one line read by the introduction's install line, the script and CI's cache
 key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and
-`ikigai-web` share the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3 and 77ac767),
-so the client speaks the server's wire; moving gonk is a reason to look at this file too. (0.1.42
-was already on crates.io when the pin moved to ed43af3 and then 77ac767; the rule takes 0.1.41 because that is
-what gonk links.)
+`ikigai-web` share the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3,
+77ac767 and edb9a3d), so the client speaks the server's wire; moving gonk is a reason to look at
+this file too. (0.1.42 and 0.1.43 were already on crates.io when the pin moved to edb9a3d; the rule
+takes 0.1.41 because that is what gonk links. The ikigai Book's REPL transcripts are a
+separate, hand-run check against whatever `ikigai` is on `PATH`: `crates/book-urns/tests/book_transcripts.rs`.)
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
-`ikigai-ledger` 0.4.2, `ikigai-store` 0.2.6 (in-memory, `persistent` off) and `ikigai-browse`
-0.18.0, with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
+`ikigai-ledger` 0.5.0, `ikigai-store` 0.2.8 (in-memory, `persistent` off; 0.2.7 is a security
+floor, ledger #915) and `ikigai-browse` 0.18.0, with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
 There was one exception, from the morning `ikigai-ledger` 0.4.0 was published until the pin moved
 to ad0653b (gonk PR #86, the keyed bridges): the book's crates took 0.4.0 while the pinned gonk
 linked 0.3.0, so no transcript could use `key=` against gonk. That is closed; if a later arc has to

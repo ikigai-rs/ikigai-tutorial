@@ -30,46 +30,50 @@ $ git -C upstream/specs -c user.name='A Reader' -c user.email=reader@example.com
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout "file://$PWD/upstream/notes" "file://$PWD/upstream/specs"
-cloned     notes at …  ~/.ikigai/checkouts/notes
-cloned     specs at …  ~/.ikigai/checkouts/specs
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" "file://$PWD/upstream/notes" "file://$PWD/upstream/specs"
+cloned     notes at …  …/.ikigai/checkouts/notes
+cloned     specs at …  …/.ikigai/checkouts/specs
 
 browse roots:
-  gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
-  gonk.browse.root = "specs=~/.ikigai/checkouts/specs"
+  gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
+  gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 
 not written: add the lines above to …/.config/ikigai/config.toml, or run again with --write-config
 ```
 
-Each URL is cloned into `~/.ikigai/checkouts/<name>`, where `<name>` is the URL's last path
-segment without `.git`, and it is also the browse root's name. `name=url` sets a different one
+Each URL is cloned into `checkouts/<name>` under the data home (`~/.ikigai/checkouts/<name>`
+on a machine that names no homes), where `<name>` is the URL's last path segment without
+`.git`, and it is also the browse root's name. `name=url` sets a different one
 (`kata=git@github.com:kenn-io/kata.git`), and `--dir` puts the clones somewhere else.
-(`HOME` is this page's directory, so `~` here is the page's. Unlike the server and `client`,
-`checkout` has no `--config-home` or `--data-home` at the gonk this book pins: it reads the
-process's homes, so a scratch run still sets `HOME` and `XDG_CONFIG_HOME`.)
+`--config-home` and `--data-home` are the server's two flags, so the checkout writes the
+`config.toml` the server will read and clones under the data home it will use; this page names
+both inside its own directory. A path under your home directory is printed and written with
+`~`, and any other in full, which is why the lines above begin with `…`: where this page's
+directory is depends on where you run it. (Before gonk PR 106, ledger #918, `checkout` had
+neither flag and read the process's homes, so this page had to set `HOME` for it.)
 
 Without `--write-config` the lines are only printed. With it, the missing ones are appended to
 the config home's `config.toml`:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout "file://$PWD/upstream/notes" "file://$PWD/upstream/specs" --write-config
-current    notes at …  ~/.ikigai/checkouts/notes
-current    specs at …  ~/.ikigai/checkouts/specs
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" "file://$PWD/upstream/notes" "file://$PWD/upstream/specs" --write-config
+current    notes at …  …/.ikigai/checkouts/notes
+current    specs at …  …/.ikigai/checkouts/specs
 
 browse roots:
-  gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
-  gonk.browse.root = "specs=~/.ikigai/checkouts/specs"
+  gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
+  gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 
 …/.config/ikigai/config.toml:
-  added      gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
-  added      gonk.browse.root = "specs=~/.ikigai/checkouts/specs"
+  added      gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
+  added      gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 
 gonk reads gonk.browse.root at startup only: restart it to serve the new root(s). Under launchd:
   launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
 $ cat .config/ikigai/config.toml
-gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
-gonk.browse.root = "specs=~/.ikigai/checkouts/specs"
+gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
+gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 ```
 
 The second run found both clones already there and current, so it cloned nothing, and only
@@ -93,13 +97,13 @@ Run the same command again, and each clone is fetched and its default branch
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout "file://$PWD/upstream/notes" "file://$PWD/upstream/specs"
-updated    notes …..… (1 commit(s), fast-forward)  ~/.ikigai/checkouts/notes
-current    specs at …  ~/.ikigai/checkouts/specs
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" "file://$PWD/upstream/notes" "file://$PWD/upstream/specs"
+updated    notes …..… (1 commit(s), fast-forward)  …/.ikigai/checkouts/notes
+current    specs at …  …/.ikigai/checkouts/specs
 
 browse roots:
-  gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
-  gonk.browse.root = "specs=~/.ikigai/checkouts/specs"
+  gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
+  gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 
 not written: add the lines above to …/.config/ikigai/config.toml, or run again with --write-config
 ```
@@ -120,22 +124,22 @@ $ git init -q -b main upstream/tools
 $ printf '# Tools\n' > upstream/tools/README.md
 $ git -C upstream/tools add README.md
 $ git -C upstream/tools -c user.name='A Reader' -c user.email=reader@example.com commit -qm 'Start the tools'
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout "file://$PWD/upstream/tools"
-cloned     tools at …  ~/.ikigai/checkouts/tools
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" "file://$PWD/upstream/tools"
+cloned     tools at …  …/.ikigai/checkouts/tools
 
 browse roots:
-  gonk.browse.root = "tools=~/.ikigai/checkouts/tools"
+  gonk.browse.root = "tools=…/.ikigai/checkouts/tools"
 
 not written: add the lines above to …/.config/ikigai/config.toml, or run again with --write-config
 $ printf 'A third line.\n' >> upstream/notes/README.md
 $ git -C upstream/notes -c user.name='A Reader' -c user.email=reader@example.com commit -qam 'A third line'
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout --all
-updated    notes …..… (1 commit(s), fast-forward)  ~/.ikigai/checkouts/notes
-current    specs at …  ~/.ikigai/checkouts/specs
-current    tools at …  ~/.ikigai/checkouts/tools
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --all
+updated    notes …..… (1 commit(s), fast-forward)  …/.ikigai/checkouts/notes
+current    specs at …  …/.ikigai/checkouts/specs
+current    tools at …  …/.ikigai/checkouts/tools
 
-coverage of ~/.ikigai/checkouts by the roots in …/.config/ikigai/config.toml:
-  unused     tools  ~/.ikigai/checkouts/tools  no gonk.browse.root points into it: gonk does not browse it (`checkout <url> --write-config` adds its line)
+coverage of …/.ikigai/checkouts by the roots in …/.config/ikigai/config.toml:
+  unused     tools  …/.ikigai/checkouts/tools  no gonk.browse.root points into it: gonk does not browse it (`checkout <url> --write-config` adds its line)
 ```
 
 Each checkout gets its line, in the same words as before, and then a **coverage** report that
@@ -158,14 +162,14 @@ was**: nothing is reset, stashed, merged or discarded.
 <!-- transcript: run -->
 ```console
 $ printf 'work in progress\n' > .ikigai/checkouts/specs/wip.txt
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout --all
-current    notes at …  ~/.ikigai/checkouts/notes
-REFUSED    specs  ~/.ikigai/checkouts/specs
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --all
+current    notes at …  …/.ikigai/checkouts/notes
+REFUSED    specs  …/.ikigai/checkouts/specs
   it has local changes (1 path(s); `git -C …/.ikigai/checkouts/specs status`). A managed checkout is fast-forwarded only; nothing was fetched or changed
-current    tools at …  ~/.ikigai/checkouts/tools
+current    tools at …  …/.ikigai/checkouts/tools
 
-coverage of ~/.ikigai/checkouts by the roots in …/.config/ikigai/config.toml:
-  unused     tools  ~/.ikigai/checkouts/tools  no gonk.browse.root points into it: gonk does not browse it (`checkout <url> --write-config` adds its line)
+coverage of …/.ikigai/checkouts by the roots in …/.config/ikigai/config.toml:
+  unused     tools  …/.ikigai/checkouts/tools  no gonk.browse.root points into it: gonk does not browse it (`checkout <url> --write-config` adds its line)
 $ cat .ikigai/checkouts/specs/wip.txt
 work in progress
 ```

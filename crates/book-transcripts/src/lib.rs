@@ -34,12 +34,28 @@
 //!
 //! ## What a page is
 //!
-//! **One page is one session**: one scratch directory, which is also `HOME` and (under
-//! `.config`) the config home, shared by every block on the page in page order — so a server a
-//! `serve` block starts is the one the next block's `curl` reaches, and an item filed in one
-//! block is listed in the next. Each `$ ` line is its own `sh -c`, so a `cd` or a shell variable
-//! does not carry; the files do. That is a constraint on how a chapter is written, and it is
-//! stated here rather than discovered.
+//! **One page is one session**: one scratch directory, the working directory of every block on
+//! the page in page order — so a server a `serve` block starts is the one the next block's
+//! `curl` reaches, and an item filed in one block is listed in the next. Each `$ ` line is its
+//! own `sh -c`, so a `cd` or a shell variable does not carry; the files do. That is a constraint
+//! on how a chapter is written, and it is stated here rather than discovered.
+//!
+//! ## The home a page did not ask for
+//!
+//! A page names its homes itself (`--config-home`, `--data-home`), because a reader who copies
+//! a command runs it in their REAL home. So `HOME` and `XDG_CONFIG_HOME` are NOT the page's
+//! directory: they point into a separate, empty TRAP directory, and a page that leaves a file
+//! there fails ([`stray_writes`]) — which is what a command that forgot its `--config-home`
+//! does. Until ledger #917 both pointed at the page's directory, so that command passed here
+//! and would have written into the reader's real config home. An empty directory is not a
+//! write (`ikigai` makes `~/.ikigai/workspace` on every start, and a reader's already exists).
+//!
+//! A page that genuinely needs `HOME` to be its own directory says so ONCE, anywhere on it,
+//! with its reason ([`home_declared`]); the reason is said where an editor reads it:
+//!
+//! ```text
+//! <!-- transcripts: home — what reads `~`, and why no flag can name it -->
+//! ```
 //!
 //! ## What "matches" means
 //!
@@ -141,6 +157,46 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
         }
         i = end + 1;
     }
+    out
+}
+
+/// The reason a page gives for running with `HOME` set to its own directory, if it gives one:
+/// the first `<!-- transcripts: home — why -->` line on the page. `Some("")` is a declaration
+/// with no reason, which the runner refuses. (`transcripts:`, plural, is a page's declaration;
+/// `transcript:` belongs to the block below it.)
+pub fn home_declared(text: &str) -> Option<String> {
+    text.lines().find_map(|line| {
+        let (_, rest) = line.split_once("transcripts:")?;
+        let rest = rest.trim().trim_end_matches("-->").trim();
+        let reason = rest.strip_prefix("home")?;
+        Some(
+            reason
+                .trim()
+                .trim_start_matches(['—', '-', ':'])
+                .trim()
+                .to_string(),
+        )
+    })
+}
+
+/// Every file (anything but a directory) under `home`, relative to it, sorted: what a page
+/// wrote into a home it did not declare. An empty directory is not a write.
+pub fn stray_writes(home: &Path) -> Vec<PathBuf> {
+    fn walk(root: &Path, dir: &Path, out: &mut Vec<PathBuf>) {
+        let Ok(entries) = fs::read_dir(dir) else {
+            return;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            match entry.file_type() {
+                Ok(t) if t.is_dir() => walk(root, &path, out),
+                _ => out.push(path.strip_prefix(root).unwrap_or(&path).to_path_buf()),
+            }
+        }
+    }
+    let mut out = Vec::new();
+    walk(home, home, &mut out);
+    out.sort();
     out
 }
 
@@ -439,6 +495,40 @@ gonk.port = 1070
     fn output_before_any_command_is_an_orphan() {
         let blocks = scan_page("p.md", "```console\nstray\n$ true\n```\n");
         assert_eq!(blocks[0].orphans, s(&["stray"]));
+    }
+
+    #[test]
+    fn a_page_declares_its_home_once_with_a_reason() {
+        assert_eq!(home_declared("no declaration\n"), None);
+        assert_eq!(
+            home_declared("x\n<!-- transcripts: home — the server reads `~` -->\ny\n"),
+            Some("the server reads `~`".to_string())
+        );
+        assert_eq!(
+            home_declared("<!-- transcripts: home -->\n"),
+            Some(String::new()),
+            "declared without a reason: the runner refuses it"
+        );
+        assert_eq!(
+            home_declared("<!-- transcript: run -->\n"),
+            None,
+            "a block's declaration is not a page's"
+        );
+    }
+
+    #[test]
+    fn a_stray_write_is_a_file_and_an_empty_directory_is_not() {
+        let home = std::env::temp_dir().join(format!("bt-stray-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&home);
+        fs::create_dir_all(home.join(".ikigai/workspace")).unwrap();
+        assert!(stray_writes(&home).is_empty(), "an empty directory");
+        fs::create_dir_all(home.join(".config/ikigai")).unwrap();
+        fs::write(home.join(".config/ikigai/config.toml"), "x = 1\n").unwrap();
+        assert_eq!(
+            stray_writes(&home),
+            vec![PathBuf::from(".config/ikigai/config.toml")]
+        );
+        fs::remove_dir_all(&home).unwrap();
     }
 
     #[test]

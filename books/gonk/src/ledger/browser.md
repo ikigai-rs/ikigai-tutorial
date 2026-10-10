@@ -15,7 +15,7 @@ what it prints in a file as well as on the screen:
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
 …
   log     one `gonk:Access` line per request at each door, on stderr (`gonk.log.access = false` turns it off)
 …
@@ -79,7 +79,10 @@ $ curl -s -H 'Accept: text/turtle' http://127.0.0.1:1070/iki/ledger/items | grep
 
 and so is a query over it. Asked for a results format rather than HTML, CSV among them,
 `/sparql` answers a program instead of a person: it is the SPARQL 1.1 Protocol, run under your
-grant.
+grant. An anonymous caller's query also runs under a time budget, the banner's `anonymous SPARQL
+budget 1000 ms`: it runs for at most a second, so one expensive query cannot hold the server
+(gonk PR 105, ledger #964). gonk's own queries, the ones behind its pages, never run
+under it.
 
 <!-- transcript: run -->
 ```console
@@ -159,6 +162,34 @@ Refused, rather than served with an empty grant: an empty grant is still offered
 that needs no grant (the pages, the passkey ceremonies, a resource's description), and gonk's
 audit showed another site filling the passkey ceremony's table that way. A refused request
 learns nothing, not even which methods a path accepts.
+
+A read from another page is the subtler case, because a link to an item from somewhere else
+is ordinary and ought to work. The browser labels every request with where it came from
+(`Sec-Fetch-Site`) and what it is for (`Sec-Fetch-Mode`, `Sec-Fetch-Dest`), and gonk draws
+its line at the page's **origin**, port included. The port matters: a site is a scheme and a
+domain, so a page on `http://localhost:8090` is the *same site* as gonk, and the browser sends
+gonk's sign-in cookie with everything that page asks for. Another page that **navigates**
+here (a link, a typed address) is answered, under only the read half of whoever is signed in;
+another page that **loads** something from here, as an image, a script, a frame or a
+`fetch`, is refused at the edge. `curl` can send the labels a browser would:
+
+<!-- transcript: run -->
+```console
+$ curl -s -w '\n%{http_code}\n' -H 'Sec-Fetch-Site: same-site' -H 'Sec-Fetch-Mode: no-cors' -H 'Sec-Fetch-Dest: image' http://localhost:1070/l/default/item/1
+a page that is not this server's own may only NAVIGATE here (a link, or a typed address); it may not load this server's resources as an image, script, frame or fetch
+403
+$ curl -s -o /dev/null -w '%{http_code}\n' -H 'Sec-Fetch-Site: same-site' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Dest: document' http://localhost:1070/l/default/item/1
+200
+```
+
+Nothing gonk serves is meant to be embedded in another page, and a load is how a page spends
+someone's authority without anyone clicking anything: an `<img>` pointing at a resource that
+asks a model for an explanation or a review (the [browse](../browse/explain.md) family's)
+would run the model and archive its answer under the signed-in identity's grant. Through gonk
+`ed43af3` both kinds of read were answered under the whole grant, which is what that
+`<img>` did (gonk PR 100, ledger #880). The read half, for a navigation, is the same caution
+one step milder: following a link from elsewhere shows what the identity may read, and does
+not spend on its behalf.
 
 ## Who you are, and what that grants
 
@@ -262,18 +293,21 @@ $ grep ' urn:iki:gonk:act ' gonk.log
 … gonk:Access urn:iki:gonk:act door=http verb=sink outcome=ok bytes=… dur=… principal=anon q=-
 $ grep ' urn:iki:gonk:page:item:default:1 ' gonk.log
 … gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
+… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
 ```
 
 Read them with three things in mind:
 
-- **The subject is the resource, not the URL.** `/l/default/item/1` was
+- **The subject is the resource, not the URL.** `/l/default/item/1` (read twice: once by
+  `curl` as itself, once as another page's link) was
   `urn:iki:gonk:page:item:default:1`; the form was `urn:iki:gonk:act`.
 - **`principal` is who a WRITE was from.** The form's line says `anon`; a page read says `-`,
   because the HTTP library tells a door who a write is from and never a read. A signed-in
   write would name the passkey's IRI.
 - **`outcome` is the kernel's, not HTTP's.** A refusal the resource makes (the `/l/book`
   page) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
-  cross-site form, the foreign `Host`), is no line at all: there was no request to log.
+  cross-site form, the foreign `Host`, the loaded image), is no line at all: there was no
+  request to log.
 
 <!-- transcript: run -->
 ```console
