@@ -30,17 +30,17 @@ Clone them and write their roots in one command:
 
 <!-- transcript: run -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk checkout "file://$PWD/upstream/flight" "file://$PWD/upstream/notes" --write-config
-cloned     flight at …  ~/.ikigai/checkouts/flight
-cloned     notes at …  ~/.ikigai/checkouts/notes
+$ ikigai-gonk checkout --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" "file://$PWD/upstream/flight" "file://$PWD/upstream/notes" --write-config
+cloned     flight at …  …/.ikigai/checkouts/flight
+cloned     notes at …  …/.ikigai/checkouts/notes
 
 browse roots:
-  gonk.browse.root = "flight=~/.ikigai/checkouts/flight"
-  gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
+  gonk.browse.root = "flight=…/.ikigai/checkouts/flight"
+  gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
 
 …/.config/ikigai/config.toml:
-  added      gonk.browse.root = "flight=~/.ikigai/checkouts/flight"
-  added      gonk.browse.root = "notes=~/.ikigai/checkouts/notes"
+  added      gonk.browse.root = "flight=…/.ikigai/checkouts/flight"
+  added      gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
 
 gonk reads gonk.browse.root at startup only: restart it to serve the new root(s). Under launchd:
   launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
@@ -56,17 +56,14 @@ way the checkout said:
 $ launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
 ```
 
-Here it starts for the first time, with this page as its home. This is the one page where the
-server still gets its homes from `HOME` and `XDG_CONFIG_HOME` rather than from `--config-home`
-and `--data-home`: `checkout` reads the process's homes and has no flag for either at the gonk
-this book pins, and the roots it wrote are `~/.ikigai/checkouts/…`, which mean whatever `HOME`
-says to the server that reads them. So the server has to see the same `HOME` the checkout did:
+Here it starts for the first time, with the same two homes the checkout was given, so it reads
+the `config.toml` the checkout wrote:
 
 <!-- transcript: serve -->
 ```console
-$ env HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" ikigai-gonk --port 1070 --no-quic --no-backup
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
   browse  urn:repo:{flight (watched), notes (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
 ```

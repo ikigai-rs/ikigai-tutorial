@@ -182,7 +182,7 @@ $ printf 'gonk.browse.root = "demo=%s/demo"\n' "$PWD" > .config/ikigai/config.to
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup --mount "prefer urn:llm:=$PWD/model.sock"
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
   browse  urn:repo:{demo (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
   backup  …
   llm     …/model.sock (prefer; dialled on first use) — explain/review bound; file urn:llm:coder:ask @400, dir urn:llm:ask @600, review urn:llm:coder:ask @800, pr urn:llm:coder:ask @600 tokens. Deriving needs urn:cap:net:localhost, which `--browse derive` mints and nothing else does

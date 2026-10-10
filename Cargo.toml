@@ -87,7 +87,10 @@ ikigai-diagram = "0.1.0"
 ikigai-module = "0.3.1"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
-ikigai-sparql = "0.1.7"
+# 0.1.11 is the floor for a security fix, not for an API: it is the release cli 0.1.43 adopted
+# (ledger #962), and a book should not teach a face below the floor its own host ships. Before
+# it the floor was 0.1.7, the API the chapter uses. A 0.x caret: also a ceiling (<0.2.0).
+ikigai-sparql = "0.1.11"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"
@@ -96,23 +99,29 @@ oxrdf = "0.3"
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
 # built from.
-# 0.4.0 is the API floor because part 5's `sync_ledger` files each task with the keyed append it
+# The API floor is 0.4.0, because part 5's `sync_ledger` files each task with the keyed append it
 # added (`append key=<task IRI>`: at most one item per key, enforced by the ledger in the same
 # store update that files it, answering `existing` when the key is taken), which is what makes two
 # concurrent syncs safe. It also made `Item` and `Filter` `#[non_exhaustive]`; no crate here
-# builds either. The pin is 0.4.2 because that is what the gonk in `gonk.rev` links (77ac767, whose
-# roborev and kata bridges file through the same keyed append): a malformed timestamp no longer
-# drops an item from `items`/`next` (ledger #866). Before 0.4.0 the floor was 0.3.0, which
-# fixed the unled audit's findings on 0.2.1 that the first chapter walks straight through — two
-# appends in one millisecond minting the same id, and `next` cached across the clock. A 0.x
-# caret, so also a ceiling (<0.5.0): read it as a RANGE when gonk moves.
-ikigai-ledger = "0.4.2"
+# builds either. The pin is 0.5.0 because that is what the gonk in `gonk.rev` links (edb9a3d,
+# gonk PR 107): an item's lifecycle state as a compare-and-set atom, claim leases with a kind
+# the host stamps, and the doctor (ledger #775). Nothing here uses them yet, and the cells and Rust
+# chapters print what they did (every JSON addition is a new field); the one transcript that
+# lists the ledger's MCP tools ("Over MCP") gains eight. Before that the pin was 0.4.2, where
+# a malformed timestamp stopped dropping an item from `items`/`next` (ledger #866). Before 0.4.0
+# the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that the first chapter
+# walks straight through — two appends in one millisecond minting the same id, and `next` cached
+# across the clock. A 0.x caret, so also a ceiling (<0.6.0): read it as a RANGE when gonk moves
+# (0.6.0 is published, and gonk does not link it yet).
+ikigai-ledger = "0.5.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
-# RocksDB at all. 0.2.6 is what gonk links. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.6", default-features = false }
+# RocksDB at all. 0.2.8 is what gonk edb9a3d links (gonk PR 104), and 0.2.7 is a security floor
+# below which no book crate should sit (ledger #915; cli 0.1.43 adopted it). A 0.x caret: also a
+# ceiling (<0.3.0).
+ikigai-store = { version = "0.2.8", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk 77ac767 links,
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk edb9a3d links,
 # and it is the release that added the explain-status cost line the chapter shows ("opens
 # instantly from the archive"). A 0.x caret: also a ceiling (<0.19.0); read it as a RANGE when
 # gonk moves.

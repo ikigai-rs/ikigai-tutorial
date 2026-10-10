@@ -65,8 +65,8 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 ```
 
 The modules it links are the published crates, and the book's own crates use the same
-versions: `ikigai-ledger` 0.4.2 (0.4.0 added the keyed append [part 5](spec/ledger.md) syncs
-with and the [bridges](bridges/roborev.md) file through), `ikigai-store` 0.2.6 and
+versions: `ikigai-ledger` 0.5.0 (0.4.0 added the keyed append [part 5](spec/ledger.md) syncs
+with and the [bridges](bridges/roborev.md) file through), `ikigai-store` 0.2.8 and
 `ikigai-browse` 0.18.0.
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.

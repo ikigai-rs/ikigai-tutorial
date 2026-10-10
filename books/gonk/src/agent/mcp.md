@@ -125,6 +125,12 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-comment__sink"
 "name":"ledger-defer__delete"
 "name":"ledger-defer__sink"
+"name":"ledger-doctor__source"
+"name":"ledger-item-closed__exists"
+"name":"ledger-item-holder-is__exists"
+"name":"ledger-item-state-is__exists"
+"name":"ledger-item-state__sink"
+"name":"ledger-item-state__source"
 "name":"ledger-item__exists"
 "name":"ledger-item__sink"
 "name":"ledger-item__source"
@@ -132,6 +138,8 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-label__delete"
 "name":"ledger-label__sink"
 "name":"ledger-ledgers__source"
+"name":"ledger-lifecycle__exists"
+"name":"ledger-lifecycle__source"
 "name":"ledger-link__delete"
 "name":"ledger-link__sink"
 "name":"ledger-next__source"
@@ -140,9 +148,14 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-reopen__sink"
 ```
 
-Twenty tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
-`urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. A `__delete`
-tool is here only where the ledger's writer may delete (a label, a claim, a link, a deferral).
+Twenty-eight tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
+`urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. Eight of
+them arrived with `ikigai-ledger` 0.5.0 and are not used in this book yet: an item's lifecycle
+**state** (`ledger-item-state__*`, a compare-and-set, so of two agents moving one item out of the
+same state exactly one wins), the **assertions** an agent can check before it acts
+(`ledger-item-state-is__exists`, `-holder-is`, `-closed`), the **lifecycles** themselves as
+resources, and the **doctor**, a read-only report of orphaned, abandoned and lease-expired work.
+A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a deferral).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging
 takes another, and this grant holds neither.
 

@@ -126,7 +126,9 @@ argument: the client holds the *write* family (for `default`), so the door lets 
 through, and the ledger itself refuses it, because the token names a different ledger.
 
 A certificate the server was never told to trust gets nothing. Mint one with no grant, after the
-server started:
+server started. The hint it prints names the grant's shape rather than a grant, because a
+command copied from it could narrow a client's existing authority (it printed a fixed
+`--ledger default=write` until gonk PR 106, ledger #918):
 
 <!-- transcript: run -->
 ```console
@@ -135,7 +137,7 @@ client `stranger`  …/.config/ikigai/gonk/quic/clients/stranger
   fingerprint  …
   principal    urn:iki:gonk:client:…
   NOT enrolled — a trusted certificate with no grant is refused. Enrol it:
-    ikigai-gonk client add stranger --ledger default=write
+    ikigai-gonk client add stranger --ledger <ledger>=<read|write|delete|purge>
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -223,16 +225,19 @@ stranger         …  grant -            trusted, NOT enrolled (refused at conne
 ```
 
 A key pair that may have leaked is replaced with `--rotate`: a new identity for the same name,
-and the old fingerprint unenrolled. Name the grant again as you rotate, or the new certificate
-is minted unenrolled:
+under the same authority. With no scope flags the old certificate's enrollment moves to the new
+one, the same grant, and `grants.json` is not touched (with scope flags the grant is rewritten
+as for any `client add`, and refused without `--force` if it changes). Until gonk PR 106 (ledger
+#918) a rotation without flags left the new certificate enrolled under nothing, so the client
+was refused at its next connection:
 
 <!-- transcript: run -->
 ```console
-$ ikigai-gonk client add laptop --rotate --ledger default=write --browse read --root notes --ledger-graph default --port 1070 --config-home "$PWD/.config/ikigai"
+$ ikigai-gonk client add laptop --rotate --port 1070 --config-home "$PWD/.config/ikigai"
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:gonk:client:…
-  enrolled     grant `laptop` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     under grant `laptop`, unchanged — the old certificate's … moved to this one
   ROTATED      the old certificate … was unenrolled — a client still holding the old bundle is refused from its next connection; give it this one
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:

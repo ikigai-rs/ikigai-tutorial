@@ -225,7 +225,7 @@ own** in an empty directory, with its two homes inside that directory:
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
 …
   socket  …/.ikigai/gonk.sock — owner only
   quic    off (--no-quic)
@@ -239,8 +239,11 @@ store, the socket, backups and the review queue. `--config-home` and `--data-hom
 so this gonk keeps everything in the directory you started it in. Started without them, it
 would open — or, if one is running, be refused by — the store a real gonk on your machine holds.
 (`--store` names the dataset's directory outright, and `--socket` the socket, when only one of
-them should move.) The paths are written with `$PWD` because gonk prints and hands on the
-paths it was given: a relative one would reach the banner's `mount` line as relative too.
+them should move.) The paths are written with `$PWD` so they mean the same directory in every
+command on the page. gonk makes a relative home absolute from the directory it started in (since
+gonk PR 106, ledger #918; before it, a relative home reached the banner's `mount` line
+relative), but it leaves a `--socket` as given, because a Unix socket's path must fit in 104
+bytes.
 Port 1070 keeps it off a real gonk's 1060; `--no-quic` and `--no-backup` keep it from opening a
 network door or writing archives this chapter does not need.
 

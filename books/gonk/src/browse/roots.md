@@ -45,7 +45,7 @@ root is the shape of a typo, not something to serve as empty.
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s)
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
   browse  urn:repo:{notes (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
 ```
@@ -203,7 +203,7 @@ local".
 A root is also the place an explanation is about: browse can derive one per file or
 directory from a model gonk mounts, archived once per content version, so the hash above is
 the key that says when one is stale. That needs a model, and is the next chapter,
-*Explain, with a mounted model* (coming).
+[Explain, with a mounted model](explain.md).
 
 In resource terms: the **atoms** are the files on disk, which git and you change and gonk
 does not; `tree`, `file`, `hash` and `state` are **views** of them; and the watcher is what

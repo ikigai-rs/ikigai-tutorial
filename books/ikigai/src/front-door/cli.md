@@ -113,7 +113,7 @@ it — a composite that had read the file inherits its thread. Writing to the fi
 same cut without your help; this is the resource for doing it on somebody else's behalf,
 which is what a filesystem watcher does when a file changes out from under the kernel.
 
-Now the part the first draft of this page got wrong. Try the same cut on a pure function:
+Now the same cut on a pure function, which declares no thread at all:
 
 <!-- transcript: continues -->
 
@@ -125,36 +125,44 @@ ikigai> sink urn:kernel:cut urn:iki:fn:toUpper
 cut urn:iki:fn:toUpper
 [uncacheable]
 ikigai> cache urn:iki:fn:toUpper in="a b"
-cached
+not cached
 ```
 
-Still cached. A cut invalidates the entries whose **declared threads** include the one
-you cut, and `toUpper` — a pure function of its arguments — declared none: same input,
-same answer, forever, and no thread to hang that on. The entry is valid until the kernel
-forgets it. Nothing was named wrongly here; there was simply nothing to invalidate, and
-`urn:kernel:cache` shows exactly that:
+Invalidated too. `toUpper` is a pure function of its arguments and declares no golden
+thread, but it does not have to: the kernel hangs every cacheable read from a thread named
+after the read's own target, so a cut of `urn:iki:fn:toUpper` reaches every answer resolved
+through that name, whatever its arguments. (Before core 0.1.73 it did not, and this block
+said `cached`: a cut reached only the threads an endpoint declared. [Golden threads in
+practice](../getting-started/golden-threads.md#two-holes-closed) tells that story, and why
+the change closed a hole.) `urn:kernel:cache` shows what the two cuts left behind:
 
 <!-- transcript: continues -->
 
 ```text
 ikigai> source urn:kernel:cache
 cache
-  entries  3 / 4096
+  entries  3 / 4096 (2 stale)
   size     338 B / 64.0 MB
-  urn:file:notes.txt  text/plain                     17 B  1 thread
-  urn:iki:fn:toUpper  application/json              318 B  0 threads
-  urn:iki:fn:toUpper  text/plain                      3 B  0 threads
+  urn:file:notes.txt  cut      text/plain                     17 B  1 thread    root
+  urn:iki:fn:toUpper  live     application/json              318 B  1 thread    root
+  urn:iki:fn:toUpper  cut      text/plain                      3 B  1 thread    root
 ```
 
 The first two lines are the cache's bound — 4096 entries and 64 MiB by default, the
 least-recently-used entry going when either is exceeded; [Golden threads in
-practice](../getting-started/golden-threads.md) is where a host picks a different one.
-Two entries for `toUpper` — its description, fetched once to route the arguments, and the
-answer — each with **0 threads**. The file's entry has **1 thread**, and it is still
-listed even though section 6 cut it and the probe said `not cached`: a cut bumps a
-generation and nothing more, and a stale entry is evicted lazily, the next time
-something *resolves* the name. `cache` only looks. Read the file again and the entry is
-replaced.
+practice](../getting-started/golden-threads.md) is where a host picks a different one. Then
+one row per entry: the name it was resolved from, its **state**, its type and size, how
+many threads it hangs from, and the resolution chain it was computed in (`root` here, the
+host's own space).
+
+Two rows say `cut`: the file and `toUpper`'s answer, each hanging from its one thread, the
+one named after it. They are still listed, and counted as `(2 stale)`, even though the probes
+said `not cached`: a cut bumps a generation and nothing more, and a stale entry is evicted
+lazily, the next time something *resolves* the name. `cache` only looks, so it marks a stale
+entry rather than evicting it. Read the file again and its entry is replaced. The `live` row
+is `toUpper`'s description, fetched once to route the arguments; it hangs from the thread
+of the host's bindings, not from the name, because a description changes when what is bound
+changes, so the cut left it alone.
 
 ## 7. Which threads have been cut
 
@@ -183,20 +191,21 @@ trace  urn:iki:fn:toUpper
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 
-urn:iki:fn:toUpper   toUpper · cached · main · 0ms   → 3b  A B
+urn:iki:fn:toUpper   toUpper · computed · main · 0ms   → 3b  A B
 ```
 
 One real resolution, recorded: who asked, under what authority, over what transport, and
-then the tree — each node saying whether it was computed or served (served, here: the
-cut in section 6 did not touch it), on which thread, how long it took. A composite shows its sub-resolutions as children. This is the same
+then the tree — each node saying whether it was computed or served (computed, here: the
+cut in section 6 invalidated the cached answer, so this read made a new one), on which
+thread, how long it took. A composite shows its sub-resolutions as children. This is the same
 `issue_traced` the book's tests call, rendered.
 
 ## What you have seen
 
 A system that can list what exists and what you may do, resolve names into other names'
 arguments, change a representation's format on request, serve an answer without
-recomputing it, invalidate precisely — what declared the thread, nothing else, and never by
-timeout — and show you its own execution. None of it needed a line of Rust. All of it is what [Resolution](../getting-started/resolution.md)
+recomputing it, invalidate precisely — what hangs from the cut thread, nothing else, and never
+by timeout — and show you its own execution. None of it needed a line of Rust. All of it is what [Resolution](../getting-started/resolution.md)
 describes, and Part I is where you build an endpoint that gets every one of these
 properties for free.
 
@@ -204,6 +213,7 @@ Every name printed on this page is checked, on every commit, against a written-d
 claim about the CLI (`books/ikigai/cli-vocabulary.txt`) — and that file is checked against
 a real binary by a test that has to be run by hand, because CI has no `ikigai`. Every
 transcript on this page is replayed against a real binary by another
-(`cargo test -p book-urns --test book_transcripts -- --ignored`), which is how the first
-draft's section 6 was caught claiming a cut had invalidated something it had not. If a
+(`cargo test -p book-urns --test book_transcripts -- --ignored`). Neither runs in CI, so
+both are only as current as the last time someone ran them: section 6 went on saying a cut
+left a pure function's answer `cached` long after core 0.1.73 changed it. If a
 command here fails on a newer CLI, those two are where to look first.
