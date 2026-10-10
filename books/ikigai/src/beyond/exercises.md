@@ -74,6 +74,14 @@ No socket is involved, which is the point of `DeadPeer`: every rule here is abou
 happens when the answer is *not* a representation, so the only peer you need is one that
 never gives one. Wrap the mount in a `Kernel::new(..)` and issue through it as Part I did.
 
+Part I issued under `Capability::root()`, and here that matters. `DeadPeer` overrides only
+`issue`, and since `ikigai-resolve` 0.1.40 a resolver that does not override `issue_as`
+refuses every capability but root with `Error::Denied` (the fail-closed default in [Who is
+asking](identity.md)). Under a narrowed capability, then, the prefer-mount over
+`dead(Error::Unavailable)` fails with `Denied` and never falls back, which looks exactly
+like the third outcome for the wrong reason. To run the exercise under a narrowed
+capability, give `DeadPeer` an `issue_as` that does what its `issue` does.
+
 The three outcomes are three different questions, and it helps to name them before you
 assert them. `Unavailable` on a prefer-mount is "the peer is not there, so this machine
 answers" — the counter proves *preferring* happened before *falling back*. `Unavailable` on

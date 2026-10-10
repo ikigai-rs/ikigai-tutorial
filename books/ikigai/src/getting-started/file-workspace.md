@@ -6,13 +6,33 @@ everything else.
 
 ## The jail
 
-The tree is **`$IKIGAI_FILES`, else `~/.ikigai/workspace`**, created if missing.
+The tree is **`$IKIGAI_FILES`, else `~/.ikigai/workspace`**. The CLI creates it if it is
+missing, and since `ikigai-cli` 0.1.41 it creates it private (`0700`) whatever your umask;
+a directory that already exists is left as you made it. The file endpoint never creates its
+own root: a root it cannot open serves nothing.
 
 It is deliberately a dedicated, ikigai-owned sandbox and deliberately *not* your home
 directory or your documents. Even the owner's root capability reaches only inside this
 tree, and the file endpoint's jail is a hard floor **regardless of capability** — a
 second, independent check, because one mechanism guarding your entire filesystem is one
 mechanism too few.
+
+"Hard floor" is a claim about the file actually opened, not about the path you typed, and
+it holds in that sense since `ikigai-fs` 0.1.8 (`ikigai-cli` 0.1.40). Before that the jail
+judged the path you named, and a symbolic link, or a swap between the check and the open,
+could put a different file behind it. Now:
+
+- The path is opened **one name at a time**, each from an open handle on the directory
+  before it, and the read or write happens on the handle that walk produced, so nothing can
+  be swapped in between the check and the use.
+- A **symbolic link anywhere in the path** is refused: the last name or a directory on the
+  way, pointing inside the tree or out of it.
+- A file has **one name**, its path as it is spelled on disk. `./notes.txt`, `a//b` and
+  `dir/` are refused, and the error names the spelling to use (`notes.txt`); so is
+  `NOTES.txt` for `notes.txt` on a volume that folds case, as macOS does by default. `..`
+  and absolute paths never leave the tree.
+- On **Windows** there is no confined backend yet, so the file endpoint refuses every
+  request rather than serve one unconfined.
 
 ## Two mechanisms, on purpose
 
