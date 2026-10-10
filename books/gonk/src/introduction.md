@@ -20,8 +20,8 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
 - **A ledger of your own.** File, comment, link, claim, close and ask `next` — in this page,
   in a kernel of your own, and against a gonk you start. Then the same ledger in a browser.
 - **An agent's ledger.** The ledger reached from another process over the socket, the way an
-  agent's tool calls reach it; and over MCP, once gonk projects its manifold that way
-  (tracked as ledger item 782; marked *coming* until it lands).
+  agent's tool calls reach it; and over MCP, where `ikigai mcp` projects the ledger's actions as
+  an agent's tools, through a door that names the agent.
 - **The repository browser.** A repository's tree and files as resources, and an explanation
   of each derived once per content version, from a model gonk mounts rather than links.
 - **Review without a reviewer.** One-off review, what a finding is, and the audit protocol
@@ -34,9 +34,6 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
   machine.
 - **Several machines.** The three doors, the grant each runs under, and a QUIC client.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
-
-One chapter is not written yet, *Over MCP*, because gonk does not project MCP yet; it is listed
-in the sidebar without a link, so the shape of the book is visible before all of it is.
 
 ## Three kinds of example, and how each is checked
 

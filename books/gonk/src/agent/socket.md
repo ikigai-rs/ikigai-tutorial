@@ -250,15 +250,14 @@ passkey's label, so it would read as Ada's. gonk's README states this residual r
 hiding it. An agent that must not be able to claim a person needs an identity of its own on the
 QUIC door, where the author rule runs ([The three doors](../machines/doors.md)).
 
-## Over MCP (coming)
+## Over MCP
 
-An agent framework that speaks MCP rather than ikigai would reach the same ledger through
-`ikigai mcp`, which projects a kernel's capability-scoped manifold as MCP tools: run it with
-gonk's socket mounted and a sealed grant like the one above, and the agent's tool list is the
-ledger's actions under that grant and nothing else. That is planned and not yet checked
-end to end (ledger item 782: tool names for `urn:iki:ledger:*`, idempotent append, and a
-per-agent identity so the log can name the agent), so the *Over MCP* chapter is listed as
-coming until it is.
+An agent framework that speaks MCP rather than ikigai reaches the same ledger through
+`ikigai mcp`, which projects a kernel's capability-scoped manifold as MCP tools. It could do
+that over this socket with a sealed grant like the one above, and the tool list would be the
+ledger's actions under that grant; but every request would still be the owner's, with the
+residual just shown. The [next chapter](mcp.md) gives the agent an identity of its own on the
+QUIC door instead, so the author rule runs and the log names the agent.
 
 ## What you have now
 

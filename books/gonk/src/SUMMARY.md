@@ -10,7 +10,7 @@
 # An agent's ledger
 
 - [Over the socket](agent/socket.md)
-- [Over MCP (coming)]()
+- [Over MCP](agent/mcp.md)
 
 # The repository browser
 
