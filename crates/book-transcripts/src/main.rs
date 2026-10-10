@@ -192,7 +192,8 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
                 }
                 continue;
             }
-            Kind::Run | Kind::Serve => {}
+            // A page is one session here already, so a continued block is just the next run.
+            Kind::Run | Kind::Serve | Kind::Continues => {}
         }
         if !block.orphans.is_empty() {
             failures.push(format!(

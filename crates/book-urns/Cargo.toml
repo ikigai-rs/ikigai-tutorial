@@ -27,6 +27,9 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 time-resource = { path = "../time-resource" }
 spreadsheet = { path = "../spreadsheet" }
 push = { path = "../push" }
+# The one parser for `<!-- transcript: … -->` (ledger #1075): the REPL replay reads a block's
+# declaration exactly as the console runner and the `cargo run` check do.
+book-transcripts = { path = "../book-transcripts" }
 # The page's kernel, so "may a cell name this" is asked of the space the page really
 # runs (`book_wasm::page_space()`), not of a copy of its composition kept here.
 book-wasm = { path = "../book-wasm" }
