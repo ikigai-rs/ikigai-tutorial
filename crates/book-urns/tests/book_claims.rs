@@ -91,10 +91,11 @@ const CLI_028: Source = Source::Crate {
     name: "ikigai-cli",
     version: "0.1.28",
 };
-/// The status chapter's manifest check: re-stamped from 0.1.28 on 2026-10-10 (ledger #1110).
-const CLI_045: Source = Source::Crate {
+/// The status chapter's manifest check: re-stamped from 0.1.28 to 0.1.45 on 2026-10-10 (ledger
+/// #1110), and to 0.1.46 the same day, with the book's cli pin (ledger #1125).
+const CLI_046: Source = Source::Crate {
     name: "ikigai-cli",
-    version: "0.1.45",
+    version: "0.1.46",
 };
 /// The CLI the configuration chapter is stamped at: re-stamped from 0.1.28 when the passkey
 /// relying party stopped being an environment variable (ledger #926).
@@ -215,9 +216,9 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/status.md",
-        stamp: "`ikigai-cli` 0.1.45 by manifest",
+        stamp: "`ikigai-cli` 0.1.46 by manifest",
         says: "the CLI does not embed wasmtime",
-        source: CLI_045,
+        source: CLI_046,
         file: "Cargo.toml",
         needle: "wasmtime",
         present: false,
@@ -316,6 +317,52 @@ const CLAIMS: &[Claim] = &[
         },
         file: "src/lib.rs",
         needle: "fn a_mount_carries_a_narrowed_capability_to_its_peer",
+        present: true,
+    },
+    Claim {
+        chapter: "getting-started/file-workspace.md",
+        stamp: "`exists` is the `Exists` verb (`ikigai-cli` 0.1.46 and later)",
+        says: "the REPL has an `exists` command",
+        source: Source::Crate {
+            name: "ikigai-engine",
+            version: "0.1.46",
+        },
+        file: "src/engine.rs",
+        needle: r#""exists" => output(self, self.run_exists(rest).await),"#,
+        present: true,
+    },
+    Claim {
+        chapter: "getting-started/file-workspace.md",
+        stamp: "it waits at most **two seconds** for stdin's first byte (`ikigai-cli` 0.1.46 and later)",
+        says: "a content-less sink under -c waits two seconds for stdin, then sends no content",
+        source: CLI_046,
+        file: "src/main.rs",
+        needle: "const STDIN_GRACE: std::time::Duration = std::time::Duration::from_secs(2);",
+        present: true,
+    },
+    Claim {
+        chapter: "getting-started/golden-threads.md",
+        stamp: "Since `ikigai-core` 0.1.95 that is whether the write returned",
+        says: "a Sink or Delete the kernel dispatched cuts its target even when it fails",
+        source: Source::Crate {
+            name: "ikigai-core",
+            version: "0.1.95",
+        },
+        file: "src/kernel.rs",
+        needle: "A WRITE THAT RAN AND FAILED STILL CUTS",
+        present: true,
+    },
+    Claim {
+        chapter: "beyond/identity.md",
+        stamp: "Since `ikigai-core` 0.1.93 the identity travels too",
+        says: "a door mints the principal into the capability as a scope",
+        source: Source::Crate {
+            name: "ikigai-core",
+            version: "0.1.93",
+        },
+        file: "src/capability.rs",
+        needle:
+            "pub fn with_principal(&self, principal: &str) -> Result<Capability, PrincipalError>",
         present: true,
     },
     Claim {

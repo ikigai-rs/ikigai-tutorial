@@ -96,8 +96,9 @@ Why record it at all? Because a refused authority is a security fact, and the on
 that could log it is the one that was refused. A log built on this seam sees every
 denial; without it a denial reaches no observer inside the kernel.
 
-In the REPL the same refusal is one line. `trace` renders the tree only when the
-resolution succeeded; on an error it prints where it stopped:
+In the REPL the same refusal draws as a tree. Since `ikigai-cli` 0.1.46 `trace` renders the
+nodes it collected even when the resolution failed (core 0.1.92 made a failed invocation a trace
+node, and the floor's refusal was already an event), then prints where it stopped:
 
 ```text
 ikigai> cap urn:cap:kernel:inspect
@@ -107,12 +108,18 @@ trace  urn:file:notes.txt
   client      ikigai repl  ·  capability: urn:cap:kernel:inspect
   transport   embedded · in-process
 
+urn:file:notes.txt   file · denied · main · — · cap ✓ · denied=urn:cap:fs:read:*
 urn:file:notes.txt   cap ✗ denied: denied: capability does not grant `urn:cap:fs:read:*` (declared by `urn:file:notes.txt`)
 ```
 
-The `cap ✗` is the authority dimension made visible; the message names the scope lacked
-and the resource that declared it. The denial *event* exists in the kernel either way —
-the REPL simply does not draw it.
+The first line is a denial *event*, the kind the listing above records, drawn: the endpoint that would have
+answered (`file`), the outcome (`denied`), no duration (`—`, it never ran), and the scope the
+floor found missing as the event's note. The last line is the error, and its `cap ✗` is the
+authority dimension made visible: the message names the scope lacked and the resource that
+declared it. Read the node's outcome, not its `cap ✓`: that mark means only that the hop ran
+under the session's capability unchanged, and at 0.1.46 the CLI draws it on a refused hop too.
+Before 0.1.46 the REPL printed the last line alone, and the event existed in the kernel
+undrawn.
 
 ## Before it runs: the dry run
 

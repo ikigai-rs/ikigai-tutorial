@@ -91,31 +91,56 @@ wrote 6 bytes to notes.txt
 ikigai> source urn:file:notes.txt
 a note
 [computed]
+ikigai> exists urn:file:notes.txt
+true
+[computed]
+ikigai> exists urn:file:nothing-here.txt
+false
+[computed]
 ```
 
-Do not quote the note. The rest of a `sink` line is the content **verbatim**, quote marks
-included, so a quoted note is stored with its quotes and read back with them. Quoting is for
-the words of a `source` line and for a named argument, so `content="…"` is the way to quote a
-body:
+`exists` is the `Exists` verb (`ikigai-cli` 0.1.46 and later): is the resource there, asked
+without reading it. Its arguments route the way `source`'s do, and it takes no pipe, because
+the question is about one resource.
+
+The rest of a `sink` line is the content **verbatim** (spaces, JSON, Turtle and quote marks
+kept), with one exception since `ikigai-cli` 0.1.46: content that is exactly **one quoted
+token** is unquoted, by the same rules as `content="…"`. So a quoted note is stored without its
+quotes; to store the quote marks, escape them. Only the double quote is a quote to the REPL,
+so single quotes are stored as typed, and so is anything that is not one quoted token:
 
 ```text
 ikigai> sink urn:file:notes.txt "a note"
-wrote 8 bytes to notes.txt
-[uncacheable]
-ikigai> source urn:file:notes.txt
-"a note"
-[computed]
-ikigai> sink urn:file:notes.txt content="a note"
 wrote 6 bytes to notes.txt
 [uncacheable]
 ikigai> source urn:file:notes.txt
 a note
 [computed]
+ikigai> sink urn:file:notes.txt "\"a note\""
+wrote 8 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+"a note"
+[computed]
+ikigai> sink urn:file:notes.txt 'a note'
+wrote 8 bytes to notes.txt
+[uncacheable]
+ikigai> sink urn:file:notes.txt "a" and "b"
+wrote 11 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+"a" and "b"
+[computed]
 ```
 
-There is no `exists` command. The REPL spells four of the five verbs (`source`, `sink`,
-`delete`, and `describe` for `Meta`); `Exists` is issued from code, as
-`Request::new(Verb::Exists, …)`.
+A `sink` with no content on its line takes its content from a pipe, so
+`printf 'a note' | ikigai --plain -c 'sink urn:file:notes.txt'` stores `a note`. Under `-c`
+it waits at most **two seconds** for stdin's first byte (`ikigai-cli` 0.1.46 and later): a
+stdin nobody writes to, such as an editor's or an agent's inherited pipe, then sends the sink
+with **no** `content` at all, never an empty one, and says so on stderr. The file endpoint
+requires `content`, so that sink is refused and the file keeps what it held. A stdin that is
+empty and closed (`< /dev/null`) is different: it answers at once, and its answer is an empty
+body.
 
 Then look in `~/.ikigai/workspace`: it is an ordinary directory. Nothing about the model
 requires the storage to be exotic; it requires the *access* to be named.

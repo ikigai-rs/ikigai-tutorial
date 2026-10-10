@@ -5,11 +5,11 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.93** and
-`ikigai-module` **0.3.2**, stamped on 2026-10-10 (core 0.1.95 is on crates.io as of that
-day; the book has not moved to it), and its shell examples are replayed against
-`ikigai-cli` **0.1.44**, the one release pinned in `books/ikigai/ikigai-cli.version`
-(0.1.45 is on crates.io as of 2026-10-10). A test (`crates/book-urns/tests/book_claims.rs`)
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.95** and
+`ikigai-module` **0.3.2**, stamped on 2026-10-10 (each its crate's newest release on
+crates.io that day), and its shell examples are replayed against `ikigai-cli` **0.1.46**,
+the one release pinned in `books/ikigai/ikigai-cli.version` (also the newest that day). A
+test (`crates/book-urns/tests/book_claims.rs`)
 holds those three numbers to the workspace's lock and that pin, and re-checks each stamped
 claim below against the published crate it names, so that when one of them stops being
 true the fix is a diff, not a discovery.
@@ -109,7 +109,7 @@ builds one, and a wasm module has no ambient filesystem or network to begin with
 sets a memory budget, and none can stop a computation it has started:
 the word "fuel" appears in none of them (checked across the organization's repositories
 on 2026-10-10; the probe re-checks `ikigai-module` 0.3.2 and
-`ikigai-cli` 0.1.45 by manifest). The nearest thing is a deadline on the *answer*, not on
+`ikigai-cli` 0.1.46 by manifest). The nearest thing is a deadline on the *answer*, not on
 the work: since `ikigai-xslt` 0.2.1 every transform is answered
 within a time budget, five seconds, with a typed `Timeout`, and the crate says plainly that
 the work past the deadline is **abandoned, never stopped** (checked at
@@ -119,9 +119,9 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.93. This chapter was last stamped at
-0.1.78, on 2026-09-27, and fifteen releases landed between the two in thirteen days. Each is
-one line here, and taught where a chapter teaches it:
+The chapters above build against `ikigai-core` 0.1.95. This chapter was stamped at 0.1.78
+on 2026-09-27, and seventeen releases landed between the two in thirteen days. Each is one
+line here, and taught where a chapter teaches it:
 
 - **0.1.79 — documents and tests only.** The check of what a wall keeps out answers only for
   what the graph shows in full, and a second query lists the paths it cannot answer for.
@@ -167,16 +167,27 @@ one line here, and taught where a chapter teaches it:
 - **0.1.92 — a failed invocation is a trace node.** An invocation that ran and failed
   records an event with the error's kind, so the trace and the cache agree about what a
   resolution touched. No chapter teaches it yet.
-- **0.1.93 — who a request is for, and the thread a failure hangs from.** A door puts the
-  principal it authenticated into the capability (`Capability::with_principal`, read back
-  with `Capability::principal`), and `Invocation::depends_on` lets an atom whose absence is
-  another name's state hang its `NotFound` from that name's thread. No chapter teaches either
-  yet.
-
-Two more are on crates.io as of 2026-10-10 and this book does not build against them yet:
-0.1.94 (a percent escape in a match or contract IRI is exactly two hex digits) and 0.1.95
-(those IRIs are parsed leniently and always emitted in one canonical spelling, and a write
-that ran and failed cuts its target).
+- **0.1.93 — who a request is for, and the thread a failure hangs from.** A principal is a
+  capability scope, `urn:cap:principal:<iri>`: a door mints the party it authenticated into
+  the capability (`Capability::with_principal`), and an endpoint reads it back with
+  `Capability::principal` ([Who is asking](../beyond/identity.md), "Identity is not
+  authority"). And `Invocation::depends_on` lets an atom whose absence is *another* name's
+  state hang its `NotFound` from that name's thread, so a composite that caught the
+  `NotFound` and cached a fallback is cut when that name changes; it rides only a `NotFound`
+  or `Unresolved`, and any other failure stays uncached. No chapter teaches `depends_on` yet:
+  the spreadsheet falls back only on an atom's own `NotFound`, which the atom's own thread
+  already covers ([A spreadsheet, V](../applied/spreadsheet-5.md), "fall back on an atom's own
+  `NotFound`").
+- **0.1.94 — a percent escape is two hex digits.** A match or contract IRI whose escape
+  carries a sign (`%+1`) is refused where it used to name a door; nothing else about the
+  parse moved.
+- **0.1.95 — lenient in, canonical out; a write that ran and failed cuts.** A match or
+  contract IRI is parsed in any spelling that names the same door (an upper-case digest, an
+  unnecessary escape), and every one core emits is the canonical spelling
+  (`canonical_match_iri`, `canonical_contract_iri`); every IRI this book prints was already
+  canonical, so none moved. And a `Sink` or `Delete` the kernel dispatched cuts its target
+  whether it returned success or an error; a request refused before it ran cuts nothing
+  ([Golden threads in practice](../getting-started/golden-threads.md)).
 
 The stamp before this one, 0.1.78, covered the six releases after 0.1.72: the two
 cache-soundness holes closed and a depth budget (0.1.73), one thread for "the binding set

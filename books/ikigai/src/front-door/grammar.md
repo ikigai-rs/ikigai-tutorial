@@ -127,9 +127,16 @@ source a | sink <iri>
 ```
 
 Leading `key=value` pairs name declared arguments; the rest of the line is the content,
-verbatim: quoting does not apply to it, so `sink <iri> "a note"` stores the quote marks
-too. To quote a body, name it: `content="a note"`. The pipe form stores the upstream value. A successful `sink` cuts the golden thread named
-after the target, which is how a write invalidates every cached read that declared that
+verbatim — spaces, JSON, Turtle and quote marks kept — with one exception (`ikigai-cli`
+0.1.46 and later): content that is exactly one quoted token is unquoted by the same rules as
+`content="…"`, so `sink <iri> "a note"` stores `a note`, and `sink <iri> "\"a note\""` is how to
+store the quote marks. Only `"` quotes; `'a note'` is stored as typed, and so is `"a" and "b"`,
+which is not one token. [The file workspace](../getting-started/file-workspace.md#try-it)
+replays each case. The pipe form stores the upstream value; with no pipe and no content on the
+line, a `sink` under `-c` reads stdin, waits at most two seconds for its first byte, and on
+silence sends no `content` at all rather than an empty one (it says so on stderr). A `sink` the
+kernel dispatched cuts the golden thread named after the target, whether it succeeded or
+(since core 0.1.95) failed, which is how a write invalidates every cached read that declared that
 thread — the file endpoint's reads do; a pure function's do not, having nothing to hang
 one on.
 
@@ -158,6 +165,18 @@ verbs: Source, Meta
 outputs: text/plain;charset=utf-8
 [computed]</pre>
 </div>
+
+## Asking: `exists`
+
+```text
+exists <iri> [key=value …]
+```
+
+The `Exists` verb (`ikigai-cli` 0.1.46 and later): is the resource there, asked without
+reading it. The answer is the endpoint's, by convention `true` or `false`. Arguments route as
+they do for `source`, and a pipe is refused: the question is about one resource. [The file
+workspace](../getting-started/file-workspace.md#try-it) asks it of a file it just wrote and
+of one that is not there.
 
 ## Probing the cache: `cache`
 

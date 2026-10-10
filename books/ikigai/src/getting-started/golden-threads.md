@@ -15,8 +15,12 @@ happen without the endpoint's help:
 - **Derive.** A composite — anything that resolves another resource from inside its own
   invocation, `inv.source(..)` — inherits the threads of everything it resolved. Its
   cache entry hangs from the union.
-- **Cut.** After a successful `Sink` or `Delete`, the kernel cuts the thread named after
-  the write's canonical target. A cut is cheap and blind: it bumps the thread's
+- **Cut.** After a `Sink` or `Delete` it dispatched, the kernel cuts the thread named after
+  the write's canonical target. Since `ikigai-core` 0.1.95 that is whether the write returned
+  success or an error, because an endpoint can change state and then fail (record a run,
+  then report the run's error), and a cache that believed nothing changed would answer for
+  the old state; a write refused *before* it ran (a capability the caller lacks, a name
+  nothing binds) changed nothing and cuts nothing. A cut is cheap and blind: it bumps the thread's
   generation and nothing else. `Kernel::cut` and the REPL's `sink urn:kernel:cut` do the
   same by hand, which is what a filesystem watcher does when a file changes out from
   under the kernel.

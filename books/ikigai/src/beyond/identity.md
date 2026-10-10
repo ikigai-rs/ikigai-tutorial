@@ -176,12 +176,20 @@ provenance, read off the connection and refused from the query string, so a writ
 arriving from a browser carries who made it and nothing the caller typed can forge it.
 A ledger records that stamp as the author.
 
-What core does *not* do yet, stated plainly: the request carries no principal. A
-capability travels with every invocation; an identity stops at the door that
-established it, and an endpoint that wants to know who asked has to be handed the fact
-by its host. That is a known gap with a design in progress — an optional principal IRI
-beside the capability, readable, never itself authority — and until it lands the
-attribution the ledger records is the transport's doing, not the kernel's.
+Since `ikigai-core` 0.1.93 the identity travels too, and it travels *as a scope*. A door
+that authenticated a party mints `urn:cap:principal:<iri>` into the capability the request
+runs under (`Capability::with_principal`), and an endpoint that needs to know who it is
+serving reads it back with `inv.capability.principal()`, or asks `acts_as(iri)` for a
+gate scoped to an author. Being a scope is what made it cheap: the cache already keys on
+the capability, so two principals' answers are two cache entries; the wire already carries
+the scope set, so the name crosses a mount; the trace already records the capability. And
+it widens nothing. A capability names at most one principal (one holding two names
+neither), narrowing never adds or changes it and `attenuate` may shed it, `clamp` keeps
+the name the *channel* authenticated rather than one the peer carried, and root names
+nobody. The doors in `ikigai-cli` 0.1.46 mint it: the HTTP transport on every verb, reads
+included, and the QUIC door from the client certificate, with the stamped provenance on a
+write unchanged beside it. Before 0.1.93 an identity stopped at the door that established
+it, and an endpoint that wanted to know who asked had to be handed the fact by its host.
 
 ## Authority only shrinks
 

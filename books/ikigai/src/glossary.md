@@ -63,8 +63,9 @@ another kernel and reports nothing. [Scope and alias](getting-started/scope-and-
 **Principal.** *Who* asked — a fact a door establishes (a certificate, a passkey, a
 socket's peer credential) and stamps on a write as provenance. Not the capability, which
 is *what may happen*: an anonymous local caller has authority and no identity, a
-signed-in caller with a narrow grant has identity and little authority. Core carries no
-principal on the request yet; the door does the stamping. [Who is
+signed-in caller with a narrow grant has identity and little authority. Since core 0.1.93
+the door mints it into the request's capability as a scope, `urn:cap:principal:<iri>`,
+which an endpoint reads with `principal()` and which widens nothing. [Who is
 asking](beyond/identity.md).
 
 **Catalog.** `urn:kernel:catalog`: every bound endpoint's description, as one RDF graph,

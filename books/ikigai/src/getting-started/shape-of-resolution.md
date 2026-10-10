@@ -225,7 +225,7 @@ walls and doors over families of names, which is the arrangement above. It does 
 for three kinds of node on a path *below* a wall: an opaque space (a remote peer, or an
 overlay written before the kernel could ask), a rewriting door, and a template door or
 family whose codes are not a prefix. A path through one of those is *unknown*, never *no*,
-and a second query — which the kernel's formal document will carry from ikigai-core
+and a second query — which the kernel's formal document has carried since ikigai-core
 0.1.79 — reports exactly those nodes so that "unknown" is a list rather than a shrug. The
 rewriting door is the one to take seriously: a code from *outside* the family walks past
 the wall, is rewritten *into* the family by an alias behind it, and opens the private
