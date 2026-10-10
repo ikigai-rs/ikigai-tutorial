@@ -126,8 +126,9 @@ sink <iri> [key=value …] <content>
 source a | sink <iri>
 ```
 
-Leading `key=value` pairs name declared arguments; the rest of the line is the content.
-The pipe form stores the upstream value. A successful `sink` cuts the golden thread named
+Leading `key=value` pairs name declared arguments; the rest of the line is the content,
+verbatim: quoting does not apply to it, so `sink <iri> "a note"` stores the quote marks
+too. To quote a body, name it: `content="a note"`. The pipe form stores the upstream value. A successful `sink` cuts the golden thread named
 after the target, which is how a write invalidates every cached read that declared that
 thread — the file endpoint's reads do; a pure function's do not, having nothing to hang
 one on.
