@@ -5,23 +5,25 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.78** and
-`ikigai-module` **0.3.1**, stamped on 2026-09-27, and its shell examples were last probed
-against `ikigai-cli` **0.1.26** on 2026-09-26 (0.1.28 is on crates.io as of 2026-09-27; the
-probe runs whatever binary is installed); a test (`crates/book-urns/tests/book_claims.rs`)
-can re-check each stamped claim against the published crate it names, so that when one of
-them stops being true the fix is a diff, not a discovery.
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.93** and
+`ikigai-module` **0.3.2**, stamped on 2026-10-10 (core 0.1.95 is on crates.io as of that
+day; the book has not moved to it), and its shell examples are replayed against
+`ikigai-cli` **0.1.44**, the one release pinned in `books/ikigai/ikigai-cli.version`
+(0.1.45 is on crates.io as of 2026-10-10). A test (`crates/book-urns/tests/book_claims.rs`)
+holds those three numbers to the workspace's lock and that pin, and re-checks each stamped
+claim below against the published crate it names, so that when one of them stops being
+true the fix is a diff, not a discovery.
 
 ## Phase 1
 
-`ikigai-module` 0.3.1's own first line still calls it **"the dynamically-loadable module
+`ikigai-module` 0.3.2's own first line still calls it **"the dynamically-loadable module
 format (Phase 1: in-process proof)"**. That line undersells the crate — it has grown a
 socket transport, at 0.2.0 capability enforcement across the boundary, and at 0.3.0 typed
 errors, golden threads and endpoint cards crossing the wire, since somebody wrote it —
 which is worth knowing as a habit: a crate's one-line self-description is the
 thing least likely to be updated when the crate changes.
 
-What is actually there, at `ikigai-module` 0.3.1 (0.3.1 over 0.3.0 is a constructor form, no new surface):
+What is actually there, at `ikigai-module` 0.3.2 (0.3.2 over 0.3.1 records a failed callback, below; 0.3.1 over 0.3.0 was a constructor form, no new surface):
 
 | piece | state |
 |---|---|
@@ -30,10 +32,10 @@ What is actually there, at `ikigai-module` 0.3.1 (0.3.1 over 0.3.0 is a construc
 | an out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
 | a module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`); since 0.3.0 the module's **cards** cross at `connect` (`ModuleCall::Cards`), so the host enforces against the module's own description and the manifold through a `ModuleSpace` lists the module's actions rather than one endpoint named `module` |
 | the error type across the wire | **since 0.3.0** — `ModuleReply::ErrorTyped` and `ModuleCall::HostError`: a module-side denial arrives at the host as a `Denied`, a host resource's `NotFound` arrives in the module as a `NotFound`; before that the wire flattened both to a string |
-| golden threads across the wire | **since 0.3.0** — `ModuleReply::ResolvedThreaded` carries a result's declared threads; before that a module result through the loopback or wasm session was cached forever with nothing to cut it, and a `Sink` through the mount left it stale |
+| golden threads across the wire | **since 0.3.0** — `ModuleReply::ResolvedThreaded` carries a result's declared threads; before that a module result through the loopback or wasm session was cached forever with nothing to cut it, and a `Sink` through the mount left it stale. Since 0.3.2 a callback that **failed** is a dependency on the wasm path too, by core's rule for a failed sub-request (`record_failure`): a `NotFound` or `Unresolved` hangs the module's answer from the missing name, any other failure makes it uncacheable; the native transports (in-process, loopback, Unix socket) already had that, through the host's own issuer |
 | an embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
 | isolation | **not there** — a process boundary is not a resource budget |
-| hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-09-26) |
+| hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-10-10) |
 
 ## Read that table the right way
 
@@ -73,7 +75,7 @@ than against a floor the host wrote for it. The test that keeps this sentence tr
 ```
 
 **Do not assume you can ship a module to a running host.** Nothing loads one at runtime
-outside the browser demo (as of 2026-09-26).
+outside the browser demo (as of 2026-10-10).
 
 **Do not assume the ABI is stable.** Phase 2 exists precisely to change how these messages
 travel — 0.2.0 changed `ModuleSpace::new`'s signature once, and 0.3.0 added variants to
@@ -103,44 +105,86 @@ module as WebAssembly under an embedded runtime, so a host can hand it a memory 
 execution budget and a closed syscall surface as well as a capability. Part of that already
 exists for an unrelated reason — the browser demo runs modules as wasm, `ikigai-xslt-module`
 builds one, and a wasm module has no ambient filesystem or network to begin with. What does
-*not* exist is any of the native half: no host in the ecosystem embeds wasmtime, and no
-crate sets an execution or memory budget — the word "fuel" appears in none of them
-(checked across the organization's repositories on 2026-09-26; the probe re-checks
-`ikigai-module` 0.3.1 and `ikigai-cli` 0.1.28 by manifest). Treat this section as the
-direction and the table above as the state, and do not plan a deployment on the
-difference.
+*not* exist is any of the native half: no host in the ecosystem embeds wasmtime, no crate
+sets a memory budget, and none can stop a computation it has started:
+the word "fuel" appears in none of them (checked across the organization's repositories
+on 2026-10-10; the probe re-checks `ikigai-module` 0.3.2 and
+`ikigai-cli` 0.1.45 by manifest). The nearest thing is a deadline on the *answer*, not on
+the work: since `ikigai-xslt` 0.2.1 every transform is answered
+within a time budget, five seconds, with a typed `Timeout`, and the crate says plainly that
+the work past the deadline is **abandoned, never stopped** (checked at
+`ikigai-xslt` 0.3.0) — the caller is released and the thread keeps running. Treat this
+section as the direction and the table above as the state, and do not plan a deployment on
+the difference.
 
-## The kernel since this book's last bump
+## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.78. Between the previous edition's
-0.1.72 and it, six releases landed in nine days, each one sentence here and taught where a
-chapter teaches it:
+The chapters above build against `ikigai-core` 0.1.93. This chapter was last stamped at
+0.1.78, on 2026-09-27, and fifteen releases landed between the two in thirteen days. Each is
+one line here, and taught where a chapter teaches it:
 
-- **0.1.73 — the two cache-soundness holes closed, and a depth budget.** A cacheable read
-  hangs from its own name whether or not it declares it, and a failed sub-request is a
-  dependency — a thread on the missing name, or no caching at all for a result built on a
-  refusal ([Golden threads in practice](../getting-started/golden-threads.md)); and a
-  sub-request has a nesting budget, `Kernel::with_max_depth`, default 64, refused as
-  `DepthExceeded` rather than overflowed.
-<!-- urn-gate: illustration urn:kernel:bindings — a golden thread's name, not a resource;
-     see "Golden threads in practice". -->
-- **0.1.74 — `urn:kernel:bindings`.** One thread meaning "the binding set changed", which
-  every face derived from the bindings hangs from and the party that rebinds a running
-  kernel cuts ([Golden threads in practice](../getting-started/golden-threads.md), "Not
-  yet"); and the capability floor memoizes an endpoint's description instead of rebuilding
-  it per request.
-- **0.1.75 — the first temporal corridor.** The chain reaches selection, the cache probe
-  and the pipe, and `Scope::with_named_at` carries a clock derived from the corridor that
-  pins time ([Scope and alias](../getting-started/scope-and-alias.md), "As of").
-- **0.1.76 — `Limit`.** A door onto a wall: a family of names carved out of a chain by
-  structure, `Unresolved` rather than `Denied`, and subtracted from the catalog ([Scope
-  and alias](../getting-started/scope-and-alias.md), "Not yet").
-- **0.1.77 — lossless by declaration.** `.lossy()` on a transreptor's description, and a
-  planner that refuses a lossy hop without `lossy=allow`
-  ([Transreption](../building/transreption.md)).
-- **0.1.78 — the arrangement is a resource.** Spaces can carry a name, a hit reports which
-  space answered, and `urn:kernel:topology` renders the chain you are standing in as
-  Turtle, every node an IRI. No chapter teaches it yet.
+- **0.1.79 — documents and tests only.** The check of what a wall keeps out answers only for
+  what the graph shows in full, and a second query lists the paths it cannot answer for.
+- **0.1.80 — `Conflict`.** A typed refusal for a request the resource's *current state* says
+  no to, the 409 of the taxonomy, found by this book's game: a move to a taken square
+  ([Tic-tac-toe, VI](../applied/tic-tac-toe-6.md)). The spreadsheet's market and its
+  read-only past refuse with it ([A spreadsheet, V](../applied/spreadsheet-5.md),
+  [VI](../applied/spreadsheet-6.md)).
+- **0.1.81 — levels and sealed names.** `Level`, the resolved scope a hit reports, and a
+  host's seals on names, checked when a space is built ([Tic-tac-toe,
+  VII](../applied/tic-tac-toe-7.md), "What a declaration may and may not do").
+- **0.1.82 — corridors stack, and a read says why it was not cached.** `Scope::stack`
+  ([A spreadsheet, VI](../applied/spreadsheet-6.md)); every uncacheable read names its
+  reason ([Tracing a resolution](../beyond/tracing.md)); a fallback over a composite's
+  `NotFound` is cut when the atom changes, and the cache readout marks each row live, cut or
+  expired ([A spreadsheet, III](../applied/spreadsheet-3.md)); and cut listeners.
+- **0.1.83 — a space built from its declaration.** `Registry`, `build` and
+  `Topology::from_turtle` (the `declare` feature), the inverse of `urn:kernel:topology`, with
+  every door naming the endpoint that answers it ([Tic-tac-toe,
+  VII](../applied/tic-tac-toe-7.md)).
+- **0.1.84 — declarations are bounded.** A declaration past a depth, node or text bound is
+  refused rather than overflowing the stack; and `Kernel::root_topology`, the root's own
+  arrangement, which Part VII's test compares the coded game with the declared one through.
+- **0.1.85 — the audit release.** The capability floor covers every verb an endpoint can be
+  asked for, not only the ones it declares; nothing but the kernel answers inside the
+  kernel's own namespace; and a seal names a level by the object registered, not by its name.
+- **0.1.86 — exclusions are sticky.** A deny-shaped scope survives `attenuate` and `clamp`:
+  grants only shrink, exclusions only accumulate.
+- **0.1.87 — the "why" tools.** `urn:kernel:explain`, a dry run of resolution ([Tracing a
+  resolution](../beyond/tracing.md)); `urn:kernel:dependents`, what a cut would recompute
+  ([Golden threads in practice](../getting-started/golden-threads.md)); and
+  `Description::unsatisfied_scopes`, the floor's own predicate ([Who is
+  asking](../beyond/identity.md)).
+- **0.1.88 and 0.1.90 — vocabulary only.** Natural-language drafting terms move into `ik:`,
+  and `ikigai_vocab::space()` names itself.
+- **0.1.89 — a space's name survives only what keeps its doors.** Binding onto a named space
+  drops its name, and a module space that needs no configuration names itself. This book
+  binds every such space behind doors of its own, so no page printed differently.
+- **0.1.91 — an action match has its own IRI, and a contract is content-addressed.** A match
+  is named by its verb and door, and the contract behind it by a digest of what it declares,
+  which every `Meta` and catalog graph in this book now prints ([What resolution buys
+  you](../getting-started/payoff.md)).
+- **0.1.92 — a failed invocation is a trace node.** An invocation that ran and failed
+  records an event with the error's kind, so the trace and the cache agree about what a
+  resolution touched. No chapter teaches it yet.
+- **0.1.93 — who a request is for, and the thread a failure hangs from.** A door puts the
+  principal it authenticated into the capability (`Capability::with_principal`, read back
+  with `Capability::principal`), and `Invocation::depends_on` lets an atom whose absence is
+  another name's state hang its `NotFound` from that name's thread. No chapter teaches either
+  yet.
+
+Two more are on crates.io as of 2026-10-10 and this book does not build against them yet:
+0.1.94 (a percent escape in a match or contract IRI is exactly two hex digits) and 0.1.95
+(those IRIs are parsed leniently and always emitted in one canonical spelling, and a write
+that ran and failed cuts its target).
+
+The stamp before this one, 0.1.78, covered the six releases after 0.1.72: the two
+cache-soundness holes closed and a depth budget (0.1.73), one thread for "the binding set
+changed" (0.1.74; both in [Golden threads in
+practice](../getting-started/golden-threads.md)), the first temporal corridor (0.1.75) and
+`Limit` (0.1.76; both in [Scope and alias](../getting-started/scope-and-alias.md)), lossless
+by declaration ([Transreption](../building/transreption.md), 0.1.77), and the arrangement as
+a resource, `urn:kernel:topology` ([Tic-tac-toe, VII](../applied/tic-tac-toe-7.md), 0.1.78).
 
 ## Exercises
 

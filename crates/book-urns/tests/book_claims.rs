@@ -81,13 +81,20 @@ struct Claim {
     present: bool,
 }
 
+/// The status chapter's stamp: re-stamped from 0.3.1 on 2026-10-10 (ledger #1110).
 const MODULE: Source = Source::Crate {
     name: "ikigai-module",
-    version: "0.3.1",
+    version: "0.3.2",
 };
-const CLI: Source = Source::Crate {
+/// The machine-client chapter's stamp, where `ikigai mcp` with no grant warns.
+const CLI_028: Source = Source::Crate {
     name: "ikigai-cli",
     version: "0.1.28",
+};
+/// The status chapter's manifest check: re-stamped from 0.1.28 on 2026-10-10 (ledger #1110).
+const CLI_045: Source = Source::Crate {
+    name: "ikigai-cli",
+    version: "0.1.45",
 };
 /// The CLI the configuration chapter is stamped at: re-stamped from 0.1.28 when the passkey
 /// relying party stopped being an environment variable (ledger #926).
@@ -99,20 +106,26 @@ const CLI_043: Source = Source::Crate {
     name: "ikigai-cli",
     version: "0.1.43",
 };
+/// The status chapter's time-budget sentence (2026-10-10, ledger #1110).
+const XSLT_030: Source = Source::Crate {
+    name: "ikigai-xslt",
+    version: "0.3.0",
+};
 const LISP: Source = Source::Crate {
     name: "ikigai-lisp",
     version: "0.2.0",
 };
+/// The browser demo's `main` on 2026-10-10 (ledger #1110); 4ae3903 before that.
 const WEB_DEMO: Source = Source::GitHub {
     repo: "ikigai-web-demo",
-    sha: "4ae390362cb6180df9403788d8147d95dceef238",
+    sha: "24a13fb445b26dd877224530919e84726063cb35",
 };
 
 /// The claims. The stamp is what the prose must say; the rest is what the probe checks.
 const CLAIMS: &[Claim] = &[
     Claim {
         chapter: "modules/status.md",
-        stamp: "ikigai-module` 0.3.1's own first line still calls it",
+        stamp: "ikigai-module` 0.3.2's own first line still calls it",
         says: "the crate's first line still says Phase 1: in-process proof",
         source: MODULE,
         file: "src/lib.rs",
@@ -184,6 +197,15 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/status.md",
+        stamp: "a callback that **failed** is a dependency on the wasm path too",
+        says: "a failed out-of-band callback is recorded by core's rule (0.3.2)",
+        source: MODULE,
+        file: "src/lib.rs",
+        needle: "fn record_failure(&mut self, requested: &Iri, error: &Error)",
+        present: true,
+    },
+    Claim {
+        chapter: "modules/status.md",
         stamp: "`ModuleCall::Cards`",
         says: "the module's cards cross at connect (0.3.0)",
         source: MODULE,
@@ -193,16 +215,16 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "modules/status.md",
-        stamp: "`ikigai-cli` 0.1.28 by manifest",
+        stamp: "`ikigai-cli` 0.1.45 by manifest",
         says: "the CLI does not embed wasmtime",
-        source: CLI,
+        source: CLI_045,
         file: "Cargo.toml",
         needle: "wasmtime",
         present: false,
     },
     Claim {
         chapter: "modules/status.md",
-        stamp: "`WasmModuleSpace`, as of 2026-09-26",
+        stamp: "`WasmModuleSpace`, as of 2026-10-10",
         says: "the browser demo loads modules",
         source: WEB_DEMO,
         file: "src/lib.rs",
@@ -210,10 +232,37 @@ const CLAIMS: &[Claim] = &[
         present: true,
     },
     Claim {
+        chapter: "modules/status.md",
+        stamp: "`ikigai-xslt` 0.3.0) — the caller is released",
+        says: "ikigai-xslt answers within a time budget and abandons the work past it",
+        source: XSLT_030,
+        file: "src/limits.rs",
+        needle: "The work is **abandoned, not cancelled**", // spelling: quote (ikigai-xslt's own words)
+        present: true,
+    },
+    Claim {
+        chapter: "modules/status.md",
+        stamp: "since `ikigai-xslt` 0.2.1 every transform is",
+        says: "the time budget arrived in ikigai-xslt 0.2.1",
+        source: XSLT_030,
+        file: "src/lib.rs",
+        needle: "Since 0.2.1 it is answered within [`limits::DEFAULT_TIME_BUDGET`]",
+        present: true,
+    },
+    Claim {
+        chapter: "modules/status.md",
+        stamp: "within a time budget, five seconds",
+        says: "ikigai-xslt's default time budget is five seconds",
+        source: XSLT_030,
+        file: "src/limits.rs",
+        needle: "pub const DEFAULT_TIME_BUDGET: Duration = Duration::from_secs(5);",
+        present: true,
+    },
+    Claim {
         chapter: "beyond/agent.md",
         stamp: "runs as root, loudly** (`ikigai-cli` 0.1.28)",
         says: "ikigai mcp with no grant prints that it runs unrestricted",
-        source: CLI,
+        source: CLI_028,
         file: "src/main.rs",
         needle: "running UNRESTRICTED (root)",
         present: true,
@@ -370,6 +419,55 @@ fn every_stamped_claim_is_still_in_the_prose() {
     assert!(
         CLAIMS.len() >= 10,
         "the table is not reading its own claims"
+    );
+}
+
+/// The version the workspace's `Cargo.lock` resolves for `name`. The book is one workspace
+/// with one lock, so each ikigai crate appears there at exactly one version.
+fn locked_version(name: &str) -> String {
+    let lock = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../Cargo.lock");
+    let text = std::fs::read_to_string(&lock)
+        .unwrap_or_else(|e| panic!("reading {}: {e}", lock.display()));
+    let header = format!("name = \"{name}\"\nversion = \"");
+    let versions: Vec<&str> = text
+        .match_indices(&header)
+        .map(|(at, _)| {
+            let rest = &text[at + header.len()..];
+            &rest[..rest.find('"').expect("a closing quote")]
+        })
+        .collect();
+    assert_eq!(
+        versions.len(),
+        1,
+        "{name} should be locked at exactly one version, found {versions:?}"
+    );
+    versions[0].to_string()
+}
+
+/// The status chapter's opening names the versions the book builds against, and those are
+/// facts about THIS workspace, so they are checked against it rather than stamped: it said
+/// core 0.1.78 for two weeks after the lock had moved to 0.1.93, and nothing noticed
+/// (ledger #1110). Moving a pin without moving the sentence now fails here.
+#[test]
+fn the_status_chapter_names_the_versions_the_book_builds_against() {
+    let text = std::fs::read_to_string(book_src().join("modules/status.md"))
+        .expect("reading modules/status.md");
+    let cli_pin =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../books/ikigai/ikigai-cli.version");
+    let cli = std::fs::read_to_string(&cli_pin)
+        .unwrap_or_else(|e| panic!("reading {}: {e}", cli_pin.display()));
+    let expected = [
+        format!("`ikigai-core` **{}**", locked_version("ikigai-core")),
+        format!("`ikigai-module` **{}**", locked_version("ikigai-module")),
+        format!("`ikigai-cli` **{}**", cli.trim()),
+    ];
+    let missing: Vec<&String> = expected
+        .iter()
+        .filter(|e| !text.contains(e.as_str()))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "modules/status.md does not say what the book builds against: missing {missing:?}"
     );
 }
 
