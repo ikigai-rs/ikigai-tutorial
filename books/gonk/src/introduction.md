@@ -64,10 +64,13 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are the published crates, and the book's own crates use the same
-versions: `ikigai-ledger` 0.5.0 (0.4.0 added the keyed append [part 5](spec/ledger.md) syncs
-with and the [bridges](bridges/roborev.md) file through), `ikigai-store` 0.2.8 and
-`ikigai-browse` 0.18.0.
+The modules it links are published crates: `ikigai-ledger` 0.5.0 (0.4.0 added the keyed
+append [part 5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through),
+`ikigai-store` 0.2.8 and `ikigai-browse` 0.18.0. The book's own crates, the ones its Rust
+listings and in-page cells run, take the newest releases of the same modules: `ikigai-ledger`
+0.6.2, `ikigai-store` 0.2.10 and `ikigai-browse` 0.18.1. Nothing a page shows differs between
+the two: a `console` block is checked against the pinned gonk, and a listing or a cell against
+the book's crates.
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.
 

@@ -31,8 +31,9 @@ hello-camel = { path = "../hello-camel" }
 # `crates/two-hosts`, and that is the file you do NOT edit.
 two-hosts = { path = "../two-hosts" }
 # The `Resolver` trait a connected peer implements, and the `async_trait` its methods
-# are declared with — both needed to hand-write a peer that is always down.
-ikigai-resolve = "0.1.18"
+# are declared with — both needed to hand-write a peer that is always down. 0.1.44 here and for
+# `ikigai-ipc` below, the cli crates' published head, with `crates/two-hosts`.
+ikigai-resolve = "0.1.44"
 # The concrete resolver `two_hosts::socket::connect` returns, so a helper can name it.
-ikigai-ipc = "0.1.18"
+ikigai-ipc = "0.1.44"
 async-trait = "0.1"

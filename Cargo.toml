@@ -27,7 +27,14 @@ lto = true
 # Published crates, deliberately — NOT path refs to sibling checkouts. A reader who
 # clones only this repo must be able to `cargo run` immediately; path refs would
 # require them to have the whole ecosystem laid out beside it.
-# 0.1.91 is the floor because the book prints what it changed (ledger #948, #1034): an action's
+# Every ikigai pin in this workspace sits at its crate's newest published release as of
+# 2026-10-10, so the book teaches what a reader's fresh `cargo add` resolves. Where a pin moved for
+# that alone its comment says so, and the reason that set the previous floor is kept beneath it.
+# 0.1.93 is the pin because it is core's published head (0.1.92: a failed invocation is a trace
+# node; 0.1.93: a principal is a capability scope, and `Invocation::depends_on` names the thread a
+# failure hangs from), and the cli crates at 0.1.44 (engine, resolve, ipc) require 0.1.91 at
+# least. No page printed differently at it: every cell, every `cargo run` output and every
+# transcript replayed unchanged. Before that, 0.1.91 was the floor because the book prints what it changed (ledger #948, #1034): an action's
 # match has its own IRI, `urn:ikigai:match:{verb}:{pattern}`, one per door and verb, and the
 # contract behind it is CONTENT-ADDRESSED, `urn:ikigai:contract:{id}:{verb}:b3:{hex}`, joined to
 # the match by `ik:contract`. The old per-id `urn:ikigai:endpoint:{id}:action:{verb}` is gone, so
@@ -55,35 +62,49 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.91"
+ikigai-core = "0.1.93"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
-# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.91 is the floor
-# because it renders each action at its content-addressed contract IRI (above), with the
+# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.93 is the pin
+# because it is the release paired with core 0.1.93 (it requires core 0.1.91 or later). Before
+# that, 0.1.91 was the floor because it renders each action at its content-addressed contract IRI (above), with the
 # action's inputs under that contract, and its vocabulary defines `ik:contract` and documents
 # `ik:ActionMatch`'s new subject; it requires core 0.1.91. Before that the pin was 0.1.66, the release core 0.1.66
 # paired with, while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-vocab = "0.1.91"
+ikigai-vocab = "0.1.93"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
-# ceiling too: "0.3.1" admits nothing from 0.4. 0.3.1 is the floor because part VII uses what
-# it added: `ComposeOver::named`, so each of the game's views carries a name of its own, which
-# is what a declared door binds it by (an unnamed one is `composeOver`, like every other).
-ikigai-fn = "0.3.1"
+# ceiling too: "0.3.1" admitted nothing from 0.4, and the book sat behind that ceiling until
+# 2026-10-10. 0.3.1 became the floor because part VII uses what it added: `ComposeOver::named`,
+# so each of the game's views carries a name of its own, which is what a declared door binds it
+# by (an unnamed one is `composeOver`, like every other). 0.4.1 is the pin because it is the
+# published head: 0.4.0's one change is that `space()` names itself `urn:iki:space:fn` (ledger
+# #987), and the book binds compose behind doors of its own, and binding a door drops a space's
+# name (core 0.1.89), so no answered-by or topology a page prints moved; 0.4.1 exports
+# `MARKER_LETTERS` and `escape_markers`, which nothing here uses. A 0.x caret: also a ceiling
+# (<0.5.0).
+ikigai-fn = "0.4.1"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
 # transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the
 # floor because it added `arrangement_space()`, which mounts the arrangement surface alone, and
 # the `full` feature, off here: nothing in the tutorial mounts the query or graph compilers or
 # the code-graph codec, so the page compiles neither `sha2` nor `oxrdfio` (ledger #649). 0.1.4
-# added the arrangement surface at all. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-sexpr = { version = "0.1.5", default-features = false }
+# added the arrangement surface at all. 0.2.0 is the pin because it is the published head, past
+# the old pin's 0.x ceiling (<0.2.0): its one change is that both its spaces name themselves
+# (`urn:iki:space:sexpr`, `…:sexpr:arrangement`, ledger #987), and the book calls its functions
+# rather than mounting its spaces, so nothing a page prints moved. A 0.x caret: also a ceiling
+# (<0.3.0).
+ikigai-sexpr = { version = "0.2.0", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Only
-# part VII's picture test uses it (a dev-dependency), so the page pays nothing for it. 0.1.0 is
-# the first release; a 0.x caret, so also a ceiling (<0.2.0).
-ikigai-diagram = "0.1.0"
-# 0.3.1 is what the book's status chapter stamps its claims at (`book_claims` re-checks them
-# against that published crate), so it is the pin; 0.3.1 over 0.3.0 is a constructor form,
-# no new surface. 0.3.0 is the version where the module wire carries the error TYPE both ways, a result's
+# part VII's picture test uses it (a dev-dependency), so the page pays nothing for it. 0.2.0 is
+# the published head, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
+# `urn:iki:space:diagram` (ledger #987), and `render` is unchanged, so the picture is the same
+# bytes. A 0.x caret, so also a ceiling (<0.3.0).
+ikigai-diagram = "0.2.0"
+# 0.3.2 is the pin because it is the published head: a failed out-of-band host call is recorded
+# as a dependency, which no chapter shows. The status chapter still stamps its claims at 0.3.1
+# (`book_claims` fetches that exact version from crates.io, whatever this pin says), so moving
+# this line restamps nothing. 0.3.1 over 0.3.0 is a constructor form, no new surface. 0.3.0 is the version where the module wire carries the error TYPE both ways, a result's
 # declared golden threads, and the module's cards (so the manifold through a ModuleSpace
 # lists the module's own actions and the host enforces its `requires` from its own
 # description). It was a minor bump because `ModuleCall`/`ModuleReply` are exhaustive
@@ -94,13 +115,17 @@ ikigai-diagram = "0.1.0"
 # (Older history: 0.2.0 enforced a module endpoint's declared `requires` across the
 # boundary, growing `ModuleSpace::new` its `ModuleFloor` argument; 0.1.9 was the floor
 # because `Resolved` grew a public `canonical` field in ikigai-core 0.1.64.)
-ikigai-module = "0.3.1"
+ikigai-module = "0.3.2"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
-# 0.1.11 is the floor for a security fix, not for an API: it is the release cli 0.1.43 adopted
-# (ledger #962), and a book should not teach a face below the floor its own host ships. Before
-# it the floor was 0.1.7, the API the chapter uses. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-sparql = "0.1.11"
+# 0.2.1 is the pin because it is the published head, past the old pin's 0.x ceiling (<0.2.0):
+# 0.2.0's change is that each configuration-free space names itself `urn:iki:space:<module>`
+# (ledger #987), and 0.2.1 sizes the SPARQL thread for the build, so debug and release agree
+# (ledger #1025). "The graph face" printed the same rows at it. Before that the floor was 0.1.11,
+# for a security fix, not for an API: the release cli 0.1.43 adopted (ledger #962), since a book
+# should not teach a face below the floor its own host ships; before it, 0.1.7, the API the
+# chapter uses. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-sparql = "0.2.1"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"
@@ -108,44 +133,59 @@ oxrdf = "0.3"
 # The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
-# built from.
+# built from, at their newest releases. Since 2026-10-10 those are AHEAD of what the gonk in
+# `gonk.rev` links (ledger 0.5.0, store 0.2.8, browse 0.18.0; gonk's main had not moved past
+# ledger 0.5.0 either): a console transcript is gonk's answer and a cell or `cargo run` is these
+# crates', each checked against its own source, and none of them differs between the two today.
 # The API floor is 0.4.0, because part 5's `sync_ledger` files each task with the keyed append it
 # added (`append key=<task IRI>`: at most one item per key, enforced by the ledger in the same
 # store update that files it, answering `existing` when the key is taken), which is what makes two
 # concurrent syncs safe. It also made `Item` and `Filter` `#[non_exhaustive]`; no crate here
-# builds either. The pin is 0.5.0 because that is what the gonk in `gonk.rev` links (edb9a3d,
-# gonk PR 107): an item's lifecycle state as a compare-and-set atom, claim leases with a kind
+# builds either. The pin is 0.6.2 because it is the published head, past 0.5.0's 0.x ceiling
+# (<0.6.0): 0.6.0 names `space()` `urn:iki:space:ledger` (ledger #987), 0.6.1 draws a real id nonce
+# in the browser (ledger #797), and 0.6.2 makes a page of `items` say it is a page (`1–2 of 5
+# item(s)`, with `offset=`; ledger #419), adds `…:item:{id}:about`, and floors ikigai-store at
+# 0.2.10. No page here asks `items` for a `limit=` smaller than the ledger, so every `N item(s)`
+# line a page prints is unchanged. Before that the pin was 0.5.0, what the gonk in `gonk.rev`
+# links (edb9a3d, gonk PR 107): an item's lifecycle state as a compare-and-set atom, claim leases with a kind
 # the host stamps, and the doctor (ledger #775). Nothing here uses them yet, and the cells and Rust
 # chapters print what they did (every JSON addition is a new field); the one transcript that
 # lists the ledger's MCP tools ("Over MCP") gains eight. Before that the pin was 0.4.2, where
 # a malformed timestamp stopped dropping an item from `items`/`next` (ledger #866). Before 0.4.0
 # the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that the first chapter
 # walks straight through — two appends in one millisecond minting the same id, and `next` cached
-# across the clock. A 0.x caret, so also a ceiling (<0.6.0): read it as a RANGE when gonk moves
-# (0.6.0 is published, and gonk does not link it yet).
-ikigai-ledger = "0.5.0"
+# across the clock. A 0.x caret, so also a ceiling (<0.7.0): read it as a RANGE.
+ikigai-ledger = "0.6.2"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
-# RocksDB at all. 0.2.8 is what gonk edb9a3d links (gonk PR 104), and 0.2.7 is a security floor
-# below which no book crate should sit (ledger #915; cli 0.1.43 adopted it). A 0.x caret: also a
-# ceiling (<0.3.0).
-ikigai-store = { version = "0.2.8", default-features = false }
+# RocksDB at all. 0.2.10 is the pin because it is the published head, and ledger 0.6.2 and
+# markdown 0.1.2 both require it: 0.2.9 bounds the SIZE of every SPARQL answer, refusing rather
+# than truncating (ledger #970), and 0.2.10 sizes the SPARQL thread for the build (ledger #1003).
+# No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
+# links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
+# #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
+ikigai-store = { version = "0.2.10", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.0 is what gonk edb9a3d links,
-# and it is the release that added the explain-status cost line the chapter shows ("opens
-# instantly from the archive"). A 0.x caret: also a ceiling (<0.19.0); read it as a RANGE when
-# gonk moves.
-ikigai-browse = "0.18.0"
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.1 is the pin because it is the
+# published head: a review answer's last finding is kept when it cannot have been cut (ledger
+# #818), and the chapter's stub answer printed the same findings at it. The floor is 0.18.0, the
+# release that added the explain-status cost line the chapter shows ("opens instantly from the
+# archive"), and what gonk edb9a3d links. A 0.x caret: also a ceiling (<0.19.0); read it as a
+# RANGE.
+ikigai-browse = "0.18.1"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
 oxigraph = { version = "0.5.11", default-features = false }
 # Markdown as a graph, for the OpenSpec part: one generic structural lift plus a MAPPING resource
 # (a lift profile and SPARQL CONSTRUCTs), found by name at `urn:markdown:mapping:{name}` under a
-# config home. 0.1.0 is the first release on crates.io (2026-10-06); before it, this line was a
-# pin to one full git revision of the public repository, the way DESIGN.md pins gonk. A 0.x
-# caret, so also a ceiling (<0.2.0).
-ikigai-markdown = "0.1.0"
+# config home. 0.1.2 is the pin because it is the published head: 0.1.1 bounds a mapping's SPARQL
+# and reads frontmatter without recursion (ledger #963), and 0.1.2 refuses SPARQL `SERVICE` in a
+# mapping in every build (ledger #1085). The OpenSpec mapping uses neither `SERVICE` nor deep
+# frontmatter, so it lifts the same graph. 0.1.0 is the first release on crates.io (2026-10-06);
+# before it, this line was a pin to one full git revision of the public repository, the way
+# DESIGN.md pins gonk. A 0.x caret, so also a ceiling (<0.2.0).
+ikigai-markdown = "0.1.2"
 # The config file "Configuration" reads through `layered_paths`.
 toml = "0.8"
 futures = "0.3"
