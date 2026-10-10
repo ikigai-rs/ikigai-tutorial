@@ -222,7 +222,7 @@ Both endpoints describe themselves, so the page can tell you what a cell takes. 
     ik:output "text/plain;charset=utf-8" ;
     ik:input &lt;urn:ikigai:endpoint:ttt-cell:input:x&gt; ;
     ik:input &lt;urn:ikigai:endpoint:ttt-cell:input:y&gt; ;
-    ik:action &lt;urn:ikigai:endpoint:ttt-cell:action:source&gt; .
+    ik:action &lt;urn:ikigai:contract:ttt-cell:source:b3:…&gt; .
 &#32;
 &lt;urn:ikigai:endpoint:ttt-cell:input:x&gt; ik:inputName "x" ;
     ik:source "binding" ;
@@ -236,13 +236,28 @@ Both endpoints describe themselves, so the page can tell you what a cell takes. 
     ik:summary "the row — any integer" ;
     ik:class &lt;http://www.w3.org/2001/XMLSchema#integer&gt; .
 &#32;
-&lt;urn:ikigai:endpoint:ttt-cell:action:source&gt; a ik:Action ;
+&lt;urn:ikigai:contract:ttt-cell:source:b3:…:input:x&gt; ik:inputName "x" ;
+    ik:source "binding" ;
+    ik:required true ;
+    ik:summary "the column — any integer" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#integer&gt; .
+&#32;
+&lt;urn:ikigai:contract:ttt-cell:source:b3:…:input:y&gt; ik:inputName "y" ;
+    ik:source "binding" ;
+    ik:required true ;
+    ik:summary "the row — any integer" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#integer&gt; .
+&#32;
+&lt;urn:ikigai:contract:ttt-cell:source:b3:…&gt; a ik:Action ;
     ik:verb "Source" ;
     ik:output "text/plain;charset=utf-8" ;
-    ik:input &lt;urn:ikigai:endpoint:ttt-cell:input:x&gt; ;
-    ik:input &lt;urn:ikigai:endpoint:ttt-cell:input:y&gt; .
+    ik:input &lt;urn:ikigai:contract:ttt-cell:source:b3:…:input:x&gt; ;
+    ik:input &lt;urn:ikigai:contract:ttt-cell:source:b3:…:input:y&gt; .
 [computed]</pre>
 </div>
+
+The `b3:…` in the contract's name stands for a digest of the contract, which this book does not
+spell out; [What resolution buys you](../getting-started/payoff.md) says why.
 
 ## Loose on purpose
 

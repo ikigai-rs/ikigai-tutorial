@@ -153,6 +153,9 @@ fn is_urn_char(c: char) -> bool {
         || matches!(c, ':' | '.' | ',' | '-' | '_' | '~' | '/' | '{' | '}' | '%')
 }
 
+/// What a book writes in place of a content-addressed digest.
+pub const ELIDED: char = '…';
+
 /// Pull the `urn:` literals out of one line.
 fn urns_in_line(line: &str) -> Vec<String> {
     let bytes: Vec<char> = line.chars().collect();
@@ -166,6 +169,18 @@ fn urns_in_line(line: &str) -> Vec<String> {
             let mut j = i;
             while j < bytes.len() && is_urn_char(bytes[j]) {
                 j += 1;
+            }
+            // A contract IRI's digest is written `…` (`urn:ikigai:contract:{id}:{verb}:b3:…`,
+            // see core 0.1.91 and ledger #948): it changes whenever the contract does, so the
+            // book never spells it. `…` is not a URN character, so without this the name would
+            // end at `b3:` and lose any `:input:{name}` after it. The test that checks graph
+            // nodes reads the `…` as "64 hex digits".
+            if j < bytes.len() && bytes[j] == ELIDED && bytes[i..j].ends_with(&[':', 'b', '3', ':'])
+            {
+                j += 1;
+                while j < bytes.len() && is_urn_char(bytes[j]) {
+                    j += 1;
+                }
             }
             if !preceded_by_word {
                 let token: String = bytes[i..j].iter().collect();
@@ -470,6 +485,21 @@ mod tests {
         assert_eq!(
             urns_in_line("`$h{urn:iki:tutorial:sheet:cell:{ref}}` and $a{urn:kernel:cache}."),
             ["urn:iki:tutorial:sheet:cell:{ref}", "urn:kernel:cache"]
+        );
+    }
+
+    #[test]
+    fn an_elided_contract_digest_stays_inside_the_name() {
+        assert_eq!(
+            urns_in_line(
+                "ik:action &lt;urn:ikigai:contract:ttt-cell:source:b3:…:input:x&gt; and \
+                 <urn:ikigai:contract:t:sink:b3:…>; but urn:x:y… ends at the name."
+            ),
+            [
+                "urn:ikigai:contract:ttt-cell:source:b3:…:input:x",
+                "urn:ikigai:contract:t:sink:b3:…",
+                "urn:x:y"
+            ]
         );
     }
 

@@ -936,6 +936,68 @@ mod tests {
         out
     }
 
+    /// A contract IRI with its digest replaced by `…`: `urn:ikigai:contract:{id}:{verb}:b3:…`.
+    ///
+    /// Since core 0.1.91 every `describe` names each action by its CONTENT
+    /// (`urn:ikigai:contract:{id}:{verb}:b3:{hex}`, ledger #948), so the 64 hex digits change
+    /// whenever anything in the contract does, a summary's wording included. A chapter that
+    /// spelled them would go red on every such edit and teach nothing by it, so the page
+    /// writes `…` where the digest goes, and the replay compares on the same footing. The
+    /// shape around it (prefix, id, verb, `b3:`, any `:input:` tail) is still compared, and
+    /// the URN gate (`crates/book-urns`) checks each elided node against a real catalog.
+    fn elide_contract_digests(text: &str) -> String {
+        const PREFIX: &str = "urn:ikigai:contract:";
+        const DIGEST: usize = 64;
+        let mut out = String::with_capacity(text.len());
+        let mut rest = text;
+        while let Some(at) = rest.find(PREFIX) {
+            let (before, node) = rest.split_at(at);
+            out.push_str(before);
+            // The node ends where an IRI does: at `>`, whitespace or a quote.
+            let end = node
+                .find(|c: char| c == '>' || c == '"' || c.is_whitespace())
+                .unwrap_or(node.len());
+            match node[..end].find(":b3:") {
+                Some(b3)
+                    if end - (b3 + 4) >= DIGEST
+                        && node.as_bytes()[b3 + 4..b3 + 4 + DIGEST]
+                            .iter()
+                            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(b)) =>
+                {
+                    out.push_str(&node[..b3 + 4]);
+                    out.push('…');
+                    rest = &node[b3 + 4 + DIGEST..];
+                }
+                _ => {
+                    out.push_str(PREFIX);
+                    rest = &node[PREFIX.len()..];
+                }
+            }
+        }
+        out.push_str(rest);
+        out
+    }
+
+    #[test]
+    fn a_contract_digest_is_elided_and_nothing_else_is() {
+        let hex = "0123456789abcdef".repeat(4);
+        let got = elide_contract_digests(&format!(
+            "ik:action <urn:ikigai:contract:ttt-cell:source:b3:{hex}> .\n\
+             <urn:ikigai:contract:ttt-cell:source:b3:{hex}:input:x> ik:inputName \"x\" ;\n\
+             <urn:ikigai:endpoint:ttt-cell:input:x> b3:{hex}\n\
+             urn:ikigai:contract:short:source:b3:abc"
+        ));
+        assert_eq!(
+            got,
+            format!(
+                "ik:action <urn:ikigai:contract:ttt-cell:source:b3:…> .\n\
+                 <urn:ikigai:contract:ttt-cell:source:b3:…:input:x> ik:inputName \"x\" ;\n\
+                 <urn:ikigai:endpoint:ttt-cell:input:x> b3:{hex}\n\
+                 urn:ikigai:contract:short:source:b3:abc"
+            )
+        );
+    }
+
     /// One runnable cell of a chapter: the chain it runs in (`data-game`, or `data-scenario`
     /// with any `data-as-of`, as `js/run.js` spells it for the page), the instant it runs at
     /// on a page with a story clock (`data-at`), its command, and the text of its expected
@@ -1193,6 +1255,8 @@ mod tests {
             if let Some(here) = &here {
                 got = got.replace(here.as_str(), " · ThreadId(1) · ");
             }
+            // A contract IRI's digest is spelled `…` on the page (see `elide_contract_digests`).
+            got = elide_contract_digests(&got);
             let tidy = |s: &str| -> Vec<String> {
                 s.trim_end()
                     .lines()

@@ -211,7 +211,7 @@ two marks:
     ik:input &lt;urn:ikigai:endpoint:ttt-move:input:x&gt; ;
     ik:input &lt;urn:ikigai:endpoint:ttt-move:input:y&gt; ;
     ik:input &lt;urn:ikigai:endpoint:ttt-move:input:content&gt; ;
-    ik:action &lt;urn:ikigai:endpoint:ttt-move:action:sink&gt; .
+    ik:action &lt;urn:ikigai:contract:ttt-move:sink:b3:…&gt; .
 &#32;
 &lt;urn:ikigai:endpoint:ttt-move:input:x&gt; ik:inputName "x" ;
     ik:source "binding" ;
@@ -233,12 +233,32 @@ two marks:
     ik:oneOf "X" ;
     ik:oneOf "O" .
 &#32;
-&lt;urn:ikigai:endpoint:ttt-move:action:sink&gt; a ik:Action ;
+&lt;urn:ikigai:contract:ttt-move:sink:b3:…:input:x&gt; ik:inputName "x" ;
+    ik:source "binding" ;
+    ik:required true ;
+    ik:summary "the column — any integer" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#integer&gt; .
+&#32;
+&lt;urn:ikigai:contract:ttt-move:sink:b3:…:input:y&gt; ik:inputName "y" ;
+    ik:source "binding" ;
+    ik:required true ;
+    ik:summary "the row — any integer" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#integer&gt; .
+&#32;
+&lt;urn:ikigai:contract:ttt-move:sink:b3:…:input:content&gt; ik:inputName "content" ;
+    ik:source "argument" ;
+    ik:required false ;
+    ik:summary "the mark to play — checked against the turn; left out, the turn plays" ;
+    ik:class &lt;http://www.w3.org/2001/XMLSchema#string&gt; ;
+    ik:oneOf "X" ;
+    ik:oneOf "O" .
+&#32;
+&lt;urn:ikigai:contract:ttt-move:sink:b3:…&gt; a ik:Action ;
     ik:verb "Sink" ;
     ik:output "text/plain;charset=utf-8" ;
-    ik:input &lt;urn:ikigai:endpoint:ttt-move:input:x&gt; ;
-    ik:input &lt;urn:ikigai:endpoint:ttt-move:input:y&gt; ;
-    ik:input &lt;urn:ikigai:endpoint:ttt-move:input:content&gt; .
+    ik:input &lt;urn:ikigai:contract:ttt-move:sink:b3:…:input:x&gt; ;
+    ik:input &lt;urn:ikigai:contract:ttt-move:sink:b3:…:input:y&gt; ;
+    ik:input &lt;urn:ikigai:contract:ttt-move:sink:b3:…:input:content&gt; .
 [computed]</pre>
 </div>
 

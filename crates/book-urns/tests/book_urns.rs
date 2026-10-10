@@ -168,39 +168,103 @@ fn is_capability_scope(urn: &str) -> bool {
 
 /// A node in the description graph — `<urn:ikigai:endpoint:camel-case:input:in>` — is a
 /// name too, and the prose quotes several. Nothing *resolves* one: it is the skolem IRI
-/// `ikigai-vocab` mints for an endpoint, an input or an action so the catalog has no
-/// blank nodes. The authority for such a name is the catalog itself, so the check is
-/// that a tutorial host's catalog really contains it, verbatim, in angle brackets.
-/// A renamed skolem prefix or a renamed endpoint then fails here rather than leaving
-/// the book quoting a graph that no longer exists.
+/// `ikigai-vocab` mints for an endpoint, an input or a contract so the catalog has no
+/// blank nodes, or the IRI core mints for one row of the tool list (`urn:ikigai:match:…`,
+/// a door and a verb). The authority for such a name is the graph that holds it, so the
+/// check is that a tutorial host's catalog or tool list really contains it, in angle
+/// brackets. A renamed skolem prefix or a renamed endpoint then fails here rather than
+/// leaving the book quoting a graph that no longer exists.
 fn is_graph_node(urn: &str) -> bool {
     urn.starts_with("urn:ikigai:endpoint:")
+        || urn.starts_with(CONTRACT_PREFIX)
+        || urn.starts_with("urn:ikigai:match:")
+}
+
+/// The contract prefix: `urn:ikigai:contract:{id}:{verb}:b3:{hex}` (core 0.1.91).
+const CONTRACT_PREFIX: &str = "urn:ikigai:contract:";
+
+/// A BLAKE3 digest in a contract IRI, as hex.
+const DIGEST_HEX: usize = 64;
+
+/// Whether a contract node spells its digest instead of eliding it. The digest is the
+/// contract's content address, so it changes whenever the contract does (a summary's
+/// wording included): a page that spells one goes stale on an edit nobody would think of
+/// as touching it. The book writes `…` (`book_urns::ELIDED`), and Run prints the real one.
+fn spells_a_digest(urn: &str) -> bool {
+    urn.starts_with(CONTRACT_PREFIX)
+        && urn.split(":b3:").nth(1).is_some_and(|tail| {
+            tail.len() >= DIGEST_HEX
+                && tail.as_bytes()[..DIGEST_HEX]
+                    .iter()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(b))
+        })
+}
+
+/// Whether `graph` quotes `<node>`, reading an elided digest (`b3:…`) in `node` as exactly
+/// 64 lower-case hex digits.
+fn quotes(graph: &str, node: &str) -> bool {
+    let Some((before, after)) = node.split_once(book_urns::ELIDED) else {
+        return graph.contains(&format!("<{node}>"));
+    };
+    let (open, close) = (format!("<{before}"), format!("{after}>"));
+    graph.match_indices(&open).any(|(at, _)| {
+        let rest = &graph[at + open.len()..];
+        rest.len() >= DIGEST_HEX
+            && rest.as_bytes()[..DIGEST_HEX]
+                .iter()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(b))
+            && rest[DIGEST_HEX..].starts_with(&close)
+    })
 }
 
 fn the_catalog_contains(node: &str) -> bool {
     use std::sync::OnceLock;
-    static CATALOGS: OnceLock<Vec<String>> = OnceLock::new();
-    let catalogs = CATALOGS.get_or_init(|| {
-        let render = |kernel: ikigai_core::Kernel| {
-            let request = Request::new(
-                Verb::Source,
-                Iri::parse("urn:kernel:catalog").expect("a constant IRI"),
-            );
+    static GRAPHS: OnceLock<Vec<String>> = OnceLock::new();
+    let graphs = GRAPHS.get_or_init(|| {
+        // The catalog is Turtle already; the tool list is a plain list of doors unless asked.
+        let render = |kernel: &ikigai_core::Kernel, name: &str| {
+            let mut request = Request::new(Verb::Source, Iri::parse(name).expect("a constant IRI"));
+            if name == "urn:kernel:actions" {
+                request = request.with_arg("as", ArgRef::Inline(b"text/turtle".to_vec()));
+            }
             let repr = block_on(kernel.issue(request, &Capability::root()))
-                .expect("the tutorial host renders its catalog");
+                .unwrap_or_else(|e| panic!("the tutorial host renders {name}: {e}"));
             String::from_utf8(repr.bytes).expect("Turtle is UTF-8")
         };
-        vec![
-            // The page's kernel: Part I's space and the applied chapter's game, so a node the
-            // game's `describe` cell prints is checked against a catalog that has it.
-            render(book_wasm::page_kernel()),
-            // Building endpoints' kernel, which Part II's Rust examples run against, so a node
-            // a `urn:kernel:explain` answer prints there (`counter`'s) is checked too.
-            render(building_endpoints::kernel()),
-        ]
+        // The page's kernel: Part I's space and the applied chapter's game, so a node the
+        // game's `describe` cell prints is checked against a catalog that has it. Building
+        // endpoints' kernel, which Part II's Rust examples run against, so a node a
+        // `urn:kernel:explain` answer prints there (`counter`'s) is checked too. Each one's
+        // catalog (endpoints, inputs, contracts) and its tool list (matches).
+        [book_wasm::page_kernel(), building_endpoints::kernel()]
+            .iter()
+            .flat_map(|kernel| {
+                ["urn:kernel:catalog", "urn:kernel:actions"].map(|name| render(kernel, name))
+            })
+            .collect()
     });
-    let quoted = format!("<{node}>");
-    catalogs.iter().any(|catalog| catalog.contains(&quoted))
+    graphs.iter().any(|graph| quotes(graph, node))
+}
+
+#[test]
+fn an_elided_digest_matches_sixty_four_hex_digits_and_nothing_else() {
+    let hex = "0123456789abcdef".repeat(4);
+    let graph = format!(
+        "<urn:ikigai:contract:t:source:b3:{hex}> a ik:Action ;\n\
+         <urn:ikigai:contract:t:source:b3:{hex}:input:in> ik:inputName \"in\" ."
+    );
+    assert!(quotes(&graph, "urn:ikigai:contract:t:source:b3:…"));
+    assert!(quotes(&graph, "urn:ikigai:contract:t:source:b3:…:input:in"));
+    assert!(!quotes(&graph, "urn:ikigai:contract:t:sink:b3:…"));
+    assert!(!quotes(
+        &graph,
+        "urn:ikigai:contract:t:source:b3:…:input:out"
+    ));
+    assert!(!quotes(&graph, "urn:ikigai:contract:t:source:b3:…:input"));
+    assert!(spells_a_digest(&format!(
+        "urn:ikigai:contract:t:source:b3:{hex}"
+    )));
+    assert!(!spells_a_digest("urn:ikigai:contract:t:source:b3:…"));
 }
 
 /// The kernel the page runs: `book_wasm::page_kernel()` compiled to wasm. A cell may name
@@ -238,9 +302,23 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
             continue;
         }
         if is_graph_node(&mention.urn) {
-            if !the_catalog_contains(&mention.urn) {
+            // A node's SHAPE (`urn:ikigai:contract:{id}:{verb}:b3:{hex}`) is not a node, and
+            // says so the way any other placeholder does.
+            if matches!(
+                scan.exemption(&mention.urn).map(|d| d.kind),
+                Some(Exemption::Illustration)
+            ) {
+                continue;
+            }
+            if spells_a_digest(&mention.urn) {
                 failures.push(format!(
-                    "{}: quotes a catalog node no tutorial host's catalog contains.",
+                    "{}: spells a contract's digest. It changes whenever the contract does; \
+                     write `b3:…` and let Run print the real one.",
+                    describe(mention)
+                ));
+            } else if !the_catalog_contains(&mention.urn) {
+                failures.push(format!(
+                    "{}: quotes a graph node no tutorial host's catalog or tool list contains.",
                     describe(mention)
                 ));
             }
