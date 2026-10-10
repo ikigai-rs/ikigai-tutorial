@@ -359,13 +359,17 @@ contains them.
 
 A second instrument runs in CI: [`a11y/axe.mjs`](a11y/axe.mjs) drives axe-core over a
 jsdom of every page with the book's scripts run, which is the only way to see what
-JavaScript adds — the copy buttons, the Run cells, the search repairs. The two catch
-different things and both gate the deploy. What neither can judge — reading order, plain
+JavaScript adds — the copy buttons, the Run cells, the search repairs. A third,
+[`a11y/axe-browser.mjs`](a11y/axe-browser.mjs), runs axe-core in a real browser over the
+assembled site, in all five themes, with the in-page kernels loaded and every cell run:
+the only one that sees COLOR outside the theme's variables (a highlight.js token, an
+`opacity`, a link told from its sentence by hue alone). The three catch different things
+and all gate the deploy. What neither can judge — reading order, plain
 language, whether a link's purpose is clear beyond the generic phrases the gate refuses —
 is a reviewer's job, and [`docs/a11y.md`](docs/a11y.md) is the assessment that says so.
 
 **The book's constitution, one line:** every chapter goes through `./scripts/test-books.sh`,
-which is now `mdbook test` + contrast + structure, and `pages.yml` adds axe — so an
+which is now `mdbook test` + contrast + structure, and `pages.yml` adds axe twice (jsdom and a real browser) — so an
 accessibility regression is a red build, not a review comment.
 
 > ⚠ **Left alone, deliberately: two `<h1>`s per page** — the book title in the menu bar and

@@ -546,11 +546,12 @@ re-render; the status line is `role="status"` and is the target of every play an
 what a move did is announced once. Its content is plain text on purpose: an element inside it
 would fire extra `htmx:afterSettle` events and re-trigger the board. Checked with axe-core in
 a real browser (light, rust, navy themes: no violations in the boards) and with jsdom
-`a11y/axe.mjs` + `book-a11y`. ⚠ CI still never sees a LIVE board: the page is linked now, so
-`pages.yml`'s axe scans it, but jsdom cannot load the wasm, so it only ever sees the fallback
-line (`a11y/no-kernel.mjs` checks that a board with no kernel is a message with no squares).
-The in-browser check was re-run on parts I–VI when the arc was linked; re-run it after any
-change to the markup, `ttt.css` or `ttt.js`.
+`a11y/axe.mjs` + `book-a11y`. jsdom cannot load the wasm, so `a11y/axe.mjs` only ever sees
+the fallback line (`a11y/no-kernel.mjs` checks that a board with no kernel is a message with
+no squares); the LIVE board is CI's since ledger #616: `a11y/axe-browser.mjs` loads every
+page in a real browser, in all five themes, with the kernel loaded and every cell run, so a
+board's squares are what it audits. What it does not do is play: a board mid-game or after
+a win is still checked by hand after any change to the markup, `ttt.css` or `ttt.js`.
 
 ### `ttt-host` (`crates/ttt-host`)
 
