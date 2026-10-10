@@ -55,6 +55,21 @@
 //! `chapter 6` — no link — is refused outright rather than checked, because there is
 //! nothing to check it against: the fix for both is to name the chapter, which is a claim
 //! that cannot go stale in a reorder.
+//!
+//! ## A blank line inside a runnable cell
+//!
+//! A cell is raw HTML in the markdown (`<div class="ikigai-run" data-cmd='…'>`, then
+//! `<pre class="ikigai-run-expected">…</pre>`, then `</div>`), and CommonMark ends an HTML
+//! block that opens with `<div` at the first **blank line**. Everything after it renders as
+//! markdown. Measured on mdbook 0.5.4 (ledger #614): a blank line inside the expected output
+//! can drop the cell's `</pre></div>`, so every later cell on the page is nested inside this
+//! one's expected output; or it can turn the rest of the output into a `<p>` with curly
+//! quotes and no indentation; and a blank line inside `data-cmd` drops the whole cell. mdbook
+//! builds all three without a warning, and this crate's name checks pass on them (the names
+//! are still there). [`blank_lines_in_cells`] finds the line in the source, which is where
+//! the fix goes: an otherwise-empty line of expected output is written `&#32;`, which
+//! renders as a space and does not end the block, and a command list needs no blank line at
+//! all. `book-a11y` checks the other end, the built page.
 
 use std::fs;
 use std::path::Path;
@@ -424,6 +439,110 @@ fn collect_markdown(root: &Path, dir: &Path, out: &mut Vec<String>) -> Result<()
     Ok(())
 }
 
+/// Where in a runnable cell a blank line was found. The cure differs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CellPart {
+    /// Inside `<pre class="ikigai-run-expected">`: write `&#32;` on the line instead.
+    ExpectedOutput,
+    /// Anywhere else in the cell, which in practice is the `data-cmd` command list: delete
+    /// the line.
+    Markup,
+}
+
+/// A blank line inside a runnable cell, which ends mdbook's HTML block (see the module
+/// documentation).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CellBlank {
+    /// 1-based line number of the blank line.
+    pub line: usize,
+    /// 1-based line number of the `<div class="ikigai-run"` the cell opens with.
+    pub cell: usize,
+    /// Which part of the cell the blank line is in.
+    pub part: CellPart,
+}
+
+/// The cell markers, in the order a line is read.
+const CELL_OPEN: &str = "<div class=\"ikigai-run\"";
+const EXPECTED_OPEN: &str = "<pre class=\"ikigai-run-expected\"";
+const EXPECTED_CLOSE: &str = "</pre>";
+const CELL_CLOSE: &str = "</div>";
+
+/// Every blank line inside a runnable cell of one markdown document.
+///
+/// A cell runs from the line carrying `<div class="ikigai-run"` to the first `</div>` after
+/// its expected output closes. A line is blank when it is empty or only whitespace, which is
+/// what CommonMark ends the block on. Fenced code is skipped (a listing may show cell markup
+/// without being one), and so are HTML comments, which the line numbering survives. A cell
+/// that never closes reports every blank line to the end of the file, which is loud, and
+/// right: nothing after it renders as written.
+pub fn blank_lines_in_cells(text: &str) -> Vec<CellBlank> {
+    let (visible, _) = split_comments(text);
+    let mut found = Vec::new();
+    let mut fence = false;
+    // The open cell: the line it started on, and whether its expected output is open.
+    let mut cell: Option<(usize, bool)> = None;
+    for (index, line) in visible.lines().enumerate() {
+        let number = index + 1;
+        if cell.is_none() && line.trim_start().starts_with("```") {
+            fence = !fence;
+            continue;
+        }
+        if fence {
+            continue;
+        }
+        if let Some((start, in_expected)) = cell {
+            if line.trim().is_empty() {
+                found.push(CellBlank {
+                    line: number,
+                    cell: start,
+                    part: if in_expected {
+                        CellPart::ExpectedOutput
+                    } else {
+                        CellPart::Markup
+                    },
+                });
+                continue;
+            }
+        }
+        // Walk the markers on this line in order: a one-line cell opens and closes on it.
+        let mut rest = line;
+        loop {
+            match cell {
+                None => match rest.find(CELL_OPEN) {
+                    Some(at) => {
+                        cell = Some((number, false));
+                        rest = &rest[at + CELL_OPEN.len()..];
+                    }
+                    None => break,
+                },
+                Some((start, false)) => {
+                    let pre = rest.find(EXPECTED_OPEN);
+                    let close = rest.find(CELL_CLOSE);
+                    match (pre, close) {
+                        (Some(p), c) if c.is_none_or(|c| p < c) => {
+                            cell = Some((start, true));
+                            rest = &rest[p + EXPECTED_OPEN.len()..];
+                        }
+                        (_, Some(c)) => {
+                            cell = None;
+                            rest = &rest[c + CELL_CLOSE.len()..];
+                        }
+                        _ => break,
+                    }
+                }
+                Some((start, true)) => match rest.find(EXPECTED_CLOSE) {
+                    Some(at) => {
+                        cell = Some((start, false));
+                        rest = &rest[at + EXPECTED_CLOSE.len()..];
+                    }
+                    None => break,
+                },
+            }
+        }
+    }
+    found
+}
+
 /// The book's written-down belief about what the `ikigai` CLI resolves.
 ///
 /// This is not evidence — it is a claim, in one place, that one command can check. See
@@ -610,6 +729,62 @@ mod tests {
     fn an_exemption_without_a_reason_is_refused() {
         let text = "<!-- urn-gate: unbound urn:fn:toCamel -->\n";
         assert!(scan_markdown("x.md", text).is_err());
+    }
+
+    /// A cell the way the chapters write one, with `{gap}` standing for one output line.
+    fn cell(gap: &str) -> String {
+        format!(
+            "prose\n\n<div class=\"ikigai-run\" data-cmd='source urn:a\nsource urn:b'>\n\
+             <pre class=\"ikigai-run-expected\">a\n{gap}\nb</pre>\n</div>\n\nmore prose\n"
+        )
+    }
+
+    #[test]
+    fn a_blank_line_in_expected_output_is_found_with_its_line_and_cell() {
+        assert_eq!(
+            blank_lines_in_cells(&cell("")),
+            vec![CellBlank {
+                line: 6,
+                cell: 3,
+                part: CellPart::ExpectedOutput
+            }]
+        );
+        // Whitespace only is just as blank to CommonMark.
+        assert_eq!(blank_lines_in_cells(&cell("   ")).len(), 1);
+    }
+
+    #[test]
+    fn the_space_entity_is_the_cure_and_blank_lines_outside_a_cell_are_prose() {
+        assert_eq!(blank_lines_in_cells(&cell("&#32;")), vec![]);
+        assert_eq!(blank_lines_in_cells(&cell("-")), vec![]);
+    }
+
+    #[test]
+    fn a_blank_line_in_the_command_list_is_markup_not_output() {
+        let text = "<div class=\"ikigai-run\" data-cmd='source urn:a\n\nsource urn:b'>\n\
+                    <pre class=\"ikigai-run-expected\">a</pre>\n</div>\n";
+        assert_eq!(
+            blank_lines_in_cells(text),
+            vec![CellBlank {
+                line: 2,
+                cell: 1,
+                part: CellPart::Markup
+            }]
+        );
+    }
+
+    #[test]
+    fn a_one_line_cell_closes_on_its_own_line() {
+        let text = "<div class=\"ikigai-run\" data-cmd='source urn:a'><pre class=\"ikigai-run-expected\">a</pre></div>\n\nprose\n";
+        assert_eq!(blank_lines_in_cells(text), vec![]);
+    }
+
+    #[test]
+    fn cell_markup_in_a_fence_or_a_comment_is_not_a_cell() {
+        let fenced = format!("```html\n{}```\n", cell(""));
+        assert_eq!(blank_lines_in_cells(&fenced), vec![]);
+        let commented = format!("<!--\n{}-->\n", cell(""));
+        assert_eq!(blank_lines_in_cells(&commented), vec![]);
     }
 
     const SUMMARY: &str = "\

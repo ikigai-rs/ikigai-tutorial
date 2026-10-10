@@ -266,6 +266,19 @@ purpose. A direct quote keeps its author's spelling and says so on its own line:
 > "… the colour of the thing …" <!-- spelling: quote (a quoted source's own words) -->
 ```
 
+### And the cells' markup
+
+A runnable cell is raw HTML in the markdown, and CommonMark ends an HTML block that opens
+with `<div` at the first blank line. So a blank line inside a cell (an empty line of
+expected output is the easy one to write) renders the rest of it as markdown. On mdbook
+0.5.4 that nested every later cell on the page inside one cell's expected output, or turned
+the output into a paragraph with curly quotes, or (inside `data-cmd`) dropped the cell; and
+mdbook, the URN gate and axe all stayed green on each. `crates/book-urns/tests/book_cells.rs`
+refuses the blank line in the source and names `file:line`; the cure is `&#32;` on an
+otherwise-empty line of output, which renders as a space and does not end the block.
+`book-a11y` checks the built page from the other end: no markup inside an expected output,
+no cell left open, and as many cells on each page as its chapter writes.
+
 ### And the colors
 
 `mdbook` is sound by default in the ways a generator can be — `<html lang>`, a `<main>`, a
