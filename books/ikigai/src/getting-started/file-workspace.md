@@ -82,11 +82,40 @@ the first place.
 
 ## Try it
 
-```bash
-ikigai --plain -c 'sink urn:file:notes.txt "a note"'
-ikigai --plain -c 'source urn:file:notes.txt'
-ikigai --plain -c 'exists urn:file:notes.txt'
+At the REPL (`ikigai`), or one line at a time with `ikigai --plain -c '…'`:
+
+```text
+ikigai> sink urn:file:notes.txt a note
+wrote 6 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+a note
+[computed]
 ```
 
-Then look in `~/.ikigai/workspace` — it is an ordinary directory. Nothing about the model
+Do not quote the note. The rest of a `sink` line is the content **verbatim**, quote marks
+included, so a quoted note is stored with its quotes and read back with them. Quoting is for
+the words of a `source` line and for a named argument, so `content="…"` is the way to quote a
+body:
+
+```text
+ikigai> sink urn:file:notes.txt "a note"
+wrote 8 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+"a note"
+[computed]
+ikigai> sink urn:file:notes.txt content="a note"
+wrote 6 bytes to notes.txt
+[uncacheable]
+ikigai> source urn:file:notes.txt
+a note
+[computed]
+```
+
+There is no `exists` command. The REPL spells four of the five verbs (`source`, `sink`,
+`delete`, and `describe` for `Meta`); `Exists` is issued from code, as
+`Request::new(Verb::Exists, …)`.
+
+Then look in `~/.ikigai/workspace`: it is an ordinary directory. Nothing about the model
 requires the storage to be exotic; it requires the *access* to be named.
