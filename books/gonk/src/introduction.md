@@ -33,6 +33,9 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
   the repositories gonk browses and keeping them current; and all three in order on a fresh
   machine.
 - **Several machines.** The three doors, the grant each runs under, and a QUIC client.
+- **Scripts and sentences.** A query saved at a name and run by a person and a worker; a query
+  drafted from a sentence by a machine and published by a person; and what each door may do with
+  either.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
 ## Three kinds of example, and how each is checked

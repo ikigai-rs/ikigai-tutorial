@@ -1,0 +1,27 @@
+[package]
+name = "model-stub"
+version = "0.1.0"
+description = "A deterministic urn:llm: peer for The gonk Book's transcripts: urn:llm:ask and urn:llm:config served over a Unix socket, answering each ask with a canned SPARQL draft, so a scratch gonk mounts a model and drafts without any network or real model."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "model_stub"
+path = "src/lib.rs"
+
+[[bin]]
+name = "model-stub"
+path = "src/main.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+# The Meta renderer, so a mount describes this peer's contracts the way a real one does.
+ikigai-vocab.workspace = true
+# The socket door a `gonk.mount = "prefer urn:llm:=<socket>"` line dials. The cli crates'
+# published head, as `crates/two-hosts` takes; the wire is the one gonk's 0.1.44 speaks.
+ikigai-ipc = "0.1.46"
+async-trait = "0.1"
+serde_json.workspace = true

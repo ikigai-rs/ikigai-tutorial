@@ -20,6 +20,12 @@
 #         `-web` share the cli's version), so the client a page runs speaks the wire the pinned
 #         gonk serves. Installed `--locked` into `target/ikigai-cli/<version>/`.
 #
+#   model-stub is this workspace's own `crates/model-stub`: a deterministic `urn:llm:` peer on a
+#         Unix socket, which "Scripts and sentences in gonk" starts and mounts so a scratch gonk
+#         drafts without a real model or the network. Built here and copied alone into
+#         `target/model-stub/bin/`, so the page's PATH gains that one binary and not the rest of
+#         `target/debug`.
+#
 # ⚠ Every page runs in a SCRATCH home (`HOME` and `XDG_CONFIG_HOME` point into a temporary
 # directory), so nothing here reads or writes a real gonk's store, socket or grants; and a
 # command naming port 1060, a real gonk's, is refused before it runs.
@@ -88,10 +94,16 @@ if [ ! -x "$book_cli_root/bin/ikigai" ]; then
         --root "$book_cli_root" --target-dir "$book_cli_root/build"
 fi
 
+cargo build --quiet -p model-stub
+stub_root="target/model-stub/bin"
+mkdir -p "$stub_root"
+cp target/debug/model-stub "$stub_root/"
+
 status=0
 
 echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli) ──────────────────"
 cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
+    --path "$stub_root" \
     || status=1
 
 # The test runs `ikigai` by name, so the pinned one goes first on PATH; `--version` is printed

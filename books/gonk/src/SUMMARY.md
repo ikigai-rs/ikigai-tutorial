@@ -40,6 +40,10 @@
 - [The three doors, and who is asking](machines/doors.md)
 - [A QUIC client, and the grant it runs under](machines/quic-client.md)
 
+# Scripts and sentences
+
+- [Scripts and sentences in gonk](scripts/in-gonk.md)
+
 # Embedding
 
 - [The ledger, the store and browse in your own kernel](embedding/own-kernel.md)

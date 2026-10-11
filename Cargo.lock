@@ -1477,6 +1477,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "model-stub"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "ikigai-core",
+ "ikigai-ipc",
+ "ikigai-vocab",
+ "serde_json",
+]
+
+[[package]]
 name = "notify"
 version = "6.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
