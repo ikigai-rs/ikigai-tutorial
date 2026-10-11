@@ -140,30 +140,35 @@ oxrdf = "0.3"
 # The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
-# built from, at their newest releases. The gonk in `gonk.rev` (d9c9bcf) links the same ledger
-# 0.6.2, store 0.2.12 and browse 0.18.2; only its core differs (0.1.93, these crates 0.1.95). From
-# the morning of 2026-10-10 until that pin moved, these crates were AHEAD of the pinned gonk
-# (edb9a3d: ledger 0.5.0, store 0.2.8, browse 0.18.0). A console transcript is gonk's answer and
-# a cell or `cargo run` is these crates', each checked against its own source.
-# The API floor is 0.4.0, because part 5's `sync_ledger` files each task with the keyed append it
-# added (`append key=<task IRI>`: at most one item per key, enforced by the ledger in the same
-# store update that files it, answering `existing` when the key is taken), which is what makes two
-# concurrent syncs safe. It also made `Item` and `Filter` `#[non_exhaustive]`; no crate here
-# builds either. The pin is 0.6.2 because it is the published head, past 0.5.0's 0.x ceiling
-# (<0.6.0): 0.6.0 names `space()` `urn:iki:space:ledger` (ledger #987), 0.6.1 draws a real id nonce
-# in the browser (ledger #797), and 0.6.2 makes a page of `items` say it is a page (`1–2 of 5
-# item(s)`, with `offset=`; ledger #419), adds `…:item:{id}:about`, and floors ikigai-store at
-# 0.2.10. No page here asks `items` for a `limit=` smaller than the ledger, so every `N item(s)`
-# line a page prints is unchanged. Before that the pin was 0.5.0, what the gonk in `gonk.rev`
-# links (edb9a3d, gonk PR 107): an item's lifecycle state as a compare-and-set atom, claim leases with a kind
-# the host stamps, and the doctor (ledger #775). Nothing here uses them yet, and the cells and Rust
-# chapters print what they did (every JSON addition is a new field); the one transcript that
-# lists the ledger's MCP tools ("Over MCP") gains eight. Before that the pin was 0.4.2, where
-# a malformed timestamp stopped dropping an item from `items`/`next` (ledger #866). Before 0.4.0
-# the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that the first chapter
-# walks straight through — two appends in one millisecond minting the same id, and `next` cached
-# across the clock. A 0.x caret, so also a ceiling (<0.7.0): read it as a RANGE.
-ikigai-ledger = "0.6.2"
+# built from, at their newest releases. The gonk in `gonk.rev` (9704b54) links core 0.1.95, store
+# 0.2.12 and browse 0.18.2, as these crates do, and ledger 0.6.2, where these crates take 0.9.0:
+# for the ledger these crates are AHEAD of the pinned gonk. A console transcript is gonk's answer
+# and a cell or `cargo run` is these crates', each checked against its own source.
+# The API floor is 0.9.0, because part 5 ("The ledger as the work queue") asks the ledger how many
+# items implement a requirement with `urn:iki:ledger:count`, which 0.9.0 added (the total alone,
+# one COUNT query, without `items`' page or its corpus check; ledger #1128). Below that, 0.4.0 is
+# the floor `sync_ledger` needs: the keyed append (`append key=<task IRI>`: at most one item per
+# key, enforced by the ledger in the same store update that files it, answering `existing` when
+# the key is taken), which is what makes two concurrent syncs safe. It also made `Item` and
+# `Filter` `#[non_exhaustive]`; no crate here builds either.
+# What 0.7.0 and 0.8.0 brought (neither was published on its own; 0.9.0 carries both): per-verb
+# grants `urn:cap:ledger:{claim,comment,close}:{ledger}`, which `write:{ledger}` still covers, so
+# `ledger-host`'s four-token writer is unchanged; a close RELEASES the item's claim in the same
+# update (no page closes a claimed item, so no answer a page prints moved); `release from=`,
+# `claim renew=true`, keyed comments, `comment handback=true` (an awaiting-dispatcher state that
+# `next` excludes), and a claim's holder bound to the capability's principal when it carries one
+# (root carries none, so every claim here is the free-text holder it was). Every cell and Rust
+# chapter prints what it did on 0.6.2.
+# Before 0.9.0 the pin was 0.6.2: 0.6.0 names `space()` `urn:iki:space:ledger` (ledger #987),
+# 0.6.1 draws a real id nonce in the browser (ledger #797), and 0.6.2 makes a page of `items` say
+# it is a page (`1–2 of 5 item(s)`, with `offset=`; ledger #419), adds `…:item:{id}:about`, and
+# floors ikigai-store at 0.2.10. Before that the pin was 0.5.0 (an item's lifecycle state as a
+# compare-and-set atom, claim leases with a kind the host stamps, and the doctor; ledger #775),
+# then 0.4.2, where a malformed timestamp stopped dropping an item from `items`/`next` (ledger
+# #866). Before 0.4.0 the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that
+# the first chapter walks straight through: two appends in one millisecond minting the same id,
+# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.10.0): read it as a RANGE.
+ikigai-ledger = "0.9.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.12 is the pin because it is the published head, and markdown 0.1.3

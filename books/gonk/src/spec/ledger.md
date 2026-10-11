@@ -94,11 +94,11 @@ assert!(item.contains("key:      urn:openspec:change:add-undo:task:1.2"), "{item
 assert!(item.contains("about:    urn:openspec:change:add-undo:task:1.2"), "{item}");
 assert!(item.contains("about:    urn:openspec:spec:moves:requirement:the-last-move-can-be-undone"));
 
-// So the ledger can be asked by requirement.
-let undo = ask(&host, Verb::Source, "urn:iki:ledger:items", &[
+// So the ledger can be asked by requirement: how many items implement it.
+let undo = ask(&host, Verb::Source, "urn:iki:ledger:count", &[
     ("about", "urn:openspec:spec:moves:requirement:the-last-move-can-be-undone"),
 ]).unwrap();
-assert!(undo.contains("2 item(s)"), "{undo}");
+assert_eq!(undo, "2\n");
 
 // And `next` ranks them with everything else in the ledger.
 let next = ask(&host, Verb::Source, "urn:iki:ledger:next", &[]).unwrap();
@@ -119,6 +119,11 @@ assert_eq!(sync_ledger(&host).unwrap(), [
 let next = ask(&host, Verb::Source, "urn:iki:ledger:next", &[]).unwrap();
 assert!(next.starts_with("nothing is ready"), "{next}");
 ```
+
+`count` takes the same filter `items` does (`about`, `status`, `labels`, …) and answers the number
+alone: one COUNT query, without the listing's page or the check `items` makes over the whole ledger
+for an item it cannot read. It arrived in `ikigai-ledger` 0.9.0; `items` with the same `about=`
+ends with the same total (`2 item(s)`) and the two items besides.
 
 The labels name the change (`[add-undo openspec]`), the title carries the task's number, and the
 close reason is a comment on the item, so a person reading the ledger later sees *why* it closed
@@ -143,8 +148,9 @@ through it. So the split is the natural one. A host of your own links the lift a
 `urn:gk:iki:store:graph-select` and `urn:gk:iki:ledger:append` are all served to the owner).
 The graphs then live in gonk's durable store beside the ledger, and gonk's own pages show the
 items. The key needs a gonk whose ledger knows it, `ikigai-ledger` 0.4.0 or later, and the gonk
-this book pins ([`gonk.rev`](../introduction.md#which-gonk)) links 0.6.2. (This book's checks run
-the in-process host above, not that arrangement.) gonk does not run the sync itself; doing that
+this book pins ([`gonk.rev`](../introduction.md#which-gonk)) links 0.6.2, which has the key but not
+`count`: against that gonk, ask `items` with `about=` and read its last line. (This book's checks
+run the in-process host above, not that arrangement.) gonk does not run the sync itself; doing that
 on a watcher over a browse root's `openspec/` directory would be a separate piece of work.
 
 There are no Run cells in this part, on purpose. The page's kernel is the ledger over an in-memory

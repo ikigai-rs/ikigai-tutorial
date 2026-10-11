@@ -64,13 +64,16 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-ledger` 0.6.2 (0.4.0 added the keyed
-append [part 5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through),
-`ikigai-store` 0.2.12 and `ikigai-browse` 0.18.2, the same releases the book's own crates (the
-ones its Rust listings and in-page cells run) take. The kernel is the one place they differ:
-gonk links `ikigai-core` 0.1.93 and the book's crates 0.1.95, and nothing a page shows depends
-on the difference. A `console` block is checked against the pinned gonk, and a listing or a
-cell against the book's crates.
+The modules it links are published crates: `ikigai-core` 0.1.95, `ikigai-store` 0.2.12 and
+`ikigai-browse` 0.18.2, the same releases the book's own crates (the ones its Rust listings and
+in-page cells run) take, and `ikigai-ledger` 0.6.2 (0.4.0 added the keyed append [part
+5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through). The ledger is
+the one place they differ: the book's crates take 0.9.0, which adds `count`, the number of items a
+filter admits without the listing, and part 5's walk asks it; gonk's 0.6.2 has no `count`. Between
+the two, a close also releases the item's claim, and the ledger gained per-verb grants (claim,
+comment, close) and a hand-back state that `next` leaves out; no page here closes a claimed item
+or hands one back, so every answer the two print for the same request is the same. A `console`
+block is checked against the pinned gonk, and a listing or a cell against the book's crates.
 
 What the pin's last move (from edb9a3d) changed for a reader, each where the page
 that shows it says so: a browse root no longer lists or serves its `.git` directory

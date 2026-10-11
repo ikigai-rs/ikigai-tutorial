@@ -120,13 +120,16 @@ under its own key: this pin follows gonk's lock, that one follows the release th
 pages were last replayed against.)
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
-`ikigai-ledger` 0.6.2, `ikigai-store` 0.2.12 (in-memory, `persistent` off; 0.2.7 is a security
-floor, ledger #915) and `ikigai-browse` 0.18.2 (itself a security floor: it never serves `.git`,
-ledger #1126), with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
-There was one exception, from the morning `ikigai-ledger` 0.4.0 was published until the pin moved
-to ad0653b (gonk PR #86, the keyed bridges): the book's crates took 0.4.0 while the pinned gonk
-linked 0.3.0, so no transcript could use `key=` against gonk. That is closed; if a later arc has to
-open one like it, the introduction says so, and so does the chapter it touches.
+`ikigai-store` 0.2.12 (in-memory, `persistent` off; 0.2.7 is a security floor, ledger #915) and
+`ikigai-browse` 0.18.2 (itself a security floor: it never serves `.git`, ledger #1126), with
+`oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`. The ledger is the
+exception, and it is OPEN: since ledger #1198 (2026-10-11) the book's crates take `ikigai-ledger`
+0.9.0 while the pinned gonk (9704b54) links 0.6.2, so part 5's walk asks `count` (0.9.0) and no
+transcript can. The introduction says so, and so does part 5's "In gonk" section. It closes when
+the pin moves to a gonk that links 0.9.0 or later (gonk main took 0.8.0 in gonk PR #128, which has
+no `count`). There was one before it, from the morning `ikigai-ledger` 0.4.0 was published until
+the pin moved to ad0653b (gonk PR #86, the keyed bridges): the book's crates took 0.4.0 while the
+pinned gonk linked 0.3.0, so no transcript could use `key=` against gonk.
 
 **`ikigai-markdown`** is taken at 0.1.0 from crates.io. Until it was published (2026-10-06) it was
 pinned the way this book pins gonk, to one full git revision of its public repository, never a
