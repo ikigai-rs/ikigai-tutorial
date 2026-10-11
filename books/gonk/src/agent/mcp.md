@@ -33,7 +33,7 @@ $ mkdir -p .config/ikigai
 $ ikigai-gonk client add agent --ledger default=write --port 1070 --config-home "$PWD/.config/ikigai"
 client `agent`  …/.config/ikigai/gonk/quic/clients/agent
   fingerprint  …
-  principal    urn:iki:gonk:client:…
+  principal    urn:iki:host:gonk:client:…
   enrolled     grant `agent` (4 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
@@ -195,8 +195,8 @@ $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:
 {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.44"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
-{"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:gonk:client:…\n  updated:  …\n"}],"isError":false}}
-{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:gonk:client:…."}],"isError":true}}
+{"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n"}],"isError":false}}
+{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:host:gonk:client:…."}],"isError":true}}
 {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"tool `ledger-item__delete` is not available under this capability"}],"isError":true}}
 {"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them"}],"isError":true}}
 ```
@@ -208,7 +208,7 @@ Read the answers in order:
   in the ledger, so this holds for concurrent retries as well as sequential ones. An agent that
   keys what it files can retry freely.
 - **4: the author is the agent.** The item was filed with no `author` argument, and gonk filled
-  it with the name of the identity that asked, `urn:iki:gonk:client:<fingerprint>`, from the
+  it with the name of the identity that asked, `urn:iki:host:gonk:client:<fingerprint>`, from the
   certificate the connection was made with.
 - **5: and only the agent.** On the QUIC door an `author` that names a principal must be the
   caller's own, so the agent cannot file as Ada. This is the residual the socket chapter ended
@@ -227,11 +227,11 @@ Read the answers in order:
 $ grep -E 'quic client| door=quic ' gonk.log
 ikigai-gonk: quic client … → grant "agent"
 ikigai-gonk: quic client … → grant "agent"
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:item:key:agent-task-1 door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:default:item:key:agent-task-1 door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 ```
 
 One connection line per `ikigai mcp` process, naming the grant. One access line per request
@@ -262,7 +262,7 @@ the default port opens its QUIC door on UDP 1060.
 | a browser | HTTP, loopback | anonymous, or a passkey's grant | `anon`, or the passkey |
 | `curl`, a hook | HTTP, loopback | anonymous | `anon` |
 | `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `owner` |
-| an agent over MCP | QUIC, with its own certificate | its client's grant on the server, and its own ceiling on the client | the agent's `urn:iki:gonk:client:…` |
+| an agent over MCP | QUIC, with its own certificate | its client's grant on the server, and its own ceiling on the client | the agent's `urn:iki:host:gonk:client:…` |
 
 The agent's tool calls were the ledger's resources by their own names, the same `append`, `item`
 and `next` that the page's kernel ran in [the first chapter](../ledger/your-own.md), with the same

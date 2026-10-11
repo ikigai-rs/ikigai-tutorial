@@ -1,0 +1,10 @@
+# Every text file is checked out with LF line endings, on every platform (ledger #1205).
+#
+# `ikigai-devtools`' vector-drift compares shared vectors by their raw bytes, and the
+# tic-tac-toe template language's normative cases live in `crates/tic-tac-toe/README.md`,
+# copied verbatim into the polyglot faces. A Windows clone with `core.autocrlf=true` would
+# otherwise check that README out with CRLF, and the copy would read as drift. The index is
+# already LF throughout (`git ls-files --eol`, 2026-10-10), so this needs no renormalize.
+* text=auto eol=lf
+*.md text eol=lf
+*.sh text eol=lf

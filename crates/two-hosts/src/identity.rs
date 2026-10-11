@@ -31,7 +31,7 @@ pub fn minter(enrolled: BTreeMap<String, Vec<String>>) -> Minter {
             file_segment: peer.segment_id.clone(),
             // Who the server says is asking, stamped on every request as a NAME — never
             // authority, which is `capability` alone. This minter names no one; gonk names
-            // each client `urn:iki:gonk:client:<fingerprint>` here.
+            // each client `urn:iki:host:gonk:client:<fingerprint>` here.
             principal: None,
         })
     })

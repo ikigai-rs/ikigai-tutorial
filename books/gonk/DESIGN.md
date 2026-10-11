@@ -32,7 +32,7 @@ used stand alone."
 | | Importing a kata ledger | transcripts: a fixture export (gonk's test fixture) into a ledger of its own, `--dry-run` (it reads the ledger), the import, `next` over the imported links, a re-run, a dry run of a later export naming the one new comment, that export converging, what is lost (ledger #774) | **written** |
 | | Checkout | transcripts: `file://` scratch remotes, clone, `--write-config`, an update, `--all` with its coverage report, a refusal on a dirty checkout; the timer (manual) | **written** |
 | | A fresh machine, end to end | transcripts: checkout → roots → start → kata import → the roborev hook → `next`, in one session | **written** |
-| Several machines | The three doors | transcripts: `client add --port 1070` (the QUIC door opens only with a certificate enrolled; `--port` makes the printed `--connect` line right), gonk with `--port 1070` (which moves the QUIC door to UDP 1070 too, since gonk PR 93), one request through each door, the access log read back from a `tee`d file (`door=`, `principal=`: `anon`/`owner`/`-` on HTTP and the socket, and the client's `urn:iki:gonk:client:<fingerprint>` on every QUIC request), a QUIC write's author filled with that name and a write naming another principal refused, a refusal at the door's floor that writes no line | **written** |
+| Several machines | The three doors | transcripts: `client add --port 1070` (the QUIC door opens only with a certificate enrolled; `--port` makes the printed `--connect` line right), gonk with `--port 1070` (which moves the QUIC door to UDP 1070 too, since gonk PR 93), one request through each door, the access log read back from a `tee`d file (`door=`, `principal=`: `anon`/`owner`/`-` on HTTP and the socket, and the client's `urn:iki:host:gonk:client:<fingerprint>` on every QUIC request), a QUIC write's author filled with that name and a write naming another principal refused, a refusal at the door's floor that writes no line | **written** |
 | | A QUIC client | transcripts: `client add laptop --ledger default=write --browse read --root notes`, `grants.json`, the bundle copied to a second directory (`laptop/`), `ikigai --connect quic://… --cert-dir`, refusals outside the grant (delete at the floor, another ledger at the ledger), a stranger's certificate refused in the handshake (the client is told only "connection lost"), the server's log naming the client; a raw store write to the ledger graph refused at the door, then allowed after `--ledger-graph default --force` (the identity kept); `client list`, `--rotate` with no scope flags (the enrollment moves to the new certificate, same grant, since gonk PR 106) with the old bundle refused, `client remove`; a real second machine is manual | **written** |
 | Embedding | The ledger, store and browse in your own kernel | Rust (`crates/embed-host`): one dataset handed to the store and to browse with a `SharerWrites` promise (`in_memory_shared_declaring`) and browse confined to that graph; the stub model; three callers' capabilities (agent, headless reviewer, person) each refused outside its lines; the ledger↔browse join through `graph-select` over both graphs; a cached ledger read asserted with `Kernel::is_cached` | **written** |
 
@@ -72,7 +72,7 @@ link, so the outline is visible on the published site and nothing 404s.
   `--data-home` does, and what would have landed in a reader's real homes. An empty directory is
   not a write (`ikigai` makes `~/.ikigai/workspace` on every start). A page that truly needs
   `HOME` as its own directory declares it once, with its reason:
-  `<!-- transcripts: home — why -->` (plural, a PAGE's declaration; none needs it at d9c9bcf).
+  `<!-- transcripts: home — why -->` (plural, a PAGE's declaration; none needs it at 9704b54).
   Through 77ac767 the runner set `HOME` to the page's directory for every command, so a forgotten
   flag passed here and was reviewed by eye.
   Since arc 2 two more things: a fence of ANY language declared `file NAME` is written to
@@ -111,9 +111,9 @@ crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --
 and the file is one line read by the introduction's install line, the script and CI's cache
 key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and
 `ikigai-web` share the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3,
-77ac767 and edb9a3d; 0.1.44 at d9c9bcf), so the client speaks the server's wire; moving gonk is a
+77ac767 and edb9a3d; 0.1.44 at d9c9bcf and 9704b54), so the client speaks the server's wire; moving gonk is a
 reason to look at this file too. (0.1.42 and 0.1.43 were already on crates.io when the pin moved to
-edb9a3d, and 0.1.45 and 0.1.46 when it moved to d9c9bcf; the rule takes what gonk links. The ikigai Book's REPL transcripts are a
+edb9a3d, 0.1.45 and 0.1.46 when it moved to d9c9bcf, and 0.1.47 when it moved to 9704b54; the rule takes what gonk links. The ikigai Book's REPL transcripts are a
 separate check, `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
 `books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
 under its own key: this pin follows gonk's lock, that one follows the release the ikigai Book's

@@ -37,7 +37,7 @@ notes` reads that one repository.
 $ ikigai-gonk client add laptop --ledger default=write --browse read --root notes --port 1070 --config-home "$PWD/.config/ikigai"
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
-  principal    urn:iki:gonk:client:…
+  principal    urn:iki:host:gonk:client:…
   enrolled     grant `laptop` (6 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
@@ -134,7 +134,7 @@ command copied from it could narrow a client's existing authority (it printed a 
 $ ikigai-gonk client add stranger --port 1070 --config-home "$PWD/.config/ikigai"
 client `stranger`  …/.config/ikigai/gonk/quic/clients/stranger
   fingerprint  …
-  principal    urn:iki:gonk:client:…
+  principal    urn:iki:host:gonk:client:…
   NOT enrolled — a trusted certificate with no grant is refused. Enroll it:
     ikigai-gonk client add stranger --ledger <ledger>=<read|write|delete|purge>
   restart ikigai-gonk: trusted certificates are read at startup
@@ -158,11 +158,11 @@ server's `clients.json` and restart the server if the certificate was enrolled a
 ```console
 $ grep -E 'quic client| door=quic ' gonk.log
 ikigai-gonk: quic client … → grant "laptop"
-… gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
-… gonk:Access urn:repo:notes:tree door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
-… gonk:Access urn:repo:notes:file:README.md door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:repo:notes:tree door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:repo:notes:file:README.md door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 ikigai-gonk: quic client … → grant "laptop"
-… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 ```
 
 One connection line per session naming the grant, and one access line per request the door
@@ -193,7 +193,7 @@ exists, so changing it takes `--force`, which names what it changes:
 $ ikigai-gonk client add laptop --ledger default=write --browse read --root notes --ledger-graph default --force --port 1070 --config-home "$PWD/.config/ikigai"
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
-  principal    urn:iki:gonk:client:…
+  principal    urn:iki:host:gonk:client:…
   enrolled     grant `laptop` (7 scopes) in …/.config/ikigai/gonk/grants.json
   REPLACED     grant `laptop` (--force) — every identity enrolled under it holds the new list from its next request or connection:
     adds     urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default
@@ -235,7 +235,7 @@ was refused at its next connection:
 $ ikigai-gonk client add laptop --rotate --port 1070 --config-home "$PWD/.config/ikigai"
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
-  principal    urn:iki:gonk:client:…
+  principal    urn:iki:host:gonk:client:…
   enrolled     under grant `laptop`, unchanged — the old certificate's … moved to this one
   ROTATED      the old certificate … was unenrolled — a client still holding the old bundle is refused from its next connection; give it this one
   restart ikigai-gonk: trusted certificates are read at startup

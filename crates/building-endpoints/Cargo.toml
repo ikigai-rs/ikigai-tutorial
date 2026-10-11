@@ -20,13 +20,17 @@ path = "src/bin/building.rs"
 ikigai-core.workspace = true
 ikigai-vocab.workspace = true
 ikigai-sparql.workspace = true
-# Not used by this crate. They are here to CONSTRAIN the resolver: `spareval` (under
-# oxigraph, under ikigai-sparql) admits `>=0.10,<0.12` on md-5, sha1 and sha2, while
-# `ikigai-quic` (under two-hosts, in this same workspace) pins `sha2 = "0.10"`. Left to
-# itself the resolver picks md-5/sha1 0.11 beside sha2 0.10 — two `digest` majors in one
-# crate — and spareval fails to compile with "the trait bound `…: Digest` is not
-# satisfied", nowhere near the cause. Stating 0.10 here makes every fresh resolve pick
-# one major, which a lockfile pin alone would not survive a `cargo update`.
+# Not used by this crate, and NOT a defense: a direct dependency is its own edge and never
+# constrains another crate's. `spareval` (under oxigraph, under ikigai-sparql) takes md-5, sha1
+# and sha2 as three independent `>=0.10,<0.12` edges and bounds them all by md-5's `Digest`, so
+# a lock that pairs sha2 0.10 with md-5/sha1 0.11 on spareval fails to compile ("the trait bound
+# `…: Digest` is not satisfied", nowhere near the cause). A fresh resolve never produces that:
+# it takes 0.11 for all three even with these pins beside it (measured, ledger #1148). An
+# incremental one can (a `cargo add` or `update -p` while `ikigai-quic`'s `sha2 = "0.10"` is
+# locked). This workspace's lock sits on the consistent 0.10 series because of its history, not
+# because of these lines. If it ever mixes: `cargo tree -p spareval -e normal --depth 1`, then
+# `cargo update -p <the stale crate>@<its version>` (never --precise). ikigai-devtools'
+# `just lock-lint` checks every committed lock daily (ledger #1195).
 md-5 = "0.10"
 sha1 = "0.10"
 oxttl.workspace = true
