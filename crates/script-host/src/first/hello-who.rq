@@ -1,0 +1,4 @@
+# @param who xsd:string default world
+SELECT (CONCAT("Hello, ", ?who, "!") AS ?greeting)
+FROM <urn:iki:tutorial:empty>
+WHERE {}

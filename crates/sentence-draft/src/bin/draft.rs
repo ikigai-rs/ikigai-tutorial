@@ -4,6 +4,7 @@
 //! cargo run -p sentence-draft                          # the stub model, as every gate runs it
 //! cargo run -p sentence-draft -- 3                     # only section 3 (every section still runs)
 //! cargo run -p sentence-draft -- 0 --ollama llama3.1   # a local Ollama, at that model
+//! cargo run -p sentence-draft -- ask                   # "Your first script", step 4 (the stub)
 //! ```
 //!
 //! Each line that starts `alice>`, `bob>`, `carol>` or `host>` is one request under that
@@ -11,16 +12,21 @@
 
 use ikigai_core::{Capability, Kernel, Verb};
 use ikigai_nl::Grounding;
+use script_host::first::SHELF;
 use script_host::show::{self, line, say, section};
 use script_host::{issue, ITEMS};
 use sentence_draft::{
-    alice, bob, carol, kernel, publish_example, Model, ASK_P2, ASK_TITLES, P2_CORRECTED,
-    TITLES_FIRST,
+    alice, bob, carol, kernel, publish_example, shelf_kernel, Model, ASK_BOOKS, ASK_P2, ASK_TITLES,
+    P2_CORRECTED, TITLES_FIRST,
 };
 
 fn main() {
-    show::from_args();
     let args: Vec<String> = std::env::args().collect();
+    // The first page's step, `-- ask`: a sentence on the shelf, on a host of its own.
+    if args.get(1).map(String::as_str) == Some("ask") {
+        return first_ask();
+    }
+    show::from_args();
     // ANCHOR: model
     let model = match args.iter().position(|a| a == "--ollama") {
         Some(at) => Model::Ollama(args.get(at + 1).cloned().unwrap_or("llama3.1".into())),
@@ -224,4 +230,51 @@ fn ask(
 ) {
     // A refusal is part of what the program shows, so it is printed, not raised.
     let _ = show::ask(kernel, who, capability, verb, iri, args, command);
+}
+
+/// "Your first script", step 4: ask in a sentence, look at the draft, publish it, run it. On a
+/// host of its own, holding the shelf of three books, with the stub as the model.
+fn first_ask() {
+    let kernel = shelf_kernel(&Model::stub());
+    let you = Capability::root();
+    ask(
+        &kernel,
+        "you",
+        &you,
+        Verb::Sink,
+        "urn:nl:sparql",
+        &[("ask", ASK_BOOKS), ("graph", SHELF), ("save", "book-count")],
+        &format!(
+            "sink urn:nl:sparql ask=\"{ASK_BOOKS}\" graph=urn:iki:tutorial:shelf save=book-count"
+        ),
+    );
+    // Publishing is the draft's own text, sunk again with `state=published`.
+    say(
+        "you",
+        "source urn:script:book-count | sink urn:script:book-count language=sparql state=published",
+    );
+    let draft = issue(&kernel, &you, Verb::Source, "urn:script:book-count", &[])
+        .unwrap_or_else(|e| panic!("the draft: {e}"));
+    let published = issue(
+        &kernel,
+        &you,
+        Verb::Sink,
+        "urn:script:book-count",
+        &[
+            ("language", "sparql"),
+            ("state", "published"),
+            ("content", &draft),
+        ],
+    )
+    .unwrap_or_else(|e| panic!("publishing the draft: {e}"));
+    show::text(&published);
+    ask(
+        &kernel,
+        "you",
+        &you,
+        Verb::Source,
+        "urn:script:book-count:result",
+        &[("as", "text/csv")],
+        "source urn:script:book-count:result as=text/csv",
+    );
 }

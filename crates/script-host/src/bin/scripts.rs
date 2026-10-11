@@ -5,6 +5,7 @@
 //! ```text
 //! cargo run -p script-host          # every section
 //! cargo run -p script-host -- 2     # only section 2 (every section still runs)
+//! cargo run -p script-host -- hello # "Your first script", step 1 (also `shelf`, `grant`)
 //! ```
 //!
 //! A read says whether the kernel answered it from its cache (`[cached]`) or had to compute
@@ -15,6 +16,12 @@ use script_host::show::{self, ask, line, say, section};
 use script_host::{alice, kernel, read, version_of, CLOSE_ITEM, OPEN_ITEMS};
 
 fn main() {
+    // The first page's steps are words (`-- hello`, `-- shelf`, `-- grant`), each its own host.
+    if let Some(step) = std::env::args().nth(1) {
+        if script_host::first::run(&step) {
+            return;
+        }
+    }
     show::from_args();
     let kernel = kernel();
     let alice = alice();

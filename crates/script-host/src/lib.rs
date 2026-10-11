@@ -23,6 +23,8 @@ use ikigai_script::sparql::SparqlDoor;
 use ikigai_script::{ChangeHook, MemoryBackend, SpaceConfig};
 use ikigai_store::DurableStore;
 
+pub mod first;
+
 /// The named graph the items live in.
 pub const ITEMS: &str = "urn:iki:tutorial:items";
 
@@ -118,6 +120,15 @@ pub fn space() -> Fallback {
 /// descriptions under `urn:kernel:bindings`, which only the host can cut: so the change hook
 /// reaches back to the kernel it is part of, through a cell filled once the kernel exists.
 pub fn kernel_beside(ceiling: CeilingPolicy, beside: Vec<Arc<dyn Space>>) -> Arc<Kernel> {
+    kernel_over(ceiling, beside, Some(SEED))
+}
+
+/// [`kernel_beside`], with the store seeded by `seed` (a SPARQL update), or left empty.
+pub fn kernel_over(
+    ceiling: CeilingPolicy,
+    beside: Vec<Arc<dyn Space>>,
+    seed: Option<&str>,
+) -> Arc<Kernel> {
     let cell: Arc<OnceLock<Weak<Kernel>>> = Arc::new(OnceLock::new());
     let reach = Arc::clone(&cell);
     let hook: ChangeHook = Arc::new(move |_name: &str| {
@@ -135,14 +146,16 @@ pub fn kernel_beside(ceiling: CeilingPolicy, beside: Vec<Arc<dyn Space>>) -> Arc
         .with_clock(Arc::new(FixedClock::at(BOOK_TIME))),
     );
     let _ = cell.set(Arc::downgrade(&kernel));
-    issue(
-        &kernel,
-        &Capability::root(),
-        Verb::Sink,
-        "urn:iki:store:update",
-        &[("content", SEED)],
-    )
-    .expect("seeding the store");
+    if let Some(seed) = seed {
+        issue(
+            &kernel,
+            &Capability::root(),
+            Verb::Sink,
+            "urn:iki:store:update",
+            &[("content", seed)],
+        )
+        .expect("seeding the store");
+    }
     kernel
 }
 // ANCHOR_END: kernel

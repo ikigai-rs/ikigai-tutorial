@@ -70,6 +70,7 @@
 
 # Code and language as resources
 
+- [Your first script](code/first.md)
 - [Scripts are resources](code/scripts.md)
 - [Who a script runs as](code/authority.md)
 - [A sentence becomes a draft](code/sentence.md)

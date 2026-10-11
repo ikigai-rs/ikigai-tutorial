@@ -15,7 +15,8 @@ HTTP, an agent's tool list, a timer) reaches it the way it reaches anything else
 script is a read or a write, so the cache, the golden threads and the capabilities already
 apply to it, and none of them is written again.
 
-Three chapters. This one publishes a query and runs it. [Who a script runs
+[Your first script](first.md) showed each of these once, on a shelf of books. Three chapters
+take them in depth, on a handful of work items. This one publishes a query and runs it. [Who a script runs
 as](authority.md) asks under whose authority it runs, which is the question a published piece of
 code always raises. [A sentence becomes a draft](sentence.md) lets a language model write one, and
 shows how little the model is allowed to do.

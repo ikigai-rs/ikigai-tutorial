@@ -42,6 +42,7 @@
 
 # Scripts and sentences
 
+- [Your first saved query](scripts/first.md)
 - [Scripts and sentences in gonk](scripts/in-gonk.md)
 
 # Embedding

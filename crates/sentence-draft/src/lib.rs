@@ -30,6 +30,18 @@ pub const ASK_TITLES: &str = "the titles of the open items";
 pub const ASK_P2: &str =
     "the number and title of every open item with priority 2 or higher (0 is highest), ordered by number";
 
+// ANCHOR: book_count
+/// The first page's ask, and what the stub answers it with: a count, which passes the check
+/// the first time.
+pub const ASK_BOOKS: &str = "How many books are on the shelf?";
+
+/// The stub's draft for [`ASK_BOOKS`].
+pub const BOOK_COUNT: &str = "PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT (COUNT(?book) AS ?books) WHERE {
+  GRAPH <urn:iki:tutorial:shelf> { ?book dcterms:title ?title }
+}";
+// ANCHOR_END: book_count
+
 // ANCHOR: drafts
 /// The stub's first draft for [`ASK_TITLES`]: `ledger:state` is not a predicate the items
 /// graph uses (it says `ledger:status`), and the check says so.
@@ -97,6 +109,7 @@ impl Model {
         Model::Stub(Arc::new(Mutex::new(stub::Stub::new(&[
             (ASK_TITLES, &[TITLES_FIRST, TITLES_REPAIRED]),
             (ASK_P2, &[P2_DRAFT]),
+            (ASK_BOOKS, &[BOOK_COUNT]),
         ]))))
     }
 
@@ -134,6 +147,22 @@ pub fn kernel_with(model: &Model, yours: Vec<Arc<dyn Space>>) -> Arc<Kernel> {
     script_host::kernel_beside(same_for_all(Ceiling::unbounded()), beside)
 }
 // ANCHOR_END: host
+
+/// The first page's drafting host: the script host in front of a store holding the shelf of
+/// three books (`script_host::first`), then `ikigai-nl`, the vocabulary and a model door. No
+/// worked examples: the shelf is all there is to see.
+pub fn shelf_kernel(model: &Model) -> Arc<Kernel> {
+    let nl = SpaceConfig::new().examples(Examples::Named(Vec::new()));
+    script_host::kernel_over(
+        same_for_all(Ceiling::unbounded()),
+        vec![
+            Arc::new(ikigai_nl::space(nl)) as Arc<dyn Space>,
+            Arc::new(ikigai_vocab::space()) as Arc<dyn Space>,
+            model.space(),
+        ],
+        Some(script_host::first::BOOKS),
+    )
+}
 
 /// The host's spaces with the stub as the model, for the book's name gate.
 pub fn space() -> Fallback {

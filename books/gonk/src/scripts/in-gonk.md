@@ -4,9 +4,9 @@
 name, fetched without running, run as a read, versioned by its content, and run under the least of
 what its publisher held, what its runner holds and what the host allows. Its [next
 chapter](../../code/sentence.html) let a model write the query, as a **draft** nobody but the
-person who asked could see, until a person published it. This chapter does not teach either idea
-again. It shows the same two things in gonk, which mounts
-[`ikigai-script`](https://crates.io/crates/ikigai-script) and
+person who asked could see, until a person published it. [Your first saved query](first.md) did
+each once in gonk, as its owner. This chapter does not teach either idea again. It shows the same
+two things in gonk, which mounts [`ikigai-script`](https://crates.io/crates/ikigai-script) and
 [`ikigai-nl`](https://crates.io/crates/ikigai-nl) behind its three doors, and so has to answer a
 question a library cannot: **who is asking**, through which door, and what each of them may do.
 

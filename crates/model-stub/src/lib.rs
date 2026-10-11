@@ -68,6 +68,16 @@ SELECT ?title WHERE {
   GRAPH <urn:iki:ledger:graph:default> { ?item ledger:status ledger:open ; dcterms:title ?title }
 } ORDER BY ?title";
 
+/// The first page's ask ("Your first saved query"), which drafts right the first time.
+pub const ASK_OPEN_COUNT: &str = "How many open items are there?";
+
+/// The draft for [`ASK_OPEN_COUNT`]: a count of the open items, the query the page's reader
+/// wrote by hand a step earlier.
+pub const OPEN_COUNT: &str = "PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
+SELECT (COUNT(?item) AS ?count) WHERE {
+  GRAPH <urn:iki:ledger:graph:default> { ?item ledger:status ledger:open }
+}";
+
 /// Any other ask: every item's number and title.
 pub const ANYTHING: &str = "PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -91,6 +101,8 @@ pub fn draft_for(prompt: &str) -> &'static str {
     let repairing = prompt.contains("Your previous draft was:");
     if ask == ASK_P2 {
         P2_DRAFT
+    } else if ask == ASK_OPEN_COUNT {
+        OPEN_COUNT
     } else if ask == ASK_TITLES {
         if repairing {
             TITLES_REPAIRED
@@ -216,6 +228,7 @@ mod tests {
         assert_eq!(draft_for(&prompt(ASK_P2, false)), P2_DRAFT);
         assert_eq!(draft_for(&prompt(ASK_TITLES, false)), TITLES_FIRST);
         assert_eq!(draft_for(&prompt(ASK_TITLES, true)), TITLES_REPAIRED);
+        assert_eq!(draft_for(&prompt(ASK_OPEN_COUNT, false)), OPEN_COUNT);
         assert_eq!(draft_for(&prompt("something else", false)), ANYTHING);
         assert_eq!(draft_for("no ask at all"), ANYTHING);
     }
