@@ -107,8 +107,9 @@ request for the tool list.
 
 The command is the one an agent framework is configured with. `--override` mounts gonk's QUIC
 door at `urn:iki:ledger:`, so every ledger name goes there and nowhere else; `--cert-dir` after
-it is that mount's identity; `--grant` is the ceiling above. `ikigai` 0.1.41 has no flag for its
-config home, so the page points `XDG_CONFIG_HOME` at the agent's directory. The tool names are
+it is that mount's identity; `--grant` is the ceiling above. The page points
+`XDG_CONFIG_HOME` at the agent's directory to give it a config home of its own
+(`--config-home agent/.config/ikigai` says the same since `ikigai-cli` 0.1.43). The tool names are
 picked out of the answer and sorted (byte order, so the list reads the same on every machine), because the full answer carries every argument's
 description:
 
@@ -126,6 +127,8 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-defer__delete"
 "name":"ledger-defer__sink"
 "name":"ledger-doctor__source"
+"name":"ledger-item-about__delete"
+"name":"ledger-item-about__sink"
 "name":"ledger-item-closed__exists"
 "name":"ledger-item-holder-is__exists"
 "name":"ledger-item-state-is__exists"
@@ -148,14 +151,17 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-reopen__sink"
 ```
 
-Twenty-eight tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
+Thirty tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
 `urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. Eight of
 them arrived with `ikigai-ledger` 0.5.0 and are not used in this book yet: an item's lifecycle
 **state** (`ledger-item-state__*`, a compare-and-set, so of two agents moving one item out of the
 same state exactly one wins), the **assertions** an agent can check before it acts
 (`ledger-item-state-is__exists`, `-holder-is`, `-closed`), the **lifecycles** themselves as
 resources, and the **doctor**, a read-only report of orphaned, abandoned and lease-expired work.
-A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a deferral).
+Two more arrived with 0.6.2: `ledger-item-about__sink` and `__delete`, which add and remove what an
+item is **about** (a file, a PR, the session that delivered it) without touching its title or body.
+A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
+deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging
 takes another, and this grant holds neither.
 
@@ -186,7 +192,7 @@ and another ledger:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/calls.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.41"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.44"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:gonk:client:…\n  updated:  …\n"}],"isError":false}}

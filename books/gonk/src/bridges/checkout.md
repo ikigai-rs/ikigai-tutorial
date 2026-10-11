@@ -69,8 +69,7 @@ browse roots:
   added      gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
   added      gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 
-gonk reads gonk.browse.root at startup only: restart it to serve the new root(s). Under launchd:
-  launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
+gonk reads gonk.browse.root at startup only: restart gonk to serve the new root(s).
 $ cat .config/ikigai/config.toml
 gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
 gonk.browse.root = "specs=…/.ikigai/checkouts/specs"

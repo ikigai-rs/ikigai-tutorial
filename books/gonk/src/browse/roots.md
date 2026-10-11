@@ -63,7 +63,6 @@ is `urn:gk:repo:notes:tree`:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:tree'
-.git	dir	-
 README.md	file	41
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:file:README.md'
@@ -73,7 +72,11 @@ A repository this book creates.
 [uncacheable]
 ```
 
-A listing line is `name`, `kind` and `size`, tab-separated. The file resource answers the
+A listing line is `name`, `kind` and `size`, tab-separated. The repository's `.git` directory
+is not in it, and a name under it answers `NotFound` whatever the grant: since `ikigai-browse`
+0.18.2 (in gonk since gonk PR 123) a root never serves its own git internals, whose `config` can
+carry a remote's credentials. Before that the listing began with a `.git` line, and an ordinary
+read grant could read `.git/config`. The file resource answers the
 file's own bytes, under the media type its extension maps to. Two more resources answer the
 questions a reader of a repository keeps asking, *is this what I think it is* and *has
 anything changed*:
@@ -106,11 +109,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:t
 
 <urn:repo:notes:tree> a ik:Directory ;
     ik:repo "notes" ;
-    ik:entry <urn:repo:notes:tree:.git>, <urn:repo:notes:file:README.md> .
-
-<urn:repo:notes:tree:.git> a ik:Directory ;
-    ik:fileName ".git" ;
-    ik:path ".git" .
+    ik:entry <urn:repo:notes:file:README.md> .
 
 <urn:repo:notes:file:README.md> a ik:File ;
     ik:fileName "README.md" ;

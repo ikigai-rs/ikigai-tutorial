@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.41
+ikigai 0.1.44
 ```
 
 ## Start a gonk, and find its socket
@@ -71,20 +71,23 @@ agent's tool description, and it is the ledger's own:
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'describe urn:gk:iki:ledger:append' | grep -E 'ik:title|ik:inputName'
 [computed]
     ik:title "File a ledger item" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:ledger> ik:inputName "ledger" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:content> ik:inputName "content" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:kind> ik:inputName "kind" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:priority> ik:inputName "priority" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:labels> ik:inputName "labels" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:about> ik:inputName "about" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:revision> ik:inputName "revision" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:author> ik:inputName "author" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:key> ik:inputName "key" ;
-<urn:ikigai:endpoint:ledger-append:action:sink:input:as> ik:inputName "as" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:ledger> ik:inputName "ledger" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:content> ik:inputName "content" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:kind> ik:inputName "kind" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:priority> ik:inputName "priority" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:labels> ik:inputName "labels" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:about> ik:inputName "about" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:revision> ik:inputName "revision" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:author> ik:inputName "author" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:key> ik:inputName "key" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:as> ik:inputName "as" ;
 ```
 
 (`[computed]` comes first because the cli writes its status line to standard error, which does
-not go through `grep`.) Each input is declared with a summary, whether it is required, and its
+not go through `grep`.) Each input hangs from the action's **contract**, whose IRI ends in a
+digest of everything the action declares (`b3:` and its BLAKE3 hash, since `ikigai-core` 0.1.91),
+so a ledger that changed what `append` accepts, down to a summary's wording, would answer a
+different IRI; the page writes `…` where the digest goes. Each input is declared with a summary, whether it is required, and its
 type; `content` is the one a value or a pipe lands in. `key` is the caller's own name for the
 item: an append whose key is already taken files nothing and answers the item that holds it,
 which is how [part 5's sync](../spec/ledger.md) and the [bridges](../bridges/roborev.md) file
@@ -116,11 +119,12 @@ ready: 2   excluded: 0
 ```
 
 Here the config home IS the lesson, so the page names its own: `XDG_CONFIG_HOME` is where
-`ikigai` looks for it, and `ikigai-cli` 0.1.41 has no flag that says it instead. Without that
-prefix the command reads yours.
+`ikigai` looks for it. Since `ikigai-cli` 0.1.43 the flag `--config-home <dir>` says it too,
+and wins over the variable; the page keeps the variable, which every release reads. Without
+one or the other the command reads yours.
 
 ⚠ **Write the socket's path out in full.** The mount line is read as it is written, and
-`ikigai-cli` 0.1.41 does not expand a leading `~` in it: `mount = "prefer
+`ikigai-cli` 0.1.44 does not expand a leading `~` in it: `mount = "prefer
 urn:iki:ledger:=~/.ikigai/gonk.sock"` fails with *No such file or directory*, naming the
 unexpanded path. That is why the line above is written with `printf` and `$PWD`; in your own
 config home, write your home directory's path.

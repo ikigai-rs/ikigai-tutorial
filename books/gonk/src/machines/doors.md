@@ -48,7 +48,7 @@ ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
 …
   socket  …/.ikigai/gonk.sock — owner only
   quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
-  log     one `gonk:Access` line per request at each door, on stderr (`gonk.log.access = false` turns it off)
+  log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
 …
 ```
 
@@ -110,18 +110,24 @@ ikigai-gonk: quic client … → grant "laptop"
 
 `door=` is which door, and `principal=` is who the door could say was asking:
 
-- **HTTP**: `anon` on an anonymous write, a passkey's IRI on a signed-in one, and `-` on any read:
-  the HTTP library tells the door who a write is from, never a read.
+- **HTTP**: `anon` on an anonymous write and `-` on an anonymous read; a signed-in passkey's IRI
+  on **every** request, reads included. That last part is new in the gonk this book pins (gonk
+  PR 122): before it the HTTP library told the door who a write was from and never a read, so a
+  signed-in read was logged `-` too.
 - **socket**: `owner`, always — there is exactly one user it lets in.
 - **QUIC**: the client's name, `urn:iki:gonk:client:<fingerprint>`, on **every** request, reads
   included. The certificate authenticated the connection, so the door knows which client is
   asking whatever it asks. The connection line below the access lines says the same thing in
   short (the fingerprint's first sixteen hex digits) with the grant it mapped to.
 
-The QUIC name is not only in the log. `ikigai-quic` stamps it on each request as an argument
-called `principal`, after removing any the client sent, so it cannot be forged from the client
-side; and it is not part of the capability, so a client that narrows its own capability (an
-agent's grant carried with the request) is named all the same. A write that names no `author`
+The QUIC name is not only in the log. The door mints it into the request's **capability**, as
+core's principal scope (`urn:cap:principal:<iri>`, `ikigai-core` 0.1.93), and that is where gonk
+reads it. A capability carries at most one principal, and when the door narrows a capability the
+client carried to the grant it holds, the result keeps the door's name and drops any the client
+sent, so it cannot be forged from the client side, and a client that narrows its own capability
+(an agent's grant carried with the request) is named all the same. (`ikigai-quic` also still
+stamps the name on each request as an argument called `principal`, after removing any the client
+sent; until gonk PR 122 that argument was where gonk read it.) A write that names no `author`
 is filed with this name as its author, and a write that names a *different* principal as its
 author is refused:
 

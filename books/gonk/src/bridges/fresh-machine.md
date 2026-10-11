@@ -42,14 +42,15 @@ browse roots:
   added      gonk.browse.root = "flight=…/.ikigai/checkouts/flight"
   added      gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
 
-gonk reads gonk.browse.root at startup only: restart it to serve the new root(s). Under launchd:
-  launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
+gonk reads gonk.browse.root at startup only: restart gonk to serve the new root(s).
 ```
 
 ## 2. gonk, serving them
 
-gonk reads its roots when it starts. If it is already running as a service, restart it the
-way the checkout said:
+gonk reads its roots when it starts, which is what the checkout's last line says. If it is
+already running as a service, restart it the way that service is run; under launchd, with the
+label your plist gives it (`dev.ikigai-rs.gonk` here; the checkout stopped printing one, because a
+label is one operator's choice):
 
 <!-- transcript: manual — it restarts a launchd service, which a scratch check does not have -->
 ```console

@@ -140,10 +140,11 @@ oxrdf = "0.3"
 # The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
-# built from, at their newest releases. Since 2026-10-10 those are AHEAD of what the gonk in
-# `gonk.rev` links (ledger 0.5.0, store 0.2.8, browse 0.18.0; gonk's main had not moved past
-# ledger 0.5.0 either): a console transcript is gonk's answer and a cell or `cargo run` is these
-# crates', each checked against its own source, and none of them differs between the two today.
+# built from, at their newest releases. The gonk in `gonk.rev` (d9c9bcf) links the same ledger
+# 0.6.2, store 0.2.12 and browse 0.18.2; only its core differs (0.1.93, these crates 0.1.95). From
+# the morning of 2026-10-10 until that pin moved, these crates were AHEAD of the pinned gonk
+# (edb9a3d: ledger 0.5.0, store 0.2.8, browse 0.18.0). A console transcript is gonk's answer and
+# a cell or `cargo run` is these crates', each checked against its own source.
 # The API floor is 0.4.0, because part 5's `sync_ledger` files each task with the keyed append it
 # added (`append key=<task IRI>`: at most one item per key, enforced by the ledger in the same
 # store update that files it, answering `existing` when the key is taken), which is what makes two

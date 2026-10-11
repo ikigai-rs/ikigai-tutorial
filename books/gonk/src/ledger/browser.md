@@ -17,7 +17,7 @@ $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --p
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
 …
-  log     one `gonk:Access` line per request at each door, on stderr (`gonk.log.access = false` turns it off)
+  log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
 …
 ```
 
@@ -147,7 +147,7 @@ a write from another site is refused: its Origin or Sec-Fetch-Site names a page 
 
 `curl` sends no `Origin` unless told to, and neither does a script, which is why the requests
 before it were unaffected. A request whose `Host` is anything but `localhost`, `127.0.0.1` or
-`[::1]` (with this port) is refused the same way, reads included, and the front page is no
+`[::1]` (with this port) is refused too, reads included, and the front page is no
 exception; that is the defense against DNS rebinding, where a page on another site reaches a
 loopback server under its own name:
 
@@ -155,10 +155,12 @@ loopback server under its own name:
 ```console
 $ curl -s -w '\n%{http_code}\n' -H 'Host: elsewhere.example' http://127.0.0.1:1070/
 this server answers only to its own loopback name (localhost, 127.0.0.1 or [::1], with its port); a request under another Host is refused — it is how a DNS rebinding page reaches a loopback server
-403
+421
 ```
 
-Refused, rather than served with an empty grant: an empty grant is still offered everything
+The status is `421 Misdirected Request` (since gonk e45e5f9, `403` before): the request named a
+server that is not this one, which is a different refusal from this server declining a request
+made to it, and the cross-site write above stays `403`. Refused, rather than served with an empty grant: an empty grant is still offered everything
 that needs no grant (the pages, the passkey ceremonies, a resource's description), and gonk's
 audit showed another site filling the passkey ceremony's table that way. A refused request
 learns nothing, not even which methods a path accepts.
@@ -301,9 +303,11 @@ Read them with three things in mind:
 - **The subject is the resource, not the URL.** `/l/default/item/1` (read twice: once by
   `curl` as itself, once as another page's link) was
   `urn:iki:gonk:page:item:default:1`; the form was `urn:iki:gonk:act`.
-- **`principal` is who a WRITE was from.** The form's line says `anon`; a page read says `-`,
-  because the HTTP library tells a door who a write is from and never a read. A signed-in
-  write would name the passkey's IRI.
+- **`principal` is who the door could say was asking.** The form's line says `anon`, an
+  anonymous write; a page read by nobody signed in says `-`. Signed in, every line names the
+  passkey's IRI, a read as well as a write: the door mints it into the request's capability
+  (core's principal scope), which is where the log reads it. Before gonk PR 122 the HTTP door
+  knew who a write was from and never a read, so a signed-in read said `-` too.
 - **`outcome` is the kernel's, not HTTP's.** A refusal the resource makes (the `/l/book`
   page) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
   cross-site form, the foreign `Host`, the loaded image), is no line at all: there was no

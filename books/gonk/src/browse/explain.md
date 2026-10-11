@@ -185,11 +185,11 @@ ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
   browse  urn:repo:{demo (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
   backup  …
-  llm     …/model.sock (prefer; dialled on first use) — explain/review bound; file urn:llm:coder:ask @400, dir urn:llm:ask @600, review urn:llm:coder:ask @800, pr urn:llm:coder:ask @600 tokens. Deriving needs urn:cap:net:localhost, which `--browse derive` mints and nothing else does
+  llm     …/model.sock (prefer; dialed on first use) — explain/review bound; file urn:llm:coder:ask @400, dir urn:llm:ask @600, review urn:llm:coder:ask @800, pr urn:llm:coder:ask @600 tokens. Deriving needs urn:cap:net:localhost, which `--browse derive` mints and nothing else does
 …
 ```
 
-The `llm` line is the mount: where the model is, that it is **dialled on first use** rather than
+The `llm` line is the mount: where the model is, that it is **dialed on first use** rather than
 at startup (so a model that is down does not stop a ledger from serving), and which provider
 writes which layer, with each layer's token ceiling. gonk's defaults ask `urn:llm:coder:ask` for
 files and reviews and `urn:llm:ask` for directories — names a peer running the `ikigai-llm`
