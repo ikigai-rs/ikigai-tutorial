@@ -124,6 +124,7 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-claim__sink"
 "name":"ledger-close__sink"
 "name":"ledger-comment__sink"
+"name":"ledger-count__source"
 "name":"ledger-defer__delete"
 "name":"ledger-defer__sink"
 "name":"ledger-doctor__source"
@@ -151,7 +152,7 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-reopen__sink"
 ```
 
-Thirty tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
+Thirty-one tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
 `urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. Eight of
 them arrived with `ikigai-ledger` 0.5.0 and are not used in this book yet: an item's lifecycle
 **state** (`ledger-item-state__*`, a compare-and-set, so of two agents moving one item out of the
@@ -160,6 +161,8 @@ same state exactly one wins), the **assertions** an agent can check before it ac
 resources, and the **doctor**, a read-only report of orphaned, abandoned and lease-expired work.
 Two more arrived with 0.6.2: `ledger-item-about__sink` and `__delete`, which add and remove what an
 item is **about** (a file, a PR, the session that delivered it) without touching its title or body.
+And one with 0.9.0: `ledger-count__source`, the number of items a filter admits, without the
+listing (the figure part 5 [asks for](../spec/ledger.md#the-walk)).
 A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
 deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging

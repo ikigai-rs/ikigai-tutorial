@@ -20,7 +20,7 @@ used stand alone."
 | A ledger of your own | A ledger of your own | cells (wasm) · Rust (`crates/ledger-host`) · transcripts | **written** |
 | | The ledger in a browser | transcripts (curl of the pages, the form as `/act`, the SPARQL 1.1 Protocol face of `/sparql` over the union of the caller's graphs and its refusal of a ledger outside the grant, the cross-site write, the foreign `Host` and a read another page LOADS (an image) each a `403` at the edge while a read it NAVIGATES to is answered (gonk PR 100, ledger #880), the anonymous SPARQL budget in the banner, `passkey invite --ledger --browse read`, the access log read back from a `tee`d file) · manual (the passkey ceremony, a browser) | **written** |
 | An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:gk:=…/gonk.sock" -c …` (alias), why a mounted read is `[uncacheable]` at the client, the config-home `prefer` line (`XDG_CONFIG_HOME`: the cli has no config-home flag), `cap seal` to a `grants` list, the socket's access lines, and what the seal does and does not bound — a sealed ledger grant's raw `urn:iki:store:graph-update` to its graph refused over the socket since 77ac767 (gonk PR 98, ledger #899; ed43af3 admitted it) while root still writes raw, and a sealed session still filing an item whose `author` names a passkey (the socket runs no author rule); `ikigai-cli` pinned beside gonk | **written** |
-| | Over MCP | transcripts: `client add agent --ledger default=write`, gonk serving the QUIC door on 1070, the bundle and a client-side `grants.json` ceiling (`show: ["ledger-*"]`) in `agent/`, `ikigai mcp --override urn:iki:ledger:=quic://… --cert-dir agent/gonk --grant agent` fed JSON-RPC from `file` blocks (stdin is null for a `run` command): the 30 tool names (eight new with `ikigai-ledger` 0.5.0: item state, the assertions, lifecycles, the doctor; two with 0.6.2: an item's `about`), sorted with `LC_ALL=C`; a keyed append twice (`existing`), the item read by `key:`, its `author` the client's principal; a passkey-shaped `author`, a hidden `ledger-item__delete` and another ledger refused; the access log naming the client, and a ledger-less call logged as `default` (ledger #927, from ledger #782's verified path) | **written** |
+| | Over MCP | transcripts: `client add agent --ledger default=write`, gonk serving the QUIC door on 1070, the bundle and a client-side `grants.json` ceiling (`show: ["ledger-*"]`) in `agent/`, `ikigai mcp --override urn:iki:ledger:=quic://… --cert-dir agent/gonk --grant agent` fed JSON-RPC from `file` blocks (stdin is null for a `run` command): the 31 tool names (eight new with `ikigai-ledger` 0.5.0: item state, the assertions, lifecycles, the doctor; two with 0.6.2: an item's `about`; one with 0.9.0: `count`), sorted with `LC_ALL=C`; a keyed append twice (`existing`), the item read by `key:`, its `author` the client's principal; a passkey-shaped `author`, a hidden `ledger-item__delete` and another ledger refused; the access log naming the client, and a ledger-less call logged as `default` (ledger #927, from ledger #782's verified path) | **written** |
 | The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a commit, a `file`-block `config.toml` root); tree/file/hash/state over the socket, a commit picked up by the watcher without a restart, the signed-out `/browse` notice | **written** |
 | | Explain, with a mounted model | Rust (`crates/browse-host`): browse over a scratch directory with a STUB model at `urn:llm:stub:{ask,model}` that counts its calls, so "derive once, then from the archive", the version tag, the content-keyed archive and the cost line are asserted; transcripts: the banner with `--mount` (a socket nothing listens on), `explain-status` answering and `explain` refused `unavailable` over the socket; manual for a real model | **written** |
 | Review without a reviewer | One-off review, what a finding is | Rust (`crates/browse-host`, the same stub model): a pass minting two pending findings with stable ids, the archive (no second model call), decline with a reason from the closed set, a `should_panic` reproduction, publish with `reproduced=yes` → an annotation `derived_from` the finding, a decision refused without `revises=`, and the capability split (read / derive / annotate) | **written** |
@@ -72,7 +72,7 @@ link, so the outline is visible on the published site and nothing 404s.
   `--data-home` does, and what would have landed in a reader's real homes. An empty directory is
   not a write (`ikigai` makes `~/.ikigai/workspace` on every start). A page that truly needs
   `HOME` as its own directory declares it once, with its reason:
-  `<!-- transcripts: home — why -->` (plural, a PAGE's declaration; none needs it at 9704b54).
+  `<!-- transcripts: home — why -->` (plural, a PAGE's declaration; none needs it at 9f2e89e).
   Through 77ac767 the runner set `HOME` to the page's directory for every command, so a forgotten
   flag passed here and was reviewed by eye.
   Since arc 2 two more things: a fence of ANY language declared `file NAME` is written to
@@ -111,25 +111,30 @@ crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --
 and the file is one line read by the introduction's install line, the script and CI's cache
 key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and
 `ikigai-web` share the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3,
-77ac767 and edb9a3d; 0.1.44 at d9c9bcf and 9704b54), so the client speaks the server's wire; moving gonk is a
+77ac767 and edb9a3d; 0.1.44 at d9c9bcf, 9704b54 and 9f2e89e), so the client speaks the server's wire; moving gonk is a
 reason to look at this file too. (0.1.42 and 0.1.43 were already on crates.io when the pin moved to
-edb9a3d, 0.1.45 and 0.1.46 when it moved to d9c9bcf, and 0.1.47 when it moved to 9704b54; the rule takes what gonk links. The ikigai Book's REPL transcripts are a
+edb9a3d, 0.1.45 and 0.1.46 when it moved to d9c9bcf, 0.1.47 when it moved to 9704b54, and 0.1.50 when it
+moved to 9f2e89e; the rule takes what gonk links. The ikigai Book's REPL transcripts are a
 separate check, `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
 `books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
 under its own key: this pin follows gonk's lock, that one follows the release the ikigai Book's
 pages were last replayed against.)
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
-`ikigai-store` 0.2.12 (in-memory, `persistent` off; 0.2.7 is a security floor, ledger #915) and
-`ikigai-browse` 0.18.2 (itself a security floor: it never serves `.git`, ledger #1126), with
-`oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`. The ledger is the
-exception, and it is OPEN: since ledger #1198 (2026-10-11) the book's crates take `ikigai-ledger`
-0.9.0 while the pinned gonk (9704b54) links 0.6.2, so part 5's walk asks `count` (0.9.0) and no
-transcript can. The introduction says so, and so does part 5's "In gonk" section. It closes when
-the pin moves to a gonk that links 0.9.0 or later (gonk main took 0.8.0 in gonk PR #128, which has
-no `count`). There was one before it, from the morning `ikigai-ledger` 0.4.0 was published until
-the pin moved to ad0653b (gonk PR #86, the keyed bridges): the book's crates took 0.4.0 while the
-pinned gonk linked 0.3.0, so no transcript could use `key=` against gonk.
+`ikigai-ledger` 0.9.0, `ikigai-store` 0.2.14 (in-memory, `persistent` off; 0.2.7 is a security
+floor, ledger #915) and `ikigai-browse` 0.18.4 (0.18.2 is a security floor: it never serves `.git`,
+ledger #1126), with `oxigraph` 0.5 named directly because browse takes an `oxigraph::store::Store`.
+A newer release that gonk does not link yet (store 0.2.15, published 2026-10-11) waits for the pin,
+so a transcript and a listing are always answered by the same module.
+**There is no version gap now.** There were two, both CLOSED by moving the pin. From ledger #1198
+(2026-10-11) until the pin moved to 9f2e89e (ledger #1245) the book's crates took `ikigai-ledger`
+0.9.0 while the pinned gonk (9704b54) linked 0.6.2, so part 5's walk asked `count` and no transcript
+could; the crates' item-count tests then counted through `items`' footer (`3 item(s)`), and since
+the move they ask `urn:iki:ledger:count`, the figure part 5 cites. Before that, from the morning
+`ikigai-ledger` 0.4.0 was published until the pin moved to ad0653b (gonk PR #86, the keyed
+bridges), the book's crates took 0.4.0 while the pinned gonk linked 0.3.0, so no transcript could
+use `key=` against gonk. ⚠ When the book's crates must move ahead of gonk again, say so here, in the
+introduction, and on the page whose transcripts cannot follow.
 
 **`ikigai-markdown`** is taken at 0.1.0 from crates.io. Until it was published (2026-10-06) it was
 pinned the way this book pins gonk, to one full git revision of its public repository, never a

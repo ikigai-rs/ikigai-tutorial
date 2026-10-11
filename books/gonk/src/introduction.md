@@ -64,29 +64,29 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.1.95, `ikigai-store` 0.2.12 and
-`ikigai-browse` 0.18.2, the same releases the book's own crates (the ones its Rust listings and
-in-page cells run) take, and `ikigai-ledger` 0.6.2 (0.4.0 added the keyed append [part
-5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through). The ledger is
-the one place they differ: the book's crates take 0.9.0, which adds `count`, the number of items a
-filter admits without the listing, and part 5's walk asks it; gonk's 0.6.2 has no `count`. Between
-the two, a close also releases the item's claim, and the ledger gained per-verb grants (claim,
-comment, close) and a hand-back state that `next` leaves out; no page here closes a claimed item
-or hands one back, so every answer the two print for the same request is the same. A `console`
-block is checked against the pinned gonk, and a listing or a cell against the book's crates.
+The modules it links are published crates: `ikigai-core` 0.1.95, `ikigai-ledger` 0.9.0,
+`ikigai-store` 0.2.14 and `ikigai-browse` 0.18.4, the same releases the book's own crates (the
+ones its Rust listings and in-page cells run) take, so a `console` block checked against the
+pinned gonk and a listing or a cell checked against the book's crates are answered by the same
+code. (0.4.0 added the keyed append [part 5](spec/ledger.md) syncs with and the
+[bridges](bridges/roborev.md) file through; 0.9.0 added `count`, the number of items a filter
+admits without the listing, which part 5's walk asks.) It also links `ikigai-script` 0.3.0 and
+`ikigai-nl` 0.2.1, and serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
-What the pin's last move (from edb9a3d) changed for a reader, each where the page
-that shows it says so: a browse root no longer lists or serves its `.git` directory
-([Browse roots](browse/roots.md)); a request under a foreign `Host` is answered `421`, not
-`403` ([The ledger in a browser](ledger/browser.md)); a signed-in passkey is named on reads as
-well as writes, because the doors mint their principal into the capability ([The three
-doors](machines/doors.md)); the ledger tools gain an item's `about` ([Over MCP](agent/mcp.md));
-`checkout` ends by saying to restart gonk rather than naming one operator's launchd label; and
-the startup banner's `log` line says how the Queue badge's poll is sampled. Two more show on no
-page here: the browser's ledger list pages by `offset=`, and its count sentence names the row
-cap when the cap is what stopped a page, and `gonk:backup`'s status says when the next archive is due, phased to the
-newest archive rather than to the last restart. From [Over the socket](agent/socket.md) on,
-the pages run `ikigai-cli` 0.1.44, whose transports the pinned gonk links, where they ran 0.1.41.
+What the pin's last move (from 9704b54) changed for a reader, each where the page that shows it
+says so: the ledger is 0.9.0 where it was 0.6.2, so the agent's tools gain
+`ledger-count__source` ([Over MCP](agent/mcp.md)) and part 5's count can be asked of gonk itself
+([In gonk](spec/ledger.md#in-gonk-and-not-in-this-page)); a close also releases the item's claim,
+and the ledger's per-verb grants arrive as a fifth `--ledger` authority, `worker` (claim and
+comment, never close), which the hint a client with no grant prints now names ([A QUIC
+client](machines/quic-client.md)). No page here closes a claimed item or hands one back. Two more show
+on no page here: the browser's ledger page reads its total from `count`, and a plan the owner runs
+over the socket may read a ledger filed after gonk started. The move before it (from edb9a3d to
+9704b54) kept a browse root's `.git` out of the listing ([Browse roots](browse/roots.md)),
+answered a foreign `Host` with `421` ([The ledger in a browser](ledger/browser.md)), named a
+signed-in passkey on reads as well as writes ([The three doors](machines/doors.md)) and gave the
+ledger tools an item's `about` ([Over MCP](agent/mcp.md)). From [Over the socket](agent/socket.md)
+on, the pages run `ikigai-cli` 0.1.44, whose transports the pinned gonk links.
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.
 

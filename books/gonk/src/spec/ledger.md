@@ -147,10 +147,10 @@ through it. So the split is the natural one. A host of your own links the lift a
 (as in [Over the socket](../agent/socket.md), where `urn:gk:iki:store:load`,
 `urn:gk:iki:store:graph-select` and `urn:gk:iki:ledger:append` are all served to the owner).
 The graphs then live in gonk's durable store beside the ledger, and gonk's own pages show the
-items. The key needs a gonk whose ledger knows it, `ikigai-ledger` 0.4.0 or later, and the gonk
-this book pins ([`gonk.rev`](../introduction.md#which-gonk)) links 0.6.2, which has the key but not
-`count`: against that gonk, ask `items` with `about=` and read its last line. (This book's checks
-run the in-process host above, not that arrangement.) gonk does not run the sync itself; doing that
+items. The key needs a gonk whose ledger knows it, `ikigai-ledger` 0.4.0 or later, and `count`
+one that links 0.9.0 or later; the gonk this book pins ([`gonk.rev`](../introduction.md#which-gonk))
+links 0.9.0, so both are served there as `urn:gk:iki:ledger:append` and `urn:gk:iki:ledger:count`.
+(This book's checks run the in-process host above, not that arrangement.) gonk does not run the sync itself; doing that
 on a watcher over a browse root's `openspec/` directory would be a separate piece of work.
 
 There are no Run cells in this part, on purpose. The page's kernel is the ledger over an in-memory

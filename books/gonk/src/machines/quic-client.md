@@ -136,7 +136,7 @@ client `stranger`  …/.config/ikigai/gonk/quic/clients/stranger
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
   NOT enrolled — a trusted certificate with no grant is refused. Enroll it:
-    ikigai-gonk client add stranger --ledger <ledger>=<read|write|delete|purge>
+    ikigai-gonk client add stranger --ledger <ledger>=<read|worker|write|delete|purge>
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>

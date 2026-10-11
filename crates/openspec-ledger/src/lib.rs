@@ -397,11 +397,11 @@ mod tests {
         let all = ask(
             &kernel,
             Verb::Source,
-            "urn:iki:ledger:items",
+            "urn:iki:ledger:count",
             &[("status", "all")],
         )
         .unwrap();
-        assert!(all.contains("3 item(s)"), "{all}");
+        assert_eq!(all, "3\n");
     }
 
     /// Part 5's sync as it was first written, before the key: ask which open tasks no item is
@@ -461,11 +461,11 @@ mod tests {
         let all = ask(
             &kernel,
             Verb::Source,
-            "urn:iki:ledger:items",
+            "urn:iki:ledger:count",
             &[("status", "all")],
         )
         .unwrap();
-        assert!(all.contains("12 item(s)"), "{all}");
+        assert_eq!(all, "12\n");
     }
 
     /// The key is what the sync recognizes, not `about`: an item filed by hand ABOUT a task,
@@ -488,10 +488,10 @@ mod tests {
         let about = ask(
             &kernel,
             Verb::Source,
-            "urn:iki:ledger:items",
+            "urn:iki:ledger:count",
             &[("about", task)],
         )
         .unwrap();
-        assert!(about.contains("2 item(s)"), "{about}");
+        assert_eq!(about, "2\n");
     }
 }

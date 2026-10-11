@@ -140,10 +140,11 @@ oxrdf = "0.3"
 # The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
-# built from, at their newest releases. The gonk in `gonk.rev` (9704b54) links core 0.1.95, store
-# 0.2.12 and browse 0.18.2, as these crates do, and ledger 0.6.2, where these crates take 0.9.0:
-# for the ledger these crates are AHEAD of the pinned gonk. A console transcript is gonk's answer
-# and a cell or `cargo run` is these crates', each checked against its own source.
+# built from, at the releases its lock takes. The gonk in `gonk.rev` (9f2e89e) links core 0.1.95,
+# ledger 0.9.0, store 0.2.14 and browse 0.18.4, as these crates do. A console transcript is gonk's
+# answer and a cell or `cargo run` is these crates', each checked against its own source. (Until
+# 9f2e89e the pinned gonk, 9704b54, linked ledger 0.6.2 while these crates took 0.9.0, so no
+# transcript could ask `count`; ledger #1245 closed that gap.)
 # The API floor is 0.9.0, because part 5 ("The ledger as the work queue") asks the ledger how many
 # items implement a requirement with `urn:iki:ledger:count`, which 0.9.0 added (the total alone,
 # one COUNT query, without `items`' page or its corpus check; ledger #1128). Below that, 0.4.0 is
@@ -175,23 +176,32 @@ ikigai-ledger = "0.9.0"
 # requires 0.2.11: 0.2.11 words a SPARQL `SERVICE` refusal for the consumer that asked (ledger
 # #1094), and 0.2.12 runs every update on the store's one writer thread, so reads after a bulk
 # write stay fast (ledger #1127). No page uses `SERVICE`, and no query a page runs changed its
-# answer. Before that the pin was 0.2.10, the head on the morning of 2026-10-10, which ledger
+# answer. 0.2.14 is the pin now because it is what the pinned gonk (9f2e89e) links: 0.2.13 copies
+# a scoped update's footprint rather than the whole graph (ledger #1132), and 0.2.14 hands a host
+# that writes through the raw handle the store's own writer thread (`SharedWriter`, ledger #1207),
+# which no crate here uses; every answer a page prints is the same. (0.2.15, published since,
+# enforces declared graphs; gonk does not link it yet, so neither does the book.) Before 0.2.14
+# the pin was 0.2.12 for the reasons above. Before that the pin was 0.2.10, the head on the morning of 2026-10-10, which ledger
 # 0.6.2 requires: 0.2.9 bounds the SIZE of every SPARQL answer, refusing rather
 # than truncating (ledger #970), and 0.2.10 sizes the SPARQL thread for the build (ledger #1003).
 # No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
 # links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.12", default-features = false }
+ikigai-store = { version = "0.2.14", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.2 is the pin because it is the
-# published head and a SECURITY floor: it never serves a repository's `.git` (refused at the jail,
-# hidden from the listing; ledger #1126), and gonk d9c9bcf links it. No chapter lists or reads
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.4 is the pin because it is what
+# the pinned gonk (9f2e89e) links: 0.18.3 lists a symlink in the tree only when the jail serves its
+# target (ledger #1130), and 0.18.4 commits every browse write on one writer thread, so reads after
+# a burst of writes stay fast (ledger #1131). No chapter's root holds a symlink, and the stub
+# model's explanations and findings printed the same at it. (0.18.5, which moves those writes onto
+# ikigai-store's `SharedWriter`, is not published yet.) 0.18.2 is a SECURITY floor: it never
+# serves a repository's `.git` (refused at the jail, hidden from the listing; ledger #1126). No chapter lists or reads
 # `.git`, so nothing a page prints moved. Before that the pin was 0.18.1: a review answer's last finding is kept when it cannot have been cut (ledger
 # #818), and the chapter's stub answer printed the same findings at it. The floor is 0.18.0, the
 # release that added the explain-status cost line the chapter shows ("opens instantly from the
 # archive"), and what gonk edb9a3d links. A 0.x caret: also a ceiling (<0.19.0); read it as a
 # RANGE.
-ikigai-browse = "0.18.2"
+ikigai-browse = "0.18.4"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
