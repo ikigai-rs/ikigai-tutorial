@@ -1,0 +1,37 @@
+[package]
+name = "sentence-draft"
+version = "0.1.0"
+description = "The code taught by the book's chapter \"A sentence becomes a draft\": ikigai-nl's grounding under the caller's grant, the mechanical check, repair, and a saved draft a person publishes. The model drafts and never acts; every gate runs it against a stub."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "sentence_draft"
+path = "src/lib.rs"
+
+[[bin]]
+name = "draft"
+path = "src/bin/draft.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-vocab.workspace = true
+ikigai-script.workspace = true
+ikigai-nl.workspace = true
+# The model door the drafter asks, for a reader with a local Ollama (`--ollama MODEL`): the
+# real `urn:llm:ask`, over the HTTP seam this crate fills with a blocking client.
+ikigai-llm.workspace = true
+ikigai-http.workspace = true
+ureq.workspace = true
+async-trait = "0.1"
+serde_json.workspace = true
+futures.workspace = true
+# The previous chapters' host: the script host and the store, with the same items in it.
+script-host = { path = "../script-host" }
+
+[dev-dependencies]
+# The scanner behind tests/book_runs.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }

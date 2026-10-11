@@ -58,6 +58,13 @@ resolve on GitHub, the list moved before this page did — the organization is t
   and Turtle, no Lisp engine.
 - [`ikigai-lisp`](https://github.com/ikigai-rs/ikigai-lisp) — the Lisp engine
   (`urn:lisp:eval`), whose builtins are the five verbs.
+- [`ikigai-script`](https://github.com/ikigai-rs/ikigai-script) — scripts as resources in any
+  host: `urn:script:{name}` with content-addressed versions, run as a read or for its effects,
+  under the least of what it declares, what its publisher held and the host's ceiling.
+  [Scripts are resources](code/scripts.md) mounts it.
+- [`ikigai-nl`](https://github.com/ikigai-rs/ikigai-nl) — natural language to a DRAFT script,
+  with the model as a drafter and never an actor. [A sentence becomes a
+  draft](code/sentence.md) mounts it.
 
 ## Personal and platform
 

@@ -207,6 +207,37 @@ oxigraph = { version = "0.5.11", default-features = false }
 # before it, this line was a pin to one full git revision of the public repository, the way
 # DESIGN.md pins gonk. A 0.x caret, so also a ceiling (<0.2.0).
 ikigai-markdown = "0.1.3"
+# Scripts as resources, for the section "Code and language as resources": `urn:script:{name}`
+# with content-addressed versions, `…:result` (run as a read) and `…:runs` (run for effects),
+# under the least of what a script declares, what its publisher held and the host's ceiling.
+# 0.3.2 is the pin because it is the published head. The API floor is 0.3.0: "Who a script runs
+# as" teaches NAMESPACE grants (`urn:cap:script:write:team-*`) and exclusions, and `authority::
+# holds`, which arrived there (ledger #1173, #1174); 0.3.1 and 0.3.2 fix plans (ledger #1220,
+# #1222), which no chapter publishes, so every answer the chapters print is the same at 0.3.0.
+# It requires core 0.1.95, the line above. A 0.x caret: also a ceiling (<0.4.0); read it as a
+# RANGE.
+ikigai-script = "0.3.2"
+# Natural language to a DRAFT script, for "A sentence becomes a draft": `urn:nl:grounding` (what
+# the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.2.1 is the
+# pin and the floor: it is the published head, and the release whose grounding asks the script
+# host's own rule (`authority::holds`) whether the caller may read a named example (ledger #1196),
+# so a namespace grant reaches an example here as it does at the script host. 0.2.0 bounded each
+# draft with `max_tokens` (ledger #1203), which the chapter's stub model records. It requires
+# ikigai-script 0.3.0 itself. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-nl = "0.2.1"
+# A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
+# every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
+# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.13.1 and
+# the HTTP seam it is built on, ikigai-http 0.1.9 (`HttpTransport`, which the host fills; 0.1.7
+# is llm's own floor, the port-aware network gate). 0.x carets: ceilings too (<0.14.0, <0.2.0).
+ikigai-llm = "0.13.1"
+ikigai-http = "0.1.9"
+# The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
+# `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
+# localhost. "2" is that example's line; a caret, so <3.0.0.
+ureq = { version = "2", default-features = false }
+# The JSON faces the drafting chapter reads back (a draft's attempts, a check's findings).
+serde_json = "1"
 # The config file "Configuration" reads through `layered_paths`.
 toml = "0.8"
 futures = "0.3"

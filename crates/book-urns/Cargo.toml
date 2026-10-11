@@ -27,6 +27,10 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 time-resource = { path = "../time-resource" }
 spreadsheet = { path = "../spreadsheet" }
 push = { path = "../push" }
+# The section "Code and language as resources": the script host, and the drafting host that
+# mounts ikigai-nl beside it.
+script-host = { path = "../script-host" }
+sentence-draft = { path = "../sentence-draft" }
 # The one parser for `<!-- transcript: … -->` (ledger #1075): the REPL replay reads a block's
 # declaration exactly as the console runner and the `cargo run` check do.
 book-transcripts = { path = "../book-transcripts" }

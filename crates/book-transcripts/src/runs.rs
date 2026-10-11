@@ -73,6 +73,12 @@ pub const GATED: &[(&str, &str)] = &[
         "loadable-module",
         "crates/loadable-module/tests/demo_transcript.rs",
     ),
+    (
+        "script-authority",
+        "crates/script-authority/tests/book_runs.rs",
+    ),
+    ("script-host", "crates/script-host/tests/book_runs.rs"),
+    ("sentence-draft", "crates/sentence-draft/tests/book_runs.rs"),
 ];
 
 /// The repository root: this crate is `crates/book-transcripts`.

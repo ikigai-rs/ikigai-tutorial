@@ -37,3 +37,12 @@ ikigai-resolve = "0.1.46"
 # The concrete resolver `two_hosts::socket::connect` returns, so a helper can name it.
 ikigai-ipc = "0.1.46"
 async-trait = "0.1"
+# The section "Code and language as resources", for the exercises in `tests/code.rs`: the script
+# host, its ceilings, and the drafting host with its stub model. Read-only from here, like
+# `two-hosts`: the book includes its listings from those crates.
+script-host = { path = "../script-host" }
+script-authority = { path = "../script-authority" }
+sentence-draft = { path = "../sentence-draft" }
+# A draft's and a check's JSON faces, read back into their types.
+ikigai-nl.workspace = true
+serde_json.workspace = true

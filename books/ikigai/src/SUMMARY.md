@@ -68,6 +68,13 @@
 - [A spreadsheet, VI: a sheet is a space, and spaces stack](applied/spreadsheet-6.md)
 - [A spreadsheet, VII: push](applied/spreadsheet-7.md)
 
+# Code and language as resources
+
+- [Scripts are resources](code/scripts.md)
+- [Who a script runs as](code/authority.md)
+- [A sentence becomes a draft](code/sentence.md)
+- [Exercises: code and language](code/exercises.md)
+
 # Polyglot tracks
 
 - [One wire, three languages](polyglot/index.md)

@@ -1,0 +1,34 @@
+[package]
+name = "script-host"
+version = "0.1.0"
+description = "The code taught by the book's chapter \"Scripts are resources\": a host of the book's own that mounts ikigai-script beside an in-memory store, so a SPARQL query is published at a name, fetched without running, read as a cached answer and run for its effects."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "script_host"
+path = "src/lib.rs"
+
+[[bin]]
+name = "scripts"
+path = "src/bin/scripts.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+# `TurtleRenderer`: a published query is its own catalog entry, and the engine routes
+# arguments by the JSON Meta face, so the kernel needs a renderer as every book host does.
+ikigai-vocab.workspace = true
+# The script host itself: `urn:script:{name}` and its family, as a space this crate mounts.
+ikigai-script.workspace = true
+# The store a SPARQL script runs against, in memory, bound exactly as a host binds it.
+ikigai-store.workspace = true
+futures.workspace = true
+
+[dev-dependencies]
+# A run record's JSON face, read back in tests/scripts.rs.
+serde_json.workspace = true
+# The scanner behind tests/book_runs.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }

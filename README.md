@@ -390,7 +390,8 @@ accessibility regression is a red build, not a review comment.
 ```
 books/                 mdbook sources — prose
 crates/                the code each part teaches — compiled, linted, tested
-                       (hello-camel, building-endpoints, loadable-module, two-hosts)
+                       (hello-camel, building-endpoints, loadable-module, two-hosts, …,
+                       script-host, script-authority, sentence-draft)
 crates/your-endpoints  the reader's crate: where the exercises are done, never quoted
 examples/              the polyglot tracks' listings (Python, Deno, a notebook), run by hand
                        against a served kernel — not compiled here, not on PyPI/JSR yet

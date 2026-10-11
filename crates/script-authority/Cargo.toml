@@ -1,0 +1,28 @@
+[package]
+name = "script-authority"
+version = "0.1.0"
+description = "The code taught by the book's chapter \"Who a script runs as\": the least of what a script declares, what its publisher held at publish and the host's ceiling, never above its publisher; namespace grants and exclusions; and the refusals a reader can run."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "script_authority"
+path = "src/lib.rs"
+
+[[bin]]
+name = "authority"
+path = "src/bin/authority.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-script.workspace = true
+# The previous chapter's host: the same composition, the same data, under a ceiling policy
+# this crate supplies.
+script-host = { path = "../script-host" }
+
+[dev-dependencies]
+# The scanner behind tests/book_runs.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }
