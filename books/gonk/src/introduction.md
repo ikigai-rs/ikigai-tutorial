@@ -68,10 +68,13 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 ```
 
 The modules it links are published crates: `ikigai-core` 0.1.96, `ikigai-ledger` 0.9.0,
-`ikigai-store` 0.2.15, `ikigai-browse` 0.18.6, `ikigai-script` 0.3.3 and `ikigai-nl` 0.3.0, the
-same releases the book's own crates (the ones its Rust listings and in-page cells run) take, so a
-`console` block checked against the pinned gonk and a listing or a cell checked against the book's
-crates are answered by the same code. (0.4.0 of the ledger added the keyed append [part 5](spec/ledger.md)
+`ikigai-store` 0.2.15, `ikigai-browse` 0.18.6, `ikigai-script` 0.3.3 and `ikigai-nl` 0.3.0. The
+book's own crates (the ones its Rust listings and in-page cells run) take the same releases where
+they can, so a `console` block checked against the pinned gonk and a listing or a cell checked
+against the book's crates are answered by the same code. Today four run ahead, each its crate's
+newest release: core 0.1.98, the ledger 0.11.0, the store 0.2.19 and `ikigai-nl` 0.4.0. Of those,
+only one difference shows in this book: from core 0.1.97 a refusal at a family scope also says what
+satisfies it, and the pages where gonk refuses one say so. (0.4.0 of the ledger added the keyed append [part 5](spec/ledger.md)
 syncs with and the [bridges](bridges/roborev.md) file through; 0.9.0 added `count`, the number of
 items a filter admits without the listing, which part 5's walk asks.) It serves scripts and
 drafting at `urn:script:*` and `urn:nl:*`.

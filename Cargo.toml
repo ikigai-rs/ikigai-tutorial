@@ -30,7 +30,17 @@ lto = true
 # Every ikigai pin in this workspace sits at its crate's newest published release as of
 # 2026-10-10, so the book teaches what a reader's fresh `cargo add` resolves. Where a pin moved for
 # that alone its comment says so, and the reason that set the previous floor is kept beneath it.
-# 0.1.96 is the pin because it is what the pinned gonk (2598192) links, and because the cli crates
+# 0.1.98 is the pin because it is core's published head (0.1.97 is YANKED: it was published from a
+# draft branch, and a lock must never hold it), and because the book prints what 0.1.97 changed: a
+# refusal at a FAMILY scope (`prefix*`) names what satisfies it, `capability does not grant
+# `urn:cap:script:run:open-*` (declared by `…`; any grant under `urn:cap:script:run:open-`
+# satisfies it)`, which "Who a script runs as" shows (ledger #1292, #1323); an exact scope's
+# refusal is unchanged byte for byte. 0.1.98 adds only what no page uses: a `%` in an endpoint id
+# or input name is a character (`%25`) wherever an IRI is minted from the name, and an authored
+# scope that is not an IRI is a literal in every face. ⚠ The `ikigai` the books replay
+# (cli 0.1.55) and the pinned gonk (2598192) still link 0.1.96, so a REPL transcript or a gonk
+# console prints the family refusal without that clause; a crate's own run and an in-page cell
+# print it with. Before that the pin was 0.1.96: what the pinned gonk links, and the cli crates
 # at 0.1.52 (engine, resolve, ipc, quic, web) require it: it adds the layer vocabulary (ledger
 # #1182), which no page uses, and nothing a page prints moved. Before that the pin was 0.1.95,
 # core's published head and what the cli 0.1.46 crates required: 0.1.94 refuses a sign in a percent escape of a
@@ -69,10 +79,12 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.96"
+ikigai-core = "0.1.98"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
-# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.96 is the pin
-# because it is the release paired with core 0.1.96 (it defines the layer family, which no page
+# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.98 is the pin
+# because it is the release paired with core 0.1.98 (0.1.97 is yanked with core's): it spells a `%`
+# in an endpoint id or input name as `%25` and moves `owl:versionInfo`, and no page renders either.
+# Before that the pin was 0.1.96, paired with core 0.1.96 (it defines the layer family, which no page
 # renders). Before that the pin was 0.1.95, paired with core 0.1.95; 0.1.94 and 0.1.95 change only its
 # `owl:versionInfo` and its tests (the shared contract vectors), and it still requires core
 # 0.1.91 or later. Before that the pin was 0.1.93, paired with core 0.1.93. Before
@@ -80,7 +92,7 @@ ikigai-core = "0.1.96"
 # action's inputs under that contract, and its vocabulary defines `ik:contract` and documents
 # `ik:ActionMatch`'s new subject; it requires core 0.1.91. Before that the pin was 0.1.66, the release core 0.1.66
 # paired with, while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-vocab = "0.1.96"
+ikigai-vocab = "0.1.98"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
@@ -143,11 +155,22 @@ oxrdf = "0.3"
 # The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a
 # git rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is
-# built from, at the releases its lock takes. The gonk in `gonk.rev` (9f2e89e) links core 0.1.95,
-# ledger 0.9.0, store 0.2.14 and browse 0.18.4, as these crates do. A console transcript is gonk's
-# answer and a cell or `cargo run` is these crates', each checked against its own source. (Until
-# 9f2e89e the pinned gonk, 9704b54, linked ledger 0.6.2 while these crates took 0.9.0, so no
-# transcript could ask `count`; ledger #1245 closed that gap.)
+# built from, and they follow gonk's lock until a release the book needs runs ahead of it. ⚠ That
+# is the case NOW (2026-10-12, ledger #1323): the gonk in `gonk.rev` (2598192) links core 0.1.96,
+# ledger 0.9.0 and store 0.2.15, while these crates take core 0.1.98, ledger 0.11.0 and store 0.2.19,
+# each its crate's published head; gonk's own main links the same older three. A console
+# transcript is gonk's answer and a cell or `cargo run` is these crates', each checked against its
+# own source, so the gap shows only where the releases differ in what they print: a family-scope
+# refusal (core 0.1.97), which no gonk-book cell prints and its consoles print without the new
+# clause. books/gonk/DESIGN.md records the gap. (Until 9f2e89e the pinned gonk, 9704b54, linked
+# ledger 0.6.2 while these crates took 0.9.0, so no transcript could ask `count`; ledger #1245
+# closed that gap.)
+# 0.11.0 is the pin because it is the published head: 0.10.0 adds `urn:cap:ledger:about:{ledger}`,
+# which adds and removes an item's `about` edges without the close grant (`write:{ledger}` still
+# covers it, so `ledger-host`'s writer is unchanged), and `item:{id}:about` now declares the family
+# `urn:cap:ledger:*`, as claim, comment and close do (ledger #1315); 0.11.0 adds a claim kind,
+# `agent` (`ClaimKind::Agent`, and `ClaimKind` is `#[non_exhaustive]` from now on; ledger #1329),
+# which no crate here matches on or stamps. Every cell and Rust chapter prints what it did on 0.9.0.
 # The API floor is 0.9.0, because part 5 ("The ledger as the work queue") asks the ledger how many
 # items implement a requirement with `urn:iki:ledger:count`, which 0.9.0 added (the total alone,
 # one COUNT query, without `items`' page or its corpus check; ledger #1128). Below that, 0.4.0 is
@@ -171,11 +194,18 @@ oxrdf = "0.3"
 # then 0.4.2, where a malformed timestamp stopped dropping an item from `items`/`next` (ledger
 # #866). Before 0.4.0 the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that
 # the first chapter walks straight through: two appends in one millisecond minting the same id,
-# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.10.0): read it as a RANGE.
-ikigai-ledger = "0.9.0"
+# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.12.0): read it as a RANGE.
+# The old pin, "0.9.0", was a ceiling below 0.10 and held the book at 0.9.
+ikigai-ledger = "0.11.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
-# RocksDB at all. 0.2.12 is the pin because it is the published head, and markdown 0.1.3
+# RocksDB at all. 0.2.19 is the pin because it is the published head (with ledger 0.11.0, ahead of
+# the pinned gonk, which links 0.2.15): 0.2.16 and 0.2.17 make every `SharedWriter::over` on one
+# handle share the store's one writer (ledger #1276, #1324), 0.2.18 adds `EvaluationBudget`, a time
+# budget for SPARQL a consumer evaluates itself (ledger #1327), and 0.2.19 bounds the RDF 1.2 triple
+# terms an update leaves in the store and reads `<<(` as one token (ledger #1333, #1354). No crate
+# here calls `over` or the budget, no page writes a triple term, and every answer a page prints is
+# the same. Before that, 0.2.12 was the pin because it was the published head, and markdown 0.1.3
 # requires 0.2.11: 0.2.11 words a SPARQL `SERVICE` refusal for the consumer that asked (ledger
 # #1094), and 0.2.12 runs every update on the store's one writer thread, so reads after a bulk
 # write stay fast (ledger #1127). No page uses `SERVICE`, and no query a page runs changed its
@@ -191,7 +221,7 @@ ikigai-ledger = "0.9.0"
 # No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
 # links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.15", default-features = false }
+ikigai-store = { version = "0.2.19", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
 # Book's "Explain, with a mounted model" and "One-off review". 0.18.6 is the pin because it is what
 # the pinned gonk (2598192) links: 0.18.5 writes every archive record in one transaction on

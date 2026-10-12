@@ -179,7 +179,9 @@ error: denied: this capability does not hold `urn:cap:ledger:read:book`. A ledge
 ```
 
 The filing worked; the delete and the other ledger did not, with the token each one needed
-named in the refusal. `author=agent-7` is the ledger's own argument for who filed an item. It
+named in the refusal. (A gonk that links `ikigai-core` 0.1.97 or later adds to the first refusal
+what satisfies its family, ``; any grant under `urn:cap:ledger:delete:` satisfies it``; the pinned
+one links 0.1.96.) `author=agent-7` is the ledger's own argument for who filed an item. It
 is a claim the caller makes, not an identity the socket proves, which is the next section.
 
 ## What the door saw

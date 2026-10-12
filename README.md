@@ -217,9 +217,10 @@ saying `not cached`, and the corrected block went stale in turn, because nothing
 replay in CI (ledger #998). The page says `not cached` again now, for the new reason, and the
 replay is a CI step (below).
 
-The test types every transcript's lines into one `ikigai --plain` REPL on its stdin, the way a
+The test types every transcript's lines into one `ikigai --quiet` REPL on its stdin, the way a
 reader at the prompt does, and diffs what the REPL printed, stdout and stderr in the order they
-were written (cache verdicts, durations and a file thread's generation normalized; `…` matches
+were written. `--quiet` (cli 0.1.55) prints only the answers, with no banner and no prompt when
+stdin is not a terminal, so nothing is stripped before the comparison (cache verdicts, durations and a file thread's generation normalized; `…` matches
 any run of lines). It does not pass them as `-c … -c …`: a `-c` batch whose stdin is not a
 terminal fetches and caches the contract of a bare `source` (cli 0.1.48 and later), so its
 `urn:kernel:cache` lists rows a reader's REPL never shows. A block that is the next part of the same sitting says

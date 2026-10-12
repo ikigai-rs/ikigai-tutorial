@@ -120,7 +120,8 @@ error: denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledg
 ```
 
 The first is the family: this grant holds no ledger's delete token at all, so the door refuses it
-before dispatch. The second is subtler, and it is why a ledger's name is in its IRI rather than an
+before dispatch. (From `ikigai-core` 0.1.97 the refusal says so itself, ending ``; any grant under
+`urn:cap:ledger:delete:` satisfies it``; the pinned gonk links 0.1.96.) The second is subtler, and it is why a ledger's name is in its IRI rather than an
 argument: the client holds the *write* family (for `default`), so the door lets the request
 through, and the ledger itself refuses it, because the token names a different ledger.
 

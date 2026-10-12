@@ -353,6 +353,18 @@ const CLAIMS: &[Claim] = &[
         present: true,
     },
     Claim {
+        chapter: "code/authority.md",
+        stamp: "so it can name only that family, and since `ikigai-core` 0.1.97 it",
+        says: "a refusal at a family scope names the prefix any grant under which satisfies it",
+        source: Source::Crate {
+            name: "ikigai-core",
+            version: "0.1.97",
+        },
+        file: "src/kernel.rs",
+        needle: "under `{prefix}` satisfies it)",
+        present: true,
+    },
+    Claim {
         chapter: "beyond/identity.md",
         stamp: "Since `ikigai-core` 0.1.93 the identity travels too",
         says: "a door mints the principal into the capability as a scope",

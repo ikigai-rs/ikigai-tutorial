@@ -44,17 +44,20 @@ ikigai-vocab.workspace = true
 # loop rather than block the page. 0.1.29 is the floor because the spreadsheet's part VI uses
 # what it added: `as-of=<instant>` on a line, which resolves the line in a temporal corridor
 # built from doors the host supplies (`Engine::with_as_of_doors`), and hands the resolver that
-# line's chain (`Resolver::issue_as_async_in`). 0.1.52 is the pin because it is the cli crates'
-# published head and what the gonk Book's pinned gonk links; the workspace locks every cli crate
-# at one version, so this one follows, and the ikigai Book's REPL transcripts replay against the
-# same release (`books/ikigai/ikigai-cli.version`), so a cell and a transcript render alike.
-ikigai-engine = "0.1.52"
+# line's chain (`Resolver::issue_as_async_in`). 0.1.55 is the pin because it is the cli crates'
+# published head; the workspace locks every cli crate at one version, so this one follows, and the
+# ikigai Book's REPL transcripts replay against the same release (`books/ikigai/ikigai-cli.version`),
+# so a cell and a transcript render alike. (The gonk Book's pinned gonk links 0.1.52. 0.1.53 to
+# 0.1.55 changed the engine only in where a piped value goes: a content-less `delete` takes one
+# into a declared `content`, a `source` value is routed among the Source action's own arguments,
+# and a stdin known to be empty is no value. No cell pipes into a `delete` or a per-verb source.)
+ikigai-engine = "0.1.55"
 # The `Resolver` seam the engine drives, implemented here by `InChain` so a cell can run in
 # one chain (a game's, a person's scenario) on the page's kernel. 0.1.29 matches the engine:
 # it is where `issue_as_async_in` and `is_cached_in` arrived, which `InChain` overrides to
-# stack the line's chain inside its own (`Scope::stack`, core 0.1.82). 0.1.52 is the pin, with
+# stack the line's chain inside its own (`Scope::stack`, core 0.1.82). 0.1.55 is the pin, with
 # the engine.
-ikigai-resolve = "0.1.52"
+ikigai-resolve = "0.1.55"
 # The trait is an `#[async_trait]`, so its implementor needs the macro.
 async-trait = "0.1"
 # `block_on` for the trait's one synchronous method, as the kernel's own impl does.
