@@ -91,14 +91,12 @@ read is written, so the refresh ran the query again. On your own gonk the page i
 
 ## 2. Ask gonk in a sentence
 
-Now let the model write the query. `graph=` says which graph the question is about, and `save=`
-the name to keep the answer at. (`graph=` is the drafter's name for it in the `ikigai-nl` this
-book's gonk links, 0.2.1; from 0.3.0 the drafter calls it `focus=`, as the grounding and the check
-do, and keeps `graph=` as an alias for one release.)
+Now let the model write the query. `focus=` says which graph the question is about, and `save=`
+the name to keep the answer at.
 
 <!-- transcript: run -->
 ```console
-$ printf 'How many open items are there?' | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:nl:sparql save=how-many-open graph=urn:iki:ledger:graph:default'
+$ printf 'How many open items are there?' | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:nl:sparql save=how-many-open focus=urn:iki:ledger:graph:default'
 urn:script:how-many-open:version:sha256:… (a DRAFT of urn:script:how-many-open: review it, then publish it with state=published)
 PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
 SELECT (COUNT(?item) AS ?count) WHERE {

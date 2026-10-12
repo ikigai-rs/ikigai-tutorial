@@ -60,7 +60,7 @@ cargo run -p sentence-draft -- 1
 ```text
 alice> source urn:nl:grounding as=application/json   (summarized)
 actions     26 of 26
-vocabulary  179 of 179
+vocabulary  199 of 199
 graphs      1 of 1
   urn:iki:tutorial:items  20 triples, 5 predicates
     dcterms:title    literal xsd:string
@@ -73,7 +73,7 @@ examples    1 of 1
 
 carol> source urn:nl:grounding as=application/json   (summarized)
 actions     8 of 8
-vocabulary  179 of 179
+vocabulary  199 of 199
 graphs      0 of 0
 examples    0 of 0
 ```

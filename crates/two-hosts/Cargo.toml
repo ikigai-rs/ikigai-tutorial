@@ -20,14 +20,15 @@ ikigai-core.workspace = true
 # the `Minter` signature IS the lesson of "Who is asking" and a prose copy of it
 # would rot silently. 0.1.41 because that release added `Session.principal`, a public field, so
 # the `Session { … }` literal in `src/identity.rs` names it: under the old "0.1.18" a fresh resolve
-# took 0.1.41 and the listing the book prints no longer compiled. 0.1.46 is the pin for both and
-# for `ikigai-resolve` below: the cli crates' published head, so the transports the book
-# compiles against are the ones its REPL transcripts' `ikigai` ships.
-ikigai-ipc = "0.1.46"
-ikigai-quic = "0.1.46"
+# took 0.1.41 and the listing the book prints no longer compiled. 0.1.52 is the pin for both and
+# for `ikigai-resolve` below: the cli crates' published head, and the transports the gonk Book's
+# pinned gonk links. (The ikigai Book's REPL transcripts replay against 0.1.46; see
+# `crates/book-wasm`.)
+ikigai-ipc = "0.1.52"
+ikigai-quic = "0.1.52"
 # `MountedRemote` (the alias/override composition) and the `Resolver` surface a
 # connected peer presents.
-ikigai-resolve = "0.1.46"
+ikigai-resolve = "0.1.52"
 # `Failover` — what `--prefer` is made of. 0.1.11, the published head.
 ikigai-throttle = "0.1.11"
 async-trait = "0.1"

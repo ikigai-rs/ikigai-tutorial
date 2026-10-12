@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.44
+ikigai 0.1.52
 ```
 
 ## Start a gonk, and find its socket
@@ -124,7 +124,7 @@ and wins over the variable; the page keeps the variable, which every release rea
 one or the other the command reads yours.
 
 ⚠ **Write the socket's path out in full.** The mount line is read as it is written, and
-`ikigai-cli` 0.1.44 does not expand a leading `~` in it: `mount = "prefer
+`ikigai-cli` 0.1.52 does not expand a leading `~` in it: `mount = "prefer
 urn:iki:ledger:=~/.ikigai/gonk.sock"` fails with *No such file or directory*, naming the
 unexpanded path. That is why the line above is written with `printf` and `$PWD`; in your own
 config home, write your home directory's path.

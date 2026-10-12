@@ -10,12 +10,6 @@ two things in gonk, which mounts [`ikigai-script`](https://crates.io/crates/ikig
 [`ikigai-nl`](https://crates.io/crates/ikigai-nl) behind its three doors, and so has to answer a
 question a library cannot: **who is asking**, through which door, and what each of them may do.
 
-⚠ This page runs the gonk this book pins, which links `ikigai-script` 0.3.0 and `ikigai-nl` 0.2.1.
-Newer releases of both change three answers on it: the drafter's focus argument, what happens to a
-draft whose preview is empty, and the refusal a draft's author gets for running it. Each place says
-what the newer release does; the ikigai Book's chapter shows it, and this page will when its gonk
-takes them.
-
 The cast, all on this page's one scratch gonk:
 
 | who | door | what they hold |
@@ -138,8 +132,8 @@ worker
 
 `bot`'s seven: the ledger's two read tokens, the mount's host, and all four script tokens over
 the namespace (`write` and `delete` are what `publish` means). `reviewer` holds `read` and `run`
-over the same names and nothing that drafts. `worker`'s `--worker default` is a ledger role new in
-this pin (`--ledger default=worker` says the same): read, claim and comment, never close, for a
+over the same names and nothing that drafts. `worker`'s `--worker default` is a ledger role
+(`--ledger default=worker` says the same): read, claim and comment, never close, for a
 remote worker whose dispatcher closes. It carries the ledger graph's store WRITE token, because
 the ledger writes a claim or a comment as a store update under the caller's own capability; the
 socket and QUIC doors refuse a narrowed caller's raw write to a ledger graph all the same
@@ -288,7 +282,7 @@ A signed-out caller may not draft at all, and is refused before any model is ask
 
 <!-- transcript: run -->
 ```console
-$ curl -s -X POST --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-titles&graph=urn:iki:ledger:graph:default'
+$ curl -s -X POST --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-titles&focus=urn:iki:ledger:graph:default'
 denied: capability does not grant `urn:cap:net:localhost` (declared by `urn:nl:sparql`)
 $ grep -c ' ask ' model.log
 0
@@ -298,44 +292,40 @@ The token it names is the one `--nl draft` mints. gonk DECLARES it on `urn:nl:sp
 kernel refuses before the grounding is computed, and the manifold offers the drafter only to the
 callers who may draft.
 
-### Focus every draft: `graph=`
+### What the model is shown, and `focus=`
 
-The drafter tells the model what the caller may see — the actions it may take, the vocabulary,
-the shape of each graph it may read — and refuses a grounding over 1 MiB rather than trimming it.
-⚠ **On a gonk the size of a working one, running this pin's drafter, an unfocused draft is
-refused**, every time. The live gonk on 2026-10-11, browsing 48 repositories, answered its owner's
-first unfocused draft with:
+The drafter tells the model what the caller may see, and refuses a grounding over 1 MiB rather than
+trimming it. Of the grounding it reads only what a query needs, asked for with `parts=`: the
+vocabulary, the shape of each graph the caller may read, and the worked examples. It never reads
+the actions, the caller's manifold, because a query calls none of them, and they are what grows
+with a gonk: each browse root adds its own family. So the size of a gonk does not refuse a draft.
+Measured on a scratch gonk at this book's pin browsing 48 roots, as the live gonk did on
+2026-10-11: the whole grounding, actions included, is 4,632,254 bytes and refused unfocused; the
+parts the drafter reads are 109,915 bytes, and an unfocused draft there was drafted, repaired and
+saved. (The live gonk, whose drafter then read the whole grounding, refused every unfocused draft
+that day; [ledger #1243](http://localhost:1060/l/default/item/1243) is the fix.)
 
-```text
-error: invalid argument `focus`: the grounding with no focus is 4966451 bytes as application/json,
-over this host's bound of 1048576 (it holds 1529 actions, 179 vocabulary terms, 2 graphs and 0
-examples). Narrow it with focus= a graph IRI or a topic word
-```
-
-What grows it is the caller's manifold, and each browse root adds its own family of actions: about
-100 KB of grounding each, measured on this pin (none: 330 KB; three roots: 637 KB; eight: 1,079,531
-bytes, refused). This page's gonk browses nothing, so its grounding fits, and focused on the ledger
-graph it is a few kilobytes:
+This page's gonk shows the same shape at its own size. The actions are counted and left out, and
+`focus=`, a graph IRI or a topic word, narrows what is left to what mentions it:
 
 <!-- transcript: run -->
 ```console
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding as=application/json' 2>/dev/null | wc -c | awk '{ print ($1 > 1048576 ? "over" : "under") " the 1 MiB bound, unfocused" }'
-under the 1 MiB bound, unfocused
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | wc -c | awk '{ print ($1 < 10000 ? "under 10 KB" : "over 10 KB") ", focused on the ledger graph" }'
-under 10 KB, focused on the ledger graph
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
+left out: parts= did not ask for it (101 offered)
+urn:ikigai:vocab: 199 of 199
+urn:iki:store:graphs: 1 of 1
+urn:script:catalog: 1 of 1
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)"'
+urn:ikigai:vocab: 0 of 199
+urn:iki:store:graphs: 1 of 1
+urn:script:catalog: 1 of 1
 ```
 
-So every draft on this page passes `graph=`, a graph IRI or a topic word (`graph=ledger` worked on
-the live gonk), as every draft on a real gonk running this pin must. Note the two spellings: this
-pin's drafter takes `graph=`, and its refusal and `urn:nl:grounding` say `focus=`, for the same
-thing.
+Unfocused, the model would be shown all 199 terms of the vocabulary; focused on the ledger graph,
+the graph's own shape and the example that reads it, and no term, since none mentions the graph.
 
-`ikigai-nl` 0.3.0 changes both ([ledger #1243](http://localhost:1060/l/default/item/1243)). Its
-drafter reads only the parts a query needs, the vocabulary, the graphs and the examples, and never
-the actions, which are what grows with every browse root; so the refusal above was measured on
-this pin and does not describe that release. And its drafter takes `focus=`, like the grounding
-and the check, keeping `graph=` as an alias for one release. This page passes `graph=` because the
-gonk it pins does not take `focus=` on the drafter.
+Every draft on this page passes `focus=` all the same: what the model is not shown, it cannot
+mistake. (`graph=`, the drafter's older name for it, is accepted for one more release.)
 
 ## A machine drafts
 
@@ -344,8 +334,8 @@ gonk it pins does not take `focus=` on the drafter.
 
 <!-- transcript: run -->
 ```console
-$ printf 'the number and title of every open item with priority 2 or higher (0 is highest), ordered by number' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-open-p2 graph=urn:iki:ledger:graph:default'
-urn:script:team-open-p2:version:sha256:… (a DRAFT of urn:script:team-open-p2: review it, then publish it with state=published)
+$ printf 'the number and title of every open item with priority 2 or higher (0 is highest), ordered by number' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-open-p2 focus=urn:iki:ledger:graph:default'
+urn:script:team-open-p2:version:sha256:… (a DRAFT of urn:script:team-open-p2: review it, then publish it with state=published). its preview is EMPTY: no row matched, and no attempt within the bound of 3 did better; the warnings name the patterns that match nothing on their own. Review it before publishing
 # @param limit xsd:integer optional default 2
 SELECT ?number ?title
 FROM <urn:iki:ledger:graph:default>
@@ -360,30 +350,28 @@ WHERE {
   }
 }
 ORDER BY ?number
+warning: the preview is empty: no row matches, and these triple patterns match nothing on their own in the graphs it reads: GRAPH <urn:iki:ledger:graph:default> { ?item <https://ikigai-rs.dev/ns/ledger#status> "open" }. A string written where the data holds an IRI (or the reverse), or a literal of another datatype, matches nothing: compare each with the kind of value its predicate takes
 preview (LIMIT 5):
 ?number	?title
 [uncacheable]
 $ cat model.log
 model-stub: urn:llm:ask and urn:llm:config on …/model.sock (model stub)
 model-stub: ask 1: the number and title of every open item with priority 2 or higher (0 is highest), ordered by number
+model-stub: ask 2 (a repair): the number and title of every open item with priority 2 or higher (0 is highest), ordered by number
 ```
 
-That is what Llama 3.3 70B wrote on the live gonk, and the stub writes it here so the page can
-show what happened next: **nothing**. The check passed it (it parses, and every predicate it names
-is one the ledger graph uses), so it was saved, and its preview is empty. The one error is
-`ledger:status "open"`: the ledger stores the status as the IRI `ledger:open`, and a string never
-equals an IRI. (`FROM` beside a `GRAPH` block naming the same graph looks like a second error, and
-in standard SPARQL it would be one; here it is harmless, because a script's graphs are passed as
-both its default and its named graphs, as the ikigai Book's
-[claims test](../../code/sentence.html#a-draft-the-check-passed-and-should-not-have) pins.) ⚠ **On
-this pin, an empty preview is not a failure**: no repair runs and nothing marks the draft, and a
-person reading the draft is the check that catches it. `ikigai-nl` 0.3.0 changes that
-([ledger #1242](http://localhost:1060/l/default/item/1242)): the check warns that the preview is
-empty and names the pattern that matches nothing on its own (here, the string `"open"`), the
-drafter sends the model that warning and asks again, the grounding says that `ledger:status` takes
-the IRI `ledger:open` or `ledger:closed`, and a draft still empty when drafting stops is saved
-MARKED, on the first line of the answer. The ikigai Book's [same
-draft](../../code/sentence.html#a-draft-the-check-passed-and-should-not-have) shows it.
+That is what Llama 3.3 70B wrote on the live gonk, and the stub writes it here. The check passes
+it: it parses, and every predicate it names is one the ledger graph uses. But its preview is empty,
+and the check says why, by trying each triple pattern on its own and naming the one that matches
+nothing: `ledger:status "open"`. The ledger stores the status as the IRI `ledger:open`, and a
+string never equals an IRI. So the drafter sends the model that warning and asks again (`ask 2 (a
+repair)` in the stub's log). The stub answers with the same draft, as a model that cannot see its
+mistake would, and a repair that repeats an earlier attempt stops the drafting: asking a third time
+would buy nothing. The draft is saved all the same, MARKED on the first line of the answer, so the
+person who reviews it starts from the warning. (`FROM` beside a `GRAPH` block naming the same graph
+looks like a second error, and in standard SPARQL it would be one; here it is harmless, because a
+script's graphs are passed as both its default and its named graphs, as the ikigai Book's [claims
+test](../../code/sentence.html#a-draft-the-check-passed-and-should-not-have) pins.)
 
 ### The attempts, and where the draft came from
 
@@ -392,7 +380,7 @@ said of it — here for an ask whose first draft the check refuses, so the draft
 
 <!-- transcript: run -->
 ```console
-$ printf 'the titles of the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-titles graph=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.status, .script, (.attempts[] | "attempt \(.n) by \(.model): valid=\(.valid) \(.errors | join("; "))"), "preview: \(.check.preview.rows | length) row(s)"'
+$ printf 'the titles of the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-titles focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.status, .script, (.attempts[] | "attempt \(.n) by \(.model): valid=\(.valid) \(.errors | join("; "))"), "preview: \(.check.preview.rows | length) row(s)"'
 saved
 urn:script:team-titles
 attempt 1 by stub: valid=false the predicate <https://ikigai-rs.dev/ns/ledger#state> is used by none of the graphs this query reads and is not in the vocabulary
@@ -406,7 +394,7 @@ the script it produced:
 
 <!-- transcript: run -->
 ```console
-$ printf 'the titles of the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-titles-prov graph=urn:iki:ledger:graph:default as=text/turtle' 2>/dev/null | grep -E 'draftValid|wasRevisionOf|script:team-titles-prov>' | sed -E 's/[0-9a-f]{64}/…/g'
+$ printf 'the titles of the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-titles-prov focus=urn:iki:ledger:graph:default as=text/turtle' 2>/dev/null | grep -E 'draftValid|wasRevisionOf|script:team-titles-prov>' | sed -E 's/[0-9a-f]{64}/…/g'
 <urn:nl:sparql:drafting:…:attempt:1> <https://ikigai-rs.dev/ns#draftValid> "false"^^<http://www.w3.org/2001/XMLSchema#boolean> .
 <urn:nl:sparql:drafting:…:attempt:2> <https://ikigai-rs.dev/ns#draftValid> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
 <urn:nl:sparql:drafting:…:attempt:2> <http://www.w3.org/ns/prov#wasRevisionOf> <urn:nl:sparql:drafting:…:attempt:1> .
@@ -435,27 +423,18 @@ urn:script:team-titles-prov  draft  sha256:…
 [uncacheable]
 ```
 
-A draft cannot be run either, and on this pin the refusals are worth reading closely, because one
-of them is wrong. Its author asks first, then the owner:
+A draft cannot be run either, by anyone. Its author asks first, then the owner:
 
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'source urn:script:team-titles:result'
-error: denied: capability does not grant `urn:cap:lisp` (declared by `urn:script:team-titles:result`)
+error: conflict: urn:script:team-titles is a draft; publish it (`state=published`) to run it
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:script:team-titles:result'
-error: conflict: urn:script:team-titles is a draft; publish it (`state=published`) to run it, or try the code at urn:script:eval
+error: conflict: urn:script:team-titles is a draft; publish it (`state=published`) to run it
 ```
 
-The owner's answer is the true one: it is a draft, and publishing it is the way to run it. `bot`
-is told it lacks a Lisp grant, which has nothing to do with a SPARQL draft: a draft wears the
-script library's generic contract, which declares the Lisp grant, so a caller without it is
-refused at that contract before the real reason is reached. And `urn:script:eval`, the hint in the
-owner's answer, refuses SPARQL. Both are this pin's `ikigai-script` (0.3.0), and 0.3.3 fixes them
-([ledger #1261](http://localhost:1060/l/default/item/1261)): the generic contract no longer declares
-the Lisp grant (a published Lisp script's own door adds it), so `bot` is told what the owner is
-told, that it is a draft and publishing it is how to run it, and the hint names a door only for a
-language that door takes, so a SPARQL draft gets none. The ikigai Book's [A draft is nobody's
-script yet](../../code/sentence.html#a-draft-is-nobodys-script-yet) shows both answers.
+Both are told the same true thing: it is a draft, and publishing it is how to run it. Only a caller
+who may see the draft hears that much; to `reviewer` it does not exist.
 
 ## A person publishes
 
@@ -497,7 +476,7 @@ ORDER BY ?number
 
 <!-- transcript: run -->
 ```console
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c "source urn:gk:nl:sparql:check focus=urn:iki:ledger:graph:default content=\"$(cat team-open-p2.rq)\""
+$ cat team-open-p2.rq | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:sparql:check focus=urn:iki:ledger:graph:default'
 valid select over <urn:iki:ledger:graph:default>
 requires: urn:cap:store:read:graph:urn:iki:ledger:graph:default
 preview (LIMIT 5):
@@ -507,8 +486,7 @@ preview (LIMIT 5):
 [uncacheable]
 ```
 
-Rows, where the draft had none. (The query is passed inline because this page's `ikigai`, 0.1.44,
-reads a pipe only into a `sink`.) Publishing it under the draft's name replaces the draft, and
+Rows, where the draft had none. Publishing it under the draft's name replaces the draft, and
 `public=true` lets a signed-out caller run it:
 
 <!-- transcript: run -->
@@ -529,7 +507,7 @@ asked.
 
 <!-- transcript: run -->
 ```console
-$ printf 'all the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-open-p2 graph=urn:iki:ledger:graph:default'
+$ printf 'all the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-open-p2 focus=urn:iki:ledger:graph:default'
 error: invalid argument `save`: urn:script:team-open-p2 is a published script, and a draft saved there would replace it; choose another name
 $ grep -c ': all the open items$' model.log
 0
@@ -544,11 +522,11 @@ argument is a query argument:
 
 <!-- transcript: manual — needs a session cookie, which only a passkey ceremony in a browser can mint -->
 ```console
-$ curl -X POST -b 'gonk_session=…' --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-ann-titles&graph=urn:iki:ledger:graph:default'
+$ curl -X POST -b 'gonk_session=…' --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-ann-titles&focus=urn:iki:ledger:graph:default'
 urn:script:team-ann-titles:version:sha256:… (a DRAFT of urn:script:team-ann-titles: review it, then publish it with state=published)
 …
-$ curl -X POST -b 'gonk_session=…' --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-ann-titles2&graph=urn:iki:ledger:graph:default&as=application/json'
-$ curl -X POST -b 'gonk_session=…' --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-ann-titles3&graph=urn:iki:ledger:graph:default&as=text/turtle'
+$ curl -X POST -b 'gonk_session=…' --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-ann-titles2&focus=urn:iki:ledger:graph:default&as=application/json'
+$ curl -X POST -b 'gonk_session=…' --data-binary 'the titles of the open items' 'http://localhost:1070/nl/sparql?save=team-ann-titles3&focus=urn:iki:ledger:graph:default&as=text/turtle'
 $ curl -b 'gonk_session=…' 'http://localhost:1070/script/team-ann-titles'
 $ curl -X POST -b 'gonk_session=…' --data-binary @team-ann-titles.rq 'http://localhost:1070/script/team-ann-titles?language=sparql&state=published'
 $ curl -b 'gonk_session=…' 'http://localhost:1070/script/team-ann-titles/result?as=text/csv'

@@ -21,7 +21,7 @@ ikigai-core.workspace = true
 # The Meta renderer, so a mount describes this peer's contracts the way a real one does.
 ikigai-vocab.workspace = true
 # The socket door a `gonk.mount = "prefer urn:llm:=<socket>"` line dials. The cli crates'
-# published head, as `crates/two-hosts` takes; the wire is the one gonk's 0.1.44 speaks.
-ikigai-ipc = "0.1.46"
+# published head, as `crates/two-hosts` takes; the wire is the one gonk's 0.1.52 speaks.
+ikigai-ipc = "0.1.52"
 async-trait = "0.1"
 serde_json.workspace = true

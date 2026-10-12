@@ -30,8 +30,10 @@ lto = true
 # Every ikigai pin in this workspace sits at its crate's newest published release as of
 # 2026-10-10, so the book teaches what a reader's fresh `cargo add` resolves. Where a pin moved for
 # that alone its comment says so, and the reason that set the previous floor is kept beneath it.
-# 0.1.95 is the pin because it is core's published head, and because the cli crates at 0.1.46
-# (engine, resolve, ipc, quic, web) require it: 0.1.94 refuses a sign in a percent escape of a
+# 0.1.96 is the pin because it is what the pinned gonk (2598192) links, and because the cli crates
+# at 0.1.52 (engine, resolve, ipc, quic, web) require it: it adds the layer vocabulary (ledger
+# #1182), which no page uses, and nothing a page prints moved. Before that the pin was 0.1.95,
+# core's published head and what the cli 0.1.46 crates required: 0.1.94 refuses a sign in a percent escape of a
 # match or contract IRI (`%+1`), and 0.1.95 parses those IRIs leniently and emits only their
 # canonical spelling (`canonical_match_iri`, `canonical_contract_iri`), and a Sink or Delete the
 # kernel dispatched cuts its target whether it succeeded or failed (a refusal before dispatch
@@ -67,17 +69,18 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.95"
+ikigai-core = "0.1.96"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
-# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.95 is the pin
-# because it is the release paired with core 0.1.95; 0.1.94 and 0.1.95 change only its
+# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.96 is the pin
+# because it is the release paired with core 0.1.96 (it defines the layer family, which no page
+# renders). Before that the pin was 0.1.95, paired with core 0.1.95; 0.1.94 and 0.1.95 change only its
 # `owl:versionInfo` and its tests (the shared contract vectors), and it still requires core
 # 0.1.91 or later. Before that the pin was 0.1.93, paired with core 0.1.93. Before
 # that, 0.1.91 was the floor because it renders each action at its content-addressed contract IRI (above), with the
 # action's inputs under that contract, and its vocabulary defines `ik:contract` and documents
 # `ik:ActionMatch`'s new subject; it requires core 0.1.91. Before that the pin was 0.1.66, the release core 0.1.66
 # paired with, while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-vocab = "0.1.95"
+ikigai-vocab = "0.1.96"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
@@ -179,29 +182,32 @@ ikigai-ledger = "0.9.0"
 # answer. 0.2.14 is the pin now because it is what the pinned gonk (9f2e89e) links: 0.2.13 copies
 # a scoped update's footprint rather than the whole graph (ledger #1132), and 0.2.14 hands a host
 # that writes through the raw handle the store's own writer thread (`SharedWriter`, ledger #1207),
-# which no crate here uses; every answer a page prints is the same. (0.2.15, published since,
-# enforces declared graphs; gonk does not link it yet, so neither does the book.) Before 0.2.14
+# which no crate here uses; every answer a page prints is the same. 0.2.15 is the pin because it
+# is what the pinned gonk (2598192) links: it enforces the graphs an update declares and loads on
+# the writer thread (ledger #1207, #1209). Before that the pin was 0.2.14. Before 0.2.14
 # the pin was 0.2.12 for the reasons above. Before that the pin was 0.2.10, the head on the morning of 2026-10-10, which ledger
 # 0.6.2 requires: 0.2.9 bounds the SIZE of every SPARQL answer, refusing rather
 # than truncating (ledger #970), and 0.2.10 sizes the SPARQL thread for the build (ledger #1003).
 # No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
 # links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.14", default-features = false }
+ikigai-store = { version = "0.2.15", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.4 is the pin because it is what
-# the pinned gonk (9f2e89e) links: 0.18.3 lists a symlink in the tree only when the jail serves its
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.6 is the pin because it is what
+# the pinned gonk (2598192) links: 0.18.5 writes every archive record in one transaction on
+# ikigai-store's `SharedWriter` (ledger #1207, #1253), and 0.18.6 adds
+# `Mount::annotations_through`, writing annotations through a host's writer (ledger #1252), which
+# no crate here calls. Before that the pin was 0.18.4, what gonk 9f2e89e linked: 0.18.3 lists a symlink in the tree only when the jail serves its
 # target (ledger #1130), and 0.18.4 commits every browse write on one writer thread, so reads after
 # a burst of writes stay fast (ledger #1131). No chapter's root holds a symlink, and the stub
-# model's explanations and findings printed the same at it. (0.18.5, which moves those writes onto
-# ikigai-store's `SharedWriter`, is not published yet.) 0.18.2 is a SECURITY floor: it never
+# model's explanations and findings printed the same at it. 0.18.2 is a SECURITY floor: it never
 # serves a repository's `.git` (refused at the jail, hidden from the listing; ledger #1126). No chapter lists or reads
 # `.git`, so nothing a page prints moved. Before that the pin was 0.18.1: a review answer's last finding is kept when it cannot have been cut (ledger
 # #818), and the chapter's stub answer printed the same findings at it. The floor is 0.18.0, the
 # release that added the explain-status cost line the chapter shows ("opens instantly from the
 # archive"), and what gonk edb9a3d links. A 0.x caret: also a ceiling (<0.19.0); read it as a
 # RANGE.
-ikigai-browse = "0.18.4"
+ikigai-browse = "0.18.6"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
