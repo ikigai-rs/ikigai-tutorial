@@ -14,7 +14,8 @@ two stages that are worth keeping apart:
    queries that turn that structure into a domain — here, OpenSpec's. The lifter has never heard
    of a requirement. Every word of OpenSpec in this chapter is in the mapping.
 
-`ikigai-markdown` is on crates.io; this book's workspace takes 0.1.0, its first release.
+`ikigai-markdown` is on crates.io (its first release was 0.1.0); this book's workspace takes
+0.1.4.
 
 ## The mapping, by name
 
@@ -31,6 +32,15 @@ so the book never reads yours:
 
 The store and the ledger are the [first chapter](../ledger/your-own.md)'s; the lift is the third
 space. The graph will live in the same store as the ledger, which is what the next chapter needs.
+
+A mapping's constructs are SPARQL, and the lift runs them under a time budget, the same one the
+store's own doors use: 5 seconds for a caller, raised by a `urn:cap:store:budget:<ms>` grant, 120
+seconds for root, and a `Timeout` past it. An evaluation that cannot be stopped is counted, and
+while too many are still running the lift refuses new ones, so the count is what keeps a runaway
+mapping from holding the machine's cores. `space_with` makes that budget itself. A host that
+mounts the lift more than once, or wants other numbers, makes ONE `EvaluationBudget` and passes it
+to every `space_with_budget` it mounts, so that every lift shares one count. This host mounts one
+lift, so the default is already the one. The store keeps its own count for its own doors.
 
 The mapping's **lift profile** has one entry. It turns every RFC 2119 keyword in the tree into a
 match the constructs can see, one per occurrence:

@@ -255,15 +255,21 @@ ikigai-browse = "0.18.8"
 oxigraph = { version = "0.5.11", default-features = false }
 # Markdown as a graph, for the OpenSpec part: one generic structural lift plus a MAPPING resource
 # (a lift profile and SPARQL CONSTRUCTs), found by name at `urn:markdown:mapping:{name}` under a
-# config home. 0.1.3 is the pin because it is the published head: it words the `SERVICE` refusal
-# as a mapping's remedy rather than the store's (ledger #1108). Before that the pin was 0.1.2:
+# config home. 0.1.4 is the pin because it is the published head: it runs a lift's CONSTRUCTs
+# under ikigai-store's `EvaluationBudget` (5 s, raised by a `urn:cap:store:budget:<ms>` grant, 120 s
+# for root; a `Timeout` past it), adds `space_with_budget`, and requires store 0.2.19, the pin
+# below (ledger #1344). The book's caller is root and the OpenSpec constructs finish far inside
+# the base, so the lift prints the same graph. One lift space is mounted, so `space_with`'s
+# default budget is already the one per host its README asks for. Before that the pin was 0.1.3:
+# it words the `SERVICE` refusal as a mapping's remedy rather than the store's (ledger #1108).
+# Before that the pin was 0.1.2:
 # 0.1.1 bounds a mapping's SPARQL
 # and reads frontmatter without recursion (ledger #963), and 0.1.2 refuses SPARQL `SERVICE` in a
 # mapping in every build (ledger #1085). The OpenSpec mapping uses neither `SERVICE` nor deep
 # frontmatter, so it lifts the same graph. 0.1.0 is the first release on crates.io (2026-10-06);
 # before it, this line was a pin to one full git revision of the public repository, the way
 # DESIGN.md pins gonk. A 0.x caret, so also a ceiling (<0.2.0).
-ikigai-markdown = "0.1.3"
+ikigai-markdown = "0.1.4"
 # Scripts as resources, for the section "Code and language as resources": `urn:script:{name}`
 # with content-addressed versions, `…:result` (run as a read) and `…:runs` (run for effects),
 # under the least of what a script declares, what its publisher held and the host's ceiling.

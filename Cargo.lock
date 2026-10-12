@@ -1082,9 +1082,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-markdown"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a9d8ba7cf2dccda180c38db779c3ee14f47f2832fdc566ba440c4038735730d"
+checksum = "5282dcba6e0d3ccf4c74527dab4f25c83637509accc686f372058edae0f0522d"
 dependencies = [
  "async-trait",
  "ikigai-core",
