@@ -118,7 +118,7 @@ event = "review.completed"
 command = "ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root {repo_name} --repo-path {repo} --job {job_id} --sha {sha} --agent {agent} --findings {findings}"
 ```
 
-(On your machine the port is gonk's own, 1060.) The next review roborev completes on `notes`
+(On your machine the port is gonk's own, 1062.) The next review roborev completes on `notes`
 runs that line with roborev's values in place; this is what it receives and runs:
 
 <!-- transcript: file review.md -->

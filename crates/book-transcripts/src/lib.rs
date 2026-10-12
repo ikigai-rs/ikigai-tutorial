@@ -410,16 +410,26 @@ pub fn matches(expected: &[String], actual: &[String]) -> bool {
 
 /// Is this command forbidden to run on a machine that has a real gonk? Returns why.
 ///
-/// A real gonk listens on 1060 (HTTP, and QUIC on UDP) and its socket is `~/.ikigai/gonk.sock`.
+/// A real gonk listens on 1062 (HTTP, and QUIC on UDP) and its socket is `~/.ikigai/gonk.sock`.
 /// The runner gives every command a scratch `HOME`, so `~` and the default socket are scratch;
-/// a PORT is not, and a `curl … :1060/iki/ledger/append` in a page would file an item in the
+/// a PORT is not, and a `curl … :1062/iki/ledger/append` in a page would file an item in the
 /// reader's — or the maintainer's — real ledger every time the check ran. So a page may not
 /// name that port in anything the runner executes, and the check refuses before running it.
+///
+/// 1060 stays refused too: it was gonk's default until 2026-10-12, so a gonk configured before
+/// the move may still hold it, and it is NetKernel's port, which now runs beside ikigai.
 pub fn refused(command: &str) -> Option<&'static str> {
+    if command.contains("1062") {
+        return Some(
+            "names port 1062, a real gonk's port — a book's transcript must run against a \
+             scratch gonk on a port of its own (the gonk book uses 1070)",
+        );
+    }
     if command.contains("1060") {
         return Some(
-            "names port 1060, a real gonk's port — a book's transcript must run against a \
-             scratch gonk on a port of its own (the gonk book uses 1070)",
+            "names port 1060, NetKernel's port and gonk's default before 1062 — a book's \
+             transcript must run against a scratch gonk on a port of its own (the gonk book \
+             uses 1070)",
         );
     }
     None
@@ -684,7 +694,15 @@ gonk.port = 1070
 
     #[test]
     fn the_real_gonks_port_is_refused() {
-        assert!(refused("curl http://127.0.0.1:1060/iki/ledger/items").is_some());
+        assert!(refused("curl http://127.0.0.1:1062/iki/ledger/items").is_some());
+        assert!(refused("ikigai --connect quic://server.local:1062 -c 'source x'").is_some());
         assert!(refused("curl http://127.0.0.1:1070/iki/ledger/items").is_none());
+    }
+
+    #[test]
+    fn the_old_default_port_stays_refused() {
+        // gonk's default until 2026-10-12, and NetKernel's port: a live service either way.
+        assert!(refused("curl http://127.0.0.1:1060/iki/ledger/items").is_some());
+        assert!(refused("ikigai --connect quic://server.local:1060 -c 'source x'").is_some());
     }
 }

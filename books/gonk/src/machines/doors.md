@@ -54,8 +54,9 @@ ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
 
 `--port` moves both network doors: HTTP on TCP 1070, loopback only, and QUIC on UDP 1070, every
 interface, because a QUIC door is for other machines. TCP 1070 and UDP 1070 are different ports,
-so the two doors share the number. (Through gonk's audit round 4 the QUIC door stayed on UDP 1060
-whatever `--port` said, so a scratch gonk with an enrolled client collided with a real one.)
+so the two doors share the number. (Through gonk's audit round 4 the QUIC door stayed on UDP 1060,
+its default then, whatever `--port` said, so a scratch gonk with an enrolled client collided with
+a real one.)
 `--quic-bind IP:PORT` still names a bind outright, and naming one changes its meaning from "if
 you can" to "must": gonk refuses to start with a bind named and no certificate enrolled, rather
 than run with the door silently shut.

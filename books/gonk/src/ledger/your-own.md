@@ -244,7 +244,7 @@ command on the page. gonk makes a relative home absolute from the directory it s
 gonk PR 106, ledger #918; before it, a relative home reached the banner's `mount` line
 relative), but it leaves a `--socket` as given, because a Unix socket's path must fit in 104
 bytes.
-Port 1070 keeps it off a real gonk's 1060; `--no-quic` and `--no-backup` keep it from opening a
+Port 1070 keeps it off a real gonk's 1062; `--no-quic` and `--no-backup` keep it from opening a
 network door or writing archives this chapter does not need.
 
 The banner is the server describing itself, a line per door and per family it did or did not

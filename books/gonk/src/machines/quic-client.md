@@ -271,12 +271,12 @@ what `client list` shows as `enrolled, NO bundle`.
 <!-- transcript: manual — a second machine, which a check on one runner does not have -->
 ```console
 $ scp -r server:.config/ikigai/gonk/quic/clients/laptop ~/gonk-laptop
-$ ikigai --connect quic://server.local:1060 --cert-dir ~/gonk-laptop -c 'source urn:iki:ledger:next'
+$ ikigai --connect quic://server.local:1062 --cert-dir ~/gonk-laptop -c 'source urn:iki:ledger:next'
 ```
 
-The same, with the bundle moved rather than copied, the server reachable on UDP 1060 (a gonk on
-the default port opens its QUIC door on UDP 1060, every interface), and the client's `ikigai`
+The same, with the bundle moved rather than copied, the server reachable on UDP 1062 (a gonk on
+the default port opens its QUIC door on UDP 1062, every interface), and the client's `ikigai`
 built with `--features quic`.
 A client that should reach gonk all the time, rather than per command, puts the same two things in
-its own config home as a mount, `mount = "prefer urn:iki:ledger:=quic://server.local:1060
+its own config home as a mount, `mount = "prefer urn:iki:ledger:=quic://server.local:1062
 /home/you/gonk-laptop"`, and every `urn:iki:ledger:*` it asks then goes to gonk.

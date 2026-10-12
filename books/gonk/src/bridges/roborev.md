@@ -174,13 +174,13 @@ or a repository's `.roborev.toml`):
 ```toml
 [[hooks]]
 event = "review.completed"
-command = "ikigai-gonk roborev file --gonk http://127.0.0.1:1060 --ledger default --root {repo_name} --repo-path {repo} --job {job_id} --sha {sha} --agent {agent} --findings {findings}"
+command = "ikigai-gonk roborev file --gonk http://127.0.0.1:1062 --ledger default --root {repo_name} --repo-path {repo} --job {job_id} --sha {sha} --agent {agent} --findings {findings}"
 ```
 
 roborev replaces each `{…}` with a **single-quoted** value before `sh -c` runs the line, so
 nothing in a finding can escape into the shell, and `{findings}` is the whole Markdown review
 as one argument. `{repo_name}` is right for `--root` when the repository's name and its browse
-root's name match; otherwise write the root's name in. (The URL is a real gonk's port, 1060,
+root's name match; otherwise write the root's name in. (The URL is a real gonk's port, 1062,
 because that is what your hook will name. The page uses 1070.)
 
 So the hook's own invocation, for the review above, is this. It is the third time this page has

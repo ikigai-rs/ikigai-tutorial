@@ -303,7 +303,7 @@ Measured on a scratch gonk at this book's pin browsing 48 roots, as the live gon
 2026-10-11: the whole grounding, actions included, is 4,632,254 bytes and refused unfocused; the
 parts the drafter reads are 109,915 bytes, and an unfocused draft there was drafted, repaired and
 saved. (The live gonk, whose drafter then read the whole grounding, refused every unfocused draft
-that day; [ledger #1243](http://localhost:1060/l/default/item/1243) is the fix.)
+that day; [ledger #1243](http://localhost:1062/l/default/item/1243) is the fix.)
 
 This page's gonk shows the same shape at its own size. The actions are counted and left out, and
 `focus=`, a graph IRI or a topic word, narrows what is left to what mentions it:

@@ -251,12 +251,12 @@ below, with the server's address and the bundle where the agent's machine keeps 
 
 <!-- transcript: manual — an agent framework's configuration, and a gonk on another machine -->
 ```console
-$ ikigai mcp --override urn:iki:ledger:=quic://server.local:1060 --cert-dir ~/gonk-agent --grant agent
+$ ikigai mcp --override urn:iki:ledger:=quic://server.local:1062 --cert-dir ~/gonk-agent --grant agent
 ```
 
 Mount flags go after `mcp`, and they replace the `mount` lines of the agent's own config home
 for this process, so nothing else the agent's machine has configured is composed in. A gonk on
-the default port opens its QUIC door on UDP 1060.
+the default port opens its QUIC door on UDP 1062.
 
 ## What you have now
 

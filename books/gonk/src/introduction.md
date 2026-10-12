@@ -131,5 +131,5 @@ mdbook serve books/gonk --open
 
 ⚠ **Nothing in this book touches a gonk you already run.** Every transcript runs a scratch gonk
 on port 1070 whose config and data homes are inside the page's own directory (`--config-home`,
-`--data-home`), and the check refuses any command that names 1060, a real gonk's port, before it
-runs.
+`--data-home`), and the check refuses any command that names 1062, a real gonk's port, before it
+runs (or 1060, NetKernel's port and gonk's own until 2026-10-12).

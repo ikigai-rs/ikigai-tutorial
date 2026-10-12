@@ -87,7 +87,7 @@ open
 
 Nobody told the query that the ledger changed. gonk remembers an answer only until something it
 read is written, so the refresh ran the query again. On your own gonk the page is
-`http://localhost:1060/script/open-count/result`, and it is right every time you open it.
+`http://localhost:1062/script/open-count/result`, and it is right every time you open it.
 
 ## 2. Ask gonk in a sentence
 

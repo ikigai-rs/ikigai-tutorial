@@ -28,7 +28,8 @@
 #
 # ⚠ Every page runs in a SCRATCH home (`HOME` and `XDG_CONFIG_HOME` point into a temporary
 # directory), so nothing here reads or writes a real gonk's store, socket or grants; and a
-# command naming port 1060, a real gonk's, is refused before it runs.
+# command naming port 1062, a real gonk's, or 1060, NetKernel's (and gonk's before 2026-10-12),
+# is refused before it runs.
 #
 # The ikigai book's transcripts are REPL blocks (`ikigai> …`), not `console` blocks, and are
 # replayed by `crates/book-urns/tests/book_transcripts.rs`, which is `#[ignore]`d because it

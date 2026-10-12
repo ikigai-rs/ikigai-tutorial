@@ -20,7 +20,8 @@
 //! nothing in it unless the page put something there. That is not a convenience: the machine
 //! this runs on may have a real gonk, whose store is one writer's and whose ledger is
 //! somebody's work. The one thing a scratch home cannot redirect is a TCP port, which is why a
-//! command naming 1060 is refused before it runs (`book_transcripts::refused`).
+//! command naming 1062 (gonk's port) or 1060 (NetKernel's, and gonk's before 2026-10-12) is
+//! refused before it runs (`book_transcripts::refused`).
 //!
 //! `--path DIR` (repeatable) is put in front of `PATH`, so a page says `ikigai-gonk`, as a
 //! reader types it, and the runner decides which build that means.
