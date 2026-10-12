@@ -178,7 +178,7 @@ preview (LIMIT 5):
 ```
 
 `focus=` names the graph the ask is about, as it does for the grounding and the check. (Before
-`ikigai-nl` 0.3.0 the drafter alone called it `graph=`, which it still accepts, for one release.)
+`ikigai-nl` 0.3.0 the drafter alone called it `graph=`, which 0.4.0 still accepts as a deprecated alias.)
 The stub's first draft said `ledger:state`, the check refused it, and the drafter asked again: the
 same prompt, followed by `urn:nl:prompt:sparql-repair` filled with the previous draft and exactly
 what the check found in it, nothing else. The second draft passed, and was saved. The bound on attempts is 3 by default, and drafting also stops
@@ -207,7 +207,7 @@ cargo run -p sentence-draft -- 4
 
 ```text
 alice> sink urn:nl:sparql ask="the number and title of every open item with priority 2 or higher (0 is highest), ordered by number" focus=urn:iki:tutorial:items save=open-p2
-urn:script:open-p2:version:sha256:… (a DRAFT of urn:script:open-p2: review it, then publish it with state=published). its preview is EMPTY: no row matched, and no attempt within the bound of 3 did better; the warnings name the patterns that match nothing on their own. Review it before publishing
+urn:script:open-p2:version:sha256:… (a DRAFT of urn:script:open-p2: review it, then publish it with state=published). its preview is EMPTY: no row matched, and drafting stopped: the model repeated attempt 1, so no later attempt did better; the warnings name the patterns that match nothing on their own. Review it before publishing
 
 # @param limit xsd:integer optional default 2
 SELECT ?number ?title
@@ -249,9 +249,13 @@ shown the one pattern that matched nothing, has what it needs to fix it.
 
 When drafting stops with the preview still empty, the draft is kept, and **marked**: the first line
 of the answer says the preview is EMPTY and to review it, the JSON face says `emptyPreview`, and in
-its provenance the attempt it derives from carries the warning. Nothing is saved silently. (The
-mark says "no attempt within the bound of 3 did better"; here there were two, because the second
-repeated the first.)
+its provenance the attempt it derives from carries the warning. Nothing is saved silently. The mark
+also says what stopped drafting: here "drafting stopped: the model repeated attempt 1", because there
+were two attempts, not the bound of 3, and the second gave the first again. That second attempt is
+recorded as a **repeat**, not as a new draft: it is not checked again, so it stays invalid with one
+error naming the attempt it repeats, its JSON carries `repeatOf: 1`, and in the provenance it is
+`prov:alternateOf` attempt 1. Had all three attempts been tried, the mark would say "no attempt
+within the bound of 3 did better". (Before `ikigai-nl` 0.4.0 it said that either way.)
 
 Two smaller things are wrong too. It names the priority bound `limit`, a parameter nobody asked for
 whose name reads like a row count. And it pairs `FROM <g>` with `GRAPH <g> { … }`, which in

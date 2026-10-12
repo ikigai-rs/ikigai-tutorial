@@ -125,6 +125,39 @@ fn the_drafter_repairs_an_empty_preview_and_marks_the_draft_it_keeps() {
         "{:?}",
         draft.attempts[1].errors
     );
+    // The second is marked a REPEAT of the first, not a new draft: never checked again, so it
+    // stays invalid with that one error (ikigai-nl 0.4.0, ledger #1298); the first is not one.
+    assert_eq!(
+        draft.attempts[1].repeat_of,
+        Some(1),
+        "{:#?}",
+        draft.attempts
+    );
+    assert!(!draft.attempts[1].valid);
+    assert_eq!(
+        draft.attempts[1].errors.len(),
+        1,
+        "{:?}",
+        draft.attempts[1].errors
+    );
+    assert_eq!(draft.attempts[0].repeat_of, None);
+    // The note names what stopped drafting (the repeat), not a bound it never reached.
+    let note = draft.note.as_deref().unwrap_or_default();
+    assert!(
+        note.contains(
+            "drafting stopped: the model repeated attempt 1, so no later attempt did better"
+        ),
+        "{note}"
+    );
+    assert!(!note.contains("within the bound"), "{note}");
+    // And in the provenance the repeat is an alternate of the attempt it repeats.
+    assert!(
+        draft.prov.lines().any(|l| l.contains(":attempt:2>")
+            && l.contains("prov#alternateOf> <")
+            && l.contains(":attempt:1>")),
+        "{}",
+        draft.prov
+    );
     let Model::Stub(stub) = &model else {
         unreachable!()
     };

@@ -237,16 +237,18 @@ ikigai-markdown = "0.1.3"
 # read it as a RANGE.
 ikigai-script = "0.3.3"
 # Natural language to a DRAFT script, for "A sentence becomes a draft": `urn:nl:grounding` (what
-# the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.3.0 is the
-# pin and the floor: it is the published head, and the release whose check calls an empty preview
-# a warning with its evidence (the patterns that match nothing alone), whose drafter repairs an
-# empty preview and marks a draft it could not fix, whose grounding states each predicate's value
-# kinds, and whose drafter takes `focus=` like the grounding and the check (`graph=` a deprecated
-# alias; ledger #1242, #1243). 0.2.1 asked the script host's own rule whether the caller may read
-# a named example (ledger #1196); 0.2.0 bounded each draft with `max_tokens` (ledger #1203), which
-# the chapter's stub model records. It requires ikigai-script 0.3.0 itself. A 0.x caret: also a
-# ceiling (<0.4.0); the old pin "0.2.1" was a ceiling below 0.3 and held the book at 0.2.
-ikigai-nl = "0.3.0"
+# the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.4.0 is the
+# pin and the floor: it is the published head, and the release whose drafter, when the model gives
+# a draft it already gave, marks that attempt a repeat (`repeatOf` in JSON, `prov:alternateOf` in
+# Turtle) and says "drafting stopped: the model repeated attempt N" rather than naming a bound it
+# did not reach (ledger #1298), which the chapter's stub shows. 0.3.0 made an empty preview a
+# warning with its evidence (the patterns that match nothing alone), repaired and marked it, stated
+# each predicate's value kinds in the grounding, and gave the drafter `focus=` (`graph=` a
+# deprecated alias; ledger #1242, #1243). 0.2.1 asked the script host's own rule whether the caller
+# may read a named example (ledger #1196); 0.2.0 bounded each draft with `max_tokens` (ledger
+# #1203), which the stub model records. It requires ikigai-script 0.3.0 itself. A 0.x caret: also a
+# ceiling (<0.5.0); the old pin "0.3.0" was a ceiling below 0.4 and held the book at 0.3.
+ikigai-nl = "0.4.0"
 # A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
 # every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
 # `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.13.1 and

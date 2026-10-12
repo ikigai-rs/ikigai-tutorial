@@ -1113,9 +1113,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-nl"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2535d3713c14067b81539ebba09fad7badbd5e1546d9ac46a935e0e44bd953c"
+checksum = "2e140f9429b3416a60d5edfa22d8225962aa2a3ebdacf807faea20311f705af4"
 dependencies = [
  "async-trait",
  "getrandom 0.3.4",
