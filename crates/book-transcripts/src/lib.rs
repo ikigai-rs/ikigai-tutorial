@@ -416,18 +416,12 @@ pub fn matches(expected: &[String], actual: &[String]) -> bool {
 /// reader's — or the maintainer's — real ledger every time the check ran. So a page may not
 /// name that port in anything the runner executes, and the check refuses before running it.
 ///
-/// 1060 stays refused too: it was gonk's default until 2026-10-12, so a gonk configured before
-/// the move may still hold it, and it is NetKernel's port, which now runs beside ikigai.
+/// 1060 stays refused too: it was gonk's default until 2026-10-12, and a live service on this
+/// machine may hold it.
 pub fn refused(command: &str) -> Option<&'static str> {
-    if command.contains("1062") {
+    if command.contains("1062") || command.contains("1060") {
         return Some(
-            "names port 1062, a real gonk's port — a book's transcript must run against a \
-             scratch gonk on a port of its own (the gonk book uses 1070)",
-        );
-    }
-    if command.contains("1060") {
-        return Some(
-            "names port 1060, NetKernel's port and gonk's default before 1062 — a book's \
+            "names port 1062 or 1060, ports a live service on this machine uses — a book's \
              transcript must run against a scratch gonk on a port of its own (the gonk book \
              uses 1070)",
         );
@@ -701,7 +695,7 @@ gonk.port = 1070
 
     #[test]
     fn the_old_default_port_stays_refused() {
-        // gonk's default until 2026-10-12, and NetKernel's port: a live service either way.
+        // gonk's default until 2026-10-12, and a port a live service may hold.
         assert!(refused("curl http://127.0.0.1:1060/iki/ledger/items").is_some());
         assert!(refused("ikigai --connect quic://server.local:1060 -c 'source x'").is_some());
     }

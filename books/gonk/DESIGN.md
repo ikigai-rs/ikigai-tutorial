@@ -55,8 +55,8 @@ link, so the outline is visible on the published site and nothing 404s.
   #165). A `console` fence of `$ ` lines is declared `run`, `serve` or `manual — why` in a
   comment above it; under `--strict` an undeclared one FAILS. One page is one session: a fresh
   scratch directory that is the working directory of every command, in page order. A `serve` block's one command is started and left running; its expected lines
-  are its startup banner. A command naming 1062 (gonk's port) or 1060 (NetKernel's, and gonk's
-  before 2026-10-12) is refused before it runs. pages.yml runs it in
+  are its startup banner. A command naming 1062 or 1060 (ports a live service on this machine
+  uses) is refused before it runs. pages.yml runs it in
   a `transcripts` job the deploy needs, with the gonk build cached by revision.
   **How a page names a scratch gonk** (gonk PR 94, ledger #799; in the pin since ed43af3):
   by flags, `ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" …`, and
