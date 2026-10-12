@@ -5,9 +5,9 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.98** and
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.99** and
 `ikigai-module` **0.3.2**, stamped on 2026-10-12 (each its crate's newest release on
-crates.io that day), and its shell examples are replayed against `ikigai-cli` **0.1.55**,
+crates.io that day), and its shell examples are replayed against `ikigai-cli` **0.1.56**,
 the one release pinned in `books/ikigai/ikigai-cli.version` (the newest on 2026-10-12). A
 test (`crates/book-urns/tests/book_claims.rs`)
 holds those three numbers to the workspace's lock and that pin, and re-checks each stamped

@@ -21,8 +21,8 @@ ikigai-core.workspace = true
 # The Meta renderer, so a mount describes this peer's contracts the way a real one does.
 ikigai-vocab.workspace = true
 # The socket door a `gonk.mount = "prefer urn:llm:=<socket>"` line dials. The cli crates'
-# published head, as `crates/two-hosts` takes. The pinned gonk links 0.1.52, and 0.1.53 to 0.1.55
-# changed no wire, so the stub and gonk speak one protocol.
-ikigai-ipc = "0.1.55"
+# published head, as `crates/two-hosts` takes. The pinned gonk links 0.1.55, and 0.1.56 changed no
+# Unix-socket wire (its change is the QUIC keep-alive), so the stub and gonk speak one protocol.
+ikigai-ipc = "0.1.56"
 async-trait = "0.1"
 serde_json.workspace = true

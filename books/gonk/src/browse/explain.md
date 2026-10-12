@@ -204,7 +204,7 @@ Ask over the socket, as in the previous chapter:
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:demo:explain-status:src/lib.rs' -c 'source urn:gk:repo:demo:explain:src/lib.rs'
 derive	code-v1@coder	coder
 [uncacheable]
-error: unavailable: the mounted peer at …/model.sock is not reachable (last dial failed; the next is held off for up to 30s)
+error: unavailable: the mounted peer at …/model.sock is not reachable (the last 1 dial(s) failed; the next is held off for … more)
 — batch: 2 commands · uncacheable
 ```
 

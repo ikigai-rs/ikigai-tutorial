@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.52
+ikigai 0.1.56
 ```
 
 ## Start a gonk, and find its socket
@@ -124,7 +124,7 @@ and wins over the variable; the page keeps the variable, which every release rea
 one or the other the command reads yours.
 
 ⚠ **Write the socket's path out in full.** The mount line is read as it is written, and
-`ikigai-cli` 0.1.52 does not expand a leading `~` in it: `mount = "prefer
+`ikigai-cli` 0.1.56 does not expand a leading `~` in it: `mount = "prefer
 urn:iki:ledger:=~/.ikigai/gonk.sock"` fails with *No such file or directory*, naming the
 unexpanded path. That is why the line above is written with `printf` and `$PWD`; in your own
 config home, write your home directory's path.
@@ -173,16 +173,16 @@ $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:def
 sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
-error: denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`)
+error: denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:delete:` satisfies it)
 error: denied: this capability does not hold `urn:cap:ledger:read:book`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:read:*` but not this resource, which is the point of naming them
 — batch: 4 commands · uncacheable
 ```
 
 The filing worked; the delete and the other ledger did not, with the token each one needed
-named in the refusal. (A gonk that links `ikigai-core` 0.1.97 or later adds to the first refusal
-what satisfies its family, ``; any grant under `urn:cap:ledger:delete:` satisfies it``; the pinned
-one links 0.1.96.) `author=agent-7` is the ledger's own argument for who filed an item. It
-is a claim the caller makes, not an identity the socket proves, which is the next section.
+named in the refusal. The first is refused at the family, and says what satisfies it: any grant
+under `urn:cap:ledger:delete:`, none of which the seal kept. `author=agent-7` is the ledger's own
+argument for who filed an item. It is a claim the caller makes, not an identity the socket proves,
+which is the next section.
 
 ## What the door saw
 

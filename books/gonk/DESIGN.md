@@ -106,58 +106,73 @@ the pin from 5050879 to 9b182ff with one shared build directory, `cargo install 
 called the new revision `Fresh` and installed the previous binary, so the check would have gone
 on testing the old gonk under the new pin's name.
 
-**`ikigai-cli` is pinned the same way, in `books/gonk/ikigai-cli.version`** (arc 2), and since
-arc 3 it is installed **with its `quic` feature** (not a default; without it `--connect quic://…`
-is refused), into `target/ikigai-cli/<version>+quic/`, under a CI cache key ending `-quic`. It IS on
-crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --version =X`),
-and the file is one line read by the introduction's install line, the script and CI's cache
-key. Choose the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and
-`ikigai-web` share the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3,
-77ac767 and edb9a3d; 0.1.44 at d9c9bcf, 9704b54 and 9f2e89e; 0.1.52 at 2598192), so the client speaks the server's wire; moving gonk is a
-reason to look at this file too. (0.1.42 and 0.1.43 were already on crates.io when the pin moved to
-edb9a3d, 0.1.45 and 0.1.46 when it moved to d9c9bcf, 0.1.47 when it moved to 9704b54, and 0.1.50 when it
-moved to 9f2e89e; the rule takes what gonk links. At 2598192 gonk links 0.1.52, the head when the
-pin moved there; 0.1.53 to 0.1.55 changed no wire, so this pin stays with gonk's lock. The ikigai Book's REPL transcripts are a
-separate check, `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
+**`ikigai-cli` is pinned the same way, in `books/gonk/ikigai-cli.version`** (arc 2), and since arc 3
+it is installed **with its `quic` feature** (not a default; without it `--connect quic://…` is
+refused), into `target/ikigai-cli/<version>+quic/`, under a CI cache key ending `-quic`. It IS on
+crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --version =X`), and
+the file is one line read by the introduction's install line, the script and CI's cache key. Choose
+the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and `ikigai-web` share
+the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3, 77ac767 and edb9a3d;
+0.1.44 at d9c9bcf, 9704b54 and 9f2e89e; 0.1.52 at 2598192; 0.1.55 at 71ca542), so the client speaks
+the server's wire; moving gonk is a reason to look at this file too. ⚠ **At 71ca542 the pin is
+0.1.56, one release PAST gonk's 0.1.55 transports** (ledger #1365), the one exception so far. The
+reason is what a page prints: a client that mounts gonk's socket checks a family-scope floor in ITS
+OWN kernel, so "Over the socket"'s refusal is worded by the client's `ikigai-core`, and only 0.1.56
+links core 0.1.98 or later (0.1.55 links 0.1.96: replayed with 0.1.55, that page printed the refusal
+without core 0.1.97's clause while "A QUIC client"'s, refused at gonk's door, printed it with).
+0.1.56 changed no wire. Its one behavior change is the QUIC keep-alive: a 0.1.56 client pings, and a
+0.1.55 door does not answer pings while it resolves, so a QUIC call silent for more than 15 s can be
+lost (cli's own changelog: upgrade doors before clients). No checked page has such a call (the stub
+answers at once); the introduction says so for a reader with a real model. When gonk takes the
+0.1.56 transports this pin is back to following gonk's lock. (0.1.42 and 0.1.43 were already on
+crates.io when the pin moved to edb9a3d, 0.1.45 and 0.1.46 when it moved to d9c9bcf, 0.1.47 when it
+moved to 9704b54, and 0.1.50 when it moved to 9f2e89e; the rule takes what gonk links. At 2598192
+gonk linked 0.1.52, the head when the pin moved there; 0.1.53 to 0.1.55 changed no wire, so this pin
+stayed with gonk's lock. The ikigai Book's REPL transcripts are a separate check,
+`crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
 `books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
-under its own key: this pin follows gonk's lock, that one follows the release the ikigai Book's
-pages were last replayed against. That one is 0.1.55 (2026-10-12, ledger #1353), the release the
-book's crates lock every cli crate at, `ikigai-engine` (the in-page cells' grammar) among them, and
-the replay runs it `--quiet`, which prints only the answers. Moving the ikigai Book's pin to 0.1.52
-waited on the replay: from 0.1.48 a `-c` batch whose stdin is not a terminal fetches the contract of a bare
-`source` (stdin might fill its one required argument) and caches it, and the replay drove a REPL
-block as such a batch, so "Twenty minutes, nothing compiled" section 6's `urn:kernel:cache`
-gained two rows an interactive REPL never shows. The replay now types a block's lines into the
-REPL on its stdin, the way a reader does (ledger #1304).)
+under its own key: this pin follows gonk's lock (but for the exception above), that one follows the
+release the ikigai Book's pages were last replayed against. That one is 0.1.56 (2026-10-12, ledger
+#1365; 0.1.55 before it, ledger #1353), the release the book's crates lock every cli crate at,
+`ikigai-engine` (the in-page cells' grammar) among them, and the replay runs it `--quiet`, which
+prints only the answers. Moving the ikigai Book's pin to 0.1.52 waited on the replay: from 0.1.48 a
+`-c` batch whose stdin is not a terminal fetches the contract of a bare `source` (stdin might fill
+its one required argument) and caches it, and the replay drove a REPL block as such a batch, so
+"Twenty minutes, nothing compiled" section 6's `urn:kernel:cache` gained two rows an interactive
+REPL never shows. The replay now types a block's lines into the REPL on its stdin, the way a reader
+does (ledger #1304).)
 
 The book's crates link the PUBLISHED modules, at the versions that revision takes unless a gap is
-recorded below: at 2598192 gonk links `ikigai-core` 0.1.96, `ikigai-ledger` 0.9.0, `ikigai-store`
-0.2.15 (in-memory here, `persistent` off; 0.2.7 is a security floor, ledger #915), `ikigai-browse`
-0.18.6 (0.18.2 is a security floor: it never serves `.git`, ledger #1126), `ikigai-script` 0.3.3,
-`ikigai-nl` 0.3.0 and the cli crates at 0.1.52, with `oxigraph` 0.5 named directly because browse
-takes an `oxigraph::store::Store`. A newer release that gonk does not link yet waits for the pin, so
-a transcript and a listing are always answered by the same module, unless the book needs it first.
-**There is a version gap NOW, OPEN since 2026-10-12.** The book's crates take each crate's published
-head where gonk (2598192, and gonk's own main that day) does not: `ikigai-core` 0.1.98 (0.1.97 is
-yanked), `ikigai-ledger` 0.11.0, `ikigai-store` 0.2.19 and the cli crates at 0.1.55 (ledger #1323,
-#1353), and `ikigai-nl` 0.4.0 since tutorial PR 111 (ledger #1301). Of what those print, only core
-0.1.97's family-scope refusal reaches this book: "Your own ledger", "Over the socket" and "A QUIC
-client" show gonk refusing `urn:cap:ledger:delete:*` without the clause 0.1.97 adds (`; any grant
-under …`), and each says so in prose. No cell here prints a family refusal, and nl 0.4.0's repeat
-mark is shown only by the ikigai Book's stub. The gap closes when the pin moves to a gonk that links
-these releases. There were three gaps before it, all CLOSED by moving the pin. From the
-morning `ikigai-script` 0.3.3 and `ikigai-nl` 0.3.0 were published (2026-10-11, tutorial PR 108)
-until the pin moved to 2598192 (ledger #1299), the book's crates took them while the pinned gonk
-(9f2e89e) linked script 0.3.0 and nl 0.2.1, so "Scripts and sentences in gonk" printed the older
-answers (`graph=`, an empty preview neither repaired nor marked, a draft's author refused for
-`urn:cap:lisp`) and said in prose what the newer releases do. From ledger #1198
-(2026-10-11) until the pin moved to 9f2e89e (ledger #1245) the book's crates took `ikigai-ledger`
-0.9.0 while the pinned gonk (9704b54) linked 0.6.2, so part 5's walk asked `count` and no transcript
-could; the crates' item-count tests then counted through `items`' footer (`3 item(s)`), and since
-the move they ask `urn:iki:ledger:count`, the figure part 5 cites. Before that, from the morning
-`ikigai-ledger` 0.4.0 was published until the pin moved to ad0653b (gonk PR #86, the keyed
-bridges), the book's crates took 0.4.0 while the pinned gonk linked 0.3.0, so no transcript could
-use `key=` against gonk. ⚠ When the book's crates must move ahead of gonk again, say so here, in the
+recorded below: at 71ca542 gonk links `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.0, `ikigai-store`
+0.2.19 (in-memory here, `persistent` off; 0.2.7 is a security floor, ledger #915), `ikigai-browse`
+0.18.8 (0.18.2 is a security floor: it never serves `.git`, ledger #1126), `ikigai-script` 0.3.3,
+`ikigai-nl` 0.4.0 and the cli crates at 0.1.55, with `oxigraph` 0.5 named directly because browse
+takes an `oxigraph::store::Store`. The book's crates take every one of those, and the cli crates at
+0.1.56 with the ikigai Book's pin (0.1.56 changed no engine code). A newer release that gonk does
+not link yet waits for the pin, so a transcript and a listing are always answered by the same
+module, unless the book needs it first. **There is no version gap now** (closed 2026-10-12, ledger
+#1365, by moving the pin to 71ca542). There were four gaps before it, all CLOSED by moving the pin.
+From tutorial PR 111 and PR 112 (2026-10-12) the book's crates took `ikigai-core` 0.1.98,
+`ikigai-ledger` 0.11.0, `ikigai-store` 0.2.19 and `ikigai-nl` 0.4.0 while the pinned gonk (2598192)
+linked core 0.1.96, ledger 0.9.0, store 0.2.15 and nl 0.3.0, and the `ikigai` both books replayed
+(cli 0.1.55) linked core 0.1.96: "Your own ledger", "Over the socket" and "A QUIC client" showed
+gonk refusing `urn:cap:ledger:delete:*` without the clause core 0.1.97 adds (`; any grant under …`)
+and said so in prose, and "Scripts and sentences in gonk" printed nl 0.3.0's "no attempt within the
+bound of 3 did better" for a draft whose repair repeated attempt 1. Moving the pin also changed what
+a mounted peer that cannot be reached says ("the last 1 dial(s) failed; the next is held off for …
+more", the cli 0.1.55 transports gonk now links). Before that, from the morning `ikigai-script`
+0.3.3 and `ikigai-nl` 0.3.0 were published (2026-10-11, tutorial PR 108) until the pin moved to
+2598192 (ledger #1299), the book's crates took them while the pinned gonk (9f2e89e) linked script
+0.3.0 and nl 0.2.1, so "Scripts and sentences in gonk" printed the older answers (`graph=`, an empty
+preview neither repaired nor marked, a draft's author refused for `urn:cap:lisp`) and said in prose
+what the newer releases do. From ledger #1198 (2026-10-11) until the pin moved to 9f2e89e (ledger
+#1245) the book's crates took `ikigai-ledger` 0.9.0 while the pinned gonk (9704b54) linked 0.6.2, so
+part 5's walk asked `count` and no transcript could; the crates' item-count tests then counted
+through `items`' footer (`3 item(s)`), and since the move they ask `urn:iki:ledger:count`, the
+figure part 5 cites. Before that, from the morning `ikigai-ledger` 0.4.0 was published until the pin
+moved to ad0653b (gonk PR #86, the keyed bridges), the book's crates took 0.4.0 while the pinned
+gonk linked 0.3.0, so no transcript could use `key=` against gonk. ⚠ When the book's crates must
+move ahead of gonk again, say so here, in the
 introduction, and on the page whose transcripts cannot follow.
 
 **`ikigai-markdown`** is taken at 0.1.0 from crates.io. Until it was published (2026-10-06) it was

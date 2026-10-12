@@ -294,7 +294,7 @@ unless told otherwise — and nothing else. Deleting is a separate grant:
 <!-- transcript: run -->
 ```console
 $ curl -s -X DELETE http://127.0.0.1:1070/iki/ledger/item/1
-denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`)
+denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:delete:` satisfies it)
 $ ikigai-gonk grants default delete
 [
   "urn:cap:ledger:read:default",
@@ -312,10 +312,9 @@ the Rust half plus two: the ledger's delete grant, and a write grant for a SECON
 `…:default:deleted`. A delete is a move into that ledger's graveyard, recoverable by hand, so
 it is a write to two graphs, and the caller must be able to make both. The refusal names the token it wanted,
 because a capability that is declared is a capability that is enforced, and the other way
-round. It is gonk's refusal, from the `ikigai-core` the pinned revision links (0.1.96). From core
-0.1.97 a refusal at a family scope like this one also says what satisfies it, ``; any grant under
-`urn:cap:ledger:delete:` satisfies it``, and this line gains that clause when the pin moves to a
-gonk that links it.
+round. It is gonk's refusal, from the `ikigai-core` the pinned revision links, and since core
+0.1.97 a refusal at a family scope like this one also says what satisfies it: any grant under
+`urn:cap:ledger:delete:`, which is exactly what `delete` in the list above adds.
 
 <!-- transcript: manual — it opens a browser, which a check cannot look at -->
 ```console

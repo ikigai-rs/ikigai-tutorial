@@ -106,7 +106,7 @@ tracer receives.
 ```
 
 ```text
-denied: capability does not grant `urn:cap:fs:write:*` (declared by `urn:file:notes.txt`)
+denied: capability does not grant `urn:cap:fs:write:*` (declared by `urn:file:notes.txt`; any grant under `urn:cap:fs:write:` satisfies it)
 ```
 
 The client carried a narrowed capability; the served kernel clamped it to what the

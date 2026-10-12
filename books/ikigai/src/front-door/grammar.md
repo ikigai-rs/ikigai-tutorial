@@ -224,7 +224,7 @@ authority — enforced by the kernel, per verb, against what each endpoint decla
 ikigai> cap read-only
 narrowed — capability: urn:cap:fs:read:/Users/you/.ikigai/workspace
 ikigai> sink urn:file:notes.txt nope
-error: denied: capability does not grant `urn:cap:fs:write:*` (declared by `urn:file:notes.txt`)
+error: denied: capability does not grant `urn:cap:fs:write:*` (declared by `urn:file:notes.txt`; any grant under `urn:cap:fs:write:` satisfies it)
 ikigai> cap reset
 reset to identity — capability: root (full authority)
 ```

@@ -109,7 +109,7 @@ trace  urn:file:notes.txt
   transport   embedded · in-process
 
 urn:file:notes.txt   file · denied · main · — · cap ✗ · denied=urn:cap:fs:read:*
-urn:file:notes.txt   cap ✗ denied: denied: capability does not grant `urn:cap:fs:read:*` (declared by `urn:file:notes.txt`)
+urn:file:notes.txt   cap ✗ denied: denied: capability does not grant `urn:cap:fs:read:*` (declared by `urn:file:notes.txt`; any grant under `urn:cap:fs:read:` satisfies it)
 ```
 
 The first line is a denial *event*, the kind the listing above records, drawn: the endpoint that would have

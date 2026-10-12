@@ -335,7 +335,7 @@ mistake. (`graph=`, the drafter's older name for it, is accepted for one more re
 <!-- transcript: run -->
 ```console
 $ printf 'the number and title of every open item with priority 2 or higher (0 is highest), ordered by number' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-open-p2 focus=urn:iki:ledger:graph:default'
-urn:script:team-open-p2:version:sha256:… (a DRAFT of urn:script:team-open-p2: review it, then publish it with state=published). its preview is EMPTY: no row matched, and no attempt within the bound of 3 did better; the warnings name the patterns that match nothing on their own. Review it before publishing
+urn:script:team-open-p2:version:sha256:… (a DRAFT of urn:script:team-open-p2: review it, then publish it with state=published). its preview is EMPTY: no row matched, and drafting stopped: the model repeated attempt 1, so no later attempt did better; the warnings name the patterns that match nothing on their own. Review it before publishing
 # @param limit xsd:integer optional default 2
 SELECT ?number ?title
 FROM <urn:iki:ledger:graph:default>

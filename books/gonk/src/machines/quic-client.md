@@ -115,13 +115,13 @@ wanted:
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'delete urn:iki:ledger:item:1' -c 'sink urn:iki:ledger:acme:append Not mine'
-error: denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`)
+error: denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:delete:` satisfies it)
 error: denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them
 ```
 
 The first is the family: this grant holds no ledger's delete token at all, so the door refuses it
-before dispatch. (From `ikigai-core` 0.1.97 the refusal says so itself, ending ``; any grant under
-`urn:cap:ledger:delete:` satisfies it``; the pinned gonk links 0.1.96.) The second is subtler, and it is why a ledger's name is in its IRI rather than an
+before dispatch, and the refusal says so itself, naming the prefix any grant under which would
+satisfy it. The second is subtler, and it is why a ledger's name is in its IRI rather than an
 argument: the client holds the *write* family (for `default`), so the door lets the request
 through, and the ledger itself refuses it, because the token names a different ledger.
 
