@@ -120,14 +120,13 @@ two pins agree for now. The ikigai Book's REPL transcripts are a
 separate check, `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
 `books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
 under its own key: this pin follows gonk's lock, that one follows the release the ikigai Book's
-pages were last replayed against. At 2598192 they differ: this one is 0.1.52 and that one stays
-0.1.46, while the book's crates lock every cli crate, `ikigai-engine` (the in-page cells' grammar)
-among them, at 0.1.52. That is the one gap left, and it is the replay's, not a reader's: from
-0.1.48 a `-c` batch whose stdin is not a terminal, which is how
-`crates/book-urns/tests/book_transcripts.rs` drives a REPL block, fetches the contract of a bare
-`source` (stdin might fill its one required argument) and caches it, so "Twenty minutes, nothing compiled"
-section 6's `urn:kernel:cache` gains two rows an interactive REPL never shows. Moving that pin
-waits on the replay driving a REPL the way a reader does.)
+pages were last replayed against. At 2598192 both are 0.1.52, the release the book's crates lock
+every cli crate at, `ikigai-engine` (the in-page cells' grammar) among them. Moving the ikigai
+Book's pin there waited on the replay: from 0.1.48 a `-c` batch whose stdin is not a terminal fetches the contract of a bare
+`source` (stdin might fill its one required argument) and caches it, and the replay drove a REPL
+block as such a batch, so "Twenty minutes, nothing compiled" section 6's `urn:kernel:cache`
+gained two rows an interactive REPL never shows. The replay now types a block's lines into the
+REPL on its stdin, the way a reader does (ledger #1304).)
 
 The book's crates link the PUBLISHED modules at the versions that revision takes:
 `ikigai-core` 0.1.96, `ikigai-ledger` 0.9.0, `ikigai-store` 0.2.15 (in-memory, `persistent` off;

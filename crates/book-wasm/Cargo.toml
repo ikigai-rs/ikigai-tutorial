@@ -46,13 +46,8 @@ ikigai-vocab.workspace = true
 # built from doors the host supplies (`Engine::with_as_of_doors`), and hands the resolver that
 # line's chain (`Resolver::issue_as_async_in`). 0.1.52 is the pin because it is the cli crates'
 # published head and what the gonk Book's pinned gonk links; the workspace locks every cli crate
-# at one version, so this one follows. ⚠ The ikigai Book's REPL transcripts still replay against
-# 0.1.46 (`books/ikigai/ikigai-cli.version`): from 0.1.48 a `-c` batch with a non-terminal stdin,
-# which is how the replay drives the CLI, fetches a contract for a bare `source` and caches it,
-# so the replay's `urn:kernel:cache` lists rows an interactive REPL does not. A cell has no stdin,
-# so it lists what an interactive REPL does. One rendering differs: from 0.1.48 `trace` marks a
-# hop the floor denied `cap ✗`, where "Tracing a resolution"'s 0.1.46 block shows `cap ✓` and
-# says why.
+# at one version, so this one follows, and the ikigai Book's REPL transcripts replay against the
+# same release (`books/ikigai/ikigai-cli.version`), so a cell and a transcript render alike.
 ikigai-engine = "0.1.52"
 # The `Resolver` seam the engine drives, implemented here by `InChain` so a cell can run in
 # one chain (a game's, a person's scenario) on the page's kernel. 0.1.29 matches the engine:

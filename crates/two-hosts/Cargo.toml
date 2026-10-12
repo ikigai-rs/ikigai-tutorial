@@ -21,9 +21,8 @@ ikigai-core.workspace = true
 # would rot silently. 0.1.41 because that release added `Session.principal`, a public field, so
 # the `Session { … }` literal in `src/identity.rs` names it: under the old "0.1.18" a fresh resolve
 # took 0.1.41 and the listing the book prints no longer compiled. 0.1.52 is the pin for both and
-# for `ikigai-resolve` below: the cli crates' published head, and the transports the gonk Book's
-# pinned gonk links. (The ikigai Book's REPL transcripts replay against 0.1.46; see
-# `crates/book-wasm`.)
+# for `ikigai-resolve` below: the cli crates' published head, the transports the gonk Book's
+# pinned gonk links, and the release the ikigai Book's REPL transcripts replay against.
 ikigai-ipc = "0.1.52"
 ikigai-quic = "0.1.52"
 # `MountedRemote` (the alias/override composition) and the `Resolver` surface a

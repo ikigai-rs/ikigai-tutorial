@@ -10,9 +10,16 @@
 //! named after its own target, the CLI says `not cached`, and the corrected block went stale
 //! in turn, red here and invisible, because CI does not run this file (ledger #998).
 //!
-//! The replay sends every `ikigai> ` line of a block to ONE `ikigai --plain` process, as
-//! repeated `-c` arguments, so the cache carries across the lines the way it does in a
-//! REPL session, and diffs the output against the block's non-prompt lines. Two kinds of
+//! The replay types every `ikigai> ` line of a block into ONE `ikigai --plain` REPL, a line
+//! at a time on its stdin, the way a reader at the prompt does, so the cache carries across
+//! the lines as it does in their session; then it diffs what the REPL printed (stdout and
+//! stderr in the one order they were written, prompts taken off) against the block's
+//! non-prompt lines. ⚠ It used to pass the lines as repeated `-c` arguments instead, and a
+//! `-c` batch is not a REPL: from `ikigai-cli` 0.1.48 a batch whose stdin is not a terminal
+//! fetches (and caches) the contract of every bare `source`, in case stdin fills its one
+//! required argument (ledger #1166), so the front door's `urn:kernel:cache` listed five rows
+//! where a reader sees three, and the book's pin could not move past 0.1.46 (ledger #1304).
+//! Two kinds of
 //! noise are normalized away on both sides — the `[computed]` / `[cached]` /
 //! `[N computed · M cached]` verdict lines, and durations like `0ms` — because a verdict
 //! depends on what the reader ran before, and the prose beside a block, not the block,
@@ -173,22 +180,93 @@ fn scan_page(file: &str, text: &str, out: &mut Vec<Transcript>) {
     }
 }
 
-/// A transcript's own home, removed when the transcript is done.
-struct ScratchHome(PathBuf);
+/// A transcript's own home, removed when the transcript is done, and the file beside it
+/// that the REPL's screen is written to.
+struct ScratchHome {
+    dir: PathBuf,
+    /// Outside the home, so no command a page runs there can list or read it.
+    screen: PathBuf,
+}
 
 impl ScratchHome {
     fn new(n: usize) -> ScratchHome {
-        let dir = std::env::temp_dir().join(format!("book-transcripts-{}-{n}", std::process::id()));
+        let base = format!("book-transcripts-{}-{n}", std::process::id());
+        let dir = std::env::temp_dir().join(&base);
+        let screen = std::env::temp_dir().join(format!("{base}.screen"));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join(".config")).expect("a scratch home");
-        ScratchHome(dir)
+        ScratchHome { dir, screen }
     }
 }
 
 impl Drop for ScratchHome {
     fn drop(&mut self) {
-        let _ = std::fs::remove_dir_all(&self.0);
+        let _ = std::fs::remove_dir_all(&self.dir);
+        let _ = std::fs::remove_file(&self.screen);
     }
+}
+
+/// Type `commands` into one `ikigai --plain` REPL in `home`, a line each, and return what its
+/// screen showed: stdout and stderr as ONE stream, in the order the REPL wrote them, because
+/// that is what a reader's terminal shows (an error under the command that caused it, not
+/// after the whole session).
+///
+/// The two streams share one file rather than two pipes: two pipes read separately lose the
+/// order between them, and one descriptor behind both keeps it (the REPL flushes each prompt
+/// and each answer as it writes them, and stderr is unbuffered). The whole session is written
+/// to stdin before the REPL is waited for, which is what a paste does; the commands are a few
+/// hundred bytes, far under a pipe's buffer, and the REPL's output goes to the file, so neither
+/// side can block the other.
+fn type_into_repl(home: &ScratchHome, commands: &[String]) -> std::io::Result<String> {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let screen = std::fs::File::create(&home.screen)?;
+    let mut child = Command::new("ikigai")
+        .current_dir(&home.dir)
+        .env("HOME", &home.dir)
+        .env("XDG_CONFIG_HOME", home.dir.join(".config"))
+        .arg("--plain")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::from(screen.try_clone()?))
+        .stderr(Stdio::from(screen))
+        .spawn()?;
+    {
+        let mut stdin = child.stdin.take().expect("stdin was piped");
+        for c in commands {
+            writeln!(stdin, "{c}")?;
+        }
+        // Dropping stdin is the reader's Ctrl-D: the REPL ends at EOF.
+    }
+    child.wait()?;
+    std::fs::read_to_string(&home.screen)
+}
+
+/// The lines a reader would compare with the page, from the REPL's raw screen.
+///
+/// What comes before the first prompt is the session's greeting, not an answer: the banner
+/// (`ikigai 0.1.52 — REPL. Type …`, whose version is the pin's and not the page's) and the
+/// topology lines on stderr (`ikigai: mount   none composed …`). A prompt is printed with no
+/// newline, so each answer arrives on the prompt's line (`ikigai> HELLO`) and a command that
+/// prints nothing leaves a bare prompt in front of the next; every leading prompt is taken
+/// off, and the last one, left at EOF, is then an empty line. If no prompt appears at all,
+/// the REPL never started, and everything it printed is kept so the failure says why.
+fn screen_lines(screen: &str) -> Vec<String> {
+    const PROMPT: &str = "ikigai> ";
+    let lines: Vec<&str> = screen.lines().collect();
+    let Some(first) = lines.iter().position(|l| l.starts_with(PROMPT)) else {
+        return lines.into_iter().map(str::to_string).collect();
+    };
+    lines[first..]
+        .iter()
+        .map(|l| {
+            let mut l = *l;
+            while let Some(rest) = l.strip_prefix(PROMPT) {
+                l = rest;
+            }
+            if l == PROMPT.trim_end() { "" } else { l }.to_string()
+        })
+        .collect()
 }
 
 /// Drop the lines that legitimately differ between the book and a replay: cache verdicts
@@ -351,30 +429,13 @@ fn every_transcript_in_the_book_replays_against_the_installed_cli() {
             continue;
         }
         let home = ScratchHome::new(n);
-        let mut cmd = Command::new("ikigai");
-        cmd.current_dir(&home.0)
-            .env("HOME", &home.0)
-            .env("XDG_CONFIG_HOME", home.0.join(".config"));
-        cmd.arg("--plain");
-        for c in &t.commands {
-            cmd.arg("-c").arg(c);
-        }
-        let output = match cmd.output() {
-            Ok(o) => o,
+        let screen = match type_into_repl(&home, &t.commands) {
+            Ok(screen) => screen,
             Err(e) => panic!(
-                "no `ikigai` on PATH ({e}); install it with `cargo install ikigai-cli --locked`"
+                "could not run `ikigai` ({e}); install it with `cargo install ikigai-cli --locked`"
             ),
         };
-        let mut actual: Vec<String> = String::from_utf8_lossy(&output.stdout)
-            .lines()
-            .map(str::to_string)
-            .collect();
-        actual.extend(
-            String::from_utf8_lossy(&output.stderr)
-                .lines()
-                .map(str::to_string),
-        );
-        let actual = normalize(actual);
+        let actual = normalize(screen_lines(&screen));
         let expected = normalize(t.expected.iter().cloned());
         let ok = matches(&expected, &actual);
         let where_ = t
@@ -431,6 +492,33 @@ mod unit {
             "— batch: 2 commands",
         ]));
         assert_eq!(n, s(&["A B", "x · <verdict> · main · <ms>   → 3b"]));
+    }
+
+    #[test]
+    fn the_greeting_and_the_prompts_are_not_part_of_the_screen() {
+        let screen = "ikigai 0.1.52 \u{2014} REPL. Type `help`, or `quit` to exit.\n\
+                      ikigai: mount   none composed \u{2014} no `mount` lines in the config home\n\
+                      ikigai> wrote 17 bytes to notes.txt\n\
+                      [uncacheable]\n\
+                      ikigai> ikigai> remember the milk\n\
+                      second line\n\
+                      ikigai> error: unknown command `foo` (try `help`)\n\
+                      ikigai> \n";
+        assert_eq!(
+            normalize(screen_lines(screen)),
+            s(&[
+                "wrote 17 bytes to notes.txt",
+                "remember the milk",
+                "second line",
+                "error: unknown command `foo` (try `help`)",
+            ])
+        );
+    }
+
+    #[test]
+    fn a_screen_with_no_prompt_is_kept_whole_so_the_failure_says_why() {
+        let screen = "ikigai: no such config\n";
+        assert_eq!(screen_lines(screen), s(&["ikigai: no such config"]));
     }
 
     #[test]

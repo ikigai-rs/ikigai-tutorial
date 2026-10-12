@@ -108,18 +108,25 @@ trace  urn:file:notes.txt
   client      ikigai repl  ·  capability: urn:cap:kernel:inspect
   transport   embedded · in-process
 
-urn:file:notes.txt   file · denied · main · — · cap ✓ · denied=urn:cap:fs:read:*
+urn:file:notes.txt   file · denied · main · — · cap ✗ · denied=urn:cap:fs:read:*
 urn:file:notes.txt   cap ✗ denied: denied: capability does not grant `urn:cap:fs:read:*` (declared by `urn:file:notes.txt`)
 ```
 
 The first line is a denial *event*, the kind the listing above records, drawn: the endpoint that would have
-answered (`file`), the outcome (`denied`), no duration (`—`, it never ran), and the scope the
-floor found missing as the event's note. The last line is the error, and its `cap ✗` is the
-authority dimension made visible: the message names the scope lacked and the resource that
-declared it. Read the node's outcome, not its `cap ✓`: that mark means only that the hop ran
-under the session's capability unchanged, and at 0.1.46 the CLI draws it on a refused hop too.
-Before 0.1.46 the REPL printed the last line alone, and the event existed in the kernel
-undrawn.
+answered (`file`), the outcome (`denied`), no duration (`—`, it never ran), the authority mark,
+and the scope the floor found missing as the event's note. The last line is the error, and its
+`cap ✗` is the authority dimension made visible: the message names the scope lacked and the
+resource that declared it.
+
+The node's mark says what happened to the session's authority at that hop. Under a narrowed
+session, `cap ✓` is a hop that ran under that capability unchanged; `cap ↓` followed by scopes
+is a hop that ran under less (an attenuation, or a mount's clamp), and names what it held; and
+`cap ✗` is a hop the floor refused, as here, so the mark and the outcome agree. A refused hop
+that had been attenuated first keeps its scopes (`cap ↓ … ✗`), because which authority was
+refused is the diagnosis. A root session draws no mark at all. Before `ikigai-cli` 0.1.48 a
+refused hop under an unchanged capability was drawn `cap ✓`, which read as "authorized", the
+one thing that node was not; and before 0.1.46 the REPL printed the last line
+alone, and the event existed in the kernel undrawn.
 
 ## Before it runs: the dry run
 
