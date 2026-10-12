@@ -76,6 +76,21 @@ fn publishing_and_running_are_separate_grants() {
     assert!(result(&kernel, &bob(), "open-items")
         .unwrap()
         .contains("Fix the flaky test"));
+    // The refusal is the kernel's and names only the family; the entry's own contract names
+    // the exact grant, and says why the floor is the family (ikigai-script 0.3.3).
+    let contract = issue(
+        &kernel,
+        &Capability::root(),
+        Verb::Meta,
+        "urn:script:open-items:result",
+        &[("as", "application/json")],
+    )
+    .expect("the entry's contract");
+    assert!(
+        contract.contains("urn:cap:script:run:open-items"),
+        "{contract}"
+    );
+    assert!(contract.contains("namespace"), "{contract}");
 }
 
 #[test]

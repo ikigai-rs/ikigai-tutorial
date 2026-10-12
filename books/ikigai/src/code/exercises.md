@@ -105,21 +105,26 @@ has produced, at the end, an answer saying so.
 
 ---
 
-## 4. The check ledger item 1242 asks for, as a composition
+## 4. The style note ledger item 1242 left out, as a composition
 
-Bind an endpoint of your own at `urn:iki:tutorial:yours:checked` that takes `content`, asks
-`urn:nl:sparql:check` for its JSON face, and answers that check with one more warning when the
-query is valid and its preview has no rows. Mount it with `sentence_draft::kernel_with`, and ask
-it about the live demo's draft and about the corrected query.
+The live demo's draft pairs `FROM <g>` with `GRAPH <g> { … }`. On this host that is harmless (the
+script host runs a query over one set of graphs that serves as both its default and its named
+graphs), so ledger item 1242 dropped it as a check, and `urn:nl:sparql:check` says nothing about
+it. Against an ordinary SPARQL endpoint it finds nothing. Bind an endpoint of your own at
+`urn:iki:tutorial:yours:checked` that takes `content`, asks `urn:nl:sparql:check` for its JSON
+face, and answers that check with one more warning when the query names a graph both in a `FROM`
+and in a `GRAPH`. Mount it with `sentence_draft::kernel_with`, and ask it about the live demo's
+draft and about the corrected query.
 
 <!-- urn-gate: illustration urn:iki:tutorial:yours:checked — the name the reader binds in this
      exercise, in their own test; no host this workspace builds binds it. -->
 
 - **File** — `crates/your-endpoints/tests/code.rs`; `sentence_draft::{P2_DRAFT, P2_CORRECTED}` are
-  the two queries, and `ikigai_nl::Check` is the type of the JSON face.
+  the two queries, and `ikigai_nl::Check` is the type of the JSON face (its `graphs` are the graphs
+  the text names).
 - **Run** — `cargo test -p your-endpoints --test code`
-- **Right when** — `P2_DRAFT` comes back with a warning saying the preview is empty, and
-  `P2_CORRECTED` comes back without one.
+- **Right when** — `P2_DRAFT` comes back with your warning beside the check's own (its preview is
+  empty), and `P2_CORRECTED` comes back with neither.
 - **Read again** — [A sentence becomes a draft](sentence.md), "A draft the check passed, and
   should not have"; and [Binding, and a host of your own](../getting-started/binding.md).
 
@@ -129,11 +134,13 @@ it about the live demo's draft and about the corrected query.
 `AsyncFnEndpoint` is the shape: it issues a sub-request through `inv.issue(…)`, under the caller's
 capability, so your endpoint can never show anybody a preview they could not have asked for. Give
 it a `Description` with `content` as its input, or nothing can route an argument to it by name.
+For each graph in the check's `graphs`, look for `FROM <g>` and `GRAPH <g>` in the text; a text
+search is enough for this exercise, though a parser would not be fooled by a comment.
 
-This is the resource-first version of the fix, and it is worth asking what it does not do. It
-warns a person who asks; it does not make the drafter repair, because the drafter asks
-`urn:nl:sparql:check` by name, and your endpoint is a different name. And a warning is not an
-error: a drafter that saw one would still save the draft. Making an empty preview a reason to
-repair is a change to the drafter, which is the ledger item.
+This is the resource-first version of a check, and it is worth asking what it does not do. It
+warns a person who asks; the drafter never sees it, because the drafter asks `urn:nl:sparql:check`
+by name, and your endpoint is a different name. That is the difference between this note and the
+empty preview: `ikigai-nl` 0.3.0 made the empty preview a reason to repair by changing the check
+and the drafter, which is where a finding has to live for a model to be told about it.
 
 </details>

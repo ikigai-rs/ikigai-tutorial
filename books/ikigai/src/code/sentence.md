@@ -17,7 +17,7 @@ The steps, each a resource:
 | ground | `urn:nl:grounding` | what the caller may do and see, as data: actions, vocabulary, each readable graph's shape, worked examples |
 | draft | `urn:nl:prompt:sparql`, then the host's `urn:llm:ask` | the ask and the grounding, filled into a prompt that is itself a resource, sent to the model door |
 | check | `urn:nl:sparql:check` | parse, derive the authority, check every predicate and class, and a dry run |
-| repair | `urn:nl:prompt:sparql-repair` | a refused draft goes back with what was refused in it, up to a bound |
+| repair | `urn:nl:prompt:sparql-repair` | a refused draft, or one whose preview is empty, goes back with what the check found in it, up to a bound |
 | save | `urn:script:{name}` with `state=draft` | a `Sink` under the caller, so the script host checks it once more |
 
 `urn:nl:sparql` runs the five in order. Every one is also a name a person can ask directly, which
@@ -59,10 +59,15 @@ cargo run -p sentence-draft -- 1
 
 ```text
 alice> source urn:nl:grounding as=application/json   (summarized)
-actions     24 of 24
+actions     26 of 26
 vocabulary  179 of 179
 graphs      1 of 1
   urn:iki:tutorial:items  20 triples, 5 predicates
+    dcterms:title    literal xsd:string
+    rdf:type         iri
+    ledger:number    literal xsd:integer
+    ledger:priority  literal xsd:integer
+    ledger:status    iri: ledger:open ledger:closed
 examples    1 of 1
   open-items (sparql, sha256:e1977365…)
 
@@ -77,14 +82,19 @@ The grounding is a **composition**: it holds no state, and every part of it is a
 kernel under the caller's capability. The actions are the caller's own manifold (`urn:kernel:actions`,
 the tool list an agent would get), with each action's arguments. The vocabulary is the `ik:` terms.
 The graphs are the store's own listing of what the caller may read, each summarized by a few stored
-queries (its classes and predicates, with counts, and a few sample triples). The examples are
-published scripts the caller may read: here the host names one, the first chapter's `open-items`,
-and the grounding shows it to Alice and not to Carol, by asking the script host's own rule.
+queries (its classes and predicates, with counts, and a few sample triples). Each predicate also
+says what KIND of value it takes, an IRI or a literal of some datatype, and, when its values are a
+small closed set, what they are: `ledger:status` is the IRI `ledger:open` or `ledger:closed`, never
+the string `"open"`. That line exists because of the draft in section 4. The examples are published
+scripts the caller may read: here the host names one, the first chapter's `open-items`, and the
+grounding shows it to Alice and not to Carol, by asking the script host's own rule.
 
-So Carol's model would be told about eight actions and no data at all, and the payroll graph is not
-in Alice's grounding, because she cannot read it. (It would be in Bob's, because he can.) A graph the
-caller cannot read contributes nothing, **not even its name**, and a model cannot leak what it was
-never shown.
+So Carol's grounding offers eight actions and no data at all, and the payroll graph is not in
+Alice's, because she cannot read it. (It would be in Bob's, because he can.) A graph the caller
+cannot read contributes nothing, **not even its name**, and a model cannot leak what it was never
+shown. (The actions are in the grounding for a drafter that writes calls. One that writes a query
+reads only the vocabulary, the graphs and the examples, with `parts=`: a query is not an action
+call, and on a host with thousands of actions they are most of the grounding's size.)
 
 The grounding is cached per capability, and hangs from every thread its parts hang from, so a write
 to a graph it summarized, a change of bindings, or a republished example recomputes it. Its parts
@@ -149,7 +159,7 @@ cargo run -p sentence-draft -- 3
 ```
 
 ```text
-alice> sink urn:nl:sparql ask="the titles of the open items" graph=urn:iki:tutorial:items save=open-titles
+alice> sink urn:nl:sparql ask="the titles of the open items" focus=urn:iki:tutorial:items save=open-titles
 urn:script:open-titles:version:sha256:… (a DRAFT of urn:script:open-titles: review it, then publish it with state=published)
 
 PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
@@ -167,10 +177,11 @@ preview (LIMIT 5):
 (the model was asked 2 times)
 ```
 
+`focus=` names the graph the ask is about, as it does for the grounding and the check. (Before
+`ikigai-nl` 0.3.0 the drafter alone called it `graph=`, which it still accepts, for one release.)
 The stub's first draft said `ledger:state`, the check refused it, and the drafter asked again: the
 same prompt, followed by `urn:nl:prompt:sparql-repair` filled with the previous draft and exactly
-what the check refused in it, nothing else. The
-second draft passed, and was saved. The bound on attempts is 3 by default, and drafting also stops
+what the check found in it, nothing else. The second draft passed, and was saved. The bound on attempts is 3 by default, and drafting also stops
 the first time a model answers with a draft it already gave, because a model repeating itself is
 not converging. Three is a cost bound, each attempt one model call; nobody has measured where
 repair stops paying.
@@ -195,8 +206,8 @@ cargo run -p sentence-draft -- 4
 ```
 
 ```text
-alice> sink urn:nl:sparql ask="the number and title of every open item with priority 2 or higher (0 is highest), ordered by number" graph=urn:iki:tutorial:items save=open-p2
-urn:script:open-p2:version:sha256:… (a DRAFT of urn:script:open-p2: review it, then publish it with state=published)
+alice> sink urn:nl:sparql ask="the number and title of every open item with priority 2 or higher (0 is highest), ordered by number" focus=urn:iki:tutorial:items save=open-p2
+urn:script:open-p2:version:sha256:… (a DRAFT of urn:script:open-p2: review it, then publish it with state=published). its preview is EMPTY: no row matched, and no attempt within the bound of 3 did better; the warnings name the patterns that match nothing on their own. Review it before publishing
 
 # @param limit xsd:integer optional default 2
 SELECT ?number ?title
@@ -213,14 +224,34 @@ WHERE {
 }
 ORDER BY ?number
 
+warning: the preview is empty: no row matches, and these triple patterns match nothing on their own in the graphs it reads: GRAPH <urn:iki:tutorial:items> { ?item <https://ikigai-rs.dev/ns/ledger#status> "open" }. A string written where the data holds an IRI (or the reverse), or a literal of another datatype, matches nothing: compare each with the kind of value its predicate takes
 preview (LIMIT 5):
 ?number	?title
+
+(the model was asked 2 times)
 ```
 
-The preview is **empty**, and the draft was saved anyway. Every check passed: it parses, it reads a
-graph Alice may read, every predicate and class it names exists there. What is wrong with it is
-not a fact about names. It compares the status to the string `"open"`, and the status in this graph
-(and in gonk's) is the IRI `ledger:open`; a string is never equal to an IRI, so nothing matches.
+Every check passed: it parses, it reads a graph Alice may read, every predicate and class it names
+exists there. What is wrong with it is not a fact about names. It compares the status to the string
+`"open"`, and the status in this graph (and in gonk's) is the IRI `ledger:open`; a string is never
+equal to an IRI, so nothing matches.
+
+The preview says so. An empty preview is not an error, because an empty answer is sometimes the
+right one ("which items are overdue?" on a good day), so the check cannot refuse it. It is a
+**warning, with its evidence**: the check runs each triple pattern of the query alone, in its graph,
+and names the ones that match nothing on their own. Here that is exactly one pattern, the string
+`"open"`. And the drafter treats a valid draft with an empty preview as a reason to repair: it sent
+the model the draft and that warning, the way it sends a refused draft and its errors in section 3.
+The stub answers this ask with the live demo's draft whatever it is told, so its second answer was
+its first again, and drafting stopped there, because a model repeating itself is not converging. A
+real model, told that `ledger:status` takes the IRI `ledger:open` (the grounding now says so) and
+shown the one pattern that matched nothing, has what it needs to fix it.
+
+When drafting stops with the preview still empty, the draft is kept, and **marked**: the first line
+of the answer says the preview is EMPTY and to review it, the JSON face says `emptyPreview`, and in
+its provenance the attempt it derives from carries the warning. Nothing is saved silently. (The
+mark says "no attempt within the bound of 3 did better"; here there were two, because the second
+repeated the first.)
 
 Two smaller things are wrong too. It names the priority bound `limit`, a parameter nobody asked for
 whose name reads like a row count. And it pairs `FROM <g>` with `GRAPH <g> { … }`, which in
@@ -228,15 +259,11 @@ standard SPARQL finds nothing on its own: `FROM` sets only the default graph, so
 no named graphs to match. On this host that pairing happens to be harmless, because the script host
 runs a query over one set of graphs that serves as both the default graph and the named ones; the
 crate's tests (`crates/sentence-draft/tests/claims.rs`) pin that the string alone empties this
-preview. Run against an ordinary SPARQL endpoint, it would be wrong twice.
+preview, and that the check names that pattern and no other. Run against an ordinary SPARQL
+endpoint, it would be wrong twice.
 
-**The check does not yet treat an empty preview as a failure** (ledger item 1242). That is the
-honest state of it, and it is not a simple omission: an empty answer is sometimes the right answer
-("which items are overdue?" on a good day), so a check cannot just refuse one. What the ledger item
-proposes is to make an empty preview a reason to repair, telling the model which patterns matched
-nothing, and to let the grounding say which predicates take an IRI and which a literal, so that a
-drafter has no string to guess. Until then, the empty preview is in the answer, in plain sight, and
-the person reading the draft is the check.
+So the mechanical half caught what it could, said why, and asked again. What it cannot do is
+decide that an empty answer is wrong; a person reading the marked draft still does that.
 
 ## A draft is nobody's script yet
 
@@ -249,10 +276,10 @@ bob> source urn:script:open-p2
 error: not found: no script is published at urn:script:open-p2
 
 host> source urn:script:open-p2:result
-error: conflict: urn:script:open-p2 is a draft; publish it (`state=published`) to run it, or try the code at urn:script:eval
+error: conflict: urn:script:open-p2 is a draft; publish it (`state=published`) to run it
 
 alice> source urn:script:open-p2:result
-error: denied: capability does not grant `urn:cap:lisp` (declared by `urn:script:open-p2:result`)
+error: conflict: urn:script:open-p2 is a draft; publish it (`state=published`) to run it
 ```
 
 Bob holds the read grant for `open-p2`, and to him the draft does not exist: `NotFound`, in the same
@@ -261,12 +288,18 @@ the thing privacy hides. A draft is visible only to its author, the principal th
 capability named, until it is published.
 
 Nobody can run a draft, not even the host: its `…:result` is refused for its state, and says what
-to do about it. Alice's refusal is right too, but its reason is not the real one. A SPARQL draft has
-no contract of its own until it is published (a script's own catalog entry is made from its
-published text), so it wears the generic one, and the generic `…:result` declares the Lisp
-evaluator's grant, which Alice does not hold. The kernel's floor refuses on that before the script
-host can say "draft". The refusal holds; the words mislead, and a reader who meets them now knows
-why.
+to do about it. Alice, its author, is told the same thing in the same words: it is a draft, and
+publishing it is how to run it. A draft has no contract of its own until it is published (a
+script's own catalog entry is made from its published text), so it wears the generic one, which
+declares only the run grant; the language's own grant (the Lisp evaluator's, for a Lisp script)
+joins it when a script of that language is published. The state is reported before any run grant
+is checked, because anyone who can see the draft may know it is one.
+
+(Before `ikigai-script` 0.3.3 the generic contract declared the Lisp evaluator's grant, so Alice,
+who holds no Lisp grant, was refused for that by the kernel's floor before the script host could
+say "draft": a true refusal, for a reason that had nothing to do with a SPARQL query. The host's
+answer also pointed at `urn:script:eval`, which runs only Lisp. Both are fixed; the hint is now
+offered only for a language that door takes.)
 
 ## A person corrects it, checks it, and publishes it
 
@@ -321,9 +354,10 @@ Every step is the same resource, under the same capability. Alice holds
 `urn:cap:net:localhost:11434`, the port-aware grant `ikigai-llm` checks before it reaches the
 server, and a caller holding no network grant could not draft at all. What changes is
 what comes back: the number of attempts, whether the first draft passes, and the query itself, none
-of which a book can promise. Section 4 is the one to run more than once. A model that gets the
-status right is answering this ask, not every ask, and the empty preview is still the signal to
-look for.
+of which a book can promise. Section 4 is the one to run more than once: a model shown the warning
+and the value kinds may repair the status on its second attempt, or may not. A model that gets the
+status right is answering this ask, not every ask, and the mark on an empty preview is still the
+signal to look for.
 
 ## What was built
 

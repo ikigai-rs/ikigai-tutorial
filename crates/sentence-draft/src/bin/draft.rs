@@ -76,29 +76,32 @@ fn main() {
         "urn:nl:sparql",
         &[
             ("ask", ASK_TITLES),
-            ("graph", ITEMS),
+            ("focus", ITEMS),
             ("save", "open-titles"),
         ],
         &format!(
-            "sink urn:nl:sparql ask=\"{ASK_TITLES}\" graph=urn:iki:tutorial:items save=open-titles"
+            "sink urn:nl:sparql ask=\"{ASK_TITLES}\" focus=urn:iki:tutorial:items save=open-titles"
         ),
     );
     // ANCHOR_END: draft
-    if let Model::Stub(stub) = &model {
-        let prompts = stub.lock().expect("the stub").prompts.len();
+    if let Some(prompts) = asked(&model) {
         line(&format!("\n(the model was asked {prompts} times)"));
     }
 
     section(4, "A draft the check passed, and should not have");
+    let before = asked(&model);
     ask(
         &kernel,
         "alice",
         &alice,
         Verb::Sink,
         "urn:nl:sparql",
-        &[("ask", ASK_P2), ("graph", ITEMS), ("save", "open-p2")],
-        &format!("sink urn:nl:sparql ask=\"{ASK_P2}\" graph=urn:iki:tutorial:items save=open-p2"),
+        &[("ask", ASK_P2), ("focus", ITEMS), ("save", "open-p2")],
+        &format!("sink urn:nl:sparql ask=\"{ASK_P2}\" focus=urn:iki:tutorial:items save=open-p2"),
     );
+    if let (Some(before), Some(after)) = (before, asked(&model)) {
+        line(&format!("\n(the model was asked {} times)", after - before));
+    }
 
     section(5, "A draft is nobody's script yet");
     ask(
@@ -205,6 +208,29 @@ fn grounding(kernel: &Kernel, who: &str, capability: &Capability) {
             "  {}  {} triples, {} predicates",
             shape.graph, shape.triples, shape.properties
         ));
+        // What kind of value each predicate takes, and the values of a small closed set: what
+        // a drafter reads before it writes a comparison (ledger #1242).
+        for p in &shape.property_partitions {
+            let kinds: Vec<String> = p
+                .kinds
+                .iter()
+                .map(|k| match &k.datatype {
+                    Some(datatype) => format!("{} {}", k.kind, compact(datatype)),
+                    None => k.kind.clone(),
+                })
+                .collect();
+            let values: Vec<String> = p.values.iter().map(|v| compact(v)).collect();
+            let values = if values.is_empty() {
+                String::new()
+            } else {
+                format!(": {}", values.join(" "))
+            };
+            line(&format!(
+                "    {:<16} {}{values}",
+                compact(&p.iri),
+                kinds.join(", ")
+            ));
+        }
     }
     line(&format!(
         "examples    {} of {}",
@@ -215,6 +241,31 @@ fn grounding(kernel: &Kernel, who: &str, capability: &Capability) {
             "  {} ({}, {})",
             example.name, example.language, example.version
         ));
+    }
+}
+
+/// An IRI (bracketed or not) with this chapter's prefixes, for the summary only.
+fn compact(iri: &str) -> String {
+    let bare = iri.trim_start_matches('<').trim_end_matches('>');
+    [
+        ("https://ikigai-rs.dev/ns/ledger#", "ledger:"),
+        ("http://purl.org/dc/terms/", "dcterms:"),
+        ("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf:"),
+        ("http://www.w3.org/2001/XMLSchema#", "xsd:"),
+    ]
+    .iter()
+    .find_map(|(ns, prefix)| {
+        bare.strip_prefix(ns)
+            .map(|local| format!("{prefix}{local}"))
+    })
+    .unwrap_or_else(|| iri.to_string())
+}
+
+/// How many prompts the stub has been sent, or `None` for a real model.
+fn asked(model: &Model) -> Option<usize> {
+    match model {
+        Model::Stub(stub) => Some(stub.lock().expect("the stub").prompts.len()),
+        Model::Ollama(_) => None,
     }
 }
 
@@ -243,9 +294,9 @@ fn first_ask() {
         &you,
         Verb::Sink,
         "urn:nl:sparql",
-        &[("ask", ASK_BOOKS), ("graph", SHELF), ("save", "book-count")],
+        &[("ask", ASK_BOOKS), ("focus", SHELF), ("save", "book-count")],
         &format!(
-            "sink urn:nl:sparql ask=\"{ASK_BOOKS}\" graph=urn:iki:tutorial:shelf save=book-count"
+            "sink urn:nl:sparql ask=\"{ASK_BOOKS}\" focus=urn:iki:tutorial:shelf save=book-count"
         ),
     );
     // Publishing is the draft's own text, sunk again with `state=published`.

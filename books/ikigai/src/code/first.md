@@ -17,10 +17,19 @@ The smallest script there is, `hello.rq`:
 {{#include ../../../../crates/script-host/src/first/hello.rq}}
 ```
 
-It answers one row, and reads nothing. (A script always names the graphs it reads, and the host
-checks who may read them; this one names an empty graph and uses nothing in it.) And the same
-greeting with a parameter, `hello-who.rq`: the comment line says it takes a `who`, a string,
-which is `world` unless the caller says otherwise.
+It answers one row, and its second line is the first lesson of this section: **a script names the
+data it reads, even a hello world.** `FROM <urn:iki:tutorial:empty>` says which graph this query
+reads. Nothing in it is used, and the graph is empty, but the line is not decoration: the host
+works out from what a script names the authority its publisher and its runners need (here, the
+right to read that one graph), and it runs the query over exactly those graphs and no others. A
+query that names none is refused when it is published, and the refusal says to name a graph with
+`FROM`. So even the smallest script says what it reads, and the rest of this section leans on that.
+
+<!-- urn-gate: illustration urn:iki:tutorial:empty — the name of a named GRAPH the hello script
+     reads, which holds nothing; no space binds it. -->
+
+And the same greeting with a parameter, `hello-who.rq`: the comment line says it takes a `who`, a
+string, which is `world` unless the caller says otherwise.
 
 ```sparql
 {{#include ../../../../crates/script-host/src/first/hello-who.rq}}
@@ -159,7 +168,7 @@ cargo run -p sentence-draft -- ask
 ```
 
 ```text
-you> sink urn:nl:sparql ask="How many books are on the shelf?" graph=urn:iki:tutorial:shelf save=book-count
+you> sink urn:nl:sparql ask="How many books are on the shelf?" focus=urn:iki:tutorial:shelf save=book-count
 urn:script:book-count:version:sha256:… (a DRAFT of urn:script:book-count: review it, then publish it with state=published)
 
 PREFIX dcterms: <http://purl.org/dc/terms/>

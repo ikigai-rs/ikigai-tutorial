@@ -25,9 +25,11 @@ use crate::{kernel_over, read};
 /// The named graph the shelf lives in.
 pub const SHELF: &str = "urn:iki:tutorial:shelf";
 
-/// The smallest script there is: a query that answers one row. Every script names the graphs
-/// it reads (that is what the host checks a publisher and a runner against), so this one names
-/// an empty graph, and uses nothing in it.
+/// The smallest script there is: a query that answers one row. A script names the data it
+/// reads, even a hello world: the host derives who may publish and run it from the graphs it
+/// names and runs it over exactly those, and refuses at publish a query that names none
+/// (ledger #1278, decided: keep the `FROM`). So this one names an empty graph, and uses
+/// nothing in it.
 pub const HELLO: &str = include_str!("first/hello.rq");
 
 /// The same greeting, with a parameter: `who`, a string, `world` unless the caller says.

@@ -92,7 +92,9 @@ read is written, so the refresh ran the query again. On your own gonk the page i
 ## 2. Ask gonk in a sentence
 
 Now let the model write the query. `graph=` says which graph the question is about, and `save=`
-the name to keep the answer at:
+the name to keep the answer at. (`graph=` is the drafter's name for it in the `ikigai-nl` this
+book's gonk links, 0.2.1; from 0.3.0 the drafter calls it `focus=`, as the grounding and the check
+do, and keeps `graph=` as an alias for one release.)
 
 <!-- transcript: run -->
 ```console

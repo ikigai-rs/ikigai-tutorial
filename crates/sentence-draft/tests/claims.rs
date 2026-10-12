@@ -7,9 +7,13 @@
 //! the store's graph-scoped doors (ikigai-script's dataset: every graph the text names is both
 //! the default graph and a named graph), only the first is a defect: these tests say which,
 //! so the chapter cannot say otherwise.
+//!
+//! Since ikigai-nl 0.3.0 the check names the pattern that empties a preview, the drafter repairs
+//! an empty preview and marks a draft it could not fix (ledger #1242), and since ikigai-script
+//! 0.3.3 a draft's author is told it is a draft, not that she lacks Lisp (ledger #1261).
 
-use ikigai_core::Verb;
-use ikigai_nl::{Check, Draft, Status};
+use ikigai_core::{Capability, Error, Verb};
+use ikigai_nl::{Check, Draft, Status, EMPTY_PREVIEW};
 use script_host::{issue, ITEMS};
 use sentence_draft::{
     alice, bob, carol, kernel, publish_example, Model, ASK_P2, ASK_TITLES, P2_CORRECTED, P2_DRAFT,
@@ -34,15 +38,158 @@ fn rows(check: &Check) -> usize {
 }
 
 #[test]
-fn the_demo_draft_passes_the_check_with_an_empty_preview() {
+fn the_demo_draft_passes_the_check_with_an_empty_preview_and_its_evidence() {
     let c = check(P2_DRAFT);
     assert!(c.valid, "{c:#?}");
     assert!(c.errors.is_empty(), "{:?}", c.errors);
-    assert_eq!(
-        rows(&c),
-        0,
-        "the preview is empty, and the check does not call that a failure (ledger #1242)"
+    assert_eq!(rows(&c), 0);
+    // A warning, never an error (ledger #1242), naming the one pattern that matches nothing.
+    assert!(
+        c.warnings.iter().any(|w| w.starts_with(EMPTY_PREVIEW)),
+        "{:?}",
+        c.warnings
     );
+    assert_eq!(
+        c.unmatched,
+        vec![
+            "GRAPH <urn:iki:tutorial:items> { ?item <https://ikigai-rs.dev/ns/ledger#status> \"open\" }"
+                .to_string()
+        ]
+    );
+}
+
+#[test]
+fn the_corrected_query_has_no_empty_preview_warning() {
+    let c = check(P2_CORRECTED);
+    assert!(
+        !c.warnings.iter().any(|w| w.starts_with(EMPTY_PREVIEW)),
+        "{:?}",
+        c.warnings
+    );
+    assert!(c.unmatched.is_empty());
+}
+
+#[test]
+fn the_grounding_says_the_status_is_an_iri_from_a_closed_set() {
+    let kernel = kernel(&Model::stub());
+    let json = issue(
+        &kernel,
+        &alice(),
+        Verb::Source,
+        "urn:nl:grounding",
+        &[("focus", ITEMS), ("as", "application/json")],
+    )
+    .expect("the grounding");
+    let g: ikigai_nl::Grounding = serde_json::from_str(&json).expect("its JSON face");
+    let status = g.graphs.items[0]
+        .property_partitions
+        .iter()
+        .find(|p| p.iri == "https://ikigai-rs.dev/ns/ledger#status")
+        .expect("ledger:status is listed");
+    assert_eq!(status.kinds.len(), 1);
+    assert_eq!(status.kinds[0].kind, "iri");
+    assert!(status
+        .values
+        .contains(&"<https://ikigai-rs.dev/ns/ledger#open>".to_string()));
+}
+
+#[test]
+fn the_drafter_repairs_an_empty_preview_and_marks_the_draft_it_keeps() {
+    let model = Model::stub();
+    let kernel = kernel(&model);
+    let json = issue(
+        &kernel,
+        &alice(),
+        Verb::Sink,
+        "urn:nl:sparql",
+        &[
+            ("ask", ASK_P2),
+            ("focus", ITEMS),
+            ("save", "open-p2"),
+            ("as", "application/json"),
+        ],
+    )
+    .expect("drafting");
+    let draft: Draft = serde_json::from_str(&json).expect("the draft's JSON face");
+    assert_eq!(draft.status, Status::Saved, "{draft:#?}");
+    assert!(draft.empty_preview, "the draft it kept is marked");
+    // Two attempts: the first valid with an empty preview, sent back; the stub answers the same
+    // draft, and a repeat stops drafting (recorded as the second attempt's error).
+    assert_eq!(draft.attempts.len(), 2, "{:#?}", draft.attempts);
+    assert!(draft.attempts[0].valid && draft.attempts[0].empty_preview);
+    assert!(
+        draft.attempts[1]
+            .errors
+            .iter()
+            .any(|e| e.contains("the same draft as attempt 1")),
+        "{:?}",
+        draft.attempts[1].errors
+    );
+    let Model::Stub(stub) = &model else {
+        unreachable!()
+    };
+    let prompts = &stub.lock().unwrap().prompts;
+    assert_eq!(prompts.len(), 2);
+    // The repair prompt carries the warning and the pattern that matched nothing.
+    assert!(prompts[1].contains(EMPTY_PREVIEW), "{}", prompts[1]);
+    assert!(
+        prompts[1].contains("ledger#status> \"open\""),
+        "{}",
+        prompts[1]
+    );
+    // And the saved text's provenance carries the mark.
+    assert!(draft.prov.contains("draftWarning"), "{}", draft.prov);
+}
+
+#[test]
+fn a_draft_is_refused_to_its_author_for_its_state_not_for_lisp() {
+    let kernel = kernel(&Model::stub());
+    issue(
+        &kernel,
+        &alice(),
+        Verb::Sink,
+        "urn:nl:sparql",
+        &[("ask", ASK_P2), ("focus", ITEMS), ("save", "open-p2")],
+    )
+    .expect("drafting");
+    for who in [alice(), Capability::root()] {
+        match issue(
+            &kernel,
+            &who,
+            Verb::Source,
+            "urn:script:open-p2:result",
+            &[],
+        ) {
+            Err(Error::Conflict(why)) => {
+                assert!(why.contains("is a draft"), "{why}");
+                assert!(
+                    !why.contains("urn:script:eval"),
+                    "eval runs no SPARQL: {why}"
+                );
+            }
+            other => panic!("a draft is refused for its state (ledger #1261): {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn graph_is_still_accepted_as_the_focus() {
+    let kernel = kernel(&Model::stub());
+    let json = issue(
+        &kernel,
+        &alice(),
+        Verb::Sink,
+        "urn:nl:sparql",
+        &[
+            ("ask", ASK_TITLES),
+            ("graph", ITEMS),
+            ("save", "open-titles"),
+            ("as", "application/json"),
+        ],
+    )
+    .expect("drafting with the deprecated alias");
+    let draft: Draft = serde_json::from_str(&json).expect("the draft's JSON face");
+    assert_eq!(draft.status, Status::Saved, "{draft:#?}");
 }
 
 #[test]
@@ -85,7 +232,7 @@ fn the_check_catches_an_unknown_predicate_and_the_drafter_repairs_it() {
         "urn:nl:sparql",
         &[
             ("ask", ASK_TITLES),
-            ("graph", ITEMS),
+            ("focus", ITEMS),
             ("save", "open-titles"),
             ("as", "application/json"),
         ],
@@ -112,7 +259,7 @@ fn a_saved_draft_is_its_authors_alone_until_a_person_publishes_it() {
         &alice(),
         Verb::Sink,
         "urn:nl:sparql",
-        &[("ask", ASK_P2), ("graph", ITEMS), ("save", "open-p2")],
+        &[("ask", ASK_P2), ("focus", ITEMS), ("save", "open-p2")],
     )
     .expect("drafting");
     let head = issue(

@@ -74,7 +74,9 @@ pinned gonk and a listing or a cell checked against the book's crates are answer
 code. (0.4.0 added the keyed append [part 5](spec/ledger.md) syncs with and the
 [bridges](bridges/roborev.md) file through; 0.9.0 added `count`, the number of items a filter
 admits without the listing, which part 5's walk asks.) It also links `ikigai-script` 0.3.0 and
-`ikigai-nl` 0.2.1, and serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
+`ikigai-nl` 0.2.1, and serves scripts and drafting at `urn:script:*` and `urn:nl:*`. Those two are
+older than the book's own crates take (0.3.3 and 0.3.0), and [Scripts and sentences in
+gonk](scripts/in-gonk.md) says where the newer releases answer differently.
 
 What the pin's last move (from 9704b54) changed for a reader, each where the page that shows it
 says so: the ledger is 0.9.0 where it was 0.6.2, so the agent's tools gain

@@ -2,13 +2,19 @@
 
 [The ikigai Book](../../code/scripts.html) showed code as a resource: a query published at a
 name, fetched without running, run as a read, versioned by its content, and run under the least of
-what its publisher held, what its runner holds and what the host allows. Its [next
-chapter](../../code/sentence.html) let a model write the query, as a **draft** nobody but the
-person who asked could see, until a person published it. [Your first saved query](first.md) did
+what its publisher held, what its runner holds and what the host allows. [A sentence becomes a
+draft](../../code/sentence.html), two chapters later, let a model write the query, as a **draft**
+nobody but the person who asked could see, until a person published it. [Your first saved query](first.md) did
 each once in gonk, as its owner. This chapter does not teach either idea again. It shows the same
 two things in gonk, which mounts [`ikigai-script`](https://crates.io/crates/ikigai-script) and
 [`ikigai-nl`](https://crates.io/crates/ikigai-nl) behind its three doors, and so has to answer a
 question a library cannot: **who is asking**, through which door, and what each of them may do.
+
+⚠ This page runs the gonk this book pins, which links `ikigai-script` 0.3.0 and `ikigai-nl` 0.2.1.
+Newer releases of both change three answers on it: the drafter's focus argument, what happens to a
+draft whose preview is empty, and the refusal a draft's author gets for running it. Each place says
+what the newer release does; the ikigai Book's chapter shows it, and this page will when its gonk
+takes them.
 
 The cast, all on this page's one scratch gonk:
 
@@ -296,8 +302,9 @@ callers who may draft.
 
 The drafter tells the model what the caller may see — the actions it may take, the vocabulary,
 the shape of each graph it may read — and refuses a grounding over 1 MiB rather than trimming it.
-⚠ **On a gonk the size of a working one, an unfocused draft is refused**, every time. The live gonk
-on 2026-10-11, browsing 48 repositories, answered its owner's first unfocused draft with:
+⚠ **On a gonk the size of a working one, running this pin's drafter, an unfocused draft is
+refused**, every time. The live gonk on 2026-10-11, browsing 48 repositories, answered its owner's
+first unfocused draft with:
 
 ```text
 error: invalid argument `focus`: the grounding with no focus is 4966451 bytes as application/json,
@@ -319,9 +326,16 @@ under 10 KB, focused on the ledger graph
 ```
 
 So every draft on this page passes `graph=`, a graph IRI or a topic word (`graph=ledger` worked on
-the live gonk), as every draft on a real gonk must until the drafter trims its own grounding
-([ledger #1243](http://localhost:1060/l/default/item/1243)). Note the two spellings: the drafter
-takes `graph=`, and its refusal and `urn:nl:grounding` say `focus=`, for the same thing.
+the live gonk), as every draft on a real gonk running this pin must. Note the two spellings: this
+pin's drafter takes `graph=`, and its refusal and `urn:nl:grounding` say `focus=`, for the same
+thing.
+
+`ikigai-nl` 0.3.0 changes both ([ledger #1243](http://localhost:1060/l/default/item/1243)). Its
+drafter reads only the parts a query needs, the vocabulary, the graphs and the examples, and never
+the actions, which are what grows with every browse root; so the refusal above was measured on
+this pin and does not describe that release. And its drafter takes `focus=`, like the grounding
+and the check, keeping `graph=` as an alias for one release. This page passes `graph=` because the
+gonk it pins does not take `focus=` on the drafter.
 
 ## A machine drafts
 
@@ -361,10 +375,15 @@ is one the ledger graph uses), so it was saved, and its preview is empty. The on
 equals an IRI. (`FROM` beside a `GRAPH` block naming the same graph looks like a second error, and
 in standard SPARQL it would be one; here it is harmless, because a script's graphs are passed as
 both its default and its named graphs, as the ikigai Book's
-[claims test](../../code/sentence.html#a-draft-the-check-passed-and-should-not-have) pins.) ⚠ **An
-empty preview is not yet a failure**: no repair runs and nothing marks the draft
-([ledger #1242](http://localhost:1060/l/default/item/1242)). A person reading the draft is the
-check that catches it.
+[claims test](../../code/sentence.html#a-draft-the-check-passed-and-should-not-have) pins.) ⚠ **On
+this pin, an empty preview is not a failure**: no repair runs and nothing marks the draft, and a
+person reading the draft is the check that catches it. `ikigai-nl` 0.3.0 changes that
+([ledger #1242](http://localhost:1060/l/default/item/1242)): the check warns that the preview is
+empty and names the pattern that matches nothing on its own (here, the string `"open"`), the
+drafter sends the model that warning and asks again, the grounding says that `ledger:status` takes
+the IRI `ledger:open` or `ledger:closed`, and a draft still empty when drafting stops is saved
+MARKED, on the first line of the answer. The ikigai Book's [same
+draft](../../code/sentence.html#a-draft-the-check-passed-and-should-not-have) shows it.
 
 ### The attempts, and where the draft came from
 
@@ -416,8 +435,8 @@ urn:script:team-titles-prov  draft  sha256:…
 [uncacheable]
 ```
 
-A draft cannot be run either, and the refusals are worth reading closely, because one of them is
-wrong. Its author asks first, then the owner:
+A draft cannot be run either, and on this pin the refusals are worth reading closely, because one
+of them is wrong. Its author asks first, then the owner:
 
 <!-- transcript: run -->
 ```console
@@ -431,8 +450,12 @@ The owner's answer is the true one: it is a draft, and publishing it is the way 
 is told it lacks a Lisp grant, which has nothing to do with a SPARQL draft: a draft wears the
 script library's generic contract, which declares the Lisp grant, so a caller without it is
 refused at that contract before the real reason is reached. And `urn:script:eval`, the hint in the
-owner's answer, refuses SPARQL. Both are current behavior, not the design
-([ledger #1261](http://localhost:1060/l/default/item/1261)).
+owner's answer, refuses SPARQL. Both are this pin's `ikigai-script` (0.3.0), and 0.3.3 fixes them
+([ledger #1261](http://localhost:1060/l/default/item/1261)): the generic contract no longer declares
+the Lisp grant (a published Lisp script's own door adds it), so `bot` is told what the owner is
+told, that it is a draft and publishing it is how to run it, and the hint names a door only for a
+language that door takes, so a SPARQL draft gets none. The ikigai Book's [A draft is nobody's
+script yet](../../code/sentence.html#a-draft-is-nobodys-script-yet) shows both answers.
 
 ## A person publishes
 

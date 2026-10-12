@@ -122,8 +122,10 @@ she holds no run grant at all. The scope the refusal names is worth a second loo
 `urn:cap:script:run:open-items` but `urn:cap:script:run:open-*`. A published query is its own
 endpoint, and the kernel checks its declared grant before the endpoint runs, from a description
 that cannot depend on who asks. So a name with a hyphen in it declares its top-level namespace as
-the gate (`open-items` is in the namespace `open`), and the exact grant is checked inside. Here
-that reads oddly, because nobody meant `open` as a namespace; [the last section](#a-namespace-grant-and-an-exclusion-that-wins-over-it)
+the gate (`open-items` is in the namespace `open`), and the exact grant is checked inside. The
+refusal is the kernel's own, so it can name only that family; the entry's own contract, what a
+`meta` of `urn:script:open-items:result` answers, says which exact grant runs it and why the floor
+is the family. Here that reads oddly, because nobody meant `open` as a namespace; [the last section](#a-namespace-grant-and-an-exclusion-that-wins-over-it)
 is where namespaces are meant.
 
 Carol holds the run grant, and the run is refused anyway: the query reads the items, and Carol
