@@ -50,9 +50,9 @@
 - [Solo on one machine](ways/solo.md)
 - [Remote workers](ways/workers.md)
 - [Review every commit](ways/review-every-commit.md)
-- [Hub and spoke]()
-- [Spec first]()
-- [Periodic unled audits]()
+- [Hub and spoke](ways/hub-and-spoke.md)
+- [Spec first](ways/spec-first.md)
+- [Periodic unled audits](ways/audits.md)
 
 # Embedding
 

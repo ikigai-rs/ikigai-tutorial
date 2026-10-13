@@ -300,4 +300,4 @@ before anyone notices.
 Choose it when there is more work than one machine's attention, when the work is well enough
 specified to be done from a brief, and when you want the machine that writes code to be unable to
 accept its own work. If the work is not yet specified that well, a coordinating session in front
-of the workers is the next chapter, Hub and spoke.
+of the workers is the next chapter, [Hub and spoke](hub-and-spoke.md).
