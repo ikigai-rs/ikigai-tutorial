@@ -256,3 +256,113 @@ two of you apart, and the evidence check is self-review.
 Choose it when one person is responsible for everything that merges and the agent works where
 that person can see it. Move to [remote workers](workers.md) when an agent should run unattended
 or on another machine, hold less than everything, and be unable to close its own work.
+
+## With the starter
+
+The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter) packages this process as a
+**profile**, `solo`: its `tools/new.py --process solo` generates a repository (a library-lending
+sample, with its specs) whose `AGENTS.md` holds the rules above and no others, and whose
+`.gonk/process.toml` records the process for `tools/gonk.py` to read back. The book checks the
+starter at one revision, held in one file (`books/gonk/starter.rev`) the way [the gonk it
+pins](../introduction.md#which-gonk) is. (`LC_ALL=C`, so the listing's order is the same on every
+machine.)
+
+<!-- transcript: run -->
+```console
+$ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
+$ git -C starter checkout --quiet {{#include ../../starter.rev}}
+$ cd starter && python3 tools/new.py ../library --process solo
+generated the library-lending sample (python, process solo) in …/library: 52 files
+next, in that directory:
+  git init, then commit everything it wrote (the one commit where every file is yours)
+  python3 scripts/test.py                      every test, as CI runs them
+  python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
+  python3 tools/gonk.py seed                   file the open changes' tasks as items
+  python3 tools/gonk.py next                   what to do first, and why
+
+AGENTS.md holds this process's rules; README.md walks through the sample.
+$ LC_ALL=C ls -A library
+.gitattributes
+.github
+.gitignore
+.gonk
+AGENTS.md
+CLAUDE.md
+README.md
+artifacts
+docs
+hooks
+justfile
+openspec
+scripts
+tests
+tools
+$ grep '^## ' library/AGENTS.md
+## The loop
+## 1. Claim the item before you write
+## 2. One agent per claimed item, one agent per working tree
+## 3. Reproduce before you fix
+## 4. Every change through a pull request with green CI
+## 5. Report with evidence; the dispatcher closes
+## 6. Never a bare `#N`
+## Specs, artifacts, queries and scripts
+## Optional: a hook for Claude Code
+$ cat library/.gonk/process.toml
+# How this repository's team works: the process profiles it was generated with, and what
+# each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
+# profiles/; `python3 tools/gonk.py init` and `status` report it and read nothing else to
+# decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
+version = 1
+process = ["solo"]
+hooks = ["claude:require-claim"]
+checks = []
+
+[profile.solo]
+summary = "one person and their agent: you are your own dispatcher, and close after checking your own evidence"
+roles = ["you: both the dispatcher and whoever does the work"]
+```
+
+`AGENTS.md`'s numbered sections are this chapter's guides, and `CLAUDE.md` is a link to it. The one
+hook every profile carries, `claude:require-claim`, is an optional Claude Code hook that refuses an
+edit while the working tree holds no claim; it is off until its settings are merged. `init` names
+the ledger, the socket and the holder this working tree claims under, then asks this page's gonk:
+
+<!-- transcript: run -->
+```console
+$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent
+gonk init: …/library
+  ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
+  ok       process   solo (.gonk/process.toml)
+  note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
+  note     role      you: both the dispatcher and whoever does the work
+  note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ledger    `default` (.gonk/gonk.toml)
+  ok       holder    `agent` (.gonk/local.toml, this working tree only)
+  ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
+  ok       gonk      socket …/.ikigai/gonk.sock answers
+  ok       items     `default` holds 1 item(s), 0 open
+  ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
+  ok       scripts   published 4: urn:script:default-open-items-for-artifact, urn:script:default-open-work-by-change, urn:script:default-requirements-with-open-work, urn:script:default-next-for-artifact
+  ok       nl        gonk offers `urn:nl:sparql`: drafting a query from a sentence (ikigai-nl)
+
+agents over MCP (configure the agent with this command):
+  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
+
+ready.
+$ cd library && python3 tools/gonk.py status
+process: solo
+no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
+```
+
+`init` also published the sample's four saved queries to gonk ([Scripts and
+sentences](../scripts/in-gonk.md)), as the owner may. `status` is the question the claim hook asks
+before every edit; here it says to claim first, which is step 2 above as `python3 tools/gonk.py
+claim <number>`.
+
+Profiles **combine**: `--process` takes a list, because they answer different questions (who
+dispatches, how the work is defined, how bugs are found), so `--process solo,spec` is this chapter
+with [spec first](spec-first.md)'s rules added. With no `--process` at all a repository gets
+`solo,workers,spec`. The one pair refused is [unled audits](audits.md) with [review every
+commit](review-every-commit.md), two answers to the same question.

@@ -20,6 +20,19 @@
 #         `-web` share the cli's version), so the client a page runs speaks the wire the pinned
 #         gonk serves. Installed `--locked` into `target/ikigai-cli/<version>/`.
 #
+#   the starter is ikigai-gonk-starter, pinned to ONE git revision in `books/gonk/starter.rev`
+#         (the same one-file shape as gonk.rev). Each "Ways of working" page ends by generating a
+#         repository with the starter's `tools/new.py --process <profile>`, and it gets the
+#         starter as a reader does: `git clone https://github.com/ikigai-rs/ikigai-gonk-starter`
+#         then `git checkout` of the pinned revision, which the page names with
+#         `{{#include ../../starter.rev}}` (the runner expands it as mdbook renders it). It is
+#         cloned ONCE here, into `target/gonk-starter/<rev>/`, and the pages' `git clone` of that
+#         URL is pointed at that local clone by git's own `url.<base>.insteadOf`, passed in the
+#         environment (`GIT_CONFIG_COUNT`, so no config file is written in any home): six pages
+#         make no network fetch, and every one checks out exactly the pinned commit. Without the
+#         redirect (the runner run by hand) the same page clones from GitHub and checks out the
+#         same commit, so the redirect changes where the bytes come from, never which bytes.
+#
 #   model-stub is this workspace's own `crates/model-stub`: a deterministic `urn:llm:` peer on a
 #         Unix socket, which "Scripts and sentences in gonk" and the "Ways of working" pages start
 #         and mount so a scratch gonk drafts, explains and reviews without a real model or the
@@ -101,10 +114,30 @@ stub_root="target/model-stub/bin"
 mkdir -p "$stub_root"
 cp target/debug/model-stub "$stub_root/"
 
+starter_rev="$(tr -d '[:space:]' < books/gonk/starter.rev)"
+case "$starter_rev" in
+    *[!0-9a-f]*|'') echo "books/gonk/starter.rev is not a git revision: '$starter_rev'" >&2; exit 2 ;;
+esac
+if [ "${#starter_rev}" -ne 40 ]; then
+    echo "books/gonk/starter.rev must be a full 40-character revision, not '$starter_rev'" >&2
+    exit 2
+fi
+starter_url="https://github.com/ikigai-rs/ikigai-gonk-starter"
+starter="target/gonk-starter/$starter_rev"
+if [ ! -d "$starter/.git" ]; then
+    echo "cloning ikigai-gonk-starter at $starter_rev into $starter (once per revision)"
+    rm -rf "$starter.partial"
+    git clone --quiet --no-checkout "$starter_url" "$starter.partial"
+    git -C "$starter.partial" checkout --quiet --detach "$starter_rev"
+    mv "$starter.partial" "$starter"
+fi
+
 status=0
 
-echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli) ──────────────────"
-cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
+echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli, starter $starter_rev) ──────────────────"
+GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0="url.$PWD/$starter.insteadOf" GIT_CONFIG_VALUE_0="$starter_url" \
+    cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
     --path "$stub_root" \
     || status=1
 

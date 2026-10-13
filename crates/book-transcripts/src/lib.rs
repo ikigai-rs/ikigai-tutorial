@@ -35,6 +35,10 @@
 //! joined by single spaces, so a reason wrapped to the page's width is kept whole. Every check
 //! that reads one, here and in the ikigai book's REPL replay, reads it with [`declared`].
 //!
+//! A command may carry `{{#include PATH}}` of a one-line file, which the runner expands as
+//! mdbook does when it renders the page ([`expand_includes`]): how a page names a pinned
+//! revision held in one file (`books/gonk/starter.rev`) in a command it runs.
+//!
 //! A `file` block is how a page gives its commands an input (a config file, a fixture) without
 //! a heredoc: each command is one `sh -c` line, so a multi-line file cannot be typed into one,
 //! and the reader sees the file's whole content where they would copy it from. Its NAME must be
@@ -408,6 +412,65 @@ pub fn matches(expected: &[String], actual: &[String]) -> bool {
     }
 }
 
+/// A command with its `{{#include PATH}}`s replaced the way mdbook replaces them when it
+/// renders the page, so the line a reader sees and the line the check runs are the same line.
+/// PATH is relative to the page's directory, `page_dir`, as it is for mdbook.
+///
+/// It exists for a PIN held in a one-line file (`books/gonk/starter.rev`): a command such as
+/// `git -C starter checkout --quiet {{#include ../../starter.rev}}` names the revision the
+/// book checks without a second copy of it on the page, so moving the pin stays a one-line
+/// change. Only that shape is taken: a whole file of ONE line, its trailing newline dropped (as
+/// mdbook prints it). A line range or an anchor (`{{#include f:2}}`, `{{#include f:name}}`),
+/// a file of several lines, an unclosed `{{#include` or a file that cannot be read is an
+/// error, never a command run with the include left in it.
+///
+/// ```
+/// use book_transcripts::expand_includes;
+///
+/// let dir = std::env::temp_dir().join(format!("bt-include-doc-{}", std::process::id()));
+/// std::fs::create_dir_all(dir.join("src/ways")).unwrap();
+/// std::fs::write(dir.join("starter.rev"), "38f539e\n").unwrap();
+/// let page = dir.join("src/ways");
+/// assert_eq!(
+///     expand_includes("git checkout {{#include ../../starter.rev}}", &page).unwrap(),
+///     "git checkout 38f539e"
+/// );
+/// assert_eq!(expand_includes("no include here", &page).unwrap(), "no include here");
+/// std::fs::remove_dir_all(&dir).unwrap();
+/// ```
+pub fn expand_includes(command: &str, page_dir: &Path) -> Result<String, String> {
+    const OPEN: &str = "{{#include ";
+    let mut out = String::new();
+    let mut rest = command;
+    while let Some(at) = rest.find(OPEN) {
+        out.push_str(&rest[..at]);
+        let after = &rest[at + OPEN.len()..];
+        let Some(close) = after.find("}}") else {
+            return Err(format!("an unclosed `{OPEN}` in `{command}`"));
+        };
+        let target = after[..close].trim();
+        if target.is_empty() || target.contains(':') {
+            return Err(format!(
+                "`{{{{#include {target}}}}}`: a command takes a whole one-line file only, \
+                 never a line range or an anchor"
+            ));
+        }
+        let path = page_dir.join(target);
+        let text = fs::read_to_string(&path)
+            .map_err(|e| format!("`{{{{#include {target}}}}}` ({}): {e}", path.display()))?;
+        let text = text.trim_end_matches(['\n', '\r']);
+        if text.contains('\n') {
+            return Err(format!(
+                "`{{{{#include {target}}}}}` is several lines; a command takes a one-line file"
+            ));
+        }
+        out.push_str(text);
+        rest = &after[close + 2..];
+    }
+    out.push_str(rest);
+    Ok(out)
+}
+
 /// Is this command forbidden to run on a machine that has a real gonk? Returns why.
 ///
 /// A real gonk listens on 1062 (HTTP, and QUIC on UDP) and its socket is `~/.ikigai/gonk.sock`.
@@ -698,5 +761,40 @@ gonk.port = 1070
         // gonk's default until 2026-10-12, and a port a live service may hold.
         assert!(refused("curl http://127.0.0.1:1060/iki/ledger/items").is_some());
         assert!(refused("ikigai --connect quic://server.local:1060 -c 'source x'").is_some());
+    }
+
+    #[test]
+    fn an_include_is_a_whole_one_line_file_or_an_error() {
+        let dir = std::env::temp_dir().join(format!("bt-include-{}", std::process::id()));
+        fs::create_dir_all(dir.join("src")).unwrap();
+        fs::write(dir.join("one.rev"), "abc123\n").unwrap();
+        fs::write(dir.join("two.txt"), "a\nb\n").unwrap();
+        let page = dir.join("src");
+        assert_eq!(
+            expand_includes("x {{#include ../one.rev}} y {{#include ../one.rev}}", &page).unwrap(),
+            "x abc123 y abc123",
+            "every include on the line, each replaced"
+        );
+        assert!(
+            expand_includes("{{#include ../two.txt}}", &page).is_err(),
+            "several lines"
+        );
+        assert!(
+            expand_includes("{{#include ../one.rev:1}}", &page).is_err(),
+            "a range"
+        );
+        assert!(
+            expand_includes("{{#include ../one.rev:pin}}", &page).is_err(),
+            "an anchor"
+        );
+        assert!(
+            expand_includes("{{#include ../one.rev", &page).is_err(),
+            "unclosed"
+        );
+        assert!(
+            expand_includes("{{#include ../none.rev}}", &page).is_err(),
+            "unreadable"
+        );
+        fs::remove_dir_all(&dir).unwrap();
     }
 }

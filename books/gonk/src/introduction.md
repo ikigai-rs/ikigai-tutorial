@@ -126,6 +126,18 @@ $ cargo install --locked ikigai-cli --version {{#include ../ikigai-cli.version}}
 from "another machine"; without it the command line refuses a `quic://` address, and everything
 before that chapter works either way.
 
+Each [Ways of working](ways/solo.md) chapter ends with the [gonk
+starter](https://github.com/ikigai-rs/ikigai-gonk-starter), a template repository whose
+`tools/new.py` generates a repository set up for that process. It is pinned the same way, to one
+git revision in one file (`books/gonk/starter.rev`), and those pages clone it and check that
+revision out themselves. It needs Python 3.11 or later and nothing else:
+
+<!-- transcript: manual — the Ways of working pages run these two commands themselves, reading the same file -->
+```console
+$ git clone https://github.com/ikigai-rs/ikigai-gonk-starter
+$ git -C ikigai-gonk-starter checkout {{#include ../starter.rev}}
+```
+
 ## How to read this book
 
 The published copy is at <https://ikigai-rs.github.io/ikigai-tutorial/gonk/>, rebuilt from

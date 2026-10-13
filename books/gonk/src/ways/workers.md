@@ -184,7 +184,8 @@ not handed to anyone else until a deliberate takeover (`takeover=true from=worke
 
 The starter repository, [`ikigai-gonk-starter`](https://github.com/ikigai-rs/ikigai-gonk-starter),
 packages this loop as `tools/worker.py`, with the scripts that set up a worker machine's accounts.
-This page uses none of it, so that every step stays visible.
+The loop here uses none of it, so that every step stays visible; [With the
+starter](#with-the-starter), at the end, shows what it generates.
 
 ### 4. Hand back with evidence
 
@@ -301,3 +302,114 @@ Choose it when there is more work than one machine's attention, when the work is
 specified to be done from a brief, and when you want the machine that writes code to be unable to
 accept its own work. If the work is not yet specified that well, a coordinating session in front
 of the workers is the next chapter, [Hub and spoke](hub-and-spoke.md).
+
+## With the starter
+
+The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `workers` profile is this
+chapter packaged: `tools/new.py --process workers` adds a "Worker machines" section to the
+repository's `AGENTS.md`, carries `tools/worker.py` (the claim, work, report loop above, run
+unattended) with its configuration's template and its service units, and the `just worker`
+recipes that run it. The book checks the starter at the revision in `books/gonk/starter.rev`
+([Solo](solo.md#with-the-starter) says more):
+
+<!-- transcript: run -->
+```console
+$ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
+$ git -C starter checkout --quiet {{#include ../../starter.rev}}
+$ cd starter && python3 tools/new.py ../library --process workers
+generated the library-lending sample (python, process workers) in …/library: 56 files
+next, in that directory:
+  git init, then commit everything it wrote (the one commit where every file is yours)
+  python3 scripts/test.py                      every test, as CI runs them
+  python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
+  python3 tools/gonk.py seed                   file the open changes' tasks as items
+  python3 tools/gonk.py next                   what to do first, and why
+
+AGENTS.md holds this process's rules; README.md walks through the sample.
+$ grep '^## ' library/AGENTS.md
+## The loop
+## 1. Claim the item before you write
+## 2. One agent per claimed item, one agent per working tree
+## 3. Reproduce before you fix
+## 4. Every change through a pull request with green CI
+## 5. Report with evidence; the dispatcher closes
+## 6. Never a bare `#N`
+## Specs, artifacts, queries and scripts
+## Worker machines
+## Optional: a hook for Claude Code
+$ ls library/tools library/worker
+library/tools:
+gonk.py
+worker.py
+
+library/worker:
+units
+worker.sample.toml
+$ cat library/.gonk/process.toml
+# How this repository's team works: the process profiles it was generated with, and what
+# each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
+# profiles/; `python3 tools/gonk.py init` and `status` report it and read nothing else to
+# decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
+version = 1
+process = ["workers"]
+hooks = ["claude:require-claim"]
+checks = ["worker-config"]
+
+[profile.workers]
+summary = "a dispatcher and unattended worker machines: workers claim and report, and never close or merge"
+roles = ["dispatcher: marks items for workers, checks each hand-back, merges and closes, or rejects", "worker: an unattended machine running tools/worker.py; claims, works, reports"]
+```
+
+On a worker machine, `init` takes the QUIC door and the bundle `client add` wrote, here
+`worker-1`'s from step 0, and asks gonk as that worker:
+
+<!-- transcript: run -->
+```console
+$ cd library && git init -q && python3 tools/gonk.py init --ledger default --quic quic://127.0.0.1:1070 --cert-dir ../worker-1/gonk --holder worker-1
+gonk init: …/library
+  ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
+  ok       process   workers (.gonk/process.toml)
+  note     workers   a dispatcher and unattended worker machines: workers claim and report, and never close or merge
+  note     role      dispatcher: marks items for workers, checks each hand-back, merges and closes, or rejects
+  note     role      worker: an unattended machine running tools/worker.py; claims, works, reports
+  note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
+  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ledger    `default` (.gonk/gonk.toml)
+  ok       holder    `worker-1` (.gonk/local.toml, this working tree only)
+  ok       identity  urn:iki:host:gonk:client:… (from …/worker-1/gonk/client.crt)
+  ok       alias     older records name it urn:iki:gonk:client:…: gonk reads that spelling as this machine too, and never mints it again
+  ok       gonk      quic quic://127.0.0.1:1070 (certificates in …/worker-1/gonk) answers
+  ok       items     `default` holds 2 item(s), 1 open
+  ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
+  failed   scripts   urn:script:default-open-items-for-artifact was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-open-items-for-artifact`; any grant under `urn:cap:script:write:` satisfies it)
+  failed   scripts   urn:script:default-open-work-by-change was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-open-work-by-change`; any grant under `urn:cap:script:write:` satisfies it)
+  failed   scripts   urn:script:default-requirements-with-open-work was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-requirements-with-open-work`; any grant under `urn:cap:script:write:` satisfies it)
+  failed   scripts   urn:script:default-next-for-artifact was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-next-for-artifact`; any grant under `urn:cap:script:write:` satisfies it)
+  unknown  nl        could not ask gonk about `urn:nl:sparql`
+
+this machine's QUIC identity, for the gonk operator to enroll (once):
+…
+agents over MCP (configure the agent with this command):
+  ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir …/worker-1/gonk
+
+ready.
+$ cd library && python3 tools/gonk.py status
+process: workers
+no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
+```
+
+The identity row is the name gonk's access log gives this machine, and the lines elided after it
+are the `client add` and `grants.json` an operator would use to enroll it, which step 0 already
+did. The `failed` rows are the worker grant at work: `init` offers to publish the sample's saved
+queries, and a worker may not write scripts (the dispatcher's own `init`, as the owner over the
+socket, publishes them, as [Solo](solo.md#with-the-starter) shows). The `unknown` row is this
+page's gonk mounting no model: it binds no `urn:nl:sparql` (its banner says so), and the starter
+reads that refusal as a gonk it could not ask. The `worker` row is what a worker machine still
+needs, its `.gonk/worker.toml`; setting that machine up (its accounts, the boundary its agent runs
+inside) is the starter's `worker/README.md`.
+
+Profiles combine (`--process workers,spec` adds [spec first](spec-first.md)'s rules, and no
+`--process` at all means `solo,workers,spec`); only [unled audits](audits.md) and [review every
+commit](review-every-commit.md) refuse each other.

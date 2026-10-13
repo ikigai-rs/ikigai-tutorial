@@ -35,8 +35,8 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use book_transcripts::{
-    home_declared, matches, normalize, pages, refused, safe_file_name, scan_page, stray_writes,
-    Block, Kind, ANY,
+    expand_includes, home_declared, matches, normalize, pages, refused, safe_file_name, scan_page,
+    stray_writes, Block, Command as Step, Kind, ANY,
 };
 
 /// How long one `run` command may take before it is a failure.
@@ -203,19 +203,40 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
             ));
             continue;
         }
-        if let Some(why) = block.commands.iter().find_map(|c| refused(&c.text)) {
+        // A command's `{{#include …}}`s, expanded as mdbook renders them, so what runs is
+        // what the reader sees; a page directory is the book's `src/` joined with the page.
+        let dir = options.book.join("src").join(&block.file);
+        let dir = dir.parent().unwrap_or(&dir);
+        let expanded: Result<Vec<Step>, String> = block
+            .commands
+            .iter()
+            .map(|c| {
+                Ok(Step {
+                    text: expand_includes(&c.text, dir)?,
+                    expected: c.expected.clone(),
+                })
+            })
+            .collect();
+        let commands = match expanded {
+            Ok(commands) => commands,
+            Err(e) => {
+                failures.push(format!("{at}: {e}"));
+                continue;
+            }
+        };
+        if let Some(why) = commands.iter().find_map(|c| refused(&c.text)) {
             failures.push(format!("{at}: refused, not run — {why}"));
             continue;
         }
         if block.kind == Kind::Serve {
-            if block.commands.len() != 1 {
+            if commands.len() != 1 {
                 failures.push(format!(
                     "{at}: a serve block starts ONE command; this one has {}",
-                    block.commands.len()
+                    commands.len()
                 ));
                 continue;
             }
-            let command = &block.commands[0];
+            let command = &commands[0];
             ran += 1;
             match Server::start(&scratch, &options.paths, command) {
                 Ok(server) => {
@@ -227,7 +248,7 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
             continue;
         }
         let mut block_ok = true;
-        for command in &block.commands {
+        for command in &commands {
             ran += 1;
             let actual = scratch.run(&options.paths, &command.text);
             let expected = normalize(&command.expected);
@@ -246,8 +267,8 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
         println!(
             "{} {at} ({} command{})",
             if block_ok { "ok  " } else { "MISS" },
-            block.commands.len(),
-            if block.commands.len() == 1 { "" } else { "s" }
+            commands.len(),
+            if commands.len() == 1 { "" } else { "s" }
         );
     }
     for server in servers {
@@ -415,11 +436,7 @@ struct Server {
 impl Server {
     /// Start it, and wait until what it has printed matches the page's lines (anything after
     /// them is allowed: a server goes on printing).
-    fn start(
-        scratch: &Scratch,
-        paths: &[PathBuf],
-        command: &book_transcripts::Command,
-    ) -> Result<Server, String> {
+    fn start(scratch: &Scratch, paths: &[PathBuf], command: &Step) -> Result<Server, String> {
         // `exec`, so the process this holds IS the server: killing a shell that forked it
         // would leave the server running, holding its port, after the page is done. And its
         // own process GROUP, which is what `stop` signals: a serve line that is a pipeline

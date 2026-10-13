@@ -242,3 +242,126 @@ and the closes are a host's or a script's to run.
 Choose it when behavior matters more than speed: a public interface, a protocol, something several
 people or agents will build against. It pairs well with [Hub and spoke](hub-and-spoke.md), where a
 change's tasks are the arcs. For a one-line fix, file an item and fix it.
+
+## With the starter
+
+The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `spec` profile adds a "Spec
+first" section to `AGENTS.md` and nothing else, because what it needs is already in every
+repository the starter generates: an `openspec/` tree (the library-lending sample's, with two
+changes in flight) and `tools/gonk.py seed`, the seeder step 2 wrote out by hand. Spec first says
+how work is *defined*, not who does it, so it has no roles of its own and is meant to be combined:
+here with [Solo](solo.md), as `--process solo,spec`. The book checks the starter at the revision
+in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter) says more):
+
+<!-- transcript: run -->
+```console
+$ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
+$ git -C starter checkout --quiet {{#include ../../starter.rev}}
+$ cd starter && python3 tools/new.py ../library --process solo,spec
+generated the library-lending sample (python, process solo, spec) in …/library: 52 files
+next, in that directory:
+  git init, then commit everything it wrote (the one commit where every file is yours)
+  python3 scripts/test.py                      every test, as CI runs them
+  python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
+  python3 tools/gonk.py seed                   file the open changes' tasks as items
+  python3 tools/gonk.py next                   what to do first, and why
+
+AGENTS.md holds this process's rules; README.md walks through the sample.
+$ grep '^## ' library/AGENTS.md
+## The loop
+## 1. Claim the item before you write
+## 2. One agent per claimed item, one agent per working tree
+## 3. Reproduce before you fix
+## 4. Every change through a pull request with green CI
+## 5. Report with evidence; the dispatcher closes
+## 6. Never a bare `#N`
+## Specs, artifacts, queries and scripts
+## Spec first
+## Optional: a hook for Claude Code
+$ cat library/.gonk/process.toml
+# How this repository's team works: the process profiles it was generated with, and what
+# each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
+# profiles/; `python3 tools/gonk.py init` and `status` report it and read nothing else to
+# decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
+version = 1
+process = ["solo", "spec"]
+hooks = ["claude:require-claim"]
+checks = []
+
+[profile.solo]
+summary = "one person and their agent: you are your own dispatcher, and close after checking your own evidence"
+roles = ["you: both the dispatcher and whoever does the work"]
+
+[profile.spec]
+summary = "spec first: every change in behavior starts as an openspec change, seed files its tasks, next orders them"
+roles = []
+```
+
+`seed --dry-run` reads the changes in flight and says what it would send, asking gonk nothing: one
+item per open task, keyed by the task's IRI, and `blocks` links in `tasks.md` order. Run without
+`--dry-run`, each item is also `about` the requirement its task cites and labeled with its change,
+and a second run files nothing (the key answers `existing`).
+
+<!-- transcript: run -->
+```console
+$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent
+gonk init: …/library
+  ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
+  ok       process   solo, spec (.gonk/process.toml)
+  note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
+  note     role      you: both the dispatcher and whoever does the work
+  note     spec      spec first: every change in behavior starts as an openspec change, seed files its tasks, next orders them
+  note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ledger    `default` (.gonk/gonk.toml)
+  ok       holder    `agent` (.gonk/local.toml, this working tree only)
+  ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
+  ok       gonk      socket …/.ikigai/gonk.sock answers
+  ok       items     `default` holds 3 item(s), 0 open
+  ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
+  ok       scripts   published 4: urn:script:default-open-items-for-artifact, urn:script:default-open-work-by-change, urn:script:default-requirements-with-open-work, urn:script:default-next-for-artifact
+  unknown  nl        could not ask gonk about `urn:nl:sparql`
+
+agents over MCP (configure the agent with this command):
+  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
+
+ready.
+$ cd library && python3 tools/gonk.py seed --dry-run
+would file  add-holds 1.1: Accept a hold on a title whose copies are all out
+            key=urn:openspec:change:add-holds:task:1.1
+would file  add-holds 1.2: Keep a returned copy for the first holder
+            key=urn:openspec:change:add-holds:task:1.2
+would file  add-holds 1.3: Refuse a renewal while a hold waits
+            key=urn:openspec:change:add-holds:task:1.3
+would file  add-holds 1.4: Add a vector to openspec/vectors.json for every new scenario
+            key=urn:openspec:change:add-holds:task:1.4
+would file  add-holds 2.1: Add `library.py hold MEMBER ISBN`
+            key=urn:openspec:change:add-holds:task:2.1
+would file  add-holds 2.2: Show who a kept copy waits for in `library.py copy`
+            key=urn:openspec:change:add-holds:task:2.2
+would file  cap-late-fees 1.1: Stop a late return's fee at 1000 cents
+            key=urn:openspec:change:cap-late-fees:task:1.1
+would file  cap-late-fees 1.2: Add a vector for the capped return to openspec/vectors.json
+            key=urn:openspec:change:cap-late-fees:task:1.2
+would link  add-holds 1.1 blocks 1.2
+would link  add-holds 1.2 blocks 1.3
+would link  add-holds 1.3 blocks 1.4
+would link  add-holds 1.4 blocks 2.1
+would link  add-holds 2.1 blocks 2.2
+would link  cap-late-fees 1.1 blocks 1.2
+
+seed --dry-run: 8 open task(s) would be filed, in 6 order link(s); 0 checked off
+$ cd library && python3 tools/gonk.py status
+process: solo, spec
+no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
+```
+
+The `unknown` row is this page's gonk mounting no model, so it binds no `urn:nl:sparql` (its
+banner says so); the starter reads that refusal as a gonk it could not ask. The two changes in
+flight seed two chains, and `next` offers the head of each: two tasks that can go in parallel,
+and the rest of each chain one at a time behind its head.
+
+Any profile that says who does the work combines with this one (`--process workers,spec`,
+`hub,spec`); only [unled audits](audits.md) and [review every commit](review-every-commit.md)
+refuse each other.

@@ -312,3 +312,100 @@ Choose it when a goal spans repositories, when the arcs can run in parallel once
 CI in each repository is trusted enough to be the gate. For one repository and one agent,
 [Solo on one machine](solo.md) is cheaper; for work that is already items, a dispatcher and
 [remote workers](workers.md) is enough.
+
+## With the starter
+
+The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `hub` profile packages the
+hub's two acts: `tools/hub.py arc` files an arc whose body is its brief (shaped by
+`.gonk/templates/brief.md`) and links it `parent` and `blocks`, as step 1 did by hand, and
+`tools/hub.py dispatch` gives an arc its own `git worktree` and holder, `arc-<item>`, as step 3
+describes; `just arc` and `just dispatch` run them. `AGENTS.md` gains a "Hub and spoke" section.
+The book checks the starter at the revision in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter)
+says more):
+
+<!-- transcript: run -->
+```console
+$ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
+$ git -C starter checkout --quiet {{#include ../../starter.rev}}
+$ cd starter && python3 tools/new.py ../library --process hub
+generated the library-lending sample (python, process hub) in …/library: 54 files
+next, in that directory:
+  git init, then commit everything it wrote (the one commit where every file is yours)
+  python3 scripts/test.py                      every test, as CI runs them
+  python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
+  python3 tools/gonk.py seed                   file the open changes' tasks as items
+  python3 tools/gonk.py next                   what to do first, and why
+
+AGENTS.md holds this process's rules; README.md walks through the sample.
+$ grep '^## ' library/AGENTS.md
+## The loop
+## 1. Claim the item before you write
+## 2. One agent per claimed item, one agent per working tree
+## 3. Reproduce before you fix
+## 4. Every change through a pull request with green CI
+## 5. Report with evidence; the dispatcher closes
+## 6. Never a bare `#N`
+## Specs, artifacts, queries and scripts
+## Hub and spoke
+## Optional: a hook for Claude Code
+$ ls library/tools library/.gonk/templates
+library/.gonk/templates:
+brief.md
+
+library/tools:
+gonk.py
+hub.py
+$ cat library/.gonk/process.toml
+# How this repository's team works: the process profiles it was generated with, and what
+# each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
+# profiles/; `python3 tools/gonk.py init` and `status` report it and read nothing else to
+# decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
+version = 1
+process = ["hub"]
+hooks = ["claude:require-claim"]
+checks = []
+
+[profile.hub]
+summary = "a hub splits work into single-repository arcs with written briefs, each dispatched to its own working tree and holder"
+roles = ["hub: writes briefs as items, links them, dispatches each arc, closes on the evidence, asks a person before merging its own work", "arc agent: works one arc from its brief in its own working tree, merges on green, reports"]
+```
+
+<!-- transcript: run -->
+```console
+$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder hub
+gonk init: …/library
+  ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
+  ok       process   hub (.gonk/process.toml)
+  note     hub       a hub splits work into single-repository arcs with written briefs, each dispatched to its own working tree and holder
+  note     role      hub: writes briefs as items, links them, dispatches each arc, closes on the evidence, asks a person before merging its own work
+  note     role      arc agent: works one arc from its brief in its own working tree, merges on green, reports
+  note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ledger    `default` (.gonk/gonk.toml)
+  ok       holder    `hub` (.gonk/local.toml, this working tree only)
+  ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
+  ok       gonk      socket …/.ikigai/gonk.sock answers
+  ok       items     `default` holds 4 item(s), 0 open
+  ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
+  ok       scripts   published 4: urn:script:default-open-items-for-artifact, urn:script:default-open-work-by-change, urn:script:default-requirements-with-open-work, urn:script:default-next-for-artifact
+  unknown  nl        could not ask gonk about `urn:nl:sparql`
+
+agents over MCP (configure the agent with this command):
+  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
+
+ready.
+$ cd library && python3 tools/gonk.py status
+process: hub
+no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
+```
+
+The `unknown` row is this page's gonk mounting no model, so it binds no `urn:nl:sparql` (its
+banner says so); the starter reads that refusal as a gonk it could not ask. The profile adds no
+sensor the chapter lacks: the fence is still the claim, and the arc agent's merge on green and the
+hub's question before merging its own work (step 6) are rules in the generated `AGENTS.md`, held
+by the forge and by whoever reads them.
+
+Profiles combine: a hub usually works over [remote workers](workers.md) or [spec-first](spec-first.md)
+tasks, so `--process hub,workers,spec` is a list, not a new profile. Only [unled audits](audits.md)
+and [review every commit](review-every-commit.md) refuse each other.

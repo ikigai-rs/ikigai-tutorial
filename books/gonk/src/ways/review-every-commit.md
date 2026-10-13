@@ -328,3 +328,116 @@ Turning it off is one line: remove `gonk.review.arm = true`. The hook keeps drop
 nothing drains them; a person can still run one by hand over the socket (the `review` line of an
 unarmed banner prints how), and [One-off review](../review/one-off.md) is always there for a file
 someone already suspects.
+
+## With the starter
+
+The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `review-every-commit`
+profile packages step 2: `tools/new.py --process review-every-commit` adds a "Review on every
+commit" section to `AGENTS.md` and a committed `hooks/git/post-commit`, whose
+`review-on-commit.py` runs the same `ikigai-gonk review request <root> <path>` for each file a
+commit touched, detached, so a commit never waits and never fails because of it. Its settings (the
+root's name, gonk's config file, paths never queued) are a `[review]` table in
+`.gonk/process.toml`. The book checks the starter at the revision in `books/gonk/starter.rev`
+([Solo](solo.md#with-the-starter) says more):
+
+<!-- transcript: run -->
+```console
+$ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
+$ git -C starter checkout --quiet {{#include ../../starter.rev}}
+$ cd starter && python3 tools/new.py ../library --process review-every-commit
+generated the library-lending sample (python, process review-every-commit) in …/library: 54 files
+next, in that directory:
+  git init, then commit everything it wrote (the one commit where every file is yours)
+  python3 scripts/test.py                      every test, as CI runs them
+  python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
+  git config core.hooksPath hooks/git     the post-commit review hook
+  python3 tools/gonk.py seed                   file the open changes' tasks as items
+  python3 tools/gonk.py next                   what to do first, and why
+
+AGENTS.md holds this process's rules; README.md walks through the sample.
+$ grep '^## ' library/AGENTS.md
+## The loop
+## 1. Claim the item before you write
+## 2. One agent per claimed item, one agent per working tree
+## 3. Reproduce before you fix
+## 4. Every change through a pull request with green CI
+## 5. Report with evidence; the dispatcher closes
+## 6. Never a bare `#N`
+## Specs, artifacts, queries and scripts
+## Review on every commit
+## Optional: a hook for Claude Code
+$ ls library/hooks/git
+post-commit
+review-on-commit.py
+$ cat library/.gonk/process.toml
+# How this repository's team works: the process profiles it was generated with, and what
+# each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
+# profiles/; `python3 tools/gonk.py init` and `status` report it and read nothing else to
+# decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
+version = 1
+process = ["review-every-commit"]
+hooks = ["claude:require-claim", "git:post-commit"]
+checks = ["review"]
+
+[profile.review-every-commit]
+summary = "a read-only reviewer on every commit: a post-commit hook asks gonk to review the touched files, and a person triages the findings"
+roles = ["reviewer: gonk's review pass, read-only; it cannot publish a finding", "triager: a person who decides each finding and files the ones to act on"]
+
+# The review-every-commit profile: what hooks/git/post-commit asks gonk for. Committed, since
+# every clone commits to the same repository on the same gonk.
+[review]
+# The name gonk serves this repository under, its `gonk.browse.root = "<name>=<path>"` line.
+# Unset, it is this working tree's directory name.
+# root = "my-repo"
+# gonk's config.toml, when it is not in gonk's default config home: `ikigai-gonk review
+# request` reads the queue's location from it.
+# config = "~/.config/ikigai/config.toml"
+# Paths never queued: machine-written files a review could only restate. Shell-style
+# patterns matched against the whole path as git spells it, where `*` also matches `/`.
+skip = ["*.lock", "package-lock.json", "*/package-lock.json"]
+```
+
+The hook is installed by pointing git at `hooks/git` (`just hooks` does the same), and `init`, the
+profile's `review` check, then asks this page's gonk whether it can review this repository:
+
+<!-- transcript: run -->
+```console
+$ cd library && git init -q && git config core.hooksPath hooks/git && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder triager
+gonk init: …/library
+  ok       layout               openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     openspec             8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
+  ok       process              review-every-commit (.gonk/process.toml)
+  note     review-every-commit  a read-only reviewer on every commit: a post-commit hook asks gonk to review the touched files, and a person triages the findings
+  note     role                 reviewer: gonk's review pass, read-only; it cannot publish a finding
+  note     role                 triager: a person who decides each finding and files the ones to act on
+  note     hook                 the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  ok       hook                 post-commit asks gonk to review each commit (core.hooksPath)
+  ok       ikigai               ikigai 0.1.56 at …/ikigai
+  ok       ledger               `default` (.gonk/gonk.toml)
+  ok       holder               `triager` (.gonk/local.toml, this working tree only)
+  ok       identity             the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
+  ok       gonk                 socket …/.ikigai/gonk.sock answers
+  ok       items                `default` holds 1 item(s), 1 open
+  ok       scripts              gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
+  ok       scripts              published 4: urn:script:default-open-items-for-artifact, urn:script:default-open-work-by-change, urn:script:default-requirements-with-open-work, urn:script:default-next-for-artifact
+  ok       nl                   gonk offers `urn:nl:sparql`: drafting a query from a sentence (ikigai-nl)
+  missing  review               gonk serves no browse root named `library`: its operator adds `gonk.browse.root = "library=<path to this repository on gonk's machine>"`, or name gonk's root for it in .gonk/process.toml's `[review] root`
+
+agents over MCP (configure the agent with this command):
+  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
+
+1 thing(s) missing.
+$ cd library && python3 tools/gonk.py status
+process: review-every-commit
+no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
+```
+
+The one thing missing is true: this page's gonk serves `demo`, not the repository just generated.
+With its root added to gonk's `config.toml` (step 2's `printf`) and gonk restarted, `init` goes on
+to ask whether gonk binds a review pass (a model is mounted) and whether its queue is armed, the
+two things step 3's banner shows. A tree that reaches gonk over QUIC is told instead that its
+commits queue nothing: the queue is a directory on gonk's machine, which no network door reaches.
+
+Profiles combine (`--process solo,review-every-commit` is [Solo](solo.md)'s roles with this
+review), with one exception: this profile and [unled audits](audits.md) answer the same question,
+how bugs are found, and `tools/new.py` refuses the pair.

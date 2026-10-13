@@ -263,3 +263,123 @@ Choose it on a rotation for every repository that matters, and out of turn for o
 recent change or a security surface. Choose [Review every commit](review-every-commit.md) instead
 or as well where its arithmetic is different (a small team, a cheap local model, a codebase new to
 its readers).
+
+## With the starter
+
+The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `audits` profile packages
+step 1's brief: `tools/audit.py` (and `just audit`) files an unled audit of the files it is given
+as one item, its body `.gonk/templates/audit.md` with the repository, the budget and the file list
+filled in, and refuses a file that does not exist. `AGENTS.md` gains a "Periodic audits" section.
+It replaces review on every commit rather than adding to it, so asking for both is refused, with
+the reason. The book checks the starter at the revision in `books/gonk/starter.rev`
+([Solo](solo.md#with-the-starter) says more):
+
+<!-- transcript: run -->
+```console
+$ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
+$ git -C starter checkout --quiet {{#include ../../starter.rev}}
+$ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
+new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
+$ cd starter && python3 tools/new.py ../library --process audits
+generated the library-lending sample (python, process audits) in …/library: 54 files
+next, in that directory:
+  git init, then commit everything it wrote (the one commit where every file is yours)
+  python3 scripts/test.py                      every test, as CI runs them
+  python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
+  python3 tools/gonk.py seed                   file the open changes' tasks as items
+  python3 tools/gonk.py next                   what to do first, and why
+
+AGENTS.md holds this process's rules; README.md walks through the sample.
+$ grep '^## ' library/AGENTS.md
+## The loop
+## 1. Claim the item before you write
+## 2. One agent per claimed item, one agent per working tree
+## 3. Reproduce before you fix
+## 4. Every change through a pull request with green CI
+## 5. Report with evidence; the dispatcher closes
+## 6. Never a bare `#N`
+## Specs, artifacts, queries and scripts
+## Periodic audits
+## Optional: a hook for Claude Code
+$ ls library/tools library/.gonk/templates
+library/.gonk/templates:
+audit.md
+
+library/tools:
+audit.py
+gonk.py
+$ cat library/.gonk/process.toml
+# How this repository's team works: the process profiles it was generated with, and what
+# each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
+# profiles/; `python3 tools/gonk.py init` and `status` report it and read nothing else to
+# decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
+version = 1
+process = ["audits"]
+hooks = ["claude:require-claim"]
+checks = []
+
+[profile.audits]
+summary = "periodic unled audits instead of per-commit review: one repository, a file list, a budget, a reproduction per bug, one item per finding"
+roles = ["auditor: claims an audit item, reads only what it lists, files one item per reproduced bug"]
+```
+
+<!-- transcript: run -->
+```console
+$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder coordinator
+gonk init: …/library
+  ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
+  ok       process   audits (.gonk/process.toml)
+  note     audits    periodic unled audits instead of per-commit review: one repository, a file list, a budget, a reproduction per bug, one item per finding
+  note     role      auditor: claims an audit item, reads only what it lists, files one item per reproduced bug
+  note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ledger    `default` (.gonk/gonk.toml)
+  ok       holder    `coordinator` (.gonk/local.toml, this working tree only)
+  ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
+  ok       gonk      socket …/.ikigai/gonk.sock answers
+  ok       items     `default` holds 3 item(s), 2 open
+  ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
+  ok       scripts   published 4: urn:script:default-open-items-for-artifact, urn:script:default-open-work-by-change, urn:script:default-requirements-with-open-work, urn:script:default-next-for-artifact
+  unknown  nl        could not ask gonk about `urn:nl:sparql`
+
+agents over MCP (configure the agent with this command):
+  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
+
+ready.
+$ cd library && python3 tools/audit.py artifacts/service/lending/domain.py artifacts/cli/library.py --dry-run
+Audit library: 2 file(s), 60 tool calls
+
+Repository: `library`. Budget: 60 tool calls. Files, and nothing else:
+
+- `artifacts/service/lending/domain.py`
+- `artifacts/cli/library.py`
+
+An **unled audit**: read the files above and find the bugs in them. No earlier findings, no
+hints and no suspicions come with it, on purpose: a lead narrows what gets looked at to what
+someone already suspected.
+
+- **A reproduction for every bug**: a failing test, or a command and its output. A suspicion
+  without one is not reported as a bug.
+- **One item per finding**: `python3 tools/gonk.py file "<title>" --labels audit-finding
+  --body "<the reproduction, the file and the line>"`, so each is claimed, fixed and closed on
+  its own.
+- **Stop at the budget.** Say where you stopped and what you did not read.
+- **Report** with `--note` listing the items you filed; close `--reason audit-no-change` when
+  you found nothing.
+$ cd library && python3 tools/gonk.py status
+process: audits
+no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
+```
+
+`--dry-run` prints the item and files nothing; without it the audit is an item labeled `audit`,
+and a second audit of the same files is a second item, on purpose: an audit is periodic. The
+template's rules are this chapter's in the starter's own commands: `gonk.py file` for each
+finding (step 3), then the audit's `report` naming the items filed, or a close with
+`audit-no-change` when nothing was found. The `unknown` row is this
+page's gonk mounting no model, so it binds no `urn:nl:sparql` (its banner says so); the starter
+reads that refusal as a gonk it could not ask.
+
+Every other pair of profiles combines: `--process solo,audits` is one person auditing their own
+repository on a schedule, and `--process solo,spec` is [Solo](solo.md) with [spec
+first](spec-first.md)'s rules.

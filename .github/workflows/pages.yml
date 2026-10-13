@@ -203,6 +203,9 @@ jobs:
   # it for every exact name in `books/ikigai/cli-vocabulary.txt` (ledger #1031). Every PR runs
   # both, whatever it touches: a cli the pin did not move can still disagree with a page
   # someone edited.
+  # The "Ways of working" pages also clone the gonk starter at `books/gonk/starter.rev`; the
+  # script clones it once into `target/gonk-starter/<rev>/` and points the pages' clones there.
+  # Not cached: a few megabytes, seconds to fetch.
   # A job of its own because building gonk compiles RocksDB; each build is cached by its
   # pin, so it is paid once per pin. The deploy needs it like it needs `books`.
   transcripts:
