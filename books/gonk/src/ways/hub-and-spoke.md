@@ -115,8 +115,6 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:cla
 [uncacheable]
 ```
 
-(The item numbers are bare: `#` starts a comment in the command grammar.)
-
 ### 2. `next` orders the arcs
 
 <!-- transcript: run -->
