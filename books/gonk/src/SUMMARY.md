@@ -45,6 +45,15 @@
 - [Your first saved query](scripts/first.md)
 - [Scripts and sentences in gonk](scripts/in-gonk.md)
 
+# Ways of working
+
+- [Solo on one machine](ways/solo.md)
+- [Remote workers](ways/workers.md)
+- [Review every commit](ways/review-every-commit.md)
+- [Hub and spoke]()
+- [Spec first]()
+- [Periodic unled audits]()
+
 # Embedding
 
 - [The ledger, the store and browse in your own kernel](embedding/own-kernel.md)

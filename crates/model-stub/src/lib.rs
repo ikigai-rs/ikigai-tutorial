@@ -14,6 +14,14 @@
 //! Every ask is counted and logged on standard output, so a page can show that a refused draft
 //! never reached the model. The shape is gonk's own test stub's (`tests/nl_1138.rs`) and the
 //! ikigai Book's (`crates/sentence-draft/src/stub.rs`).
+//!
+//! It also answers what a browse root sends a model ("Ways of working", ledger #1435), so a scratch
+//! gonk can explain, review and judge through the same mount: `urn:llm:coder:ask` (gonk's default
+//! provider for files, reviews and the judge) is bound to the same endpoint, `urn:llm:coder:model`
+//! names the stub, and an ask is told apart by its SYSTEM prompt, as `crates/browse-host`'s
+//! in-process stub tells them apart: a review gets [`REVIEW`], a judge's check gets [`JUDGE`], an
+//! explanation gets [`EXPLANATION`], and anything else (drafting sends no system prompt this stub
+//! recognizes) gets a SPARQL draft as before.
 
 use std::io::Write;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -85,6 +93,66 @@ SELECT ?number ?title WHERE {
   GRAPH <urn:iki:ledger:graph:default> { ?item ledger:number ?number ; dcterms:title ?title }
 } ORDER BY ?number";
 
+/// The stub's explanation, whatever it is asked to explain (browse-host's, word for word).
+pub const EXPLANATION: &str = "Defines `initials`, which joins the first letter of each \
+space-separated word of a name into one string.";
+
+/// The stub's review of `src/lib.rs` (browse-host's `demo` file), in the grammar browse parses:
+/// three lines per finding. Each QUOTE is a line of that file, so both findings anchor.
+pub const REVIEW: &str = "\
+QUOTE: name.split(' ').map(|word| &word[..1]).collect()
+SEVERITY: major
+NOTE: Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty name, crashes the caller.
+QUOTE: pub fn initials(name: &str) -> String {
+SEVERITY: minor
+NOTE: Returning a String allocates on every call; return a &str instead.
+";
+
+/// The stub judge's answer to any claim: browse's four questions and a verdict, in the format
+/// its judge prompt asks for. The answers are the ones that make browse's rule say `confirmed`.
+pub const JUDGE: &str = "\
+CODE: yes - the code shown slices the first byte of every word, empty or not.
+DISCLOSED: no - no comment at the site says an empty word is excluded.
+OCCURS: yes - a name with two spaces in a row splits into an empty word.
+TEST: no - this is library code.
+VERDICT: confirmed
+";
+
+/// What a model is asked to do, told apart by the system prompt browse sends with each ask.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Kind {
+    /// A review pass over a file (browse's review system prompt).
+    Review,
+    /// The judge checking one finding (browse's judge system prompt).
+    Judge,
+    /// An explanation of a file or a directory (browse's explain system prompt).
+    Explain,
+    /// Anything else: a SPARQL draft, by the ask the prompt carries.
+    Draft,
+}
+
+/// The kind of an ask, by its system prompt. The phrases are browse 0.18's own prompts'.
+pub fn kind_of(system: &str) -> Kind {
+    if system.contains("reviewing a colleague's file") {
+        Kind::Review
+    } else if system.contains("You check one claim a code reviewer made") {
+        Kind::Judge
+    } else if system.contains("explanation layer of a repository browser") {
+        Kind::Explain
+    } else {
+        Kind::Draft
+    }
+}
+
+/// The `Path:` a review prompt names, for the log line.
+fn path_of(prompt: &str) -> &str {
+    prompt
+        .lines()
+        .find_map(|l| l.strip_prefix("Path: "))
+        .and_then(|p| p.split_whitespace().next())
+        .unwrap_or("")
+}
+
 /// The ask a drafting prompt carries: between its `The ask:` line and the grounding after it.
 pub fn ask_of(prompt: &str) -> &str {
     prompt
@@ -122,25 +190,54 @@ struct Ask {
 impl Endpoint for Ask {
     async fn invoke(&self, inv: &Invocation<'_>) -> ikigai_core::Result<Representation> {
         let n = self.calls.fetch_add(1, Ordering::SeqCst) + 1;
-        let prompt = match inv.request.args.get("prompt") {
+        let arg = |name: &str| match inv.request.args.get(name) {
             Some(ArgRef::Inline(bytes)) => String::from_utf8_lossy(bytes).into_owned(),
             _ => String::new(),
         };
-        let draft = draft_for(&prompt);
+        let prompt = arg("prompt");
+        let system = arg("system");
         let mut out = std::io::stdout().lock();
-        let _ = writeln!(
-            out,
-            "model-stub: ask {n}{}: {}",
-            if prompt.contains("Your previous draft was:") {
-                " (a repair)"
-            } else {
-                ""
-            },
-            ask_of(&prompt)
-        );
+        let kind = kind_of(&system);
+        let text = match kind {
+            Kind::Review => {
+                let _ = writeln!(out, "model-stub: ask {n}: review {}", path_of(&prompt));
+                REVIEW.to_string()
+            }
+            Kind::Judge => {
+                let _ = writeln!(out, "model-stub: ask {n}: judge one finding");
+                JUDGE.to_string()
+            }
+            Kind::Explain => {
+                let _ = writeln!(out, "model-stub: ask {n}: explain");
+                EXPLANATION.to_string()
+            }
+            Kind::Draft => {
+                let draft = draft_for(&prompt);
+                let _ = writeln!(
+                    out,
+                    "model-stub: ask {n}{}: {}",
+                    if prompt.contains("Your previous draft was:") {
+                        " (a repair)"
+                    } else {
+                        ""
+                    },
+                    ask_of(&prompt)
+                );
+                format!("Here is the query.\n```sparql\n{draft}\n```\n")
+            }
+        };
         let _ = out.flush();
+        // What `ikigai-llm` does: the JSON envelope for `as=application/json` (a review asks for
+        // it, to read `finish_reason`), plain text otherwise (the judge reads the raw answer).
+        // A draft keeps the envelope whatever it asks, as this stub always answered drafts.
+        if kind != Kind::Draft && arg("as") != "application/json" {
+            return Ok(Representation::new(
+                ReprType::new("text/plain").with_param("charset", "utf-8"),
+                text.into_bytes(),
+            ));
+        }
         let envelope = serde_json::json!({
-            "text": format!("Here is the query.\n```sparql\n{draft}\n```\n"),
+            "text": text,
             "model": MODEL,
             "finish_reason": "stop",
             "usage": null,
@@ -159,8 +256,9 @@ impl Endpoint for Ask {
         let string = "http://www.w3.org/2001/XMLSchema#string";
         Description::new("model-stub-ask").verb(Verb::Meta).action(
             ActionSpec::new(Verb::Source)
-                .summary("A canned SPARQL draft, by the ask the prompt carries.")
+                .summary("A canned answer: a review, a judge check or an explanation by the system prompt, otherwise a SPARQL draft by the ask.")
                 .input(ArgSpec::new("prompt").class(string))
+                .input(ArgSpec::new("system").class(string).optional())
                 .input(
                     ArgSpec::new("temperature")
                         .class("http://www.w3.org/2001/XMLSchema#decimal")
@@ -175,6 +273,30 @@ impl Endpoint for Ask {
                 .output("application/json")
                 .requires("urn:cap:net:*"),
         )
+    }
+}
+
+/// `urn:llm:coder:model`: the model's identity, which browse folds into every version tag.
+struct ModelId;
+
+#[async_trait]
+impl Endpoint for ModelId {
+    async fn invoke(&self, _inv: &Invocation<'_>) -> ikigai_core::Result<Representation> {
+        Ok(Representation::new(
+            ReprType::new("text/plain").with_param("charset", "utf-8"),
+            MODEL.as_bytes().to_vec(),
+        ))
+    }
+
+    fn name(&self) -> &str {
+        "model-stub-model"
+    }
+
+    fn describe(&self) -> Description {
+        Description::new("model-stub-model")
+            .verb(Verb::Source)
+            .summary("The stub's model name.")
+            .output("text/plain")
     }
 }
 
@@ -205,7 +327,14 @@ impl Endpoint for Config {
 /// its contracts. `calls` counts the asks.
 pub fn kernel(calls: Arc<AtomicUsize>) -> Kernel {
     let space = EndpointSpace::new()
-        .bind(Exact::new("urn:llm:ask"), Ask { calls })
+        .bind(
+            Exact::new("urn:llm:ask"),
+            Ask {
+                calls: calls.clone(),
+            },
+        )
+        .bind(Exact::new("urn:llm:coder:ask"), Ask { calls })
+        .bind(Exact::new("urn:llm:coder:model"), ModelId)
         .bind(Exact::new("urn:llm:config"), Config);
     Kernel::with_meta_renderer(Arc::new(space), Arc::new(ikigai_vocab::TurtleRenderer))
 }
@@ -231,5 +360,26 @@ mod tests {
         assert_eq!(draft_for(&prompt(ASK_OPEN_COUNT, false)), OPEN_COUNT);
         assert_eq!(draft_for(&prompt("something else", false)), ANYTHING);
         assert_eq!(draft_for("no ask at all"), ANYTHING);
+    }
+
+    #[test]
+    fn a_system_prompt_names_the_kind_of_ask() {
+        assert_eq!(
+            kind_of("You are an experienced engineer reviewing a colleague's file. …"),
+            Kind::Review
+        );
+        assert_eq!(
+            kind_of("You check one claim a code reviewer made about a file. …"),
+            Kind::Judge
+        );
+        assert_eq!(
+            kind_of("You are the explanation layer of a repository browser. …"),
+            Kind::Explain
+        );
+        assert_eq!(kind_of(""), Kind::Draft);
+        assert_eq!(
+            path_of("Repository: demo\nPath: src/lib.rs\n\n```"),
+            "src/lib.rs"
+        );
     }
 }

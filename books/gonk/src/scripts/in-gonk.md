@@ -311,7 +311,7 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (101 offered)
+left out: parts= did not ask for it (103 offered)
 urn:ikigai:vocab: 199 of 199
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1

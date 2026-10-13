@@ -36,6 +36,11 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
 - **Scripts and sentences.** A query saved at a name and run by a person and a worker; a query
   drafted from a sentence by a machine and published by a person; and what each door may do with
   either.
+- **Ways of working.** Processes rather than features: one person and an agent on one machine; a
+  dispatcher and remote workers; review on every commit; hub and spoke; spec first; and periodic
+  unled audits. Each chapter answers the same questions in the same order (who holds which role,
+  what runs where, the loop step by step, what holds it, and what it costs), and links back to the
+  chapters that teach its machinery rather than teaching it again.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
 ## Three kinds of example, and how each is checked

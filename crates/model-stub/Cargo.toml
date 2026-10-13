@@ -1,7 +1,7 @@
 [package]
 name = "model-stub"
 version = "0.1.0"
-description = "A deterministic urn:llm: peer for The gonk Book's transcripts: urn:llm:ask and urn:llm:config served over a Unix socket, answering each ask with a canned SPARQL draft, so a scratch gonk mounts a model and drafts without any network or real model."
+description = "A deterministic urn:llm: peer for The gonk Book's transcripts: urn:llm:ask and urn:llm:config served over a Unix socket, answering each ask with a canned SPARQL draft (or, for browse's explain, review and judge asks, a canned explanation, review or verdict, also at urn:llm:coder:ask), so a scratch gonk mounts a model and drafts, explains and reviews without any network or real model."
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

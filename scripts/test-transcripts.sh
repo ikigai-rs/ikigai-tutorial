@@ -21,8 +21,9 @@
 #         gonk serves. Installed `--locked` into `target/ikigai-cli/<version>/`.
 #
 #   model-stub is this workspace's own `crates/model-stub`: a deterministic `urn:llm:` peer on a
-#         Unix socket, which "Scripts and sentences in gonk" starts and mounts so a scratch gonk
-#         drafts without a real model or the network. Built here and copied alone into
+#         Unix socket, which "Scripts and sentences in gonk" and the "Ways of working" pages start
+#         and mount so a scratch gonk drafts, explains and reviews without a real model or the
+#         network. Built here and copied alone into
 #         `target/model-stub/bin/`, so the page's PATH gains that one binary and not the rest of
 #         `target/debug`.
 #
