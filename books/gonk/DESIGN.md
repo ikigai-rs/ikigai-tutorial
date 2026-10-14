@@ -141,7 +141,10 @@ include (above). `scripts/test-transcripts.sh` clones it ONCE per revision into
 `target/gonk-starter/<rev>/` and runs the pages with git's `url.<that clone>.insteadOf` set in the
 environment (`GIT_CONFIG_COUNT`/`_KEY_0`/`_VALUE_0`, so no config file lands in any home): six
 pages make no network fetch, and each still checks out exactly the pinned commit, so the redirect
-changes where the bytes come from and never which bytes. Run by hand without it, the same pages
+changes where the bytes come from and never which bytes. The clone's own `main` is put at the pin
+on every run, so its HEAD is a branch as GitHub's is: a clone of a repository whose HEAD is
+detached prints git's detached-HEAD advice whatever `--quiet` says, and once the starter's `main`
+moved past the pin (2026-10-14) every "With the starter" page printed it. Run by hand without it, the same pages
 clone from GitHub. No CI cache: the clone is a few megabytes and costs seconds. Moving the pin is
 the one-line change plus the pages' output where the starter changed it; the introduction prints
 the install line from the same file. What the pinned starter does that a reader may trip on, as

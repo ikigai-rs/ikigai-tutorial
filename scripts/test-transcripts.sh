@@ -131,6 +131,13 @@ if [ ! -d "$starter/.git" ]; then
     git -C "$starter.partial" checkout --quiet --detach "$starter_rev"
     mv "$starter.partial" "$starter"
 fi
+# The cache's HEAD is a BRANCH at the pin, never a detached commit, and this runs every time so
+# an older cache is repaired too. A reader's `git clone` from GitHub checks out a branch; a clone
+# of a repository whose HEAD is detached prints git's detached-HEAD advice, and `--quiet` does
+# not silence it. That advice then lands in the page's output as if the reader would see it. It
+# stayed hidden while the starter's `main` was the pinned commit, because clone then names the
+# matching branch; the starter's `main` moving past the pin is what exposed it.
+git -C "$starter" checkout --quiet -B main "$starter_rev"
 
 status=0
 
