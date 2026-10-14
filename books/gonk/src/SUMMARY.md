@@ -53,6 +53,7 @@
 - [Hub and spoke](ways/hub-and-spoke.md)
 - [Spec first](ways/spec-first.md)
 - [Periodic unled audits](ways/audits.md)
+- [Harness engineering](ways/harness.md)
 
 # Embedding
 

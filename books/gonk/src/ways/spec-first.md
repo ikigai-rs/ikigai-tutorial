@@ -258,7 +258,7 @@ in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter) says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo,spec
-generated the library-lending sample (python, process solo, spec) in …/library: 52 files
+generated the library-lending sample (python, process solo, spec) in …/library: 59 files
 next, in that directory:
   git init, then commit everything it wrote (the one commit where every file is yours)
   python3 scripts/test.py                      every test, as CI runs them
@@ -307,6 +307,7 @@ and a second run files nothing (the key answers `existing`).
 $ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
   note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
   ok       process   solo, spec (.gonk/process.toml)
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence

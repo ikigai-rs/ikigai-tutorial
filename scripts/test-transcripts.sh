@@ -28,7 +28,7 @@
 #         `{{#include ../../starter.rev}}` (the runner expands it as mdbook renders it). It is
 #         cloned ONCE here, into `target/gonk-starter/<rev>/`, and the pages' `git clone` of that
 #         URL is pointed at that local clone by git's own `url.<base>.insteadOf`, passed in the
-#         environment (`GIT_CONFIG_COUNT`, so no config file is written in any home): six pages
+#         environment (`GIT_CONFIG_COUNT`, so no config file is written in any home): seven pages
 #         make no network fetch, and every one checks out exactly the pinned commit. Without the
 #         redirect (the runner run by hand) the same page clones from GitHub and checks out the
 #         same commit, so the redirect changes where the bytes come from, never which bytes.

@@ -41,6 +41,7 @@ used stand alone."
 | | Hub and spoke | transcripts, gonk primitives only (the authors' private hub tooling is named only as that): a goal and two arcs filed with briefs piped from `file` blocks, `parent` and `blocks` links, the hub's claim on the goal (no lease), `next` offering one arc and saying why the others wait, a spoke's leased claim and a second spoke's `conflict`, a hand-back and release, the hub's close making the blocked arc ready, the second arc the same way, the hub's OWN item handed back to a person with "Merge?" and cleared by the person's comment, the closes that release the hub's claims, an arc's item showing its `parent`, the doctor clean · manual (a spoke's worktree, pull request, CI and self-merge); **With the starter** (transcripts): `new.py --process hub` (`tools/hub.py`, `.gonk/templates/brief.md`), headings, `process.toml`, `gonk.py init` and `status` | **written** |
 | | Spec first | transcripts: a scratch repository with an OpenSpec change (`proposal.md` and the spec part's `tasks.md` as `file` blocks) committed as the proposal; the seeding written out as the requests a seeder sends (keyed by the task IRI, `about` the task and its requirement, labeled with the change; a re-seed answering `existing`), `blocks` in `tasks.md` order, `next` one task at a time, `count about=` a requirement, a box checked in the same commit as the work, a close by `item=key:…`, the change archived with `git mv`, the remaining closes, `next` empty. The lift is not in gonk, so the seeding is not gonk's; the chapter links the spec part's Rust walk for the host that sends the same requests; **With the starter** (transcripts): `new.py --process solo,spec` (the combining example: `spec` has no roles), headings, `process.toml` with both profiles, `gonk.py init`, `seed --dry-run` (eight tasks, six `blocks` links, asking gonk nothing) and `status` | **written** |
 | | Periodic unled audits | transcripts: a two-file shell repository as the audited code (so a reproduction runs in the page with no compiler), the audit's brief as a keyed item claimed by the coordinator, two detached worktrees at the pinned commit, each auditor's reproduction run (a glob-expanded name; a doubled dash), two findings filed one item each (keyed, `parent` the audit, `about` the file, the reproduction in the body), the report's budget, unread scope and one suspicion as a comment on the audit, `next`, a finding closed with its evidence. What an auditor does with its budget is an agent's, and is described, not run; **With the starter** (transcripts): `new.py --process audits,review-every-commit` refused with its reason, then `--process audits` (`tools/audit.py`, `.gonk/templates/audit.md`), headings, `process.toml`, `gonk.py init`, `audit.py … --dry-run` (the item it would file) and `status` | **written** |
+| | Harness engineering | prose: Böckeler's model in the book's words (guides and sensors, computational and inferential, stages, categories, the steering loop, templates), the article cited and one short phrase quoted; transcripts, all against the pinned starter (the chapter IS the starter, so it has no separate "With the starter" section): `new.py --process solo`, the harness files listed, one guide and the sensor that `statedBy` it shown with `awk -v RS=` (a paragraph each, not the whole graph), `harness.py check`, `gonk.py init` (its `harness` and `hook` rows), a rule made to FIRE (`report` without `--evidence`) and the firing-log segment read back with `cat` and `harness.py firings`, `gonk.py harness` over the page's socket (the page's gonk is the owner, which loading the graph needs) with its four answers, a second load adding nothing; the steering loop shown: one "rule with no sensor" (`stage-files-by-name`, its guide shown, a sensor for it described) and one "never fired" (`edit-without-live-claim`, silent because the hook is off; the claim released and the hook run by hand with a Claude Code tool call piped in, so it fires) and the three things "never fired" can mean; the namespace (`https://ikigai-rs.dev/ns/harness#` answered 404 when the page was written, so the starter's `vocabulary.ttl` is named as the definition; say it is served only once a GET answers 200); the authors' private tooling named as running a larger harness the same way, no detail | **written** |
 | Embedding | The ledger, store and browse in your own kernel | Rust (`crates/embed-host`): one dataset handed to the store and to browse with a `SharerWrites` promise (`in_memory_shared_declaring`) and browse confined to that graph; the stub model; three callers' capabilities (agent, headless reviewer, person) each refused outside its lines; the ledger↔browse join through `graph-select` over both graphs; a cached ledger read asserted with `Kernel::is_cached` | **written** |
 
 **Ways of working sits after "Scripts and sentences" and before "Embedding"** (ledger #1435). Its
@@ -56,8 +57,11 @@ against the pin below, what the generated repository holds for that profile, and
 `tools/gonk.py init` and `status` say about it against the page's own scratch gonk. The loop above
 it stays in gonk's primitives, so the section shows the packaging and teaches nothing the chapter
 has not. The guide and
-sensor words are Böckeler's, used lightly; a harness chapter, and one on collaborating across
-organizations, come later and are not in the outline yet.
+sensor words are Böckeler's, used lightly in those six; **Harness engineering** (ledger #1462) is
+the seventh chapter and uses them fully, because its subject is the controls around any of the six
+rather than a process of its own. It keeps the five questions, and its loop is the starter's
+harness from the first step, so it ends without a "With the starter" section. A chapter on
+collaborating across organizations comes later and is not in the outline yet.
 
 Unwritten chapters are mdbook DRAFT entries (`- [Title]()`), listed in the sidebar without a
 link, so the outline is visible on the published site and nothing 404s.
@@ -134,12 +138,16 @@ called the new revision `Fresh` and installed the previous binary, so the check 
 on testing the old gonk under the new pin's name.
 
 **The gonk starter is pinned the same way, in `books/gonk/starter.rev`** (ledger #1436's arc), one
-full revision of `ikigai-rs/ikigai-gonk-starter`, at 38f539e (PR 26, the process profiles), never
-a path into a checkout. Each "Ways of working" page clones it the way a reader does, `git clone
+full revision of `ikigai-rs/ikigai-gonk-starter`, never a path into a checkout. It was 38f539e (PR 26,
+the process profiles) and moved to c7a501a (PR 30, after PR 29) for Harness engineering: PR 29 is
+the harness template (`.gonk/harness/`, `tools/harness.py`, the firing log, `gonk.py harness`) and
+PR 30 makes `vocabulary.ttl` the namespace's complete public definition, which the chapter names.
+The move changed the other six pages' "With the starter" output in three ways and no other: seven
+more generated files, `harness.py` in `tools/`, and a `note harness` row after `layout` in `init`. Each "Ways of working" page clones it the way a reader does, `git clone
 https://github.com/ikigai-rs/ikigai-gonk-starter starter`, then checks out the pin through an
 include (above). `scripts/test-transcripts.sh` clones it ONCE per revision into
 `target/gonk-starter/<rev>/` and runs the pages with git's `url.<that clone>.insteadOf` set in the
-environment (`GIT_CONFIG_COUNT`/`_KEY_0`/`_VALUE_0`, so no config file lands in any home): six
+environment (`GIT_CONFIG_COUNT`/`_KEY_0`/`_VALUE_0`, so no config file lands in any home): seven
 pages make no network fetch, and each still checks out exactly the pinned commit, so the redirect
 changes where the bytes come from and never which bytes. The clone's own `main` is put at the pin
 on every run, so its HEAD is a branch as GitHub's is: a clone of a repository whose HEAD is

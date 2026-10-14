@@ -317,7 +317,7 @@ recipes that run it. The book checks the starter at the revision in `books/gonk/
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process workers
-generated the library-lending sample (python, process workers) in …/library: 56 files
+generated the library-lending sample (python, process workers) in …/library: 63 files
 next, in that directory:
   git init, then commit everything it wrote (the one commit where every file is yours)
   python3 scripts/test.py                      every test, as CI runs them
@@ -340,6 +340,7 @@ $ grep '^## ' library/AGENTS.md
 $ ls library/tools library/worker
 library/tools:
 gonk.py
+harness.py
 worker.py
 
 library/worker:
@@ -368,6 +369,7 @@ On a worker machine, `init` takes the QUIC door and the bundle `client add` wrot
 $ cd library && git init -q && python3 tools/gonk.py init --ledger default --quic quic://127.0.0.1:1070 --cert-dir ../worker-1/gonk --holder worker-1
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
   note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
   ok       process   workers (.gonk/process.toml)
   note     workers   a dispatcher and unattended worker machines: workers claim and report, and never close or merge

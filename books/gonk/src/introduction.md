@@ -40,7 +40,10 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
   dispatcher and remote workers; review on every commit; hub and spoke; spec first; and periodic
   unled audits. Each chapter answers the same questions in the same order (who holds which role,
   what runs where, the loop step by step, what holds it, and what it costs), and links back to the
-  chapters that teach its machinery rather than teaching it again.
+  chapters that teach its machinery rather than teaching it again. The last, harness engineering,
+  is about the controls around any of them: the rules and checks as a graph, a log of every time
+  a check fires, and the questions that say which rules nothing checks and which checks have
+  never fired.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
 ## Three kinds of example, and how each is checked
@@ -128,9 +131,12 @@ before that chapter works either way.
 
 Each [Ways of working](ways/solo.md) chapter ends with the [gonk
 starter](https://github.com/ikigai-rs/ikigai-gonk-starter), a template repository whose
-`tools/new.py` generates a repository set up for that process. It is pinned the same way, to one
-git revision in one file (`books/gonk/starter.rev`), and those pages clone it and check that
-revision out themselves. It needs Python 3.11 or later and nothing else:
+`tools/new.py` generates a repository set up for that process, and [Harness
+engineering](ways/harness.md) uses the harness it generates. The starter is pinned the same way,
+to one git revision in one file (`books/gonk/starter.rev`), and those pages clone it and check that
+revision out themselves. Its last move was to a revision that carries the harness; in the
+other six chapters that shows as `tools/harness.py` and the harness files among what is generated,
+and one `harness` row in what `init` reports. It needs Python 3.11 or later and nothing else:
 
 <!-- transcript: manual — the Ways of working pages run these two commands themselves, reading the same file -->
 ```console

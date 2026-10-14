@@ -272,7 +272,7 @@ machine.)
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 52 files
+generated the library-lending sample (python, process solo) in …/library: 59 files
 next, in that directory:
   git init, then commit everything it wrote (the one commit where every file is yours)
   python3 scripts/test.py                      every test, as CI runs them
@@ -332,6 +332,7 @@ the ledger, the socket and the holder this working tree claims under, then asks 
 $ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
   note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
   ok       process   solo (.gonk/process.toml)
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
@@ -359,7 +360,8 @@ no live claim: this working tree holds no claim. Claim the item first: `python3 
 `init` also published the sample's four saved queries to gonk ([Scripts and
 sentences](../scripts/in-gonk.md)), as the owner may. `status` is the question the claim hook asks
 before every edit; here it says to claim first, which is step 2 above as `python3 tools/gonk.py
-claim <number>`.
+claim <number>`. The `harness` row is about the repository's harness, its rules and checks as a
+graph, which [Harness engineering](harness.md) walks through.
 
 Profiles **combine**: `--process` takes a list, because they answer different questions (who
 dispatches, how the work is defined, how bugs are found), so `--process solo,spec` is this chapter

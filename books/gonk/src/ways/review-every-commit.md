@@ -345,7 +345,7 @@ root's name, gonk's config file, paths never queued) are a `[review]` table in
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process review-every-commit
-generated the library-lending sample (python, process review-every-commit) in …/library: 54 files
+generated the library-lending sample (python, process review-every-commit) in …/library: 61 files
 next, in that directory:
   git init, then commit everything it wrote (the one commit where every file is yours)
   python3 scripts/test.py                      every test, as CI runs them
@@ -405,6 +405,7 @@ profile's `review` check, then asks this page's gonk whether it can review this 
 $ cd library && git init -q && git config core.hooksPath hooks/git && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder triager
 gonk init: …/library
   ok       layout               openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     harness              4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
   note     openspec             8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
   ok       process              review-every-commit (.gonk/process.toml)
   note     review-every-commit  a read-only reviewer on every commit: a post-commit hook asks gonk to review the touched files, and a person triages the findings

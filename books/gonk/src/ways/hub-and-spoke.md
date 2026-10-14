@@ -328,7 +328,7 @@ says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process hub
-generated the library-lending sample (python, process hub) in …/library: 54 files
+generated the library-lending sample (python, process hub) in …/library: 61 files
 next, in that directory:
   git init, then commit everything it wrote (the one commit where every file is yours)
   python3 scripts/test.py                      every test, as CI runs them
@@ -354,6 +354,7 @@ brief.md
 
 library/tools:
 gonk.py
+harness.py
 hub.py
 $ cat library/.gonk/process.toml
 # How this repository's team works: the process profiles it was generated with, and what
@@ -375,6 +376,7 @@ roles = ["hub: writes briefs as items, links them, dispatches each arc, closes o
 $ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder hub
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
   note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
   ok       process   hub (.gonk/process.toml)
   note     hub       a hub splits work into single-repository arcs with written briefs, each dispatched to its own working tree and holder

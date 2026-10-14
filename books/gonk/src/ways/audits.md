@@ -281,7 +281,7 @@ $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
 $ cd starter && python3 tools/new.py ../library --process audits
-generated the library-lending sample (python, process audits) in …/library: 54 files
+generated the library-lending sample (python, process audits) in …/library: 61 files
 next, in that directory:
   git init, then commit everything it wrote (the one commit where every file is yours)
   python3 scripts/test.py                      every test, as CI runs them
@@ -308,6 +308,7 @@ audit.md
 library/tools:
 audit.py
 gonk.py
+harness.py
 $ cat library/.gonk/process.toml
 # How this repository's team works: the process profiles it was generated with, and what
 # each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
@@ -328,6 +329,7 @@ roles = ["auditor: claims an audit item, reads only what it lists, files one ite
 $ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder coordinator
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
+  note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
   note     openspec  8 open task(s) in 2 change(s) in flight: `python3 tools/gonk.py seed` files them as ledger items (again is a no-op)
   ok       process   audits (.gonk/process.toml)
   note     audits    periodic unled audits instead of per-commit review: one repository, a file list, a budget, a reproduction per bug, one item per finding
