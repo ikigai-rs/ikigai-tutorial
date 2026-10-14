@@ -195,7 +195,7 @@ and another ledger:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/calls.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.56"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.61"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n"}],"isError":false}}

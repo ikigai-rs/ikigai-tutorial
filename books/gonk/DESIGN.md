@@ -37,7 +37,7 @@ used stand alone."
 | Scripts and sentences | Scripts and sentences in gonk | transcripts, the hub's live run of 2026-10-11 (`claude/research/nl-script-demo-2026-10-11.md`, private) as the checked sequence: a STUB model peer (`crates/model-stub`, `model-stub "$PWD/model.sock"`, a `serve` block) mounted by `gonk.mount`; `client add` with `--script 'team-*=publish'`, `--script 'team-*=run'`, `--worker default --script public=run` and `--nl draft`, and `passkey invite` with the same, the grants read back with `jq`; `open-by-label` published public over the socket and run by anonymous HTTP (CSV) and by the worker over QUIC, which claims and cannot close; the anonymous budget at 3 a minute (a cached answer not counted, a write cutting the cache, the refusal's `500`); anonymous drafting refused before any model call (the stub's log); what the drafter reads of the grounding (`parts=`: the actions counted and left out) unfocused and with `focus=` (ledger #1243; a scratch gonk with 48 roots measured in prose: the whole grounding 4.6 MB and refused, the drafter's parts 110 KB and an unfocused draft saved); the demo's draft with its empty preview, its warning, one repair the stub repeats, and the MARK on its first line (ledger #1242); `as=application/json` attempts (a repair) and `as=text/turtle` PROV-O; a draft absent to another holder of the namespace, the owner's catalog; running a draft refused as a draft, for its author and the owner alike (ledger #1261); a QUIC publish refused; the owner's check (the query piped: cli 0.1.52 fills a source's one required argument from a batch's stdin) and publish; a draft refused over a published name. The signed-in HTTP spelling is `manual` (a passkey ceremony) | **written** |
 | Ways of working | Solo on one machine | transcripts: the stub model (`model-stub`, which since this part also answers browse's explain, review and judge asks by their system prompts, at `urn:llm:ask` and `urn:llm:coder:ask`, and names itself at `urn:llm:coder:model`), a scratch repository, a gonk with `--no-quic`; over the socket: file with a body as a comment, `next`, `claim lease=30m`, `renew=true`, one explain derived once (the stub's log shows one ask for two reads), a branch and a commit, a `handback=true` comment with the evidence, the release `from=`, `next` excluding the item as awaiting its dispatcher, the close with a note, the doctor clean · manual (the forge: push, `gh pr create`, CI); **With the starter** (transcripts): the pinned starter cloned and checked out, `new.py --process solo`, `LC_ALL=C ls -A`, the `AGENTS.md` headings, `.gonk/process.toml`, `gonk.py init` over the page's socket (it publishes the sample's four saved queries as the owner) and `status`; the default `solo,workers,spec` and the one refused pair in prose | **written** |
 | | Remote workers | transcripts: `client add worker-1 --worker default` and `worker-2`, the grant read back with `jq`, gonk with its QUIC door on 1070, bundles copied to `worker-1/` and `worker-2/`; the dispatcher files two items with briefs piped from `file` blocks (a `-c` batch's stdin fills a content-less sink); over QUIC: `next`, a claim, a second worker's claim refused as a `conflict` and its release of the first's claim `denied` (the claim's principal), a renewal, hand-backs with evidence and releases, a worker's close refused at the grant; over the socket: `next` empty (both awaiting), a close, a `rejects=true` that makes the other ready again, the worker's comment attributed to its principal, the refusals in the access log · manual (a worker machine's agent, worktree and forge); the starter's `tools/worker.py` named as the packaged form, not used; **With the starter** (transcripts): `new.py --process workers` (`tools/worker.py`, `worker/`), headings, `process.toml`, `gonk.py init` over QUIC with `worker-1`'s bundle (the identity and alias rows; the four script publishes `failed` at the worker grant; the enrollment lines elided with `…`) and `status` | **written** |
-| | Review every commit | transcripts: the stub model as above, a scratch repository with a `post-commit` hook (a `file` block) running `ikigai-gonk review request`, `gonk.review.space`/`grant`/`arm` and the exact reviewer grant (a `file` block for `grants.json`), gonk ARMED (the banner's `review` line), a commit whose hook prints the request id, a wait on `urn:iki:gonk:review:depth`, the stub's log (one review, one judge), the findings listing, the judge's verdict read with `jq`, a decline with a reason and a publish with `reproduced=yes` over the socket, the annotation `derived_from` the finding, a keyed append filing the published finding (twice: `existing`); roborev and kata named as tools that implement the process, linked to the Bridges chapters (hub, 2026-10-13) · manual (the signed-in Queue page); **With the starter** (transcripts): `new.py --process review-every-commit` (`hooks/git/post-commit` + `review-on-commit.py`, the `[review]` table), `core.hooksPath`, `gonk.py init` with the hook `ok` and `review` missing (the page's gonk serves `demo`, not the generated repository; prose says what the root line and a restart add) and `status` | **written** |
+| | Review every commit | transcripts: the stub model as above, a scratch repository with a `post-commit` hook (a `file` block) running `ikigai-gonk review request`, `gonk.review.space`/`grant`/`arm` and the exact reviewer grant (a `file` block for `grants.json`), gonk ARMED (the banner's `review` line), a commit whose hook prints the request id, a wait on `urn:iki:gonk:review:depth`, the stub's log (one review, one judge), the findings listing, the judge's verdict read with `jq`, a decline with a reason and a publish with `reproduced=yes` over the socket, the annotation `derived_from` the finding, `ikigai-gonk findings file demo` filing the published finding (`--dry-run`, then twice: `filed`, then `already`; key `urn:iki:finding:{id}`) and the item it made (gonk 3edf830; the hand step with `key=finding:<id>` it replaces would have been filed twice, ledger #1472); roborev and kata named as tools that implement the process, linked to the Bridges chapters (hub, 2026-10-13) · manual (the signed-in Queue page); **With the starter** (transcripts): `new.py --process review-every-commit` (`hooks/git/post-commit` + `review-on-commit.py`, the `[review]` table), `core.hooksPath`, `gonk.py init` with the hook `ok` and `review` missing (the page's gonk serves `demo`, not the generated repository; prose says what the root line and a restart add) and `status` | **written** |
 | | Hub and spoke | transcripts, gonk primitives only (the authors' private hub tooling is named only as that): a goal and two arcs filed with briefs piped from `file` blocks, `parent` and `blocks` links, the hub's claim on the goal (no lease), `next` offering one arc and saying why the others wait, a spoke's leased claim and a second spoke's `conflict`, a hand-back and release, the hub's close making the blocked arc ready, the second arc the same way, the hub's OWN item handed back to a person with "Merge?" and cleared by the person's comment, the closes that release the hub's claims, an arc's item showing its `parent`, the doctor clean · manual (a spoke's worktree, pull request, CI and self-merge); **With the starter** (transcripts): `new.py --process hub` (`tools/hub.py`, `.gonk/templates/brief.md`), headings, `process.toml`, `gonk.py init` and `status` | **written** |
 | | Spec first | transcripts: a scratch repository with an OpenSpec change (`proposal.md` and the spec part's `tasks.md` as `file` blocks) committed as the proposal; the seeding written out as the requests a seeder sends (keyed by the task IRI, `about` the task and its requirement, labeled with the change; a re-seed answering `existing`), `blocks` in `tasks.md` order, `next` one task at a time, `count about=` a requirement, a box checked in the same commit as the work, a close by `item=key:…`, the change archived with `git mv`, the remaining closes, `next` empty. The lift is not in gonk, so the seeding is not gonk's; the chapter links the spec part's Rust walk for the host that sends the same requests; **With the starter** (transcripts): `new.py --process solo,spec` (the combining example: `spec` has no roles), headings, `process.toml` with both profiles, `gonk.py init`, `seed --dry-run` (eight tasks, six `blocks` links, asking gonk nothing) and `status` | **written** |
 | | Periodic unled audits | transcripts: a two-file shell repository as the audited code (so a reproduction runs in the page with no compiler), the audit's brief as a keyed item claimed by the coordinator, two detached worktrees at the pinned commit, each auditor's reproduction run (a glob-expanded name; a doubled dash), two findings filed one item each (keyed, `parent` the audit, `about` the file, the reproduction in the body), the report's budget, unread scope and one suspicion as a comment on the audit, `next`, a finding closed with its evidence. What an auditor does with its budget is an agent's, and is described, not run; **With the starter** (transcripts): `new.py --process audits,review-every-commit` refused with its reason, then `--process audits` (`tools/audit.py`, `.gonk/templates/audit.md`), headings, `process.toml`, `gonk.py init`, `audit.py … --dry-run` (the item it would file) and `status` | **written** |
@@ -157,7 +157,8 @@ clone from GitHub. No CI cache: the clone is a few megabytes and costs seconds. 
 the one-line change plus the pages' output where the starter changed it; the introduction prints
 the install line from the same file. What the pinned starter does that a reader may trip on, as
 the pages show it: its `init` reports a gonk that binds no `urn:nl:sparql` (no model mounted) as
-`unknown … could not ask gonk`, because cli 0.1.56's `describe` of an unbound name exits non-zero,
+`unknown … could not ask gonk`, because the pinned cli's `describe` of an unbound name exits non-zero
+(0.1.56, and 0.1.61 still),
 which `gonk.py`'s `offered()` reads as no answer; and over QUIC with a worker grant `init` tries to
 publish the sample's saved queries and prints four `failed` rows before `ready.`. Both are the
 starter's to change, not this book's, and the pages say what each row means rather than hiding it.
@@ -169,9 +170,13 @@ crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --
 the file is one line read by the introduction's install line, the script and CI's cache key. Choose
 the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and `ikigai-web` share
 the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3, 77ac767 and edb9a3d;
-0.1.44 at d9c9bcf, 9704b54 and 9f2e89e; 0.1.52 at 2598192; 0.1.55 at 71ca542), so the client speaks
-the server's wire; moving gonk is a reason to look at this file too. ⚠ **At 71ca542 the pin is
-0.1.56, one release PAST gonk's 0.1.55 transports** (ledger #1365), the one exception so far. The
+0.1.44 at d9c9bcf, 9704b54 and 9f2e89e; 0.1.52 at 2598192; 0.1.55 at 71ca542; 0.1.61 at 3edf830), so
+the client speaks the server's wire; moving gonk is a reason to look at this file too. At 3edf830
+the pin is 0.1.61, gonk's own transports, and the exception below is closed (ledger #1472's arc,
+2026-10-14). 0.1.62 was already on crates.io and the rule took what gonk links; both link
+`ikigai-core` 0.1.99 as published, so a socket mount's family-scope refusal reads the same either
+way. ⚠ **At 71ca542 the pin was 0.1.56, one release PAST gonk's 0.1.55 transports** (ledger
+#1365), the one exception so far. The
 reason is what a page prints: a client that mounts gonk's socket checks a family-scope floor in ITS
 OWN kernel, so "Over the socket"'s refusal is worded by the client's `ikigai-core`, and only 0.1.56
 links core 0.1.98 or later (0.1.55 links 0.1.96: replayed with 0.1.55, that page printed the refusal
@@ -188,8 +193,9 @@ stayed with gonk's lock. The ikigai Book's REPL transcripts are a separate check
 `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
 `books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
 under its own key: this pin follows gonk's lock (but for the exception above), that one follows the
-release the ikigai Book's pages were last replayed against. That one is 0.1.56 (2026-10-12, ledger
-#1365; 0.1.55 before it, ledger #1353), the release the book's crates lock every cli crate at,
+release the ikigai Book's pages were last replayed against. That one is 0.1.62 (2026-10-14, the
+update wave; 0.1.56 before it, ledger #1365; 0.1.55 before that, ledger #1353), the release the
+book's crates lock every cli crate at,
 `ikigai-engine` (the in-page cells' grammar) among them, and the replay runs it `--quiet`, which
 prints only the answers. Moving the ikigai Book's pin to 0.1.52 waited on the replay: from 0.1.48 a
 `-c` batch whose stdin is not a terminal fetches the contract of a bare `source` (stdin might fill
@@ -199,15 +205,28 @@ REPL never shows. The replay now types a block's lines into the REPL on its stdi
 does (ledger #1304).)
 
 The book's crates link the PUBLISHED modules, at the versions that revision takes unless a gap is
-recorded below: at 71ca542 gonk links `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.0, `ikigai-store`
-0.2.19 (in-memory here, `persistent` off; 0.2.7 is a security floor, ledger #915), `ikigai-browse`
-0.18.8 (0.18.2 is a security floor: it never serves `.git`, ledger #1126), `ikigai-script` 0.3.3,
-`ikigai-nl` 0.4.0 and the cli crates at 0.1.55, with `oxigraph` 0.5 named directly because browse
-takes an `oxigraph::store::Store`. The book's crates take every one of those, and the cli crates at
-0.1.56 with the ikigai Book's pin (0.1.56 changed no engine code). A newer release that gonk does
-not link yet waits for the pin, so a transcript and a listing are always answered by the same
-module, unless the book needs it first. **There is no version gap now** (closed 2026-10-12, ledger
-#1365, by moving the pin to 71ca542). There were four gaps before it, all CLOSED by moving the pin.
+recorded below: at 3edf830 gonk links `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.1, `ikigai-store`
+0.2.21 (in-memory here, `persistent` off; 0.2.21 is a security floor, ledger #1426–#1429),
+`ikigai-browse` 0.18.8 (0.18.2 is a security floor: it never serves `.git`, ledger #1126),
+`ikigai-script` 0.3.3, `ikigai-nl` 0.4.0 and the cli crates at 0.1.61, with `oxigraph` 0.5 named
+directly because browse takes an `oxigraph::store::Store`. A newer release that gonk does not link
+yet waits for the pin, so a transcript and a listing are always answered by the same module, unless
+the book needs it first.
+
+**A version gap is OPEN, by decision** (2026-10-14, the update wave). The hub's wave moved every ikigai pin to
+its crate's newest release, ahead of gonk's lock, so the book's crates take `ikigai-core` 0.1.102,
+`ikigai-ledger` 0.12.0, `ikigai-store` 0.2.22, `ikigai-browse` 0.18.9, `ikigai-script` 0.3.5 and the
+cli crates at 0.1.62, while the pinned gonk (3edf830) links core 0.1.99, ledger 0.11.1, store 0.2.21,
+browse 0.18.8, script 0.3.3 and cli 0.1.61. No page prints differently because of it, checked by
+replaying every transcript and running every cell and listing: no console reads a ledger item's
+JSON face (where 0.12.0 adds `"children": []`), no query names a `GRAPH` outside its set (which
+store 0.2.22 refuses rather than answering empty), and no page shows a typed selection or a trace
+of a `urn:kernel:*` operation through gonk (core 0.1.102). The gap closes when the pin moves to a
+gonk that links those releases; until then a page that comes to show one of those differences says
+so where it shows it. There were four gaps before this one, all CLOSED by moving the pin; the last
+was closed 2026-10-12 (ledger #1365) by moving the pin to 71ca542, which linked core 0.1.99,
+ledger 0.11.0, store 0.2.19, browse 0.18.8, script 0.3.3 and nl 0.4.0, as the book's crates then
+did.
 From tutorial PR 111 and PR 112 (2026-10-12) the book's crates took `ikigai-core` 0.1.98,
 `ikigai-ledger` 0.11.0, `ikigai-store` 0.2.19 and `ikigai-nl` 0.4.0 while the pinned gonk (2598192)
 linked core 0.1.96, ledger 0.9.0, store 0.2.15 and nl 0.3.0, and the `ikigai` both books replayed

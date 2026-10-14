@@ -23,7 +23,7 @@ path = "src/main.rs"
 # The workspace's core. This crate once pinned its own, 0.1.80, above the workspace's floor of
 # the day, because the cli 0.1.30 crates below required it for `Error::Conflict` (the state
 # refuses the request, wire v8's typed Conflict and the edge's 409); the workspace has long
-# passed it, and the cli 0.1.56 crates require 0.1.98.
+# passed it, and the cli 0.1.62 crates require 0.1.98.
 ikigai-core.workspace = true
 # The Meta renderer, so each served kernel answers `describe` and a peer's JSON Meta.
 ikigai-vocab.workspace = true
@@ -32,21 +32,21 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 # 0.1.30 is the hardened edge the tic-tac-toe README's path <-> IRI rule describes (ledger
 # #80, #591): the target decoded as bytes, a malformed escape a 400, `+` a space in the query
 # only, `%2F` data inside its segment, and header/body/write deadlines plus a connection cap.
-# 0.1.56 is the pin for this crate and the three below: the cli crates' published head, and one
+# 0.1.62 is the pin for this crate and the three below: the cli crates' published head, and one
 # release for all four, as 0.1.30 was.
-ikigai-web = "0.1.56"
+ikigai-web = "0.1.62"
 # The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
 # peer store). 0.1.30 speaks wire v8 (a typed Conflict), backward compatible with the v7
 # the Python and Deno faces were built against; both speak v8 at their main.
-ikigai-ipc = "0.1.56"
+ikigai-ipc = "0.1.62"
 # `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
 # `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds. 0.1.30 is the release
 # the two crates above belong to.
-ikigai-resolve = "0.1.56"
+ikigai-resolve = "0.1.62"
 # `-c <line>`: the REPL grammar (`source`, `sink`, `cache`, `trace`) run against the game's
 # own kernel in this process, so a line's verdict is that kernel's. 0.1.18 is the floor
 # book-wasm states for the same `Engine::new` / `eval` / `Action` surface.
-ikigai-engine = "0.1.56"
+ikigai-engine = "0.1.62"
 async-trait = "0.1"
 futures.workspace = true
 # The runtime ikigai-web's server runs on.

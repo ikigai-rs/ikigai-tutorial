@@ -5,10 +5,10 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.99** and
-`ikigai-module` **0.3.2**, stamped on 2026-10-12 (each its crate's newest release on
-crates.io that day), and its shell examples are replayed against `ikigai-cli` **0.1.56**,
-the one release pinned in `books/ikigai/ikigai-cli.version` (the newest on 2026-10-12). A
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.102** and
+`ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest release on
+crates.io that day), and its shell examples are replayed against `ikigai-cli` **0.1.62**,
+the one release pinned in `books/ikigai/ikigai-cli.version` (the newest on 2026-10-14). A
 test (`crates/book-urns/tests/book_claims.rs`)
 holds those three numbers to the workspace's lock and that pin, and re-checks each stamped
 claim below against the published crate it names, so that when one of them stops being
@@ -16,14 +16,14 @@ true the fix is a diff, not a discovery.
 
 ## Phase 1
 
-`ikigai-module` 0.3.2's own first line still calls it **"the dynamically-loadable module
+`ikigai-module` 0.4.0's own first line still calls it **"the dynamically-loadable module
 format (Phase 1: in-process proof)"**. That line undersells the crate — it has grown a
 socket transport, at 0.2.0 capability enforcement across the boundary, and at 0.3.0 typed
 errors, golden threads and endpoint cards crossing the wire, since somebody wrote it —
 which is worth knowing as a habit: a crate's one-line self-description is the
 thing least likely to be updated when the crate changes.
 
-What is actually there, at `ikigai-module` 0.3.2 (0.3.2 over 0.3.1 records a failed callback, below; 0.3.1 over 0.3.0 was a constructor form, no new surface):
+What is actually there, at `ikigai-module` 0.4.0 (0.4.0 over 0.3.2 holds a module's out-of-band call to the host to its session's capability, fails a call over an unwired channel at once with a typed error, and has the session transport return the kernel's own `Result`; 0.3.2 over 0.3.1 records a failed callback, below; 0.3.1 over 0.3.0 was a constructor form, no new surface):
 
 | piece | state |
 |---|---|
@@ -108,7 +108,7 @@ builds one, and a wasm module has no ambient filesystem or network to begin with
 *not* exist is any of the native half: no host in the ecosystem embeds wasmtime, no crate
 sets a memory budget, and none can stop a computation it has started:
 the word "fuel" appears in none of them (checked across the organization's repositories
-on 2026-10-10; the probe re-checks `ikigai-module` 0.3.2 and
+on 2026-10-10; the probe re-checks `ikigai-module` 0.4.0 and
 `ikigai-cli` 0.1.46 by manifest). The nearest thing is a deadline on the *answer*, not on
 the work: since `ikigai-xslt` 0.2.1 every transform is answered
 within a time budget, five seconds, with a typed `Timeout`, and the crate says plainly that

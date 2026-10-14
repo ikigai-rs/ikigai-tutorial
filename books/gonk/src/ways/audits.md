@@ -335,7 +335,7 @@ gonk init: …/library
   note     audits    periodic unled audits instead of per-commit review: one repository, a file list, a budget, a reproduction per bug, one item per finding
   note     role      auditor: claims an audit item, reads only what it lists, files one item per reproduced bug
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ikigai    ikigai 0.1.61 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `coordinator` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

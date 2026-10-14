@@ -377,7 +377,7 @@ gonk init: …/library
   note     role      worker: an unattended machine running tools/worker.py; claims, works, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
-  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ikigai    ikigai 0.1.61 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `worker-1` (.gonk/local.toml, this working tree only)
   ok       identity  urn:iki:host:gonk:client:… (from …/worker-1/gonk/client.crt)

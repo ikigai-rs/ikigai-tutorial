@@ -383,7 +383,7 @@ gonk init: …/library
   note     role      hub: writes briefs as items, links them, dispatches each arc, closes on the evidence, asks a person before merging its own work
   note     role      arc agent: works one arc from its brief in its own working tree, merges on green, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ikigai    ikigai 0.1.61 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `hub` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

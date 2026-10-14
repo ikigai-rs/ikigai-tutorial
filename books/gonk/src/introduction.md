@@ -75,35 +75,44 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.0,
-`ikigai-store` 0.2.19, `ikigai-browse` 0.18.8, `ikigai-script` 0.3.3 and `ikigai-nl` 0.4.0. The
-book's own crates (the ones its Rust listings and in-page cells run) take the same releases, so a
-`console` block checked against the pinned gonk and a listing or a cell checked against the book's
-crates are answered by the same code. (0.4.0 of the ledger added the keyed append [part 5](spec/ledger.md)
-syncs with and the [bridges](bridges/roborev.md) file through; 0.9.0 added `count`, the number of
-items a filter admits without the listing, which part 5's walk asks.) It serves scripts and
-drafting at `urn:script:*` and `urn:nl:*`.
+The modules it links are published crates: `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.1,
+`ikigai-store` 0.2.21, `ikigai-browse` 0.18.8, `ikigai-script` 0.3.3 and `ikigai-nl` 0.4.0. The
+book's own crates (the ones its Rust listings and in-page cells run) take the newest releases, one
+step ahead of that: `ikigai-core` 0.1.102, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.22,
+`ikigai-browse` 0.18.9 and `ikigai-script` 0.3.5. So a `console` block is answered by gonk's
+releases and a listing or a cell by the newer ones. No page prints differently because of it (the
+newer releases add a ledger item's `children` to its JSON face, refuse a query whose `GRAPH` names
+a graph outside its set, and trace the kernel's own operations, and no page here shows any of those
+through gonk); a page that comes to show one will say so. (0.4.0 of the ledger added the keyed
+append [part 5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through;
+0.9.0 added `count`, the number of items a filter admits without the listing, which part 5's walk
+asks.) It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
-What the pin's last move (from 2598192) changed for a reader, each where the page that shows it
-says so: a refusal at a family scope now also says what satisfies it, ``; any grant under
-`urn:cap:ledger:delete:` satisfies it`` ([Your own ledger](ledger/your-own.md), [Over the
-socket](agent/socket.md), [A QUIC client](machines/quic-client.md)); a draft whose repair repeats
-an earlier attempt says the drafting stopped there, rather than naming a bound it did not reach
-([Scripts and sentences in gonk](scripts/in-gonk.md)); and a mounted peer that cannot be reached
-says how many dials failed and how long the next is held off ([Explain, with a mounted
-model](browse/explain.md)). The `ikigai` the pages run moved with it, from 0.1.52 to 0.1.56. The
-move before it (from 9f2e89e) gave the drafter `focus=` (its older `graph=` still works for one
-release), read only the parts of the grounding a query needs, sent a draft whose preview is empty
-back to the model with a warning naming the pattern that matches nothing and saved it MARKED if it
-stayed empty, told a draft's author who runs it that it is a draft, and let `ikigai` read a pipe
-into a `source` whose one required argument is unfilled, which is how that chapter hands the
-owner's query to the check. The move before that (from 9704b54) took the ledger from 0.6.2 to
-0.9.0, so the agent's tools gain `ledger-count__source` ([Over MCP](agent/mcp.md)) and part 5's
-count can be asked of gonk itself ([In gonk](spec/ledger.md#in-gonk-and-not-in-this-page)); a
-close also releases the item's claim, and the ledger's per-verb grants arrive as a fifth
-`--ledger` authority, `worker` (claim and comment, never close), which the hint a client with no
-grant prints now names ([A QUIC client](machines/quic-client.md)). No page here closes a claimed
-item or hands one back.
+What the pin's last move (from 71ca542) changed for a reader, each where the page that shows it
+says so: gonk files its own published review findings as ledger items with `ikigai-gonk findings
+file` ([Review every commit](ways/review-every-commit.md)); a request refused at the HTTP edge (a
+cross-site write, a foreign `Host`, a page loaded as an image) now writes an access line too ([The
+ledger in a browser](ledger/browser.md)); and the `ikigai` the pages run moved from 0.1.56 to
+0.1.61, which reads a leading `~` in a mount line as your home ([Over the
+socket](agent/socket.md)). The move before it (from 2598192) changed: a refusal at a family scope
+now also says what satisfies it, ``; any grant under `urn:cap:ledger:delete:` satisfies it`` ([Your
+own ledger](ledger/your-own.md), [Over the socket](agent/socket.md), [A QUIC
+client](machines/quic-client.md)); a draft whose repair repeats an earlier attempt says the
+drafting stopped there, rather than naming a bound it did not reach ([Scripts and sentences in
+gonk](scripts/in-gonk.md)); and a mounted peer that cannot be reached says how many dials failed
+and how long the next is held off ([Explain, with a mounted model](browse/explain.md)). The
+`ikigai` the pages run moved with it, from 0.1.52 to 0.1.56. The move before that (from 9f2e89e)
+gave the drafter `focus=` (its older `graph=` still works for one release), read only the parts of
+the grounding a query needs, sent a draft whose preview is empty back to the model with a warning
+naming the pattern that matches nothing and saved it MARKED if it stayed empty, told a draft's
+author who runs it that it is a draft, and let `ikigai` read a pipe into a `source` whose one
+required argument is unfilled, which is how that chapter hands the owner's query to the check. The
+move before that one (from 9704b54) took the ledger from 0.6.2 to 0.9.0, so the agent's tools gain
+`ledger-count__source` ([Over MCP](agent/mcp.md)) and part 5's count can be asked of gonk itself
+([In gonk](spec/ledger.md#in-gonk-and-not-in-this-page)); a close also releases the item's claim,
+and the ledger's per-verb grants arrive as a fifth `--ledger` authority, `worker` (claim and
+comment, never close), which the hint a client with no grant prints now names ([A QUIC
+client](machines/quic-client.md)). No page here closes a claimed item or hands one back.
 
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.
@@ -111,14 +120,12 @@ every time: no example in this book calls a real model or the network.
 From [Over the socket](agent/socket.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
-way. It is the newest release, 0.1.56, one past the transports the pinned gonk was built with
-(0.1.55): it speaks the same wire, and its own `ikigai-core` is the one that words a refusal at a
-family scope the way gonk does, which [Over the socket](agent/socket.md) prints. ⚠ One difference
-a reader with a real model can meet: a 0.1.56 client pings a QUIC door it is waiting on, and a
-0.1.55 door does not answer those pings while it works, so a call that is silent for more than 15
-seconds (a real model drafting or explaining) can be lost over `quic://`. The book's stub model
-answers at once, and the socket is not affected; the difference closes when gonk takes the 0.1.56
-transports.
+way. It is 0.1.61, the release whose transports the pinned gonk was built with, so it speaks the
+same wire, and its own `ikigai-core` (0.1.99, as gonk's) words a refusal at a family scope the way
+gonk does, which [Over the socket](agent/socket.md) prints. (0.1.62 is newer and changes no wire;
+the rule takes what gonk links, and the book's crates take 0.1.62.) The QUIC keep-alive a client
+sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
+model drafting or explaining) is not lost over `quic://`.
 
 <!-- transcript: manual — the check installs this version itself (scripts/test-transcripts.sh), reading the same file -->
 ```console

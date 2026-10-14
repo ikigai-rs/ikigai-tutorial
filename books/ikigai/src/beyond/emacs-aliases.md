@@ -162,7 +162,7 @@ mounted kernel's resources under the mount's prefix, so mounting a peer at `urn:
 gave functions like `ikigai-narrow-kernel-catalog`. A mount only adds: where the peer binds
 an endpoint the local kernel binds too, both functions are defined, so
 `ikigai-narrow-iki-fn-toUpper` sits beside the local `ikigai-fn-toUpper` (checked against
-`ikigai-cli` 0.1.56, the release this book is pinned to).
+`ikigai-cli` 0.1.56, the release this book was pinned to when this page was written).
 
 <!-- urn-gate: illustration urn:narrow: — a mount prefix from the scratch run, not a name the CLI binds. -->
 

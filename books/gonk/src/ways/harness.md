@@ -192,7 +192,7 @@ gonk init: …/library
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.56 at …/ikigai
+  ok       ikigai    ikigai 0.1.61 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `ada` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

@@ -236,35 +236,76 @@ everyone who reads the file sees, one hop from the model's claim it came from.
 ### 6. File it
 
 A published finding is a fact about the code, and fixing it is work, so it goes on the ledger.
-Filing is a person's act here too, keyed by the finding so that filing it twice files once:
+`ikigai-gonk findings file <root>` files a root's **published** findings as ledger items, never
+a pending one: the Queue decides, and the ledger holds what was decided. It speaks to the running
+gonk over its owner-only socket, because reading findings takes the browse read no anonymous
+caller holds. `--dry-run` reads for real and files nothing:
 
 <!-- transcript: run -->
 ```console
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append key=finding:645d521aab16830f076e0857 about=urn:iki:finding:645d521aab16830f076e0857 priority=1 labels=review initials panics on an empty word'
-#1 urn:iki:ledger:default:item:…
-[uncacheable]
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append key=finding:645d521aab16830f076e0857 about=urn:iki:finding:645d521aab16830f076e0857 priority=1 labels=review initials panics on an empty word'
-#1 urn:iki:ledger:default:item:… existing open
-[uncacheable]
+$ ikigai-gonk findings file demo --socket "$PWD/.ikigai/gonk.sock" --dry-run
+would file  645d521aab16830f076e0857  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…
+    key=urn:iki:finding:645d521aab16830f076e0857
+    labels=finding,repo:demo,major,reproduced
+    about=urn:repo:demo:file:src/lib.rs urn:iki:finding:645d521aab16830f076e0857 urn:iki:annotation:645d521aab16830f076e0857
+dry run, nothing filed: 1 published finding(s) on demo: 1 would be filed, 0 already filed, 0 skipped
+$ ikigai-gonk findings file demo --socket "$PWD/.ikigai/gonk.sock"
+filed    #1  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…
+1 published finding(s) on demo: 1 filed, 0 already filed, 0 skipped
+$ ikigai-gonk findings file demo --socket "$PWD/.ikigai/gonk.sock"
+already  #1 (open)  urn:iki:finding:645d521aab16830f076e0857
+1 published finding(s) on demo: 0 filed, 1 already filed, 0 skipped
+```
+
+Each finding is **one keyed append**, `key=urn:iki:finding:{id}`: the ledger checks the key and
+files in the same store update, so the second run, a timer that runs it after every triage
+session, or a second person running it at the same moment, files nothing new. The declined
+finding is not listed at all; it was never published. By default only the serious words
+(`gonk.queue.serious`, `critical` and `major` unless the config says otherwise) are filed, judged
+on the person's word when they re-rated it; `--severity all` files every published finding,
+and `--reproduced` only those a person marked reproduced. No priority is set: the severity is a
+label, and ranking is the ledger's `next` policy's call.
+
+The item carries the finding whole:
+
+<!-- transcript: run -->
+```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:1'
-   #1  open    p1  initials panics on an empty word  [review]
+   #1  open    p-  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…  [finding major repo:demo reproduced]
   iri:      urn:iki:ledger:default:item:…
-  key:      finding:645d521aab16830f076e0857
+  key:      urn:iki:finding:645d521aab16830f076e0857
   filed:    …
   updated:  …
+  about:    urn:iki:annotation:645d521aab16830f076e0857
   about:    urn:iki:finding:645d521aab16830f076e0857
+  about:    urn:repo:demo:file:src/lib.rs
+  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty name, crashes the caller.
+  - finding: urn:iki:finding:645d521aab16830f076e0857
+  - file: src/lib.rs line 3
+  - quote: "name.split(' ').map(|word| &word[..1]).collect()"
+  - severity: major
+  - reviewer: stub
+  - published: …, marked reproduced
+  - note: initials("Ada Lovelace") panics: the empty middle word has no byte 0.
+  - annotation: urn:iki:annotation:645d521aab16830f076e0857
+  - judge: confirmed
+  - key: urn:iki:finding:645d521aab16830f076e0857
 [uncacheable]
 ```
 
-`about` joins the item to the finding, and through it to the file and the annotation, in one
-graph: "what is open against this file" is a query, not a search. From here the item is ordinary
-work: claimed, fixed on a branch with the reproduction as its regression test, and closed with the
-pull request as evidence, as in [Solo on one machine](solo.md).
+`about` joins the item to the finding, the annotation its publication minted and the file, in one
+graph: "what is open against this file" is a query, not a search, and browse's page for the file
+lists the item. From here the item is ordinary work: claimed, fixed on a branch with the
+reproduction as its regression test, and closed with the pull request as evidence, as in [Solo on
+one machine](solo.md).
 
-⚠ **gonk files nothing from its own review by itself.** The keyed append above is the whole of the
-step, and something has to send it: a person after triage, as here, or a script of your own over
-the socket. (For another tool's findings gonk ships a command, below; for its own there is none
-at the revision this book pins.)
+⚠ **gonk files nothing from its own review by itself.** Publishing and filing are two acts on
+purpose: the Queue's publish runs under the deciding person's grant, which holds
+`urn:cap:annotate` and need not hold any ledger's write token, and one click with effects in two
+graphs would leave no way to publish without filing. Something has to run `findings file`: a
+person after triage, as here, or a timer. ⚠ And file with the command only: an item filed by
+hand with some other key (`key=finding:<id>` was this chapter's own hand step before gonk had the
+command) is not the command's key, so the command files the finding again beside it.
 
 ### The same process with another reviewer
 
@@ -413,7 +454,7 @@ gonk init: …/library
   note     role                 triager: a person who decides each finding and files the ones to act on
   note     hook                 the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   ok       hook                 post-commit asks gonk to review each commit (core.hooksPath)
-  ok       ikigai               ikigai 0.1.56 at …/ikigai
+  ok       ikigai               ikigai 0.1.61 at …/ikigai
   ok       ledger               `default` (.gonk/gonk.toml)
   ok       holder               `triager` (.gonk/local.toml, this working tree only)
   ok       identity             the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

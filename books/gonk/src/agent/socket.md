@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.56
+ikigai 0.1.61
 ```
 
 ## Start a gonk, and find its socket
@@ -123,11 +123,12 @@ Here the config home IS the lesson, so the page names its own: `XDG_CONFIG_HOME`
 and wins over the variable; the page keeps the variable, which every release reads. Without
 one or the other the command reads yours.
 
-⚠ **Write the socket's path out in full.** The mount line is read as it is written, and
-`ikigai-cli` 0.1.56 does not expand a leading `~` in it: `mount = "prefer
-urn:iki:ledger:=~/.ikigai/gonk.sock"` fails with *No such file or directory*, naming the
-unexpanded path. That is why the line above is written with `printf` and `$PWD`; in your own
-config home, write your home directory's path.
+**A leading `~` in the mount line is your home.** Since `ikigai-cli` 0.1.58 the line
+`mount = "prefer urn:iki:ledger:=~/.ikigai/gonk.sock"` dials the socket under the home of whoever
+runs `ikigai`, by the same rule as every other path in the config home (`~name` is refused by
+name); before it the `~` was dialed as written and failed with *No such file or directory*. The
+line above is written with `printf` and `$PWD` only because this page's gonk is not in a home:
+its socket is in the page's scratch directory.
 
 A mount claims one prefix, so a host that also wants the store's resources adds the same line
 for `urn:iki:store:`, as the banner says. The two are one line each because a mount is a

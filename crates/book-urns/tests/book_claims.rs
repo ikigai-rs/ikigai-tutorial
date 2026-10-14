@@ -81,10 +81,11 @@ struct Claim {
     present: bool,
 }
 
-/// The status chapter's stamp: re-stamped from 0.3.1 on 2026-10-10 (ledger #1110).
+/// The status chapter's stamp: re-stamped from 0.3.1 on 2026-10-10 (ledger #1110), and from 0.3.2
+/// to 0.4.0 on 2026-10-14 with the workspace's pin (every claim below held at 0.4.0).
 const MODULE: Source = Source::Crate {
     name: "ikigai-module",
-    version: "0.3.2",
+    version: "0.4.0",
 };
 /// The machine-client chapter's stamp, where `ikigai mcp` with no grant warns.
 const CLI_028: Source = Source::Crate {
@@ -126,7 +127,7 @@ const WEB_DEMO: Source = Source::GitHub {
 const CLAIMS: &[Claim] = &[
     Claim {
         chapter: "modules/status.md",
-        stamp: "ikigai-module` 0.3.2's own first line still calls it",
+        stamp: "ikigai-module` 0.4.0's own first line still calls it",
         says: "the crate's first line still says Phase 1: in-process proof",
         source: MODULE,
         file: "src/lib.rs",

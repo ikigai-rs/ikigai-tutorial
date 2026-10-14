@@ -293,15 +293,17 @@ every line.
 ```console
 $ grep ' urn:iki:gonk:act ' gonk.log
 … gonk:Access urn:iki:gonk:act door=http verb=sink outcome=ok bytes=… dur=… principal=anon q=-
+… gonk:Access urn:iki:gonk:act door=http verb=sink outcome=denied bytes=- dur=0 principal=anon q=-
 $ grep ' urn:iki:gonk:page:item:default:1 ' gonk.log
 … gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
+… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=denied bytes=- dur=0 principal=- q=-
 … gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
 ```
 
 Read them with three things in mind:
 
-- **The subject is the resource, not the URL.** `/l/default/item/1` (read twice: once by
-  `curl` as itself, once as another page's link) was
+- **The subject is the resource, not the URL.** `/l/default/item/1` (asked three times: by
+  `curl` as itself, as an image another page loads, and as another page's link) was
   `urn:iki:gonk:page:item:default:1`; the form was `urn:iki:gonk:act`.
 - **`principal` is who the door could say was asking.** The form's line says `anon`, an
   anonymous write; a page read by nobody signed in says `-`. Signed in, every line names the
@@ -309,9 +311,11 @@ Read them with three things in mind:
   (core's principal scope), which is where the log reads it. Before gonk PR 122 the HTTP door
   knew who a write was from and never a read, so a signed-in read said `-` too.
 - **`outcome` is the kernel's, not HTTP's.** A refusal the resource makes (the `/l/book`
-  page) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
-  cross-site form, the foreign `Host`, the loaded image), is no line at all: there was no
-  request to log.
+  page, below) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
+  cross-site form, the foreign `Host`, the loaded image), is a line too, written by the edge
+  itself: `outcome=denied bytes=- dur=0`, under the resource the path would have reached, so
+  the second `act` line is the cross-site form and the middle item line is the image. Probing
+  shows up in the log. (Before gonk PR 151 an edge refusal wrote no line at all.)
 
 <!-- transcript: run -->
 ```console

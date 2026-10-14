@@ -28,10 +28,20 @@ lto = true
 # clones only this repo must be able to `cargo run` immediately; path refs would
 # require them to have the whole ecosystem laid out beside it.
 # Every ikigai pin in this workspace sits at its crate's newest published release as of
-# 2026-10-12, so the book teaches what a reader's fresh `cargo add` resolves. Where a pin moved for
+# 2026-10-14, so the book teaches what a reader's fresh `cargo add` resolves. Where a pin moved for
 # that alone its comment says so, and the reason that set the previous floor is kept beneath it.
-# 0.1.99 is the pin because it is core's published head and what the pinned gonk (71ca542) links:
-# `Description::validate` refuses an endpoint id or input name holding a code point no IRI can carry
+# 0.1.102 is the pin because it is core's published head (2026-10-14). 0.1.100 and 0.1.101 encode a
+# `[`, `]`, `#` or `?` in a name wherever an IRI is minted from it (ledger #1361, #1390), which no
+# crate here names. 0.1.102 is additive in the API (`Capability::satisfies`, `Verb: Ord`) and changes
+# three things a consumer observes: a typed selection ends with every argument-free action, the
+# kernel's own among them (ledger #271); every `urn:kernel:*` operation is a trace node (ledger
+# #39); and `urn:kernel:validate endpoint=` resolves in the caller's chain (ledger #28). The pinned
+# gonk (3edf830) links 0.1.99, and so does the `ikigai` both books replay (cli 0.1.61 and 0.1.62,
+# installed `--locked`, link 0.1.99), so a console or REPL transcript can print what 0.1.99 printed
+# while a cell or `cargo run` prints 0.1.102; no page printed differently at the move
+# (books/gonk/DESIGN.md records the gap). Before that the pin was 0.1.99, core's published
+# head and what the pinned gonk (71ca542) then linked: `Description::validate` refuses an endpoint
+# id or input name holding a code point no IRI can carry
 # (DEL, a C1 control, private use, a noncharacter; ledger #1351), which no crate here names. The
 # floor for what the books PRINT is 0.1.97 (YANKED: it was published from a draft branch, and a lock
 # must never hold it), whose change the books show: a refusal at a FAMILY scope (`prefix*`) names
@@ -82,10 +92,12 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.99"
+ikigai-core = "0.1.102"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
-# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.99 is the pin because
-# it is the release paired with core 0.1.99: it moves `owl:versionInfo` and nothing else, which no
+# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.102 is the pin because
+# it is the release paired with core 0.1.102: 0.1.101 spells a plan id as a name (ledger #1391), and
+# 0.1.102 moves `owl:versionInfo` and nothing else; no page renders either. Before that the pin was
+# 0.1.99, paired with core 0.1.99: it moves `owl:versionInfo` and nothing else, which no
 # page renders. Before that the pin was 0.1.98, paired with core 0.1.98 (0.1.97 is yanked with
 # core's): it spells a `%` in an endpoint id or input name as `%25`. Before that the pin was 0.1.96,
 # paired with core 0.1.96 (it defines the layer family, which no page renders). Before that the pin
@@ -96,7 +108,7 @@ ikigai-core = "0.1.99"
 # contract, and its vocabulary defines `ik:contract` and documents `ik:ActionMatch`'s new subject;
 # it requires core 0.1.91. Before that the pin was 0.1.66, the release core 0.1.66 paired with,
 # while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-vocab = "0.1.99"
+ikigai-vocab = "0.1.102"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
@@ -129,10 +141,15 @@ ikigai-sexpr = { version = "0.2.3", default-features = false }
 # `urn:iki:space:diagram` (ledger #987), and `render` is unchanged, so the picture is the same
 # bytes. A 0.x caret, so also a ceiling (<0.3.0).
 ikigai-diagram = "0.2.0"
-# 0.3.2 is the pin because it is the published head: a failed out-of-band host call is recorded
-# as a dependency, which no chapter shows. The status chapter still stamps its claims at 0.3.1
-# (`book_claims` fetches that exact version from crates.io, whatever this pin says), so moving
-# this line restamps nothing. 0.3.1 over 0.3.0 is a constructor form, no new surface. 0.3.0 is the version where the module wire carries the error TYPE both ways, a result's
+# 0.4.0 is the pin because it is the published head: an out-of-band host call is held to its
+# session's capability (ledger #83), an unwired module channel fails at once with a typed error
+# (ledger #746), and `ModuleSessionTransport::invoke_session` returns `ikigai_core::Result`, the
+# minor bump; no crate here implements that trait (`loadable-module` builds a `ModuleSpace` over
+# the in-process transport). A 0.x caret, so also a ceiling (<0.5.0); the old pin "0.3.2" was a
+# ceiling below 0.4. Before that the pin was 0.3.2: a failed out-of-band host call is recorded
+# as a dependency, which no chapter shows. The status chapter stamps its claims at a version of its
+# own (`book_claims` fetches that exact version from crates.io, whatever this pin says); it was
+# re-stamped at 0.4.0 with this pin, and every claim held. 0.3.1 over 0.3.0 is a constructor form, no new surface. 0.3.0 is the version where the module wire carries the error TYPE both ways, a result's
 # declared golden threads, and the module's cards (so the manifold through a ModuleSpace
 # lists the module's own actions and the host enforces its `requires` from its own
 # description). It was a minor bump because `ModuleCall`/`ModuleReply` are exhaustive
@@ -143,10 +160,13 @@ ikigai-diagram = "0.2.0"
 # (Older history: 0.2.0 enforced a module endpoint's declared `requires` across the
 # boundary, growing `ModuleSpace::new` its `ModuleFloor` argument; 0.1.9 was the floor
 # because `Resolved` grew a public `canonical` field in ikigai-core 0.1.64.)
-ikigai-module = "0.3.2"
+ikigai-module = "0.4.0"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
-# 0.2.2 is the pin because it is the published head: an update cannot grow a stored triple term past
+# 0.2.4 is the pin because it is the published head: 0.2.3 counts a GRAPH block's patterns toward
+# the enclosing join (ledger #1426, #1429), and 0.2.4 transrepts a `graph=` source to RDF when its
+# type is not an RDF syntax (ledger #1442); "The graph face" selects over the catalog's Turtle, which
+# is RDF already, and prints the same rows. Before that the pin was 0.2.2, the published head then: an update cannot grow a stored triple term past
 # the nesting bound (ledger #1326), and "The graph face" only selects. Before that the pin was
 # 0.2.1, the published head past the old pin's 0.x ceiling (<0.2.0): 0.2.0's change is that each
 # configuration-free space names itself `urn:iki:space:<module>` (ledger #987), and 0.2.1 sizes the
@@ -154,7 +174,7 @@ ikigai-module = "0.3.2"
 # the same rows at it. Before that the floor was 0.1.11, for a security fix, not for an API: the
 # release cli 0.1.43 adopted (ledger #962), since a book should not teach a face below the floor its
 # own host ships; before it, 0.1.7, the API the chapter uses. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-sparql = "0.2.2"
+ikigai-sparql = "0.2.4"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"
@@ -162,17 +182,26 @@ oxrdf = "0.3"
 # The gonk Book. gonk itself is NOT a dependency of any crate here: it is a binary, pinned to a git
 # rev in `books/gonk/gonk.rev` (it is not on crates.io), and installed only by
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is built
-# from, and they follow gonk's lock until a release the book needs runs ahead of it. Today they take
-# the same releases: the gonk in `gonk.rev` (71ca542) links core 0.1.99, ledger 0.11.0, store
-# 0.2.19, browse 0.18.8, script 0.3.3 and nl 0.4.0, as these crates do (ledger #1365). A console
-# transcript is gonk's answer and a cell or `cargo run` is these crates', each checked against its
-# own source, so when the two run apart again books/gonk/DESIGN.md records the gap. (From tutorial
+# from, and they follow gonk's lock until a release the book needs runs ahead of it. Today they run
+# ahead: the gonk in `gonk.rev` (3edf830) links core 0.1.99, ledger 0.11.1, store 0.2.21, browse
+# 0.18.8, script 0.3.3 and nl 0.4.0, while these crates take the 2026-10-14 heads (core 0.1.102,
+# ledger 0.12.0, store 0.2.22, browse 0.18.9, script 0.3.5). A console transcript is gonk's answer
+# and a cell or `cargo run` is these crates', each checked against its own source, so the gap is
+# recorded in books/gonk/DESIGN.md. (From 2026-10-12 to 2026-10-14 the gonk then pinned (71ca542)
+# linked core 0.1.99, ledger 0.11.0, store 0.2.19, browse 0.18.8, script 0.3.3 and nl 0.4.0, as these
+# crates did (ledger #1365). From tutorial
 # PR 111 and PR 112 to ledger #1365 the pinned gonk, 2598192, linked core 0.1.96, ledger 0.9.0 and
 # store 0.2.15 while these crates took core 0.1.98, ledger 0.11.0 and store 0.2.19, so its consoles
 # printed the family-scope refusal without core 0.1.97's clause; until 9f2e89e the pinned gonk,
 # 9704b54, linked ledger 0.6.2 while these crates took 0.9.0, so no transcript could ask `count`;
 # ledger #1245 closed that gap.)
-# 0.11.0 is the pin because it is the published head: 0.10.0 adds `urn:cap:ledger:about:{ledger}`,
+# 0.12.0 is the pin because it is the published head: 0.11.1 fixes an unled audit's findings (a
+# deep `blocks` chain, a large ledger, closed items; ledger #1418–#1423) and floors ikigai-store at
+# 0.2.21, a security floor; 0.12.0 accepts `labels=` at any length, adds `parent=` on items and
+# `count`, `Filter::parent` and `Item::children`, puts `"children": []` in every JSON item object, and
+# gives `next` the hand-back reason (ledger #1452, #1454, #1455). Additive: no crate here builds an
+# `Item` or a `Filter`. The old pin "0.11.0" was a ceiling below 0.12. Before that the pin was
+# 0.11.0, the published head then: 0.10.0 adds `urn:cap:ledger:about:{ledger}`,
 # which adds and removes an item's `about` edges without the close grant (`write:{ledger}` still
 # covers it, so `ledger-host`'s writer is unchanged), and `item:{id}:about` now declares the family
 # `urn:cap:ledger:*`, as claim, comment and close do (ledger #1315); 0.11.0 adds a claim kind,
@@ -201,13 +230,21 @@ oxrdf = "0.3"
 # then 0.4.2, where a malformed timestamp stopped dropping an item from `items`/`next` (ledger
 # #866). Before 0.4.0 the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that
 # the first chapter walks straight through: two appends in one millisecond minting the same id,
-# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.12.0): read it as a RANGE.
+# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.13.0): read it as a RANGE.
 # The old pin, "0.9.0", was a ceiling below 0.10 and held the book at 0.9.
-ikigai-ledger = "0.11.0"
+ikigai-ledger = "0.12.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
-# RocksDB at all. 0.2.19 is the pin because it is the published head, with ledger 0.11.0, and what
-# the pinned gonk (71ca542) links: 0.2.16 and 0.2.17 make every `SharedWriter::over` on one
+# RocksDB at all. 0.2.22 is the pin because it is the published head and what ledger 0.12.0 requires
+# (0.2.21, a security floor). 0.2.20 names a consumer's own timeout argument (ledger #1383); 0.2.21
+# counts a GRAPH block's patterns toward the join bound, caps in-flight overdue work and bounds a
+# load (ledger #1426–#1428); 0.2.22 REFUSES a scoped read whose constant `GRAPH <iri>` names a graph
+# outside its `graph=` set, naming the graph, where it answered empty (ledger #388), and adds the
+# join count and `SharedWriter::narrowed_away` (ledger #1464, #1479). It stays a caret, not an exact
+# pin: nothing here depends on one patch's bytes, and a caret lets a reader's resolve take the next
+# security floor. No page's query names a GRAPH outside its set. Before that the pin was 0.2.19, the
+# published head with ledger 0.11.0, and what the pinned gonk (71ca542) linked: 0.2.16 and 0.2.17
+# make every `SharedWriter::over` on one
 # handle share the store's one writer (ledger #1276, #1324), 0.2.18 adds `EvaluationBudget`, a time
 # budget for SPARQL a consumer evaluates itself (ledger #1327), and 0.2.19 bounds the RDF 1.2 triple
 # terms an update leaves in the store and reads `<<(` as one token (ledger #1333, #1354). No crate
@@ -228,10 +265,14 @@ ikigai-ledger = "0.11.0"
 # No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
 # links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.19", default-features = false }
+ikigai-store = { version = "0.2.22", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.8 is the pin because it is the
-# published head and what the pinned gonk (71ca542) links: 0.18.7 archives a review pass that
+# Book's "Explain, with a mounted model" and "One-off review". 0.18.9 is the pin because it is the
+# published head: one writer per store handle, narrowed to the mount graph (ledger #1324), and a PR
+# explanation cut at the output budget is refused rather than archived (ledger #1055); no Rust API,
+# resource name or stored term moves. The pinned gonk (3edf830) links 0.18.8. Before that the pin was
+# 0.18.8, the published head and what the pinned gonk (71ca542) linked: 0.18.7 archives a review
+# pass that
 # carries findings when every fresh quote misquotes (ledger #1303), and 0.18.8 keeps an erroring
 # pass's clean memos and names memo-less regions in the region count (ledger #1312); the stub
 # model's explanations and findings printed the same at it. Before that the pin was 0.18.6, what
@@ -248,7 +289,7 @@ ikigai-store = { version = "0.2.19", default-features = false }
 # release that added the explain-status cost line the chapter shows ("opens instantly from the
 # archive"), and what gonk edb9a3d links. A 0.x caret: also a ceiling (<0.19.0); read it as a
 # RANGE.
-ikigai-browse = "0.18.8"
+ikigai-browse = "0.18.9"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
@@ -273,7 +314,10 @@ ikigai-markdown = "0.1.4"
 # Scripts as resources, for the section "Code and language as resources": `urn:script:{name}`
 # with content-addressed versions, `…:result` (run as a read) and `…:runs` (run for effects),
 # under the least of what a script declares, what its publisher held and the host's ceiling.
-# 0.3.3 is the pin and the floor for what the chapters PRINT: a run of a draft is refused for its
+# 0.3.5 is the pin because it is the published head: 0.3.4 lets a script declare a store time
+# budget, bounded like the rest of its authority (ledger #1384), and 0.3.5 moves its ledger and store
+# dev floors to the security releases (ledger #1458); no chapter declares a budget. 0.3.3 is the
+# floor for what the chapters PRINT: a run of a draft is refused for its
 # state ("… is a draft; publish it to run it"), where before it the generic run contract declared
 # `urn:cap:lisp` and the author of a SPARQL draft was told her capability did not grant Lisp
 # (ledger #1261), and a query that reads no graph is refused saying what to write (ledger
@@ -282,7 +326,7 @@ ikigai-markdown = "0.1.4"
 # (ledger #1173, #1174); 0.3.1 and 0.3.2 fix plans (ledger #1220, #1222), which no chapter
 # publishes. It requires core 0.1.95, the line above. A 0.x caret: also a ceiling (<0.4.0);
 # read it as a RANGE.
-ikigai-script = "0.3.3"
+ikigai-script = "0.3.5"
 # Natural language to a DRAFT script, for "A sentence becomes a draft": `urn:nl:grounding` (what
 # the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.4.0 is the
 # pin and the floor: it is the published head, and the release whose drafter, when the model gives
@@ -298,10 +342,14 @@ ikigai-script = "0.3.3"
 ikigai-nl = "0.4.0"
 # A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
 # every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
-# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.13.1 and
+# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.14.0 and
 # the HTTP seam it is built on, ikigai-http 0.1.9 (`HttpTransport`, which the host fills; 0.1.7
-# is llm's own floor, the port-aware network gate). 0.x carets: ceilings too (<0.14.0, <0.2.0).
-ikigai-llm = "0.13.1"
+# is llm's own floor, the port-aware network gate). 0.14.0 types a transport failure as
+# `Unavailable` or `Timeout` where 0.13 said `Endpoint`, and refuses an `as=` its faces do not
+# declare (ledger #88, #179); the drafter reports whatever the model's failure says, and asks for no
+# face. It declares rust-version 1.88. 0.x carets: ceilings too (<0.15.0, <0.2.0); the old pin
+# "0.13.1" was a ceiling below 0.14.
+ikigai-llm = "0.14.0"
 ikigai-http = "0.1.9"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
