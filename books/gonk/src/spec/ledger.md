@@ -32,6 +32,13 @@ idempotent by construction — a task with an item answers `existing`, an item t
 `FINISHED` — so a host can run it on every commit, or on a file watcher, and a second run with
 nothing changed writes nothing.
 
+"Writes nothing" is meant literally, and it matters to whoever reads the ledger in between. A
+re-sync whose appends all answer `existing` changes nothing in the store, so it cuts no golden
+thread, and a `next` that a reader has already asked for is still served from the cache after it.
+A sync on every commit costs the ledger's readers nothing on the commits that touch no task. The
+walk below asserts it with `Kernel::is_cached`, which asks the cache without resolving anything;
+the sync that does close an item cuts `next` like any other write.
+
 ## The task's IRI is the key
 
 Each append carries `key=<the task's IRI>`. A key is the caller's own name for an item, unique in
@@ -66,7 +73,7 @@ archived for real:
 ```rust
 # extern crate openspec_ledger;
 # extern crate ikigai_core;
-use ikigai_core::Verb;
+use ikigai_core::{Capability, Iri, Request, Verb};
 use openspec_ledger::{ask, kernel, lift_tree, sync_ledger, Workspace};
 
 let tree = Workspace::new();
@@ -104,10 +111,20 @@ assert_eq!(undo, "2\n");
 let next = ask(&host, Verb::Source, "urn:iki:ledger:next", &[]).unwrap();
 assert!(next.contains("ready: 3"), "{next}");
 
+// A sync with nothing to do cuts nothing: that `next` is still in the cache after it.
+let cached = || host.is_cached(
+    &Request::new(Verb::Source, Iri::parse("urn:iki:ledger:next").unwrap()),
+    &Capability::root(),
+);
+assert!(cached());
+assert!(sync_ledger(&host).unwrap().is_empty());
+assert!(cached(), "a re-sync that filed nothing cut next");
+
 // Check off 1.2 in tasks.md, lift, sync: its item closes, with the reason.
 tree.check("add-undo", "1.2");
 lift_tree(&host, &tree.tree()).unwrap();
 assert_eq!(sync_ledger(&host).unwrap(), ["closed #1 (done) — checked off in tasks.md"]);
+assert!(!cached(), "a close is a write, and cuts next");
 
 // Archive the change: its folder moves, the lift sees the new paths, the rest close.
 tree.archive("add-undo", "2026-10-07");

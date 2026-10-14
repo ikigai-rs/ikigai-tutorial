@@ -256,13 +256,55 @@ passkey's label, so it would read as Ada's. gonk's README states this residual r
 hiding it. An agent that must not be able to claim a person needs an identity of its own on the
 QUIC door, where the author rule runs ([The three doors](../machines/doors.md)).
 
+## Asking in SPARQL
+
+The browser's [`/sparql`](../ledger/browser.md#the-pages) has a twin on the socket. gonk binds
+`urn:sparql:select` (and `:ask`, `:construct` and `:describe`) over the store it holds, so under
+the alias it is `urn:gk:sparql:select`. Naming no graph, a query's dataset is the **union of
+every named graph the caller may read**. At root over the socket that is every graph gonk holds:
+here the ledger's, and the one the delete above moved item 2's six quads into:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:sparql:select as=text/csv query="SELECT ?g (COUNT(*) AS ?n) WHERE { GRAPH ?g { ?s ?p ?o } } GROUP BY ?g ORDER BY ?g"'
+g,n
+urn:iki:ledger:graph:default,…
+urn:iki:ledger:graph:default:deleted,6
+[uncacheable]
+```
+
+Sealed to a read of one ledger, the same query's union is that ledger's graph alone. `graph=`
+narrows the dataset to the graphs it names, and a graph the seal holds no token for refuses the
+whole query rather than answering over the part it can see. The ledger's deleted graph and a
+graph that does not exist are refused in the same words, so a refusal says nothing about whether
+a graph is there:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default' -c 'source urn:gk:sparql:select as=text/csv query="SELECT ?g (COUNT(*) AS ?n) WHERE { GRAPH ?g { ?s ?p ?o } } GROUP BY ?g ORDER BY ?g"' -c 'source urn:gk:sparql:select as=text/csv graph=urn:iki:ledger:graph:default:deleted query="SELECT * WHERE { ?s ?p ?o }"' -c 'source urn:gk:sparql:select as=text/csv graph=urn:iki:ledger:graph:nothing-here query="SELECT * WHERE { ?s ?p ?o }"'
+sealed — capability: urn:cap:ledger:read:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+g,n
+urn:iki:ledger:graph:default,…
+[uncacheable]
+error: denied: reading <urn:iki:ledger:graph:default:deleted> through `urn:iki:store:graph-select` needs the grant `urn:cap:store:read:graph:urn:iki:ledger:graph:default:deleted`, which this capability does not hold. Every graph a scoped read names must be granted: the read is refused rather than answered over the graphs that are, because a narrower dataset than the one asked for returns rows that look right and are not. A grant names exactly one graph; holding `urn:cap:store:read` does not imply it, and is instead the authority for `urn:iki:store:select` over the whole dataset.
+error: denied: reading <urn:iki:ledger:graph:nothing-here> through `urn:iki:store:graph-select` needs the grant `urn:cap:store:read:graph:urn:iki:ledger:graph:nothing-here`, which this capability does not hold. Every graph a scoped read names must be granted: the read is refused rather than answered over the graphs that are, because a narrower dataset than the one asked for returns rows that look right and are not. A grant names exactly one graph; holding `urn:cap:store:read` does not imply it, and is instead the authority for `urn:iki:store:select` over the whole dataset.
+— batch: 4 commands · uncacheable
+```
+
+Each form is one hop onto the store's `urn:iki:store:graph-select` under the caller's own
+capability, which is why the refusal is the store's: SPARQL over the socket is a mapping onto the
+grant, not a second way around it. The same query text answered less under the seal, and that is
+the point of a default dataset drawn from the grant: the query never has to know whose it is. A
+host that wants the query face without a prefix adds one more line to its config
+home, `mount = "prefer urn:sparql:=…/gonk.sock"`, the same shape as the ledger's.
+
 ## Over MCP
 
 An agent framework that speaks MCP rather than ikigai reaches the same ledger through
 `ikigai mcp`, which projects a kernel's capability-scoped manifold as MCP tools. It could do
 that over this socket with a sealed grant like the one above, and the tool list would be the
 ledger's actions under that grant; but every request would still be the owner's, with the
-residual just shown. The [next chapter](mcp.md) gives the agent an identity of its own on the
+residual shown above. The [next chapter](mcp.md) gives the agent an identity of its own on the
 QUIC door instead, so the author rule runs and the log names the agent.
 
 ## What you have now

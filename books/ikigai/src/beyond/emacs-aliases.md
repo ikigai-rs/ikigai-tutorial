@@ -159,15 +159,12 @@ error: denied: capability does not grant `urn:cap:kernel:inspect` (declared by `
 the kernel you reach gives you. Change which kernel that is, and refresh: a different
 `ikigai-connect` host gives that host's surface. A mount in `ikigai-mounts` adds the
 mounted kernel's resources under the mount's prefix, so mounting a peer at `urn:narrow:`
-gave functions like `ikigai-narrow-kernel-catalog`.
+gave functions like `ikigai-narrow-kernel-catalog`. A mount only adds: where the peer binds
+an endpoint the local kernel binds too, both functions are defined, so
+`ikigai-narrow-iki-fn-toUpper` sits beside the local `ikigai-fn-toUpper` (checked against
+`ikigai-cli` 0.1.56, the release this book is pinned to).
 
 <!-- urn-gate: illustration urn:narrow: — a mount prefix from the scratch run, not a name the CLI binds. -->
-
-> ⚠ As of `ikigai-cli` 0.1.41, a mount also *removes* functions. When the mounted peer
-> binds an endpoint the local kernel also binds (both had `toUpper` and the kernel's own
-> resources), the generated file keeps only the mounted copy, so in that run
-> `ikigai-fn-toUpper` was gone and `ikigai-narrow-iki-fn-toUpper` took its place. Check
-> the count after you refresh with a new mount.
 
 ## Calling them
 

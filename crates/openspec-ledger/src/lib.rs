@@ -370,6 +370,38 @@ mod tests {
         assert!(sync_ledger(&kernel).unwrap().is_empty());
     }
 
+    /// A re-sync with nothing to do cuts nothing: every append answers `existing`, so no store
+    /// update runs and a cached `next` is still served from the cache afterward. The sync that
+    /// DOES act (a checked box closing an item) cuts it, so the probe is seen to answer both ways.
+    #[test]
+    fn a_no_op_resync_leaves_a_cached_next_cached() {
+        use ikigai_core::{Capability, Iri, Request};
+        let next = Request::new(Verb::Source, Iri::parse("urn:iki:ledger:next").unwrap());
+        let tree = Workspace::new();
+        let kernel = kernel();
+        lift_tree(&kernel, &tree.tree()).unwrap();
+        assert_eq!(sync_ledger(&kernel).unwrap().len(), 3);
+        ask(&kernel, Verb::Source, "urn:iki:ledger:next", &[]).unwrap();
+        assert!(
+            kernel.is_cached(&next, &Capability::root()),
+            "next is cached once read"
+        );
+
+        assert!(sync_ledger(&kernel).unwrap().is_empty());
+        assert!(
+            kernel.is_cached(&next, &Capability::root()),
+            "a re-sync whose appends all answer `existing` cut next's thread"
+        );
+
+        tree.check("add-undo", "1.2");
+        lift_tree(&kernel, &tree.tree()).unwrap();
+        assert_eq!(sync_ledger(&kernel).unwrap().len(), 1);
+        assert!(
+            !kernel.is_cached(&next, &Capability::root()),
+            "a close cuts next"
+        );
+    }
+
     /// ★ The claim the chapter makes: syncs running at once file each task ONCE. With 0.3.0's
     /// check-then-append (a query for tasks no item is `about`, then an append) every thread
     /// could see a task unfiled before any of them filed it; the key makes the check and the
