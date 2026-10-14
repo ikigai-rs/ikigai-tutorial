@@ -64,7 +64,9 @@ what to fix:
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:sheet:cell:a1
 source urn:iki:tutorial:sheet:cell:E1'>
 <pre class="ikigai-run-expected">error: invalid argument `ref`: `a1` is not a cell: a capital letter for the column, then the row (e.g. B3)
-error: invalid argument `ref`: E1 is off the sheet, which is columns A–D and rows 1–6</pre>
+       `ref`: the cell, A1 to D6
+error: invalid argument `ref`: E1 is off the sheet, which is columns A–D and rows 1–6
+       `ref`: the cell, A1 to D6</pre>
 </div>
 
 The page's formula bar, further down, is more forgiving: it is the edge where a person types,

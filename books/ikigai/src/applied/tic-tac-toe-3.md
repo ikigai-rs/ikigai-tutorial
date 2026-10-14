@@ -183,6 +183,7 @@ Now each of the rules, once. Naming the wrong mark, then the right one:
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:move:1:0 X
 sink urn:iki:tutorial:ttt:move:1:0 O'>
 <pre class="ikigai-run-expected">error: invalid argument `content`: it is O's turn, not X's
+       `content`: the mark to play — checked against the turn; left out, the turn plays (one of: X, O)
 O plays 1,0
 [uncacheable]</pre>
 </div>

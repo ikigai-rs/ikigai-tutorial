@@ -175,7 +175,8 @@ the client speaks the server's wire; moving gonk is a reason to look at this fil
 the pin is 0.1.61, gonk's own transports, and the exception below is closed (ledger #1472's arc,
 2026-10-14). 0.1.62 was already on crates.io and the rule took what gonk links; both link
 `ikigai-core` 0.1.99 as published, so a socket mount's family-scope refusal reads the same either
-way. ⚠ **At 71ca542 the pin was 0.1.56, one release PAST gonk's 0.1.55 transports** (ledger
+way. 0.1.63 (the evening of 2026-10-14) changed no transport crate's source, so the rule still
+takes 0.1.61. ⚠ **At 71ca542 the pin was 0.1.56, one release PAST gonk's 0.1.55 transports** (ledger
 #1365), the one exception so far. The
 reason is what a page prints: a client that mounts gonk's socket checks a family-scope floor in ITS
 OWN kernel, so "Over the socket"'s refusal is worded by the client's `ikigai-core`, and only 0.1.56
@@ -193,8 +194,9 @@ stayed with gonk's lock. The ikigai Book's REPL transcripts are a separate check
 `crates/book-urns/tests/book_transcripts.rs`, against a SEPARATE pin,
 `books/ikigai/ikigai-cli.version`, which the same script installs into its own root and CI caches
 under its own key: this pin follows gonk's lock (but for the exception above), that one follows the
-release the ikigai Book's pages were last replayed against. That one is 0.1.62 (2026-10-14, the
-update wave; 0.1.56 before it, ledger #1365; 0.1.55 before that, ledger #1353), the release the
+release the ikigai Book's pages were last replayed against. That one is 0.1.63 (the evening of
+2026-10-14, the second update wave, which links core 0.1.103 as the book's crates do; 0.1.62 that
+morning; 0.1.56 before it, ledger #1365; 0.1.55 before that, ledger #1353), the release the
 book's crates lock every cli crate at,
 `ikigai-engine` (the in-page cells' grammar) among them, and the replay runs it `--quiet`, which
 prints only the answers. Moving the ikigai Book's pin to 0.1.52 waited on the replay: from 0.1.48 a
@@ -214,14 +216,14 @@ yet waits for the pin, so a transcript and a listing are always answered by the 
 the book needs it first.
 
 **A version gap is OPEN, by decision** (2026-10-14, the update wave). The hub's wave moved every ikigai pin to
-its crate's newest release, ahead of gonk's lock, so the book's crates take `ikigai-core` 0.1.102,
-`ikigai-ledger` 0.12.0, `ikigai-store` 0.2.22, `ikigai-browse` 0.18.9, `ikigai-script` 0.3.5 and the
-cli crates at 0.1.62, while the pinned gonk (3edf830) links core 0.1.99, ledger 0.11.1, store 0.2.21,
+its crate's newest release, ahead of gonk's lock, and the evening's wave moved them again, so the
+book's crates take `ikigai-core` 0.1.103, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
+`ikigai-browse` 0.18.9, `ikigai-script` 0.3.6 and the cli crates at 0.1.63, while the pinned gonk (3edf830) links core 0.1.99, ledger 0.11.1, store 0.2.21,
 browse 0.18.8, script 0.3.3 and cli 0.1.61. No page prints differently because of it, checked by
 replaying every transcript and running every cell and listing: no console reads a ledger item's
 JSON face (where 0.12.0 adds `"children": []`), no query names a `GRAPH` outside its set (which
 store 0.2.22 refuses rather than answering empty), and no page shows a typed selection or a trace
-of a `urn:kernel:*` operation through gonk (core 0.1.102). The gap closes when the pin moves to a
+of a `urn:kernel:*` operation through gonk (core 0.1.102 and 0.1.103). The gap closes when the pin moves to a
 gonk that links those releases; until then a page that comes to show one of those differences says
 so where it shows it. There were four gaps before this one, all CLOSED by moving the pin; the last
 was closed 2026-10-12 (ledger #1365) by moving the pin to 71ca542, which linked core 0.1.99,

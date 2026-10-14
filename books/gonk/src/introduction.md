@@ -78,8 +78,8 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 The modules it links are published crates: `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.1,
 `ikigai-store` 0.2.21, `ikigai-browse` 0.18.8, `ikigai-script` 0.3.3 and `ikigai-nl` 0.4.0. The
 book's own crates (the ones its Rust listings and in-page cells run) take the newest releases, one
-step ahead of that: `ikigai-core` 0.1.102, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.22,
-`ikigai-browse` 0.18.9 and `ikigai-script` 0.3.5. So a `console` block is answered by gonk's
+step ahead of that: `ikigai-core` 0.1.103, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
+`ikigai-browse` 0.18.9 and `ikigai-script` 0.3.6. So a `console` block is answered by gonk's
 releases and a listing or a cell by the newer ones. No page prints differently because of it (the
 newer releases add a ledger item's `children` to its JSON face, refuse a query whose `GRAPH` names
 a graph outside its set, and trace the kernel's own operations, and no page here shows any of those
@@ -122,8 +122,8 @@ as the other process that reaches gonk. It IS on crates.io, so it is pinned to o
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
 way. It is 0.1.61, the release whose transports the pinned gonk was built with, so it speaks the
 same wire, and its own `ikigai-core` (0.1.99, as gonk's) words a refusal at a family scope the way
-gonk does, which [Over the socket](agent/socket.md) prints. (0.1.62 is newer and changes no wire;
-the rule takes what gonk links, and the book's crates take 0.1.62.) The QUIC keep-alive a client
+gonk does, which [Over the socket](agent/socket.md) prints. (0.1.62 and 0.1.63 are newer and
+change no wire; the rule takes what gonk links, and the book's crates take 0.1.63.) The QUIC keep-alive a client
 sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
 model drafting or explaining) is not lost over `quic://`.
 

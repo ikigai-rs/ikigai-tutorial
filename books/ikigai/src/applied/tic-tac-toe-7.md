@@ -286,7 +286,8 @@ tries to add an undo by naming one:
 ```
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:ttt:build urn:iki:tutorial:ttt:arrangement:undo'>
-<pre class="ikigai-run-expected">error: invalid argument `of`: &lt;urn:ikigai:space:_:1:door:2&gt; binds `ttt-undo`, which the host did not register: a declaration arranges registered endpoints and never mints one</pre>
+<pre class="ikigai-run-expected">error: invalid argument `of`: &lt;urn:ikigai:space:_:1:door:2&gt; binds `ttt-undo`, which the host did not register: a declaration arranges registered endpoints and never mints one
+       `of`: the name of a declaration, e.g. urn:iki:tutorial:ttt:arrangement:tic-tac-toe; the one input, so a positional value lands here</pre>
 </div>
 
 <!-- urn-gate: illustration urn:ikigai:space:_:1:door:2 — the name core's refusal gives the

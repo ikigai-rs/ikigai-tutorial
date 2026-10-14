@@ -19,5 +19,8 @@ path = "src/main.rs"
 [dependencies]
 # The contrast floor lives in the ecosystem's own crate rather than in six lines of
 # luminance arithmetic copied into this one. `ikigai-browse` was its first consumer; the
-# onboarding material is the second, which is the point.
-ikigai-a11y = "0.2.1"
+# onboarding material is the second, which is the point. 0.2.2 is the pin because it is the
+# published head: its one library change is the ikigai-core floor, raised to 0.1.100, beneath the
+# workspace's core pin; no API change, so the contrast it measures is the same arithmetic. A 0.x
+# caret: also a ceiling (<0.3.0).
+ikigai-a11y = "0.2.2"

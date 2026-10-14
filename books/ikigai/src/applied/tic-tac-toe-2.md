@@ -65,8 +65,16 @@ spelled another way:
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:ttt:cells:0.0,1.0,2.0,
 source urn:iki:tutorial:ttt:cells:0.0,01.0'>
 <pre class="ikigai-run-expected">error: invalid argument `list`: an empty member — cells are x.y, joined by single commas
-error: invalid argument `list`: `01` is not an integer in its plain form (e.g. 0, 2, -1)</pre>
+       `list`: the cells, in order: x.y joined by commas, e.g. 0.0,1.0,2.0
+error: invalid argument `list`: `01` is not an integer in its plain form (e.g. 0, 2, -1)
+       `list`: the cells, in order: x.y joined by commas, e.g. 0.0,1.0,2.0</pre>
 </div>
+
+The first line of each is the endpoint's refusal, word for word. The indented line under it is
+the shell's, not the game's: since `ikigai-cli` 0.1.63, a refusal of one named argument is
+followed by what that argument's own description says it takes, read from the endpoint's
+contract, so the fix sits next to the complaint. The game declared that description once, in
+its `ArgSpec`, and never wrote it into an error message.
 
 ## Rows, columns and diagonals: eight names, no code
 
