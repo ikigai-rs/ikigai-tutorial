@@ -15,7 +15,7 @@ Adapted from the [ACCESSIBILITY.md template](https://github.com/mgifford/ACCESSI
 | Project | ikigai-tutorial: *The ikigai Book* and *The gonk Book* |
 | Published at | <https://ikigai-rs.github.io/ikigai-tutorial/> and <https://ikigai-rs.github.io/ikigai-tutorial/gonk/> |
 | Owner | the maintainers of this repository |
-| Report a barrier | [a GitHub issue](https://github.com/ikigai-rs/ikigai-tutorial/issues/new) |
+| Report a barrier | [a GitHub issue](https://github.com/ikigai-rs/ikigai-tutorial/issues/new) with the `accessibility` label |
 | Private channel | [private vulnerability reporting](https://github.com/ikigai-rs/ikigai-tutorial/security/advisories/new), for anything security-sensitive |
 | Target | WCAG 2.2 Level AA |
 | Status | Evaluation in progress. No conformance claim. |
@@ -200,10 +200,12 @@ claim, a new exception or an accepted risk needs a maintainer's review.
 
 ## Reporting a barrier
 
-[Open an issue](https://github.com/ikigai-rs/ikigai-tutorial/issues/new) and put "accessibility"
-in its title. Useful details: what you were trying to do, the page and theme, what happened and
-what you expected, whether you found a way around it, and your browser, operating system and any
-assistive technology, if you are comfortable sharing them. You never need to disclose a disability.
+[Open an issue](https://github.com/ikigai-rs/ikigai-tutorial/issues/new) and give it the
+`accessibility` label; if GitHub does not let you set labels on this repository, put
+"accessibility" in the title and a maintainer will add the label. Useful details: what you were
+trying to do, the page and theme, what happened and what you expected, whether you found a way
+around it, and your browser, operating system and any assistive technology, if you are
+comfortable sharing them. You never need to disclose a disability.
 
 Anything security-sensitive, or anything you would rather not post publicly, goes through
 [private vulnerability reporting](https://github.com/ikigai-rs/ikigai-tutorial/security/advisories/new).
@@ -241,7 +243,8 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-09-29 | Three color failures only a real browser sees, repaired | PR #56 |
 | 2026-10-10 | Blank lines inside cells refused at the source and on the built page | PR #91 |
 | 2026-10-10 | axe in a real browser, every theme, made a gate | PR #97 |
-| 2026-10-15 | This file | this pull request |
+| 2026-10-15 | This file | PR #128 |
+| 2026-10-15 | Reporting asks for the `accessibility` label; `AGENTS.md` points agents here | this pull request |
 
 ## References
 
