@@ -429,6 +429,14 @@ accessibility regression is a red build, not a review comment.
 > popup is `display: none` until you press `?`, so it is out of the tree entirely — worth
 > recording, because a static scan of the markup will keep reporting it.
 
+## Accessibility
+
+**[ACCESSIBILITY.md](ACCESSIBILITY.md)** says what is in scope (both books as published, their
+in-page kernels, and mdbook's chrome as far as we can repair it), the target (WCAG 2.2 AA; an
+evaluation in progress, not a conformance claim), the evidence above and what it does not cover,
+the barriers we know about, and how to report one. Read it before changing a book's pages,
+styles, scripts or kernels.
+
 ## Layout
 
 ```
