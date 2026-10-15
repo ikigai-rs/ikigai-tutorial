@@ -43,6 +43,7 @@
 
 - [A kernel behind a socket](beyond/socket.md)
 - [Who is asking](beyond/identity.md)
+- [A query's authority is its dataset](beyond/datasets.md)
 - [Preferential resolution](beyond/preference.md)
 - [The editor as a client](beyond/emacs.md)
 - [The aliases, day to day](beyond/emacs-aliases.md)

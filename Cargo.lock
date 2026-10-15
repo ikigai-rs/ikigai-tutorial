@@ -736,6 +736,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "graph-authority"
+version = "0.1.0"
+dependencies = [
+ "book-transcripts",
+ "ikigai-core",
+ "ikigai-script",
+ "ikigai-store",
+ "oxigraph",
+ "script-host",
+]
+
+[[package]]
 name = "hash32"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

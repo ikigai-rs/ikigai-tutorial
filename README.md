@@ -13,7 +13,7 @@ computing kernel in Rust. Books, worked examples, and the code they teach.
 | **Getting started** | The resolution model, running a kernel, your first endpoint (`camel-case`), what resolution buys you (a cache hit, a golden thread cut, a trace, a catalog — each one run), self-description, binding, configuration (a config file the host reads, layered), the file workspace |
 | **Building endpoints** | A transreptor of your own and the kernel selecting it, a three-verb endpoint whose declared capability is enforced per verb, SPARQL over the catalog, and a clock-reading endpoint tested under a fixed clock |
 | **Loadable modules** | Modules vs. linked-in spaces, the host callback, the wire session, dual-mode crates, and an honest account of what is actually finished |
-| **Beyond one host** | A kernel behind a socket, the authority a certificate mints, the three things a mount can mean, an editor and a machine as clients — and three exercises against all of it |
+| **Beyond one host** | A kernel behind a socket, the authority a certificate mints, a query's authority as its dataset (two tenants in one store, one SPARQL text, three answers, and a join refused rather than narrowed), the three things a mount can mean, an editor and a machine as clients — and three exercises against all of it |
 | **Polyglot tracks** | Part I mirrored from Python and TypeScript over the wire protocol — decorator, signature-as-contract, mount-as-binding, cache and trace from outside, a scoped connect refused — plus a notebook querying the catalog with rdflib and SPARQL; and what an L0 peer cannot do |
 | *end matter* | A glossary, a map of every repository in the organization (derived from the org's list, not from memory), and how to contribute a module |
 
@@ -395,7 +395,7 @@ accessibility regression is a red build, not a review comment.
 books/                 mdbook sources — prose
 crates/                the code each part teaches — compiled, linted, tested
                        (hello-camel, building-endpoints, loadable-module, two-hosts, …,
-                       script-host, script-authority, sentence-draft)
+                       graph-authority, script-host, script-authority, sentence-draft)
 crates/your-endpoints  the reader's crate: where the exercises are done, never quoted
 examples/              the polyglot tracks' listings (Python, Deno, a notebook), run by hand
                        against a served kernel — not compiled here, not on PyPI/JSR yet

@@ -23,7 +23,9 @@ runner does not, so the runner's own capability is the fourth term, implicit in 
 For a SPARQL script the first term is not written by anybody. It is **derived** from the text:
 each graph a query names is `urn:cap:store:read:graph:<iri>`, and the one graph an update writes is
 `urn:cap:store:write:graph:<iri>`. So the author cannot understate what a query needs, and cannot
-overstate it either.
+overstate it either. What those grants mean at the store itself, and why a query naming one graph
+its caller was not granted is refused rather than answered over the rest, is [A query's authority
+is its dataset](../beyond/datasets.md).
 
 This chapter runs every case it describes. The host is [the previous
 chapter's](scripts.md), with the same items, under a ceiling policy of its own:

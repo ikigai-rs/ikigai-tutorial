@@ -295,7 +295,8 @@ The description is the contract. The kernel checks every scope an action `requir
 **before dispatch and before the cache lookup** — so a refused caller neither enters the
 endpoint nor is served a cached answer somebody else computed (core 0.1.49). An
 endpoint may add a *finer* ceiling of its own on top: the file workspace's jail is one,
-a store's per-graph effect check is another. What it may not do is enforce a scope it
+a store's per-graph effect check is another ([A query's authority is its
+dataset](datasets.md), next, is that one in full). What it may not do is enforce a scope it
 never declared, because the offer, the pre-flight and the enforcement are all read from
 the same declaration.
 

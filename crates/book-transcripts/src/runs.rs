@@ -68,6 +68,10 @@ pub const GATED: &[(&str, &str)] = &[
         "building-endpoints",
         "crates/building-endpoints/tests/book_runs.rs",
     ),
+    (
+        "graph-authority",
+        "crates/graph-authority/tests/book_runs.rs",
+    ),
     ("hello-camel", "crates/hello-camel/tests/book_runs.rs"),
     (
         "loadable-module",

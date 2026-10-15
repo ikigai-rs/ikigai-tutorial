@@ -1,0 +1,38 @@
+[package]
+name = "graph-authority"
+version = "0.1.0"
+description = "The code taught by the book's chapter \"A query's authority is its dataset\": two tenants' graphs in one store, the same SPARQL text run by three callers, and every way a query or an update might reach past the graphs its caller holds, refused or confined."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "graph_authority"
+path = "src/lib.rs"
+
+[[bin]]
+name = "datasets"
+path = "src/bin/datasets.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+# The store's per-graph doors are the subject of the chapter. The pin is the workspace's; the
+# floor for what this chapter PRINTS is 0.2.22, which refuses a constant `GRAPH <other>` outside
+# the dataset by name instead of answering it empty (ledger #388).
+ikigai-store.workspace = true
+# The ceiling policy for the one script the chapter publishes (no ceiling: the host lets a
+# script touch what its publisher held and its runner holds).
+ikigai-script.workspace = true
+# "Scripts are resources"' host: the script space in front of a store, a kernel over both with
+# a seed of this crate's choosing, and the `who> command` printer every program in this part
+# uses.
+script-host = { path = "../script-host" }
+# `RdfFormat`, for the one writer the kernel cannot see: a sharer loading N-Quads straight into
+# the store's handle, in the section on caching.
+oxigraph.workspace = true
+
+[dev-dependencies]
+# The scanner behind tests/book_runs.rs: dependency-free, so no cycle (ledger #1072).
+book-transcripts = { path = "../book-transcripts" }
