@@ -46,8 +46,11 @@ The callers are capabilities, the kind a host's door mints for whoever authentic
 ```
 
 A grant names exactly one graph: `urn:cap:store:read:graph:<iri>` to read it through the store's
-graph-scoped doors, `urn:cap:store:write:graph:<iri>` to write it. There is no prefix form and no
-"every graph" form short of the broad keys, and reading and writing one graph are two grants.
+graph-scoped doors, `urn:cap:store:write:graph:<iri>` to write it. There is no prefix form, and
+reading and writing one graph are two grants. The broad keys, `urn:cap:store:read` and
+`urn:cap:store:write`, are the authority for the whole-dataset doors (`urn:iki:store:select`,
+`urn:iki:store:update`), and a graph-scoped door does not take one in place of the graph grant it
+declares.
 
 The kernel is [Scripts are resources](../code/scripts.md)' host, the script space in front of an
 in-memory store, seeded with the two graphs instead of that chapter's work items. Scripts are a
