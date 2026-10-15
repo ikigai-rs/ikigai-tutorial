@@ -114,7 +114,7 @@ out     Hello, Peter!
 **[The gonk Book](books/gonk)** — gonk, the work-ledger and repository-browser host, one
 part per way it is used on its own: a ledger of your own, an agent's ledger, the repository
 browser, review without a reviewer, a spec in the repository (OpenSpec), bridges, several
-machines, and embedding. Published at **<https://ikigai-rs.github.io/ikigai-tutorial/gonk/>**,
+machines, scripts and sentences, several teams, ways of working, and embedding. Published at **<https://ikigai-rs.github.io/ikigai-tutorial/gonk/>**,
 by the same run as the first book and through the same gates. Its design, outline and the
 check each kind of example is under are in [`books/gonk/DESIGN.md`](books/gonk/DESIGN.md);
 the first chapter, *A ledger of your own*, is written, and the rest are listed as drafts.

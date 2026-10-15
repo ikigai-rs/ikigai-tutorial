@@ -45,6 +45,10 @@
 - [Your first saved query](scripts/first.md)
 - [Scripts and sentences in gonk](scripts/in-gonk.md)
 
+# Several teams
+
+- [Two teams, one gonk](teams/two-teams.md)
+
 # Ways of working
 
 - [Solo on one machine](ways/solo.md)

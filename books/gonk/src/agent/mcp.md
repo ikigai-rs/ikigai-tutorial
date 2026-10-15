@@ -170,7 +170,9 @@ takes another, and this grant holds neither.
 
 Every tool that names a ledger takes it as an argument, `ledger`, with the default `default`
 (the ledger whose name the IRI may omit, as in [Whose ledger](../ledger/your-own.md#whose-ledger)).
-An agent that leaves it out writes to `default`, which is the ledger it was granted.
+An agent that leaves it out writes to `default`, which is the ledger it was granted. An agent
+granted a named ledger passes `ledger` every time, and two such agents are offered the same
+tools ([Two teams, one gonk](../teams/two-teams.md#two-tool-lists-and-a-third) compares them).
 
 ## Filing, once
 

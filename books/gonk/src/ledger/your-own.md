@@ -213,6 +213,8 @@ assert!(matches!(refused, Err(Error::Denied(_))));
 
 A named ledger spells its labels with its name (`book#1`), so two ledgers' `#1`s cannot be
 confused in one sentence. The ledger called `default` is the one whose name may be left out.
+[Two teams, one gonk](../teams/two-teams.md) gives two teams a named ledger each, in one gonk,
+and shows what each team's grant does and does not reach.
 
 ## Served
 

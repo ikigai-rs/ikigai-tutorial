@@ -36,6 +36,10 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
 - **Scripts and sentences.** A query saved at a name and run by a person and a worker; a query
   drafted from a sentence by a machine and published by a person; and what each door may do with
   either.
+- **Several teams.** Two teams' ledgers in one gonk, an agent for each and a manager over both:
+  one query answering each caller by its grants, a join across the teams and the code review, a
+  report one team publishes that the other cannot run, what a signed-out caller and a deleted item
+  show, and each identity's tool list.
 - **Ways of working.** Processes rather than features: one person and an agent on one machine; a
   dispatcher and remote workers; review on every commit; hub and spoke; spec first; and periodic
   unled audits. Each chapter answers the same questions in the same order (who holds which role,
@@ -82,8 +86,10 @@ step ahead of that: `ikigai-core` 0.1.103, `ikigai-ledger` 0.12.0, `ikigai-store
 `ikigai-browse` 0.18.9 and `ikigai-script` 0.3.6. So a `console` block is answered by gonk's
 releases and a listing or a cell by the newer ones. No page prints differently because of it (the
 newer releases add a ledger item's `children` to its JSON face, refuse a query whose `GRAPH` names
-a graph outside its set, and trace the kernel's own operations, and no page here shows any of those
-through gonk); a page that comes to show one will say so. (0.4.0 of the ledger added the keyed
+a graph outside its set, and trace the kernel's own operations). Only one page here meets any of
+those through gonk: [Two teams, one gonk](teams/two-teams.md#the-managers-join) sends gonk a query
+whose `GRAPH` names a graph outside its set, and says what gonk's store, one release short,
+answers instead. (0.4.0 of the ledger added the keyed
 append [part 5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through;
 0.9.0 added `count`, the number of items a filter admits without the listing, which part 5's walk
 asks.) It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.

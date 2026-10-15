@@ -556,3 +556,7 @@ answer on this page is a composition the libraries already define — a script's
 from the grounding and the model door — and gonk's own contribution is the line between them and
 each caller: which door, which principal, which grant, and the two rules no grant can carry (a
 machine drafts, a person publishes; a draft is its author's).
+
+[Two teams, one gonk](../teams/two-teams.md#a-report-one-team-publishes) publishes a report under
+one team's grant: the other team may run every report in the namespace and still cannot run that
+one, and a report over both teams' ledgers is refused at publish.

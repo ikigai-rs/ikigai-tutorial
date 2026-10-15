@@ -340,4 +340,5 @@ stylesheet.
 The pages added no authority and no state of their own. The ledger is the graph it was in the
 last chapter; a page is a view of it, a form is one of its actions, and an identity is a name
 for a list of tokens in `grants.json`. The next part reaches the same ledger from another
-process, the way an agent does.
+process, the way an agent does. (What a signed-out caller sees of a gonk that two teams share is in
+[Two teams, one gonk](../teams/two-teams.md#what-a-signed-out-caller-sees).)

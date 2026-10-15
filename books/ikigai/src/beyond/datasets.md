@@ -521,3 +521,8 @@ store where the declaration cannot be exact (a family declared, one graph enforc
 store adds is the one idea in the title: it does not ask what a query means. It asks which
 graphs the caller named, refuses if any one is not granted, and gives the query nothing else to
 read.
+
+The gonk Book applies this chapter to a server: [Two teams, one
+gonk](../gonk/teams/two-teams.html) gives two teams a ledger each in one gonk, and runs the same
+questions through its doors, with an agent per team, a manager over both, and a signed-out
+browser.

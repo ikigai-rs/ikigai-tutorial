@@ -298,6 +298,8 @@ grant, not a second way around it. The same query text answered less under the s
 the point of a default dataset drawn from the grant: the query never has to know whose it is. A
 host that wants the query face without a prefix adds one more line to its config
 home, `mount = "prefer urn:sparql:=…/gonk.sock"`, the same shape as the ledger's.
+[Two teams, one gonk](../teams/two-teams.md#one-text-four-answers) asks one query as two teams'
+agents, a manager over both and a signed-out browser, and gets four answers.
 
 ## Over MCP
 
