@@ -244,7 +244,7 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-10 | Blank lines inside cells refused at the source and on the built page | PR #91 |
 | 2026-10-10 | axe in a real browser, every theme, made a gate | PR #97 |
 | 2026-10-15 | This file | PR #128 |
-| 2026-10-15 | Reporting asks for the `accessibility` label; `AGENTS.md` points agents here | this pull request |
+| 2026-10-15 | Reporting asks for the `accessibility` label; `AGENTS.md` points agents here | PR #130 |
 
 ## References
 
