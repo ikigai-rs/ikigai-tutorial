@@ -17,6 +17,12 @@ TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"
 CARGO_TARGET_DIR="$TARGET" cargo build
 
+# Each book's "What's new" page, from its changes.toml, BEFORE any `mdbook build`, so the page
+# every build (and the deploy) publishes is the one the entries say. The page is committed too:
+# `crates/book-whats-new/tests/pages.rs` fails when the committed page and the entries disagree,
+# so a page written here and not committed turns `cargo test` red rather than going stale.
+"$TARGET/debug/book-whats-new" generate
+
 status=0
 for book in books/*/; do
     name="$(basename "$book")"

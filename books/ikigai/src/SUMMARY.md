@@ -2,6 +2,7 @@
 
 [Introduction](introduction.md)
 [A note from a human](human.md)
+[What's new](whats-new.md)
 
 # The front door
 

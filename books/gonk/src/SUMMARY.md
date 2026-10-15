@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](introduction.md)
+[What's new](whats-new.md)
 
 # A ledger of your own
 

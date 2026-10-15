@@ -298,6 +298,46 @@ purpose. A direct quote keeps its author's spelling and says so on its own line:
 > "… the colour of the thing …" <!-- spelling: quote (a quoted source's own words) -->
 ```
 
+### And what changed
+
+Every book has a **What's new** page (`src/whats-new.md`, linked near the top of its
+`SUMMARY.md`): the changes a reader would notice, newest first, each a date, a sentence or two
+written for the reader, and links to the pages it concerns, titled from `SUMMARY.md`. Nothing on
+it points at the repository; the history is only where the first entries came from.
+
+The page is generated, from `books/<book>/changes.toml`, by `crates/book-whats-new`.
+`./scripts/test-books.sh` writes it before `mdbook build`, and the generated page is
+**committed**, so `mdbook serve` shows it with nothing run first and a reviewer reads the page a
+change will publish. `crates/book-whats-new/tests/pages.rs` fails when the committed page and the
+entries disagree (an entry edited without regenerating, or the page edited by hand), and when an
+entry names a page `SUMMARY.md` does not list: a page that moves takes its new path in every
+entry that names it, and a page that is gone moves to the entry's `removed`, listed without a
+link.
+
+```toml
+[[change]]
+date = "2026-10-15"
+summary = "A new chapter, A query's authority is its dataset, runs one SPARQL text for three callers."
+pages = ["beyond/datasets.md"]
+```
+
+**A change to a book's pages must add or update an entry.** The `whats-new` job in `pages.yml`
+runs `book-whats-new check-diff` over the change and fails, naming the files and printing the
+entry to add, when a book's published pages (any `.md` its `SUMMARY.md` lists, or `SUMMARY.md`
+itself) changed and its `changes.toml` gained no new or edited entry. Drafts and the generated
+page do not count. The escape hatch for upkeep with no news in it (a version move, a corrected
+link, a typo) is an entry with `maintenance = true`: kept in the file, left off the page. An
+entry rather than a commit trailer, because the check runs on the pull request, before the squash
+commit that would carry the trailer exists. Run it locally against your branch's base:
+
+<!-- transcript: manual — it reads the git history of whatever branch you are on -->
+```bash
+cargo run -p book-whats-new -- check-diff --base origin/main
+```
+
+A new book under `books/` is covered by being there: the generator and the check iterate
+`books/*`, and a book with no `changes.toml` is refused by both.
+
 ### And the cells' markup
 
 A runnable cell is raw HTML in the markdown, and CommonMark ends an HTML block that opens

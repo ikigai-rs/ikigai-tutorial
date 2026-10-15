@@ -1,0 +1,489 @@
+# What's new in The ikigai Book: one entry per change a reader would notice, NEWEST FIRST.
+#
+# `crates/book-whats-new` writes src/whats-new.md from this file (./scripts/test-books.sh runs it
+# before `mdbook build`), and a test fails when the two disagree. A change to this book's pages
+# that adds or updates no entry here is refused in CI, with the entry to add.
+#
+#   date        "YYYY-MM-DD"
+#   summary     one or two sentences for a READER: what they will now find (not the commit subject)
+#   pages       the pages to read for it, as SUMMARY.md links them; titles come from SUMMARY.md
+#   removed     titles of pages that no longer exist, listed without a link (optional)
+#   maintenance true for upkeep with no news in it (a version move, a link or typo fix): kept
+#               here, left off the page (optional)
+#   commit      the commit an entry was written from; for tooling only, never shown (optional)
+#
+# A page that moves: update its path in every entry that names it (the check says which).
+# The entries before 2026-10-15 were written from the repository's history, one per change.
+
+[[change]]
+date = "2026-10-15"
+summary = "A new page, What's new, lists what has changed in the book, most recent first, with the pages to read for each change."
+pages = ["introduction.md"]
+
+[[change]]
+date = "2026-10-15"
+summary = "A query's authority is its dataset now ends with a pointer to the gonk Book's Two teams, one gonk, which runs the same questions through a server's doors with an agent per team and a manager over both."
+pages = ["beyond/datasets.md"]
+commit = "e4baf01"
+
+[[change]]
+date = "2026-10-15"
+summary = "A new chapter, A query's authority is its dataset, runs the same SPARQL text for three callers over two tenants' graphs in one store, refuses a join missing one grant rather than narrowing it, and tries every escape route a query has, each as real output."
+pages = ["beyond/datasets.md", "beyond/identity.md", "code/authority.md"]
+commit = "68ab188"
+
+[[change]]
+date = "2026-10-14"
+summary = "A refused argument is now followed by that argument's own description from the endpoint's contract, so the fix sits next to the complaint; Tic-tac-toe, II explains where that line comes from, and the spreadsheet and tic-tac-toe pages show it."
+pages = ["applied/tic-tac-toe-2.md", "applied/spreadsheet-1.md", "applied/tic-tac-toe-3.md", "applied/tic-tac-toe-7.md"]
+commit = "1b022b7"
+
+[[change]]
+date = "2026-10-14"
+summary = "The status chapter is restamped at the newest releases, with a line on what the module crate's latest release changed."
+pages = []
+commit = "dbdd693"
+maintenance = true
+
+[[change]]
+date = "2026-10-13"
+summary = "The aliases, day to day drops its warning that a mount removes local functions: a mount only adds, so a peer's function sits beside the local one of the same name."
+pages = ["beyond/emacs-aliases.md"]
+commit = "9edc920"
+
+[[change]]
+date = "2026-10-12"
+summary = "Refusal messages in the tracing, grammar and Python pages now show the clause naming what grant satisfies a family scope, and the status chapter is restamped."
+pages = []
+commit = "90b546d"
+maintenance = true
+
+[[change]]
+date = "2026-10-12"
+summary = "Who a script runs as shows the kernel's refusal now saying what passes a family floor, and explains why that only gets a run as far as the exact check inside."
+pages = ["code/authority.md"]
+commit = "f81bb6d"
+
+[[change]]
+date = "2026-10-11"
+summary = "A sentence becomes a draft explains what happens when the model repeats itself: the repeat is recorded as such, not checked again, and the draft's mark says drafting stopped because of it."
+pages = ["code/sentence.md"]
+commit = "18f66cf"
+
+[[change]]
+date = "2026-10-11"
+summary = "Tracing a resolution now explains each authority mark a trace draws: unchanged, narrowed with the scopes it held, or refused, so a refused hop no longer reads as authorized."
+pages = ["beyond/tracing.md"]
+commit = "773dfd1"
+
+[[change]]
+date = "2026-10-11"
+summary = "A sentence becomes a draft shows the larger vocabulary count, and the status chapter is restamped."
+pages = []
+commit = "d09443a"
+maintenance = true
+
+[[change]]
+date = "2026-10-11"
+summary = "A sentence becomes a draft now shows the check warning on an empty preview, naming the patterns that matched nothing, the drafter repairing on it, the grounding stating what kind of value each predicate takes, and a draft's author told plainly that it is a draft. Your first script explains why even a hello world names the graph it reads, and one of the code exercises now asks for a different check."
+pages = ["code/sentence.md", "code/first.md", "code/exercises.md", "code/authority.md"]
+commit = "8bc2941"
+
+[[change]]
+date = "2026-10-11"
+summary = "A gentle opener, Your first script, walks four small steps on a shelf of books: a hello script with a parameter, a script over data, one grant line, and a sentence drafted and published."
+pages = ["code/first.md", "code/scripts.md"]
+commit = "196a5a1"
+
+[[change]]
+date = "2026-10-11"
+summary = "A new section, Code and language as resources, publishes SPARQL scripts into a running host at a name, works out whose authority a run holds, and lets a language model draft a script that a person checks and publishes, with an exercises page to follow."
+pages = ["code/scripts.md", "code/authority.md", "code/sentence.md", "code/exercises.md", "repositories.md"]
+commit = "618f0de"
+
+[[change]]
+date = "2026-10-10"
+summary = "Who is asking now names the form gonk uses today for a client's principal."
+pages = []
+commit = "668de25"
+maintenance = true
+
+[[change]]
+date = "2026-10-10"
+summary = "The REPL now has an `exists` command, a single quoted token on a `sink` line is unquoted, and a content-less sink under `-c` waits two seconds for stdin; The file workspace and the REPL grammar replay each case. Who is asking and the glossary explain that a principal now travels with the request as a capability scope, Tracing a resolution draws a refused request as a tree, and Golden threads in practice says a write that ran and failed still cuts."
+pages = ["getting-started/file-workspace.md", "front-door/grammar.md", "beyond/identity.md", "beyond/tracing.md", "getting-started/golden-threads.md", "glossary.md", "modules/status.md"]
+commit = "def0fb2"
+
+[[change]]
+date = "2026-10-10"
+summary = "Where this actually stands is brought up to date: a new rundown of every kernel release since its last stamp, each pointing to the chapter that teaches it, plus what a failed module callback now does and the answer deadline the XSLT module enforces."
+pages = ["modules/status.md"]
+commit = "3d27701"
+
+[[change]]
+date = "2026-10-10"
+summary = "Running it and What resolution buys you now show what the catalog command really prints, and The graph face lists every endpoint its string-input query returns, with a note on why the list is that long."
+pages = ["building/graph-face.md", "getting-started/payoff.md", "getting-started/running-it.md"]
+commit = "a516761"
+
+[[change]]
+date = "2026-10-10"
+summary = "The loadable-module demo output shown in What a module is and A module, end to end is now included from a file a test checks, so it cannot drift."
+pages = []
+commit = "93498a0"
+maintenance = true
+
+[[change]]
+date = "2026-10-10"
+summary = "The file workspace's Try it section is now a checked REPL transcript that shows the quoting trap on a `sink` line and the `content=` form that avoids it, and the REPL grammar says that a sink's content is taken verbatim."
+pages = ["getting-started/file-workspace.md", "front-door/grammar.md"]
+commit = "936969b"
+
+[[change]]
+date = "2026-10-10"
+summary = "The file workspace now spells out what the jail actually checks: paths opened one name at a time, symbolic links refused, one spelling per file, Windows refused outright, and a workspace created private. The Beyond one host exercises add a hint for running the dead-peer exercise under a narrowed capability."
+pages = ["getting-started/file-workspace.md", "beyond/exercises.md"]
+commit = "ef7178e"
+
+[[change]]
+date = "2026-10-10"
+summary = "Every self-description in the book now shows its per-verb contract named by a digest of its content, and What resolution buys you explains that shape, why the book writes the digest as an ellipsis, and the stable per-door name the tool list uses instead."
+pages = ["getting-started/payoff.md", "applied/tic-tac-toe-1.md", "applied/spreadsheet-2.md", "applied/tic-tac-toe-3.md"]
+commit = "4a3b07e"
+
+[[change]]
+date = "2026-10-10"
+summary = "The front door's section on cut threads now explains why a file's cut count varies: the CLI watches its workspace and cuts a file's thread for every change event the operating system reports, so a Mac and a Linux machine print different numbers for the same lines."
+pages = ["front-door/cli.md"]
+commit = "f122b9b"
+
+[[change]]
+date = "2026-10-10"
+summary = "The front door's closing note now names the exact ikigai-cli release its transcripts are replayed against on every build."
+pages = []
+commit = "c159151"
+maintenance = true
+
+[[change]]
+date = "2026-10-09"
+summary = "Twenty minutes, nothing compiled corrects its cut section: cutting a pure function's name now invalidates its cached answer, because every cacheable read hangs from a thread named after its own target. The cache readout shown has gained state and chain columns, and the trace that follows is now computed rather than served."
+pages = ["front-door/cli.md"]
+commit = "73c094f"
+
+[[change]]
+date = "2026-10-09"
+summary = "Tracing a resolution gains a dry run that shows where a request would go and whether it would be let in without sending it, and Golden threads in practice shows how to ask what a cut would recompute before making it. Who is asking now explains that a mount carries your narrowed capability to the peer and shows a test that checks a module's published grant list against its declarations; the REPL grammar describes the sandboxed Lisp, and Configuration gives the passkey flags that replaced an environment variable."
+pages = ["beyond/tracing.md", "getting-started/golden-threads.md", "beyond/identity.md", "front-door/grammar.md", "beyond/emacs.md", "getting-started/configuration.md"]
+commit = "fa1b918"
+
+[[change]]
+date = "2026-10-09"
+summary = "A new page, The aliases, day to day, is the practical half of the Emacs client: setting it up, how a resource name becomes a function, finding the functions you have, calling them, where results land, how refusals show up, and when to refresh."
+pages = ["beyond/emacs-aliases.md", "beyond/emacs.md"]
+commit = "ba7c16b"
+
+[[change]]
+date = "2026-10-09"
+summary = "Who is asking adds a note on a session's principal: a name the transport stamps on every request for logs and authorship, never authority, which stays with the capability alone."
+pages = ["beyond/identity.md"]
+commit = "e6d08fc"
+
+[[change]]
+date = "2026-10-07"
+summary = "A kernel behind a socket now uses gonk as its example of a server that links only what it serves, with a catalog listing you can run to prove it, and contrasts its mounted model with the retired dev server's linked one; Preferential resolution and the repository lists follow the same move."
+pages = ["beyond/socket.md", "beyond/preference.md", "repositories.md", "next.md"]
+commit = "94b0fc2"
+
+[[change]]
+date = "2026-10-06"
+summary = "Where to go next introduces The gonk Book, a second book about the work-ledger and repository-browser host built from the pieces this book teaches, starting with a ledger of your own that runs in the page."
+pages = ["next.md"]
+commit = "850555d"
+
+[[change]]
+date = "2026-09-30"
+summary = "Tic-tac-toe, VII now ends with the real commands for a host's own arrangement: print the running root as a declaration, draw it as an SVG, and start a host from one with `--arrangement`, plus why the game's own file is refused there."
+pages = ["applied/tic-tac-toe-7.md"]
+commit = "8476d30"
+
+[[change]]
+date = "2026-09-30"
+summary = "A new chapter, Tic-tac-toe, VII: the game's space is a file, moves the game's whole arrangement (its doors, their order, the line aliases) out of Rust into a declaration file, builds the game from it, and plays the same moves in both to show identical answers."
+pages = ["applied/tic-tac-toe-7.md", "applied/tic-tac-toe-6.md"]
+commit = "40f76ec"
+
+[[change]]
+date = "2026-09-29"
+summary = "Time is a resource and A spreadsheet, I now point to Tic-tac-toe, V for the full template language, and the contrast with the game's views is corrected."
+pages = []
+commit = "570e660"
+maintenance = true
+
+[[change]]
+date = "2026-09-29"
+summary = "Tic-tac-toe, VI rewrites how the Python and TypeScript apps fill the game's templates: each carries a small template engine of its own, shown scanning markers, splicing them, and answering the conditional itself."
+pages = ["applied/tic-tac-toe-6.md"]
+commit = "d995d90"
+
+[[change]]
+date = "2026-09-29"
+summary = "Tic-tac-toe, V now builds the game's views as pure templates with no view code, and a new section teaches the whole template language: the three markers, arguments, fallbacks, the conditional that picks a square's kind, and why an escaped value is never expanded."
+pages = ["applied/tic-tac-toe-5.md", "applied/tic-tac-toe-6.md"]
+commit = "89677bc"
+
+[[change]]
+date = "2026-09-29"
+summary = "A spreadsheet, VII is now part of the book: push, where the page is told when a value changes instead of asking every few seconds, with listening as an authority and a comparison of polling and push."
+pages = ["applied/spreadsheet-7.md", "applied/spreadsheet-5.md", "introduction.md"]
+commit = "6445b86"
+
+[[change]]
+date = "2026-09-29"
+summary = "A spreadsheet, VI is now part of the book: a sheet is a space, so a person's what-if scenario and the sheet as it was a week ago are each a corridor, and corridors stack."
+pages = ["applied/spreadsheet-6.md", "applied/time.md", "introduction.md"]
+commit = "1ac24b4"
+
+[[change]]
+date = "2026-09-29"
+summary = "A spreadsheet, V rewords where a personal scenario sits, ahead of the part that builds it; an included listing in Tic-tac-toe, IV follows a renamed function."
+pages = []
+commit = "00b8bed"
+maintenance = true
+
+[[change]]
+date = "2026-09-29"
+summary = "A spreadsheet, I to V are now part of the book: cells as atoms, a formula as code that is itself a resource, recalculation that is nothing but golden threads, cells that read the clock, and a feed that something outside the sheet writes."
+pages = ["applied/spreadsheet-1.md", "applied/spreadsheet-2.md", "applied/spreadsheet-3.md", "applied/spreadsheet-4.md", "applied/spreadsheet-5.md", "applied/time.md", "introduction.md"]
+commit = "fc26af6"
+
+[[change]]
+date = "2026-09-29"
+summary = "In Time is a resource the clock view is now a template bound at a name, with no view code at all, and its marker escapes what it splices, the default to reach for whenever a value is text somebody else chose."
+pages = ["applied/time.md"]
+commit = "11fac4b"
+
+[[change]]
+date = "2026-09-29"
+summary = "Time is a resource adds the instant, one name for the date and the time read together, so a composite that wants both cannot tear them across midnight, and corrects what the torn reading costs: served once, wrong, but never cached."
+pages = ["applied/time.md"]
+commit = "00ed78e"
+
+[[change]]
+date = "2026-09-29"
+summary = "Time is a resource is now part of the book, in a part renamed Applied: an answer that goes out of date with nobody writing, expiry instead of a golden thread, a clock the host gives the kernel, and a page that polls it."
+pages = ["applied/time.md", "introduction.md"]
+commit = "25ffb58"
+
+[[change]]
+date = "2026-09-28"
+summary = "Fixes the Python and TypeScript links in A note from a human."
+pages = []
+commit = "b60fd5d"
+maintenance = true
+
+[[change]]
+date = "2026-09-28"
+summary = "A note from a human gains a section on why ikigai is built in Rust, and where Python, TypeScript, Scheme and an Emacs REPL fit for readers who do not write Rust."
+pages = ["human.md"]
+commit = "5a6991b"
+
+[[change]]
+date = "2026-09-27"
+summary = "Tic-tac-toe, I to VI are now part of the book: one small application built end to end from a model on paper to atoms, lines, rules, many games, a board you can play in the page, and the same game held and served from Python and TypeScript. The Python and TypeScript tracks each gain a section on families, one templated door answering many names with a contract per verb."
+pages = ["applied/tic-tac-toe-1.md", "applied/tic-tac-toe-2.md", "applied/tic-tac-toe-3.md", "applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md", "applied/tic-tac-toe-6.md", "polyglot/python.md", "polyglot/typescript.md", "introduction.md", "polyglot/index.md"]
+commit = "4412943"
+
+[[change]]
+date = "2026-09-27"
+summary = "Dual-mode crates adds a troubleshooting note for the WebAssembly build: if it fails with \"can't find crate for `core`\" after you added the target, another Rust is ahead of rustup's on your PATH, and the page shows how to check and fix it."
+pages = ["modules/dual-mode.md"]
+commit = "31daf4e"
+
+[[change]]
+date = "2026-09-27"
+summary = "The Introduction now explains how to read the book locally with working Run buttons: plain `mdbook serve` disables them, and a bundled script builds the in-page kernel and serves the book."
+pages = ["introduction.md"]
+commit = "75ff355"
+
+[[change]]
+date = "2026-09-27"
+summary = "A spelling sweep brings the published pages to American English."
+pages = []
+commit = "fa2e599"
+maintenance = true
+
+[[change]]
+date = "2026-09-27"
+summary = "What resolution buys you now explains that the kernel hangs every cacheable read from the thread named after what it read, so the `title` endpoint's hand-written dependency is no longer load-bearing."
+pages = ["getting-started/payoff.md"]
+commit = "17cf9dd"
+
+[[change]]
+date = "2026-09-27"
+summary = "Golden threads in practice now shows both cache holes closed: a cacheable read hangs from its own name with no help from the endpoint, and a fallback hangs from the name that was missing. Scope and alias gains an \"As of\" section where a corridor pins time, Transreption explains lossy transreptors and the `lossy=allow` consent, and Where this actually stands lists what each recent kernel release changed."
+pages = ["getting-started/golden-threads.md", "getting-started/scope-and-alias.md", "building/transreption.md", "modules/status.md"]
+commit = "5187f1f"
+
+[[change]]
+date = "2026-09-26"
+summary = "Where this actually stands and The wire session now cover typed errors, golden threads and endpoint descriptions crossing the module boundary; Contribute a module adds the conformance test and the rules for taking a piped value, and the repositories page gains four new repositories."
+pages = ["modules/status.md", "modules/wire-session.md", "contribute.md", "repositories.md", "building/multi-verb.md", "polyglot/notebook.md"]
+commit = "8becc0e"
+
+[[change]]
+date = "2026-09-26"
+summary = "Who is asking gains a second half: identity is not authority, authority only shrinks, who enforces a declared capability, what the cache knows about authority, and the difference between being denied and finding nothing there. The Glossary adds scope, alias and principal."
+pages = ["beyond/identity.md", "glossary.md", "building/multi-verb.md", "getting-started/self-description.md", "contribute.md"]
+commit = "6b6c62b"
+
+[[change]]
+date = "2026-09-26"
+summary = "A new chapter, Golden threads in practice, shows the whole mechanism (declare, derive, cut), the cache's default bound and eviction policy, and the two rules worth stating as rules. Transreption now says plainly that a transreptor's claim to be lossless is not checked."
+pages = ["getting-started/golden-threads.md", "building/transreption.md", "front-door/cli.md", "getting-started/payoff.md"]
+commit = "3eee036"
+
+[[change]]
+date = "2026-09-26"
+summary = "A new chapter, Tracing a resolution, makes the trace the subject: what each event records, and what a denial, an alias hop and a miss inside a confinement look like, including events for things that never ran."
+pages = ["beyond/tracing.md", "getting-started/payoff.md"]
+commit = "54dbad3"
+
+[[change]]
+date = "2026-09-26"
+summary = "A new chapter, Scope and alias, covers what sits between a name and its binding: composing spaces, aliases that make two names one resource, and resolving inside a corridor or a confinement, with what each does to the cache. Preferential resolution now separates its alias mount from the kernel's own alias."
+pages = ["getting-started/scope-and-alias.md", "beyond/preference.md"]
+commit = "34bbb33"
+
+[[change]]
+date = "2026-09-13"
+summary = "The repositories page lists the persistent RDF store as a repository of its own, beside the linked-data tools it pairs with."
+pages = ["repositories.md"]
+commit = "14e1983"
+
+[[change]]
+date = "2026-09-12"
+summary = "The modules part's example now lives in the book's own namespace, and Two ways to reach a kernel explains that the host owns the prefix it delegates to a module. The repositories page adds the conformance suite that defines when a module is done."
+pages = ["modules/two-ways.md", "modules/end-to-end.md", "modules/index.md", "repositories.md"]
+commit = "f4b86cf"
+
+[[change]]
+date = "2026-09-09"
+summary = "The signature link on A note from a human now points at the About page."
+pages = []
+commit = "fdc22d8"
+maintenance = true
+
+[[change]]
+date = "2026-09-09"
+summary = "Wording fixes and a signature on A note from a human."
+pages = ["human.md"]
+commit = "7cee83a"
+maintenance = true
+
+[[change]]
+date = "2026-09-09"
+summary = "A note from a human, after the Introduction, says how the book was written and acknowledges the ideas ikigai builds on."
+pages = ["human.md"]
+commit = "24ee5e6"
+
+[[change]]
+date = "2026-09-08"
+summary = "Run cells start empty and answer nothing in advance: the expected output sits behind a disclosure and only stands in if the kernel cannot load, and Reset now puts the whole cell back."
+pages = ["getting-started/payoff.md", "getting-started/running-it.md"]
+commit = "74be360"
+
+[[change]]
+date = "2026-09-08"
+summary = "A new part, Polyglot tracks, mirrors Getting started from Python and from TypeScript, serving and calling endpoints over the wire, and adds a notebook that loads the catalog as a graph and queries it with SPARQL."
+pages = ["polyglot/index.md", "polyglot/python.md", "polyglot/typescript.md", "polyglot/notebook.md", "introduction.md"]
+commit = "af4584d"
+
+[[change]]
+date = "2026-09-08"
+summary = "A corrected explanation of cutting a golden thread: Twenty minutes, nothing compiled now caches and cuts a file, and shows that a cut invalidates only the entries that declared that thread, so a pure function's answer stays cached."
+pages = ["front-door/cli.md", "getting-started/payoff.md", "front-door/grammar.md", "getting-started/resolution.md", "glossary.md"]
+commit = "46cd9bc"
+
+[[change]]
+date = "2026-09-08"
+summary = "Where this actually stands is corrected: a module endpoint's own declared capability is now enforced by the host, and the matching exercise says so. Every claim the modules part makes about another project now carries the version it was true at."
+pages = ["modules/status.md", "modules/dual-mode.md", "getting-started/configuration.md", "beyond/agent.md"]
+commit = "85d1625"
+
+[[change]]
+date = "2026-09-08"
+summary = "Run cells no longer run on their own: each command is yours to edit, runs when you press Run or Enter, Reset restores it, and every run is kept in a history beneath the cell for comparison."
+pages = ["getting-started/payoff.md", "getting-started/running-it.md", "front-door/grammar.md"]
+commit = "1de254a"
+
+[[change]]
+date = "2026-09-08"
+summary = "The book works better with a keyboard and a screen reader: the sidebar toggle and the search box are reachable and named, Run cells announce their results, and the two exercise pages now have distinct titles."
+pages = ["getting-started/exercises.md", "beyond/exercises.md"]
+commit = "d7ef8a5"
+
+[[change]]
+date = "2026-09-08"
+summary = "A new front door: Twenty minutes, nothing compiled shows the whole model in eight CLI commands, and The REPL grammar covers one construct per section with runnable cells. A Glossary, a map of the repositories and a guide to contributing a module join the end of the book."
+pages = ["front-door/cli.md", "front-door/grammar.md", "glossary.md", "repositories.md", "contribute.md", "introduction.md", "next.md"]
+commit = "722e57a"
+
+[[change]]
+date = "2026-09-08"
+summary = "The published book now carries a working kernel: press Run beside a command in What resolution buys you, Running it or Hello, resource and it resolves for real in your browser, with nothing installed."
+pages = ["getting-started/payoff.md", "getting-started/running-it.md", "getting-started/hello-resource.md"]
+commit = "a3235d7"
+
+[[change]]
+date = "2026-09-08"
+summary = "A new part, Building endpoints, covers the builder's toolkit: writing a transreptor the kernel finds on its own, an endpoint with three verbs and a capability that is declared and enforced, the catalog queried as a graph, and testing an endpoint that reads the clock without a real one. Configuration is rewritten around a layered config file read under a golden thread."
+pages = ["building/transreption.md", "building/multi-verb.md", "building/graph-face.md", "building/hermetic.md", "getting-started/configuration.md", "introduction.md"]
+commit = "68bd051"
+
+[[change]]
+date = "2026-09-08"
+summary = "The exercises now have a crate of your own to edit, so doing them no longer rewrites the chapters, and Beyond one host gains its own exercises: serve a kernel behind a socket, break a prefer-mount and watch what falls through, and see a module's callback refused across the socket."
+pages = ["beyond/exercises.md", "getting-started/exercises.md", "modules/status.md"]
+commit = "02807e4"
+
+[[change]]
+date = "2026-09-08"
+summary = "A new chapter, What resolution buys you, runs the four things the model promises: a cache hit, a cut golden thread, a trace and a catalog. The book's own host can now describe itself, and Resolution points each concept at the chapter where you do it."
+pages = ["getting-started/payoff.md", "getting-started/resolution.md", "getting-started/binding.md", "getting-started/exercises.md"]
+commit = "9f6e2db"
+
+[[change]]
+date = "2026-09-08"
+summary = "The book now has a published home online, rebuilt whenever it changes, and the Introduction says where to find it."
+pages = ["introduction.md"]
+commit = "6b02dc6"
+
+[[change]]
+date = "2026-09-07"
+summary = "A new part, Beyond one host, takes the step the modules part stops at: a kernel behind a socket, who is asking once that socket is a network, the three things a mount can mean (alias, override, prefer), and two clients, one for the editor and one for machines, that build their commands by reading the catalog."
+pages = ["beyond/socket.md", "beyond/identity.md", "beyond/preference.md", "beyond/emacs.md", "beyond/agent.md", "introduction.md", "next.md"]
+commit = "5c24f96"
+
+[[change]]
+date = "2026-09-07"
+summary = "Every exercise now says where your code goes, how to run it and what a right answer looks like, with a worked hint behind a disclosure; Configuration gives a truthful account of environment variables, and Where this actually stands separates the out-of-process transport that is built from the wasm runtime and isolation that are not."
+pages = ["getting-started/exercises.md", "modules/status.md", "getting-started/configuration.md", "getting-started/file-workspace.md", "getting-started/hello-resource.md"]
+commit = "33013ae"
+
+[[change]]
+date = "2026-09-06"
+summary = "Binding, and a host of your own now explains why resource names are nouns in kebab-case, and Running it installs the CLI with `cargo install ikigai-cli --locked`, with a warning that `cargo install ikigai` quietly fetches an unrelated crate."
+pages = ["getting-started/binding.md", "getting-started/running-it.md", "getting-started/resolution.md"]
+commit = "b1b9093"
+
+[[change]]
+date = "2026-09-06"
+summary = "Binding, and a host of your own has a new section on binding into a namespace you own: the book's camel-case example moves into the tutorial's own prefix, and the page explains why a name in somebody else's prefix moves on their schedule, not yours."
+pages = ["getting-started/binding.md", "getting-started/hello-resource.md", "getting-started/exercises.md"]
+commit = "250b0cd"
+
+[[change]]
+date = "2026-09-03"
+summary = "The ikigai Book opens in two parts: Getting started, which builds an endpoint and binds it into a kernel you compose yourself, and Loadable modules, which covers a space compiled separately and the callback that sets a module apart from a remote peer."
+pages = ["introduction.md", "getting-started/resolution.md", "getting-started/hello-resource.md", "getting-started/binding.md", "modules/index.md", "modules/status.md", "next.md"]
+commit = "74bf0c9"

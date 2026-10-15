@@ -209,6 +209,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "book-whats-new"
+version = "0.1.0"
+dependencies = [
+ "toml",
+]
+
+[[package]]
 name = "browse-host"
 version = "0.1.0"
 dependencies = [

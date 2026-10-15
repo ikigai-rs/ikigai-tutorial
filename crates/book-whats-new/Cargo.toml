@@ -1,0 +1,22 @@
+[package]
+name = "book-whats-new"
+version = "0.1.0"
+description = "The books' What's new pages. Not a lesson: a generator and a check. Each book's changes.toml holds its dated entries; this writes src/whats-new.md from them, and refuses a change to a book's pages that adds no entry."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "book_whats_new"
+path = "src/lib.rs"
+
+[[bin]]
+name = "book-whats-new"
+path = "src/main.rs"
+
+[dependencies]
+# The entries file, read as a plain table so every field and every mistake gets its own message
+# (no serde derive). The workspace's own pin.
+toml.workspace = true
