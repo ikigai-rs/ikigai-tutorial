@@ -1,8 +1,8 @@
 # Preferential resolution
 
 A connected peer is a `Resolver`, and a `Resolver` is a thing a local kernel can compose.
-So the interesting question was never *how do I call another machine* — that was the last
-two chapters, and the answer is a function call. It is: **what do that machine's answers
+So the interesting question was never *how do I call another machine* — that was [A kernel
+behind a socket](socket.md) and [Who is asking](identity.md), and the answer is a function call. It is: **what do that machine's answers
 mean here?**
 
 There are exactly three answers, they are three different intentions rather than three
@@ -143,7 +143,7 @@ that machine — the REPL, one-shot commands, the daemon, the MCP server — com
 topology:
 
 ```toml
-mount = "prefer urn:repo:=/Users/brian/.ikigai/gonk.sock"
+mount = "prefer urn:repo:=~/.ikigai/gonk.sock"
 ```
 
 That line points at gonk, the server from [A kernel behind a socket](socket.md), which owns
@@ -169,8 +169,9 @@ local kernel instead of the one holding the archive. Write the prefix that cover
 
 ## Putting it together
 
-All three chapters in one wiring: dial the peer, decide what its answers mean, compose it
-in front of what this machine serves itself.
+This part's plumbing in one wiring: dial the peer, decide what its answers mean, compose it
+in front of what this machine serves itself. (`/tmp/gonk.sock` below stands in for a socket;
+gonk's own is the `~/.ikigai/gonk.sock` above.)
 
 ```rust,no_run
 # extern crate two_hosts;

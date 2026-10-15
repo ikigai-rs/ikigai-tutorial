@@ -123,6 +123,37 @@ link, so the outline is visible on the published site and nothing 404s.
   blocks as `console` blocks of `$ ikigai -c …`, and add the book to the script. The matcher is
   a superset of the old replay's (whole-line `…` as before, plus `…` inside a line).
 
+## Serial-reader continuity (ledger #1623)
+
+The check runs each page in a scratch directory of its own, so every page is standalone by
+construction, and nothing the check does notices what a reader going front to back carries in.
+Brian, 2026-10-15: in this book chapter 1 started a gonk and chapter 2 said to start one again, on
+the same port, as if the first were not still running. So every change to this book keeps
+serial-reader continuity:
+
+- **Setup, cleanup, names and state.** A change that adds, moves or removes any of them (a gonk, a
+  `model-stub`, a socket, a config home, an enrollment or bundle, an install, a scratch repository)
+  reads the chapters before and after it.
+- **Say what the reader has.** Every chapter that starts a gonk starts it in a new empty directory
+  on port 1070 (the introduction's [A gonk per chapter](src/introduction.md#a-gonk-per-chapter)
+  says so once), and before its first `serve` block it LINKS the last chapter that started one:
+  "if the gonk (and the `model-stub`) from [that chapter](…) is still running, stop it first, since
+  this one takes the same port". The last one is not always the previous page: the review and spec
+  chapters run no server, so Filing roborev findings names Explain.
+- **Standalone still.** A reader may open any chapter, so earlier setup is acknowledged, never
+  deleted.
+- **Forward and backward.** A forward reference says so ("later in the book", "at the end of the
+  book"); "as in [X]" points backward only. The QUIC door is the one that bites: Over MCP uses it
+  before Several machines teaches it, so both say which is which.
+- **One name per thing.** A socket is `~/.ikigai/gonk.sock` on a reader's machine and
+  `$PWD/.ikigai/gonk.sock` on a page; a client called `laptop` on two pages is two clients.
+
+Checked by `crates/book-urns/tests/book_continuity.rs`, in every book: the `serve` rule above (the
+link must name the nearest earlier page with a `serve` block), and a link whose text says the next
+or previous chapter must point at the neighboring page in `SUMMARY.md`. Both fail on a reorder. A
+term used before it is defined, a cleanup that breaks a later chapter and a stale count ("three
+chapters of plumbing") are for review: read the neighbors.
+
 ## Dependencies, and the temporary pin
 
 gonk is NOT on crates.io. **For now it is pinned to a git revision** (Brian, 2026-10-06), held

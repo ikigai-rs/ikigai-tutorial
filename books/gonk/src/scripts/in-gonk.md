@@ -33,7 +33,9 @@ starts a **stub** on a socket and mounts that instead: `model-stub`, from this b
 `crates/model-stub`, answers `urn:llm:ask` with a fixed SPARQL draft for each ask, the way the
 ikigai Book's stub does in process, and prints a line for every ask it is sent. The mount is the
 real one, so everything between the drafter and the model is gonk's own code; only the model's
-words are canned.
+words are canned. In a new empty directory, as in [every
+chapter](../introduction.md#a-gonk-per-chapter): if the gonk and the `model-stub` from [Your first
+saved query](first.md) are still running, stop them first, since this gonk takes the same port.
 
 <!-- transcript: serve -->
 ```console

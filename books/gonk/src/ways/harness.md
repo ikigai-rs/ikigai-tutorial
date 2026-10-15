@@ -73,7 +73,9 @@ a reviewed change like any other; the firing log is per working tree and never c
 
 ## The loop, step by step
 
-This page's gonk, as in every chapter before it:
+This page's gonk, as in [every chapter](../introduction.md#a-gonk-per-chapter) before it: if the
+one from [Periodic unled audits](audits.md) is still running, stop it first, since this one takes
+the same port.
 
 <!-- transcript: serve -->
 ```console

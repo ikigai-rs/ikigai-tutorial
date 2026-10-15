@@ -216,8 +216,10 @@ model call.`), and its **Queue** lists the pending findings a person should look
 first, with Decline (and its five reasons) and Publish on each. Over the socket the resources are
 the ones above, under the `urn:gk:` alias of [Over the socket](../agent/socket.md):
 `urn:gk:repo:{root}:review:{path}`, `urn:gk:repo:{root}:findings:{path}`, a Sink to
-`urn:gk:iki:finding:{id}`. Running a pass needs a mounted model; this book's checks have none, so
-the [explain chapter](../browse/explain.md) shows only that gonk refuses it as `unavailable`.
+`urn:gk:iki:finding:{id}`. Running a pass needs a mounted model, and this part's pages mount none
+that answers, so the [explain chapter](../browse/explain.md) shows only that gonk refuses it as
+`unavailable`; [Review every commit](../ways/review-every-commit.md), later, runs a pass through gonk
+with a stub model mounted.
 
 What gonk can also do — review every file a commit touches, from a `post-commit` hook — is off,
 and the next chapter is why.

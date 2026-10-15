@@ -7,7 +7,10 @@ runs them in sequence in one scratch home, so the sequence itself is checked, no
 parts.
 
 Before it: gonk and `ikigai` installed at the versions this book pins
-([Which gonk](../introduction.md#which-gonk)), and git.
+([Which gonk](../introduction.md#which-gonk)), and git. In a new empty directory, as in [every
+chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Importing a kata ledger](kata.md)
+is still running, stop it first, since this one takes the same port. (This page is a fresh machine:
+none of the last three chapters' directories is reused.)
 
 ## 1. The repositories
 

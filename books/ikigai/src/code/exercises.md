@@ -16,7 +16,7 @@ cargo test -p your-endpoints --test code
 ## 1. A query of your own, and the thread it hangs from
 
 Publish a query called `closed-items` that lists the CLOSED items, by number and title. Read its
-result twice. Then run the first chapter's `close-item` for item 4, and read it again.
+result twice. Then run `close-item` from [Scripts are resources](scripts.md) for item 4, and read it again.
 
 - **File** — `crates/your-endpoints/tests/code.rs`; start from `script_host::kernel()`.
 - **Run** — `cargo test -p your-endpoints --test code`
@@ -48,7 +48,9 @@ the update writes.
 On `script_authority::kernel(&ceilings)`, publish `GRAPHS` as `every-graph` under the host, and
 have Bob read it. Then change `every-graph`'s ceiling file to the **payroll** graph alone, and read
 again, and again after the cut the chapter makes. Then mint Dave, who holds
-`urn:cap:script:run:team-*` and the payroll graph, and have him run Alice's `team-open`.
+`urn:cap:script:run:team-*` and the payroll graph, and have him run Alice's `team-open` (publish
+it as Alice first, as [the chapter](authority.md#a-namespace-grant-and-an-exclusion-that-wins-over-it)
+does).
 
 - **File** — `crates/your-endpoints/tests/code.rs`; `Ceilings::new()` and `set` are
   `script_authority`'s.

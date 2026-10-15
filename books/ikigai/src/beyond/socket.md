@@ -1,6 +1,6 @@
 # A kernel behind a socket
 
-The last chapter of Part II ended on a sentence this part has to answer. A real module is
+[The wire session](../modules/wire-session.md) opened on a sentence this part has to answer. A real module is
 on the other side of *something* — another WebAssembly instance, an embedded wasmtime, a
 socket — and then the conversation has to be encoded.
 
@@ -50,7 +50,7 @@ The second test is the one that matters more than it looks. Ask the served kerne
 name it does not bind, and the error that comes back is `Unresolved` — the server's own
 typed error, not a generic "the call failed".
 
-Keep that in view for two chapters. A client that can tell *"your kernel has no such
+Keep that in view until [Preferential resolution](preference.md). A client that can tell *"your kernel has no such
 resource"* from *"your kernel is not there"* from *"your kernel says you may not"* can
 make a policy decision about each. A client that gets one opaque failure for all three
 cannot, and every degradation rule in this part is built on the distinction.
@@ -73,7 +73,8 @@ The one thing in the ecosystem that exists purely to be a server on a socket is 
 ledger, repositories browsed as resources and SPARQL over all of it, behind a socket, QUIC and
 HTTP. It took that job over from `ikigai-dev-server`, which this chapter used to show here and
 which is now retired. [The gonk Book](../gonk/index.html) teaches it door by door; from this
-chapter's side it is one more socket:
+chapter's side it is one more socket. With gonk installed (its install line is in [Which
+gonk](../gonk/introduction.html#which-gonk)), start it in one terminal and connect from another:
 
 ```bash
 ikigai-gonk                      # its socket: ~/.ikigai/gonk.sock
@@ -114,7 +115,7 @@ not have:
 
 ## What a broken connection is allowed to do
 
-One last thing that will matter in two chapters. A long-lived client — a daemon holding a
+One last thing that will matter in [Preferential resolution](preference.md). A long-lived client — a daemon holding a
 standing mount, an interactive `--connect` session — outlives server restarts, so
 `IpcResolver` **heals on use**: a connection that broke is dropped and redialed, version
 handshake and all, rather than failing every subsequent call forever.

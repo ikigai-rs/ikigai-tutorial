@@ -21,7 +21,7 @@ ikigai --version
 
 Every command below is one-shot: `-c` runs a line and exits, `--plain` drops the
 decoration. Run `ikigai` with no arguments for the REPL, which is the same grammar with
-a memory — and the sixth command needs that memory, so it says so.
+a memory — and [5. A cache hit](#5-a-cache-hit) needs that memory, so it says so.
 
 ## 1. Everything resolvable
 
@@ -39,7 +39,8 @@ own description, which is why it cannot be out of date.
 ikigai --plain -c 'source urn:kernel:actions'
 ```
 
-One IRI per line: the endpoints the capability you hold may invoke. As root that is
+One IRI per line: the endpoints the capability you hold may invoke. This list is the
+**manifold**: the catalog, filtered by the authority you hold. As root that is
 nearly everything. It is the same list an agent would be handed as its tools, computed
 from the same descriptions, and it narrows as authority narrows — the difference between
 this and the catalog is the whole capability model in one diff.

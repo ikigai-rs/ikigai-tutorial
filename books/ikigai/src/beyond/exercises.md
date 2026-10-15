@@ -105,8 +105,8 @@ module's `greeting` with `name` pointing at that resource — twice: under a cap
 grants the scope, and under one that grants something else.
 
 - **File** — `crates/your-endpoints/tests/beyond.rs`. Build the host in the test rather
-  than editing `module.rs`: `name()` there has no `requires`, and Part II's exercise 3
-  is about adding one in-process.
+  than editing `module.rs`: `name()` there has no `requires` (unless you left Part II's
+  exercise 3 in place), and that exercise is about adding one in-process.
 - **Run** — `cargo test -p your-endpoints --test beyond`
 - **Right when** — with `Capability::root().attenuate(["urn:cap:yours:name"])` the answer
   is `Hello, Ada!`; with `attenuate(["urn:cap:yours:other"])` the resolution fails with

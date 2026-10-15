@@ -2,8 +2,8 @@
 
 `trace` has appeared twice already as a command — in the [front door](../front-door/cli.md)
 and in [What resolution buys you](../getting-started/payoff.md), where `issue_traced` drew a
-tree with one child. This chapter makes it the subject, because three chapters of
-plumbing have just given a resolution more ways to go somewhere you did not expect: a
+tree with one child. This chapter makes it the subject, because the plumbing chapters
+earlier in this part have given a resolution more ways to go somewhere you did not expect: a
 socket, a clamp, a mount that fell back. The trace is how you find out what actually
 happened, and — the part worth a chapter — it is where the kernel records the facts that
 name something which *never ran*.
@@ -351,8 +351,9 @@ execution shows where the local one handed off.
 
 ## What not to assume
 
-- **The REPL draws a tree only on success.** A denial or a miss is one line there, with
-  the reason; the event itself is in the kernel, and a Rust host or a log sees it.
+- **Before `ikigai-cli` 0.1.46 the REPL drew a tree only on success**, and a denial or a
+  miss was one line there; since then it draws what it collected ([above](#what-a-denial-looks-like)). Either
+  way the event itself is in the kernel, and a Rust host or a log sees it.
 - **The REPL has no scope**, so `("scope", …)` notes are visible only from a host that
   resolves in a chain — `issue_in` records them through the global tracer, `Confine`
   through either.

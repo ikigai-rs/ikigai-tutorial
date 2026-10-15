@@ -9,6 +9,9 @@ against a served `ikigai-cli` 0.1.18 as it was written. `ikigai-deno` is not on 
 the listings import it by path — a sibling checkout at `../../../ikigai-deno`; edit the
 import if yours is elsewhere.
 
+If the kernel from the [Python track](python.md) is still serving `/tmp/ikbook-kernel.sock`,
+skip the first line.
+
 ```bash
 ikigai serve /tmp/ikbook-kernel.sock &
 deno run -A examples/deno/client.ts /tmp/ikbook-kernel.sock
@@ -180,7 +183,7 @@ because it is declared first:
 **Every door has two forms, and every door's declared form is tried before any door's
 stripped form.** `--mount urn:ts:=` is an *alias* mount: the host rewrites
 `urn:ts:note:milk` to `urn:note:milk` before forwarding it, the way
-[Binding](../getting-started/binding.md) described. A peer cannot know the prefix it was
+[Preferential resolution](../beyond/preference.md) described. A peer cannot know the prefix it was
 mounted at, only that it was aliased, so it answers each door at its declared pattern and at
 that pattern with the first segment stripped: `urn:ts:note:{name}` and `urn:note:{name}`.
 If the forms were tried door by door, one door's stripped form could shadow the next door's
@@ -190,8 +193,8 @@ sending stripped names, so for that connection the order reverses, and stripped 
 first. The Python face follows the same rule, so a family behaves the same whichever language serves it. Because only the first segment can be stripped, a family mounted deeper,
 at `urn:ts:note:` for example, needs `--override`, which forwards names unchanged.
 
-A family is how a store in another language holds a game: the last part of the tic-tac-toe
-arc, [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md), serves the game's stored cell as one,
+A family is how a store in another language holds a game: the sixth part of the tic-tac-toe
+arc, [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md), which you have already read, serves the game's stored cell as one,
 from TypeScript, under a Rust host that keeps everything else.
 
 ## What an L0 peer cannot do

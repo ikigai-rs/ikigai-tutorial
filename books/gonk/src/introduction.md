@@ -95,7 +95,15 @@ What each move of these pins changed for a reader, and the pages that show it, i
 [What's new](whats-new.md) page.
 
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
-every time: no example in this book calls a real model or the network.
+every time: no example in this book calls a real model or the network. From [Your first saved
+query](scripts/first.md) on, a page also starts that stub as a process of its own, `model-stub`,
+for gonk to mount. It is this book's own crate (`crates/model-stub`), not published anywhere, so it
+is installed from this repository:
+
+<!-- transcript: manual — the check builds this crate from the workspace itself (scripts/test-transcripts.sh) -->
+```console
+$ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial model-stub
+```
 
 From [Over the socket](agent/socket.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
@@ -112,9 +120,9 @@ model drafting or explaining) is not lost over `quic://`.
 $ cargo install --locked ikigai-cli --version {{#include ../ikigai-cli.version}} --features quic
 ```
 
-`--features quic` is for [A QUIC client](machines/quic-client.md), where `ikigai` reaches gonk
-from "another machine"; without it the command line refuses a `quic://` address, and everything
-before that chapter works either way.
+`--features quic` is for the pages where `ikigai` reaches gonk from "another machine" over its QUIC
+door, the first of them [Over MCP](agent/mcp.md); without it the command line refuses a `quic://`
+address, and everything before that chapter works either way.
 
 Each [Ways of working](ways/solo.md) chapter ends with the [gonk
 starter](https://github.com/ikigai-rs/ikigai-gonk-starter), a template repository whose
@@ -152,3 +160,13 @@ mdbook serve books/gonk --open
 on port 1070 whose config and data homes are inside the page's own directory (`--config-home`,
 `--data-home`), and the check refuses any command that names 1062, a real gonk's port, before it
 runs (or 1060, gonk's own until 2026-10-12).
+
+## A gonk per chapter
+
+Each chapter that runs commands runs them in a **new empty directory** of its own, the way the
+check runs each page, and the gonk it starts keeps both its homes there. Every one of those gonks
+listens on port 1070, so a chapter that starts one first asks you to stop the one an earlier chapter
+left running (Ctrl-C in its terminal, which stops the `tee` beside it too), and the same for a
+`model-stub`. Stopping loses nothing: the earlier chapter's directory keeps that gonk's store, and
+the same command started there again picks it up where it was. Starting from nothing a chapter did
+not make itself is also what lets you open the book at any chapter.

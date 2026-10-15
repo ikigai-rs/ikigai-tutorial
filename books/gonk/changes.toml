@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-15"
+summary = "A new section in the introduction, A gonk per chapter, says that each chapter runs in a new empty directory with its own gonk on port 1070, and every chapter that starts one now says to stop the one an earlier chapter left running, naming that chapter. The introduction also says how to install the `model-stub` the later chapters start, and that Over MCP is the first page to need the `quic` feature; a few cross-references now point at the right chapter."
+pages = ["introduction.md", "ledger/browser.md"]
+
+[[change]]
+date = "2026-10-15"
 summary = "The introduction no longer recounts what each move of the gonk pin changed; it names the current pins and points to What's new, whose entries now hold those details."
 pages = []
 maintenance = true

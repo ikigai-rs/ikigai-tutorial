@@ -6,7 +6,7 @@ as corridors around them. Nobody could *play* it except by typing `sink` at a pr
 part gives it a face, and the face is resources too: HTML that the game serves under names
 of its own, the same bytes whoever puts it on a screen. It covers the ground of the fifth
 part of the series Part I credits, which starts from the edge a player touches, and of its
-ninth, which draws the design together, and it ends by drawing this arc together.
+ninth, which draws the design together, and it ends by drawing the first five parts together.
 
 Here are two games, `a` and `b`. Play them with the mouse or the keyboard: Tab to a square
 and press Enter or Space.
@@ -85,7 +85,8 @@ in it but its own coordinates:
 
 **Fallbacks.** `$h{a || b}` tries `a`, and if `a` fails, `b`, and `$h{{title} || b}` stands in
 for a missing argument. The game needs none, because a cell already answers `-` for an empty
-square. The spreadsheet arc uses them, and its part V shows what the cache makes of one.
+square. (The spreadsheet's evaluator falls back on a `NotFound` in code, not in a template, and
+its [part V](spreadsheet-5.md) shows what the cache makes of a fallback.)
 
 **A template bound at a name.** A view is a template bound at a name of its own.
 `ikigai_fn::compose_over(src)` is the composer with its template fixed, and the variables the

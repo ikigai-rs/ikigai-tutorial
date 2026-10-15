@@ -33,8 +33,9 @@ not have a format; it has whatever the kernel can reach. You write one in
 (`.depends_on(..)`), conventionally named after the resource whose state it tracks. A
 resolution derived from other resolutions inherits their threads; a write to a resource
 cuts the thread named after it, and every cached entry whose threads include that one —
-directly or transitively — stops being valid at that instant. An entry that declared no
-thread, a pure function's, is untouched by any cut. Precise invalidation, not timeouts. You cut one in [What resolution buys
+directly or transitively — stops being valid at that instant. Since core 0.1.73 every cacheable
+entry also hangs from the thread named after its own target, so even a pure function's, which
+declares none, is cut by a cut of its own name. Precise invalidation, not timeouts. You cut one in [What resolution buys
 you](getting-started/payoff.md) and again, on a file, in
 [Configuration](getting-started/configuration.md).
 
@@ -45,7 +46,8 @@ equals enforced, and either half without the other is a defect. You declare one 
 own endpoint in [Multi-verb endpoints](building/multi-verb.md), and watch one cross a
 socket in Part III's [Exercises](beyond/exercises.md).
 
-**Scope.** The resolution chain a request is resolved in: corridors a host injected
+**Scope.** (Not a *capability scope*, one `urn:cap:…` string in a capability, which is
+what most chapters mean by "a scope".) The resolution chain a request is resolved in: corridors a host injected
 ahead of the kernel's root, innermost first, and whether the root is on the end at all.
 Every sub-request inherits it. Injecting a corridor (`Kernel::issue_in`) is the host's
 authority, since a corridor placed ahead of the root can stand in for any door; cutting

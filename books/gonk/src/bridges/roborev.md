@@ -72,7 +72,10 @@ renders differently, say) is refused, loudly, with nothing filed, rather than fi
 
 ## Filing it
 
-Start a scratch gonk, as in every chapter:
+Start a scratch gonk in a new empty directory, as in [every
+chapter](../introduction.md#a-gonk-per-chapter). The last chapter to start one was [Explain, with a
+mounted model](../browse/explain.md) (the review and spec chapters run none); if that gonk is still
+running, stop it first, since this one takes the same port:
 
 <!-- transcript: serve -->
 ```console

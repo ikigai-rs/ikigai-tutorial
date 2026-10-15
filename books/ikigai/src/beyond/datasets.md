@@ -314,8 +314,8 @@ supplier's has its six seeded triples and the feed's one new price.
 
 A query run through `graph-select` is told its dataset by whoever runs it. A query **published**
 is not: it is run later, by other people, and the runner does not get to pick its graphs. So a
-published query names them in its text, and [Who a script runs as](../code/authority.md) showed
-what follows from that: its authority is derived from the names, `urn:cap:store:read:graph:<iri>`
+published query names them in its text, and [Who a script runs as](../code/authority.md), in a
+later part, shows what follows from that: its authority is derived from the names, `urn:cap:store:read:graph:<iri>`
 for each graph the text reads.
 
 ```rust,ignore

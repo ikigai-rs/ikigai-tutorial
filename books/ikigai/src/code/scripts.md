@@ -39,7 +39,8 @@ it has had) is an atom: a `Sink` writes it and nothing else does. A run is an at
 writes one and nothing writes it again. A result holds nothing: it is the script's text, run
 through the store, under somebody's authority.
 
-A script may be written in three languages: Lisp, a plan, or SPARQL. This section uses SPARQL
+A script may be written in three languages: Lisp, a plan (a composition of requests written as
+data, not the transreption route of the same name), or SPARQL. This section uses SPARQL
 only, and not just because the book's data is a graph: a query's authority can be read off its
 text, and the next chapter depends on that. `ikigai-script`'s own advice, when assembling
 anything, is "a query, then a plan, then Lisp", for the same reason.

@@ -4,7 +4,8 @@ Six parts built tic-tac-toe as resources. The atom is code, because it holds the
 the rules and views are small functions and templates. But one thing about the game was still
 Rust in every part: its *arrangement*. Which doors exist, in what order they are tried, which
 names are only other names (the eight lines of Part II), and what a host puts beside the game
-(`conditional`, for the views) were all calls in `space_with_store` and `kernel_over`.
+(`conditional`, for the views) were all calls in `space_with_store` and `kernel_over` (the
+crate's function that builds the coded game's kernel and puts `conditional` behind it).
 
 A kernel already reports its arrangement. `urn:kernel:topology` answers it as Turtle, and the
 catalog and the [tracing](../beyond/tracing.md) chapter read it. This part runs that the
@@ -368,7 +369,8 @@ ikigai --arrangement mine.arrangement
 
 The first line is the s-expression face; without `as=` the same root comes back as Turtle. The
 second is an SVG, and needs `urn:cap:kernel:inspect`, which the local REPL holds. The third
-reads a declaration, Turtle or `*.arrangement`, relative to the working directory, and
+reads a declaration (here `mine.arrangement`, your edited copy of `host.arrangement`), Turtle or
+`*.arrangement`, relative to the working directory, and
 `arrangement = "<path>"` in the host's config does the same. A file that does not build stops
 the start and names the node that failed. One thing to know before you try it: a host arranges
 only the endpoints *it* registered. This chapter's `tic-tac-toe.arrangement` names `ttt-cell`
@@ -378,7 +380,8 @@ printed, it does not yet start unchanged, because a few of the host's endpoints 
 (ledger item 639); its header says which.
 
 This part declared one space, the game's root. A *game* is still a corridor built in Rust
-(Part IV's `game`), and so are the temporal and personal corridors of the spreadsheet arc.
+(Part IV's `game`), and so are the temporal and personal corridors the spreadsheet arc builds
+later ([A spreadsheet, VI](spreadsheet-6.md)).
 Declaring corridors as templates, filled in per request from a game id, an instant or a
 person, is the next step (ledger item 632).
 

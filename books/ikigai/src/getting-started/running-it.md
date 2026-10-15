@@ -48,7 +48,8 @@ for most — which [What resolution buys you](payoff.md) reads through the same 
 ## The CLI
 
 The full host is the [`ikigai-cli`](https://crates.io/crates/ikigai-cli) crate, which
-installs a binary called `ikigai`:
+installs a binary called `ikigai`. If you installed it in [Twenty minutes, nothing
+compiled](../front-door/cli.md), it is already there; if not:
 
 ```bash
 cargo install ikigai-cli --locked
@@ -72,8 +73,8 @@ knowing early, because anything you learn in one place transfers. One difference
 matters: the cache lives in the process, so a cache hit is something you see in a REPL
 session and never across two `-c` runs.
 
-Two commands worth running on your first day, because they show the system describing
-itself rather than doing work:
+The two commands the front door opened with are worth keeping at hand, because they show the
+system describing itself rather than doing work:
 
 ```bash
 ikigai --plain -c 'source urn:kernel:catalog'

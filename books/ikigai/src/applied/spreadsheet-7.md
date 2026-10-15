@@ -3,9 +3,10 @@
 [Part V](spreadsheet-5.md) ended with a page that found out about a write it did not make the
 only way a reader of a name can: it asked again, every two seconds, whether anything had changed
 or not. It also listed what the other direction needs, the kernel telling the page. There were
-four pieces. Somebody to tell: the kernel has had that since core 0.1.82, `Kernel::listen`. What
+four pieces, and a caveat. Somebody to tell: the kernel has had that since core 0.1.82, `Kernel::listen`. What
 to redraw: the host's business. A channel: in this book the host is the page, so being told is a
-function call. And a timer, because time does not cut.
+function call. And a timer, because time does not cut. (The caveat, the same answer twice, is
+early cutoff, a cost this part notes, not a piece it builds.)
 
 This part builds the host's half, in the page. It needs no server and no new core, and the sheet
 gains one template, the page that asks each cell to listen, and nothing else: not a line of its
@@ -349,7 +350,8 @@ and every two seconds while polling is on. Here is the first row of the template
 {{#include ../../../../crates/spreadsheet/templates/push.html:7}}
 ```
 
-The markup changed from "ask every two seconds" to "listen for `stale`", as Part V said it would,
+The markup changed from "ask every two seconds" to "listen for `stale`", as Part V said it would
+(the event is `stale`, per cell, rather than Part V's `grid`, because each cell is now its own view),
 and nothing in the sheet's code changed with it. What the page adds is small. Its wasm module (the
 page's host, `crates/book-wasm`) exports four things for it: a draw that remembers what the answer carried, a wait on a listener, and the
 deadline and the expired views for the timer:

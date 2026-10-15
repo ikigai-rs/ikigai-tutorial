@@ -23,8 +23,9 @@ That makes two small changes, and they are the whole of this part's code.
 
 ## The store is a space
 
-The game's space used to bind the stored cell beside everything else. Now it takes the
-store as an argument, and the store is any space at all:
+[Part II](tic-tac-toe-2.md) showed the game's space with the stored cell already in a space of
+its own, after the composites. Here is why: the space takes the store as an argument, and the
+store is any space at all:
 
 ```rust,ignore
 {{#include ../../../../crates/tic-tac-toe/src/lib.rs:space}}
@@ -386,4 +387,4 @@ O--
 ## Next
 
 Part V puts a board in this page that you can play by clicking, over the same kernel and the
-same resources, and draws the arc together.
+same resources, and draws Parts I to V together.

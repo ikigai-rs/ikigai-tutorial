@@ -5,6 +5,9 @@ Four cells, one story: the catalog is a list, then a card, then a graph, then a 
 cells as a script, which is what was run to produce the output below (against a served
 `ikigai-cli` 0.1.18 — the counts are that host's, and yours will differ).
 
+Both of the first two lines are the [Python track](python.md)'s; skip them if that kernel is
+still serving `/tmp/ikbook-kernel.sock`.
+
 ```bash
 pip install rdflib /path/to/ikigai-python
 ikigai serve /tmp/ikbook-kernel.sock &

@@ -90,9 +90,10 @@ a name. Eight exact rules, as text:
 ```
 
 The game's space is its bound endpoints wrapped in an
-[`Alias`](../getting-started/scope-and-alias.md) that rewrites through that table. Three of
-them are this part's and the one before it; the last four are the rules, which
-[Part III](tic-tac-toe-3.md) builds, reading the same table. The stored cell sits in a space
+[`Alias`](../getting-started/scope-and-alias.md) that rewrites through that table. The first
+three are this part's and the one before it; the next four are the rules, which
+[Part III](tic-tac-toe-3.md) builds, reading the same table; the rest (a reset, the templates and
+the views) arrive in [Part V](tic-tac-toe-5.md). The stored cell sits in a space
 of its own after them, because [Part IV](tic-tac-toe-4.md) swaps it per game. No
 endpoint implements a row. `urn:iki:tutorial:ttt:row:0` resolves because the table
 rewrites it to `urn:iki:tutorial:ttt:cells:0.0,1.0,2.0`, and the line endpoint answers

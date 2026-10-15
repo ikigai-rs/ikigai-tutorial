@@ -248,7 +248,8 @@ A failure is a `user-error` whose message is the kernel's own error, prefixed wi
 
 A refusal reads the same way. Here one resource was routed by an override mount to a
 second kernel on the same machine, serving under a ceiling of `urn:cap:kernel:inspect`
-alone (`ikigai serve quic://127.0.0.1:47946 --cap urn:cap:kernel:inspect`):
+alone (`ikigai serve quic://127.0.0.1:47946 --cap urn:cap:kernel:inspect`, which needs a CLI
+built with the `quic` feature, as [Who is asking](identity.md#trust-without-an-authority) says):
 
 ```elisp
 (setq ikigai-mounts

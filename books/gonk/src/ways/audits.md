@@ -38,6 +38,10 @@ Read-only on the code; everything written goes to the ledger. One machine is eno
 
 ## The loop, step by step
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [Spec first](spec-first.md) is still running, stop it first, since this one takes the same
+port.
+
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log

@@ -19,6 +19,10 @@ ikigai 0.1.61
 
 ## Start a gonk, and find its socket
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [The ledger in a browser](../ledger/browser.md) is still running, stop it first, since this one
+takes the same port.
+
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
@@ -203,7 +207,8 @@ $ grep ' urn:iki:ledger:book:items ' gonk.log
 - Every request over the socket is `principal=owner`. The socket knows that whoever connected
   could open an owner-only file, and nothing more: it cannot tell your terminal from an agent
   you started. An agent that should be attributed as itself in the log needs an identity of its
-  own, which is a certificate on the QUIC door (a later part) rather than this socket.
+  own, which is a certificate on the QUIC door (the [next chapter](mcp.md), and in full the
+Several machines part) rather than this socket.
 - The read of `book` reached gonk and was refused there, so it has a line. The delete has none:
   the declared family `urn:cap:ledger:delete:*` was not held, so it was refused before it was
   dispatched to the ledger at all.

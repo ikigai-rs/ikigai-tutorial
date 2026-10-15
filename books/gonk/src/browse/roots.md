@@ -8,6 +8,9 @@ library cannot: it **watches** each repository, so the reads can be cached and s
 stale.
 
 This page makes a repository of its own, serves it, reads it, and changes it while gonk runs.
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [Over MCP](../agent/mcp.md) is still running, stop it first, since this one takes the same
+port.
 
 ## A repository, and a root
 
@@ -185,11 +188,12 @@ reads every root; `--browse read --root notes` reads only this one. The pages ar
 HTML faces (crumbs, listings, a highlighted file view with `#L{n}` anchors and the annotation
 margin) inside gonk's header.
 
-For an ikigai host that should see the roots under their own names, as the ledger was in the
-last chapter, the mount line is the same shape with a different prefix:
+For an ikigai host that should see the roots under their own names, as the ledger was in [Over the
+socket](../agent/socket.md#the-same-names-from-the-config-home), the mount line is the same shape
+with a different prefix (`~` is the home of whoever runs `ikigai`, as there):
 
 ```toml
-mount = "prefer urn:repo:=/Users/you/.ikigai/gonk.sock"
+mount = "prefer urn:repo:=~/.ikigai/gonk.sock"
 ```
 
 ⚠ `urn:repo:` is one prefix over two families: the browse roots (`urn:repo:{root}:…`) and

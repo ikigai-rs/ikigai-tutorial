@@ -1,7 +1,7 @@
 # The editor as a client
 
-Three chapters of plumbing, and the reasonable question at the end of them is who
-benefits. This chapter and the next are the two answers, and they are the same answer twice:
+The chapters so far in this part were plumbing, and the reasonable question at the end of them
+is who benefits. This chapter and the next are the two answers, and they are the same answer twice:
 a client that reads the manifold gets a command surface it did not have to write.
 
 Start with the human one. `ikigai-emacs` is a thin client — it shells out to the `ikigai`

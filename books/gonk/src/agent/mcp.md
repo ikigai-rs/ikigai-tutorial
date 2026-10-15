@@ -24,6 +24,11 @@ input and output.
 
 ## The server: an identity for the agent
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [Over the socket](socket.md) is still running, stop it first, since this one takes the same
+port. This chapter's gonk starts only after the agent's certificate is minted, because it reads
+the certificates it trusts at startup.
+
 As in [A QUIC client](../machines/quic-client.md), the server mints the agent a certificate and
 enrolls it under a grant built from a role. The agent may write the `default` ledger:
 

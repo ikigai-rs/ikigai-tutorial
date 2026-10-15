@@ -162,7 +162,11 @@ Both sentences come from the same three facts the plain face prints; the page do
 gonk composes exactly this, with a real store and a real model. The model is named on the
 command line (or by a `gonk.mount` line in `config.toml`) as a peer to mount at `urn:llm:` —
 a Unix socket, or `quic://host:port` with a certificate directory. Make a repository to browse,
-and start a gonk of your own with a mount whose socket nothing is listening on:
+and start a gonk of your own with a mount whose socket nothing is listening on. (Later chapters, from
+[Your first saved query](../scripts/first.md) on, start a stub model process at a path like this one; here
+nothing answers, on purpose.) In a new empty directory, as in [every
+chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Browse roots](roots.md) is still
+running, stop it first, since this one takes the same port.
 
 <!-- transcript: file demo/src/lib.rs -->
 ```rust,ignore

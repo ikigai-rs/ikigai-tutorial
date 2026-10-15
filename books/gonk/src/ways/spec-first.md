@@ -41,6 +41,10 @@ ones from a query over the lifted tree.
 
 ## The loop, step by step
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [Hub and spoke](hub-and-spoke.md) is still running, stop it first, since this one takes the
+same port.
+
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log

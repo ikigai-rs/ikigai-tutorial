@@ -296,14 +296,15 @@ operation an endpoint gets, and its shape is the whole argument: it puts `space`
 the root was and cuts the root off, behind every corridor the host injected — so it can
 never shadow one, and relative to the chain it started in nothing resolves differently
 except what the root would have answered. Narrowing is an endpoint's to do; widening is
-the host's. That asymmetry is the authority staircase from
-[Resolution](resolution.md), applied to the chain instead of the capability.
+the host's. That asymmetry is [Resolution](resolution.md)'s rule that authority is narrowed
+on the way down and never widened, applied to the chain instead of the capability.
 
 ## What the key holds now
 
-[What resolution buys you](payoff.md) said the cache is keyed on the request and the
-capability. It is keyed on three things: the content-addressed request (verb, canonical
-name, every argument), a fingerprint of the capability, and a fingerprint of the chain.
+[What resolution buys you](payoff.md) named the three slots of the cache's key, and
+[Golden threads in practice](golden-threads.md) stated the rule. Here is what each holds: the
+content-addressed request (verb, canonical name, every argument), a fingerprint of the
+capability, and a fingerprint of the chain.
 The third slot is why the injection block above ended with four entries — two resources,
 each with its sub-request, once per chain — and the alias block with one: a corridor
 splits one name into two resources, a reported rewrite joins two names into one, and in

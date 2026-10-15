@@ -5,7 +5,8 @@ it has whatever formats the kernel can reach from what it has. This chapter is w
 find out what "reach" means, by using a transreptor and then writing one.
 
 The code is `crates/building-endpoints`, this part's crate. Its host chains onto Part I's
-space, so everything you built there is bound here too, plus the four endpoints these
+space, so everything you built there is bound here too, plus four endpoints: `banner`, which
+[Configuration](../getting-started/configuration.md) borrowed from this part, and the three these
 chapters add:
 
 ```rust,ignore

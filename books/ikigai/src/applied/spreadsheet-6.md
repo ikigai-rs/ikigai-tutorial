@@ -85,14 +85,14 @@ source urn:iki:tutorial:sheet:cell:B2'>
 
 ## The sheet as it was
 
-The input used to keep only what a cell held now. It keeps every write now, each stamped with the
-kernel's clock, and a clear is a write of nothing:
+Since [Part I](spreadsheet-1.md) the input has kept every write, each stamped with the kernel's
+clock, and a clear is a write of nothing. Until now only the latest one mattered:
 
 ```rust,ignore
 {{#include ../../../../crates/spreadsheet/src/lib.rs:store}}
 ```
 
-That is the only change to the sheet the temporal view needs. The rest is a corridor. Inside it,
+That history is all the temporal view needs from the sheet. The rest is a corridor. Inside it,
 `input:{ref}` is answered from the history, as of the instant the corridor is pinned to:
 
 ```rust,ignore
@@ -350,16 +350,17 @@ Alice's scenario reads them through.
 
 | the set | the name | what it is |
 |---|---|---|
-| the input's history | `urn:iki:tutorial:sheet:input:{ref}` | code: the same atom, now keeping every write |
+| the input's history | `urn:iki:tutorial:sheet:input:{ref}` | code: the same atom, every write it kept, read for the first time |
 | an input as of an instant | `input:{ref}` in `urn:ctx:time:{instant}` | code: the history, read at the corridor's clock; writes refused |
 | the time, pinned | `urn:iki:tutorial:time:now`, `…:today` in `urn:ctx:time:{instant}` | code: the corridor's clock, as text, cacheable for as long as the corridor |
-| a person's override | `input:{ref}` in `urn:iki:tutorial:sheet:scenario:{who}` | code: the second atom, a store per person, behind their capability |
+| a person's override | `input:{ref}` in `urn:iki:tutorial:sheet:scenario:{who}` | code: another atom, a store per person, behind their capability |
 | a scenario | `urn:iki:tutorial:sheet:scenario:{who}` | a corridor: a space that misses on every read it does not hold |
 | a scenario over an instant | a stack of the two | `Scope::stack`: no code |
 
 Not one line in the formulas, the compiler, the evaluator or the views changed, and none of them
-knows about people or time. The whole of what this part added is two atoms' worth of state (a
-history and a store of overrides), three small doors, and the arrangement: which corridors a request
+knows about people or time. The whole of what this part added is one atom's worth of state (a
+store of overrides), a first reading of the input's history, three small doors, and the
+arrangement: which corridors a request
 carries, and in what order. That arrangement is where the new behavior came from: a "what if" that
 costs one cell, a past that caches, a single now, and a capability that locks a person's cells
 without locking the sheet. The one thing it promised and could not deliver, a personal edit that

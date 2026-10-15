@@ -12,6 +12,10 @@ the value. It passes, it stays passing, and it is not evidence about the endpoin
 
 ## The endpoint
 
+This part's `stamp` reads only the clock. It is not the two-faced `stamp` sketched in [Scope and
+alias](../getting-started/scope-and-alias.md#as-of-the-corridor-that-pins-time), which read the
+time two ways to show a corridor pinning it.
+
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/hermetic.rs:impl}}
 ```

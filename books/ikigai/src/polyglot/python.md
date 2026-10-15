@@ -44,7 +44,8 @@ speaks to any other peer.
 In Rust you wrote the `ArgSpec`s by hand. Here they are **derived from the signature**:
 `who: str` is a required input of class `xsd:string`, the `Annotated` text is its
 summary, a default would make it optional, `Literal[...]` would be `one_of`. The
-description a Rust host sees is exactly the one it would see from a Rust endpoint:
+description a Rust host sees is exactly the one it would see from a Rust endpoint (the peer it
+asks is started in [Binding](#binding-a-mount-is-a-binding), below; start it first to run this):
 
 ```text
 $ ikigai --plain --mount urn:py:=/tmp/py-hello.sock -c 'describe urn:py:hello text/plain'
@@ -180,7 +181,8 @@ keeps no cache. The write that followed cut the note's golden thread in the host
 next read computed again and saw the new text. The peer wrote no invalidation code. The
 host cuts a name's thread after every Sink or Delete it forwards to that name. The index is
 uncacheable on purpose, because it reads every note and a write cuts only the note it
-wrote. Exists, from a client:
+wrote. Exists, from a client (the block above ended by deleting `milk`, so sink it again
+first):
 
 ```python
 k = ikigai.connect("/tmp/py-notes.sock")   # the peer itself; Exists is a read
@@ -203,7 +205,7 @@ because it is declared first:
 **Every door has two forms, and every door's declared form is tried before any door's
 stripped form.** `--mount urn:py:=` is an *alias* mount: the host rewrites
 `urn:py:note:milk` to `urn:note:milk` before forwarding it, the way
-[Binding](../getting-started/binding.md) described. A peer cannot know the prefix it was
+[Preferential resolution](../beyond/preference.md) described. A peer cannot know the prefix it was
 mounted at, only that it was aliased, so it answers each door at its declared pattern and at
 that pattern with the first segment stripped: `urn:py:note:{name}` and `urn:note:{name}`.
 If the forms were tried door by door, one door's stripped form could shadow the next door's
@@ -213,8 +215,8 @@ sending stripped names, so for that connection the order reverses, and stripped 
 first. Because only the first segment can be stripped, a family mounted deeper,
 at `urn:py:note:` for example, needs `--override`, which forwards names unchanged.
 
-A family is how a store in another language holds a game: the last part of the tic-tac-toe
-arc, [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md), serves the game's stored cell as one,
+A family is how a store in another language holds a game: the sixth part of the tic-tac-toe
+arc, [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md), which you have already read, serves the game's stored cell as one,
 from Python, under a Rust host that keeps everything else.
 
 ## What an L0 peer cannot do

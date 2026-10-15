@@ -26,7 +26,7 @@ name the time chapter already serves:
 ```
 
 The sheet reads these names; it does not serve them. The time chapter's crate does, and the
-page binds both side by side, as it binds tic-tac-toe beside Part I. That is the whole of the
+page binds both side by side, as it binds tic-tac-toe beside the book's Part I endpoints. That is the whole of the
 integration: the sheet names a resource another chapter built, and the kernel finds it.
 
 `NOW()` is the date and the time, as a spreadsheet's `NOW()` is, written the way the time
@@ -240,7 +240,7 @@ the something is not the page, and that is [Part V](spreadsheet-5.md).
 
 No endpoint was added to the sheet. The evaluator reads two more names, and the deadlines, the
 recalculation on the minute and the cells that are left alone all come from the kernel's rule
-for composites, which the sheet was already following. One thing was added to the time
-chapter's crate, and it was not code for the sheet: it was a guard that every composite over
-the date and the time would otherwise have had to remember, moved into a resource so that
-nothing has to.
+for composites, which the sheet was already following. One thing in the time chapter's crate
+exists for exactly this, and it is not code for the sheet: the guard every composite over the
+date and the time would otherwise have had to remember, which [that chapter](time.md) moved into
+a resource so that nothing has to.

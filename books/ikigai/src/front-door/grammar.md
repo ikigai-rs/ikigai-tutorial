@@ -1,7 +1,8 @@
 # The REPL grammar
 
 One grammar drives the `ikigai` REPL, its `-c` one-shot, the cells in this book, and the
-browser demo's terminal — the same engine, with a different host behind it. This chapter
+[browser demo](../getting-started/running-it.md#the-browser-demo)'s terminal — the same engine,
+with a different host behind it. This chapter
 is that grammar, one runnable line per construct. Where the in-page kernel binds the
 names, the line has a **Run** button; the rest run at a shell.
 
@@ -137,8 +138,9 @@ line, a `sink` under `-c` reads stdin, waits at most two seconds for its first b
 silence sends no `content` at all rather than an empty one (it says so on stderr). A `sink` the
 kernel dispatched cuts the golden thread named after the target, whether it succeeded or
 (since core 0.1.95) failed, which is how a write invalidates every cached read that declared that
-thread — the file endpoint's reads do; a pure function's do not, having nothing to hang
-one on.
+thread, and every cached read of that name: since core 0.1.73 every cacheable read hangs from
+the thread named after its own target, declared or not, as the [previous
+chapter](cli.md#6-cut-a-thread) showed on a pure function.
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:title a title from the grammar chapter
 source urn:iki:tutorial:camel-title'>

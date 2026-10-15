@@ -1,7 +1,8 @@
 # A sentence becomes a draft
 
-The previous two chapters published code a person wrote. This one lets a language model write it,
-and the interesting part is not the model. It is how little the model is allowed to do.
+The chapters before this one published code a person wrote, and [Your first
+script](first.md) showed a stand-in model drafting one in passing. This one lets a language model
+write it, and the interesting part is not the model. It is how little the model is allowed to do.
 
 [`ikigai-nl`](https://crates.io/crates/ikigai-nl) turns a sentence into a SPARQL query with the
 model as a **drafter, never an actor**. Every step is a resource read or write under the CALLER's
@@ -25,7 +26,7 @@ is how this chapter shows them.
 
 ## The host, and a model that is not one
 
-`crates/sentence-draft` mounts `ikigai-nl` on [the first chapter's](scripts.md) host (the script
+`crates/sentence-draft` mounts `ikigai-nl` on the host from [Scripts are resources](scripts.md) (the script
 host and the store, with the same items), beside the vocabulary the grounding cites and a model
 door:
 
@@ -86,7 +87,7 @@ queries (its classes and predicates, with counts, and a few sample triples). Eac
 says what KIND of value it takes, an IRI or a literal of some datatype, and, when its values are a
 small closed set, what they are: `ledger:status` is the IRI `ledger:open` or `ledger:closed`, never
 the string `"open"`. That line exists because of the draft in section 4. The examples are published
-scripts the caller may read: here the host names one, the first chapter's `open-items`, and the
+scripts the caller may read: here the host names one, `open-items` from [Scripts are resources](scripts.md), and the
 grounding shows it to Alice and not to Carol, by asking the script host's own rule.
 
 So Carol's grounding offers eight actions and no data at all, and the payroll graph is not in
@@ -367,7 +368,7 @@ signal to look for.
 
 | the set | the name | what it is |
 |---|---|---|
-| the drafting host | `sentence_draft::kernel` | composition: the first chapter's host, `ikigai-nl`, the vocabulary, a model door |
+| the drafting host | `sentence_draft::kernel` | composition: the host from [Scripts are resources](scripts.md), `ikigai-nl`, the vocabulary, a model door |
 | the stub model | `urn:llm:ask` (in every gate) | code: canned drafts per attempt, the prompts it was sent, no network |
 | a real model | `urn:llm:ask` (with `--ollama`) | composition: `ikigai-llm` over a blocking HTTP client |
 | a grounding | `urn:nl:grounding` | composition, `ikigai-nl`'s: the caller's own view, cached per capability |

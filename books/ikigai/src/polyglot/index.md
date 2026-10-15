@@ -1,6 +1,7 @@
 # One wire, three languages
 
-Everything before this part was Rust, and the model never depended on it. A resolution is
+Almost everything before this part was Rust ([Tic-tac-toe, VI](../applied/tic-tac-toe-6.md)
+borrowed these faces ahead of time), and the model never depended on it. A resolution is
 a request and a representation crossing a boundary, and the boundary is a wire protocol
 with a version number: `ikigai-ipc` speaks it over a Unix socket in Rust, and so do two
 other implementations of the same codec — [`ikigai-python`](https://github.com/ikigai-rs/ikigai-python)
@@ -31,7 +32,7 @@ Both tracks mirror Part I chapter for chapter, in a language with no kernel in i
 | [Multi-verb endpoints](../building/multi-verb.md) | a **family**: one URI template, a contract per verb (Source, Sink, Delete, Exists), and which door answers a name |
 
 Then a [notebook](notebook.md): the catalog as a graph, in rdflib, with one SPARQL query.
-And for a whole application served this way, the tic-tac-toe arc ends with
+And for a whole application served this way, you have already seen
 [the same game in Python and TypeScript](../applied/tic-tac-toe-6.md): a store in each
 language under a Rust host, and an app in each language that serves the host's board.
 

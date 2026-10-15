@@ -74,8 +74,9 @@ so it takes `a1` and writes to `A1`. The names themselves are not.
 
 ## The input: the atom
 
-What was typed into each cell is kept in memory, one string per cell, in a map the host
-holds:
+What was typed into each cell is kept in memory, in a map the host holds. (It keeps every
+write, each stamped with the time; until [Part VI](spreadsheet-6.md) only the latest one
+matters.)
 
 ```rust,ignore
 {{#include ../../../../crates/spreadsheet/src/lib.rs:store}}
@@ -219,7 +220,8 @@ captures are the template's arguments, so `view:cell:B2` is the `cell` template 
 {{#include ../../../../crates/spreadsheet/src/lib.rs:views}}
 ```
 
-That is all the code the grid has. The template says which cells there are and where they go, and
+That is all the code the grid has. (The last three bindings are the cost table [Part
+III](spreadsheet-3.md) adds.) The template says which cells there are and where they go, and
 each cell's view says how a value is shown, so there is no four and no six in any code, and no
 code that reads a cell.
 

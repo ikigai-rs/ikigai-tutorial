@@ -18,6 +18,10 @@ call — with **mutual certificate pinning and no certificate authority**. Each 
 self-signed identity and the exact peer certificate it will accept: the client pins the
 server's, the server requires and pins the client's.
 
+Both commands, and every `quic://` address in this part, need a CLI built with the `quic`
+feature, which the [front door](../front-door/cli.md#0-install)'s install leaves out: `cargo
+install ikigai-cli --locked --features quic`.
+
 ```bash
 ikigai cert generate            # a server identity and a client identity
 ikigai cert add-client laptop   # an ADDITIONAL client identity, and its fingerprint
@@ -153,7 +157,8 @@ scoped clients safe.
 The transport can also find its peers by name, announcing over mDNS, so a mount can say
 `peer:plasma` instead of an address — useful, because addresses move and names do not.
 
-The rule that comes with it belongs in this chapter rather than the next one:
+The rule that comes with it belongs in this chapter rather than in [Preferential
+resolution](preference.md):
 **discovery supplies an address, never trust.** An announced name is attacker-controlled;
 anything on the network can claim to be `plasma`. So a mount by name still requires a
 pinned certificate for that name, and an impostor gets a failed handshake rather than a
@@ -371,10 +376,9 @@ that goes red, before an operator's caller is refused in production.
 
 The reader-facing consequence: the tool list an agent is handed is exactly what it may
 invoke — `urn:kernel:actions` computes reach intersected with authority from the same
-declarations the kernel enforces — so the manifold cannot lie by omission. One
-qualification, from [Scope and alias](../getting-started/scope-and-alias.md): selection
-does not yet know the chain, so inside a confinement the manifold can offer an action the
-chain cannot resolve. Names, not authority; and not yet.
+declarations the kernel enforces — so the manifold cannot lie by omission. Since core
+0.1.75 that holds inside a confinement too; what is still not chain-aware is listed in [Scope
+and alias](../getting-started/scope-and-alias.md#not-yet).
 
 ## What the cache knows about authority
 

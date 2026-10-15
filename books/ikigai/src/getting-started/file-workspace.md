@@ -55,9 +55,9 @@ thing — `ws/{id}`, where the id is derived from an identity.
 There is a running demonstration of that, and it is **not in this repository**: it is
 [`ikigai-web-demo`](https://github.com/ikigai-rs/ikigai-web-demo), the kernel-as-WebAssembly
 page from [Running it](running-it.md), at
-<https://ikigai-rs.github.io/ikigai-web-demo/>. Neither `hello-camel` nor
-`loadable-module` has an identity of any kind, so nothing you have built so far can show
-you this.
+<https://ikigai-rs.github.io/ikigai-web-demo/>. `hello-camel` has no identity of any kind
+(nor does Part II's `loadable-module`, when you get there), so nothing you have built so far
+can show you this.
 
 Open that page's **Identity** tab and sign in with a passkey: the credential yields a
 stable client id, and the id scopes a private workspace segment. The tab then offers three

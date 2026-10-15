@@ -145,7 +145,8 @@ assert!(dependents(hello_camel::TITLE).contains("a cut would recompute nothing")
 hangs from its own name, below), so cutting either would rebuild it. An entry that is
 already stale, cut by another thread or past its expiry, is not listed: it recomputes
 whatever happens to this one. The last column is the chain the entry was computed in
-(`root`: no corridor), because the cache files an answer under its chain as well as its
+(`root`: no corridor, a term [Scope and alias](scope-and-alias.md) introduces), because the
+cache files an answer under its chain as well as its
 request and its authority, the third slot of rule 1 below.
 In the REPL (`ikigai-cli` 0.1.43 and later) the same question is `dependents <thread>`.
 
@@ -222,7 +223,7 @@ and a composite's is the *meet* of its own and every dependency's, with `Always`
 bottom. Adding one uncacheable source to a cached resource makes it uncacheable. That is
 a correctness no-op, and it is a performance change with no type signal. The cautionary
 tale is three sentences long: one uncacheable overlay was joined into a cached graph on a
-live server (2026-08-13, in the reading room's own repository); every read went from
+live server (2026-08-13, in `ikigai-cms-web`, the reading-room CMS); every read went from
 about 20 µs to about 1.0 s; and 68 tests stayed green, because the types are identical
 either way. Nothing catches it but measuring the read — so when you add a source to a
 cached resource, measure the read before and after. That is the only signal there is.

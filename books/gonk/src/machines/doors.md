@@ -1,6 +1,7 @@
 # The three doors, and who is asking
 
-Everything so far reached gonk from the same machine. This part is about reaching it from others,
+Everything so far reached gonk from the same machine, apart from [Over MCP](../agent/mcp.md), which
+used as much of the QUIC door as an agent needs. This part is about reaching it from others,
 and it starts with what every request has to answer first: **who is asking, and what may they
 do?** A kernel answers that with a capability, and gonk's doors are where a request is given one.
 There are three, and each authenticates something different.
@@ -13,7 +14,10 @@ There are three, and each authenticates something different.
 
 This page opens all three on one scratch gonk and sends a request through each, then reads gonk's
 access log to see what gonk knew about each caller. The [next chapter](quic-client.md) is the QUIC
-door in depth.
+door in depth. In a new empty directory, as in [every
+chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [A fresh machine, end to
+end](../bridges/fresh-machine.md) is still running, stop it first, since this one takes the same
+port.
 
 ## Opening the QUIC door
 

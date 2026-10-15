@@ -9,7 +9,10 @@ the second from a sentence. Nothing here needs more than [Over the socket](../ag
 
 The second step asks a language model. This page uses a stand-in, `model-stub` from this book's
 `crates/model-stub`, which answers each question with the same query every time, so the page
-prints the same thing on every machine. Start it first:
+prints the same thing on every machine (installed as [Which gonk](../introduction.md#which-gonk)
+says). In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if
+the gonk from [A QUIC client, and the grant it runs under](../machines/quic-client.md) is still
+running, stop it first, since this one takes the same port. Start the stub first:
 
 <!-- transcript: serve -->
 ```console

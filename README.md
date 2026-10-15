@@ -285,6 +285,32 @@ target there is nothing to check it against. Both are fixed the same way, which 
 neither is a nuisance: name the chapter. `[Where this actually
 stands](../modules/status.md)` says both halves and a reorder cannot falsify either.
 
+### And the order a reader goes in
+
+Every check above runs a page on its own, in a scratch directory of its own, so a chapter that
+ignores what the chapters before it left behind passes all of them. A reader who goes front to
+back does not start from nothing: the previous chapter's server may still be running, its
+directory and names are still in their head, and "the next chapter" means the next one in
+`SUMMARY.md`. So every book change keeps **serial-reader continuity** (ledger #1623):
+
+- A change that adds, moves or removes **setup** (a server, a socket, a config home, an
+  enrollment, an install, an environment variable, a scratch directory), **cleanup**, **names**
+  or **state** reads the chapters before and after it.
+- A chapter says what a reader arriving from the previous chapter already has, and what to do
+  with it: "if the gonk from [that chapter](…) is still running, stop it first", rather than
+  starting a second one on the same port.
+- Every chapter still works on its own, for a reader who jumps in: acknowledge earlier setup,
+  never delete it.
+- A forward reference says it is one ("later in the book"); a term is defined before a chapter
+  leans on it; one thing keeps one name across chapters.
+
+`crates/book-urns/tests/book_continuity.rs` checks the part of that a parser can decide, in every
+book: a page whose transcripts start a long-running piece (a `<!-- transcript: serve -->` block)
+must link, above that block, the nearest earlier page that started one, which is what a reader
+in order still has running; and a link that says the next or previous chapter must point at the
+neighboring page in `SUMMARY.md`. Reorder the chapters and both go red. The rest is review: each
+book's `DESIGN.md` says what to read for.
+
 ### And the spelling
 
 The book is written in American English, and a relapse is invisible in a diff that is
@@ -469,7 +495,8 @@ A new part is a heading in
 [`books/ikigai/src/SUMMARY.md`](books/ikigai/src/SUMMARY.md) and a directory of chapters
 beside it. Put the code it teaches in a crate under `crates/` so it is compiled and linted
 like anything else, and include that code into chapters by anchor rather than pasting it —
-paraphrase is how a tutorial starts lying.
+paraphrase is how a tutorial starts lying. Read the chapters on either side of the one you change,
+as a reader in order would ([And the order a reader goes in](#and-the-order-a-reader-goes-in)).
 
 Start a genuinely separate book under `books/` only when it is about something else (The
 gonk Book is the second); `test-books.sh`, axe, the no-kernel check and the link check run

@@ -41,7 +41,10 @@ steps that need it are marked.
 
 A model is optional, and this page mounts the book's stub, so that the one explanation below is
 answered without a network: in practice it is a local model host
-([Explain, with a mounted model](../browse/explain.md#a-real-model)).
+([Explain, with a mounted model](../browse/explain.md#a-real-model)). In a new empty directory, as
+in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk and the `model-stub` from
+[Two teams, one gonk](../teams/two-teams.md) are still running, stop them first, since this gonk
+takes the same port.
 
 <!-- transcript: serve -->
 ```console

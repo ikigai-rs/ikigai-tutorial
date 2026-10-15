@@ -1,6 +1,6 @@
 # The machine client
 
-The previous chapter generated a command surface for a person. This one generates the same
+[The editor as a client](emacs.md) generated a command surface for a person. This one generates the same
 thing for a program, out of the same catalog, and the fact that it is the same is the
 point the whole book has been walking toward.
 
@@ -12,6 +12,9 @@ implementations, and then the manifold as a tool list.
 `ikigai-llm` binds a facade at `urn:llm:ask` and a directly addressable endpoint per
 configured backend. Asking is the front grammar; a specific model is still a name you can
 resolve if you want that model and no other.
+
+Both answer only with a backend configured in your config home's `llm.json`, which no
+earlier chapter sets up; without one, `urn:llm:models` lists nothing to ask.
 
 ```bash
 ikigai -c 'source urn:llm:ask prompt="name three uses for a paperclip"'
@@ -69,10 +72,9 @@ Two properties fall out of that, and both are worth more than the integration it
 capability its session holds — not the full catalog with the forbidden entries filtered out
 at call time. A scoped agent cannot enumerate what it may not invoke, so a whole class of
 "the model kept trying the thing it is not allowed to do" simply does not arise. Narrowing
-authority narrows the tool list, live. (One qualification, from [Scope and
-alias](../getting-started/scope-and-alias.md): the manifold does not yet know the
-resolution chain, so inside a confinement it can offer an action the chain cannot
-resolve — an over-offer of names, not of authority, and not yet closed.)
+authority narrows the tool list, live, and since core 0.1.75 inside a confinement too
+([Scope and alias](../getting-started/scope-and-alias.md#not-yet) lists what is still not
+chain-aware).
 
 **Federation is free at the tool layer.** The manifold is projected from the composed
 kernel, mounts and all. A `prefer` mount pointing `urn:llm:` at a heavier machine puts that

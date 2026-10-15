@@ -329,9 +329,10 @@ cargo run -p hello-camel -- --catalog
 ## The same four things from a shell
 
 None of this is a property of Rust. The `ikigai` CLI drives another host with the same
-kernel in it, and the REPL grammar reaches all four. Start `ikigai` with no arguments and
-type these in one session — the cache lives in the process, so one-shot `-c` runs would
-each start empty:
+kernel in it, and the REPL grammar reaches all four. Start a fresh `ikigai` with no arguments
+(quit a REPL still open from [the front door](../front-door/cli.md) first: its cache and its cut
+threads would change what these print) and type these in one session — the cache lives in the
+process, so one-shot `-c` runs would each start empty:
 
 ```text
 ikigai> source urn:iki:fn:toUpper in="a b" | urn:iki:fn:reverseList
@@ -379,9 +380,10 @@ shell. `trace` is `issue_traced` with the CLI's own tracer rendering the tree. `
 one level up: its endpoint declared a thread named after the file, so the `sink` that wrote
 it cut that thread, and `sink urn:kernel:cut` cuts it again by hand — the resource for
 doing what a write does, on somebody else's behalf — and the cached read is gone. Note
-what a cut does *not* do: `urn:iki:fn:toUpper` declared no thread (a pure function has
-nothing to hang one on), so cutting a thread by that name would leave its entry exactly as
-cached as before. `urn:kernel:threads` shows every thread that has ever been cut, with its
+what reaches a pure function: `urn:iki:fn:toUpper` declared no thread, but since core 0.1.73
+every cacheable read also hangs from the thread named after its own target (above), so a cut
+of `urn:iki:fn:toUpper` would invalidate it too, as the [front
+door](../front-door/cli.md#6-cut-a-thread) showed. `urn:kernel:threads` shows every thread that has ever been cut, with its
 generation — the file's twice.
 
 > ⚠ The Turtle the CLI prints may differ in shape from the tutorial host's: which
@@ -397,9 +399,9 @@ own tree. An endpoint answered "what are you?" with a graph you could query. Fou
 properties, zero lines of code in `camel-case` to get any of them — they came from
 resolving a *name* rather than calling a function.
 
-The next two chapters are about the two things that made the fourth one possible: [the
-description](self-description.md) an endpoint carries, and [the host](binding.md) that
-knows how to render it.
+After [Golden threads in practice](golden-threads.md), the two chapters that follow it are
+about the two things that made the fourth one possible: [the description](self-description.md)
+an endpoint carries, and [the host](binding.md) that knows how to render it.
 
 ## Try it
 

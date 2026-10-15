@@ -6,7 +6,10 @@ that says exactly what that identity may do, the identity moved to the client, a
 refusing everything outside the grant — including a certificate it was never told to trust.
 
 Both "machines" here are directories on one machine: the server keeps its two homes in the page's
-directory, as in every chapter, and `laptop/` stands in for the client's machine. Everything below
+directory, as in [every chapter](../introduction.md#a-gonk-per-chapter), and `laptop/` stands in
+for the client's machine. If the gonk from [the previous chapter](doors.md) is still running, stop
+it first, since this one takes the same port; its `laptop` is a different client from this page's,
+with a different certificate. Everything below
 works the same with the second one somewhere else, with `127.0.0.1` replaced by the server's
 address.
 
@@ -61,7 +64,8 @@ $ cat .config/ikigai/gonk/grants.json
 
 Six tokens: the four-token ledger writer from [the first chapter](../ledger/your-own.md), reading
 the `notes` root, and reading browse's graph through the store's narrow door (so the client can
-join its items to what browse knows, as in [the embedding chapter](../embedding/own-kernel.md)).
+join its items to what browse knows, as [the embedding chapter](../embedding/own-kernel.md), at the
+end of the book, does in a kernel of its own).
 `clients.json`, beside it, maps the fingerprint to the grant's name. Two files, re-read on every
 connection: editing either changes what a client may do, or revokes it, without a restart. The
 **certificates** gonk trusts are read once, at startup — so start it now:

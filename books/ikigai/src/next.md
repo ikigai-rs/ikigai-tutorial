@@ -1,7 +1,7 @@
 # Where to go next
 
 Three reference pages close the book: a [glossary](glossary.md) of the nine terms
-[Resolution](getting-started/resolution.md) introduced, a [map of every
+[Resolution](getting-started/resolution.md) introduced and three later chapters added, a [map of every
 repository](repositories.md) in the organization, and [how to contribute a
 module](contribute.md) of your own. The short list below is the handful this book leaned
 on.

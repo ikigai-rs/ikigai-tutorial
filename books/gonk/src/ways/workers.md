@@ -37,6 +37,10 @@ two workers. On real machines only the address changes, and the bundle is moved,
 
 ### 0. Once: an identity per worker
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+and the `model-stub` from [Solo on one machine](solo.md) are still running, stop them first, since
+this page's gonk takes the same port (it needs no model).
+
 `client add … --worker <ledger>` mints a certificate and enrolls it under the ledger's worker role
 (`--ledger default=worker` says the same):
 
@@ -301,7 +305,7 @@ before anyone notices.
 Choose it when there is more work than one machine's attention, when the work is well enough
 specified to be done from a brief, and when you want the machine that writes code to be unable to
 accept its own work. If the work is not yet specified that well, a coordinating session in front
-of the workers is the next chapter, [Hub and spoke](hub-and-spoke.md).
+of the workers is [Hub and spoke](hub-and-spoke.md), two chapters on.
 
 ## With the starter
 

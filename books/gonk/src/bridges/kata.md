@@ -8,6 +8,10 @@ says plainly what does not survive the trip.
 
 ## An export
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [Filing roborev findings](roborev.md) is still running, stop it first, since this one takes the
+same port.
+
 `kata export` writes the database out as JSON Lines, one record per line, each with a `kind`
 (stop kata's daemon first, or pass `--allow-running-daemon`):
 

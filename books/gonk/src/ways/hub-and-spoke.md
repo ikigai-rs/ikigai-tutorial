@@ -47,6 +47,10 @@ machines reach it over QUIC with identities of their own, exactly as in
 
 ## The loop, step by step
 
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+and the `model-stub` from [Review every commit](review-every-commit.md) are still running, stop them
+first, since this gonk takes the same port.
+
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log

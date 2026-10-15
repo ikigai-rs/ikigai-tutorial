@@ -8,8 +8,11 @@ passkey ceremony, which needs a browser and an authenticator; it is marked, and 
 
 ## Start one, and keep what it says
 
-Start a scratch gonk as before, with both its homes in an empty directory, and this time keep
-what it prints in a file as well as on the screen:
+Start a scratch gonk as before, with both its homes in a new empty directory, and this time keep
+what it prints in a file as well as on the screen. If the one from [A ledger of your
+own](your-own.md) is still running, stop it first (Ctrl-C in its terminal): this one takes the same
+port, and the page's answers count from an empty ledger ([A gonk per
+chapter](../introduction.md#a-gonk-per-chapter)).
 
 <!-- transcript: serve -->
 ```console

@@ -11,7 +11,7 @@ that a host routes some names to *without linking it*.
 
 A module is **not** a remote kernel, and the difference is not a matter of degree.
 
-When you resolve against an IPC or QUIC peer, that peer resolves every sub-request on its
+When you resolve against an IPC or QUIC peer ([Part III](../beyond/socket.md) builds one), that peer resolves every sub-request on its
 own side. It has its own catalog, its own cache, its own spaces. You hand it a name and it
 hands you back an answer; nothing crosses back.
 
@@ -45,5 +45,5 @@ The code is in
 and as in Part I the listings are pulled from it by anchor rather than copied.
 
 > ⚠ **Read [Where this actually stands](status.md) before you plan around any of this.**
-> `ikigai-module` (0.3.0) still describes itself as "Phase 1: in-process proof". The callback machinery
+> `ikigai-module` (0.4.0) still describes itself as "Phase 1: in-process proof". The callback machinery
 > is real and exercised; the isolation is not there yet.

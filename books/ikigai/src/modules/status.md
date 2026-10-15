@@ -144,7 +144,8 @@ line here, and taught where a chapter teaches it:
   VII](../applied/tic-tac-toe-7.md)).
 - **0.1.84 — declarations are bounded.** A declaration past a depth, node or text bound is
   refused rather than overflowing the stack; and `Kernel::root_topology`, the root's own
-  arrangement, which Part VII's test compares the coded game with the declared one through.
+  arrangement, which [Tic-tac-toe, VII](../applied/tic-tac-toe-7.md)'s test compares the coded
+  game with the declared one through.
 - **0.1.85 — the audit release.** The capability floor covers every verb an endpoint can be
   asked for, not only the ones it declares; nothing but the kernel answers inside the
   kernel's own namespace; and a seal names a level by the object registered, not by its name.

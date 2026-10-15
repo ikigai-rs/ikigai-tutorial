@@ -55,8 +55,9 @@ for one as Turtle in [What resolution buys you](payoff.md).
 When a resolution is derived from other resolutions, the kernel records the dependency.
 Write to something upstream and everything that declared a dependency on it — directly,
 or by having resolved it — is invalidated: precisely, not by guesswork and not by expiry
-guessing. (A pure function of its arguments declares no dependency, and no cut touches
-it; that is what `.cacheable()` on such a function is claiming.)
+guessing. (A pure function of its arguments declares no dependency of its own; since core
+0.1.73 the one thread it hangs from is the one the kernel names after it, so only a cut of its own
+name touches it, as the [front door](../front-door/cli.md#6-cut-a-thread) showed.)
 
 This is why caching here is not a bolt-on. A cache that cannot tell you *why* an entry is
 still valid has to fall back on timeouts; one that tracks derivation can keep an answer
@@ -83,7 +84,8 @@ more than it can do; one that declares authority it does not enforce is worse. B
 treated as defects.
 
 Part I runs everything as root, on purpose; [The file workspace](file-workspace.md) is
-where a scoped capability first refuses something, and Part III leans on them hardest —
+where scoped capabilities are explained (the grammar chapter's [`cap`](../front-door/grammar.md#authority-cap)
+already showed one refuse a write), and Part III leans on them hardest —
 [Who is asking](../beyond/identity.md) is where *who* and *what may happen* come apart,
 and where the two ways authority could grow are named and declined.
 

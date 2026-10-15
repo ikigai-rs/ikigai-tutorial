@@ -24,7 +24,11 @@ visible as what it can.
 ## A repository both teams work in
 
 Both teams change one file, and a code review has something to say about it. The review needs a
-model, so the page starts the same stub as [Review every commit](../ways/review-every-commit.md):
+model, so the page starts the same stub as [Scripts and sentences in gonk](../scripts/in-gonk.md),
+which also answers a review. In a new empty directory, as in [every
+chapter](../introduction.md#a-gonk-per-chapter): if the gonk and the `model-stub` from [Scripts and
+sentences in gonk](../scripts/in-gonk.md) are still running, stop them first, since this gonk takes
+the same port. The stub:
 
 <!-- transcript: serve -->
 ```console

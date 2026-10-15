@@ -16,8 +16,9 @@ host's resources and send every write through the host. The HTMX board on this b
 pages, on `ttt-host`, and in each app is one markup.
 
 The polyglot faces are the ones the [Python](../polyglot/python.md) and
-[TypeScript](../polyglot/typescript.md) tracks teach. Each track's section on families
-introduces the templated, multi-verb doors this part uses.
+[TypeScript](../polyglot/typescript.md) tracks, later in the book, teach. Each track's section on
+families covers the templated, multi-verb doors this part uses; what this part needs of them is
+said as it goes.
 
 > **Nothing below runs in this page.** Both shapes need processes and sockets. The
 > transcripts were captured from real runs against `ikigai-python` and `ikigai-deno` at the
@@ -46,7 +47,7 @@ a store anything else, so a store never needs to know anything else. It does not
 rules, which lines exist, or that anything is cached.
 
 Both faces serve the stored cell with a **family**: one templated door answering four
-verbs, which the language tracks introduce. In Python, `family(pattern)` gives a door, and
+verbs, which the language tracks cover in full later. In Python, `family(pattern)` gives a door, and
 each verb is a decorated function whose parameters include the template's variables.
 
 <!-- excerpt: ikigai-python examples/tictactoe_store.py @ 26e173a -->
@@ -122,7 +123,7 @@ deep temporary directory does not leave room for the file name.
 accepts the peer, it runs `check_store` against it and refuses to start if a clause fails,
 naming the clause. `-c` runs one REPL line against the host's kernel, in this process, and
 prints what the line answers, the way the book's cells print it. These are Part I's,
-Part II's and Part III's commands:
+Part II's and Part III's commands, and Part V's reset:
 
 <!-- demo: run -->
 ```text
@@ -237,7 +238,9 @@ rule that turns `iki/tutorial/ttt/view/board` into a name. Each app implements b
 own language, as a client of the host.
 
 Start the host with a game over each store, then the two apps. Each app is a client of the
-host's IPC socket and a web server of its own:
+host's IPC socket and a web server of its own. If the `ttt-host` from [Part V](tic-tac-toe-5.md)
+is still running, stop it first: this one serves the same port, 8070. Part V's stores can stay;
+these use new sockets under `/tmp/ttt6demo`.
 
 <!-- demo: start -->
 ```sh
@@ -427,9 +430,9 @@ what the name captured. Any other name goes to the host, in the right game:
 Which template a view shows is not in either app. It is in the templates, as `conditional`
 markers over `cell`, `winner` and `turn`, so the apps hold no rule of the game at all.
 
-This costs something, and it is worth saying how much. Before Part V's views became
-templates, each app filled simple `{{slot}}` placeholders, and its filler was about 70
-lines. Now the TypeScript engine is about 225 lines and the Python one about 175, most of
+This costs something, and it is worth saying how much. An earlier version of these apps,
+written before Part V's views became templates, filled simple `{{slot}}` placeholders, and its
+filler was about 70 lines. Now the TypeScript engine is about 225 lines and the Python one about 175, most of
 it parsing: finding where a marker ends, splitting a request's arguments outside quotes,
 checking that every `{` opens an argument. Each whole app grew less, by a fifth to a
 quarter, because the view code that chose templates went away. And `conditional` now exists

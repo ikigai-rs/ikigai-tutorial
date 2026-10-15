@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-15**: A new section in the introduction, A gonk per chapter, says that each chapter runs in a new empty directory with its own gonk on port 1070, and every chapter that starts one now says to stop the one an earlier chapter left running, naming that chapter. The introduction also says how to install the `model-stub` the later chapters start, and that Over MCP is the first page to need the `quic` feature; a few cross-references now point at the right chapter.
+
+  Pages: [Introduction](introduction.md), [The ledger in a browser](ledger/browser.md)
+
 - **2026-10-15**: A new page, What's new, lists what has changed in the book, most recent first, with the pages to read for each change.
 
   Pages: [Introduction](introduction.md)
