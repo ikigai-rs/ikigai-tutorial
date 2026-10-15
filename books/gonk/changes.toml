@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-10-15"
+summary = "The introduction no longer recounts what each move of the gonk pin changed; it names the current pins and points to What's new, whose entries now hold those details."
+pages = []
+maintenance = true
+
+[[change]]
+date = "2026-10-15"
 summary = "A new page, What's new, lists what has changed in the book, most recent first, with the pages to read for each change."
 pages = ["introduction.md"]
 
@@ -41,8 +47,8 @@ commit = "dbdd693"
 
 [[change]]
 date = "2026-10-13"
-summary = "A new Ways of working chapter, Harness engineering, presents guides and sensors and the steering loop, with the gonk starter's harness as the worked example: a rule made to fire, its log line, and the questions the harness answers."
-pages = ["ways/harness.md", "introduction.md"]
+summary = "A new Ways of working chapter, Harness engineering, presents guides and sensors and the steering loop, with the gonk starter's harness as the worked example: a rule made to fire, its log line, and the questions the harness answers. In the other Ways of working chapters, With the starter now shows the harness too: `tools/harness.py` and the harness files among what is generated, and a `harness` row in what `init` reports."
+pages = ["ways/harness.md", "ways/solo.md", "ways/workers.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md", "ways/spec-first.md", "ways/audits.md", "introduction.md"]
 commit = "d33727a"
 
 [[change]]
@@ -102,7 +108,7 @@ maintenance = true
 
 [[change]]
 date = "2026-10-11"
-summary = "Scripts and sentences in gonk is replayed against a newer gonk: drafts take `focus=` and read only the parts of the grounding they need, an empty preview is sent back to the model and marked if it stays empty, and a draft's author is told it is a draft."
+summary = "Scripts and sentences in gonk is replayed against a newer gonk: drafts take `focus=` and read only the parts of the grounding they need, an empty preview is sent back to the model and marked if it stays empty, a draft's author is told it is a draft, and the owner's check takes the draft's query on a pipe, which `ikigai` now reads into a `source` whose one required argument is unfilled."
 pages = ["scripts/in-gonk.md", "scripts/first.md", "introduction.md"]
 commit = "d09443a"
 
@@ -127,7 +133,7 @@ commit = "677dfba"
 
 [[change]]
 date = "2026-10-11"
-summary = "With a newer gonk, the count question can be asked of gonk itself, the agent gains a count tool, and a client with no grant is pointed at the new worker authority, which may claim and comment but never close."
+summary = "With a newer gonk, the count question can be asked of gonk itself, the agent gains a count tool, and a client with no grant is pointed at the new worker authority, which may claim and comment but never close. A close now also releases the item's claim; no page closes a claimed item."
 pages = ["introduction.md", "spec/ledger.md", "agent/mcp.md", "machines/quic-client.md"]
 commit = "36ff410"
 

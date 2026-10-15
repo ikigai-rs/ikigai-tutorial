@@ -19,9 +19,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Review every commit](ways/review-every-commit.md), [The ledger in a browser](ledger/browser.md), [Over the socket](agent/socket.md), [Introduction](introduction.md)
 
-- **2026-10-13**: A new Ways of working chapter, Harness engineering, presents guides and sensors and the steering loop, with the gonk starter's harness as the worked example: a rule made to fire, its log line, and the questions the harness answers.
+- **2026-10-13**: A new Ways of working chapter, Harness engineering, presents guides and sensors and the steering loop, with the gonk starter's harness as the worked example: a rule made to fire, its log line, and the questions the harness answers. In the other Ways of working chapters, With the starter now shows the harness too: `tools/harness.py` and the harness files among what is generated, and a `harness` row in what `init` reports.
 
-  Pages: [Harness engineering](ways/harness.md), [Introduction](introduction.md)
+  Pages: [Harness engineering](ways/harness.md), [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md), [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Introduction](introduction.md)
 
 - **2026-10-13**: Over the socket gains Asking in SPARQL, querying the ledger as root, sealed to one ledger, and refused outside the seal; Changes and tasks as ledger items shows that a re-sync that files nothing leaves a cached next cached.
 
@@ -55,7 +55,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Introduction](introduction.md), [The three doors, and who is asking](machines/doors.md), [A QUIC client, and the grant it runs under](machines/quic-client.md), [Over MCP](agent/mcp.md)
 
-- **2026-10-11**: Scripts and sentences in gonk is replayed against a newer gonk: drafts take `focus=` and read only the parts of the grounding they need, an empty preview is sent back to the model and marked if it stays empty, and a draft's author is told it is a draft.
+- **2026-10-11**: Scripts and sentences in gonk is replayed against a newer gonk: drafts take `focus=` and read only the parts of the grounding they need, an empty preview is sent back to the model and marked if it stays empty, a draft's author is told it is a draft, and the owner's check takes the draft's query on a pipe, which `ikigai` now reads into a `source` whose one required argument is unfilled.
 
   Pages: [Scripts and sentences in gonk](scripts/in-gonk.md), [Your first saved query](scripts/first.md), [Introduction](introduction.md)
 
@@ -67,7 +67,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Scripts and sentences in gonk](scripts/in-gonk.md), [Introduction](introduction.md)
 
-- **2026-10-11**: With a newer gonk, the count question can be asked of gonk itself, the agent gains a count tool, and a client with no grant is pointed at the new worker authority, which may claim and comment but never close.
+- **2026-10-11**: With a newer gonk, the count question can be asked of gonk itself, the agent gains a count tool, and a client with no grant is pointed at the new worker authority, which may claim and comment but never close. A close now also releases the item's claim; no page closes a claimed item.
 
   Pages: [Introduction](introduction.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md), [Over MCP](agent/mcp.md), [A QUIC client, and the grant it runs under](machines/quic-client.md)
 

@@ -89,36 +89,10 @@ newer releases add a ledger item's `children` to its JSON face, refuse a query w
 a graph outside its set, and trace the kernel's own operations). Only one page here meets any of
 those through gonk: [Two teams, one gonk](teams/two-teams.md#the-managers-join) sends gonk a query
 whose `GRAPH` names a graph outside its set, and says what gonk's store, one release short,
-answers instead. (0.4.0 of the ledger added the keyed
-append [part 5](spec/ledger.md) syncs with and the [bridges](bridges/roborev.md) file through;
-0.9.0 added `count`, the number of items a filter admits without the listing, which part 5's walk
-asks.) It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
+answers instead. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
-What the pin's last move (from 71ca542) changed for a reader, each where the page that shows it
-says so: gonk files its own published review findings as ledger items with `ikigai-gonk findings
-file` ([Review every commit](ways/review-every-commit.md)); a request refused at the HTTP edge (a
-cross-site write, a foreign `Host`, a page loaded as an image) now writes an access line too ([The
-ledger in a browser](ledger/browser.md)); and the `ikigai` the pages run moved from 0.1.56 to
-0.1.61, which reads a leading `~` in a mount line as your home ([Over the
-socket](agent/socket.md)). The move before it (from 2598192) changed: a refusal at a family scope
-now also says what satisfies it, ``; any grant under `urn:cap:ledger:delete:` satisfies it`` ([Your
-own ledger](ledger/your-own.md), [Over the socket](agent/socket.md), [A QUIC
-client](machines/quic-client.md)); a draft whose repair repeats an earlier attempt says the
-drafting stopped there, rather than naming a bound it did not reach ([Scripts and sentences in
-gonk](scripts/in-gonk.md)); and a mounted peer that cannot be reached says how many dials failed
-and how long the next is held off ([Explain, with a mounted model](browse/explain.md)). The
-`ikigai` the pages run moved with it, from 0.1.52 to 0.1.56. The move before that (from 9f2e89e)
-gave the drafter `focus=` (its older `graph=` still works for one release), read only the parts of
-the grounding a query needs, sent a draft whose preview is empty back to the model with a warning
-naming the pattern that matches nothing and saved it MARKED if it stayed empty, told a draft's
-author who runs it that it is a draft, and let `ikigai` read a pipe into a `source` whose one
-required argument is unfilled, which is how that chapter hands the owner's query to the check. The
-move before that one (from 9704b54) took the ledger from 0.6.2 to 0.9.0, so the agent's tools gain
-`ledger-count__source` ([Over MCP](agent/mcp.md)) and part 5's count can be asked of gonk itself
-([In gonk](spec/ledger.md#in-gonk-and-not-in-this-page)); a close also releases the item's claim,
-and the ledger's per-verb grants arrive as a fifth `--ledger` authority, `worker` (claim and
-comment, never close), which the hint a client with no grant prints now names ([A QUIC
-client](machines/quic-client.md)). No page here closes a claimed item or hands one back.
+What each move of these pins changed for a reader, and the pages that show it, is on the
+[What's new](whats-new.md) page.
 
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
 every time: no example in this book calls a real model or the network.
@@ -147,9 +121,7 @@ starter](https://github.com/ikigai-rs/ikigai-gonk-starter), a template repositor
 `tools/new.py` generates a repository set up for that process, and [Harness
 engineering](ways/harness.md) uses the harness it generates. The starter is pinned the same way,
 to one git revision in one file (`books/gonk/starter.rev`), and those pages clone it and check that
-revision out themselves. Its last move was to a revision that carries the harness; in the
-other six chapters that shows as `tools/harness.py` and the harness files among what is generated,
-and one `harness` row in what `init` reports. It needs Python 3.11 or later and nothing else:
+revision out themselves. It needs Python 3.11 or later and nothing else:
 
 <!-- transcript: manual — the Ways of working pages run these two commands themselves, reading the same file -->
 ```console

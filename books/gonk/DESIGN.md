@@ -129,7 +129,9 @@ gonk is NOT on crates.io. **For now it is pinned to a git revision** (Brian, 202
 in ONE file, `books/gonk/gonk.rev`, which the book prints its install line from
 (`{{#include}}`), `scripts/test-transcripts.sh` installs from
 (`cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev <rev>`), and CI
-keys its cache on. Moving gonk is a one-line change. ⚠ **This is temporary.** Publishing gonk
+keys its cache on. Moving gonk is a one-line change. What a move changes for a reader goes into `changes.toml` (the What's
+new page), never into the introduction, which names only the current pins and any gap a page shows
+(ledger #1616). ⚠ **This is temporary.** Publishing gonk
 is Brian's call; what it would take: the crate is already publishable in shape (MIT OR
 Apache-2.0, every dependency a published crate, `version = "0.1.0"`), so it is a `just release
 ikigai-gonk` preflight, then a decision about whether a server binary with a launchd story
