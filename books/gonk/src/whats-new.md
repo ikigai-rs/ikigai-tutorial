@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-17**: The comparison tables on seven pages now name their first column (caller, resource, concern, difference, arm or what), which was blank, so a screen reader no longer announces an empty header cell.
+
+  Pages: [Over the socket](agent/socket.md), [Over MCP](agent/mcp.md), [The ledger in a browser](ledger/browser.md), [A ledger of your own](ledger/your-own.md), [The ledger, the store and browse in your own kernel](embedding/own-kernel.md), [The audit protocol, and why per-commit review is off](review/audit.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
+
 - **2026-10-15**: A new section in the introduction, A gonk per chapter, says that each chapter runs in a new empty directory with its own gonk on port 1070, and every chapter that starts one now says to stop the one an earlier chapter left running, naming that chapter. The introduction also says how to install the `model-stub` the later chapters start, and that Over MCP is the first page to need the `quic` feature; a few cross-references now point at the right chapter.
 
   Pages: [Introduction](introduction.md), [The ledger in a browser](ledger/browser.md)

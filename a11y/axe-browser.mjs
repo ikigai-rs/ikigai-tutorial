@@ -187,6 +187,9 @@ async function auditTheme(theme) {
             out.push(`${label.padEnd(56)} ${gating.length ? "FAIL" : "ok"}${advisory.length ? `  (${advisory.length} advisory)` : ""}`);
             for (const v of advisory) {
                 out.push(`    advisory: ${v.id} — ${v.help}`);
+                if (v.nodes.length) {
+                    out.push(`        ${v.nodes[0].target.join(" ")}${v.nodes.length > 1 ? ` (+${v.nodes.length - 1} more)` : ""}`);
+                }
             }
         }
         for (const v of gating) {

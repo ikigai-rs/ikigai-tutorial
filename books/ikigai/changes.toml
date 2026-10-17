@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-17"
+summary = "The comparison table in Tic-tac-toe, VII now names its first column (\"what\"), which was blank, so a screen reader no longer announces an empty header cell."
+pages = ["applied/tic-tac-toe-7.md"]
+
+[[change]]
 date = "2026-10-15"
 summary = "A serial-reader continuity pass: order words that went stale when chapters were added (the previous chapter, the last two chapters, six parts), setup a reader following the book already did (the CLI install, a REPL still open, a server still on its socket or port), terms used before they were defined, and the rule for cutting a pure function, which now reads the same in every chapter."
 pages = []

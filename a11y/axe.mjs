@@ -76,6 +76,9 @@ for (const path of pages(bookArg)) {
     if (survey) {
         for (const v of advisory) {
             console.log(`    advisory: ${v.id} — ${v.help}`);
+            if (v.nodes.length) {
+                console.log(`        ${v.nodes[0].target.join(" ")}${v.nodes.length > 1 ? ` (+${v.nodes.length - 1} more)` : ""}`);
+            }
         }
     }
 }

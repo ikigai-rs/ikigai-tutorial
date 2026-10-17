@@ -267,7 +267,7 @@ the default port opens its QUIC door on UDP 1062.
 
 ## What you have now
 
-| | how it reaches gonk | under what authority | who the log says |
+| caller | how it reaches gonk | under what authority | who the log says |
 | --- | --- | --- | --- |
 | a browser | HTTP, loopback | anonymous, or a passkey's grant | `anon`, or the passkey |
 | `curl`, a hook | HTTP, loopback | anonymous | `anon` |

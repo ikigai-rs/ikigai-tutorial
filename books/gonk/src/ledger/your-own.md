@@ -328,7 +328,7 @@ the next chapter.
 
 ## What you built
 
-| | the page | your kernel | gonk |
+| concern | the page | your kernel | gonk |
 | --- | --- | --- | --- |
 | store | in memory, per page load | in memory, per process | RocksDB, in the data home (`~/.ikigai/store` by default) |
 | clock | the story clock | the story clock, or yours | the system's |

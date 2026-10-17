@@ -541,7 +541,7 @@ her own and her door is not a machine's; she could not publish `bot`'s.
 
 Everything above, in one table:
 
-| | HTTP, signed out | HTTP, signed in | QUIC (a machine) | the socket (the owner) |
+| what | HTTP, signed out | HTTP, signed in | QUIC (a machine) | the socket (the owner) |
 | --- | --- | --- | --- | --- |
 | run and read a PUBLIC script | **yes**, within the shared budget | yes | with `--script public=run` | yes |
 | run and read a named script | no | per `--script` | per `--script` | yes |

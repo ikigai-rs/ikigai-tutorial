@@ -149,7 +149,7 @@ The declined finding is not an annotation and does not appear; the pending ones 
 
 ## What gonk adds
 
-| | your kernel | gonk |
+| difference | your kernel | gonk |
 | --- | --- | --- |
 | dataset | in memory, `in_memory_shared_declaring` | RocksDB at `~/.ikigai/store`, `open_shared_declaring` |
 | model | the stub | a peer mounted at `urn:llm:` (`--mount`) |

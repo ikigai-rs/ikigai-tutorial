@@ -48,28 +48,48 @@
     // it drives is `display: none` — so nothing in the pair can take focus, and a keyboard
     // user cannot open or close the table of contents (SC 2.1.1 Keyboard). mdbook's own
     // script also writes `aria-expanded` onto the label, which is not an attribute a label
-    // may carry (SC 4.1.2 Name, Role, Value; axe: aria-allowed-attr). Both are one repair:
-    // make the label the button it looks like — a role, a tab stop, Enter and Space — and
-    // keep `aria-expanded` true to the checkbox it controls.
+    // may carry (SC 4.1.2 Name, Role, Value; axe: aria-allowed-attr). An earlier repair gave
+    // the label `role="button"`, which a label may not have either (axe: aria-allowed-role).
+    //
+    // So the control becomes a real `<button>`. It takes over the label's icon, name and
+    // `aria-controls`, and the label is hidden but left in the DOM: mdbook's script holds a
+    // reference to it, listens for its clicks (to restore `display` before the sidebar
+    // opens) and writes `aria-expanded` to it. The button's click is forwarded to the label,
+    // so all of that still runs and the checkbox is toggled by the label's own behavior.
+    // `aria-expanded` is moved from the label to the button whenever mdbook writes it.
     function repairSidebarToggle() {
         var label = document.getElementById("mdbook-sidebar-toggle");
         var anchor = document.getElementById("mdbook-sidebar-toggle-anchor");
-        if (!label || !anchor) {
+        if (!label || !anchor || label.tagName !== "LABEL") {
             return;
         }
-        label.setAttribute("role", "button");
-        label.setAttribute("tabindex", "0");
-        var sync = function () {
-            label.setAttribute("aria-expanded", anchor.checked ? "true" : "false");
-        };
-        sync();
-        anchor.addEventListener("change", sync);
-        label.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                anchor.click();
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = label.className;
+        ["title", "aria-label", "aria-controls"].forEach(function (name) {
+            if (label.hasAttribute(name)) {
+                button.setAttribute(name, label.getAttribute(name));
             }
+            label.removeAttribute(name);
         });
+        while (label.firstChild) {
+            button.appendChild(label.firstChild);
+        }
+        var move = function () {
+            var value = label.getAttribute("aria-expanded");
+            if (value !== null) {
+                button.setAttribute("aria-expanded", value);
+                label.removeAttribute("aria-expanded");
+            }
+        };
+        button.setAttribute("aria-expanded", anchor.checked ? "true" : "false");
+        move();
+        new MutationObserver(move).observe(label, { attributes: true, attributeFilter: ["aria-expanded"] });
+        button.addEventListener("click", function () {
+            label.click();
+        });
+        label.hidden = true;
+        label.parentNode.insertBefore(button, label);
     }
 
     // mdbook renders the previous/next chapter links twice — once inline, once for wide
@@ -155,7 +175,20 @@
         }
     }
 
+    // mdbook's menu bar (the sidebar toggle, theme and search buttons, the book title and the
+    // print and edit links) is a `<div>` beside the sidebar `<nav>` and the `<main>`, so it
+    // sits outside every landmark: a reader who navigates by landmark never meets the search
+    // or theme controls (axe: region, a best practice). It is the page's header, so it is
+    // named as that.
+    function repairMenuBarLandmark() {
+        var bar = document.getElementById("mdbook-menu-bar");
+        if (bar && !bar.hasAttribute("role")) {
+            bar.setAttribute("role", "banner");
+        }
+    }
+
     function install() {
+        repairMenuBarLandmark();
         repairSearch();
         repairSidebarToggle();
         repairDuplicateNavLabels();
