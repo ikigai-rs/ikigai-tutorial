@@ -425,6 +425,47 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
 }
 
 #[test]
+fn no_vocabulary_entry_outlives_the_prose_that_needed_it() {
+    let scan = scan();
+    let vocabulary = vocabulary();
+    // An entry is live when some name the book prints, in a shell example or in prose,
+    // falls under it. A prefix entry is live when any printed name starts with it. A
+    // printed prefix (`urn:repo:`) is kept reachable by the exact entries under it
+    // (`family_is_reachable`), so those are live too: removing the last one would break it.
+    let (prefix_mentions, names): (Vec<&Mention>, Vec<&Mention>) = scan
+        .mentions
+        .iter()
+        .filter(|m| matches!(m.context, Context::Cli | Context::Prose))
+        .partition(|m| m.is_prefix);
+    let printed: Vec<&str> = names.iter().map(|m| m.urn.as_str()).collect();
+    let mut stale: Vec<String> = vocabulary
+        .exact_entries()
+        .iter()
+        .filter(|e| {
+            !printed.iter().any(|p| p == e)
+                && !prefix_mentions.iter().any(|m| e.starts_with(m.urn.as_str()))
+        })
+        .cloned()
+        .collect();
+    stale.extend(
+        vocabulary
+            .prefix_entries()
+            .iter()
+            .filter(|prefix| !printed.iter().any(|p| p.starts_with(prefix.as_str())))
+            .map(|prefix| format!("{prefix}*")),
+    );
+    assert!(
+        stale.is_empty(),
+        "books/ikigai/cli-vocabulary.txt lists {} entr{} no page prints in a shell example \
+         or in prose:\n  {}\n\nRemove each one, after checking that no prefix entry \
+         elsewhere in the file was relying on it.",
+        stale.len(),
+        if stale.len() == 1 { "y" } else { "ies" },
+        stale.join("\n  ")
+    );
+}
+
+#[test]
 fn no_exemption_outlives_the_prose_that_needed_it() {
     let scan = scan();
     let stale: Vec<String> = scan

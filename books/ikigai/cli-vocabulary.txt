@@ -27,6 +27,9 @@
 #
 #     cargo test -p book-urns --test book_urns -- --ignored --nocapture
 #
+# The always-on gate also refuses an entry no page prints (in a shell example or in prose, or as
+# an exact entry under a prefix the book prints): delete an entry when its last mention goes.
+#
 # The probe SKIPS the two prefix entries (`urn:text:*`, `urn:file:*`) because a templated
 # family has no one name to ask for; those were probed by hand against ikigai-cli 0.1.43 on
 # 2026-10-10, as `describe` of `urn:text:wc`, `urn:text:head`, `urn:text:sort` and
