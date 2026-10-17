@@ -2,12 +2,14 @@
 //!
 //! ```text
 //! book-whats-new generate [--check] [ROOT]        write books/*/src/whats-new.md (or compare)
-//! book-whats-new check-diff --base REV [--head REV] [ROOT]
+//! book-whats-new check-diff --base REV [--head REV|WORKTREE] [ROOT]
 //! ```
 //!
 //! ROOT is the repository (default `.`); every directory under `ROOT/books/` with a `book.toml` is
 //! a book, so a new book is covered by being one. `check-diff` reads git (`git diff` and `git show`
-//! between two revisions) and nothing else does: the page is made from `changes.toml` alone.
+//! between two revisions) and nothing else does: the page is made from `changes.toml` alone. `--head
+//! WORKTREE` compares the working tree (untracked files included) to `--base`, for a gate run before
+//! the commit. A file a published page pulls in with `{{#include}}` counts as part of that page.
 
 use book_whats_new::{
     books, expected_page, missing_entry_message, new_or_updated, parse_changes, prose_files,
@@ -23,7 +25,7 @@ fn main() -> ExitCode {
         Some("generate") => generate(&args[1..]),
         Some("check-diff") => check_diff(&args[1..]),
         _ => Err("usage: book-whats-new generate [--check] [ROOT]\n       \
-             book-whats-new check-diff --base REV [--head REV] [ROOT]"
+             book-whats-new check-diff --base REV [--head REV|WORKTREE] [ROOT]"
             .to_string()),
     };
     match result {
@@ -91,8 +93,18 @@ fn git(root: &Path, args: &[&str]) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&out.stdout).into_owned())
 }
 
-/// A file at a revision, or `None` when the revision does not hold it.
+/// The `--head` that means the working tree rather than a revision.
+const WORKTREE: &str = "WORKTREE";
+
+/// A file at a revision (or in the working tree), or `None` when it is not there.
 fn show(root: &Path, rev: &str, path: &str) -> Result<Option<String>, String> {
+    if rev == WORKTREE {
+        return match std::fs::read_to_string(root.join(path)) {
+            Ok(t) => Ok(Some(t)),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(e) => Err(format!("{path}: {e}")),
+        };
+    }
     let spec = format!("{rev}:{path}");
     let exists = Command::new("git")
         .arg("-C")
@@ -123,18 +135,35 @@ fn check_diff(args: &[String]) -> Result<(), String> {
     let base = base.ok_or("check-diff needs --base REV")?;
     let root = root_arg(&rest);
 
-    let changed = git(
-        &root,
-        &[
-            "diff",
-            "--name-only",
-            "--no-renames",
-            &base,
-            &head,
-            "--",
-            "books",
-        ],
-    )?;
+    // Every changed file in the repository: an included file lives outside `books/`.
+    let mut all_changed: BTreeSet<String> = if head == WORKTREE {
+        let mut set: BTreeSet<String> =
+            git(&root, &["diff", "--name-only", "--no-renames", &base])?
+                .lines()
+                .map(String::from)
+                .collect();
+        set.extend(
+            git(&root, &["ls-files", "--others", "--exclude-standard"])?
+                .lines()
+                .map(String::from),
+        );
+        set
+    } else {
+        git(
+            &root,
+            &["diff", "--name-only", "--no-renames", &base, &head],
+        )?
+        .lines()
+        .map(String::from)
+        .collect()
+    };
+    all_changed.retain(|f| !f.is_empty());
+    let changed = all_changed
+        .iter()
+        .filter(|f| f.starts_with("books/"))
+        .cloned()
+        .collect::<Vec<_>>()
+        .join("\n");
     // Per book, the files under its src/, relative to src/.
     let mut by_book: std::collections::BTreeMap<String, Vec<String>> = Default::default();
     for line in changed.lines() {
@@ -149,8 +178,12 @@ fn check_diff(args: &[String]) -> Result<(), String> {
         }
     }
 
+    // A book whose only change is an included file has no entry in `by_book` yet.
+    for book in books(&root)? {
+        by_book.entry(book).or_default();
+    }
     let mut problems = Vec::new();
-    for (book, files) in &by_book {
+    for (book, files) in &mut by_book {
         let book_dir = format!("books/{book}");
         let summary_at = |rev: &str| -> Result<Summary, String> {
             Ok(show(&root, rev, &format!("{book_dir}/src/SUMMARY.md"))?
@@ -160,6 +193,24 @@ fn check_diff(args: &[String]) -> Result<(), String> {
         let head_summary = summary_at(&head)?;
         let mut published: BTreeSet<String> = head_summary.paths();
         published.extend(summary_at(&base)?.paths());
+        // A page that pulls in a changed file changed too.
+        let mut via: Vec<String> = Vec::new();
+        for page in &published {
+            if !page.ends_with(".md") || files.contains(page) {
+                continue;
+            }
+            let page_path = format!("{book_dir}/src/{page}");
+            let mut includes = BTreeSet::new();
+            for rev in [&head, &base] {
+                if let Some(text) = show(&root, rev, &page_path)? {
+                    includes.extend(included_files(&page_path, &text));
+                }
+            }
+            if let Some(hit) = includes.iter().find(|i| all_changed.contains(*i)) {
+                via.push(format!("{page_path} includes {hit}"));
+                files.push(page.clone());
+            }
+        }
         let prose = prose_files(files, &published);
         if prose.is_empty() {
             println!("{book_dir}: no page changed");
@@ -182,7 +233,14 @@ fn check_diff(args: &[String]) -> Result<(), String> {
             .unwrap_or_default();
         let fresh = new_or_updated(&base_entries, &head_entries);
         if fresh.is_empty() {
-            problems.push(missing_entry_message(&book_dir, &prose, &head_summary));
+            let mut message = missing_entry_message(&book_dir, &prose, &head_summary);
+            if !via.is_empty() {
+                message.push_str(&format!(
+                    "\n\nPages changed through {{{{#include}}}}:\n    {}",
+                    via.join("\n    ")
+                ));
+            }
+            problems.push(message);
         } else {
             println!(
                 "{book_dir}: {} page file(s) changed, {} entr{} added or updated",
@@ -197,4 +255,40 @@ fn check_diff(args: &[String]) -> Result<(), String> {
     } else {
         Err(problems.join("\n\n"))
     }
+}
+
+/// The repository-relative files a page pulls in with `{{#include}}` (also `rustdoc_include` and
+/// `playground`), without the `:anchor` or line range.
+fn included_files(page_path: &str, text: &str) -> BTreeSet<String> {
+    let dir: Vec<&str> =
+        page_path.split('/').collect::<Vec<_>>()[..page_path.split('/').count() - 1].to_vec();
+    let mut out = BTreeSet::new();
+    let mut rest = text;
+    while let Some(i) = rest.find("{{#") {
+        rest = &rest[i + 3..];
+        let Some(end) = rest.find("}}") else { break };
+        let body = &rest[..end];
+        rest = &rest[end..];
+        let mut words = body.split_whitespace();
+        if !matches!(
+            words.next(),
+            Some("include" | "rustdoc_include" | "playground")
+        ) {
+            continue;
+        }
+        let Some(arg) = words.next() else { continue };
+        let file = arg.split(':').next().unwrap_or(arg);
+        let mut parts = dir.clone();
+        for c in file.split('/') {
+            match c {
+                "" | "." => {}
+                ".." => {
+                    parts.pop();
+                }
+                c => parts.push(c),
+            }
+        }
+        out.insert(parts.join("/"));
+    }
+    out
 }

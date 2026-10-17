@@ -204,3 +204,79 @@ fn a_new_book_without_an_entries_file_is_refused() {
         stderr(&out)
     );
 }
+
+fn check_worktree(dir: &Path) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_book-whats-new"))
+        .args(["check-diff", "--base", "HEAD", "--head", "WORKTREE"])
+        .arg(dir)
+        .output()
+        .expect("book-whats-new")
+}
+
+fn with_include(s: &Scratch) {
+    write(
+        &s.0,
+        "crates/demo/src/lib.rs",
+        "// ANCHOR: a
+fn a() {}
+// ANCHOR_END: a
+",
+    );
+    write(
+        &s.0,
+        "books/demo/src/hello.md",
+        "# Hello\n\n```rust\n{{#include ../../../crates/demo/src/lib.rs:a}}\n```\n",
+    );
+    commit(&s.0);
+}
+
+#[test]
+fn a_change_to_an_included_file_is_a_page_change() {
+    let s = scratch();
+    with_include(&s);
+    write(
+        &s.0,
+        "crates/demo/src/lib.rs",
+        "// ANCHOR: a\nfn b() {}\n// ANCHOR_END: a\n",
+    );
+    commit(&s.0);
+    let out = check(&s.0);
+    assert!(!out.status.success(), "it passed: {}", stderr(&out));
+    let e = stderr(&out);
+    assert!(e.contains("books/demo/src/hello.md"), "{e}");
+    assert!(e.contains("crates/demo/src/lib.rs"), "{e}");
+}
+
+#[test]
+fn a_change_to_an_unrelated_file_is_not() {
+    let s = scratch();
+    with_include(&s);
+    write(&s.0, "crates/demo/src/other.rs", "fn c() {}\n");
+    commit(&s.0);
+    assert!(check(&s.0).status.success());
+}
+
+#[test]
+fn worktree_mode_sees_uncommitted_changes() {
+    let s = scratch();
+    with_include(&s);
+    assert!(check_worktree(&s.0).status.success());
+    write(&s.0, "books/demo/src/hello.md", "# Hello\n\nMore.\n");
+    let out = check_worktree(&s.0);
+    assert!(!out.status.success(), "it passed: {}", stderr(&out));
+    write(
+        &s.0,
+        "books/demo/changes.toml",
+        &format!("[[change]]\ndate = \"2026-10-02\"\nsummary = \"More.\"\npages = [\"hello.md\"]\n\n{ONE_ENTRY}"),
+    );
+    let out = check_worktree(&s.0);
+    assert!(out.status.success(), "{}", stderr(&out));
+}
+
+#[test]
+fn worktree_mode_sees_an_uncommitted_included_file() {
+    let s = scratch();
+    with_include(&s);
+    write(&s.0, "crates/demo/src/lib.rs", "fn z() {}\n");
+    assert!(!check_worktree(&s.0).status.success());
+}

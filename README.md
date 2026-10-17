@@ -350,7 +350,8 @@ pages = ["beyond/datasets.md"]
 **A change to a book's pages must add or update an entry.** The `whats-new` job in `pages.yml`
 runs `book-whats-new check-diff` over the change and fails, naming the files and printing the
 entry to add, when a book's published pages (any `.md` its `SUMMARY.md` lists, or `SUMMARY.md`
-itself) changed and its `changes.toml` gained no new or edited entry. Drafts and the generated
+itself) changed and its `changes.toml` gained no new or edited entry. A file a page pulls in with
+`{{#include}}` (a crate listing, say) counts as part of that page. Drafts and the generated
 page do not count. The escape hatch for upkeep with no news in it (a version move, a corrected
 link, a typo) is an entry with `maintenance = true`: kept in the file, left off the page. An
 entry rather than a commit trailer, because the check runs on the pull request, before the squash
@@ -360,6 +361,10 @@ commit that would carry the trailer exists. Run it locally against your branch's
 ```bash
 cargo run -p book-whats-new -- check-diff --base origin/main
 ```
+
+Before you commit, `--head WORKTREE` compares the working tree (untracked files included) to the
+base instead of `HEAD`, so a gate run on uncommitted work sees the pages you changed:
+`cargo run -p book-whats-new -- check-diff --base origin/main --head WORKTREE`.
 
 A new book under `books/` is covered by being there: the generator and the check iterate
 `books/*`, and a book with no `changes.toml` is refused by both.
