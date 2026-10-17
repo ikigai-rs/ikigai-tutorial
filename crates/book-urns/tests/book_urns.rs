@@ -443,7 +443,9 @@ fn no_vocabulary_entry_outlives_the_prose_that_needed_it() {
         .iter()
         .filter(|e| {
             !printed.iter().any(|p| p == e)
-                && !prefix_mentions.iter().any(|m| e.starts_with(m.urn.as_str()))
+                && !prefix_mentions
+                    .iter()
+                    .any(|m| e.starts_with(m.urn.as_str()))
         })
         .cloned()
         .collect();
