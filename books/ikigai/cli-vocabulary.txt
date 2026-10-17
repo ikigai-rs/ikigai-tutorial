@@ -114,6 +114,10 @@ urn:lisp:aliases
 # (one per verb: Source and Sink on `history`, Exists on `httpHead`, Delete on `httpDelete`)
 # and how a refusal reads in Emacs (`posture`, routed to a narrower peer). All bound by the
 # CLI's own host; probed with `describe` in a scratch home against 0.1.41 on 2026-10-09.
+# ⚠ The two HTTP names are the OLD spelling, kept on purpose. ikigai-http 0.2.0 renamed them
+# `urn:http:head` and `urn:http:delete` (ledger #11), and keeps these as deprecated aliases until
+# 0.3.0; but the CLI pinned in ikigai-cli.version (0.1.63) links ikigai-http 0.1.9, where only
+# these exist. They move, here and on the Emacs page, when the pinned CLI links 0.2.
 urn:host:history
 urn:host:posture
 urn:httpHead

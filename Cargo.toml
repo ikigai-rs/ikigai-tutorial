@@ -365,7 +365,9 @@ ikigai-nl = "0.4.0"
 # `Unavailable` or `Timeout` where 0.13 said `Endpoint`, and refuses an `as=` its faces do not
 # declare (ledger #88, #179); the drafter reports whatever the model's failure says, and asks for no
 # face. It declares rust-version 1.88. 0.x carets: ceilings too (<0.15.0, <0.2.0); the old pin
-# "0.13.1" was a ceiling below 0.14.
+# "0.13.1" was a ceiling below 0.14. ikigai-http stays on 0.1 on purpose: 0.2.0 (`urn:httpGet`
+# became `urn:http:get`, ledger #11) is a second, distinct `HttpTransport` trait, and llm 0.14.0
+# takes ^0.1.7, so `Ureq` must implement 0.1's. It moves when a published llm takes 0.2.
 ikigai-llm = "0.14.0"
 ikigai-http = "0.1.9"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
