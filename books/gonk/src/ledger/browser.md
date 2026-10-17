@@ -332,7 +332,7 @@ stylesheet.
 
 ## What you have now
 
-| | anonymous, on loopback | signed in as `ada` |
+| resource | anonymous, on loopback | signed in as `ada` |
 | --- | --- | --- |
 | `default` | read, write | read, write (anonymous's grant, plus her own) |
 | `book` | the sign-in notice | read, write |

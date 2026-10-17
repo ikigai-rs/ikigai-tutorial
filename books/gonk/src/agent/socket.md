@@ -317,7 +317,7 @@ QUIC door instead, so the author rule runs and the log names the agent.
 
 ## What you have now
 
-| | how it reaches gonk | under what authority | who the log says |
+| caller | how it reaches gonk | under what authority | who the log says |
 | --- | --- | --- | --- |
 | a browser | HTTP, loopback | anonymous, or a passkey's grant | `anon`, or the passkey |
 | `curl`, a hook | HTTP, loopback | anonymous | `anon` |

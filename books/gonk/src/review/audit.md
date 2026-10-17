@@ -32,7 +32,7 @@ reviewer's findings that a second model had already judged credible, and set out
 them; the **unled** arm audited the same files blind. Same model in both arms, the same
 tool-call budget.
 
-| | serious bugs | tokens | serious per 100k tokens |
+| arm | serious bugs | tokens | serious per 100k tokens |
 | --- | --- | --- | --- |
 | led (follow the reviewer) | 6 | 756,357 | 0.79 |
 | unled (audit blind) | 19 | 1,128,583 | 1.68 |

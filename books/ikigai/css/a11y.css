@@ -72,6 +72,12 @@ summary:focus-visible {
     outline-offset: 2px;
 }
 
+/* The sidebar toggle's original `<label>` stays in the DOM for mdbook's script (see
+ * `repairSidebarToggle` in js/a11y.js); the button that replaces it is what is shown. */
+#mdbook-sidebar-toggle[hidden] {
+    display: none;
+}
+
 /* ── Links in running text ────────────────────────────────────────────────────
  *
  * WCAG 2.2 SC 1.4.1 (Use of Color): a link inside a sentence must be told apart from the

@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-17**: The comparison table in Tic-tac-toe, VII now names its first column ("what"), which was blank, so a screen reader no longer announces an empty header cell.
+
+  Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+
 - **2026-10-15**: A new page, What's new, lists what has changed in the book, most recent first, with the pages to read for each change.
 
   Pages: [Introduction](introduction.md)

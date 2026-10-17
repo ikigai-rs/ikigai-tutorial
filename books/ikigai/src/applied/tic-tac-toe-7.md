@@ -344,7 +344,7 @@ the same doors.
 
 What moved is the arrangement:
 
-| | coded game | declared game |
+| what | coded game | declared game |
 |---|---|---|
 | where the doors, their order and the aliases are | Rust: `space_with_store`, `stored_space`, `LINES`, and the fallback in `kernel_over` | `tic-tac-toe.arrangement`: 32 lines, not counting comments |
 | Rust that arranges anything | all of the above | none |

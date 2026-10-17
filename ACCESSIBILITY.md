@@ -122,9 +122,6 @@ has been run.
 | The skip link and the keyboard repair to the sidebar toggle need JavaScript | both books | With JavaScript off, no skip link (SC 2.4.1) and the narrow-screen sidebar cannot be opened by keyboard (SC 2.1.1) | Reading with JavaScript on |
 | Runnable cells, boards, views and sheets need JavaScript and WebAssembly | pages with live parts | Without them nothing runs | Each cell's "Expected output" holds the listing's output |
 | Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
-| mdbook's menu-bar title and right-hand buttons sit outside any landmark (axe `region`, advisory) | every page | A landmark-only reader may miss the search and theme controls | Tab order reaches them |
-| The sidebar toggle repair puts `role="button"` on a `<label>` (axe `aria-allowed-role`, advisory) | every page | None known; reported by axe as a best practice | none |
-| Empty table header cells (axe `empty-table-header`, advisory) | 8 pages: 7 in The gonk Book, and "Tic-tac-toe, VII" | A header with no text is announced as blank | The table's first row and caption |
 | The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
 | The browser run's Chrome is not pinned, and mdbook is unpinned on purpose | CI | A new Chrome or mdbook can turn the gate red and stop deploys until someone repairs it | none needed: a red gate is the design |
 
@@ -141,8 +138,9 @@ yet. `book-a11y` credits the two search-box repairs only while `js/a11y.js` stil
 |---|---|---|---|
 | Skip link to `#mdbook-content` | 2.4.1 | PR #5 | mdbook ships a skip link |
 | Contrast repairs, every theme (each with the ratio it started from, in `css/a11y.css`) | 1.4.3, 1.4.11 | PR #5, PR #56 | mdbook's palette clears the floor without them |
-| Sidebar toggle: `role="button"`, a tab stop, Enter and Space; `aria-expanded` kept true | 2.1.1, 4.1.2 | PR #13 | the toggle is a focusable control upstream |
+| Sidebar toggle: the `<label>` is hidden and a real `<button>` takes its icon and name, forwards clicks to it and carries `aria-expanded` | 2.1.1, 4.1.2 | PR #13, reworked for #1625 | the toggle is a focusable control upstream |
 | Search box: an accessible name from its placeholder; `aria-describedby` re-pointed at the id that exists | 4.1.2, 3.3.2, 1.3.1 | PR #13 | mdbook labels the field and fixes the id |
+| The menu bar given `role="banner"`, so the search, theme and print controls sit in a landmark (axe `region`) | 1.3.1 (best practice) | #1625 | mdbook puts the menu bar in a landmark |
 | The second "Page navigation" landmark named for wide screens | 1.3.1 (best practice) | PR #13 | the two landmarks are distinguishable upstream |
 | A tab stop on a code block or table that overflows, with the arrow keys kept for scrolling | 2.1.1 | PR #50 | mdbook makes scrollable regions focusable |
 | The search spinner stops under `prefers-reduced-motion` | 2.3.3 (AAA) | PR #13 | mdbook guards the animation |

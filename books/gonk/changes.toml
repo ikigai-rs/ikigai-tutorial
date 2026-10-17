@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-17"
+summary = "The comparison tables on seven pages now name their first column (caller, resource, concern, difference, arm or what), which was blank, so a screen reader no longer announces an empty header cell."
+pages = ["agent/socket.md", "agent/mcp.md", "ledger/browser.md", "ledger/your-own.md", "embedding/own-kernel.md", "review/audit.md", "scripts/in-gonk.md"]
+
+[[change]]
 date = "2026-10-16"
 summary = "The introduction's note on the gap between gonk's releases and the book's is one consistent statement: only Two teams, one gonk prints differently, because gonk's store answers a query outside its graph set with an empty result."
 pages = ["introduction.md"]
