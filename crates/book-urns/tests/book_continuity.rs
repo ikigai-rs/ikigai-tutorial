@@ -342,7 +342,8 @@ mod rules {
 
     #[test]
     fn a_bash_block_declared_serve_counts_as_a_server() {
-        let page = "Start it.\n\n<!-- transcript: serve -->\n```bash\nikigai serve /tmp/k.sock &\n```\n";
+        let page =
+            "Start it.\n\n<!-- transcript: serve -->\n```bash\nikigai serve /tmp/k.sock &\n```\n";
         assert_eq!(first_serve("a.md", page), Some(5));
         let undeclared = "Start it.\n\n```bash\nikigai serve /tmp/k.sock &\n```\n";
         assert_eq!(first_serve("a.md", undeclared), None);
