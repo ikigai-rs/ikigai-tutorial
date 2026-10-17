@@ -256,10 +256,11 @@ the book needs it first.
 its crate's newest release, ahead of gonk's lock, and the evening's wave moved them again, so the
 book's crates take `ikigai-core` 0.1.103, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
 `ikigai-browse` 0.18.9, `ikigai-script` 0.3.6 and the cli crates at 0.1.63, while the pinned gonk (3edf830) links core 0.1.99, ledger 0.11.1, store 0.2.21,
-browse 0.18.8, script 0.3.3 and cli 0.1.61. No page prints differently because of it, checked by
-replaying every transcript and running every cell and listing: no console reads a ledger item's
-JSON face (where 0.12.0 adds `"children": []`), no query names a `GRAPH` outside its set (which
-store 0.2.22 refuses rather than answering empty), and no page shows a typed selection or a trace
+browse 0.18.8, script 0.3.3 and cli 0.1.61. Only one page prints differently because of it, checked by
+replaying every transcript and running every cell and listing: Two teams, one gonk sends a query
+naming a `GRAPH` outside its set (which store 0.2.22 refuses rather than answering empty) and says
+so where it shows the empty answer; no console reads a ledger item's
+JSON face (where 0.12.0 adds `"children": []`), and no page shows a typed selection or a trace
 of a `urn:kernel:*` operation through gonk (core 0.1.102 and 0.1.103). The gap closes when the pin moves to a
 gonk that links those releases; until then a page that comes to show one of those differences says
 so where it shows it. There were four gaps before this one, all CLOSED by moving the pin; the last

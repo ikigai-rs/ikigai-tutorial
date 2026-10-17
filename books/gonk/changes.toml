@@ -16,6 +16,12 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-16"
+summary = "The introduction's note on the gap between gonk's releases and the book's is one consistent statement: only Two teams, one gonk prints differently, because gonk's store answers a query outside its graph set with an empty result."
+pages = ["introduction.md"]
+maintenance = true
+
+[[change]]
 date = "2026-10-15"
 summary = "A new section in the introduction, A gonk per chapter, says that each chapter runs in a new empty directory with its own gonk on port 1070, and every chapter that starts one now says to stop the one an earlier chapter left running, naming that chapter. The introduction also says how to install the `model-stub` the later chapters start, and that Over MCP is the first page to need the `quic` feature; a few cross-references now point at the right chapter."
 pages = ["introduction.md", "ledger/browser.md"]
