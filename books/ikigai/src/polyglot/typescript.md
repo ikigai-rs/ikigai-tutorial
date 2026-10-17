@@ -12,6 +12,7 @@ import if yours is elsewhere.
 If the kernel from the [Python track](python.md) is still serving `/tmp/ikbook-kernel.sock`,
 skip the first line.
 
+<!-- transcript: serve -->
 ```bash
 ikigai serve /tmp/ikbook-kernel.sock &
 deno run -A examples/deno/client.ts /tmp/ikbook-kernel.sock

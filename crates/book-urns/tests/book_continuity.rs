@@ -16,14 +16,16 @@
 //!   at the neighboring page in `SUMMARY.md`. An unlinked "the next chapter" is not checked,
 //!   because there is nothing to check it against; the fix there is to link it or name it.
 //!
-//! What it does not see: a long-running piece started in a block no runner classifies (the
-//! ikigai Book's `bash` blocks that start `ikigai serve` or the tic-tac-toe host), a term used
-//! before it is defined, a cleanup that breaks a later chapter. Those stay with the review the
+//! The ikigai Book's servers (`ikigai serve`, the tic-tac-toe host) start in `bash` and `sh`
+//! blocks that no runner executes; each carries `<!-- transcript: serve -->` so this check sees it.
+//!
+//! What it does not see: a long-running piece in a block that carries no such declaration, a term
+//! used before it is defined, a cleanup that breaks a later chapter. Those stay with the review the
 //! policy asks for.
 
 use std::path::{Path, PathBuf};
 
-use book_transcripts::{scan_page, Kind};
+use book_transcripts::{declared, scan_page, Kind};
 use book_urns::summary_chapters;
 
 fn books() -> Vec<PathBuf> {
@@ -178,11 +180,39 @@ fn wrong_neighbors(file: &str, text: &str, order: &[String]) -> Vec<String> {
 }
 
 /// The 1-based line of the page's first `serve` block, if it has one.
+///
+/// A `console` block the transcript runner reads counts, and so does a fence of any other kind
+/// (the ikigai Book's `bash` and `sh` blocks, which no runner executes) that carries the
+/// `<!-- transcript: serve -->` declaration: the declaration is how that book says "this starts
+/// something that stays up".
 fn first_serve(file: &str, text: &str) -> Option<usize> {
-    scan_page(file, text)
+    let scanned = scan_page(file, text)
         .into_iter()
         .find(|b| b.kind == Kind::Serve)
-        .map(|b| b.line)
+        .map(|b| b.line);
+    let lines: Vec<&str> = text.lines().collect();
+    let mut declared_at = None;
+    let mut i = 0;
+    while i < lines.len() {
+        if !lines[i].trim_start().starts_with("```") {
+            i += 1;
+            continue;
+        }
+        if declared(&lines[i.saturating_sub(5)..i]) == Kind::Serve {
+            declared_at = Some(i + 2);
+            break;
+        }
+        // Skip to the closing fence.
+        i += 1;
+        while i < lines.len() && !lines[i].trim_start().starts_with("```") {
+            i += 1;
+        }
+        i += 1;
+    }
+    match (scanned, declared_at) {
+        (Some(a), Some(b)) => Some(a.min(b)),
+        (a, b) => a.or(b),
+    }
 }
 
 /// Whether the prose above `line` links `previous`.
@@ -308,6 +338,14 @@ mod rules {
 
     fn serve(prose: &str) -> String {
         format!("{prose}\n\n<!-- transcript: serve -->\n```console\n$ gonk\n```\n")
+    }
+
+    #[test]
+    fn a_bash_block_declared_serve_counts_as_a_server() {
+        let page = "Start it.\n\n<!-- transcript: serve -->\n```bash\nikigai serve /tmp/k.sock &\n```\n";
+        assert_eq!(first_serve("a.md", page), Some(5));
+        let undeclared = "Start it.\n\n```bash\nikigai serve /tmp/k.sock &\n```\n";
+        assert_eq!(first_serve("a.md", undeclared), None);
     }
 
     #[test]

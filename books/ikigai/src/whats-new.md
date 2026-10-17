@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-17**: The version stamps agree: the kernel-since-the-stamp section now says the chapters build against ikigai-core 0.1.103 and that its list stops at 0.1.95, and the Python track says its refusal line carries a later kernel's wording than the 0.1.18 CLI its listings were first run against. The polyglot and tic-tac-toe pages that start a server now say which earlier server may still be running.
+
+  Pages: [Where this actually stands](modules/status.md), [The Python track](polyglot/python.md), [One wire, three languages](polyglot/index.md), [The notebook: the catalog as a graph](polyglot/notebook.md)
+
 - **2026-10-17**: The comparison table in Tic-tac-toe, VII now names its first column ("what"), which was blank, so a screen reader no longer announces an empty header cell.
 
   Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)

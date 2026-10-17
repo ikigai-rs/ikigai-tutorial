@@ -5,8 +5,13 @@
 <!-- urn-gate: illustration urn:py:shout — likewise. -->
 
 Part I, chapter for chapter, from a language with no kernel in it. Every listing is in
-`examples/python/` and was run against a served `ikigai-cli` 0.1.18 as it was written.
+`examples/python/` and was run against a served `ikigai-cli` 0.1.18 as it was written (the refusal text shown in the
+capabilities section is a later kernel's: see the note there).
 
+If the `ttt-host` from [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md) or its apps are still
+running, they can stay: this kernel is on a socket of its own.
+
+<!-- transcript: serve -->
 ```bash
 pip install rdflib /path/to/ikigai-python     # a checkout; not on PyPI yet
 ikigai serve /tmp/ikbook-kernel.sock &         # a kernel to talk to
@@ -109,6 +114,10 @@ tracer receives.
 ```text
 denied: capability does not grant `urn:cap:fs:write:*` (declared by `urn:file:notes.txt`; any grant under `urn:cap:fs:write:` satisfies it)
 ```
+
+That refusal line is `ikigai-core` 0.1.97's wording (its "any grant under … satisfies it"
+clause); the 0.1.18 host these listings were first run against said only that the capability
+did not grant the name. The typed refusal is the same either way.
 
 The client carried a narrowed capability; the served kernel clamped it to what the
 channel is entitled to and enforced it. The refusal crossed the wire **typed** —

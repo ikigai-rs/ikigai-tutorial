@@ -243,6 +243,7 @@ is still running, stop it first: this one serves the same port, 8070. Part V's s
 these use new sockets under `/tmp/ttt6demo`.
 
 <!-- demo: start -->
+<!-- transcript: serve -->
 ```sh
 ttt-host --game py=/tmp/ttt6demo/py.sock --game ts=/tmp/ttt6demo/ts.sock --socket /tmp/ttt6demo/host.sock &
 (cd ../ikigai-deno && deno run -A examples/tictactoe_app.ts --socket /tmp/ttt6demo/host.sock) &

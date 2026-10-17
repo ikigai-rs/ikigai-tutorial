@@ -44,7 +44,8 @@ published to PyPI or JSR yet; both install from a checkout (`pip install <path>`
 import by path), and the listings in this part say so where it matters. The listings
 themselves live in this repository under `examples/`, modeled on the sibling repositories'
 own examples (read-only for this book) so that the book builds from a clone of this
-repository alone; every one of them was run against `ikigai-cli` 0.1.18 as it was written.
+repository alone; every one of them was run against `ikigai-cli` 0.1.18 as it was written (one refusal line shown
+in the Python track carries a later kernel's wording, and says so).
 
 > ⚠ Names under `urn:py:` and `urn:ts:` in this part are served by *your* peer process and
 > resolve only while it runs and is mounted. They are not in the CLI, and the book's URN

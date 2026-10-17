@@ -6,8 +6,9 @@ cells as a script, which is what was run to produce the output below (against a 
 `ikigai-cli` 0.1.18 — the counts are that host's, and yours will differ).
 
 Both of the first two lines are the [Python track](python.md)'s; skip them if that kernel is
-still serving `/tmp/ikbook-kernel.sock`.
+still serving `/tmp/ikbook-kernel.sock` (the [TypeScript track](typescript.md) used the same one).
 
+<!-- transcript: serve -->
 ```bash
 pip install rdflib /path/to/ikigai-python
 ikigai serve /tmp/ikbook-kernel.sock &

@@ -119,8 +119,10 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.95. This chapter was stamped at 0.1.78
-on 2026-09-27, and seventeen releases landed between the two in thirteen days. Each is one
+The chapters above build against `ikigai-core` 0.1.103. This chapter was stamped at 0.1.78
+on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
+The list below stops at 0.1.95; the eight releases since (0.1.96 to 0.1.103) are taught in the
+chapters they touch, not listed here. Each is one
 line here, and taught where a chapter teaches it:
 
 - **0.1.79 — documents and tests only.** The check of what a wall keeps out answers only for

@@ -32,8 +32,7 @@ read that way, and for it to stay true on every change:
 `crates/book-urns/tests/book_continuity.rs` checks the part of this a parser can decide: a link
 whose text says the next or previous chapter (or page, or part) points at the neighboring page in
 `SUMMARY.md`. Its other rule, a page that starts a long-running piece links the page whose piece a
-reader still has running, sees only `<!-- transcript: serve -->` blocks, and this book has none: its
-servers start in `bash` and `sh` blocks that no runner classifies (the REPL replay and the
-`cargo run` check do not start anything that stays up). Declaring them as `serve` would bring them
-under that rule, and is the cheap next step if a server-starting chapter is added; until then this
-part is review.
+reader still has running, reads `<!-- transcript: serve -->` declarations. The servers of this book
+start in `bash` and `sh` blocks that no runner executes (the REPL replay and the `cargo run`
+check do not start anything that stays up), so each such block carries the declaration, which
+brings it under that rule; a new server-starting block must carry it too.
