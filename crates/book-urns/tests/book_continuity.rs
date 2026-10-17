@@ -183,7 +183,7 @@ fn wrong_neighbors(file: &str, text: &str, order: &[String]) -> Vec<String> {
 ///
 /// A `console` block the transcript runner reads counts, and so does a fence of any other kind
 /// (the ikigai Book's `bash` and `sh` blocks, which no runner executes) that carries the
-/// `<!-- transcript: serve -->` declaration: the declaration is how that book says "this starts
+/// `<!-- transcript: serve -->` declaration (or a manual one whose reason begins "a server"): the declaration is how that book says "this starts
 /// something that stays up".
 fn first_serve(file: &str, text: &str) -> Option<usize> {
     let scanned = scan_page(file, text)
@@ -198,7 +198,14 @@ fn first_serve(file: &str, text: &str) -> Option<usize> {
             i += 1;
             continue;
         }
-        if declared(&lines[i.saturating_sub(5)..i]) == Kind::Serve {
+        let starts_server = match declared(&lines[i.saturating_sub(5)..i]) {
+            Kind::Serve => true,
+            // A `cargo run` block must be declared manual, and a block has one declaration:
+            // a manual reason that says "a server" is how such a block says it stays up.
+            Kind::Manual(reason) => reason.starts_with("a server"),
+            _ => false,
+        };
+        if starts_server {
             declared_at = Some(i + 2);
             break;
         }
