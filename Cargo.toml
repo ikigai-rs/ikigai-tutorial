@@ -359,17 +359,16 @@ ikigai-script = "0.3.6"
 ikigai-nl = "0.4.0"
 # A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
 # every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
-# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.14.0 and
-# the HTTP seam it is built on, ikigai-http 0.1.9 (`HttpTransport`, which the host fills; 0.1.7
-# is llm's own floor, the port-aware network gate). 0.14.0 types a transport failure as
-# `Unavailable` or `Timeout` where 0.13 said `Endpoint`, and refuses an `as=` its faces do not
-# declare (ledger #88, #179); the drafter reports whatever the model's failure says, and asks for no
-# face. It declares rust-version 1.88. 0.x carets: ceilings too (<0.15.0, <0.2.0); the old pin
-# "0.13.1" was a ceiling below 0.14. ikigai-http stays on 0.1 on purpose: 0.2.0 (`urn:httpGet`
-# became `urn:http:get`, ledger #11) is a second, distinct `HttpTransport` trait, and llm 0.14.0
-# takes ^0.1.7, so `Ureq` must implement 0.1's. It moves when a published llm takes 0.2.
-ikigai-llm = "0.14.0"
-ikigai-http = "0.1.9"
+# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.15.0 and
+# the HTTP seam it is built on, ikigai-http 0.2.1 (`HttpTransport`, which the host fills). 0.2.0
+# renamed `urn:httpGet` to `urn:http:get` (ledger #11) and made `HttpTransport` a second, distinct
+# trait from 0.1's, so llm and http move together: llm 0.15.0 takes ^0.2, and `Ureq` must implement
+# that trait. 0.14.0 typed a transport failure as `Unavailable` or `Timeout` where 0.13 said
+# `Endpoint`, and refuses an `as=` its faces do not declare (ledger #88, #179); the drafter reports
+# whatever the model's failure says, and asks for no face. 0.x carets: ceilings too (<0.16.0,
+# <0.3.0); the old pins "0.14.0" and "0.1.9" were ceilings below 0.15 and 0.2.
+ikigai-llm = "0.15.0"
+ikigai-http = "0.2.1"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
 # localhost. "2" is that example's line; a caret, so <3.0.0.

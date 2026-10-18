@@ -83,6 +83,14 @@ From the file above:
 | `urn:httpHead` | Exists | `ikigai-httpHead?` |
 | `urn:httpDelete` | Delete | `ikigai-httpDelete-delete!` |
 
+<!-- urn-gate: unbound urn:httpHead — the name as the 0.1.41 transcript recorded it; ikigai-http 0.2.0 renamed it urn:http:head, which the vocabulary lists. -->
+<!-- urn-gate: unbound urn:httpDelete — the name as the 0.1.41 transcript recorded it; ikigai-http 0.2.0 renamed it urn:http:delete, which the vocabulary lists. -->
+
+The two HTTP rows are the spelling that run printed, recorded on 0.1.41 and not re-recorded.
+Since `ikigai-http` 0.2.0 those resources are `urn:http:head` and `urn:http:delete` (the
+`ikigai-cli` the book now replays against, 0.1.64, links it); the old names stay as deprecated
+aliases until 0.3.0.
+
 The first row is also why `urn:fn:toUpper` and `urn:iki:fn:toUpper` give one function and
 not two. The catalog lists only the canonical name, and dropping `urn:iki:` means the
 function keeps its name while the namespaces move under `urn:iki:`.

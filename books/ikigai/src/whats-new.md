@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-17**: The shell examples are now replayed against ikigai-cli 0.1.64. The aliases page says its two HTTP rows are the pre-0.2 spelling recorded on 0.1.41, and names the current urn:http:head and urn:http:delete.
+
+  Pages: [The aliases, day to day](beyond/emacs-aliases.md), [Where this actually stands](modules/status.md)
+
 - **2026-10-17**: The version stamps agree: the kernel-since-the-stamp section now says the chapters build against ikigai-core 0.1.103 and that its list stops at 0.1.95, and the Python track says its refusal line carries a later kernel's wording than the 0.1.18 CLI its listings were first run against. The polyglot and tic-tac-toe pages that start a server now say which earlier server may still be running.
 
   Pages: [Where this actually stands](modules/status.md), [The Python track](polyglot/python.md), [One wire, three languages](polyglot/index.md), [The notebook: the catalog as a graph](polyglot/notebook.md)
