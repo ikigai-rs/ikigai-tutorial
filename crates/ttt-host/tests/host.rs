@@ -99,6 +99,28 @@ async fn a_move_posted_over_http_re_renders_that_games_board() {
     let (status, reply) = http(addr, "POST", "/game/a/iki/tutorial/ttt/view/play/1/1").await;
     assert_eq!((status, reply.as_str()), (200, "X plays 1,1. O to play."));
 
+    // A taken square is refused as a conflict: 409, the message as text, the board unchanged.
+    let (status, head, refused) =
+        http_raw(addr, "POST", "/game/a/iki/tutorial/ttt/view/play/1/1").await;
+    assert_eq!(
+        (status, refused.as_str()),
+        (409, "conflict: 1,1 is taken — X played there")
+    );
+    assert!(
+        head.to_lowercase().contains("content-type: text/plain"),
+        "{head}"
+    );
+    // Off the board is a bad argument: still answered.
+    let (status, _) = http(addr, "POST", "/game/a/iki/tutorial/ttt/view/play/3/1").await;
+    assert_eq!(status, 200);
+    // The page carries the script that swaps a 409 into the status region.
+    let (status, page) = http(addr, "GET", "/game/a/").await;
+    assert_eq!(status, 200);
+    assert!(page.contains("/static/conflict.js"));
+    let (status, js) = http(addr, "GET", "/static/conflict.js").await;
+    assert_eq!(status, 200);
+    assert!(js.contains("textContent"));
+
     let (status, board) = http(addr, "GET", "/game/a/iki/tutorial/ttt/view/board").await;
     assert_eq!(status, 200);
     assert!(
@@ -593,6 +615,6 @@ fn run_lines_answer_with_the_game_kernels_verdicts_over_a_peer_store() {
         2,
         "{out}"
     );
-    assert!(out.ends_with("error: invalid argument `x, y`: 1,1 is taken — X played there\n"));
+    assert!(out.ends_with("error: conflict: 1,1 is taken — X played there\n"));
 }
 // ANCHOR_END: run_lines

@@ -134,9 +134,9 @@ server before the next was dispatched.
   winner is not `-`. It reads the winner and the board.
 - **The move** checks, in order: on the board (its CheckSet is non-empty), game not over
   (winner), square free (the platonic cell), `content` (optional; empty or absent plays the
-  turn; anything else must equal the turn). Every refusal is `InvalidArgument`: the square
-  ones are named `` `x, y` `` (there is no single argument to name), the mark one
-  `content`. Messages, verbatim: `3,1 is off the board — no line passes through it`,
+  turn; anything else must equal the turn). A square off the board is
+  `InvalidArgument` naming `x` or `y`, whichever is off; the other refusals (game over,
+  taken, wrong mark) are `Conflict`, which the view lets through (a 409 over HTTP). Messages, verbatim: `3,1 is off the board — no line passes through it`,
   `the game is over — X has won` / `the game is over — a draw`, `1,1 is taken — X played
   there`, `it is O's turn, not X's`. On success it issues `Sink stored:{x}:{y}` through the
   invocation and answers `X plays 1,1`. `content` declares `one_of(["X","O"])` and
@@ -632,8 +632,9 @@ the system chose), and lists the games sorted.
   HTTP front; ledger #564's "context crosses as values" would retire the IPC one.
 - ⚠ **ids and two boards.** Squares carry game-free ids for htmx's focus restoration. One
   board per page is fine; two need the ids namespaced (the book's shim prefixes the game).
-- ⚠ **ledger #575** will change the refusal TEXT the reply shows (the variant's Display), not
-  the view code; the chapter's pinned refusal lines (they start `invalid argument`) will move with it.
+- **Refusals (ledger #585):** the move refuses a state conflict with `Conflict`, `view:play`
+  lets it through, and `ttt-host` answers 409 with `conflict: {message}` as text/plain; its
+  `conflict.js` swaps that into the status region as text, as does the book's shim.
 
 
 ## What increment 6 left
@@ -659,11 +660,9 @@ the system chose), and lists the games sorted.
   spells the root game `urn:game:root:…` at `/` as well, which answers the same. Both keep
   their `/` page special case (the host's page for `/` has `<base href="/">` and the title
   "the root game").
-- ⚠ **ledger items 583 → 585**: 583 has landed — `Conflict` is a typed wire error (wire v8)
-  in Rust, Python and Deno, with HTTP 409 at the web edges — and `ttt-host` already has it
-  (cli 0.1.30 speaks wire v8). When 585 makes the move refuse with it (a refused move answers 409, Brian's decision on 585),
-  part VI's refusal transcript (today `invalid argument`) and parts III and V move with it.
-  The demo script will say so.
+- **ledger items 583 → 585**: both have landed here. The Python and Deno apps live in other
+  repositories and must answer a `Conflict` as 409 the same way; this repository has not
+  measured them against it.
 
 ## The views as templates (after increment 6)
 

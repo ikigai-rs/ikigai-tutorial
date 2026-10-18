@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-18**: A move the rules refuse because of the game's state (a taken square, a finished game, the wrong mark) is now a Conflict rather than an invalid argument, and a square off the board names the coordinate that is off it. The board shows the refusal in its status region as text and leaves the board as it was; Tic-tac-toe, III to VII show the new refusals.
+
+  Pages: [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md), [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md), [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md), [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md), [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+
 - **2026-10-17**: The shell examples are now replayed against ikigai-cli 0.1.64. The aliases page says its two HTTP rows are the pre-0.2 spelling recorded on 0.1.41, and names the current urn:http:head and urn:http:delete.
 
   Pages: [The aliases, day to day](beyond/emacs-aliases.md), [Where this actually stands](modules/status.md)

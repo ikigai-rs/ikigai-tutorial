@@ -203,7 +203,7 @@ source urn:iki:tutorial:ttt:turn'>
 [uncacheable]
 O plays 0,0
 [uncacheable]
-error: invalid argument `x, y`: 1,1 is taken — X played there
+error: conflict: 1,1 is taken — X played there
 O--
 -X-
 ---
@@ -223,7 +223,7 @@ source urn:iki:tutorial:ttt:turn'>
 [uncacheable]
 O plays 0,0
 [uncacheable]
-error: invalid argument `x, y`: 1,1 is taken — X played there
+error: conflict: 1,1 is taken — X played there
 O--
 -X-
 ---
@@ -233,8 +233,7 @@ X
 </div>
 
 The same answers, the same refusal in the same words, and the same verdicts from the cache.
-The refusal is still `InvalidArgument`, as [Part VI](tic-tac-toe-6.md) explained: the move
-has not switched to `Conflict` yet (ledger item 585). When it does, both games will say
+The refusal is a `Conflict`, as [Part VI](tic-tac-toe-6.md) explained, and both games say
 `conflict:` together, because a refusal belongs to the endpoint, and the file only says where
 the endpoint is bound.
 

@@ -646,10 +646,11 @@ pub fn turn() -> AsyncFnEndpoint {
 /// by hand, and so the same cut of the stored cell's thread. Nothing about turns or boards
 /// moves into the stored cell, which still takes any mark at any square.
 ///
-/// Refused, with [`Error::InvalidArgument`]: a square no line passes through (off the
-/// board), any square once the game is over, a square already played, and a `content`
-/// mark that is not the side to play. `content` is optional; left out, the move plays
-/// whoever's turn it is.
+/// Refused, with [`Error::InvalidArgument`] naming `x` or `y` (whichever is off the board):
+/// a square no line passes through. Refused, with [`Error::Conflict`] — the arguments are
+/// fine and the game's state does not permit the move: any square once the game is over, a
+/// square already played, and a `content` mark that is not the side to play. `content` is
+/// optional; left out, the move plays whoever's turn it is.
 pub fn play_move() -> AsyncFnEndpoint {
     AsyncFnEndpoint::new("ttt-move", |inv: &Invocation<'_>| -> InvokeFuture<'_> {
         Box::pin(async move {
@@ -659,23 +660,28 @@ pub fn play_move() -> AsyncFnEndpoint {
                 ));
             }
             let (x, y) = (coordinate(inv, "x")?, coordinate(inv, "y")?);
-            let square = |detail: String| Error::InvalidArgument {
-                name: "x, y".to_string(),
-                detail,
-            };
             if text_of(inv, &checkset_name(x, y)).await?.is_empty() {
-                return Err(square(format!(
-                    "{x},{y} is off the board — no line passes through it"
-                )));
+                // Either coordinate may be the one off the board; name the one that is.
+                let name = if (0..3).contains(&x) { "y" } else { "x" };
+                return Err(Error::InvalidArgument {
+                    name: name.to_string(),
+                    detail: format!("{x},{y} is off the board — no line passes through it"),
+                });
             }
             match text_of(inv, WINNER).await?.as_str() {
                 won if won == EMPTY => {}
-                DRAW => return Err(square("the game is over — a draw".to_string())),
-                mark => return Err(square(format!("the game is over — {mark} has won"))),
+                DRAW => return Err(Error::Conflict("the game is over — a draw".to_string())),
+                mark => {
+                    return Err(Error::Conflict(format!(
+                        "the game is over — {mark} has won"
+                    )))
+                }
             }
             let there = text_of(inv, &cell_name(x, y)).await?;
             if there != EMPTY {
-                return Err(square(format!("{x},{y} is taken — {there} played there")));
+                return Err(Error::Conflict(format!(
+                    "{x},{y} is taken — {there} played there"
+                )));
             }
             let side = text_of(inv, TURN).await?;
             let offered = match inv.inline_str("content") {
@@ -684,10 +690,9 @@ pub fn play_move() -> AsyncFnEndpoint {
                 Err(other) => return Err(other),
             };
             if !offered.is_empty() && offered != side {
-                return Err(Error::InvalidArgument {
-                    name: "content".to_string(),
-                    detail: format!("it is {side}'s turn, not {offered}'s"),
-                });
+                return Err(Error::Conflict(format!(
+                    "it is {side}'s turn, not {offered}'s"
+                )));
             }
             let stored = Iri::parse(stored_name(x, y))
                 .map_err(|e| Error::Endpoint(format!("the stored cell's name: {e}")))?;
@@ -868,13 +873,16 @@ pub fn view(name: &str) -> ComposeOver {
 /// What a view's `Sink` answers: `view:reply`, the `reply` template filled with `message`
 /// — what the write said — and the status.
 ///
-/// `message` is whatever the write said, success or refusal alike, as text: the view does
-/// not look inside an error to decide how to show it, so a refusal of any kind reaches the
-/// player in the kernel's own words. It is an ARGUMENT of the reply, and the template
+/// `message` is whatever the write said, as text, and a refusal reaches the player in the
+/// kernel's own words. The one refusal the view does not answer is [`Error::Conflict`]: the
+/// move did not happen, so the view lets it through to be a 409 at the HTTP edge (and in
+/// the in-page shim), which the page swaps into the status region without touching the
+/// board. Any other refusal is answered. It is an ARGUMENT of the reply, and the template
 /// splices it with `$h`, so it is escaped and never expanded, whatever the error says.
 async fn reply(inv: &Invocation<'_>, outcome: Result<Representation>) -> Result<Representation> {
     let message = match outcome {
         Ok(said) => String::from_utf8_lossy(&said.bytes).into_owned(),
+        Err(conflict @ Error::Conflict(_)) => return Err(conflict),
         Err(refused) => refused.to_string(),
     };
     let reply = Request::new(Verb::Source, name_iri(VIEW_REPLY)?)
@@ -885,8 +893,9 @@ async fn reply(inv: &Invocation<'_>, outcome: Result<Representation>) -> Result<
 }
 
 /// `ttt-view-play`: play the side to move at `(x, y)` — a `Sink` to the move, through the
-/// kernel — and answer the reply: `X plays 1,1. O to play.` A refused move is answered, not
-/// failed: `…1,1 is taken — X played there. O to play.` This is the view's one write, and it
+/// kernel — and answer the reply: `X plays 1,1. O to play.` A move the rules refuse as a
+/// [`Error::Conflict`] (a taken square, a finished game) fails with it, and so is a 409
+/// over HTTP; a bad argument is answered. This is the view's one write, and it
 /// changes nothing about the move: the rules are still the move's.
 ///
 /// It stays code because it is a SEQUENCE — write, then read the reply — and composition

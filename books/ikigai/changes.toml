@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-18"
+summary = "A move the rules refuse because of the game's state (a taken square, a finished game, the wrong mark) is now a Conflict rather than an invalid argument, and a square off the board names the coordinate that is off it. The board shows the refusal in its status region as text and leaves the board as it was; Tic-tac-toe, III to VII show the new refusals."
+pages = ["applied/tic-tac-toe-3.md", "applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md", "applied/tic-tac-toe-6.md", "applied/tic-tac-toe-7.md"]
+
+[[change]]
 date = "2026-10-17"
 summary = "The shell examples are now replayed against ikigai-cli 0.1.64. The aliases page says its two HTTP rows are the pre-0.2 spelling recorded on 0.1.41, and names the current urn:http:head and urn:http:delete."
 pages = ["beyond/emacs-aliases.md", "modules/status.md"]

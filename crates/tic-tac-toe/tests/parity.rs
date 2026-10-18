@@ -21,7 +21,7 @@
 use std::sync::Arc;
 
 use futures::executor::block_on;
-use ikigai_core::{ArgRef, Capability, Iri, Kernel, Representation, Request, Result, Verb};
+use ikigai_core::{ArgRef, Capability, Error, Iri, Kernel, Representation, Request, Result, Verb};
 use tic_tac_toe::{
     cell_name, kernel_over, move_name, stored_name, view_game_name, view_play_name, RESET, TURN,
     VIEW_BOARD, VIEW_RESET, VIEW_STATUS, WINNER,
@@ -187,14 +187,21 @@ impl Twins {
     }
 
     /// Play `(x, y)` through the view in one and through the move in the other; the replies
-    /// are the same bytes, and so is everything after. Answers the reply.
+    /// are the same bytes, and so is everything after. Answers the reply; a `Conflict` is
+    /// not answered by the view but let through, so then it answers the conflict's words.
     fn play(&self, x: i64, y: i64) -> String {
         let reply = issue(
             &self.views,
             Request::new(Verb::Sink, iri(&view_play_name(x, y))),
-        )
-        .expect("a play is answered, refused or not");
+        );
         let said = issue(&self.refs, Request::new(Verb::Sink, iri(&move_name(x, y))));
+        if let Err(conflict @ Error::Conflict(_)) = &said {
+            let through = reply.expect_err("a conflict goes through the view");
+            assert_eq!(through.to_string(), conflict.to_string(), "play {x},{y}");
+            self.agree();
+            return through.to_string();
+        }
+        let reply = reply.expect("any other play is answered, refused or not");
         let reply = String::from_utf8(reply.bytes).expect("UTF-8");
         assert_eq!(reply, reference_reply(&self.refs, said), "play {x},{y}");
         self.agree();
@@ -235,7 +242,7 @@ fn a_game_in_progress_is_the_same_bytes_and_so_is_every_reply() {
     assert_eq!(twins.play(1, 1), "X plays 1,1. O to play.");
     twins.play(0, 0);
     // Refused: taken, and off the board.
-    assert!(twins.play(1, 1).contains("1,1 is taken"));
+    assert!(twins.play(1, 1).contains("conflict: 1,1 is taken"));
     assert!(twins.play(3, 1).contains("3,1 is off the board"));
     let board = twins.agree();
     assert!(
@@ -256,10 +263,7 @@ fn a_won_game_is_the_same_bytes() {
     let board = twins.agree();
     assert_eq!(board.matches("the game is over").count(), 4, "{board}");
     assert!(!board.contains("play here"));
-    assert_eq!(
-        twins.play(2, 2),
-        "invalid argument `x, y`: the game is over — X has won. X has won."
-    );
+    assert_eq!(twins.play(2, 2), "conflict: the game is over — X has won");
     assert_eq!(twins.reset(), "The board is clear. X to play.");
 }
 

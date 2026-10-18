@@ -169,7 +169,7 @@ X
 Game `a` is over, so a move in game `a` is refused:
 
 <div class="ikigai-run" data-game='a' data-cmd='sink urn:iki:tutorial:ttt:move:0:2'>
-<pre class="ikigai-run-expected">error: invalid argument `x, y`: the game is over — X has won</pre>
+<pre class="ikigai-run-expected">error: conflict: the game is over — X has won</pre>
 </div>
 
 The same move in game `b` plays, and game `b` goes on:

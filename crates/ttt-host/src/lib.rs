@@ -65,6 +65,9 @@ const HTMX: &str = include_str!("../../../books/ikigai/src/vendor/htmx-2.0.4.min
 /// The board's stylesheet — the book's own, the one stylesheet for this markup.
 const TTT_CSS: &str = include_str!("../../../books/ikigai/css/ttt.css");
 
+/// Swaps a refused move (409) into the status region as text; see the file.
+const CONFLICT_JS: &str = include_str!("../static/conflict.js");
+
 /// This page's colors and layout, which the book's pages get from mdbook.
 const HOST_CSS: &str = include_str!("../static/host.css");
 
@@ -321,6 +324,7 @@ pub fn edge_config() -> EdgeConfig {
             page("/game/{id}", "urn:ttt-host:page:game:{id}"),
             route("/static/htmx-2.0.4.min.js", "urn:ttt-host:static:htmx"),
             route("/static/ttt.css", "urn:ttt-host:static:ttt-css"),
+            route("/static/conflict.js", "urn:ttt-host:static:conflict"),
             route("/static/host.css", "urn:ttt-host:static:host-css"),
         ]),
         ..EdgeConfig::default()
@@ -512,6 +516,7 @@ impl Space for Pages {
             "page:root" => Page::Game(None),
             "static:htmx" => Page::Static("text/javascript", HTMX),
             "static:ttt-css" => Page::Static("text/css", TTT_CSS),
+            "static:conflict" => Page::Static("text/javascript", CONFLICT_JS),
             "static:host-css" => Page::Static("text/css", HOST_CSS),
             other => match other.strip_prefix("page:game:") {
                 Some(id) if id == ROOT_GAME || self.games.iter().any(|g| g == id) => {
@@ -618,7 +623,8 @@ impl PageEndpoint {
              <title>Tic-tac-toe: {title}</title>\n<base href=\"{base}\">\n\
              <link rel=\"stylesheet\" href=\"/static/host.css\">\n\
              <link rel=\"stylesheet\" href=\"/static/ttt.css\">\n\
-             <script src=\"/static/htmx-2.0.4.min.js\"></script>\n</head>\n<body>\n<main>\n\
+             <script src=\"/static/htmx-2.0.4.min.js\"></script>\n\
+             <script src=\"/static/conflict.js\" defer></script>\n</head>\n<body>\n<main>\n\
              <h1>Tic-tac-toe: {title}</h1>\n<div class=\"ttt-boards\"><div class=\"ttt-play\">\n{game}\n</div></div>\n\
              <nav aria-label=\"Games\"><h2>Games on this host</h2><ul>{links}</ul></nav>\n</main>\n</body>\n</html>\n",
             title = escape(&if id.is_some() {

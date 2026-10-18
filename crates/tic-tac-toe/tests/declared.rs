@@ -146,7 +146,7 @@ fn a_taken_square_is_refused_in_the_same_words() {
         answer(kernel, Verb::Sink, &format!("{T}move:1:1"), None);
         assert_eq!(
             answer(kernel, Verb::Sink, &format!("{T}move:1:1"), None),
-            "error: invalid argument `x, y`: 1,1 is taken — X played there"
+            "error: conflict: 1,1 is taken — X played there"
         );
     }
 }

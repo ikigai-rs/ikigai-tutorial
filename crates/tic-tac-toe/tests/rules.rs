@@ -44,10 +44,12 @@ fn cached(kernel: &Kernel, name: &str) -> bool {
     kernel.is_cached(&Request::new(Verb::Source, iri(name)), &Capability::root())
 }
 
-/// The refusal a move met: the argument it names, and what it says.
+/// The refusal a move met: the argument it names (`conflict` for a refusal by the game's
+/// state, which names none), and what it says.
 fn refusal(result: Result<String>) -> (String, String) {
     match result {
         Err(Error::InvalidArgument { name, detail }) => (name, detail),
+        Err(Error::Conflict(detail)) => ("conflict".into(), detail),
         other => panic!("expected a refusal, got {other:?}"),
     }
 }
@@ -155,30 +157,30 @@ fn a_full_board_with_no_line_is_a_draw() -> Result<()> {
 #[test]
 fn the_move_refuses_what_the_rules_forbid_and_the_store_does_not() -> Result<()> {
     let kernel = kernel_over(Arc::default());
-    let x_y = "x, y".to_string();
+    let conflict = "conflict".to_string();
 
     assert_eq!(
         refusal(play(&kernel, 3, 1)),
         (
-            x_y.clone(),
+            "x".to_string(),
             "3,1 is off the board — no line passes through it".into()
         )
     );
     play(&kernel, 1, 1)?;
     assert_eq!(
         refusal(sink(&kernel, &move_name(0, 0), "X")),
-        ("content".into(), "it is O's turn, not X's".into())
+        (conflict.clone(), "it is O's turn, not X's".into())
     );
     assert_eq!(
         refusal(play(&kernel, 1, 1)),
-        (x_y.clone(), "1,1 is taken — X played there".into())
+        (conflict.clone(), "1,1 is taken — X played there".into())
     );
     for (x, y) in [(1, 0), (0, 0), (2, 1), (2, 2)] {
         play(&kernel, x, y)?;
     }
     assert_eq!(
         refusal(play(&kernel, 0, 2)),
-        (x_y, "the game is over — X has won".into())
+        (conflict, "the game is over — X has won".into())
     );
 
     // The atoms are unchanged: any mark, any square, no turn, no board.

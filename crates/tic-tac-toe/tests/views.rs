@@ -94,8 +94,8 @@ fn a_fresh_board_is_nine_moves() -> Result<()> {
 
 // ANCHOR: play_view
 /// A play through the view is a move through the kernel: the reply says what happened and
-/// whose turn it is, the square is taken, and a refusal is ANSWERED in the kernel's words
-/// rather than failed — whatever kind of error the move raised.
+/// whose turn it is, the square is taken, and a bad argument is ANSWERED in the kernel's
+/// words. A refusal by the game's state is a `Conflict`, and the view lets it through.
 #[test]
 fn a_play_answers_what_happened_and_whose_turn_it_is() -> Result<()> {
     let kernel = kernel_over(Arc::default());
@@ -107,11 +107,17 @@ fn a_play_answers_what_happened_and_whose_turn_it_is() -> Result<()> {
     assert!(board.contains("aria-disabled=\"true\" aria-label=\"X at 1,1\">X</button>"));
     assert_eq!(board.matches("hx-post=").count(), 8);
 
-    assert_eq!(
-        sink(&kernel, &view_play_name(1, 1))?,
-        "invalid argument `x, y`: 1,1 is taken — X played there. O to play."
-    );
+    assert!(matches!(
+        sink(&kernel, &view_play_name(1, 1)),
+        Err(Error::Conflict(m)) if m == "1,1 is taken — X played there"
+    ));
     assert!(sink(&kernel, &view_play_name(3, 1))?.contains("3,1 is off the board"));
+    // The refusal changed nothing: the status is what it was.
+    assert_eq!(source(&kernel, VIEW_STATUS)?, "O to play.");
+    assert_eq!(
+        sink(&kernel, &view_play_name(0, 0))?,
+        "O plays 0,0. X to play."
+    );
     Ok(())
 }
 // ANCHOR_END: play_view
@@ -131,10 +137,10 @@ fn a_won_game_closes_the_empty_squares() -> Result<()> {
     assert_eq!(labels.len(), 9);
     assert!(labels.contains(&("0,1: empty, the game is over".into(), "not open".into())));
     assert!(labels.contains(&("O at 1,0".into(), "not open".into())));
-    assert_eq!(
-        sink(&kernel, &view_play_name(0, 1))?,
-        "invalid argument `x, y`: the game is over — X has won. X has won."
-    );
+    assert!(matches!(
+        sink(&kernel, &view_play_name(0, 1)),
+        Err(Error::Conflict(m)) if m == "the game is over — X has won"
+    ));
     Ok(())
 }
 

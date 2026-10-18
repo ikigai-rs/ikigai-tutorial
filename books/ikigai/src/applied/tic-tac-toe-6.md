@@ -154,7 +154,7 @@ urn:iki:tutorial:ttt:cell:1:1   ttt-cell · computed · main · —   → 1b  X
 -X-
 ---
 [cached]
-error: invalid argument `x, y`: 1,1 is taken — X played there
+error: conflict: 1,1 is taken — X played there
 The board is clear
 [uncacheable]
 ```
@@ -197,7 +197,7 @@ urn:iki:tutorial:ttt:cell:1:1   ttt-cell · computed · ThreadId(1) · —   →
 -X-
 ---
 [cached]
-error: invalid argument `x, y`: 1,1 is taken — X played there
+error: conflict: 1,1 is taken — X played there
 The board is clear
 [uncacheable]</pre>
 </div>
@@ -555,27 +555,26 @@ could never be cached safely or cut when a move changed it.
 So the peers hold state, and the kernel composes. The apps follow the same rule from the
 other side: they read `winner` rather than computing it, and render only what they read.
 
-### A refusal is not typed yet
+### A refusal is typed
 
-A move the rules refuse is answered in the kernel's words, and today those words say
-`invalid argument`:
+A move the rules refuse is a `Conflict`, and the wire carries it: version 8 of the wire
+protocol gives it a tag in Rust, Python and TypeScript together, and HTTP 409 at the web
+edges. A taken square is not an invalid argument. The argument is well formed, and the
+refusal is about the state of the game. The host answers it with a 409 and the message as
+plain text:
 
 <!-- demo: run -->
 ```text
-$ curl -s -X POST http://127.0.0.1:8072/game/py/iki/tutorial/ttt/view/play/0/0
+$ curl -s -X POST http://127.0.0.1:8070/game/py/iki/tutorial/ttt/view/play/0/0
 X plays 0,0. O to play.
-$ curl -s -X POST http://127.0.0.1:8071/game/py/iki/tutorial/ttt/view/play/0/0
-invalid argument `x, y`: 0,0 is taken — X played there. O to play.
+$ curl -s -w '\n%{http_code}\n' -X POST http://127.0.0.1:8070/game/py/iki/tutorial/ttt/view/play/0/0
+conflict: 0,0 is taken — X played there
+409
 ```
 
-That is not really an invalid argument. The argument is well formed, and the refusal is
-about the state of the game. The kernel has a better error for this now, `Conflict`, and the
-wire can carry it: version 8 of the wire protocol gives it a tag in Rust, Python and
-TypeScript together, and HTTP 409 at the web edges (ledger item 583). `ttt-host` and both
-apps already speak it. What remains is the move, which still refuses with `InvalidArgument`
-(ledger item 585). When it switches, a refused move will be answered with 409 and a message
-that starts with `conflict:`, and a client that wants to treat "that square is taken"
-differently from "that is not a coordinate" will be able to tell them apart by type.
+A client that wants to treat "that square is taken" differently from "that is not a
+coordinate" tells them apart by type: the second, a square off the board, is still an
+`InvalidArgument` and a 400.
 
 ## What was built
 

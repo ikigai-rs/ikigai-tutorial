@@ -158,6 +158,14 @@
             }
             kernel.issueAsync(game, verb, iri).then(function (json) {
                 var reply = JSON.parse(json);
+                // A refused move is what a server answers with a 409 and `conflict: ...` as
+                // text: the message goes into the status region as TEXT (it is role=status,
+                // so it is announced), and the board is left alone, as the move did not
+                // happen. ttt-host's `conflict.js` does the same for the real 409.
+                if (reply.kind === "error" && reply.text.indexOf("conflict: ") === 0) {
+                    target.textContent = reply.text;
+                    return;
+                }
                 var html = reply.kind === "output" ? reply.text : escape("error: " + reply.text);
                 htmx.swap(target, namespaced(html, game), { swapStyle: "innerHTML" });
             }).catch(function (err) {

@@ -226,14 +226,21 @@ board view is cached again, with X in the center:
 [cached]</pre>
 </div>
 
-A move the rules refuse is *answered*, not failed. The view does not look inside the error
-to decide how to show it. Whatever the move raised, the player reads the kernel's own
-words, followed by whose turn it still is:
+A move the rules refuse because of the game's state, a taken square or a finished game or
+the wrong mark, is a `Conflict`, and the view lets it through rather than answering it. Over
+HTTP that is a `409` whose body is the message, as plain text; here the REPL prints the
+same words. The move did not happen, so there is no new status to show. A bad argument, a
+square off the board, is still answered in the kernel's words, followed by whose turn it still
+is.
 
 <div class="ikigai-run" data-game='a' data-cmd='sink urn:iki:tutorial:ttt:view:play:1:1'>
-<pre class="ikigai-run-expected">invalid argument `x, y`: 1,1 is taken — X played there. O to play.
-[uncacheable]</pre>
+<pre class="ikigai-run-expected">error: conflict: 1,1 is taken — X played there</pre>
 </div>
+
+The page treats that 409 as an answer, not a failure. htmx would, by default, drop a 4xx and
+report an error, so the board's script puts a 409's text into the status region (which is
+`role="status"`, so a screen reader announces it) as text, never as HTML, and leaves the
+board as it was. The next move that is made restores the status.
 
 The boards never offer that move: a square that is taken is not an open button. It happens
 when two people play one game from two screens, and the board one of them is looking at is

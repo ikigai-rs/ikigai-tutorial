@@ -1384,19 +1384,23 @@ mod tests {
         assert!(t[1].ends_with("[computed]\n[computed]\n"), "{}", t[1]);
         // A fresh board: nobody has won, X opens.
         assert_eq!(t[2], "-\n[computed]\nX\n[computed]\n");
-        // Each refusal once, each an InvalidArgument naming what to fix.
+        // Each refusal once: the state's are a Conflict, the board's an InvalidArgument.
         assert!(
-            t[4].starts_with("error: invalid argument `content`:"),
+            t[4].starts_with("error: conflict: it is O's turn, not X's"),
             "{}",
             t[4]
         );
-        assert_eq!(
-            t[5].matches("error: invalid argument `x, y`:").count(),
-            2,
+        assert!(
+            t[5].starts_with("error: conflict: 1,1 is taken"),
             "{}",
             t[5]
         );
-        assert!(t[11].starts_with("error: invalid argument `x, y`: the game is over"));
+        assert!(
+            t[5].contains("error: invalid argument `x`: 3,1 is off"),
+            "{}",
+            t[5]
+        );
+        assert!(t[11].starts_with("error: conflict: the game is over"));
         // One move through the corner: its three lines, the winner and the turn are cut;
         // a line that misses it and the corner's CheckSet are not.
         assert!(
@@ -1539,11 +1543,9 @@ mod tests {
             t[3]
         );
         assert!(t[3].ends_with("[cached]\n"), "{}", t[3]);
-        // A refused play is answered in the kernel's words, then the status.
+        // A refused play is a Conflict the view lets through: the kernel's words, no status.
         assert!(
-            t[4].starts_with(
-                "invalid argument `x, y`: 1,1 is taken — X played there. O to play.\n"
-            ),
+            t[4].starts_with("error: conflict: 1,1 is taken — X played there"),
             "{}",
             t[4]
         );

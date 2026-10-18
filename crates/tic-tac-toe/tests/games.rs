@@ -104,9 +104,7 @@ fn a_move_stays_in_its_game() -> Result<()> {
     x_wins(&kernel, &a)?;
     assert_eq!(source_in(&kernel, &a, WINNER)?, "X");
     match play_in(&kernel, &a, 0, 2) {
-        Err(Error::InvalidArgument { detail, .. }) => {
-            assert_eq!(detail, "the game is over — X has won")
-        }
+        Err(Error::Conflict(detail)) => assert_eq!(detail, "the game is over — X has won"),
         other => panic!("a move in a finished game must be refused, got {other:?}"),
     }
 

@@ -144,8 +144,11 @@ deliberate. The rules arrive in one resource, the move,
 
 The move enforces the rules by asking the resources the game already has. The CheckSet
 says whether the square is on the board, the winner whether the game is over, the cell
-whether the square is free, and the turn whose mark it is. Each refusal is an
-`InvalidArgument` with a reason a player can act on. Only when all four agree does the move
+whether the square is free, and the turn whose mark it is. A square off the board
+is an `InvalidArgument`, naming the coordinate that is off it: that argument is wrong. The
+other refusals (the game is over, the square is taken, the wrong mark) are a `Conflict`: the
+arguments are fine and the game's state does not permit the move. Each carries a reason a
+player can act on. Only when all four agree does the move
 play, and it plays by issuing a `Sink` to the stored cell, the same request a player could
 make by hand.
 
@@ -182,8 +185,7 @@ Now each of the rules, once. Naming the wrong mark, then the right one:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:move:1:0 X
 sink urn:iki:tutorial:ttt:move:1:0 O'>
-<pre class="ikigai-run-expected">error: invalid argument `content`: it is O's turn, not X's
-       `content`: the mark to play — checked against the turn; left out, the turn plays (one of: X, O)
+<pre class="ikigai-run-expected">error: conflict: it is O's turn, not X's
 O plays 1,0
 [uncacheable]</pre>
 </div>
@@ -192,8 +194,9 @@ A square that is taken, and a square that is not on the board:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:move:1:1
 sink urn:iki:tutorial:ttt:move:3:1'>
-<pre class="ikigai-run-expected">error: invalid argument `x, y`: 1,1 is taken — X played there
-error: invalid argument `x, y`: 3,1 is off the board — no line passes through it</pre>
+<pre class="ikigai-run-expected">error: conflict: 1,1 is taken — X played there
+error: invalid argument `x`: 3,1 is off the board — no line passes through it
+       `x`: the column — any integer</pre>
 </div>
 
 The move describes itself like everything else, so a player (or an agent choosing a tool)
@@ -365,7 +368,7 @@ The last rule: the game is over, so any move is refused, whatever square it name
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:move:0:2
 source urn:iki:tutorial:ttt:board'>
-<pre class="ikigai-run-expected">error: invalid argument `x, y`: the game is over — X has won
+<pre class="ikigai-run-expected">error: conflict: the game is over — X has won
 XO-
 -XO
 --X
