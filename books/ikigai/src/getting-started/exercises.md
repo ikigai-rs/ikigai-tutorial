@@ -156,6 +156,9 @@ one of them is checked by a compiler:
 let separator = inv.inline_str("separator").unwrap_or(/* your default */);
 ```
 
+(To read the declaration back in that test: the builder is `.default_value(..)`, and the
+field it sets on `ArgSpec` is `.default`.)
+
 Which means the failure mode to watch for is the two halves disagreeing — a description
 that promises one default while the code applies another. Nothing in the system catches
 that; a test that resolves without the argument and asserts the declared default's
@@ -204,6 +207,9 @@ match inv.request.args.get("in") {
     _ => return Err(Error::MissingArgument("in".into())),
 }
 ```
+
+(The last arm also catches `ArgRef::Content`, a larger value interned in the content
+store, so keep a catch-all if you rewrite the match: without one it does not compile.)
 
 Two consequences fall straight out of that shape.
 
@@ -267,5 +273,10 @@ uncacheable resource is slow, and a wrongly cached one is quietly incorrect, whi
 harder to notice. And in real code the time should come from `inv.now()`, the clock the
 kernel injects, rather than `SystemTime::now()` — a kernel does not only run on your
 machine, and `std::time` is not available everywhere it goes.
+
+The host has to inject that clock, though. `your_endpoints::kernel()` is built without one,
+so `inv.now()` answers `None` there until the kernel is built with
+`.with_clock(Arc::new(SystemClock))` (`ikigai_core::SystemClock`): the host hands the kernel
+its clock the way [Configuration](configuration.md) hands an endpoint its home.
 
 </details>
