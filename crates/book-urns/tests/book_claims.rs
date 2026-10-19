@@ -47,7 +47,7 @@ impl Source {
     fn label(&self) -> String {
         match self {
             Source::Crate { name, version } => format!("{name} {version}"),
-            Source::GitHub { repo, sha } => format!("{repo}@{}", &sha[..7]),
+            Source::GitHub { repo, sha } => format!("{repo}@{}", &sha[..sha.len().min(7)]),
         }
     }
 
@@ -564,10 +564,9 @@ fn fetch(source: &Source, into: &Path) -> Result<PathBuf, String> {
     Ok(top)
 }
 
-/// The instrument: fetch each source at its stamped version and grep for the evidence.
-#[test]
-#[ignore = "needs the network (crates.io and GitHub); run it by hand when a sibling crate releases"]
-fn every_stamped_claim_holds_at_the_version_it_names() {
+/// Fetch each claim's source as `resolve` names it, grep for the evidence, and return one line
+/// per claim that does not hold.
+fn probe(resolve: impl Fn(&Source) -> Result<Source, String>) -> Vec<String> {
     let scratch = std::env::temp_dir().join(format!("ikigai-book-claims-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&scratch);
     std::fs::create_dir_all(&scratch).expect("a scratch directory");
@@ -575,10 +574,17 @@ fn every_stamped_claim_holds_at_the_version_it_names() {
     let mut unpacked: Vec<(String, PathBuf)> = Vec::new();
     let mut failures = Vec::new();
     for claim in CLAIMS {
-        let label = claim.source.label();
+        let source = match resolve(&claim.source) {
+            Ok(source) => source,
+            Err(e) => {
+                failures.push(format!("{}: {e}", claim.source.label()));
+                continue;
+            }
+        };
+        let label = source.label();
         let top = match unpacked.iter().find(|(l, _)| *l == label) {
             Some((_, top)) => top.clone(),
-            None => match fetch(&claim.source, &scratch) {
+            None => match fetch(&source, &scratch) {
                 Ok(top) => {
                     unpacked.push((label.clone(), top.clone()));
                     top
@@ -619,12 +625,67 @@ fn every_stamped_claim_holds_at_the_version_it_names() {
         }
     }
     let _ = std::fs::remove_dir_all(&scratch);
+    failures
+}
 
+/// The instrument: fetch each source at its stamped version and grep for the evidence.
+#[test]
+#[ignore = "needs the network (crates.io and GitHub); run it by hand when a sibling crate releases"]
+fn every_stamped_claim_holds_at_the_version_it_names() {
+    let failures = probe(|source| Ok(*source));
     assert!(
         failures.is_empty(),
         "stamped claims that do not hold at the version they name:\n  {}\n\nA claim that \
          was true at its stamp and is false later is a sentence to re-stamp and rewrite, \
          not a test to delete.",
         failures.join("\n  ")
+    );
+}
+
+/// The newest stable version of a crate, from the crates.io API.
+fn latest_version(name: &str) -> Result<String, String> {
+    let out = Command::new("curl")
+        .args(["-sSfL", "-A", "ikigai-tutorial book_claims (drift check)"])
+        .arg(format!("https://crates.io/api/v1/crates/{name}"))
+        .output()
+        .map_err(|e| format!("curl: {e}"))?;
+    if !out.status.success() {
+        return Err(format!("could not look up the latest {name}"));
+    }
+    let json = String::from_utf8_lossy(&out.stdout);
+    let key = "\"max_stable_version\":\"";
+    let at = json
+        .find(key)
+        .ok_or_else(|| format!("no max_stable_version in the crates.io answer for {name}"))?;
+    let rest = &json[at + key.len()..];
+    Ok(rest[..rest.find('"').unwrap_or(0)].to_string())
+}
+
+/// The drift check — the other question. The probe above asks "is this sentence honest?"
+/// by fetching each crate at the version the prose stamps, so a claim true at 0.1.18 stays
+/// green whatever 0.1.20 does. This asks "is this still the world?" against each crate's
+/// LATEST version (a GitHub source at its default branch). It WARNS and never fails on a
+/// claim: a miss here is a prompt to re-read a sentence and re-stamp it, not a broken build.
+///
+///     cargo test -p book-urns --test book_claims -- --ignored --nocapture claims_still_hold
+#[test]
+#[ignore = "needs the network (crates.io and GitHub); advisory, it warns and does not fail"]
+fn claims_still_hold_at_the_latest_version() {
+    let warnings = probe(|source| match *source {
+        Source::Crate { name, .. } => {
+            let version: &'static str = Box::leak(latest_version(name)?.into_boxed_str());
+            Ok(Source::Crate { name, version })
+        }
+        Source::GitHub { repo, .. } => Ok(Source::GitHub { repo, sha: "HEAD" }),
+    });
+    for warning in &warnings {
+        // The annotation shows on a workflow run; the plain line is for a terminal.
+        println!("::warning title=book claim has drifted::{warning}");
+        eprintln!("warning: {warning}");
+    }
+    println!(
+        "{} of {} claims drifted from the latest release (advisory; not a failure)",
+        warnings.len(),
+        CLAIMS.len()
     );
 }
