@@ -271,6 +271,15 @@ sentence to distrust.
 cargo test -p book-urns --test book_claims -- --ignored --nocapture
 ```
 
+That probe answers "is this sentence honest?", never "is this still the world?": a claim true
+at the stamped version stays green whatever a later release does. The second question is a
+separate, advisory probe that runs the same table against each crate's latest release (the demo's
+default branch) and only warns — a miss is a sentence to re-read and re-stamp, not a failure:
+
+```bash
+cargo test -p book-urns --test book_claims -- --ignored --nocapture claims_still_hold
+```
+
 ### And the cross-references
 
 A resource name is not the only thing prose asserts about a world outside itself.
