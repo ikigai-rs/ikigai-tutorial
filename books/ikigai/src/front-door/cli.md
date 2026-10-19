@@ -19,6 +19,12 @@ ikigai --version
 > builds the dependency versions the release was tested with rather than whatever the
 > registry resolves today.
 
+That build is everything this book's commands need. To reach a kernel on another machine
+(`--connect quic://…`, or a `--mount` onto a `quic://` peer, as gonk's chapters do), build
+with `--features quic` instead, adding `web` for the HTTPS doors. The default build's
+`--help` lists those options either way, so their absence does not announce itself until a
+connect fails.
+
 Every command below is one-shot: `-c` runs a line and exits, `--plain` drops the
 decoration. Run `ikigai` with no arguments for the REPL, which is the same grammar with
 a memory — and [5. A cache hit](#5-a-cache-hit) needs that memory, so it says so.

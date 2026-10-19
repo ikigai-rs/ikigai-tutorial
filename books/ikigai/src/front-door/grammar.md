@@ -142,6 +142,11 @@ thread, and every cached read of that name: since core 0.1.73 every cacheable re
 the thread named after its own target, declared or not, as the [previous
 chapter](cli.md#6-cut-a-thread) showed on a pure function.
 
+The `urn:iki:tutorial:*` names in the cell below are this book's own, bound by the page's
+kernel and by the tutorial's host; a stock `ikigai` CLI does not bind them, and answers
+`error: no endpoint resolved for urn:iki:tutorial:title`. Run the cell here, or in a host of
+your own from [Binding](../getting-started/binding.md).
+
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:title a title from the grammar chapter
 source urn:iki:tutorial:camel-title'>
 <pre class="ikigai-run-expected">ok
@@ -242,8 +247,9 @@ list
 ```
 
 Every name bound in the current space — pattern, endpoint id, and where it is served from
-when a mount is involved. The kernel's own `urn:kernel:*` resources are intercepted rather
-than bound, so they do not appear here; `source` reaches them.
+when a mount is involved. The kernel's own `urn:kernel:*` resources are intercepted ahead
+of the bindings rather than bound; current hosts list them first all the same, and `source`
+reaches them.
 
 <div class="ikigai-run" data-cmd='list'>
 <pre class="ikigai-run-expected">urn:iki:fn:toUpper            → toUpper
@@ -259,9 +265,12 @@ urn:iki:tutorial:title        → title
 urn:iki:tutorial:camel-title  → camel-title</pre>
 </div>
 
-Eleven names in this page, in the order they were bound — `ikigai-fn`'s eight, then
+Those are Part I's eleven names, in the order they were bound — `ikigai-fn`'s eight, then
 this book's three chained on top, exactly as [Binding](../getting-started/binding.md)
-wrote them. A full CLI lists a few hundred, many served over a socket from another
+wrote them. The kernel in this page now binds more than Part I (the Applied parts'
+tic-tac-toe, time and spreadsheet names, after the kernel's own `urn:kernel:*` rows), so
+the list Run prints is longer than the expected output above, which is Part I's share of
+it. A full CLI lists a few hundred, many served over a socket from another
 process — which is [Part III](../beyond/socket.md).
 
 ## And one more: `(`

@@ -17,8 +17,8 @@
 
 [[change]]
 date = "2026-10-18"
-summary = "A move the rules refuse because of the game's state (a taken square, a finished game, the wrong mark) is now a Conflict rather than an invalid argument, and a square off the board names the coordinate that is off it. The board shows the refusal in its status region as text and leaves the board as it was; Tic-tac-toe, III to VII show the new refusals."
-pages = ["applied/tic-tac-toe-3.md", "applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md", "applied/tic-tac-toe-6.md", "applied/tic-tac-toe-7.md"]
+summary = "Notes from a first run on WSL2: Twenty minutes, nothing compiled says the default CLI build has no QUIC and when to add --features quic, the REPL grammar says which cells only this page's kernel can run and why its list prints more than the expected eleven names, the introduction links the front door, and the getting-started exercises name three things their hints left out (ArgSpec's .default field, ArgRef::Content behind the catch-all arm, and the clock your-endpoints' kernel does not have)."
+pages = ["front-door/cli.md", "front-door/grammar.md", "introduction.md", "getting-started/running-it.md", "getting-started/exercises.md"]
 
 [[change]]
 date = "2026-10-17"

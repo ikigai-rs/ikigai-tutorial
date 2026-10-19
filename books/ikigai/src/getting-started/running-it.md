@@ -60,6 +60,9 @@ cargo install ikigai-cli --locked
 > with something that is not this. `--locked` builds against the dependency versions the
 > release was tested with rather than whatever the registry resolves today.
 
+To reach a kernel on another machine over QUIC, add `--features quic`;
+[Install](../front-door/cli.md#0-install) says why.
+
 One-shot resolutions take `-c`, and `--plain` drops the decoration so output is pipeable:
 
 ```bash

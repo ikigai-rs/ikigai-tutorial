@@ -31,7 +31,7 @@ boundary on what may be done, and provenance for what was done.
 
 ## What is in here
 
-**The front door** needs no Rust: twenty minutes with the `ikigai` CLI that show the
+**[The front door](front-door/cli.md)** needs no Rust: twenty minutes with the `ikigai` CLI that show the
 whole model — a catalog, a manifold, a pipe, a format change, a cache hit, a cut thread,
 a trace — and then the REPL grammar those commands are written in, with a Run button
 wherever this page's own kernel can answer.
@@ -73,7 +73,7 @@ binding, the kernel's cache and trace seen from outside, a scoped connect refuse
 close with a notebook that queries the catalog as a graph. They say plainly what an L0
 peer cannot do: compose.
 
-Read the front door if you have not run ikigai before, then Part I — or at least
+Read [the front door](front-door/cli.md) if you have not run ikigai before, then Part I — or at least
 [Resolution](getting-started/resolution.md) and [Binding](getting-started/binding.md).
 Building endpoints assumes Part I and nothing else;
 Part II assumes you know what a `space()` is and why binding is separate from defining;
