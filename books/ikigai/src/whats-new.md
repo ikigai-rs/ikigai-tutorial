@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-19**: The book now builds against ikigai-core 0.1.108, which a newer ikigai-browse requires; Where this actually stands says so, and that every listing and cell runs unchanged on the five kernel releases since 0.1.103.
+
+  Pages: [Where this actually stands](modules/status.md)
+
 - **2026-10-18**: Notes from a first run on WSL2: Twenty minutes, nothing compiled says the default CLI build has no QUIC and when to add --features quic, the REPL grammar says which cells only this page's kernel can run and why its list prints more than the expected eleven names, the introduction links the front door, and the getting-started exercises name three things their hints left out (ArgSpec's .default field, ArgRef::Content behind the catch-all arm, and the clock your-endpoints' kernel does not have).
 
   Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md), [Introduction](introduction.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)

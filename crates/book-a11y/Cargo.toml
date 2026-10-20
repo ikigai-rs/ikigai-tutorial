@@ -23,5 +23,6 @@ path = "src/main.rs"
 # published head: it renamed the endpoint ids (`a11yConfig` became `a11y-config`, and likewise
 # `a11y-contrast` and `a11y-presentation`; ledger #11), which this crate never mounts. The `color`
 # module it uses is unchanged, so the contrast it measures is the same arithmetic. A 0.x caret:
-# also a ceiling (<0.4.0). `ikigai-browse` still takes 0.2, so the lock holds both lines.
+# also a ceiling (<0.4.0). `ikigai-browse` takes 0.3 too since its 0.19.0 (with the `themes`
+# feature, which a workspace build unifies into this binary), so the lock holds one line.
 ikigai-a11y = "0.3.0"
