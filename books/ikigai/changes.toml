@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-19"
+summary = "The book now builds against ikigai-core 0.1.108, which a newer ikigai-browse requires; Where this actually stands says so, and that every listing and cell runs unchanged on the five kernel releases since 0.1.103."
+pages = ["modules/status.md"]
+
+[[change]]
 date = "2026-10-18"
 summary = "Notes from a first run on WSL2: Twenty minutes, nothing compiled says the default CLI build has no QUIC and when to add --features quic, the REPL grammar says which cells only this page's kernel can run and why its list prints more than the expected eleven names, the introduction links the front door, and the getting-started exercises name three things their hints left out (ArgSpec's .default field, ArgRef::Content behind the catch-all arm, and the clock your-endpoints' kernel does not have)."
 pages = ["front-door/cli.md", "front-door/grammar.md", "introduction.md", "getting-started/running-it.md", "getting-started/exercises.md"]

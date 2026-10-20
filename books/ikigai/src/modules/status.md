@@ -5,10 +5,11 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.103** and
-`ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest release on
-crates.io that evening), and its shell examples are replayed against `ikigai-cli` **0.1.64**,
-the one release pinned in `books/ikigai/ikigai-cli.version` (the newest that evening). A
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.108**, stamped on
+2026-10-19, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
+release on crates.io at its stamp), and its shell examples are replayed against
+`ikigai-cli` **0.1.64**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
+newest on 2026-10-14). A
 test (`crates/book-urns/tests/book_claims.rs`)
 holds those three numbers to the workspace's lock and that pin, and re-checks each stamped
 claim below against the published crate it names, so that when one of them stops being
@@ -119,10 +120,12 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.103. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.1.108. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
-The list below stops at 0.1.95; the eight releases since (0.1.96 to 0.1.103) are taught in the
-chapters they touch, not listed here. Each is one
+The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
+chapters they touch, and the five since (0.1.104 to 0.1.108) came in as the floor of a newer
+`ikigai-browse`, with every listing and cell in the book running unchanged on them; none of
+those thirteen is listed here. Each of the seventeen is one
 line here, and taught where a chapter teaches it:
 
 - **0.1.79 — documents and tests only.** The check of what a wall keeps out answers only for

@@ -283,10 +283,20 @@ ikigai-ledger = "0.12.0"
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
 ikigai-store = { version = "0.2.23", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.18.9 is the pin because it is the
-# published head: one writer per store handle, narrowed to the mount graph (ledger #1324), and a PR
-# explanation cut at the output budget is refused rather than archived (ledger #1055); no Rust API,
-# resource name or stored term moves. The pinned gonk (3edf830) links 0.18.8. Before that the pin was
+# Book's "Explain, with a mounted model" and "One-off review". 0.19.0 is the pin because it is the
+# published head: the review pass and the judge loop stop at the first `Refused` or `RetryAfter`
+# from the mounted model, as they already stopped at a `Denied`, and return that error with its
+# type kept, so an edge can answer 429 with `Retry-After` instead of spending the remaining regions
+# (ledger #1932). An `Endpoint` failure stays the region's own. It is what gonk's review door
+# adopts in the same wave, so the book tracks it; the book's stub model never refuses or
+# rate-limits, so no page's output moves. It also carries the never-published 0.18.11 (a
+# dev-dependency bump). Its floors lift the lock's ikigai-core to 0.1.108, and it takes ikigai-a11y
+# 0.3 (with `themes`), so the lock no longer holds a11y 0.2. A 0.x caret: also a ceiling (<0.20.0);
+# read it as a RANGE.
+# Before that the pin was 0.18.9, the published head: one writer per store handle, narrowed to the
+# mount graph (ledger #1324), and a PR explanation cut at the output budget is refused rather than
+# archived (ledger #1055); no Rust API, resource name or stored term moved. The pinned gonk
+# (3edf830) links 0.18.8. Before that the pin was
 # 0.18.8, the published head and what the pinned gonk (71ca542) linked: 0.18.7 archives a review
 # pass that
 # carries findings when every fresh quote misquotes (ledger #1303), and 0.18.8 keeps an erroring
@@ -301,11 +311,10 @@ ikigai-store = { version = "0.2.23", default-features = false }
 # model's explanations and findings printed the same at it. 0.18.2 is a SECURITY floor: it never
 # serves a repository's `.git` (refused at the jail, hidden from the listing; ledger #1126). No chapter lists or reads
 # `.git`, so nothing a page prints moved. Before that the pin was 0.18.1: a review answer's last finding is kept when it cannot have been cut (ledger
-# #818), and the chapter's stub answer printed the same findings at it. The floor is 0.18.0, the
+# #818), and the chapter's stub answer printed the same findings at it. The 0.18 floor was 0.18.0, the
 # release that added the explain-status cost line the chapter shows ("opens instantly from the
-# archive"), and what gonk edb9a3d links. A 0.x caret: also a ceiling (<0.19.0); read it as a
-# RANGE.
-ikigai-browse = "0.18.9"
+# archive"), and what gonk edb9a3d linked.
+ikigai-browse = "0.19.0"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.

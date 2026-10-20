@@ -158,7 +158,7 @@ dependencies = [
 name = "book-a11y"
 version = "0.1.0"
 dependencies = [
- "ikigai-a11y 0.3.0",
+ "ikigai-a11y",
 ]
 
 [[package]]
@@ -963,9 +963,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-a11y"
-version = "0.2.2"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bc29fdfea2612cf6b6316e3d5e410c6f4f12f520619e64942a3c3f90251d265"
+checksum = "4af2688248dd5969ff8b94aaf4989f2631800e767b89fc6d8c2d6da96f5d9b44"
 dependencies = [
  "ikigai-core",
  "serde",
@@ -976,25 +976,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "ikigai-a11y"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4af2688248dd5969ff8b94aaf4989f2631800e767b89fc6d8c2d6da96f5d9b44"
-dependencies = [
- "ikigai-core",
- "serde",
- "serde_json",
- "toml",
-]
-
-[[package]]
 name = "ikigai-browse"
-version = "0.18.9"
+version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f42d9c19dd658828c25ac8ff8a1296d2c8e5aed472e0bc7c536500237106975"
+checksum = "260c77847e9bac1b477cc66cf4e492520e7c635ec0f21a480f648d727d27c816"
 dependencies = [
  "async-trait",
- "ikigai-a11y 0.2.2",
+ "ikigai-a11y",
  "ikigai-core",
  "ikigai-store",
  "notify",
@@ -1008,9 +996,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-core"
-version = "0.1.103"
+version = "0.1.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4add07745392b2994ec9438f28d6f751b470443960a8bbc99b32d7052ac829e"
+checksum = "feb9dfe90bbfdb92756418daa0db3b930dc39bd59095c9f6580d38c3d62596b5"
 dependencies = [
  "async-trait",
  "blake3",

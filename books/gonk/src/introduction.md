@@ -82,8 +82,8 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 The modules it links are published crates: `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.1,
 `ikigai-store` 0.2.21, `ikigai-browse` 0.18.8, `ikigai-script` 0.3.3 and `ikigai-nl` 0.4.0. The
 book's own crates (the ones its Rust listings and in-page cells run) take the newest releases, one
-step ahead of that: `ikigai-core` 0.1.103, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
-`ikigai-browse` 0.18.9 and `ikigai-script` 0.3.6. So a `console` block is answered by gonk's
+step ahead of that: `ikigai-core` 0.1.108, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
+`ikigai-browse` 0.19.0 and `ikigai-script` 0.3.6. So a `console` block is answered by gonk's
 releases and a listing or a cell by the newer ones. Only one page prints differently because of it: [Two teams, one gonk](teams/two-teams.md#the-managers-join)
 sends gonk a query whose `GRAPH` names a graph outside its set, which the newer store refuses and
 gonk's store, one release short, answers with an empty result, and the page says so. The other
