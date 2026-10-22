@@ -14,13 +14,16 @@
     color: var(--fg);
 }
 
-/* The command: a labeled, editable textarea, one row per line, and the buttons. */
+/* The command: the label on its own row, then the editable textarea at full width with the
+ * buttons beside it, and the help under the textarea. A label beside the textarea left a long
+ * command a narrow column to read in. */
 .ikigai-run-head {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr auto;
     grid-template-areas:
-        "label cmd buttons"
-        ".     help buttons";
+        "label label"
+        "cmd   buttons"
+        "help  buttons";
     align-items: start;
     gap: 0.3rem 0.6rem;
     padding: 0.6rem 0.8rem 0.4rem;
@@ -30,7 +33,6 @@
     grid-area: label;
     font-size: 0.8em;
     font-weight: 600;
-    padding-top: 0.45rem;
     color: var(--inline-code-color);
 }
 
@@ -48,8 +50,10 @@
     font-size: 0.9em;
     line-height: 1.5;
     resize: vertical;
-    white-space: pre;
-    overflow-x: auto;
+    /* Wrap a long line rather than scroll it sideways: each command line stays one line of
+     * input (Enter still runs, Shift+Enter still adds a line); only its display wraps. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .ikigai-run-cmd:focus-visible {
@@ -115,10 +119,14 @@
     font-weight: 600;
 }
 
+/* The commands of a run, one per line as typed, on their own line under "run N". */
 .ikigai-run-entry-cmd {
+    display: block;
+    flex-basis: 100%;
     background: transparent;
     padding: 0;
     color: var(--fg);
+    white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
