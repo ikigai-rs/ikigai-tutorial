@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-21**: Contribute a module now explains declared failure classes, the RECOMPUTE check added in conformance 0.9 and the opt-in FAILURES check in 0.10. The your-endpoints crate runs the suite for word-count, and the page explains why a 0.10.0 pin does not receive 0.11's new default.
+
+  Pages: [Contribute a module](contribute.md)
+
 - **2026-10-21**: The install notes now name ikigai-cli 0.1.68 as the first release fixing the TLS advisory. The second getting-started exercise also checks that an explicitly empty argument overrides its declared default.
 
   Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)

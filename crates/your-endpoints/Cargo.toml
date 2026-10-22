@@ -26,6 +26,8 @@ futures.workspace = true
 hello-camel = { path = "../hello-camel" }
 
 [dev-dependencies]
+# 0.9 adds RECOMPUTE; 0.10 adds opt-in FAILURES. This caret stays below 0.11.
+ikigai-conformance = "0.10.0"
 # Part III's code, for the exercises in `tests/beyond.rs`: a kernel behind a socket, and
 # the three kinds of mount. Read-only from here — the book includes its listings from
 # `crates/two-hosts`, and that is the file you do NOT edit.
