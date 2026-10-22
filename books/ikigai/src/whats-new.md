@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: In A space that changes while it runs, the view is now written as an s-expression, (exact "urn:iki:tutorial:live:picture" "urn:diagram:kernel" :resolve-at root), shown beside the Turtle it reads as, and the page's Run cell writes it that way. ikigai-sexpr 0.2.4 keeps a view's resolve-at-root through the round trip, so Views are Turtle only is gone from the chapter's known limits.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-22**: Checking a resource now runs in the page. Three Run cells read a player's Turtle face with and without the scope, check both players against the closed shapes, and show a narrowed caller refused before any shapes are read. Two buttons open the RDF Toolbox itself in place, composed by the page's own kernel from a toolbox build published with the book; its 8.3 MB engine loads only when you press one. Without the kernel, each is a link that opens the toolbox in a new tab on published copies of the Turtle faces.
 
   Pages: [Checking a resource](building/checking.md)
