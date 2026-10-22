@@ -227,7 +227,7 @@ own** in an empty directory, with its two homes inside that directory:
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   socket  …/.ikigai/gonk.sock — owner only
   quic    off (--no-quic)
@@ -252,46 +252,69 @@ network door or writing archives this chapter does not need.
 The banner is the server describing itself, a line per door and per family it did or did not
 compose. Leave it running and use another terminal. Every ledger resource is reachable over
 HTTP by a mechanical mapping: the path's segments become the name, the method the verb, query
-parameters the arguments, and the body the content.
+parameters the arguments, and the body the content. Read the ledger that way, and try to file
+into it:
 
 <!-- transcript: run -->
 ```console
+$ curl -s http://127.0.0.1:1070/iki/ledger/items
+no items match
 $ curl -s -X POST --data-binary 'Write the gonk book' http://127.0.0.1:1070/iki/ledger/append
+denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:append`; any grant under `urn:cap:ledger:write:` satisfies it)
+```
+
+The read is answered and the write is refused, which is what the banner's `anonymous read:
+default` said. An anonymous caller on loopback may read the ledgers gonk is configured to serve
+that way and write nothing: any process on this machine can reach that door, and an item filed by
+any of them could become instructions for an unattended worker that reads the ledger (gonk PR 186,
+ledger #1687; before it the same `curl` filed the item). Filing takes an identity, and the
+simplest one is yours: the **socket** in the banner's `socket` line, which only the user who
+started gonk can open. `ikigai`, the command-line host, reaches it; install it beside gonk at the
+version this book pins ([Which gonk](../introduction.md#which-gonk)). `--mount` grafts gonk's
+socket into its namespace under a prefix, so `urn:gk:iki:ledger:append` here is gonk's
+`urn:iki:ledger:append` ([Over the socket](../agent/socket.md) is the chapter on it):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append Write the gonk book' -c 'sink urn:gk:iki:ledger:append priority=0 labels=book Pin gonk to a git rev' -c 'sink urn:gk:iki:ledger:append priority=1 Check every transcript'
 #1 urn:iki:ledger:default:item:…
-$ curl -s -X POST --data-binary 'Pin gonk to a git rev' 'http://127.0.0.1:1070/iki/ledger/append?priority=0&labels=book'
+[uncacheable]
 #2 urn:iki:ledger:default:item:…
-$ curl -s -X POST --data-binary 'Check every transcript' 'http://127.0.0.1:1070/iki/ledger/append?priority=1'
+[uncacheable]
 #3 urn:iki:ledger:default:item:…
+[uncacheable]
+— batch: 3 commands · 3 uncacheable
 $ curl -s http://127.0.0.1:1070/iki/ledger/items
    #3  open    p1  Check every transcript
    #2  open    p0  Pin gonk to a git rev  [book]
    #1  open    p-  Write the gonk book
-
 3 item(s)
 ```
 
-The same answers as the page's, from a different host. Link, claim, close, and ask:
+The same answers as the page's, from a different host: filed over the socket, read back over
+HTTP. Link, claim and close the same way, and ask:
 
 <!-- transcript: run -->
 ```console
-$ curl -s -X POST --data-binary '1' 'http://127.0.0.1:1070/iki/ledger/link?item=2&type=blocks'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:link item=2 type=blocks 1' -c 'sink urn:gk:iki:ledger:claim item=3 you' -c 'sink urn:gk:iki:ledger:close item=2 Pinned.'
 linked #2 blocks #1
-$ curl -s -X POST --data-binary 'you' 'http://127.0.0.1:1070/iki/ledger/claim?item=3'
+[uncacheable]
 #3 claimed by you
-$ curl -s -X POST --data-binary 'Pinned.' 'http://127.0.0.1:1070/iki/ledger/close?item=2'
+[uncacheable]
 closed #2 (done)
+[uncacheable]
+— batch: 3 commands · 3 uncacheable
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
  1.    #1  open    p-  Write the gonk book
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
-
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
   not #3: claimed by you
 ```
 
 What the HTTP door will **not** do is part of the lesson. An anonymous caller on loopback holds
-the read and write grants of the ledgers gonk is configured to serve that way — `default`,
-unless told otherwise — and nothing else. Deleting is a separate grant:
+the read grants of the ledgers gonk is configured to serve that way — `default`, unless told
+otherwise — and nothing else. Deleting is a separate grant, beyond even a writer's:
 
 <!-- transcript: run -->
 ```console
@@ -323,8 +346,8 @@ round. It is gonk's refusal, from the `ikigai-core` the pinned revision links, a
 $ open http://localhost:1070/
 ```
 
-opens the same ledger as a page: the three items, `next`, a form to file another. That page is
-the next chapter.
+opens the same ledger as a page: the three items and `next`, and, once you sign in under a grant
+that writes it, a form to file another. That page, and signing in, is the next chapter.
 
 ## What you built
 
@@ -332,8 +355,8 @@ the next chapter.
 | --- | --- | --- | --- |
 | store | in memory, per page load | in memory, per process | RocksDB, in the data home (`~/.ikigai/store` by default) |
 | clock | the story clock | the story clock, or yours | the system's |
-| caller | root | root, or a grant | per door: loopback HTTP holds `default`'s read and write |
-| reached by | Run | `ask` | HTTP, the socket, QUIC |
+| caller | root | root, or a grant | per door: loopback HTTP holds `default`'s read; the socket is the owner's |
+| reached by | Run | `ask` | HTTP (reads, anonymously), the socket, QUIC |
 
 In resource terms: the **sets** are the ledgers and each one's items; the only **atoms** that
 hold state are one named graph per ledger, which the store holds; every action is a

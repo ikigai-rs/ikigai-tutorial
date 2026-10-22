@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.61
+ikigai 0.1.67
 ```
 
 ## Start a gonk, and find its socket
@@ -319,8 +319,8 @@ QUIC door instead, so the author rule runs and the log names the agent.
 
 | caller | how it reaches gonk | under what authority | who the log says |
 | --- | --- | --- | --- |
-| a browser | HTTP, loopback | anonymous, or a passkey's grant | `anon`, or the passkey |
-| `curl`, a hook | HTTP, loopback | anonymous | `anon` |
+| a browser | HTTP, loopback | anonymous (read only), or a passkey's grant | `-` reading anonymously, or the passkey |
+| `curl`, a hook | HTTP, loopback | anonymous: it reads, and a write is refused | `-` |
 | `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `owner` |
 
 The agent's tool calls were the ledger's resources by their own names: the same `append`,

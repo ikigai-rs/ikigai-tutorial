@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-21"
+summary = "A new chapter, Routing work to agents, runs the gonk starter's unattended worker loop: a router dispatches an item with `gonk.py dispatch` (with `--as` over the socket), a worker takes only what a router in its required `routers` list dispatched, the item's comments reach the agent as quoted data under their authors, and one worker machine runs one loop per agent (`worker.py init-agents`, the `gonk-worker@<agent>` units, `worker_repos.py`). Remote workers now says a label routes nothing by itself. Every page was replayed against gonk ca0810b, ikigai-cli 0.1.67 and the starter's main: the HTTP door no longer lets an anonymous caller write, so the ledger pages file over the socket and the kata and roborev bridges show gonk refusing them; a spent anonymous budget answers 429 with Retry-After; access-log lines carry the defaults core fills in and the new outcome kinds; MCP error results add a `kind: …; class: …` line and `ikigai mcp` answers calls concurrently; a query naming a graph outside its dataset is refused by name; and each With the starter section shows the starter's new files, AGENTS.md section and init rows."
+pages = ["ways/routing.md", "ways/workers.md", "introduction.md", "ledger/your-own.md", "ledger/browser.md", "agent/socket.md", "agent/mcp.md", "browse/roots.md", "browse/explain.md", "bridges/roborev.md", "bridges/kata.md", "bridges/fresh-machine.md", "machines/doors.md", "machines/quic-client.md", "scripts/first.md", "scripts/in-gonk.md", "teams/two-teams.md", "ways/solo.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md", "ways/spec-first.md", "ways/audits.md", "ways/harness.md"]
+
+[[change]]
+date = "2026-10-21"
 summary = "The introduction names ikigai-core 0.1.109 as the book's own crates' kernel, and says what changed in the wire since the pinned ikigai: wire v9 arrived in ikigai-cli 0.1.66, and it still offers v8, so a newer ikigai and the pinned gonk talk as before."
 pages = ["introduction.md"]
 maintenance = true

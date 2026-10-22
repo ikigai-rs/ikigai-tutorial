@@ -1,6 +1,7 @@
 # Harness engineering
 
-The six chapters before this one are processes, and each ended with a section called "What holds
+Six of the chapters before this one are processes (the seventh, [Routing work to
+agents](routing.md), runs one of them unattended), and each ended with a section called "What holds
 it": the rules the work follows and the checks that catch it when it does not. This chapter is
 about those rules and checks themselves, around any of the six: what they are, where each one
 acts, which of them ever does anything, and how they get better.
@@ -37,7 +38,7 @@ fires, is that a sign the work is good, or that the sensor cannot see?
 The worked example is the [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter), which
 is a harness template: every repository it generates carries its harness **as a graph**, logs
 every time a sensor fires, and asks gonk four coverage questions of both. Its loop is this
-chapter's loop, so where the six chapters before it end with "With the starter", this one is the
+chapter's loop, so where the six process chapters before it end with "With the starter", this one is the
 starter from the beginning.
 
 ## Who
@@ -95,9 +96,9 @@ carries the harness and the vocabulary's complete definition:
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 59 files
+generated the library-lending sample (python, process solo) in …/library: 60 files
 next, in that directory:
-  git init, then commit everything it wrote (the one commit where every file is yours)
+  git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
@@ -173,7 +174,7 @@ the graph to its vocabulary, and each guide's section to a heading of `AGENTS.md
 <!-- transcript: run -->
 ```console
 $ cd library && python3 tools/harness.py check
-harness check: 17 guide(s) and 14 other control(s) agree with the code
+harness check: 18 guide(s) and 14 other control(s) agree with the code
 ```
 
 ### 3. A rule fires
@@ -194,7 +195,7 @@ gonk init: …/library
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.61 at …/ikigai
+  ok       ikigai    ikigai 0.1.67 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `ada` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
@@ -202,7 +203,7 @@ gonk init: …/library
   note     items     `default` holds nothing yet, or this identity may not read it. A ledger has no create: it exists once something is filed in it (`python3 tools/gonk.py file "<title>"`)
   ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
   ok       scripts   published 4: urn:script:default-open-items-for-artifact, urn:script:default-open-work-by-change, urn:script:default-requirements-with-open-work, urn:script:default-next-for-artifact
-  unknown  nl        could not ask gonk about `urn:nl:sparql`
+  absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
 agents over MCP (configure the agent with this command):
   ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
@@ -210,7 +211,7 @@ agents over MCP (configure the agent with this command):
 ready.
 ```
 
-(The `unknown` row is this page's gonk mounting no model, as in [Periodic unled
+(The `absent` row is this page's gonk mounting no model, as in [Periodic unled
 audits](audits.md#with-the-starter).) Now an item, a claim, and a hand-back that forgets its
 evidence:
 
@@ -265,57 +266,67 @@ $ cd library && python3 tools/harness.py firings
 `urn:iki:harness:graph:default` with one SPARQL update, then asks the four questions in
 `.gonk/queries/harness-*.rq` and prints the answers. Writing that graph needs a store grant no
 ledger grant includes, and gonk's owner-only socket holds it, so it is the dispatcher's command,
-from gonk's machine; here this page's gonk is the owner's:
+from gonk's machine; here this page's gonk is the owner's. Before it loads, it decides from this
+working tree's own files which sensors are turned on (the same checks `init` reports), names each
+one that is not, and loads that beside the graph:
 
 <!-- transcript: run -->
 ```console
 $ cd library && python3 tools/gonk.py harness
-harness: 17 rule(s), 14 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
-loaded:  updated <urn:iki:harness:graph:default>: +324 -0 quads
+harness: 18 rule(s), 14 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
+  not wired: ctl:edit-hook-not-wired
+  not wired: ctl:edit-hook-unreadable-input
+  not wired: ctl:edit-without-live-claim
+loaded:  updated <urn:iki:harness:graph:default>: +341 -0 quads
 
 harness-firings-by-control: How often has each control fired, refusing or warning, and when first and last?
-  control                label                           outcome  firings  first…last
-  ctl:evidence-required  report and close need evidence  Refusal  1        …
+  control                label                           outcome  firings  first                     last
+  ctl:evidence-required  report and close need evidence  Refusal  1        …  …
 
 harness-guides-without-sensor: Which rules does no computational control check?
-  guide                                label                                               section
-  guide:a-claim-is-a-lease             a claim is a lease                                  1. Claim the item before you write
-  guide:hand-back-when-you-stop        hand it back when you stop                          1. Claim the item before you write
-  guide:reproduce-before-fix           reproduce before you fix                            3. Reproduce before you fix
-  guide:last-command-exit-status       a pipeline's status is its last command's           4. Every change through a pull request with green CI
-  guide:stage-files-by-name            stage files by name                                 4. Every change through a pull request with green CI
-  guide:dispatcher-closes-on-evidence  the dispatcher closes, after checking the evidence  5. Report with evidence; the dispatcher closes
-  guide:no-bare-numbers                never a bare #N                                     6. Never a bare `#N`
+  guide                           label                                                  section
+  guide:hand-back-when-you-stop   hand it back when you stop                             1. Claim the item before you write
+  guide:reproduce-before-fix      reproduce before you fix                               3. Reproduce before you fix
+  guide:last-command-exit-status  a pipeline's status is its last command's              4. Every change through a pull request with green CI
+  guide:stage-files-by-name       stage files by name                                    4. Every change through a pull request with green CI
+  guide:no-bare-numbers           never a bare #N                                        6. Never a bare `#N`
+  guide:read-accessibility-first  read ACCESSIBILITY.md before changing what people see  7. Read ACCESSIBILITY.md before changing what people see
 
 harness-sensors-never-fired: Which sensors of this repository's tools have never fired, and has a test shown each one can?
-  control                         label                                             proof
-  ctl:claim-held-by-another       claim: held by another holder                     fired by a test
-  ctl:claim-lease-expired         claim: an expired lease is not free               fired by a test
-  ctl:edit-hook-not-wired         claim hook: no claim can be checked               fired by a test
-  ctl:edit-hook-unreadable-input  claim hook: input it cannot read                  fired by a test
-  ctl:edit-without-live-claim     claim hook: an edit needs a live claim            fired by a test
-  ctl:one-claim-per-tree          a working tree holds one claim                    fired by a test
-  ctl:reject-needs-reason         a rejection says why                              fired by a test
-  ctl:takeover-refused            takeover: only an expired lease, from its holder  fired by a test
+  control                         label                                             wired  proof
+  ctl:claim-held-by-another       claim: held by another holder                     -      fired by a test
+  ctl:claim-lease-expired         claim: an expired lease is not free               -      fired by a test
+  ctl:one-claim-per-tree          a working tree holds one claim                    -      fired by a test
+  ctl:reject-needs-reason         a rejection says why                              -      fired by a test
+  ctl:takeover-refused            takeover: only an expired lease, from its holder  -      fired by a test
+  ctl:edit-hook-not-wired         claim hook: no claim can be checked               no     not wired
+  ctl:edit-hook-unreadable-input  claim hook: input it cannot read                  no     not wired
+  ctl:edit-without-live-claim     claim hook: an edit needs a live claim            no     not wired
 
 harness-sensors-without-guide: Which sensors state no rule, so an agent meets them only by tripping them?
-  sensor                   label                 execution      stages
-  ctl:reject-needs-reason  a rejection says why  computational  merge
+  none. Every sensor cites the rule of AGENTS.md it mechanizes.
 ```
 
 Four answers:
 
-- **Firings by control.** What has fired, how often, first and last. Over a real month this is the
+- **Firings by control.** What has fired, how often, first and last (times at a fixed width, to
+  the millisecond, in UTC). Over a real month this is the
   list of rules that are not landing: a sensor that fires often is doing its job, and saying that
   agents keep making the move its rule warns against.
-- **Rules with no sensor.** Seven of the seventeen rules are text an agent has to apply, with
-  nothing that notices when it does not. Some can only ever be applied by a reader; each row is a
-  candidate for a sensor, not a defect.
-- **Sensors never fired.** Eight of the fourteen, every one with a test that shows it can.
-  `evidence-required` is not on the list, because step 3 fired it.
-- **Sensors with no rule.** `reject-needs-reason` refuses a rejection without a reason, and no
-  section of `AGENTS.md` says that a rejection needs one, so an agent first hears of it from the
-  refusal. The fix is a sentence in the rules, not another sensor.
+- **Rules with no sensor.** Six of the eighteen rules are text an agent has to apply, with
+  nothing that notices when it does not. Each row is a candidate for a sensor, not a defect, and
+  some can only ever be applied by a reader: the starter's `profiles/README.md` records why several
+  stay prose on purpose (`reproduce-before-fix`, for one, is a judgment about how an agent worked,
+  with nothing in a tool call to observe).
+- **Sensors never fired.** Eight of the fourteen. Five are on wherever their code is (`-` under
+  `wired`), each with a test that shows it can fire. The other three are the Claude Code claim
+  hook's, and they read `no` and `not wired`: the hook is off in this tree, so their silence says
+  nothing about the rule. `evidence-required` is not on the list, because step 3 fired it.
+- **Sensors with no rule.** None: every sensor cites the rule it mechanizes. That is the answer
+  this question exists to reach. `reject-needs-reason`, which refuses a rejection without a
+  reason, used to be its one row, because no section of `AGENTS.md` said that a rejection needs
+  one, so an agent first heard of it from the refusal. The fix was a sentence in the rules, not
+  another sensor: section 5 now says it, and the sensor cites that rule.
 
 The load is idempotent: a firing's IRI is its log and its sequence number, so loading again adds
 nothing, and every working tree's firings land in the same graph beside each other's:
@@ -350,14 +361,16 @@ id; that control in the graph, with `statedBy guide:stage-files-by-name`; and a 
 named in `firedBy`. `harness.py check` fails if the code names an id the graph does not describe,
 or the graph describes a sensor nothing shows can fire, so a part left out is caught, and the next
 coverage answer has one row fewer. Whether the sensor is worth its friction is the steering
-question. Before it exists the evidence comes from outside the graph (how often review or the
+question, and the starter has answered it for now: not yet, because it would need a hook on every
+`git add`, and the repository's hooks are optional (its `profiles/README.md` says so, and to revisit
+the rule when a cheap, exact signal for it appears). Before it exists the evidence comes from outside the graph (how often review or the
 dispatcher catches a stray file in a commit); once it exists, the first answer counts it.
 
 Now take one sensor from the third answer, `edit-without-live-claim`: the claim hook refusing an
 edit while the working tree holds no live claim. It has never fired. Is that because nobody edits
-without a claim? Not here: `init` said the hook is **off**, because it is optional and nothing
-merged its settings. A sensor that is not installed never fires, and its silence looks exactly
-like health. The hook is a program that reads a Claude Code tool call as JSON, so it can be run
+without a claim? The answer says not: it is **not wired**, as `init` said the hook is **off**,
+because it is optional and nothing merged its settings. A sensor that is not installed never
+fires, and without that column its silence would look exactly like health. The hook is a program that reads a Claude Code tool call as JSON, so it can be run
 by hand the way Claude Code would run it, after the claim is released:
 
 <!-- transcript: run -->
@@ -372,7 +385,7 @@ $ cd library && python3 tools/harness.py firings
 2 firing(s) in urn:log:harness:tree-…
 ```
 
-So the sensor works, and was silent because nothing ran it. The `firedBy` proof answered a
+So the sensor works, and was silent because nothing ran it. The `firedBy` proof answers a
 narrower question than it seems to: it shows the code *can* fire, not that it is wired into
 anyone's work, nor that its trigger still matches what it watches. The claim refusals in the same
 answer show the third gap: `tools/gonk.py` recognizes the ledger's refusal by its wording, so a
@@ -382,8 +395,13 @@ own comment on `claim-held-by-another` says so, and an integration test holds th
 That is as far as the starter answers the question Böckeler leaves open. "Never fired" splits
 into three: **cannot fire** (no test shows it can; `harness.py check` refuses that state), **is not
 wired** (it can fire, and nothing runs it), and **is quiet** (it runs and nothing trips it). Only
-the last is evidence of good work, and telling it from the second takes knowing what is installed
-where, which no query of the graph can know yet. A real gap, stated rather than solved.
+the last is evidence of good work. The graph now tells the second from the third where it can: a
+profile's fragment says what turns its sensor on (`harness:wiredBy`: the Claude Code hook, the
+review hook, a worker's configuration), and `gonk.py harness` loads `harness:wired` for the working
+tree that ran it. Two gaps remain. Wiring is known for that one tree, not for every tree whose
+firings land in the same graph. And a sensor that is on wherever its code is (`-`) can still be
+silent because its trigger no longer matches what it watches, as the claim refusals' wording
+could; for that only a test against the real thing helps. Real gaps, stated rather than solved.
 
 ## What holds it
 
@@ -391,7 +409,8 @@ The harness has a harness:
 
 - **`tools/harness.py check`**, the guide-and-code agreement. A control the code names and the
   graph does not describe, a control the graph describes and no code names, a term the vocabulary
-  does not define, or a guide whose section is not a heading of `AGENTS.md`, each fails it by name.
+  does not define, a guide whose section is not a heading of `AGENTS.md`, or a `wiredBy` that names
+  no part the process carries, each fails it by name.
 - **One test per sensor**, named in the graph's `firedBy`, that drives the sensor and sees the
   firing recorded; the starter's own tests hold `firedBy` to the tests that exist.
 - **Stable ids.** A control's id never changes, so its firings stay joined to it across renames,

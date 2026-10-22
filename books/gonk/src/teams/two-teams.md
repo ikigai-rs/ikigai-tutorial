@@ -115,7 +115,7 @@ here is a team concept; a team is the set of tokens its ledger's name appears in
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{shop (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
   quic    udp 0.0.0.0:1070 — 3 trusted certificate(s), 3 enrolled
@@ -261,18 +261,20 @@ QUIC door. Now the same agent asks without `graph=`, leaving the dataset to its 
 <!-- transcript: run -->
 ```console
 $ cat overlap.rq | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/alpha-agent -c 'source urn:sparql:select as=text/csv'
-about,alpha,beta
-[uncacheable]
+error: invalid argument `query`: this query names <urn:iki:ledger:graph:beta> in a `GRAPH` block, and it is not in this read's dataset, `graph=urn:iki:ledger:graph:alpha`. `urn:iki:store:graph-select` reads exactly the graphs `graph=` names, so that block would match nothing; the query is refused rather than answered empty, because an empty answer to a mistyped or forgotten graph looks exactly like an empty graph. Nothing was evaluated. Correct the IRI, or add the graph to `graph=` (separated by whitespace) under a grant for it
+       `query`: A SPARQL SELECT query.
 ```
 
-⚠ **An empty answer, not a refusal, at this book's pin.** The dataset is alpha's graph alone,
-the `GRAPH <…beta>` block names a graph outside it, and a constant graph outside the dataset
-matches nothing. Nothing leaked, since beta's graph was never in the dataset; but "no overlap" is
-the answer alpha's agent would act on, and it is a statement about its grant, not about the
-teams. The gonk this book pins links `ikigai-store` 0.2.21. From 0.2.22 the store refuses a query
-that names a graph outside its dataset, by name, as the ikigai Book's [escape
-table](../../beyond/datasets.html#confinement-by-construction) shows; until a pinned gonk links
-it, **name the dataset you mean with `graph=`**, which is refused here as it is there.
+**Refused again, by the graph's name.** The dataset is alpha's graph alone, and the `GRAPH
+<…beta>` block names a graph outside it. Evaluated, that block would match nothing, and "no
+overlap" is the answer alpha's agent would act on: a statement about its grant, not about the
+teams. So the store does not evaluate it. Since `ikigai-store` 0.2.22 (the gonk this book pins
+links 0.2.23) a query that names a graph outside its dataset is refused, naming the graph, as the
+ikigai Book's [escape table](../../beyond/datasets.html#confinement-by-construction) shows; the
+gonk this book pinned before linked 0.2.21, which answered the same query with an empty table.
+The refusal is not the one before it: that one was a grant `graph=` asked for and alpha does not
+hold, this one is a graph the text names and the dataset does not include. Both stop before
+anything is read.
 
 ## Joined with the code review
 
@@ -418,8 +420,7 @@ ledgers in `gonk.http.ledger`, `default` unless configured. Neither team's ledge
 <!-- transcript: run -->
 ```console
 $ curl -s http://localhost:1070/l/alpha
-denied: Sign in to read the ledger "alpha".
-Signed in already? Your passkey's grant doesn't include the ledger "alpha".
+denied: Sign in to read the ledger "alpha". Sign in with passkey is in the header of every gonk page (the front page is /); then come back to this address.
 The grant it needs: urn:cap:ledger:read:alpha (to read the ledger "alpha")
 $ curl -s -G -H 'Accept: text/csv' --data-urlencode 'query=SELECT ?g (COUNT(*) AS ?n) WHERE { GRAPH ?g { ?s ?p ?o } } GROUP BY ?g' http://127.0.0.1:1070/sparql
 g,n
@@ -551,7 +552,7 @@ in its list.
 | --- | --- | --- |
 | what is next for my team? | `urn:iki:ledger:{ledger}:next`, under a grant naming the ledger | each agent's `next`, and the other's refused |
 | what may a query read? | the union of the graphs the caller holds, or the `graph=` it names | one text, four answers |
-| what if one graph is not granted? | refused, naming the grant; at this pin, empty if the graph is only in the text | the manager's join, and alpha's two tries |
+| what if one graph is not granted? | refused, naming the grant, or naming the graph if it is only in the text | the manager's join, and alpha's two tries |
 | can the teams' work be joined with the review? | yes, for a caller holding all three graphs | the review join |
 | who may run a published report? | whoever holds both its run grant and the graphs it reads | `report-alpha-open`, three runners |
 | may a report read more than its publisher? | no, refused at publish | `report-everyone` |

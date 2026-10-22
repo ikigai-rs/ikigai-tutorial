@@ -185,33 +185,70 @@ The agent files a task with its own name for it, `key=agent-task-1`, the way a h
 finding by the finding's id. Then it files the same thing again, as an agent does when it is
 not sure the first call landed. Then it reads the item back by that key, and finally it tries
 three things outside its grant: an `author` naming a person's passkey, the item's delete tool,
-and another ledger:
+and another ledger.
 
-<!-- transcript: file agent/calls.jsonl -->
+An MCP client matches each response to its request by `id`, not by position, and `ikigai mcp`
+relies on that: at the version this book pins, 0.1.67, it runs each `tools/call` on a thread of
+its own and writes its answer when it finishes (ledger #1695; 0.1.61, the book's previous pin,
+answered one call at a time), so the answers to calls sent together come back in the order
+they finished, not the order they were asked. (The handshake, `tools/list` and notifications are
+still answered one at a time, in order, before the next line is read.) That is what an agent
+wants, since a slow call no longer holds up a fast one behind it. It also means that calls sent
+in one batch are not sequenced: a read by key sent with the append it depends on may run first
+and find nothing. An agent that needs one call to land before the next waits for its answer, and
+so does this page, which sends the three steps as three runs of `ikigai mcp`, each with its own
+handshake:
+
+<!-- transcript: file agent/file.jsonl -->
 ```json
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"book","version":"1"}}}
 {"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ledger-append__sink","arguments":{"content":"Read the notes","key":"agent-task-1"}}}
+```
+
+<!-- transcript: file agent/retry.jsonl -->
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"book","version":"1"}}}
+{"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"ledger-append__sink","arguments":{"content":"Read the notes","key":"agent-task-1"}}}
+```
+
+<!-- transcript: file agent/check.jsonl -->
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"book","version":"1"}}}
+{"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"ledger-item__source","arguments":{"id":"key:agent-task-1"}}}
 {"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"ledger-append__sink","arguments":{"content":"Not really Ada","author":"urn:iki:gonk:passkey:ada"}}}
 {"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"ledger-item__delete","arguments":{"id":"1"}}}
 {"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"ledger-append__sink","arguments":{"ledger":"acme","content":"Not mine"}}}
 ```
 
+The four calls in the last file depend on nothing but the first two runs, so they go together,
+and their answers are sorted (byte order, which here is `id` order) because they arrive in
+whatever order they finished:
+
 <!-- transcript: run -->
 ```console
-$ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/calls.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.61"}}}
+$ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/file.jsonl 2>/dev/null
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.67"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
+$ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/retry.jsonl 2>/dev/null
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.67"}}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
+$ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/check.jsonl 2>/dev/null | LC_ALL=C sort
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.67"}}}
 {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n"}],"isError":false}}
-{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:host:gonk:client:…."}],"isError":true}}
+{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:host:gonk:client:….\nkind: denied; class: denied"}],"isError":true}}
 {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"tool `ledger-item__delete` is not available under this capability"}],"isError":true}}
-{"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them"}],"isError":true}}
+{"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them\nkind: denied; class: denied"}],"isError":true}}
 ```
 
-Read the answers in order:
+Run without `sort`, the last command prints the same seven lines with `id` 1 first and the rest
+in any order; an MCP client does not care, because it reads the `id`. (Sent as one file with the
+appends, as this page did through `ikigai-cli` 0.1.61, the read by key could overtake the first
+append and answer `not found`, which is why the page now waits.)
+
+Read the answers by `id`:
 
 - **2 and 3: one item.** The second append found the key taken and filed nothing; it answered
   with the item that holds it, marked `existing`. The check and the filing are one store update
@@ -222,33 +259,47 @@ Read the answers in order:
   certificate the connection was made with.
 - **5: and only the agent.** On the QUIC door an `author` that names a principal must be the
   caller's own, so the agent cannot file as Ada. This is the residual the socket chapter ended
-  on, closed by giving the agent its own door.
+  on, closed by giving the agent its own door. The refusal's text ends with a line for a program
+  rather than a person, `kind: denied; class: denied`: the kind of failure and its class, the
+  rule for who may repeat it (`denied`: nobody, since a different authority is a different
+  request; a `transient` one may simply be retried, and a `retry-after` one adds
+  `retry-after-ms:`). An agent reads that line instead of parsing the prose; it rides in the text
+  because the MCP version `ikigai mcp` declares (2024-11-05) has no structured slot for it.
 - **6: never sent.** The item's delete is not in this session's manifold, so `ikigai mcp`
-  refuses the call itself; gonk never sees it.
+  refuses the call itself; gonk never sees it, and the refusal is the client's own sentence,
+  with no kernel failure to classify.
 - **7: sent, and refused by the ledger.** The client's ceiling holds the write *family* (for
   `default`), so the call passes the local check and crosses the wire; the ledger refuses it,
-  because a ledger grant names one ledger. A tool that takes `ledger` as an argument can be
-  asked about any ledger; only a granted one answers.
+  because a ledger grant names one ledger, with the same `kind: denied; class: denied` line. A
+  tool that takes `ledger` as an argument can be asked about any ledger; only a granted one
+  answers.
 
 ## What the server saw
 
 <!-- transcript: run -->
 ```console
-$ grep -E 'quic client| door=quic ' gonk.log
+$ grep 'quic client' gonk.log
 ikigai-gonk: quic client … → grant "agent"
 ikigai-gonk: quic client … → grant "agent"
+ikigai-gonk: quic client … → grant "agent"
+ikigai-gonk: quic client … → grant "agent"
+$ grep ' door=quic ' gonk.log | LC_ALL=C sort -k2
+… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
+… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
 … gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 … gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 … gonk:Access urn:iki:ledger:default:item:key:agent-task-1 door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 ```
 
-One connection line per `ikigai mcp` process, naming the grant. One access line per request
-that reached gonk, each naming the agent, refusals included. Two things in the names are worth
-reading. Every append is logged as `urn:iki:ledger:default:append`: the tool call carried no
-`ledger`, the argument's default filled it, and the request went out under the ledger's full
-name. And the delete is not in the log at all, because it never left the agent's machine.
+One connection line per `ikigai mcp` process, four of them (the tool list and the three runs),
+naming the grant. One access line per request that reached gonk, each naming the agent,
+refusals included. The access lines are sorted by everything after the time, because the last
+run's three requests ran at once and their lines are written as each one finishes, in no fixed
+order; unsorted, the log reads the same lines in the order the requests ended. Two things in
+the names are worth reading. Every append is logged as `urn:iki:ledger:default:append`: the tool
+call carried no `ledger`, the argument's default filled it, and the request went out under the
+ledger's full name. And the delete is not in the log at all, because it never left the agent's
+machine. A refusal is `outcome=denied bytes=-`: the ledger answered no bytes, only the refusal.
 
 ## Wiring it into an agent
 
@@ -269,8 +320,8 @@ the default port opens its QUIC door on UDP 1062.
 
 | caller | how it reaches gonk | under what authority | who the log says |
 | --- | --- | --- | --- |
-| a browser | HTTP, loopback | anonymous, or a passkey's grant | `anon`, or the passkey |
-| `curl`, a hook | HTTP, loopback | anonymous | `anon` |
+| a browser | HTTP, loopback | anonymous (read only), or a passkey's grant | `-` reading anonymously, or the passkey |
+| `curl`, a hook | HTTP, loopback | anonymous: it reads, and a write is refused | `-` |
 | `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `owner` |
 | an agent over MCP | QUIC, with its own certificate | its client's grant on the server, and its own ceiling on the client | the agent's `urn:iki:host:gonk:client:…` |
 

@@ -3,8 +3,9 @@
 [kata](https://github.com/kenn-io/kata) keeps issues in its own database, for people and for
 agents. `ikigai-ledger` took its model from kata — issues with authors, priorities, labels,
 comments, closes with a reason, and `parent`, `blocks` and `related` links — so most of an
-import is one to one. This chapter imports one, runs it again to show that it converges, and
-says plainly what does not survive the trip.
+import is one to one. This chapter plans an import of one, shows what the gonk this book pins
+answers when the import tries to file it, and says plainly what an import keeps and what does
+not survive the trip.
 
 ## An export
 
@@ -49,8 +50,8 @@ three comments, three labels, four links, and an event. Save it as `kata.jsonl`:
 
 ## Into a ledger of its own
 
-The importer files over gonk's HTTP door, like `roborev file`, as its anonymous loopback caller,
-so the ledger it files into must be one that door grants. Start gonk granting `kata` as well as
+The importer speaks to gonk's HTTP door, like `roborev file`, as its anonymous loopback caller,
+so the ledger it imports into must be one that door grants. Start gonk granting `kata` as well as
 `default` (`--http-ledger` replaces the configured list, so name both; in a config file it is
 one `gonk.http.ledger` line each):
 
@@ -58,9 +59,17 @@ one `gonk.http.ledger` line each):
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup --http-ledger default --http-ledger kata
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default, kata; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default, kata; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
 ```
+
+Read the `http` line closely: `anonymous read: default, kata`. Since gonk PR 186 (ledger #1687)
+the door's anonymous caller **reads** the ledgers it lists and writes nothing, because any process
+on this machine, or on any machine a reverse tunnel puts the door on, could otherwise file an item
+that an unattended worker would read as instructions. The importer has no other way in yet: it
+files through that door alone, with no passkey and no socket. So against this gonk its dry run
+works and its import is refused, and the transcripts below show both. (Through gonk 3edf830 the
+same door wrote too, and this chapter's import filed the issues.)
 
 `--dry-run` reads the export, asks the ledger for each issue's key exactly as the real run
 does, and prints the plan; it writes nothing. So it says `already` for an issue that is there,
@@ -101,43 +110,31 @@ skipped   link 01K6Z000000000000000000001 related 01K6Z000000000000000000004: an
 dry run, nothing written: 3 would be filed, 0 already there; 2 comment(s), 1 close(s), 3 link(s) would be added; 1 deleted issue(s) and 1 link(s) skipped; not read: event 1, sqlite_sequence 1
 ```
 
-and without it, the import:
+and without it, the import, which this gonk refuses at its first write:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk kata import kata.jsonl --gonk http://127.0.0.1:1070 --ledger kata
 kata export version 27: 4 issue(s), 4 link(s)
-filed     kata#1   kata 0001  Stop the loop on an empty queue
-commented kata#1   kata comment 01K6Z0000000000000000000C1
-commented kata#1   kata comment 01K6Z0000000000000000000C2
-filed     kata#2   kata 0002  Rename the flight binary
-closed    kata#2   kata 0002
-filed     kata#3   kata 0003  Write the empty-queue test
-deleted   kata 0004  not imported
-linked    kata#3 parent kata#1
-linked    kata#3 blocks kata#1
-linked    kata#1 related kata#2
-skipped   link 01K6Z000000000000000000001 related 01K6Z000000000000000000004: an end was not imported, or the type is not one the ledger has
-
-3 filed, 0 already there; 2 comment(s), 1 close(s), 3 link(s) added; 1 deleted issue(s) and 1 link(s) skipped; not read: event 1, sqlite_sequence 1
+ikigai-gonk: gonk refused POST /iki/ledger/kata/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:kata:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
 ```
 
-Issues first, so that every link has two items to join, then the links. The soft-deleted
-issue is not imported, and neither is anything that hangs from it: its comment, and the link
-to it, which is reported as skipped. The last line counts everything the importer did not read,
-by kind, so nothing in the export is silently dropped.
+The refusal names the scope the append needed, says that the door's anonymous caller holds the
+read tokens and nothing more, and says why the command cannot file. It comes at the first append,
+so nothing is filed, not even the first issue.
 
-The links came across as links, which means `next` already knows the order of the work:
+Where an import can file, it does what the dry run planned, in that order: issues first, so that
+every link has two items to join, then the links. The soft-deleted issue is not imported, and
+neither is anything that hangs from it: its comment, and the link to it, which is reported as
+skipped. The last line counts everything the importer did not read, by kind, so nothing in the
+export is silently dropped. The links come across as links, so `next` would know the order of the
+work: `kata 0003` blocks `kata 0001`. Here the ledger is still empty, and `next` says so:
 
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/kata/next
- 1. kata#3  open    p-  Write the empty-queue test
-    unprioritized — no priority set, so it ranks below every item that has one; last updated …
-
-policy: priority-recency (weighs priority, recency, number)
-ready: 1   excluded: 1
-  not kata#1: blocked by kata#3
+nothing is ready (0 open item(s) excluded: the ledger has no open items matching the filter)
+policy: priority-recency
 ```
 
 ## Again, and later
@@ -145,26 +142,24 @@ ready: 1   excluded: 1
 Every issue is filed with **one** request, a keyed append whose key is `urn:kata:issue:<uid>`
 (also filed as an `about`): the ledger checks the key and files the item in the same store
 update, and a key already taken answers the item that holds it and files nothing. So the same
-export imported twice files nothing:
+export imported twice files nothing the second time: each issue already there is reported as
+`already`. Here, with nothing filed, a second run is refused just as the first was:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk kata import kata.jsonl --gonk http://127.0.0.1:1070 --ledger kata
 kata export version 27: 4 issue(s), 4 link(s)
-already   kata#1   kata 0001
-already   kata#2   kata 0002
-already   kata#3   kata 0003
-deleted   kata 0004  not imported
-skipped   link 01K6Z000000000000000000001 related 01K6Z000000000000000000004: an end was not imported, or the type is not one the ledger has
-
-0 filed, 3 already there; 0 comment(s), 0 close(s), 0 link(s) added; 1 deleted issue(s) and 1 link(s) skipped; not read: event 1, sqlite_sequence 1
+ikigai-gonk: gonk refused POST /iki/ledger/kata/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:kata:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
 ```
 
 It does more than skip. A run **converges** on the items already there: a comment whose kata
 id is not on its item is added, an issue closed in kata whose item is open is closed, and a
 missing link is made. So a later export, with work done in kata since, brings exactly that work
 across. Here a comment is added to the export, as a later `kata export` would have it, and the
-dry run, which asks the ledger, names exactly the one comment the import then adds:
+dry run asks the ledger about each issue. None is there, because nothing was filed, so its plan
+is the first plan with the new comment in it: `then 1 comment(s)` on `kata 0003`, and three
+comments in all. Over items already filed, it would say `already` for each issue and name only
+the one new comment. The import is refused, as before:
 
 <!-- transcript: run -->
 ```console
@@ -172,23 +167,34 @@ $ cp kata.jsonl later.jsonl
 $ printf '%s\n' '{"kind":"comment","data":{"author":"agent-7","body":"The test fails on an empty queue, as it should.","created_at":"2026-09-05T08:30:00.000Z","id":4,"issue_id":3,"uid":"01K6Z0000000000000000000C4"}}' >> later.jsonl
 $ ikigai-gonk kata import later.jsonl --gonk http://127.0.0.1:1070 --ledger kata --dry-run
 kata export version 27: 4 issue(s), 4 link(s) (dry run: reads only)
-already   kata#1   kata 0001
-already   kata#2   kata 0002
-already   kata#3   kata 0003
-would commented kata#3   kata comment 01K6Z0000000000000000000C4
+would file  kata 0001  Stop the loop on an empty queue
+    key=urn:kata:issue:01K6Z000000000000000000001
+    about=urn:kata:issue:01K6Z000000000000000000001
+    author=chris
+    priority=1
+    labels=bug,area:loop
+    then 2 comment(s)
+would file  kata 0002  Rename the flight binary
+    key=urn:kata:issue:01K6Z000000000000000000002
+    about=urn:kata:issue:01K6Z000000000000000000002
+    author=chris
+    priority=3
+    labels=chore
+    then 0 comment(s), close
+would file  kata 0003  Write the empty-queue test
+    key=urn:kata:issue:01K6Z000000000000000000003
+    about=urn:kata:issue:01K6Z000000000000000000003
+    author=agent-7
+    then 1 comment(s)
 deleted   kata 0004  not imported
+would linked    01K6Z000000000000000000003 parent 01K6Z000000000000000000001
+would linked    01K6Z000000000000000000003 blocks 01K6Z000000000000000000001
+would linked    01K6Z000000000000000000001 related 01K6Z000000000000000000002
 skipped   link 01K6Z000000000000000000001 related 01K6Z000000000000000000004: an end was not imported, or the type is not one the ledger has
-dry run, nothing written: 0 would be filed, 3 already there; 1 comment(s), 0 close(s), 0 link(s) would be added; 1 deleted issue(s) and 1 link(s) skipped; not read: event 1, sqlite_sequence 1
+dry run, nothing written: 3 would be filed, 0 already there; 3 comment(s), 1 close(s), 3 link(s) would be added; 1 deleted issue(s) and 1 link(s) skipped; not read: event 1, sqlite_sequence 1
 $ ikigai-gonk kata import later.jsonl --gonk http://127.0.0.1:1070 --ledger kata
 kata export version 27: 4 issue(s), 4 link(s)
-already   kata#1   kata 0001
-already   kata#2   kata 0002
-already   kata#3   kata 0003
-commented kata#3   kata comment 01K6Z0000000000000000000C4
-deleted   kata 0004  not imported
-skipped   link 01K6Z000000000000000000001 related 01K6Z000000000000000000004: an end was not imported, or the type is not one the ledger has
-
-0 filed, 3 already there; 1 comment(s), 0 close(s), 0 link(s) added; 1 deleted issue(s) and 1 link(s) skipped; not read: event 1, sqlite_sequence 1
+ikigai-gonk: gonk refused POST /iki/ledger/kata/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:kata:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
 ```
 
 ⚠ What does **not** converge: an issue's title, body, labels and priority are written once,
@@ -199,15 +205,18 @@ comment, so two imports racing on the same new comment can both add it.
 
 ## What is lost, and why
 
+An imported item's `filed` line and the provenance line its body ends with are where the loss
+shows. Against this gonk there is no item to read, so the same `grep` finds nothing:
+
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/kata/item/1 | grep -E 'filed:|Imported from'
-  filed:    … by chris
-  Imported from kata flight#0001 (01K6Z000000000000000000001), filed 2026-09-02T09:15:00.000Z by chris; owner chris.
 ```
 
-The two `filed` times disagree, and that is the loss in one line. The ledger stamps every item
-with the time **it** was filed and mints its own number, because those are facts the ledger
+On an item the import filed, the two `filed` times disagree, and that is the loss in one line:
+the `filed` line says when the import ran, by `chris`, and the provenance line says `Imported from
+kata flight#0001 (01K6Z000000000000000000001), filed 2026-09-02T09:15:00.000Z by chris; owner
+chris.` The ledger stamps every item with the time **it** was filed and mints its own number, because those are facts the ledger
 vouches for, and it has no way today to record an item as filed at some other time by some
 other system. So kata's `created_at`, its `short_id` (`0001`) and its `uid` survive only as
 text, in the provenance line every imported body ends with, and in each comment's closing

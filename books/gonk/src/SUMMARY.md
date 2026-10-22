@@ -54,6 +54,7 @@
 
 - [Solo on one machine](ways/solo.md)
 - [Remote workers](ways/workers.md)
+- [Routing work to agents](ways/routing.md)
 - [Review every commit](ways/review-every-commit.md)
 - [Hub and spoke](ways/hub-and-spoke.md)
 - [Spec first](ways/spec-first.md)

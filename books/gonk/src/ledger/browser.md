@@ -18,7 +18,7 @@ chapter](../introduction.md#a-gonk-per-chapter)).
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
 …
@@ -29,12 +29,15 @@ terminal keeps both: the screen shows them, and `gonk.log` is the record you wil
 end of this chapter. (Run as a service, the same lines go wherever the service manager sends
 standard error; gonk's README uses `/tmp/ikigai-gonk.log`.)
 
-File something, so the pages have an item to show:
+File something, so the pages have an item to show. An anonymous caller at the HTTP door only
+reads (the banner's `anonymous read: default`), so file it over the owner's socket, as in [the
+last chapter](your-own.md#served):
 
 <!-- transcript: run -->
 ```console
-$ curl -s -X POST --data-binary 'Write the gonk book' http://127.0.0.1:1070/iki/ledger/append
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append Write the gonk book'
 #1 urn:iki:ledger:default:item:…
+[uncacheable]
 ```
 
 ## The pages
@@ -49,7 +52,8 @@ $ open http://localhost:1070/
 ```
 
 The front page is the first ledger you may read, open items first, with filters for closed
-and all, a title search, and a form that files an item. A page is HTML, and HTML is something
+and all and a title search; signed in under a grant that writes the ledger, it has a form that
+files an item as well. A page is HTML, and HTML is something
 a shell can read as well as a browser. These are the lines that matter in it:
 
 <!-- transcript: run -->
@@ -121,24 +125,27 @@ answer rendered as a table.
 
 ## A form is a ledger action
 
-The form on the front page does not write anything gonk invented. It posts to `/act`, which
-names an action the ledger already declares (`_action=append`), checks every field against
-that action's contract, and issues it under your grant. This is the request your browser
-sends when you file an item there:
+The form a signed-in writer sees does not write anything gonk invented. It posts to `/act`,
+which names an action the ledger already declares (`_action=append`), checks every field
+against that action's contract, and issues it under your grant. This is the request your
+browser sends when you file an item there, here sent with no one signed in:
 
 <!-- transcript: run -->
 ```console
-$ curl -s -d _action=append -d _ledger=default -d _then=items --data-urlencode 'content=Read it in a browser' http://localhost:1070/act | grep -o "<span class='how-many'>[^<]*</span>"
-<span class='how-many'>2 open items</span>
+$ curl -s -w '\n%{http_code}\n' -d _action=append -d _ledger=default -d _then=items --data-urlencode 'content=Read it in a browser' http://localhost:1070/act
+denied: capability does not grant `urn:cap:store:write:graph:*` (declared by `urn:iki:gonk:act`; any grant under `urn:cap:store:write:graph:` satisfies it)
+403
 ```
 
-The answer is the fragment of the page that changed (`_then=items`), which the page swaps in
-place with [htmx](https://htmx.org). There is no single-page application and no build step:
-the server renders, the browser shows.
+Anonymous, the action is refused by the grant: the anonymous caller holds no write token at all
+(gonk PR 186, ledger #1687; before it this request filed the item). Signed in under a grant that
+writes `default`, the same request files the item, and the answer is the fragment of the page
+that changed (`_then=items`), which the page swaps in place with [htmx](https://htmx.org). There
+is no single-page application and no build step: the server renders, the browser shows.
 
-A door that lets anything on this machine write the ledger also lets any web page open on
-this machine try to: a page on any site can post a form to `localhost`. So the browser's own
-signals are a **refusal**. A write whose `Origin` (or `Sec-Fetch-Site`) names another site is
+A door that a browser writes through can be tried by any web page open on this machine, too: a
+page on any site can post a form to `localhost`, and the browser would send it with your
+sign-in cookie. So the browser's own signals are a **refusal**. A write whose `Origin` (or `Sec-Fetch-Site`) names another site is
 answered `403` at the edge, before it reaches anything it names:
 
 <!-- transcript: run -->
@@ -148,8 +155,8 @@ a write from another site is refused: its Origin or Sec-Fetch-Site names a page 
 403
 ```
 
-`curl` sends no `Origin` unless told to, and neither does a script, which is why the requests
-before it were unaffected. A request whose `Host` is anything but `localhost`, `127.0.0.1` or
+`curl` sends no `Origin` unless told to, and neither does a script, which is why the request
+before it was refused by the grant rather than at the edge. A request whose `Host` is anything but `localhost`, `127.0.0.1` or
 `[::1]` (with this port) is refused too, reads included, and the front page is no
 exception; that is the defense against DNS rebinding, where a page on another site reaches a
 loopback server under its own name:
@@ -198,21 +205,22 @@ not spend on its behalf.
 
 ## Who you are, and what that grants
 
-An anonymous caller on this machine reads and writes the ledgers in `gonk.http.ledger`
-(`default`, unless configured), and nothing else. A ledger outside that list is closed to it,
+An anonymous caller on this machine reads the ledgers in `gonk.http.ledger` (`default`, unless
+configured), and nothing else. A ledger outside that list is closed to it,
 and the refusal says so in words before it says it in tokens:
 
 <!-- transcript: run -->
 ```console
 $ curl -s http://localhost:1070/l/book
-denied: Sign in to read the ledger "book".
-Signed in already? Your passkey's grant doesn't include the ledger "book".
+denied: Sign in to read the ledger "book". Sign in with passkey is in the header of every gonk page (the front page is /); then come back to this address.
 The grant it needs: urn:cap:ledger:read:book (to read the ledger "book")
 ```
 
 That is the notice a signed-out visitor reads, here and on every page that needs more than
-anonymous authority, with a **Sign in with passkey** button beside it in a browser. Anything
-more than anonymous, such as delete, another ledger, or reading the repositories gonk
+anonymous authority: the one sentence that fits a signed-out caller, and where the **Sign in with
+passkey** button is (a browser that navigates to the page gets gonk's page with the button on
+it). A signed-in visitor whose grant does not reach the ledger is told that instead. Anything
+more than anonymous, such as filing, delete, another ledger, or reading the repositories gonk
 browses, belongs to an **identity**, and an identity is given by invitation:
 
 <!-- transcript: run -->
@@ -251,7 +259,8 @@ inference; it is one word on purpose, and it is refused on a server with no mode
 The repositories arrive in [Browse roots](../browse/roots.md).
 
 Two rules sit behind the command. An identity must be **strictly stronger** than anonymous, so
-`passkey invite ada --ledger default=write` is refused: signing in would change nothing. And
+`passkey invite ada --ledger default=read` is refused: signing in would change nothing.
+(`default=write` is stronger now that anonymous only reads, and is accepted.) And
 a grant name is shared by every passkey and certificate enrolled under it, so writing
 different scopes under an existing name is refused unless `--force`, naming each scope the
 rewrite would remove and add.
@@ -295,21 +304,20 @@ every line.
 <!-- transcript: run -->
 ```console
 $ grep ' urn:iki:gonk:act ' gonk.log
-… gonk:Access urn:iki:gonk:act door=http verb=sink outcome=ok bytes=… dur=… principal=anon q=-
 … gonk:Access urn:iki:gonk:act door=http verb=sink outcome=denied bytes=- dur=0 principal=anon q=-
 $ grep ' urn:iki:gonk:page:item:default:1 ' gonk.log
-… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
+… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=as=text/html
 … gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=denied bytes=- dur=0 principal=- q=-
-… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
+… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=as=text/html
 ```
 
-Read them with three things in mind:
+Read them with four things in mind:
 
 - **The subject is the resource, not the URL.** `/l/default/item/1` (asked three times: by
   `curl` as itself, as an image another page loads, and as another page's link) was
   `urn:iki:gonk:page:item:default:1`; the form was `urn:iki:gonk:act`.
 - **`principal` is who the door could say was asking.** The form's line says `anon`, an
-  anonymous write; a page read by nobody signed in says `-`. Signed in, every line names the
+  anonymous write (here the cross-site one); a page read by nobody signed in says `-`. Signed in, every line names the
   passkey's IRI, a read as well as a write: the door mints it into the request's capability
   (core's principal scope), which is where the log reads it. Before gonk PR 122 the HTTP door
   knew who a write was from and never a read, so a signed-in read said `-` too.
@@ -317,14 +325,24 @@ Read them with three things in mind:
   page, below) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
   cross-site form, the foreign `Host`, the loaded image), is a line too, written by the edge
   itself: `outcome=denied bytes=- dur=0`, under the resource the path would have reached, so
-  the second `act` line is the cross-site form and the middle item line is the image. Probing
-  shows up in the log. (Before gonk PR 151 an edge refusal wrote no line at all.)
+  the one `act` line is the cross-site form and the middle item line is the image. Probing
+  shows up in the log. (Before gonk PR 151 an edge refusal wrote no line at all.) The anonymous
+  form post has no line: the anonymous grant does not even hold the family of token `act`
+  declares, so the kernel refused it before dispatching it to anything that logs
+  ([What gonk knew](../machines/doors.md#what-gonk-knew)).
+- **`q` is the arguments the request ran with.** An edge refusal ran nothing, so it says `-`;
+  a page that was rendered says `as=text/html`, the representation the door asked the resource
+  for. The kernel fills in every default a resource declares before dispatching it (`ikigai-core`
+  0.1.104 and later), so a page over a listing carries the listing's defaults too:
 
 <!-- transcript: run -->
 ```console
 $ grep ' urn:iki:gonk:page:ledger:book ' gonk.log
-… gonk:Access urn:iki:gonk:page:ledger:book door=http verb=source outcome=denied bytes=- dur=… principal=- q=-
+… gonk:Access urn:iki:gonk:page:ledger:book door=http verb=source outcome=denied bytes=- dur=… principal=- q=as=text/html&limit=50&offset=0&status=open
 ```
+
+That is the `/l/book` refusal above: the first fifty open items, as a page, which is what the
+page would have shown had the grant reached `book`.
 
 `dur` is milliseconds, so `grep ' dur=[0-9]\{4,\} ' gonk.log` lists every request that took a
 second or more. The first page this gonk rendered is usually one of them: it compiled the
@@ -334,7 +352,7 @@ stylesheet.
 
 | resource | anonymous, on loopback | signed in as `ada` |
 | --- | --- | --- |
-| `default` | read, write | read, write (anonymous's grant, plus her own) |
+| `default` | read | read (anonymous's grant; hers names only `book`) |
 | `book` | the sign-in notice | read, write |
 | delete, purge | refused | refused: not in her grant |
 | the repositories | none | read, once a root is configured |

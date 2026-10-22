@@ -33,7 +33,7 @@ $ printf 'gonk.mount = "prefer urn:llm:=%s/model.sock"\n' "$PWD" > .config/ikiga
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
 ```
 
@@ -77,12 +77,15 @@ open
 0
 ```
 
-Nothing is open, because nothing has been filed. File an item, and refresh:
+Nothing is open, because nothing has been filed. File an item over the socket, as the owner (an
+anonymous caller on loopback reads but files nothing, as [A ledger of your
+own](../ledger/your-own.md) shows), and refresh:
 
 <!-- transcript: run -->
 ```console
-$ curl -s -X POST --data-binary 'Read the first page' http://127.0.0.1:1070/iki/ledger/append
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append Read the first page'
 #1 urn:iki:ledger:default:item:…
+[uncacheable]
 $ curl -s 'http://localhost:1070/script/open-count/result?as=text/csv'
 open
 1
