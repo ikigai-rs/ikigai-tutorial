@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-21**: The install notes now name ikigai-cli 0.1.68 as the first release fixing the TLS advisory. The second getting-started exercise also checks that an explicitly empty argument overrides its declared default.
+
+  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)
+
 - **2026-10-21**: A correction: since ikigai-core 0.1.105 the kernel fills a declared default in before your endpoint runs, and a description that marks a defaulted input required is refused. The second getting-started exercise and Contribute a module said the opposite; the exercise now shows it in a block that runs on every build.
 
   Pages: [Exercises: getting started](getting-started/exercises.md), [Contribute a module](contribute.md)
