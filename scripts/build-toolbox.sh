@@ -12,8 +12,8 @@
 #
 # The pin is `books/ikigai/toolbox.rev`: an ikigai-toolbox COMMIT (a tag can move), the one
 # whose crate the book links (`ikigai-toolbox` 0.1.0 is tag v0.1.0). It is cloned once into
-# `target/ikigai-toolbox/<rev>/` with its submodule (turtle-lsp, pinned by ikigai-toolbox), and
-# its `build.sh` runs there every time: it refuses a submodule that is not at its pin, builds the
+# `~/.cache/ikigai-tutorial/toolbox/<rev>/` (see below) with its submodule (turtle-lsp, pinned
+# by ikigai-toolbox), and its `build.sh` runs there every time: it refuses a submodule that is not at its pin, builds the
 # engine with upstream's toolchain (Rust 1.99.0, from turtle-lsp's rust-toolchain.toml) into
 # `target/engine-<commit>` inside the clone, which pages.yml caches by the submodule commit,
 # applies ikigai-toolbox's patches and writes MANIFEST.jsonld. Nothing is downloaded from
@@ -38,7 +38,11 @@ if [ "$#" -eq 0 ] && [ ! -f books/ikigai/book/index.html ]; then
     exit 1
 fi
 
-clone="target/ikigai-toolbox/$rev"
+# OUTSIDE this repository: cargo looks upward from the engine's manifest for a workspace, and a
+# clone under this repo's `target/` would find this workspace's Cargo.toml and refuse to build
+# ("current package believes it's in a workspace when it's not"). Locally `target/` may be a
+# symlink elsewhere, which hides that; CI's is not.
+clone="${XDG_CACHE_HOME:-$HOME/.cache}/ikigai-tutorial/toolbox/$rev"
 if [ ! -d "$clone/.git" ]; then
     rm -rf "$clone"
     mkdir -p "$(dirname "$clone")"

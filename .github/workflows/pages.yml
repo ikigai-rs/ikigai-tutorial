@@ -121,7 +121,7 @@ jobs:
       - name: the toolbox engine's build, cached by the pinned commit
         uses: actions/cache@v4
         with:
-          path: target/ikigai-toolbox/*/target/engine-*
+          path: ~/.cache/ikigai-tutorial/toolbox/*/target/engine-*
           key: toolbox-engine-${{ runner.os }}-${{ hashFiles('books/ikigai/toolbox.rev') }}
       - name: build the RDF Toolbox at its pin into the ikigai book (scripts/build-toolbox.sh)
         run: ./scripts/build-toolbox.sh
