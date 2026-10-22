@@ -94,17 +94,28 @@ principle in one line:
 
 > "graceful" never means "silently ignored the answer the peer actually gave".
 
-### Only a transient failure falls through
+### Only a failure that another target could fix falls through
 
 `a_prefer_mount_falls_back_to_the_local_binding_when_the_peer_is_down` — the peer is tried
 first, it is unreachable, and this machine answers.
 
-"Transient" is a typed property, not a guess about the message: exactly `Timeout` and
-`Unavailable`. Everything else — a bad argument, an endpoint error, a resource that is not
-there — is permanent, and re-issuing it somewhere else would only produce a second wrong
-answer. Notice that this is the payoff for the chapter about the socket: the taxonomy
-survives the wire, so the fallback rule can be about *what kind of failure it was* rather
-than about the fact that something failed.
+Which failures those are is a typed property, not a guess about the message: every error
+has a class (`Error::class()`, since `ikigai-core` 0.1.108), and `Failover` (from
+`ikigai-throttle` 0.2.0) advances on two of them. **Transient**, `Timeout` and
+`Unavailable`: the peer may answer now, and so may this machine. **Retry-after**, a peer
+saying "not before thirty seconds": the peer is limited, and the next target is not
+(`a_prefer_mount_falls_back_when_the_peer_says_retry_later`). Everything else is returned
+unchanged: a bad argument, a resource that is not there, a state that says no, an input
+over its budget, and an endpoint error whose class is *unknown*, because nobody can say
+re-issuing it is safe (`a_prefer_mount_does_not_swallow_a_refusal_or_an_unknown_failure`).
+Re-issuing those somewhere else would only produce a second wrong answer.
+
+Notice that this is the payoff for the chapter about the socket: the taxonomy survives the
+wire, so the fallback rule can be about *what kind of failure it was* rather than about the
+fact that something failed. (The three newest variants, `RetryAfter`, `OverBudget` and
+`Refused`, cross the wire typed from wire v9, `ikigai-cli` 0.1.66; this book's transport
+crates are still 0.1.63, so the tests above hand `Failover` the error directly rather than
+through a socket.)
 
 ### A denial still propagates
 

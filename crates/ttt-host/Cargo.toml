@@ -32,8 +32,9 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 # 0.1.30 is the hardened edge the tic-tac-toe README's path <-> IRI rule describes (ledger
 # #80, #591): the target decoded as bytes, a malformed escape a 400, `+` a space in the query
 # only, `%2F` data inside its segment, and header/body/write deadlines plus a connection cap.
-# 0.1.63 is the pin for this crate and the three below: the cli crates' published head, and one
-# release for all four, as 0.1.30 was.
+# 0.1.63 is the pin for this crate and the three below (set 2026-10-14), one release for all
+# four, as 0.1.30 was. Newer cli crates exist (0.1.66 brought wire v9) and are not taken here:
+# moving them moves the wire the book's transcripts replay, which is its own pass (ledger #2060).
 ikigai-web = "0.1.63"
 # The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
 # peer store). 0.1.30 speaks wire v8 (a typed Conflict), backward compatible with the v7

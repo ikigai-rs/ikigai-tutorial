@@ -18,6 +18,10 @@ ikigai --version
 > ikigai` does not fail — it fetches an unrelated crate by another author. `--locked`
 > builds the dependency versions the release was tested with rather than whatever the
 > registry resolves today.
+>
+> The other side of `--locked`: it also holds you to that release's flaws. Every `ikigai-cli`
+> published so far locks `rustls-webpki` 0.103.15, which has a security advisory
+> (RUSTSEC-2026-0382), and a release with the fix is coming.
 
 That build is everything this book's commands need. To reach a kernel on another machine
 (`--connect quic://…`, or a `--mount` onto a `quic://` peer, as gonk's chapters do), build

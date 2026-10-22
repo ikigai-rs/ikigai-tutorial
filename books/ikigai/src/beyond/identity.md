@@ -33,8 +33,11 @@ is a cost with no matching benefit: you would run the CA, so trusting it is trus
 yourself with extra steps. Pinning says the same thing with no infrastructure.
 
 There is a second gate in the handshake worth knowing about, because its failure mode is
-confusing if you do not: the wire version is the **ALPN protocol id**. A peer speaking a
-different wire version does not connect and get a polite error; it fails the TLS handshake.
+confusing if you do not: the wire version is the **ALPN protocol id**. Each side offers the range of
+wire versions it speaks, newest first (`ikigai/8` then `ikigai/7` in the 0.1.63 crates this
+book builds; `ikigai/9` leads from `ikigai-cli` 0.1.66), and the handshake settles on the
+newest both share. Only a peer whose versions share none with yours fails, and it does not
+connect and get a polite error; it fails the TLS handshake.
 
 ## The certificate is the credential
 

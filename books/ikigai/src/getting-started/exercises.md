@@ -143,26 +143,74 @@ Declare it in the description with `optional()` and a `default_value`.
 <details>
 <summary>Hint</summary>
 
-The trap here is the interesting part of the exercise, and it will not announce itself:
-**a declared `default_value` is not injected into the invocation.** Nothing fills the
-argument in for you. Declare `ArgSpec::new("separator").optional().default_value(" ")` and
-then call `inv.inline_str("separator")` on a request that omitted it, and you get
-`Err(MissingArgument("separator"))` — not `" "`.
+The default lives in one place, the description. Declare
+`ArgSpec::new("separator").optional().default_value(" ")` and **the kernel fills it in
+before your endpoint runs**: a request that left `separator` out reaches your code as if
+the caller had written `separator=" "`, so `inv.inline_str("separator")` answers `" "`. A
+caller's own value always wins, an empty one included. The block below runs on every build
+of this book, so the sentence cannot drift from the kernel:
 
-So the description and the implementation each carry half of the same decision, and only
-one of them is checked by a compiler:
+<!-- urn-gate: illustration urn:iki:tutorial:separator-echo — bound by the block itself, on a
+     kernel of its own, so that it shows the default being filled in and nothing else. -->
 
-```rust,ignore
-let separator = inv.inline_str("separator").unwrap_or(/* your default */);
+```rust
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{
+    ArgRef, ArgSpec, AsyncFnEndpoint, Capability, Description, EndpointSpace, Exact, Iri,
+    Kernel, ReprType, Representation, Request, Verb,
+};
+
+// An endpoint that answers with the separator it was handed, and nothing else.
+let echo = AsyncFnEndpoint::new("separator-echo", |inv| {
+    Box::pin(async move {
+        let separator = inv.inline_str("separator")?.to_string();
+        Ok(Representation::new(ReprType::new("text/plain"), separator.into_bytes()))
+    })
+})
+.with_description(
+    Description::new("separator-echo")
+        .verb(Verb::Source)
+        .input(ArgSpec::new("separator").optional().default_value(" ")),
+);
+let kernel = Kernel::new(Arc::new(
+    EndpointSpace::new().bind(Exact::new("urn:iki:tutorial:separator-echo"), echo),
+));
+let ask = || Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:separator-echo").unwrap());
+let root = Capability::root();
+
+// Left out: the kernel filled in the declared default before dispatch.
+let left_out = block_on(kernel.issue(ask(), &root)).unwrap();
+assert_eq!(left_out.bytes, b" ");
+
+// Spelled out: the caller's value wins.
+let spelled = ask().with_arg("separator", ArgRef::Inline(b",".to_vec()));
+assert_eq!(block_on(kernel.issue(spelled, &root)).unwrap().bytes, b",");
+
+// A default is what an omitted input assumes, so declaring one makes the input optional...
+let separator = ArgSpec::new("separator").default_value(" ");
+assert!(!separator.required);
+
+// ...and a description that marks a defaulted input required anyway is refused.
+let mut required = separator;
+required.required = true;
+let contradiction = Description::new("x").verb(Verb::Source).input(required);
+assert!(contradiction.validate().is_err());
 ```
+
+So your implementation reads `separator` like any other argument and does not repeat the
+default. (Before `ikigai-core` 0.1.105 the kernel did not fill it in: the read failed with
+`MissingArgument`, and every endpoint applied its default a second time, by hand, where it
+could disagree with the one it declared.) `default_value` makes the input optional by
+itself, and `.optional()` beside it only says so out loud; a description that sets a
+defaulted input back to required is refused by `Description::validate`. What is still
+yours is the test that resolves without the argument: it is the one that shows your
+camel-casing does the right thing with the default the kernel hands it.
 
 (To read the declaration back in that test: the builder is `.default_value(..)`, and the
 field it sets on `ArgSpec` is `.default`.)
-
-Which means the failure mode to watch for is the two halves disagreeing — a description
-that promises one default while the code applies another. Nothing in the system catches
-that; a test that resolves without the argument and asserts the declared default's
-behavior does.
 
 `urn:kernel:actions` will *not* show your change, by the way: it lists names, and the name
 was already there. It is the description that changed, and in this host you read that

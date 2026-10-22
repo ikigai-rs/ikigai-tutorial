@@ -82,7 +82,7 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 The modules it links are published crates: `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.1,
 `ikigai-store` 0.2.21, `ikigai-browse` 0.18.8, `ikigai-script` 0.3.3 and `ikigai-nl` 0.4.0. The
 book's own crates (the ones its Rust listings and in-page cells run) take the newest releases, one
-step ahead of that: `ikigai-core` 0.1.108, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
+step ahead of that: `ikigai-core` 0.1.109, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
 `ikigai-browse` 0.19.0 and `ikigai-script` 0.3.6. So a `console` block is answered by gonk's
 releases and a listing or a cell by the newer ones. Only one page prints differently because of it: [Two teams, one gonk](teams/two-teams.md#the-managers-join)
 sends gonk a query whose `GRAPH` names a graph outside its set, which the newer store refuses and
@@ -109,8 +109,10 @@ as the other process that reaches gonk. It IS on crates.io, so it is pinned to o
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
 way. It is 0.1.61, the release whose transports the pinned gonk was built with, so it speaks the
 same wire, and its own `ikigai-core` (0.1.99, as gonk's) words a refusal at a family scope the way
-gonk does, which [Over the socket](agent/socket.md) prints. (0.1.62 and 0.1.63 are newer and
-change no wire; the rule takes what gonk links, and the book's crates take 0.1.63.) The QUIC keep-alive a client
+gonk does, which [Over the socket](agent/socket.md) prints. (The rule takes what gonk links, and the book's own crates take 0.1.63.
+0.1.62 to 0.1.65 change no wire. Wire v9 arrived in 0.1.66: it carries the newer failure
+classes typed and a run's time left across a mount, and it still offers v8, so a newer
+`ikigai` and this gonk settle on v8 and talk as before.) The QUIC keep-alive a client
 sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
 model drafting or explaining) is not lost over `quic://`.
 

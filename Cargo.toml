@@ -28,11 +28,23 @@ lto = true
 # Published crates, deliberately — NOT path refs to sibling checkouts. A reader who
 # clones only this repo must be able to `cargo run` immediately; path refs would
 # require them to have the whole ecosystem laid out beside it.
-# Every ikigai pin in this workspace sits at its crate's newest published release as of
-# the evening of 2026-10-14, so the book teaches what a reader's fresh `cargo add` resolves. Where a
-# pin moved for that alone its comment says so, and the reason that set the previous floor is kept
-# beneath it.
-# 0.1.103 is the pin because it is core's published head (the evening of 2026-10-14): a typed
+# Each pin states the minimum the book needs, and a 0.x caret is a RANGE: "0.1.109" admits
+# every 0.1.x from 0.1.109 up and nothing from 0.2. A pin moves when the book teaches what a newer
+# release changed, when a release changes what a page prints, or to keep the book on what a
+# reader's fresh `cargo add` resolves; its comment says which, and keeps the reason that set the
+# previous floor beneath it. Releases that came out after a pin was set are not listed as missing.
+# 0.1.109 is the pin, set 2026-10-21 (ledger #2006 is its own release): 0.1.105 is the floor for
+# what the books TEACH, because it changed behavior an endpoint relies on: the kernel fills a
+# declared `default_value` in before dispatch, and `Description::validate` refuses a defaulted
+# input marked required. Exercise 2 runs that in a checked block, where its hint used to say the default
+# was not injected (ledger #19). 0.1.108 gives every error a class (`Error::class()`,
+# `RetryAfter`/`OverBudget`/`Refused`), `Verb::is_idempotent`, declared failure classes
+# (`fails(..)`, `ik:mayFail`), a run's shared retry budget and its deadline (`IssueContext`,
+# `not_after`, `Invocation::time_left`); ikigai-throttle 0.2.0 requires it, and "Preference"
+# teaches its `Failover`. 0.1.109 adds dynamic spaces (`DynamicSpace`, `Threaded`), which the
+# status chapter names and no listing uses. The status chapter's opening names this version, and
+# `book_claims` holds it to the lock. Before that the pin was 0.1.103 (the lock had reached 0.1.108
+# as ikigai-browse 0.19.0's floor): a typed
 # selection offers the input-free actions only beside a real typed fit, so a typed query that fits
 # nothing answers nothing, where 0.1.102 answered every argument-free action (ledger #271). No page
 # asks a typed selection; the untyped `urn:kernel:actions` listing is unchanged. The `ikigai` the
@@ -100,10 +112,14 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.103"
+ikigai-core = "0.1.109"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
-# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.103 is the pin because
-# it is the release paired with core 0.1.103: it moves `owl:versionInfo` and nothing else, which no
+# kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.109 is the pin, paired
+# with core 0.1.109 (set 2026-10-21): since 0.1.105 it renders the ArgSpec shape (input groups,
+# list arguments, value notes), and since 0.1.108 an action's stated failure classes as
+# `ik:mayFail`; 0.1.109 defines `ik:DynamicSpace`. No page prints a contract that states either,
+# and every printed Meta and catalog graph replayed unchanged at the move. Before that the pin was
+# 0.1.103, paired with core 0.1.103: it moves `owl:versionInfo` and nothing else, which no
 # page renders. Before that the pin
 # was 0.1.102, paired with core 0.1.102: 0.1.101 spells a plan id as a name (ledger #1391), and
 # 0.1.102 moves `owl:versionInfo` and nothing else; no page renders either. Before that the pin was
@@ -118,26 +134,29 @@ ikigai-core = "0.1.103"
 # contract, and its vocabulary defines `ik:contract` and documents `ik:ActionMatch`'s new subject;
 # it requires core 0.1.91. Before that the pin was 0.1.66, the release core 0.1.66 paired with,
 # while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-vocab = "0.1.103"
+ikigai-vocab = "0.1.109"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
 # ceiling too: "0.3.1" admitted nothing from 0.4, and the book sat behind that ceiling until
 # 2026-10-10. 0.3.1 became the floor because part VII uses what it added: `ComposeOver::named`,
 # so each of the game's views carries a name of its own, which is what a declared door binds it
-# by (an unnamed one is `composeOver`, like every other). 0.4.1 is the pin because it is the
-# published head: 0.4.0's one change is that `space()` names itself `urn:iki:space:fn` (ledger
+# by (an unnamed one is `composeOver`, like every other). 0.5.0 is the pin, set 2026-10-21: `$h{…}`
+# replaces a C0 control other than tab, LF and CR with U+FFFD, through the new shared
+# `ikigai_fn::html` escaper (ledger #1813); no view the book composes splices one, so no page's
+# output moved.
+# The old pin "0.4.1" was a ceiling below 0.5. Before that the pin was 0.4.1: 0.4.0's one change is that `space()` names itself `urn:iki:space:fn` (ledger
 # #987), and the book binds compose behind doors of its own, and binding a door drops a space's
 # name (core 0.1.89), so no answered-by or topology a page prints moved; 0.4.1 exports
 # `MARKER_LETTERS` and `escape_markers`, which nothing here uses. A 0.x caret: also a ceiling
-# (<0.5.0).
-ikigai-fn = "0.4.1"
+# (<0.6.0).
+ikigai-fn = "0.5.0"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
 # transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the floor
 # because it added `arrangement_space()`, which mounts the arrangement surface alone, and the `full`
 # feature, off here: nothing in the tutorial mounts the query or graph compilers or the code-graph
 # codec, so the page compiles neither `sha2` nor `oxrdfio` (ledger #649). 0.1.4 added the
-# arrangement surface at all. 0.2.3 is the pin because it is the published head: 0.2.1 to 0.2.3
+# arrangement surface at all. 0.2.3 is the pin (set 2026-10-14): 0.2.1 to 0.2.3
 # bound the code-graph decoder by depth and by size and hash each node once in the encoder (ledger
 # #1326, #1331, #1332), all behind the `full` feature this book leaves off. Before that the pin was
 # 0.2.0, the published head past the old pin's 0.x ceiling (<0.2.0): its one change is that both its
@@ -147,11 +166,11 @@ ikigai-fn = "0.4.1"
 ikigai-sexpr = { version = "0.2.3", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Only
 # part VII's picture test uses it (a dev-dependency), so the page pays nothing for it. 0.2.0 is
-# the published head, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
+# the pin, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
 # `urn:iki:space:diagram` (ledger #987), and `render` is unchanged, so the picture is the same
 # bytes. A 0.x caret, so also a ceiling (<0.3.0).
 ikigai-diagram = "0.2.0"
-# 0.4.0 is the pin because it is the published head: an out-of-band host call is held to its
+# 0.4.0 is the pin (set 2026-10-14): an out-of-band host call is held to its
 # session's capability (ledger #83), an unwired module channel fails at once with a typed error
 # (ledger #746), and `ModuleSessionTransport::invoke_session` returns `ikigai_core::Result`, the
 # minor bump; no crate here implements that trait (`loadable-module` builds a `ModuleSpace` over
@@ -173,7 +192,8 @@ ikigai-diagram = "0.2.0"
 ikigai-module = "0.4.0"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
-# 0.2.5 is the pin because it is the published head: a call without its required `query` is refused
+# 0.2.5 is the pin (set 2026-10-14; 0.2.6 is newer and inside the caret): a call without its
+# required `query` is refused
 # with a typed `MissingArgument` naming it, where it was an untyped endpoint error (and `ikigai-rdf`
 # 0.2.5 under it does the same for `content` and `with`). "The graph face" always names its query,
 # so it prints the same rows. Before that the pin was 0.2.4, the published head then: 0.2.3 counts a GRAPH block's patterns toward
@@ -197,8 +217,8 @@ oxrdf = "0.3"
 # `scripts/test-transcripts.sh`. What the book's crates link are the published modules gonk is built
 # from, and they follow gonk's lock until a release the book needs runs ahead of it. Today they run
 # ahead: the gonk in `gonk.rev` (3edf830) links core 0.1.99, ledger 0.11.1, store 0.2.21, browse
-# 0.18.8, script 0.3.3 and nl 0.4.0, while these crates take the heads of the evening of 2026-10-14
-# (core 0.1.103, ledger 0.12.0, store 0.2.23, browse 0.18.9, script 0.3.6). A console transcript is gonk's answer
+# 0.18.8, script 0.3.3 and nl 0.4.0, while these crates lock core 0.1.109, ledger 0.12.0, store
+# 0.2.23, browse 0.19.0 and script 0.3.6. A console transcript is gonk's answer
 # and a cell or `cargo run` is these crates', each checked against its own source, so the gap is
 # recorded in books/gonk/DESIGN.md. (From 2026-10-12 to 2026-10-14 the gonk then pinned (71ca542)
 # linked core 0.1.99, ledger 0.11.0, store 0.2.19, browse 0.18.8, script 0.3.3 and nl 0.4.0, as these
@@ -208,7 +228,7 @@ oxrdf = "0.3"
 # printed the family-scope refusal without core 0.1.97's clause; until 9f2e89e the pinned gonk,
 # 9704b54, linked ledger 0.6.2 while these crates took 0.9.0, so no transcript could ask `count`;
 # ledger #1245 closed that gap.)
-# 0.12.0 is the pin because it is the published head: 0.11.1 fixes an unled audit's findings (a
+# 0.12.0 is the pin (set 2026-10-14): 0.11.1 fixes an unled audit's findings (a
 # deep `blocks` chain, a large ledger, closed items; ledger #1418–#1423) and floors ikigai-store at
 # 0.2.21, a security floor; 0.12.0 accepts `labels=` at any length, adds `parent=` on items and
 # `count`, `Filter::parent` and `Item::children`, puts `"children": []` in every JSON item object, and
@@ -248,7 +268,7 @@ oxrdf = "0.3"
 ikigai-ledger = "0.12.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
-# RocksDB at all. 0.2.23 is the pin because it is the published head: a refusal at the overdue cap
+# RocksDB at all. 0.2.23 is the pin (set 2026-10-14): a refusal at the overdue cap
 # names the cap, whether it is the default or the host's, the machine's parallelism, and
 # `TimeBudget::with_max_overdue`, which raises it (ledger #1500); no API change, and no page's query
 # comes near the cap. Before that the pin was 0.2.22, the published head that morning and what ledger
@@ -283,8 +303,8 @@ ikigai-ledger = "0.12.0"
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
 ikigai-store = { version = "0.2.23", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
-# Book's "Explain, with a mounted model" and "One-off review". 0.19.0 is the pin because it is the
-# published head: the review pass and the judge loop stop at the first `Refused` or `RetryAfter`
+# Book's "Explain, with a mounted model" and "One-off review". 0.19.0 is the pin (set 2026-10-20;
+# later 0.19.x releases are inside the caret): the review pass and the judge loop stop at the first `Refused` or `RetryAfter`
 # from the mounted model, as they already stopped at a `Denied`, and return that error with its
 # type kept, so an edge can answer 429 with `Retry-After` instead of spending the remaining regions
 # (ledger #1932). An `Endpoint` failure stays the region's own. It is what gonk's review door
@@ -321,7 +341,7 @@ ikigai-browse = "0.19.0"
 oxigraph = { version = "0.5.11", default-features = false }
 # Markdown as a graph, for the OpenSpec part: one generic structural lift plus a MAPPING resource
 # (a lift profile and SPARQL CONSTRUCTs), found by name at `urn:markdown:mapping:{name}` under a
-# config home. 0.1.4 is the pin because it is the published head: it runs a lift's CONSTRUCTs
+# config home. 0.1.4 is the pin (set 2026-10-14; 0.1.5 is inside the caret): it runs a lift's CONSTRUCTs
 # under ikigai-store's `EvaluationBudget` (5 s, raised by a `urn:cap:store:budget:<ms>` grant, 120 s
 # for root; a `Timeout` past it), adds `space_with_budget`, and requires store 0.2.19, the pin
 # below (ledger #1344). The book's caller is root and the OpenSpec constructs finish far inside
@@ -339,7 +359,7 @@ ikigai-markdown = "0.1.4"
 # Scripts as resources, for the section "Code and language as resources": `urn:script:{name}`
 # with content-addressed versions, `…:result` (run as a read) and `…:runs` (run for effects),
 # under the least of what a script declares, what its publisher held and the host's ceiling.
-# 0.3.6 is the pin because it is the published head: its one library change is the ikigai-core floor,
+# 0.3.6 is the pin (set 2026-10-14): its one library change is the ikigai-core floor,
 # raised to 0.1.100 (a tested floor, set by its ikigai-conformance 0.8 dev-dependency), beneath the
 # core pin above; no API change. Before that the pin was 0.3.5, the head that morning: 0.3.4 lets a script declare a store time
 # budget, bounded like the rest of its authority (ledger #1384), and 0.3.5 moves its ledger and store
@@ -356,7 +376,7 @@ ikigai-markdown = "0.1.4"
 ikigai-script = "0.3.6"
 # Natural language to a DRAFT script, for "A sentence becomes a draft": `urn:nl:grounding` (what
 # the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.4.0 is the
-# pin and the floor: it is the published head, and the release whose drafter, when the model gives
+# pin and the floor: the release whose drafter, when the model gives
 # a draft it already gave, marks that attempt a repeat (`repeatOf` in JSON, `prov:alternateOf` in
 # Turtle) and says "drafting stopped: the model repeated attempt N" rather than naming a bound it
 # did not reach (ledger #1298), which the chapter's stub shows. 0.3.0 made an empty preview a
@@ -369,16 +389,22 @@ ikigai-script = "0.3.6"
 ikigai-nl = "0.4.0"
 # A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
 # every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
-# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. The newest published releases: llm 0.15.0 and
-# the HTTP seam it is built on, ikigai-http 0.2.1 (`HttpTransport`, which the host fills). 0.2.0
+# `ikigai-llm`'s `urn:llm:ask` over a local Ollama. llm 0.16.0 and the HTTP seam it is built on,
+# ikigai-http 0.3.0 (`HttpTransport`, which the host fills), set 2026-10-21; they move together,
+# since llm 0.16 takes http ^0.3. http 0.3.0 maps an origin's status to core 0.1.108's failure
+# classes in one public table (`ikigai_http::status`): a 401/403 is `Refused` (was `Denied`), a 429
+# or a 503 with `Retry-After` is `RetryAfter`, a 500 is `Endpoint`, and a transport failure that
+# timed out is `Timeout`; llm 0.16.0 types every failure through that table. `HttpTransport` did
+# not change, so `Ureq` compiles as it was, and the drafter reports whatever the failure says.
+# Before that: llm 0.15.0 and http 0.2.1. http 0.2.0
 # renamed `urn:httpGet` to `urn:http:get` (ledger #11) and made `HttpTransport` a second, distinct
 # trait from 0.1's, so llm and http move together: llm 0.15.0 takes ^0.2, and `Ureq` must implement
 # that trait. 0.14.0 typed a transport failure as `Unavailable` or `Timeout` where 0.13 said
 # `Endpoint`, and refuses an `as=` its faces do not declare (ledger #88, #179); the drafter reports
-# whatever the model's failure says, and asks for no face. 0.x carets: ceilings too (<0.16.0,
-# <0.3.0); the old pins "0.14.0" and "0.1.9" were ceilings below 0.15 and 0.2.
-ikigai-llm = "0.15.0"
-ikigai-http = "0.2.1"
+# whatever the model's failure says, and asks for no face. 0.x carets: ceilings too (<0.17.0,
+# <0.4.0); the old pins "0.15.0" and "0.2.1" were ceilings below 0.16 and 0.3.
+ikigai-llm = "0.16.0"
+ikigai-http = "0.3.0"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
 # localhost. "2" is that example's line; a caret, so <3.0.0.

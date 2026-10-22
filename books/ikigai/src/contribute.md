@@ -40,8 +40,11 @@ agent's tool is projected from it. So, from the first endpoint:
 - `ArgSpec` for every argument — `name`, `summary`, `optional()` where it is, `class(..)`
   always: an XSD datatype IRI for a scalar, an `rdfs:Class` for an entity. The one people
   leave off, and the one [The graph face](building/graph-face.md) shows is the point.
-- `one_of(..)` for enums, `default_value(..)` where a default exists — and remember that a
-  declared default is *not* injected; your code applies it.
+- `one_of(..)` for enums, `default_value(..)` where a default exists. The kernel fills a
+  declared default in before dispatch (since `ikigai-core` 0.1.105), so your code reads the
+  argument and does not apply the default a second time. A default makes its input
+  optional, and `Description::validate` refuses a description that marks a defaulted input
+  required anyway.
 - Single verb: author flat. More than one verb: one `ActionSpec` per verb, per
   [Multi-verb endpoints](building/multi-verb.md) — and the two forms are **exclusive per
   verb**: an explicit action's `requires` replaces the flat one for that verb rather than

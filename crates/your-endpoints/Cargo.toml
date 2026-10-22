@@ -32,7 +32,8 @@ hello-camel = { path = "../hello-camel" }
 two-hosts = { path = "../two-hosts" }
 # The `Resolver` trait a connected peer implements, and the `async_trait` its methods
 # are declared with — both needed to hand-write a peer that is always down. 0.1.63 here and for
-# `ikigai-ipc` below, the cli crates' published head, with `crates/two-hosts`.
+# `ikigai-ipc` below, with `crates/two-hosts` (set 2026-10-14; the wire v9 crates, 0.1.66 on, wait
+# for the book's version-move pass, ledger #2060).
 ikigai-resolve = "0.1.63"
 # The concrete resolver `two_hosts::socket::connect` returns, so a helper can name it.
 ikigai-ipc = "0.1.63"
