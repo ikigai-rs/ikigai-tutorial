@@ -49,8 +49,8 @@ The model is this book's stub, the one [Scripts and sentences in gonk](../script
 mounts. It also answers what a browse root asks a model: a fixed review of the file below, a
 judge's check, and an explanation, told apart by the system prompt each ask carries. It logs a
 line for every ask, which is how this page shows what a commit cost. In a new empty directory, as in
-[every chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Remote
-workers](workers.md) is still running, stop it first, since this one takes the same port.
+[every chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Routing work
+to agents](routing.md) is still running, stop it first, since this one takes the same port.
 
 <!-- transcript: serve -->
 ```console
