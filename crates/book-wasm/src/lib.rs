@@ -1733,12 +1733,15 @@ mod tests {
 
     /// Part V's cells, the same way — with its two boards loaded first, as the page loads
     /// them, and each refreshed after a cell runs in its game.
-    /// "A space that changes while it runs", steps 1 to 3, in the page's live host: an empty
+    /// "A space that changes while it runs", steps 1 to 5, in the page's live host: an empty
     /// space and its status; a write that adds four doors, then each invoked; a door removed,
-    /// answering `Unresolved` with its cached answer gone.
+    /// answering `Unresolved` with its cached answer gone; a declaration naming an endpoint
+    /// the host never registered, refused, with the last good doors and what they served kept;
+    /// and a view onto `urn:diagram:kernel`, which a caller narrowed below
+    /// `urn:cap:kernel:inspect` is refused through in the same words as directly.
     #[test]
     fn the_live_space_cells_answer_as_the_chapter_says_in_page_order() {
-        let t = run_chapter_in_page_order("live-space.md", 3);
+        let t = run_chapter_in_page_order("live-space.md", 5);
 
         // Empty, and saying why.
         assert!(t[0].contains("installs: 0\n"), "{}", t[0]);
@@ -1767,6 +1770,44 @@ mod tests {
             "{after}"
         );
         assert!(after.contains("a cut would recompute nothing"), "{after}");
+        // Refused: nothing bound, nothing cut. The status says why and where, the doors in
+        // force still answer from the cache, and so would the picture.
+        let refused = t[3].split("ok\n").nth(1).expect("the refused write");
+        assert!(refused.contains("\ninstalls: 2\n"), "{refused}");
+        assert!(
+            refused.contains(
+                "\nrefused: <urn:ikigai:space:_:1:door:2> binds `lisp-reverse`, which the host \
+                 did not register"
+            ),
+            "{refused}"
+        );
+        assert!(
+            refused.contains("resourceOrientedComputing\n[cached]\ncached\n"),
+            "{refused}"
+        );
+        assert!(
+            refused.ends_with("error: no endpoint resolved for urn:iki:tutorial:reverse\n"),
+            "{refused}"
+        );
+        // The view binds, answers through a sub-request at the root, and grants nothing: a
+        // narrowed caller is refused through it in the words it is refused in directly.
+        assert!(t[4].contains("\ninstalls: 3\n"), "{}", t[4]);
+        assert!(
+            t[4].contains("└─ urn:diagram:kernel   diagram-kernel"),
+            "{}",
+            t[4]
+        );
+        let denied: Vec<&str> = t[4]
+            .lines()
+            .filter(|line| line.starts_with("error: denied"))
+            .collect();
+        assert_eq!(denied.len(), 2, "{}", t[4]);
+        assert_eq!(denied[0], denied[1]);
+        assert!(
+            t[4].ends_with("capability: root (full authority)\n"),
+            "{}",
+            t[4]
+        );
     }
 
     /// The live host's picture, redrawn in the page: its text alternative is
