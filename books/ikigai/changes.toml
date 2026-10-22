@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-21"
+summary = "The install notes now name ikigai-cli 0.1.68 as the first release fixing the TLS advisory. The second getting-started exercise also checks that an explicitly empty argument overrides its declared default."
+pages = ["front-door/cli.md", "getting-started/running-it.md", "getting-started/exercises.md"]
+
+[[change]]
+date = "2026-10-21"
 summary = "A correction: since ikigai-core 0.1.105 the kernel fills a declared default in before your endpoint runs, and a description that marks a defaulted input required is refused. The second getting-started exercise and Contribute a module said the opposite; the exercise now shows it in a block that runs on every build."
 pages = ["getting-started/exercises.md", "contribute.md"]
 
