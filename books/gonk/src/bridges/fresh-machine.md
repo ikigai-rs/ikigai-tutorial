@@ -6,13 +6,6 @@ review findings arriving. Every step is a command from the last three chapters, 
 runs them in sequence in one scratch home, so the sequence itself is checked, not only its
 parts.
 
-⚠ With the gonk this book pins, the sequence stops short of filing. The kata import and the
-roborev hook both file through gonk's HTTP door as its anonymous loopback caller, and since gonk
-PR 186 (ledger #1687) that caller reads the ledgers and writes nothing; neither command has a
-signed-in or socket path yet. Steps 1 and 2 work as written; steps 3 and 4 are refused with
-`403`, and this page shows the refusals rather than hiding them. Through gonk 3edf830 both
-filed.
-
 Before it: gonk and `ikigai` installed at the versions this book pins
 ([Which gonk](../introduction.md#which-gonk)), and git. In a new empty directory, as in [every
 chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Importing a kata ledger](kata.md)
@@ -57,30 +50,50 @@ gonk reads gonk.browse.root at startup only: restart gonk to serve the new root(
 
 ## 2. gonk, serving them
 
-gonk reads its roots when it starts, which is what the checkout's last line says. If it is
-already running as a service, restart it the way that service is run; under launchd, with the
-label your plist gives it (`dev.ikigai-rs.gonk` here; the checkout stopped printing one, because a
-label is one operator's choice):
+The roborev hook will file unattended, every time a review completes, so it gets an identity of
+its own before gonk starts: a client certificate enrolled to write the `default` ledger and
+nothing else ([Filing roborev findings](roborev.md#an-identity-for-the-hook)):
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client add roborev --ledger default=write --port 1070 --config-home "$PWD/.config/ikigai"
+client `roborev`  …/.config/ikigai/gonk/quic/clients/roborev
+  fingerprint  …
+  principal    urn:iki:host:gonk:client:…
+  enrolled     grant `roborev` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  restart ikigai-gonk: trusted certificates are read at startup
+  this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
+    ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
+```
+
+gonk reads its roots, and the certificates it trusts, when it starts, which is what the last lines
+of both commands say. If it is already running as a service, restart it the way that service is
+run; under launchd, with the label your plist gives it (`dev.ikigai-rs.gonk` here; the checkout
+stopped printing one, because a label is one operator's choice):
 
 <!-- transcript: manual — it restarts a launchd service, which a scratch check does not have -->
 ```console
 $ launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
 ```
 
-Here it starts for the first time, with the same two homes the checkout was given, so it reads
-the `config.toml` the checkout wrote:
+Here it starts for the first time, with the same two homes the checkout and the enrollment were
+given, so it reads the `config.toml` the checkout wrote and the client `client add` enrolled:
 
 <!-- transcript: serve -->
 ```console
-$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{flight (watched), notes (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
+  quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
+          client  roborev  …  trusted and enrolled
+…
 ```
 
-Both roots, both watched. The `http` line also says what an anonymous caller at that door may
-do: read the `default` ledger, and nothing more. A read through the socket says they are what was cloned:
+Both roots, both watched, and the hook's client trusted and enrolled at the QUIC door. The `http`
+line also says what an anonymous caller at that door may do: read the `default` ledger, and
+nothing more. A read through the socket says the roots are what was cloned:
 
 <!-- transcript: run -->
 ```console
@@ -102,32 +115,43 @@ A `kata export` from the old tracker, here two issues, one blocking the other:
 {"kind":"link","data":{"author":"agent-7","created_at":"2026-09-02T11:01:00.000Z","from_issue_id":2,"from_issue_uid":"01K6Z000000000000000000002","id":1,"to_issue_id":1,"to_issue_uid":"01K6Z000000000000000000001","type":"blocks"}}
 ```
 
+The import runs once, by you, on this machine, so it can take the owner's socket, the shortcut
+that needs no enrollment ([Importing a kata ledger](kata.md#the-owners-socket-a-shortcut)); kata's
+authors stay the items' authors:
+
 <!-- transcript: run -->
 ```console
-$ ikigai-gonk kata import kata.jsonl --gonk http://127.0.0.1:1070
+$ ikigai-gonk kata import kata.jsonl --socket "$PWD/.ikigai/gonk.sock"
 kata export version 27: 2 issue(s), 1 link(s)
-ikigai-gonk: gonk refused POST /iki/ledger/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
+filed     #1       kata 0001  Stop the loop on an empty queue
+filed     #2       kata 0002  Write the empty-queue test
+linked    #2 blocks #1
+
+2 filed, 0 already there; 0 comment(s), 0 close(s), 1 link(s) added; 0 deleted issue(s) and 0 link(s) skipped
 ```
 
-The export is read (two issues, one link), and the first append is refused, so nothing is filed.
-Where the import can file, it files both issues and the link, and a re-run whenever the old
-tracker has moved on converges, adding comments, closes and links that are new and filing nothing
-twice ([Importing a kata ledger](kata.md), which also shows the dry run that works here).
+Import it again whenever the old tracker has moved on: a re-run converges, adding comments,
+closes and links that are new and filing nothing twice. An import that runs unattended, or as
+another user, takes a client of its own instead, `--quic` and `--cert-dir` as the hook below does
+([Importing a kata ledger](kata.md)).
 
 ## 4. The hook
 
-The last piece is one `[[hooks]]` entry in roborev's config, so every completed review hands
-its findings to gonk from now on ([Filing roborev findings](roborev.md)):
+The last piece is one `[[hooks]]` entry in roborev's config, so every completed review files
+its findings here from now on, as the client enrolled in step 2 ([Filing roborev
+findings](roborev.md)):
 
 <!-- transcript: file .roborev/config.toml -->
 ```toml
 [[hooks]]
 event = "review.completed"
-command = "ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root {repo_name} --repo-path {repo} --job {job_id} --sha {sha} --agent {agent} --findings {findings}"
+command = "ikigai-gonk roborev file --quic 127.0.0.1:1062 --cert-dir ~/.config/ikigai/gonk/quic/clients/roborev --ledger default --root {repo_name} --repo-path {repo} --job {job_id} --sha {sha} --agent {agent} --findings {findings}"
 ```
 
-(On your machine the port is gonk's own, 1062.) The next review roborev completes on `notes`
-runs that line with roborev's values in place; this is what it receives and runs:
+That is the line for your machine: gonk's own port, 1062, and the bundle where `client add`
+writes it in your config home. This page's gonk is on 1070 with a scratch config home, so the next
+review roborev completes on `notes` runs that line with roborev's values in place, and this
+page's port and bundle; this is what it receives and runs:
 
 <!-- transcript: file review.md -->
 ```markdown
@@ -152,30 +176,36 @@ The README names the project and says nothing about how to run it.
 
 <!-- transcript: run -->
 ```console
-$ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root 'notes' --repo-path "$PWD/.ikigai/checkouts/notes" --job '7' --sha 'abc1234' --agent 'claude-code' --findings "$(cat review.md)"
-ikigai-gonk: gonk refused POST /iki/ledger/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
+$ ikigai-gonk roborev file --quic 127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/roborev --ledger default --root 'notes' --repo-path "$PWD/.ikigai/checkouts/notes" --job '7' --sha 'abc1234' --agent 'claude-code' --findings "$(cat review.md)"
+filed    high     #3 The README has a title and no instructions, so a new reader cannot start the project.
 ```
 
-Refused the same way, so roborev would log this failure in its daemon log and file nothing.
-The finding is about `urn:repo:notes:file:README.md`, a file gonk now serves; filed, it would be
-an item that browse's page for that file and the ledger find each other by.
+The finding is about `urn:repo:notes:file:README.md`, a file gonk now serves, so browse's page
+for that file and the ledger item find each other. It is authored by the `roborev` client, not by
+you.
 
 ## Where that leaves you
 
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
-nothing is ready (0 open item(s) excluded: the ledger has no open items matching the filter)
-policy: priority-recency
+ 1.    #3  open    p1  The README has a title and no instructions, so a new reader cannot start the project.  [high roborev]
+    p1 — priority 1; last updated …
+ 2.    #2  open    p-  Write the empty-queue test
+    unprioritized — no priority set, so it ranks below every item that has one; last updated …
+
+policy: priority-recency (weighs priority, recency, number)
+ready: 2   excluded: 1
+  not #1: blocked by #2
 ```
 
-An empty ledger beside two repositories gonk checked out and watches. With bridges that can file,
-the same ledger would hold the work imported from kata, with its order intact (`kata 0002` blocking
-`kata 0001`), and the review finding filed by the hook. What keeps it current:
+One ledger: the work imported from kata, with its order intact (`kata 0002` blocking `kata 0001`),
+and a review finding filed by a hook, about a file in a repository gonk checked out and watches.
+What keeps it current:
 
 | what changes | what brings it in | restart? |
 | --- | --- | --- |
 | a repository upstream | `ikigai-gonk checkout --all`, by hand or [on a timer](checkout.md#on-a-timer) | no: the watcher sees the fast-forward |
 | a new repository | `ikigai-gonk checkout <url> --write-config` | yes: roots are read at startup |
-| kata | `ikigai-gonk kata import <a new export>` (refused by this gonk; its `--dry-run` works) | no |
-| a roborev review | the hook, by itself (refused by this gonk) | no |
+| kata | `ikigai-gonk kata import <a new export>` | no |
+| a roborev review | the hook, by itself | no |
