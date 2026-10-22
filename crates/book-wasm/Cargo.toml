@@ -43,6 +43,13 @@ push = { path = "../push" }
 # empty. Its dependencies (ikigai-fn, ikigai-sexpr, ikigai-diagram, core's `declare` feature)
 # build for wasm32-unknown-unknown as they are.
 live-space = { path = "../live-space" }
+# "Checking a resource": the chapter's host (two players answering N-Triples under a scope, a
+# transreptor to Turtle, the closed player shapes), with the RDF Toolbox's names
+# (`ikigai-toolbox`: `urn:toolbox:input:{iri}`, `urn:toolbox:check:{iri}`) and the shapes check
+# (`ikigai-shacl`'s subset validator) beside them. All three build for wasm32-unknown-unknown as
+# they are. The toolbox's build is not a crate: the page binds it at `urn:iki:toolbox:dist:` over
+# the copy the book publishes beside itself (`toolbox/`), see `dist_space`.
+check-resource = { path = "../check-resource" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

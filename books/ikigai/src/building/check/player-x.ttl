@@ -1,0 +1,4 @@
+@prefix ttt: <http://example.org/ttt#> .
+<urn:iki:tutorial:check:player:x> a ttt:Player ;
+	ttt:name "Ada" ;
+	ttt:mark "X" .

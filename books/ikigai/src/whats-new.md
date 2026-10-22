@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: Checking a resource now runs in the page. Three Run cells read a player's Turtle face with and without the scope, check both players against the closed shapes, and show a narrowed caller refused before any shapes are read. Two buttons open the RDF Toolbox itself in place, composed by the page's own kernel from a toolbox build published with the book; its 8.3 MB engine loads only when you press one. Without the kernel, each is a link that opens the toolbox in a new tab on published copies of the Turtle faces.
+
+  Pages: [Checking a resource](building/checking.md)
+
 - **2026-10-22**: All five steps of A space that changes while it runs now run in the page. Two new Run cells follow the first three in the same live host: a declaration naming an endpoint the host never registered, refused while the old doors keep answering from the cache, and a view onto the host's picture, which a caller with a narrowed capability is refused through in the same words as directly. The picture is redrawn after each.
 
   Pages: [A space that changes while it runs](applied/live-space.md)

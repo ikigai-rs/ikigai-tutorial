@@ -24,7 +24,9 @@
 // its no-kernel path here is a broken deploy, not something to audit around. Then every
 // cell is run once (its result pane and history are what a reader sees after Run), every
 // "Expected output" is opened, and every polling view is started, and axe waits for the
-// cells to settle. The no-kernel path has its own instruments (`axe.mjs`, `no-kernel.mjs`).
+// cells to settle. Every "check this resource" is opened in place, and axe audits the toolbox
+// page in its frame with the page around it. The no-kernel path has its own instruments
+// (`axe.mjs`, `no-kernel.mjs`).
 //
 // Which browser. `playwright-core` is pinned exactly and downloads nothing. The browser is
 // the machine's installed Google Chrome (Playwright's `chrome` channel; GitHub's Ubuntu
@@ -103,7 +105,7 @@ async function serve(route) {
     });
 }
 
-const LIVE = "div.ikigai-run, div.ttt-play, div.ikigai-view, div.sheet-play";
+const LIVE = "div.ikigai-run, div.ttt-play, div.ikigai-view, div.sheet-play, div.toolbox-check";
 
 // Load the kernel and start everything live on the page. Returns a problem, or null.
 async function start(page) {
@@ -137,6 +139,35 @@ async function start(page) {
             .every((s) => /redrawn \(|could not be redrawn/.test(s.textContent)),
         null, { timeout: 30000 });
     await page.waitForTimeout(1200);
+    // A "check this resource" (`js/toolbox.js`) is opened too: the RDF Toolbox, composed by the
+    // page's kernel and written into a frame in place, with its engine loaded. axe then audits
+    // what is in the frame along with the page (axe is put into every frame below). Ready means
+    // the toolbox page says so (`data-ready` on its body) and the panel's status line agrees.
+    const checks = await page.locator("button.toolbox-check-open").count();
+    if ((await page.locator("div.toolbox-check").count()) !== checks) {
+        return "a toolbox check did not offer its in-place panel although the kernel loaded";
+    }
+    if (checks > 0) {
+        await page.evaluate(() => {
+            for (const open of document.querySelectorAll('button.toolbox-check-open[aria-expanded="false"]')) {
+                open.click();
+            }
+        });
+        try {
+            await page.waitForFunction(() =>
+                [...document.querySelectorAll(".toolbox-panel")].every((panel) => {
+                    const frame = panel.querySelector("iframe.toolbox-frame");
+                    const body = frame && frame.contentDocument && frame.contentDocument.body;
+                    return body && body.getAttribute("data-ready") === "true" &&
+                        /ready/.test(panel.querySelector(".toolbox-panel-status").textContent);
+                }), null, { timeout: 60000 });
+        } catch (e) {
+            const said = await page.evaluate(() =>
+                [...document.querySelectorAll(".toolbox-panel-status")].map((s) => s.textContent).join(" | "));
+            return `a toolbox panel never became ready: ${said}`;
+        }
+        await page.waitForTimeout(800);
+    }
     return null;
 }
 
@@ -177,6 +208,11 @@ async function auditTheme(theme) {
             err.push(`${label}: the page did not take the ${theme} theme (html class "${applied}")`);
             await page.close();
             continue;
+        }
+        for (const frame of page.frames()) {
+            if (frame !== page.mainFrame()) {
+                await frame.evaluate(axeSource);
+            }
         }
         await page.evaluate(axeSource);
         const found = await page.evaluate(() => window.axe.run(document, { resultTypes: ["violations"] })
