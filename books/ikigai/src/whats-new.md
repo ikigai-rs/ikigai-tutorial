@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: A space that changes while it runs now runs in the page. Its first three steps are Run cells in a live host of their own: the empty space and its status, a write that adds four doors, and a door removed along with its cached answer. The picture of the host is redrawn after each one, with a description that changes with it. The chapter also states two more known limits: a rebuild loop under a narrowed capability can miss a write, and the status door is not in the picture.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-22**: A new chapter in Building endpoints, Checking a resource, follows The graph face. Any resource with a Turtle face can be checked: the RDF Toolbox reads it under your own capability, and closed SHACL shapes turn a property nobody declared into a finding. It ends on how a check differs from urn:kernel:validate, which checks a request before it runs. The repositories page now lists ikigai-toolbox.
 
   Pages: [Checking a resource](building/checking.md), [The repositories](repositories.md)

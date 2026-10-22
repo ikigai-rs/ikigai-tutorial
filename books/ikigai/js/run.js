@@ -76,6 +76,11 @@
 // built from `tic-tac-toe.arrangement` rather than from Rust (chain `declared:a`), one corridor
 // holding the whole declared game ahead of the root's coded one.
 //
+// Or a LIVE HOST ("A space that changes while it runs"): `data-live='workshop'` runs its lines in
+// a host of its own (chain `live:workshop`), a kernel beside the page's one whose dynamic space
+// the cell rebuilds by writing its declaration. `js/live.js` redraws that host's picture after
+// every such cell.
+//
 // A page may keep a STORY CLOCK: `data-clock='2026-09-22T12:00Z'` (an instant, where a plain
 // `data-clock` asks for the browser's clock) builds the page's kernel with a clock stopped
 // there, and a cell carrying `data-at='…'` moves it before it runs. Every reader's page then
@@ -182,15 +187,18 @@
         var game = cell.getAttribute("data-game");
         var scenario = cell.getAttribute("data-scenario");
         var declared = cell.getAttribute("data-declared");
+        var live = cell.getAttribute("data-live");
         var asOf = cell.getAttribute("data-as-of");
         var at = cell.getAttribute("data-at");
         // The chain the cell runs in, spelled as the page's kernel reads it. (Not `chain`: the
         // runner's `reduce` below names its promise that, and would shadow it.)
         var chainSpec = game ||
             (declared ? "declared:" + declared : null) ||
+            (live ? "live:" + live : null) ||
             (scenario ? "scenario:" + scenario + (asOf ? "@" + asOf : "") : null);
         var where = game ? ", in game " + game
             : declared ? ", in game " + declared + " built from the file"
+            : live ? ", in the live host (dynamic space " + live + ")"
             : scenario ? ", in " + scenario + "'s scenario" +
                 (asOf ? " over the sheet as of " + asOf : "")
             : "";

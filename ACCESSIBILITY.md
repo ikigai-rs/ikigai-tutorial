@@ -39,14 +39,15 @@ a review comment.
   (light, rust, coal, navy, ayu), including the 404 page and each book's generated *What's new*
   page.
 - **The in-page kernels**: the runnable cells (`js/run.js`), the tic-tac-toe boards (`js/ttt.js`),
-  the polling views (`js/view.js`) and the spreadsheet (`js/sheet.js`), with the kernel loaded and
-  without it.
+  the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`) and the live host's picture
+  (`js/live.js`), with the kernel loaded and without it.
 - **The site chrome mdbook provides** (sidebar, menu bar, search, theme menu, page navigation), as
   far as this repository can repair it: a barrier there is still a barrier for our readers.
 - **This repository's own additions to that chrome**: `css/a11y.css`, `js/a11y.js` and the cell,
   board, view and sheet styles.
 - **Generated pictures** committed into a book (today, three: the tic-tac-toe arrangement SVG,
-  and the two pictures of the host in "A space that changes while it runs").
+  and the two pictures of the host in "A space that changes while it runs"), and the one a page
+  draws (the live host's picture in that chapter, redrawn after each of its cells).
 
 ### Not ours to fix, still ours to report
 
@@ -84,7 +85,7 @@ check means the site is not updated.
 | `crates/book-a11y`, color (in `scripts/test-books.sh`) | `ikigai-a11y` 0.3.0; mdbook unpinned in CI on purpose | The palette mdbook generated plus the book's `additional-css`, in cascade order: 14 pairs per theme (13 text pairs at 4.5:1, SC 1.4.3; one component pair at 3:1, SC 1.4.11), five themes | Any color that is not a theme variable (syntax highlighting, opacity, hue-only links): the browser run covers those. Colors inside the SVG picture |
 | `crates/book-a11y`, structure (same run) | as above | The static HTML of every built page: `lang`, unique titles, one `h1` in `<main>`, no skipped heading level, `alt` on images, link text, unique ids, ARIA references that resolve, `th` in tables, names on buttons and inputs, the runnable cells' shape, the skip link's target. Faults reported by SC number | Anything JavaScript adds after load; `print.html`, `toc.html` |
 | `a11y/axe.mjs`: axe-core in jsdom (`pages.yml`) | axe-core 4.10.3, jsdom 26.1.0 | Every built page with the books' scripts run, so mdbook's copy buttons, the cells and the search repairs are seen. Gates on axe's WCAG 2.0/2.1/2.2 A and AA rules; best-practice rules are reported only | Color and target size (jsdom has no layout); the kernel path (the wasm import fails in jsdom, so cells are seen without a kernel) |
-| `a11y/no-kernel.mjs` (`pages.yml`) | jsdom 26.1.0 | With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message. Published pages and drafts | Whether the message is understood; only the absence of answers is checked |
+| `a11y/no-kernel.mjs` (`pages.yml`) | jsdom 26.1.0 | With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message, a live host's picture left as committed with its alt text and a line saying it will not be redrawn. Published pages and drafts | Whether the message is understood; only the absence of answers is checked |
 | `a11y/axe-browser.mjs`: axe-core in a real browser (`pages.yml`) | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the log, not pinned) | The assembled site, both books, every page in all five themes, with the kernels loaded, every cell run once, every "Expected output" opened, every view started. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size` | One viewport (1280×900). States it does not open: search results, the theme menu, the collapsed sidebar, the keyboard-help popup |
 | `a11y/links.mjs` (`pages.yml`) | none | Every relative link in the assembled site lands on a page in it, including links between the two books | Fragments (`#id`) and external links |
 | `crates/book-urns`, `book_cells.rs` and the chapter-number checks (`cargo test`) | none | A blank line inside a cell's markup (which breaks the page once built); a bare "chapter N" with no link | Everything else about the prose |
@@ -123,7 +124,8 @@ has been run.
 | The skip link and the keyboard repair to the sidebar toggle need JavaScript | both books | With JavaScript off, no skip link (SC 2.4.1) and the narrow-screen sidebar cannot be opened by keyboard (SC 2.1.1) | Reading with JavaScript on |
 | Runnable cells, boards, views and sheets need JavaScript and WebAssembly | pages with live parts | Without them nothing runs | Each cell's "Expected output" holds the listing's output |
 | Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
-| The pictures' `alt` text is written by hand; a test holds each SVG to its source, not the `alt` text | "Tic-tac-toe, VII", "A space that changes while it runs" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
+| The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
+| The live host's picture is redrawn in the page as an image whose `alt` is generated from the arrangement it was drawn from (`live_space::picture_text`, which a test holds the two committed pictures' `alt` to); nobody has judged whether that text reads well, and a status line announces each redraw without saying what changed in it | "A space that changes while it runs" | A long description, read again in full after every change | The cells' own output, which says what each change did |
 | The browser run's Chrome is not pinned, and mdbook is unpinned on purpose | CI | A new Chrome or mdbook can turn the gate red and stop deploys until someone repairs it | none needed: a red gate is the design |
 
 No list like this is complete. Please report what you find.

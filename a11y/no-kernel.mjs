@@ -17,6 +17,8 @@
 //   boards   no squares, no grid, no buttons: one message saying what did not load.
 //   views    nothing that polls, no controls, no count: one message saying what did not load.
 //   sheets   no grid, no formula bar, no field: one message saying what did not load.
+//   pictures a live host's picture (`figure.ikigai-live`, `js/live.js`) keeps the committed
+//            file and its alt text, and one status line says it will not be redrawn.
 //
 // WHY THIS EXISTS. `js/run.js` once filled every cell's result with the listing's expected
 // output whenever the wasm failed to load, and Brian met it on a drafts server that had lost
@@ -154,11 +156,31 @@ function checkSheets(doc, fail) {
     return sheets.length;
 }
 
+function checkLivePictures(doc, fail) {
+    const figures = doc.querySelectorAll("figure.ikigai-live[data-live]");
+    figures.forEach((figure, i) => {
+        const n = `live picture ${i + 1}`;
+        const img = figure.querySelector("img");
+        if (!img || !/\.svg$/.test(img.getAttribute("src") || "")) {
+            fail(`${n}: does not show its committed picture: ${JSON.stringify(img && img.getAttribute("src"))}`);
+        }
+        if (!img || !(img.getAttribute("alt") || "").trim()) {
+            fail(`${n}: has no text alternative`);
+        }
+        const notes = figure.querySelectorAll(".ikigai-live-status");
+        if (notes.length !== 1 || !DID_NOT_LOAD.test(notes[0].textContent)) {
+            fail(`${n}: does not say it will not be redrawn: ${JSON.stringify(figure.textContent.trim())}`);
+        }
+    });
+    return figures.length;
+}
+
 let failures = 0;
 let cellsSeen = 0;
 let boardsSeen = 0;
 let viewsSeen = 0;
 let sheetsSeen = 0;
+let picturesSeen = 0;
 let pagesSeen = 0;
 for (const book of books) {
     for (const path of pages(book)) {
@@ -183,7 +205,9 @@ for (const book of books) {
                 .every((v) => DID_NOT_LOAD.test(v.textContent));
             const sheetsDone = [...d.querySelectorAll("div.sheet-play[data-shell]")]
                 .every((v) => DID_NOT_LOAD.test(v.textContent));
-            return cellsDone && boardsDone && viewsDone && sheetsDone;
+            const picturesDone = [...d.querySelectorAll("figure.ikigai-live[data-live]")]
+                .every((f) => DID_NOT_LOAD.test(f.textContent));
+            return cellsDone && boardsDone && viewsDone && sheetsDone && picturesDone;
         });
         if (!settled) {
             fail("never reached the no-kernel state within 3s (is the load still pending?)");
@@ -211,13 +235,14 @@ for (const book of books) {
         boardsSeen += checkBoards(doc, fail);
         viewsSeen += checkViews(doc, fail);
         sheetsSeen += checkSheets(doc, fail);
+        picturesSeen += checkLivePictures(doc, fail);
         pagesSeen += 1;
         window.close();
     }
 }
 
-if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0) {
-    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views and ${sheetsSeen} sheets — ` +
+if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0 || picturesSeen === 0) {
+    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets and ${picturesSeen} live pictures — ` +
         "a check that saw nothing is not a pass (pass the drafts build too; see the header)");
     process.exit(1);
 }
@@ -225,4 +250,4 @@ if (failures) {
     console.error(`\nno-kernel: ${failures} failure${failures === 1 ? "" : "s"} across ${pagesSeen} pages`);
     process.exit(1);
 }
-console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views and ${sheetsSeen} sheets — nothing answered, every Run disabled`);
+console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets and ${picturesSeen} live pictures — nothing answered, every Run disabled, no picture redrawn`);

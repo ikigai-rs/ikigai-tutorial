@@ -303,6 +303,7 @@ fn describe(mention: &Mention) -> String {
         Context::Cli => "an `ikigai …` shell example",
         Context::Rust => "a Rust example",
         Context::Cell => "a runnable cell",
+        Context::LiveCell => "a runnable cell in the page's live host",
         Context::Prose => "prose",
     };
     format!("{} ({where_from}) names {}", mention.site(), mention.urn)
@@ -403,6 +404,20 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
                         "{}: the in-page kernel (book_wasm::page_kernel()) does not bind \
                          it, so Run would fail. Cells may name only what Part I's space \
                          or the tic-tac-toe game binds.",
+                        describe(mention)
+                    ));
+                }
+            }
+            // A cell carrying `data-live` runs in the page's live host (book_wasm's `live:`
+            // chain): the host of "A space that changes while it runs", whose doors are
+            // whatever its cells have written. The chapter's cells write `FOUR_DOORS`.
+            Context::LiveCell => {
+                if !binds(live_space_root().as_ref(), &mention.urn)
+                    && !the_kernel_answers(&mention.urn)
+                {
+                    failures.push(format!(
+                        "{}: the page's live host does not bind it, even after the chapter's \
+                         first declaration, so Run would fail.",
                         describe(mention)
                     ));
                 }
