@@ -175,6 +175,7 @@ dependencies = [
  "futures",
  "hello-camel",
  "ikigai-core",
+ "live-space",
  "loadable-module",
  "push",
  "script-host",
@@ -1015,9 +1016,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-core"
-version = "0.1.109"
+version = "0.1.110"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d696d8a3d034b06a1773c93e90d522f399eec8a3866ff888712a3d009644c1e0"
+checksum = "d77b03ae83cdeead339628ba54f5b9c09f88be94a4f55c98a30cac39483a9650"
 dependencies = [
  "async-trait",
  "blake3",
@@ -1032,11 +1033,12 @@ dependencies = [
 
 [[package]]
 name = "ikigai-diagram"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d9391a02e264855200f977508aebe81855610161c8509a29d32096890b187f2"
+checksum = "9faa2c2f24ceaad9e2c47086effb1680655a7bb248d57732fb7eb3ce7b171bda"
 dependencies = [
  "ikigai-core",
+ "ikigai-fn",
 ]
 
 [[package]]
@@ -1425,6 +1427,19 @@ name = "litemap"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
+
+[[package]]
+name = "live-space"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "hello-camel",
+ "ikigai-core",
+ "ikigai-diagram",
+ "ikigai-fn",
+ "ikigai-sexpr",
+ "ikigai-vocab",
+]
 
 [[package]]
 name = "loadable-module"

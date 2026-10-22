@@ -1,0 +1,30 @@
+[package]
+name = "live-space"
+version = "0.1.0"
+description = "The code taught by the applied chapter \"A space that changes while it runs\": a dynamic space rebuilt from a declaration resource, over endpoints Part I already wrote, drawn by ikigai-diagram."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "live_space"
+path = "src/lib.rs"
+
+[dependencies]
+# `DynamicSpace` and `Threaded` (0.1.109), and root-resolving alias rules, the views (0.1.110).
+# `declare` brings the Turtle parser `DynamicSpace::refresh` reads a declaration with.
+ikigai-core = { workspace = true, features = ["declare"] }
+ikigai-vocab.workspace = true
+# The endpoints the space binds: Part I's camel-case, title and camel-title, and ikigai-fn's
+# toUpper. None of them is new, and none changes to be bound here.
+hello-camel = { path = "../hello-camel" }
+ikigai-fn.workspace = true
+# The declaration is written as an s-expression and served as the Turtle core builds from.
+ikigai-sexpr.workspace = true
+# `urn:diagram:kernel`: the host mounts the picture of its own arrangement.
+ikigai-diagram.workspace = true
+
+# `LocalPool`: core has no runtime, so the host runs the space's rebuild loop on one.
+futures.workspace = true

@@ -437,6 +437,52 @@ pieces, each a little further apart:
 * **A timer per session**, at the earliest deadline among the views it sent, and a full redraw when
   cuts were dropped or the channel reconnects.
 
+<!-- urn-gate: illustration urn:iki:space:session:{id} — the name, and the thread, of a session
+     corridor `Threaded::session` makes. A space and a thread, not a resource. -->
+<!-- urn-gate: illustration urn:iki:space:session:alice — one such session's thread, cut by hand
+     in the block below. -->
+
+A server also has to forget a session when it ends, and what the session was served goes with it.
+`ikigai-core` 0.1.109 makes that one cut. `Threaded::session(id, space)` is a corridor named, and
+threaded, `urn:iki:space:session:{id}`: every answer served through it hangs from that one thread,
+so ending the session is cutting it. The session's answers are its own cache partition, so another
+session's are never touched. Here it is over Part I's space, with two sessions reading the same
+name:
+
+```rust
+# extern crate hello_camel;
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{ArgRef, Capability, Iri, Request, Scope, Space, Threaded, Verb};
+
+let kernel = hello_camel::kernel();
+let root = Capability::root();
+let part_one: Arc<dyn Space> = Arc::new(hello_camel::space());
+let session = |id: &str| {
+    let corridor: Arc<dyn Space> = Arc::new(Threaded::session(id, Arc::clone(&part_one)).unwrap());
+    Scope::empty().with(corridor)
+};
+let read = || {
+    Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:camel-case").unwrap())
+        .with_arg("in", ArgRef::Inline(b"resource oriented computing".to_vec()))
+};
+
+block_on(kernel.issue_in(read(), &root, session("alice"))).unwrap();
+block_on(kernel.issue_in(read(), &root, session("bob"))).unwrap();
+
+// Alice's session ends: one cut, and only what that session was served goes.
+kernel.cut("urn:iki:space:session:alice");
+assert!(!kernel.is_cached_in(&read(), &root, &session("alice")));
+assert!(kernel.is_cached_in(&read(), &root, &session("bob")));
+```
+
+Nothing else needs freeing: the corridor is dropped with the last request that carried it. The same
+combinator, one thread for everything a space served, is what makes a space that changes while the
+kernel runs safe to cache through ([A space that changes while it runs](live-space.md), earlier in
+the book).
+
 ## What was built
 
 | the set | the name | what it is |

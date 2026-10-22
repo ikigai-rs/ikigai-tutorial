@@ -27,6 +27,8 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 time-resource = { path = "../time-resource" }
 spreadsheet = { path = "../spreadsheet" }
 push = { path = "../push" }
+# "A space that changes while it runs": its host, after the chapter's first declaration bound.
+live-space = { path = "../live-space" }
 # The section "Code and language as resources": the script host, and the drafting host that
 # mounts ikigai-nl beside it.
 script-host = { path = "../script-host" }
