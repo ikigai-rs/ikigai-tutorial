@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-21"
+summary = "Contribute a module now explains declared failure classes, the RECOMPUTE check added in conformance 0.9 and the opt-in FAILURES check in 0.10. The your-endpoints crate runs the suite for word-count, and the page explains why a 0.10.0 pin does not receive 0.11's new default."
+pages = ["contribute.md"]
+
+[[change]]
+date = "2026-10-21"
 summary = "A correction: since ikigai-core 0.1.105 the kernel fills a declared default in before your endpoint runs, and a description that marks a defaulted input required is refused. The second getting-started exercise and Contribute a module said the opposite; the exercise now shows it in a block that runs on every build."
 pages = ["getting-started/exercises.md", "contribute.md"]
 

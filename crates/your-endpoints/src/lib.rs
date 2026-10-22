@@ -32,8 +32,8 @@ pub mod module;
 use std::sync::Arc;
 
 use ikigai_core::{
-    ArgSpec, Description, EndpointSpace, Exact, FnEndpoint, Invocation, Kernel, ReprType,
-    Representation, Result, Verb,
+    ArgSpec, Description, EndpointSpace, Exact, FailureClass, FnEndpoint, Invocation, Kernel,
+    ReprType, Representation, Result, Verb,
 };
 use ikigai_vocab::TurtleRenderer;
 
@@ -66,6 +66,7 @@ pub fn word_count() -> FnEndpoint {
         Description::new("word-count")
             .title("Word count")
             .summary("Counts the whitespace-separated words in the `in` argument.")
+            .fails(FailureClass::Permanent)
             .verb(Verb::Source)
             .verb(Verb::Meta)
             .input(

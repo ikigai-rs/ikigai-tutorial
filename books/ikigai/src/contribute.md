@@ -77,6 +77,32 @@ pub fn space() -> EndpointSpace {
 
 A host chains onto it. Your crate does not decide where it is mounted.
 
+## State how it fails
+
+Since `ikigai-core` 0.1.108, every error has an `Error::class()`. Declare the classes
+an endpoint can produce with `.fails(FailureClass::…)` on its `Description`, or on each
+`ActionSpec` for a multi-verb endpoint (`ActionSpec.failures` holds the declaration):
+
+```rust
+# extern crate ikigai_core;
+use ikigai_core::{ActionSpec, FailureClass, Verb};
+
+let action = ActionSpec::new(Verb::Source)
+    .fails(FailureClass::Transient)
+    .fails(FailureClass::RetryAfter);
+assert_eq!(action.admits_failure(FailureClass::Transient), Some(true));
+assert_eq!(action.admits_failure(FailureClass::Unknown), Some(false));
+```
+
+`Transient` says the same request may succeed now; `RetryAfter` says to wait until a
+stated time; `OverBudget` says the input exceeds a bound; `Denied` says the caller lacks
+a capability; `Refused` says a remote authority refused the credential presented;
+`Permanent` says the request or current state is wrong; `Unknown` says the endpoint
+could not classify it. `Permanent` is always implied, and `Denied` is implied beside a
+nonempty `requires`. Leaving the declaration unstated makes no promise; it does not
+mean the action cannot fail. State what the implementation can return so a consumer
+can decide whether to retry, wait, reduce the input or ask for authority.
+
 ## The tests
 
 A test builds a kernel over `space()`, resolves a name, and asserts the answer — the
@@ -85,9 +111,26 @@ module in the ecosystem runs: [`ikigai-conformance`](https://github.com/ikigai-r
 walks every endpoint of a kernel and reports every departure from the recipe on this
 page at once — a missing class, an undeclared scope, a `Sink` without `content`. It is
 what "done" means for a module, and it is a dev-dependency, not a rule you remember. Pin
-it as a range you read in both directions: under Cargo's 0.x rules `"0.2.0"` means
-`<0.3.0`, and most of the ecosystem's adopters sat one minor behind the current
-definition of done for weeks without a test saying so. Test the description too
+it as a range you read in both directions: under Cargo's 0.x rules `"0.10.0"` means
+`>=0.10.0, <0.11.0`, and most of the ecosystem's adopters sat one minor behind the current
+definition of done for weeks without a test saying so.
+
+Version 0.9 added `RECOMPUTE`: cut a never-expiring cached answer's golden threads
+and recompute it repeatedly, checking that its bytes agree. A cache hit alone cannot prove that the
+computation is repeatable. Version 0.10 added `FAILURES`, which compares observed
+failures with the action's declared classes. In 0.10 it is opt-in with
+`Suite::check_failures()`; it becomes the default from 0.11. A `"0.10.0"` pin is a
+ceiling below that default, so adopting it takes a deliberate version move. An action
+that states no classes is reported as unstated, never as a `FAILURES` finding.
+
+`crates/your-endpoints/tests/conformance.rs` runs the suite with `check_failures()` over
+`space()`, scoped to its own `word-count` endpoint; the endpoints inherited from
+`hello-camel` and `ikigai-fn` are listed separately. It declares `word-count` pure
+because its cacheable answer depends only on its input. The test also pins the inherited
+list so a new endpoint cannot silently escape the walk, and uses `Suite::fails_under`
+to check that non-UTF-8 input produces a `Permanent` failure.
+
+Test the description too
 (`describe().inputs`), test a `.requires` by resolving under an attenuated capability and
 asserting `Denied`, and test anything with a clock under `FixedClock` ([Testing an
 endpoint hermetically](building/hermetic.md)). If the crate reads a config home, take it

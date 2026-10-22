@@ -1001,6 +1001,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ikigai-conformance"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98df2da22c2a08f1f836ce4d0042839f244014888949a65ae36bc845753a9fa1"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "ikigai-vocab",
+ "oxrdf",
+ "oxrdfio",
+]
+
+[[package]]
 name = "ikigai-core"
 version = "0.1.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3159,6 +3172,7 @@ dependencies = [
  "async-trait",
  "futures",
  "hello-camel",
+ "ikigai-conformance",
  "ikigai-core",
  "ikigai-ipc",
  "ikigai-module",
