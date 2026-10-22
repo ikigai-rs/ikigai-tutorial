@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: A space that changes while it runs now runs in the page. Its first three steps are Run cells in a live host of their own: the empty space and its status, a write that adds four doors, and a door removed along with its cached answer. The picture of the host is redrawn after each one, with a description that changes with it. The chapter also states two more known limits: a rebuild loop under a narrowed capability can miss a write, and the status door is not in the picture.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-22**: A new chapter in Applied, A space that changes while it runs, follows Tic-tac-toe VII. It names an empty dynamic space, adds four endpoints the book already has by writing a declaration, and watches the space's picture redraw. A removed door takes its cached answers with it, a refused change keeps the old doors, and a view gives another name to something the host serves without granting anything. A spreadsheet, VII adds the session space beside it, and Where this actually stands now names ikigai-core 0.1.110.
 
   Pages: [A space that changes while it runs](applied/live-space.md), [A spreadsheet, VII: push](applied/spreadsheet-7.md), [Where this actually stands](modules/status.md)

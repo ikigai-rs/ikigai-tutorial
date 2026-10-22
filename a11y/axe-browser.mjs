@@ -129,8 +129,12 @@ async function start(page) {
         }
     });
     // Settled: no cell still running, and a polling view has had time to answer at least once.
+    // A live host's picture (`js/live.js`) is redrawn after its cells ran: wait for each one to
+    // say so, so axe sees the redrawn picture and the alt text it came with.
     await page.waitForFunction(() =>
-        [...document.querySelectorAll(".ikigai-run-caption")].every((c) => c.textContent !== "running…"),
+        [...document.querySelectorAll(".ikigai-run-caption")].every((c) => c.textContent !== "running…") &&
+        [...document.querySelectorAll("figure.ikigai-live .ikigai-live-status")]
+            .every((s) => /redrawn \(|could not be redrawn/.test(s.textContent)),
         null, { timeout: 30000 });
     await page.waitForTimeout(1200);
     return null;

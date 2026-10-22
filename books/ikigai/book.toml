@@ -31,7 +31,9 @@ additional-css = ["css/a11y.css", "css/run.css", "css/ttt.css", "css/view.css", 
 # (the clock in "Time is a resource"), with a pause and a count of what the polling cost.
 # sheet.js does the same for `<div class="sheet-play" data-shell='…'>`, the spreadsheet arc's
 # sheet: a grid and a formula bar whose form fields reach the kernel as named arguments.
-additional-js = ["js/a11y.js", "js/run.js", "js/ttt.js", "js/view.js", "js/sheet.js"]
+# live.js redraws `<figure class="ikigai-live" data-live='…'>`, the picture of a live host, after
+# every cell that ran in that host ("A space that changes while it runs").
+additional-js = ["js/a11y.js", "js/run.js", "js/ttt.js", "js/view.js", "js/sheet.js", "js/live.js"]
 
 [output.html.fold]
 enable = true

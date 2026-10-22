@@ -20,6 +20,9 @@
 //! * [`Host`] — the three, started: the space named, the host's loop (`DynamicSpace::drive`)
 //!   running on a [`LocalPool`], and a write that lets the loop catch up before it returns,
 //!   so the chapter's listings read like a REPL session.
+//! * [`picture_text`] — the picture in words: the text alternative for `urn:diagram:kernel`,
+//!   written from the same topology the picture is drawn from, so a page that redraws the
+//!   picture can keep its `alt` true.
 
 use std::sync::{Arc, Mutex};
 
@@ -27,7 +30,8 @@ use futures::executor::{block_on, LocalPool};
 use futures::task::LocalSpawnExt;
 use ikigai_core::{
     ArgRef, Capability, DynamicSpace, EndpointSpace, Error, Exact, Fallback, FnEndpoint,
-    Invocation, Iri, Kernel, Registry, ReprType, Representation, Request, Space, Verb,
+    Invocation, Iri, Kernel, MatchKind, Registry, ReprType, Representation, Request, ResolveAt,
+    Space, SpaceKind, Topology, Verb,
 };
 use ikigai_sexpr::arrangement_to_topology;
 use ikigai_vocab::TurtleRenderer;
@@ -133,6 +137,138 @@ pub fn kernel(root: Arc<dyn Space>) -> Kernel {
     Kernel::with_meta_renderer(root, Arc::new(TurtleRenderer))
 }
 // ANCHOR_END: kernel
+
+// ANCHOR: picture_text
+/// The host's arrangement in words, from `topology` (what `urn:kernel:topology` answers, and
+/// `urn:diagram:kernel` draws): the text alternative for the picture. The page sets it as the
+/// picture's `alt` every time it redraws one, and the chapter's two committed pictures carry
+/// it as theirs, so the words are never written by hand and cannot drift from the boxes.
+pub fn picture_text(topology: &Topology) -> String {
+    let mut text = String::from("The host's arrangement as nested boxes. ");
+    match (&topology.kind, topology.children.as_slice()) {
+        (SpaceKind::Chain { .. }, [root]) => {
+            text.push_str("A chain holds the root, ");
+            text.push_str(&space_text(root));
+        }
+        _ => text.push_str(&capitalized(&space_text(topology))),
+    }
+    text.push('.');
+    text
+}
+
+/// One space in words, starting lowercase: `a fallback of 3 layers. Layer 1 is …`.
+fn space_text(node: &Topology) -> String {
+    let named = |what: &str| match &node.id {
+        // A declaration's anonymous nodes are numbered by core, not named by anyone.
+        Some(id) if !id.as_str().starts_with("urn:ikigai:space:_:") => {
+            format!("the {what} {}", id.as_str())
+        }
+        _ if what.starts_with(['a', 'e', 'i', 'o', 'u']) => format!("an {what}"),
+        _ => format!("a {what}"),
+    };
+    match &node.kind {
+        SpaceKind::Fallback => {
+            let mut text = format!(
+                "{} of {}",
+                named("fallback"),
+                count(node.children.len(), "layer", "layers")
+            );
+            for (i, layer) in node.children.iter().enumerate() {
+                text.push_str(&format!(". Layer {} is {}", i + 1, space_text(layer)));
+            }
+            text
+        }
+        SpaceKind::EndpointSpace { doors } => {
+            let space = match &node.id {
+                Some(id) if !id.as_str().starts_with("urn:ikigai:space:_:") => {
+                    format!("the space {}, an endpoint space", id.as_str())
+                }
+                _ => "an endpoint space".to_string(),
+            };
+            if doors.is_empty() {
+                return format!("{space} with no doors");
+            }
+            let listed: Vec<String> = doors
+                .iter()
+                .map(|door| {
+                    let how = match door.kind {
+                        MatchKind::Exact => String::new(),
+                        other => format!(" ({})", format!("{other:?}").to_lowercase()),
+                    };
+                    format!("{}{how}, answered by {}", door.pattern, door.endpoint)
+                })
+                .collect();
+            let order = if doors.len() > 1 {
+                ", tried in order"
+            } else {
+                ""
+            };
+            format!(
+                "{space} with {}{order}: {}",
+                count(doors.len(), "door", "doors"),
+                listed.join("; ")
+            )
+        }
+        SpaceKind::Dynamic { declaration } => {
+            let inner = match node.children.as_slice() {
+                [inner] => format!(", holding {}", space_text(inner)),
+                _ => String::new(),
+            };
+            format!(
+                "{}, built from {}{inner}",
+                named("dynamic space"),
+                declaration.as_str()
+            )
+        }
+        SpaceKind::Alias { rules, .. } => {
+            let listed: Vec<String> = rules
+                .iter()
+                .map(|rule| {
+                    let at = match rule.at {
+                        ResolveAt::Root => ", asked again from the root",
+                        _ => "",
+                    };
+                    format!("{} to {}{at}", rule.from, rule.to)
+                })
+                .collect();
+            let inner = match node.children.as_slice() {
+                [inner] => format!(", over {}", space_text(inner)),
+                _ => String::new(),
+            };
+            format!(
+                "{} with {}: {}{inner}",
+                named("alias"),
+                count(rules.len(), "rule", "rules"),
+                listed.join("; ")
+            )
+        }
+        other => {
+            let kind = format!("{other:?}");
+            let kind = kind
+                .split([' ', '{', '('])
+                .next()
+                .unwrap_or("space")
+                .to_lowercase();
+            format!("{} space", named(&kind)).replace("space space", "space")
+        }
+    }
+}
+
+fn count(n: usize, one: &str, many: &str) -> String {
+    match n {
+        1 => format!("1 {one}"),
+        n => format!("{n} {many}"),
+    }
+}
+
+fn capitalized(text: &str) -> String {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().chain(chars).collect(),
+        None => String::new(),
+    }
+}
+// ANCHOR_END: picture_text
 
 /// A `Source` of `iri`, with `args` inline: the request every listing reads with.
 pub fn source(iri: &str, args: &[(&str, &str)]) -> Request {

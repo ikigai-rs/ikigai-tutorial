@@ -200,6 +200,7 @@ dependencies = [
  "ikigai-sexpr",
  "ikigai-vocab",
  "js-sys",
+ "live-space",
  "push",
  "serde_json",
  "spreadsheet",

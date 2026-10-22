@@ -19,8 +19,15 @@ takes its cached answers with it.
 
 Nothing here needs a server or a REPL. If a `ttt-host` or an `ikigai serve` from an earlier
 chapter is still running, it can stay running: this chapter uses neither. Every listing below
-runs on every build of the book, against the crate `crates/live-space`. The page's own kernel
-has no dynamic space, so this chapter has no Run buttons.
+runs on every build of the book, against the crate `crates/live-space`.
+
+The same host also runs in this page. The cells below that say "in the live host" run their
+lines in it: the root `crates/live-space` builds, with an empty dynamic space called
+`workshop`, started the first time you press Run in one of them. It is a kernel of its own,
+beside the one the book's other cells share, because that one already binds Part I's names,
+and an empty space would not look empty in front of them. Its rebuild loop is the chapter's
+`drive`, running on the page's own event loop. Run the cells in order: each one changes the
+host the next one reads.
 
 ## The host
 
@@ -121,11 +128,26 @@ why: the loop's first read found no declaration. A space that cannot read its de
 binds nothing, rather than guessing. Until a declaration binds, every name in it answers
 `Unresolved`.
 
-Here is the host as `urn:diagram:kernel` draws it now:
+In the page, the same two questions:
 
-<figure style="margin: 1em 0">
+<div class="ikigai-run" data-live='workshop' data-cmd='source urn:iki:space:dynamic:workshop:status
+source urn:iki:tutorial:camel-case in="resource oriented computing"'>
+<pre class="ikigai-run-expected">space: urn:iki:space:dynamic:workshop
+declaration: urn:iki:tutorial:live:declaration
+in force: nothing (the space is empty)
+installs: 0
+refused: the declaration could not be read: not found: urn:iki:tutorial:live:declaration
+[uncacheable]
+error: no endpoint resolved for urn:iki:tutorial:camel-case</pre>
+</div>
+
+Here is the host as `urn:diagram:kernel` draws it now. In the page, this picture is the live
+host's: after every cell that runs in it, the page asks the host for `urn:diagram:kernel`
+again and draws the answer here, with a text alternative written from the same arrangement.
+
+<figure class="ikigai-live" data-live='workshop' style="margin: 1em 0">
 <a href="live-space-empty.svg"><img src="live-space-empty.svg"
-     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of three layers. Layer 1 is an endpoint space with one door, urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, with two doors, urn:diagram:arrangement and urn:diagram:kernel. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with no doors."></a>
+     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 2 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with no doors."></a>
 <figcaption>The host before anything is declared: <code>urn:diagram:kernel</code>, as the
 host in <code>crates/live-space</code> answers it. Select the picture to open it at full
 size.</figcaption>
@@ -188,6 +210,30 @@ Part I. Its sub-request resolves from the root, finds `title` in the dynamic spa
 composes as before. The status counts one install. Its `in force` line is now the digest of
 the declaration that bound.
 
+In the page, the write is a `sink` to the declaration, on one line, and the reads after it
+are the listing's. Run it after the cell above, then look at the picture above that cell:
+
+<div class="ikigai-run" data-live='workshop' data-cmd='sink urn:iki:tutorial:live:declaration (endpoints (door "urn:iki:tutorial:camel-case" camel-case) (door "urn:iki:tutorial:title" title) (door "urn:iki:tutorial:camel-title" camel-title) (door "urn:iki:tutorial:upper" toUpper))
+source urn:iki:tutorial:camel-case in="resource oriented computing"
+source urn:iki:tutorial:upper in="resource oriented computing"
+source urn:iki:tutorial:camel-title
+source urn:iki:space:dynamic:workshop:status'>
+<pre class="ikigai-run-expected">ok
+[uncacheable]
+resourceOrientedComputing
+[computed]
+RESOURCE ORIENTED COMPUTING
+[computed]
+resourceOrientedComputing
+[computed]
+space: urn:iki:space:dynamic:workshop
+declaration: urn:iki:tutorial:live:declaration
+in force: b3:1fb3e978a7d7700944d5cb5ece16d741453c3de61ad7547be867d4ff14f0bbef
+installs: 1
+refused: nothing since the last bind
+[uncacheable]</pre>
+</div>
+
 The picture changed without anyone asking for it to change. `urn:diagram:kernel` is a
 pure function of `urn:kernel:topology`, so it is cached, and the topology hangs from the
 kernel's bindings thread, `urn:kernel:bindings`. A successful bind cuts that thread. That cut
@@ -196,7 +242,7 @@ nobody asks for. The next read draws this:
 
 <figure style="margin: 1em 0">
 <a href="live-space-doors.svg"><img src="live-space-doors.svg"
-     alt="The same host after the first declaration. Layers 1 and 2 are unchanged: the declaration's door, and the diagram space with its two doors. Layer 3, the dynamic space urn:iki:space:dynamic:workshop, now holds an endpoint space with four doors, tried in order: urn:iki:tutorial:camel-case answered by camel-case, urn:iki:tutorial:title answered by title, urn:iki:tutorial:camel-title answered by camel-title, and urn:iki:tutorial:upper answered by toUpper. All four match exactly."></a>
+     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 2 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with 4 doors, tried in order: urn:iki:tutorial:camel-case, answered by camel-case; urn:iki:tutorial:title, answered by title; urn:iki:tutorial:camel-title, answered by camel-title; urn:iki:tutorial:upper, answered by toUpper."></a>
 <figcaption>The host after one write to its declaration. A test in
 <code>crates/live-space</code> holds both pictures to what the host draws.</figcaption>
 </figure>
@@ -271,6 +317,31 @@ assert_eq!(host.title.reads.load(Ordering::SeqCst), 2);
 `camel-title` answers `Unresolved`, the same answer as a name that was never bound, and its
 cached answer is gone. If the cache had kept it, a reader would be served an answer from a
 door that no longer exists, and no read could tell them so.
+
+In the page, after the cell above: read `camel-title` (cached, since that cell read it), ask
+what hangs from the space's thread, remove the door, and ask both again:
+
+<div class="ikigai-run" data-live='workshop' data-cmd='source urn:iki:tutorial:camel-title
+source urn:kernel:dependents thread=urn:iki:space:dynamic:workshop
+sink urn:iki:tutorial:live:declaration (endpoints (door "urn:iki:tutorial:camel-case" camel-case) (door "urn:iki:tutorial:title" title) (door "urn:iki:tutorial:upper" toUpper))
+source urn:iki:tutorial:camel-title
+source urn:kernel:dependents thread=urn:iki:space:dynamic:workshop'>
+<pre class="ikigai-run-expected">resourceOrientedComputing
+[cached]
+dependents of urn:iki:space:dynamic:workshop  (cut 1 time)
+  4 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
+  urn:iki:tutorial:camel-case   text/plain                     25 B  2 threads   root
+  urn:iki:tutorial:camel-title  text/plain                     25 B  3 threads   root
+  urn:iki:tutorial:title        text/plain                     27 B  2 threads   root
+  urn:iki:tutorial:upper        text/plain                     27 B  2 threads   root
+[uncacheable]
+ok
+[uncacheable]
+error: no endpoint resolved for urn:iki:tutorial:camel-title
+dependents of urn:iki:space:dynamic:workshop  (cut 2 times)
+  (no live cached entry hangs from it: a cut would recompute nothing)
+[uncacheable]</pre>
+</div>
 
 The `(cut 1 time)` is the first bind. A space's thread is cut by every bind, including the
 one that filled it.
@@ -429,8 +500,19 @@ That is the `1 rule` the listing checks for.
 - **No sealing levels.** A level that seals names is refused in a dynamic space, because a
   running kernel's seals are fixed when it is built.
 - **Views are Turtle only** until `ikigai-sexpr` can print and read `resolveAt`.
-- **Not in the page.** The page's kernel has no dynamic space, so there are no Run buttons
-  here; the listings run in `mdbook test` instead.
+- **A loop under a narrowed capability can miss a write** (ledger #2048). `drive` hears a
+  write to the declaration only through an answer cached under its own capability that hangs
+  from the declaration's thread. Under root it hears every write. Under a narrower capability
+  that can listen, a declaration served uncacheable is never cached, so the loop binds once,
+  at start, and never hears a write again. The same happens to this chapter's own
+  declaration until it is first written, because "not found" is not cached either. This host
+  runs its loop under root; a host that narrows it must refresh on a signal of its own.
+- **The status door is not in the topology** (ledger #2049). `…:status` answers, and the
+  space's entries (so the kernel's catalog) list it, but `DynamicSpace`'s topology reports only
+  the inner space. Neither picture above shows it, and a reader who learns the host from its
+  picture cannot find it.
+- **In the page, only the first three steps run.** The refused change and the view have no
+  cells; their listings run in `mdbook test`.
 
 The same mechanism, one thread per space, also gives a server a cheap way to forget a
 session. [A spreadsheet, VII](spreadsheet-7.md#what-a-server-needs), later in the book,

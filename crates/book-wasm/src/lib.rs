@@ -23,6 +23,12 @@
 //! authority (whoever may push a corridor chooses what the names mean), so the page's host
 //! code does it from markup the chapter wrote.
 //!
+//! A cell may also run in a **live host** (`data-live='workshop'`, "A space that changes while
+//! it runs"): not a chain on the page's kernel but a kernel of its own, [`Live`], whose dynamic
+//! space the cell rebuilds by writing its declaration. Its rebuild loop runs on the page's
+//! event loop (`wasm_bindgen_futures::spawn_local`), and its picture is redrawn after every
+//! cell that runs in it ([`live_picture_async`]).
+//!
 //! Built for `wasm32-unknown-unknown` by `pages.yml` and bound with `wasm-bindgen --target
 //! web`; the output lands in the built book under `wasm/` and is never committed. The crate
 //! also builds natively (an `rlib`), which is how the workspace gates lint and test it.
@@ -41,8 +47,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use ikigai_core::{
-    ArgRef, Capability, Clock, CutBatch, Error, Expiry, Fallback, FixedClock, Iri, Kernel,
-    Provenance, Representation, Request, Scope, Space, SpaceEntry, Tracer, Verb,
+    ArgRef, Capability, Clock, CutBatch, DynamicSpace, Error, Expiry, Fallback, FixedClock, Iri,
+    Kernel, Provenance, Representation, Request, Scope, Space, SpaceEntry, Tracer, Verb,
 };
 use ikigai_engine::Engine;
 use ikigai_resolve::{CacheStatus, Resolver};
@@ -112,6 +118,138 @@ pub fn as_of_doors(inputs: Arc<InputStore>) -> Arc<dyn Space> {
     ]))
 }
 // ANCHOR_END: as_of_doors
+
+// ANCHOR: live
+/// The host of "A space that changes while it runs", started on the page: `live_space`'s root
+/// (its declaration, `urn:diagram:kernel`, then a dynamic space over the four-endpoint
+/// registry) in a kernel of its own, the engine its cells run in, and the rebuild loop.
+///
+/// A kernel of its own, not a chain on the page's: a chain is a corridor stacked AHEAD of the
+/// page's root, so a name an empty dynamic space does not bind would fall through to the root,
+/// where Part I's space answers `camel-case`, `title` and `camel-title`. The chapter's first
+/// lesson, an empty space answering nothing, could not be shown. And its picture is of this
+/// host, three layers, not of every space the book's page composes.
+///
+/// **The loop is `DynamicSpace::drive`, the chapter's own**, run on the page's event loop by
+/// `wasm_bindgen_futures::spawn_local`. Nothing in it needs a thread: it waits on a
+/// `CutListener`, a future woken by the cut, and every read it makes is in memory. What the
+/// page adds is [`settle`](Self::settle): a write wakes the loop as a microtask, which runs
+/// after the write's own line has answered, so before each line (and after the last) the page
+/// yields once to the next task, by which time every microtask, the rebuild included, has run.
+/// That is `Host::write`'s `run_until_stalled`, in the page. Built natively (the workspace's
+/// tests), the loop runs on a `LocalPool` and settling is exactly that.
+pub struct Live {
+    kernel: Arc<Kernel>,
+    space: Arc<DynamicSpace>,
+    engine: Rc<Engine>,
+    #[cfg(not(target_family = "wasm"))]
+    pool: RefCell<futures::executor::LocalPool>,
+}
+
+impl Live {
+    /// Start the host with an empty dynamic space named `name`, and its loop.
+    pub fn start(name: &str) -> Result<Live, String> {
+        // `DynamicSpace::new` panics on a name it refuses; the name comes from markup, so
+        // refuse it here, in words, instead.
+        let segment = |s: &str| {
+            !s.is_empty()
+                && s.chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+        };
+        if !name.split(':').all(segment) {
+            return Err(format!(
+                "`{name}` is not a dynamic space's name: one or more `:`-separated segments of a-z, 0-9 and -"
+            ));
+        }
+        let space = Arc::new(DynamicSpace::new(
+            name,
+            Iri::parse(live_space::DECLARATION).expect("a constant IRI"),
+            live_space::registry(Arc::default()),
+        ));
+        let root = live_space::root(Arc::default(), Arc::clone(&space));
+        let kernel = Arc::new(live_space::kernel(root));
+        let (looping, on) = (Arc::clone(&space), Arc::clone(&kernel));
+        let rebuild = async move {
+            let stopped = looping.drive(&on, &Capability::root()).await;
+            panic!("the live host's rebuild loop stopped: {stopped}");
+        };
+        #[cfg(target_family = "wasm")]
+        wasm_bindgen_futures::spawn_local(rebuild);
+        #[cfg(not(target_family = "wasm"))]
+        let pool = {
+            use futures::task::LocalSpawnExt;
+            let pool = futures::executor::LocalPool::new();
+            pool.spawner()
+                .spawn_local(rebuild)
+                .map_err(|e| e.to_string())?;
+            RefCell::new(pool)
+        };
+        Ok(Live {
+            engine: Rc::new(Engine::new(Arc::clone(&kernel))),
+            kernel,
+            space,
+            #[cfg(not(target_family = "wasm"))]
+            pool,
+        })
+    }
+
+    /// Let the rebuild loop catch up with every write so far: in the page, a future that
+    /// resolves on the next task; natively, the pool run until it stalls, here and now (a
+    /// `LocalPool` cannot run inside another executor), and a future already resolved.
+    #[cfg(target_family = "wasm")]
+    pub fn settle(&self) -> impl std::future::Future<Output = ()> + 'static {
+        next_task()
+    }
+
+    /// Let the rebuild loop catch up with every write so far: in the page, a future that
+    /// resolves on the next task; natively, the pool run until it stalls, here and now (a
+    /// `LocalPool` cannot run inside another executor), and a future already resolved.
+    #[cfg(not(target_family = "wasm"))]
+    pub fn settle(&self) -> impl std::future::Future<Output = ()> + 'static {
+        self.pool.borrow_mut().run_until_stalled();
+        std::future::ready(())
+    }
+
+    /// The engine this host's cells run in.
+    pub fn engine(&self) -> Rc<Engine> {
+        Rc::clone(&self.engine)
+    }
+
+    /// The host's picture, `urn:diagram:kernel`, read the way a cell reads it (root, through
+    /// the cache), with its text alternative written from the same topology it is drawn from,
+    /// and how many declarations have bound.
+    pub async fn picture(&self) -> Result<(String, String, u64), String> {
+        let read = Request::new(
+            Verb::Source,
+            Iri::parse("urn:diagram:kernel").expect("a constant IRI"),
+        );
+        let svg = Kernel::issue(&self.kernel, read, &Capability::root())
+            .await
+            .map_err(|e| e.to_string())?;
+        let alt = live_space::picture_text(&self.kernel.topology());
+        Ok((
+            String::from_utf8_lossy(&svg.bytes).into_owned(),
+            alt,
+            self.space.status().installs,
+        ))
+    }
+}
+
+/// Resolve on the page's next task (`setTimeout(…, 0)`): every microtask queued before it,
+/// each `spawn_local` task woken by a cut among them, has run by then.
+#[cfg(target_family = "wasm")]
+async fn next_task() {
+    #[wasm_bindgen]
+    extern "C" {
+        #[wasm_bindgen(js_name = setTimeout)]
+        fn set_timeout(handler: &js_sys::Function, millis: i32) -> JsValue;
+    }
+    let tick = js_sys::Promise::new(&mut |resolve, _| {
+        set_timeout(&resolve, 0);
+    });
+    let _ = wasm_bindgen_futures::JsFuture::from(tick).await;
+}
+// ANCHOR_END: live
 
 /// The page's kernel: [`page_space`] with the Meta renderer `hello_camel::kernel()` uses,
 /// so `describe` and `urn:kernel:catalog` answer in the page. No clock.
@@ -250,6 +388,8 @@ pub struct Page {
     listening: Arc<Listening>,
     /// The views the page has drawn for a sheet that listens, and what each answer carried.
     drawn: RefCell<Drawn>,
+    /// The live hosts a cell has named (`live:{name}`), each started on first use.
+    live: RefCell<BTreeMap<String, Rc<Live>>>,
 }
 
 /// One chain on the page: the engine its cells run in, and the chain itself — the same
@@ -290,6 +430,7 @@ impl Page {
             clock,
             listening,
             drawn: RefCell::default(),
+            live: RefCell::default(),
         }
     }
 
@@ -297,6 +438,9 @@ impl Page {
     /// on first use and kept for the life of the page, since a corridor is built ONCE (its
     /// name is the cache's claim that it is one game, one scenario).
     pub fn engine(&self, chain: Option<&str>) -> Result<Rc<Engine>, String> {
+        if let Some(live) = self.live_of(chain)? {
+            return Ok(live.engine());
+        }
         match chain {
             None => Ok(Rc::clone(&self.root)),
             Some(spec) => {
@@ -304,6 +448,22 @@ impl Page {
                 self.chain(spec, |chain| Rc::clone(&chain.engine))
             }
         }
+    }
+
+    /// The live host `spec` names (`live:{name}`), started on first use and kept for the life
+    /// of the page; `None` for any other spec, which is a chain on the page's kernel.
+    pub fn live_of(&self, chain: Option<&str>) -> Result<Option<Rc<Live>>, String> {
+        let Some(name) = chain.and_then(|spec| spec.strip_prefix("live:")) else {
+            return Ok(None);
+        };
+        if let Some(live) = self.live.borrow().get(name) {
+            return Ok(Some(Rc::clone(live)));
+        }
+        let live = Rc::new(Live::start(name)?);
+        self.live
+            .borrow_mut()
+            .insert(name.to_string(), Rc::clone(&live));
+        Ok(Some(live))
     }
 
     /// Make chain `spec` if it names a game built from `tic-tac-toe.arrangement`
@@ -390,6 +550,13 @@ impl Page {
 
     /// The scope of chain `spec`, or the empty chain for none.
     fn scope_of(&self, chain: Option<&str>) -> Result<Scope, String> {
+        if chain.is_some_and(|spec| spec.starts_with("live:")) {
+            return Err(
+                "a live host is a kernel of its own, not a chain on the page's: \
+                 a cell (data-live) or its picture asks it"
+                    .to_string(),
+            );
+        }
         match chain {
             None => Ok(Scope::empty()),
             Some(spec) => {
@@ -653,10 +820,22 @@ pub fn eval_line_in_chain_async(chain: String, line: String) -> js_sys::Promise 
 }
 
 fn eval_in(game: Option<String>, line: String) -> js_sys::Promise {
-    let engine = PAGE.with(|page| page.engine(game.as_deref()));
+    let engine = PAGE.with(|page| {
+        let live = page.live_of(game.as_deref())?;
+        Ok::<_, String>((page.engine(game.as_deref())?, live))
+    });
     wasm_bindgen_futures::future_to_promise(async move {
         let json = match engine {
-            Ok(engine) => action_to_json(engine.eval_async(&line).await),
+            // In a live host, the loop catches up before the line (with the last line's
+            // write) and after it (so whatever runs next, the picture's redraw included,
+            // sees this line's).
+            Ok((engine, Some(live))) => {
+                live.settle().await;
+                let action = engine.eval_async(&line).await;
+                live.settle().await;
+                action_to_json(action)
+            }
+            Ok((engine, None)) => action_to_json(engine.eval_async(&line).await),
             Err(refusal) => {
                 serde_json::json!({ "kind": "error", "text": refusal, "cache": "" }).to_string()
             }
@@ -717,6 +896,31 @@ pub fn issue_with_args_async(
             Err(refusal) => reply_to_json(Err(refusal), false),
         };
         Ok(JsValue::from_str(&json))
+    })
+}
+
+/// The picture of live host `name` (`live:{name}`), as it is now: what `js/live.js` draws
+/// after every cell that ran in that host. Resolves to `{ "svg", "alt", "installs" }`, or
+/// `{ "error" }`. `alt` is [`live_space::picture_text`], from the topology the picture is drawn
+/// from, so the text alternative changes exactly when the picture does.
+#[wasm_bindgen(js_name = livePictureAsync)]
+pub fn live_picture_async(name: String) -> js_sys::Promise {
+    let live = PAGE.with(|page| page.live_of(Some(&format!("live:{name}"))));
+    wasm_bindgen_futures::future_to_promise(async move {
+        let json = match live {
+            Ok(Some(live)) => {
+                live.settle().await;
+                match live.picture().await {
+                    Ok((svg, alt, installs)) => {
+                        serde_json::json!({ "svg": svg, "alt": alt, "installs": installs })
+                    }
+                    Err(error) => serde_json::json!({ "error": error }),
+                }
+            }
+            Ok(None) => unreachable!("a `live:` spec names a live host"),
+            Err(error) => serde_json::json!({ "error": error }),
+        };
+        Ok(JsValue::from_str(&json.to_string()))
     })
 }
 
@@ -998,8 +1202,9 @@ mod tests {
         );
     }
 
-    /// One runnable cell of a chapter: the chain it runs in (`data-game`, or `data-scenario`
-    /// with any `data-as-of`, as `js/run.js` spells it for the page), the instant it runs at
+    /// One runnable cell of a chapter: the chain it runs in (`data-game`, `data-declared`,
+    /// `data-live`, or `data-scenario` with any `data-as-of`, as `js/run.js` spells it for the
+    /// page), the instant it runs at
     /// on a page with a story clock (`data-at`), its command, and the text of its expected
     /// output.
     #[derive(Debug)]
@@ -1023,6 +1228,7 @@ mod tests {
     fn chain_of(tag: &str) -> Option<String> {
         attribute(tag, "data-game")
             .or_else(|| attribute(tag, "data-declared").map(|id| format!("declared:{id}")))
+            .or_else(|| attribute(tag, "data-live").map(|name| format!("live:{name}")))
             .or_else(|| {
                 attribute(tag, "data-scenario").map(|who| match attribute(tag, "data-as-of") {
                     Some(at) => format!("scenario:{who}@{at}"),
@@ -1248,9 +1454,21 @@ mod tests {
             let (chain, command, expected) = (&cell.chain, &cell.command, &cell.expected);
             at(i);
             let engine = page.engine(chain.as_deref()).expect("a valid chain");
+            // A live host's loop catches up before each line and after it, as in the page.
+            let live = page.live_of(chain.as_deref()).expect("a valid chain");
+            let settle = || {
+                if let Some(live) = &live {
+                    futures::executor::block_on(live.settle());
+                }
+            };
             let mut got: String = command
                 .lines()
-                .map(|line| render(&action_to_json(engine.eval(line))))
+                .map(|line| {
+                    settle();
+                    let answer = render(&action_to_json(engine.eval(line)));
+                    settle();
+                    answer
+                })
                 .collect();
             if let Some(here) = &here {
                 got = got.replace(here.as_str(), " · ThreadId(1) · ");
@@ -1279,6 +1497,11 @@ mod tests {
             }
             if chain.is_none() {
                 redraw();
+            }
+            // After a cell in a live host, `js/live.js` redraws that host's picture: a read of
+            // `urn:diagram:kernel`, which fills the host's cache like any other.
+            if let Some(live) = &live {
+                futures::executor::block_on(live.picture()).expect("the live host's picture");
             }
             transcript.push(got);
         }
@@ -1510,6 +1733,98 @@ mod tests {
 
     /// Part V's cells, the same way — with its two boards loaded first, as the page loads
     /// them, and each refreshed after a cell runs in its game.
+    /// "A space that changes while it runs", steps 1 to 3, in the page's live host: an empty
+    /// space and its status; a write that adds four doors, then each invoked; a door removed,
+    /// answering `Unresolved` with its cached answer gone.
+    #[test]
+    fn the_live_space_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("live-space.md", 3);
+
+        // Empty, and saying why.
+        assert!(t[0].contains("installs: 0\n"), "{}", t[0]);
+        assert!(
+            t[0].contains("error: no endpoint resolved for urn:iki:tutorial:camel-case"),
+            "{}",
+            t[0]
+        );
+        // The write bound, and the four doors answer.
+        assert!(t[1].starts_with("ok\n"), "{}", t[1]);
+        assert!(
+            t[1].contains("RESOURCE ORIENTED COMPUTING\n[computed]"),
+            "{}",
+            t[1]
+        );
+        assert!(t[1].contains("installs: 1\n"), "{}", t[1]);
+        // camel-title was served from the cache, then its door went, and its answer with it.
+        assert!(
+            t[2].starts_with("resourceOrientedComputing\n[cached]\n"),
+            "{}",
+            t[2]
+        );
+        let after = t[2].split("ok\n").nth(1).expect("the second write");
+        assert!(
+            after.contains("error: no endpoint resolved for urn:iki:tutorial:camel-title"),
+            "{after}"
+        );
+        assert!(after.contains("a cut would recompute nothing"), "{after}");
+    }
+
+    /// The live host's picture, redrawn in the page: its text alternative is
+    /// `live_space::picture_text` of the topology it was drawn from, and the chapter's two
+    /// committed pictures carry exactly that text as their `alt`.
+    #[test]
+    fn the_live_pictures_alt_text_is_the_pictures_own() {
+        let page = Page::new();
+        let live = page.live_of(Some("live:workshop")).unwrap().unwrap();
+        let draw = || {
+            futures::executor::block_on(live.settle());
+            futures::executor::block_on(live.picture()).unwrap()
+        };
+        let chapter = std::fs::read_to_string(format!(
+            "{}/../../books/ikigai/src/applied/live-space.md",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .unwrap();
+        let alt_of = |file: &str| {
+            let at = chapter
+                .find(&format!("<img src=\"{file}\""))
+                .expect("the picture");
+            let rest = &chapter[at..];
+            let open = rest.find("alt=\"").unwrap() + "alt=\"".len();
+            rest[open..open + rest[open..].find('"').unwrap()].to_string()
+        };
+        let committed = |file: &str| {
+            std::fs::read_to_string(format!(
+                "{}/../../books/ikigai/src/applied/{file}",
+                env!("CARGO_MANIFEST_DIR")
+            ))
+            .unwrap()
+        };
+
+        let (svg, alt, installs) = draw();
+        assert_eq!(installs, 0);
+        assert_eq!(svg, committed("live-space-empty.svg"));
+        assert_eq!(alt_of("live-space-empty.svg"), alt);
+
+        let engine = page.engine(Some("live:workshop")).unwrap();
+        let write = format!(
+            "sink {} {}",
+            live_space::DECLARATION,
+            live_space::FOUR_DOORS
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
+        assert_eq!(
+            render(&action_to_json(engine.eval(&write))),
+            "ok\n[uncacheable]\n"
+        );
+        let (svg, alt, installs) = draw();
+        assert_eq!(installs, 1);
+        assert_eq!(svg, committed("live-space-doors.svg"));
+        assert_eq!(alt_of("live-space-doors.svg"), alt);
+    }
+
     #[test]
     fn the_fifth_tic_tac_toe_chapters_cells_answer_as_it_says_in_page_order() {
         let t = run_chapter_in_page_order("tic-tac-toe-5.md", 9);

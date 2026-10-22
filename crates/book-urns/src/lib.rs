@@ -85,6 +85,10 @@ pub enum Context {
     /// reader presses Run. Only that kernel answers: `book_wasm::page_kernel()`, compiled to
     /// wasm. A name the CLI resolves is no use here.
     Cell,
+    /// Inside the `data-cmd` of a cell that also carries `data-live='…'`: a line the page runs
+    /// in its LIVE HOST ("A space that changes while it runs"), a kernel of its own beside
+    /// `page_kernel()` whose dynamic space a cell rebuilds. Only that host answers.
+    LiveCell,
     /// Prose, program output, a config fence — anything else. Either may answer.
     Prose,
 }
@@ -301,13 +305,14 @@ fn parse_directives(file: &str, comments: &[(usize, String)]) -> Result<Vec<Dire
     Ok(out)
 }
 
-/// The `data-cmd='…'` attributes of runnable cells, with the line each starts on.
+/// The `data-cmd='…'` attributes of runnable cells, with the line each starts on, and whether
+/// the cell runs in the page's live host (`data-live='…'` in the same tag, before `data-cmd`).
 ///
 /// Single-quoted only, by rule: a REPL line can carry double quotes (`in="a b"`), and
 /// `js/run.js` reads the attribute the same way. A double-quoted `data-cmd` is not
 /// silently skipped — it is reported, because a cell the gate cannot read is a cell it
 /// cannot vouch for.
-fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String)>, String> {
+fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String, bool)>, String> {
     let mut out = Vec::new();
     let mut rest = text;
     let mut line = 1usize;
@@ -324,7 +329,8 @@ fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String)>, String>
         let Some(end) = body.find('\'') else {
             return Err(format!("{file}:{line}: unterminated data-cmd='…'"));
         };
-        out.push((line, body[..end].to_string()));
+        let tag = before.rfind('<').map_or("", |open| &before[open..]);
+        out.push((line, body[..end].to_string(), tag.contains("data-live=")));
         line += body[..end].matches('\n').count();
         rest = &body[end + 1..];
     }
@@ -342,7 +348,7 @@ pub fn scan_markdown(file: &str, text: &str) -> Result<Scan, String> {
     // Runnable cells first: their lines run in the page, and the prose scan below will
     // see the same tokens again as prose, which is fine — the cell check is the stricter
     // of the two and both must hold.
-    for (start, command) in cell_commands(file, &visible)? {
+    for (start, command, live) in cell_commands(file, &visible)? {
         for (offset, cmd_line) in command.lines().enumerate() {
             for token in urns_in_line(cmd_line) {
                 let head = token.split(['?', '#']).next().unwrap_or(&token).to_string();
@@ -351,7 +357,11 @@ pub fn scan_markdown(file: &str, text: &str) -> Result<Scan, String> {
                     line: start + offset,
                     is_prefix: head.ends_with(':'),
                     urn: head,
-                    context: Context::Cell,
+                    context: if live {
+                        Context::LiveCell
+                    } else {
+                        Context::Cell
+                    },
                 });
             }
         }
@@ -636,6 +646,26 @@ mod tests {
         let text = "```bash\ncargo run -p hello-camel -- urn:iki:tutorial:camel-case\n```\n";
         let scan = scan_markdown("x.md", text).expect("scans");
         assert_eq!(scan.mentions[0].context, Context::Prose);
+    }
+
+    #[test]
+    fn a_cell_in_the_live_host_answers_to_the_live_host() {
+        let text = "<div class=\"ikigai-run\" data-cmd='source urn:iki:tutorial:title'>\n<pre>x</pre>\n</div>\n\
+                    <div class=\"ikigai-run\" data-live='workshop' data-cmd='source urn:iki:tutorial:upper'>\n<pre>x</pre>\n</div>\n";
+        let scan = scan_markdown("x.md", text).expect("scans");
+        let cells: Vec<(&str, Context)> = scan
+            .mentions
+            .iter()
+            .filter(|m| matches!(m.context, Context::Cell | Context::LiveCell))
+            .map(|m| (m.urn.as_str(), m.context))
+            .collect();
+        assert_eq!(
+            cells,
+            [
+                ("urn:iki:tutorial:title", Context::Cell),
+                ("urn:iki:tutorial:upper", Context::LiveCell)
+            ]
+        );
     }
 
     #[test]

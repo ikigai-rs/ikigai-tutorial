@@ -35,6 +35,14 @@ spreadsheet = { path = "../spreadsheet" }
 # Part VII's host half of push: a cut listener as a resource, what a read carries, and the
 # page's memory of the views it drew. `urn:iki:tutorial:push:*` overlaps nothing above.
 push = { path = "../push" }
+# "A space that changes while it runs": its host (the declaration resource, the picture of the
+# host's own arrangement, and a dynamic space over a four-endpoint registry) is started on the
+# page as a kernel of its own, for the cells that carry `data-live='…'` — see `Live`. It is not
+# composed into `page_space()`: Part I's space already binds three of the names its registry
+# binds, ahead of anything a dynamic space could hold, so an empty dynamic space would not look
+# empty. Its dependencies (ikigai-fn, ikigai-sexpr, ikigai-diagram, core's `declare` feature)
+# build for wasm32-unknown-unknown as they are.
+live-space = { path = "../live-space" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true
