@@ -1,0 +1,28 @@
+[package]
+name = "check-resource"
+version = "0.1.0"
+description = "The code taught by the book's chapter \"Checking a resource\": a resource read as its Turtle face under the caller's capability (ikigai-toolbox's input), then checked against closed SHACL shapes (ikigai-shacl)."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "check_resource"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+# `urn:toolbox:*`: the check page's names, and `urn:toolbox:input:{iri}`, the Turtle face it reads.
+ikigai-toolbox.workspace = true
+# `urn:shacl:validate`, the shapes check on the host. Default features off: the subset validator,
+# which covers closed shapes, without rudof's network stack (see the workspace pin).
+ikigai-shacl.workspace = true
+# The players answer N-Triples, and a transreptor of this crate's turns them into Turtle.
+oxttl.workspace = true
+oxrdf.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+futures.workspace = true

@@ -53,7 +53,11 @@ resolve on GitHub, the list moved before this page did — the organization is t
   [`ikigai-xslt-module`](https://github.com/ikigai-rs/ikigai-xslt-module) — XSLT as a
   resource, linked or loadable.
 - [`ikigai-shacl`](https://github.com/ikigai-rs/ikigai-shacl) — SHACL validation,
-  native and in the browser.
+  native and in the browser. [Checking a resource](building/checking.md) mounts it.
+- [`ikigai-toolbox`](https://github.com/ikigai-rs/ikigai-toolbox) — the RDF Toolbox
+  (turtle-lsp in the browser) served as resources: a page that checks any resource's Turtle
+  face, and its shapes, as the viewer. [Checking a resource](building/checking.md) reads through
+  it.
 - [`ikigai-sexpr`](https://github.com/ikigai-rs/ikigai-sexpr) — s-expressions to SPARQL
   and Turtle, no Lisp engine.
 - [`ikigai-lisp`](https://github.com/ikigai-rs/ikigai-lisp) — the Lisp engine

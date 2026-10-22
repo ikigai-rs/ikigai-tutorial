@@ -104,6 +104,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             Arc::new(tic_tac_toe::declared::declaration_space()) as Arc<dyn Space>,
         ),
         (
+            "check_resource::space()",
+            Arc::new(check_resource::space()) as Arc<dyn Space>,
+        ),
+        (
             "script_host::space()",
             Arc::new(script_host::space()) as Arc<dyn Space>,
         ),
