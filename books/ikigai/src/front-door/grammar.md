@@ -91,11 +91,12 @@ C
 c
 b
 a
-[3 computed]</pre>
+[1 cached · 2 computed]</pre>
 </div>
 
-Run this after the map cell above and the tally reads `1 cached · 2 computed`: the split
-was already in the cache, and the engine counts what it served as well as what it ran.
+The tally reads `1 cached · 2 computed` because the map cell above already resolved the
+split, and the engine counts what it served as well as what it ran. Run this before that
+cell, on a fresh page, and it reads `3 computed`.
 
 ## Composition: `urn:iki:fn:compose`
 
@@ -252,24 +253,96 @@ of the bindings rather than bound; current hosts list them first all the same, a
 reaches them.
 
 <div class="ikigai-run" data-cmd='list'>
-<pre class="ikigai-run-expected">urn:iki:fn:toUpper            → toUpper
-urn:iki:fn:reverseList        → reverseList
-urn:iki:fn:compose            → compose
-urn:iki:fn:conditional        → conditional
-urn:demo:wrap                 → wrap
-urn:demo:split                → split
-urn:demo:greet                → greet
-urn:demo:echo/{message}       → echo
-urn:iki:tutorial:camel-case   → camel-case
-urn:iki:tutorial:title        → title
-urn:iki:tutorial:camel-title  → camel-title</pre>
+<pre class="ikigai-run-expected">urn:kernel:actions                        → kernel-actions
+urn:kernel:aliases                        → kernel-aliases
+urn:kernel:cache                          → kernel-cache
+urn:kernel:cached                         → kernel-cached
+urn:kernel:catalog                        → kernel-catalog
+urn:kernel:constraint                     → kernel-constraint
+urn:kernel:cut                            → kernel-cut
+urn:kernel:dependents                     → kernel-dependents
+urn:kernel:explain                        → kernel-explain
+urn:kernel:scheduler                      → kernel-scheduler
+urn:kernel:threads                        → kernel-threads
+urn:kernel:topology                       → kernel-topology
+urn:kernel:uncached                       → kernel-uncached
+urn:kernel:validate                       → kernel-validate
+urn:iki:fn:toUpper                        → toUpper
+urn:iki:fn:reverseList                    → reverseList
+urn:iki:fn:compose                        → compose
+urn:iki:fn:conditional                    → conditional
+urn:demo:wrap                             → wrap
+urn:demo:split                            → split
+urn:demo:greet                            → greet
+urn:demo:echo/{message}                   → echo
+urn:iki:tutorial:camel-case               → camel-case
+urn:iki:tutorial:title                    → title
+urn:iki:tutorial:camel-title              → camel-title
+urn:iki:tutorial:ttt:cell:{x}:{y}         → ttt-cell
+urn:iki:tutorial:ttt:cells:{list}         → ttt-cells
+urn:iki:tutorial:ttt:board                → ttt-board
+urn:iki:tutorial:ttt:checkset:{x}:{y}     → ttt-checkset
+urn:iki:tutorial:ttt:winner               → ttt-winner
+urn:iki:tutorial:ttt:turn                 → ttt-turn
+urn:iki:tutorial:ttt:move:{x}:{y}         → ttt-move
+urn:iki:tutorial:ttt:reset                → ttt-reset
+urn:iki:tutorial:ttt:template:{name}      → ttt-template
+urn:iki:tutorial:ttt:view:board           → composeOver
+urn:iki:tutorial:ttt:view:square:{x}:{y}  → composeOver
+urn:iki:tutorial:ttt:view:status          → composeOver
+urn:iki:tutorial:ttt:view:reply           → composeOver
+urn:iki:tutorial:ttt:view:game:{game}     → composeOver
+urn:iki:tutorial:ttt:view:play:{x}:{y}    → ttt-view-play
+urn:iki:tutorial:ttt:view:reset           → ttt-view-reset
+urn:iki:tutorial:ttt:stored:{x}:{y}       → ttt-stored
+urn:iki:tutorial:time:now                 → time-now
+urn:iki:tutorial:time:today               → time-today
+urn:iki:tutorial:time:instant             → time-instant
+urn:iki:tutorial:time:event:{name}        → time-event
+urn:iki:tutorial:time:until:{name}        → time-until
+urn:iki:tutorial:time:template:{name}     → time-template
+urn:iki:tutorial:time:view:clock          → composeOver
+urn:iki:tutorial:sheet:input:{ref}        → sheet-input
+urn:iki:tutorial:sheet:feed:{name}        → sheet-feed
+urn:iki:tutorial:sheet:tick:{name}        → sheet-tick
+urn:iki:tutorial:sheet:compile            → sheet-compile
+urn:iki:tutorial:sheet:formula:{ref}      → sheet-formula
+urn:iki:tutorial:sheet:refs:{ref}         → sheet-refs
+urn:iki:tutorial:sheet:precedents:{ref}   → sheet-precedents
+urn:iki:tutorial:sheet:range:{from}:{to}  → sheet-range
+urn:iki:tutorial:sheet:cell:{ref}         → sheet-cell
+urn:iki:tutorial:sheet:template:{name}    → sheet-template
+urn:iki:tutorial:sheet:view:cell:{ref}    → composeOver
+urn:iki:tutorial:sheet:view:grid          → composeOver
+urn:iki:tutorial:sheet:view:cached:{ref}  → composeOver
+urn:iki:tutorial:sheet:view:cost:{ref}    → composeOver
+urn:iki:tutorial:sheet:view:cost          → composeOver
+urn:iki:tutorial:sheet:view:edit          → sheet-view-edit
+urn:iki:tutorial:push:listener:{name}     → push-listener
+urn:iki:tutorial:push:carries             → push-carries
+urn:iki:tutorial:ttt:arrangement:{name}   → ttt-arrangement
+urn:iki:tutorial:ttt:build                → ttt-build
+urn:sexpr:arrangement-to-rdf              → sexpr-arrangement-to-rdf
+urn:sexpr:arrangement-from-rdf            → sexpr-arrangement-from-rdf
+urn:iki:tutorial:check:player:x           → player-x
+urn:iki:tutorial:check:player:o           → player-o
+urn:iki:tutorial:check:shapes             → player-shapes
+urn:iki:tutorial:check:to-turtle          → to-turtle
+urn:toolbox:page                          → toolbox-page
+urn:toolbox:none                          → toolbox-none
+urn:toolbox:text:{message}                → echo
+urn:toolbox:input:{iri}                   → toolbox-input
+urn:toolbox:check:{iri}                   → toolbox-check
+urn:toolbox:{name}                        → toolbox-file
+urn:shacl:validate                        → shacl-validate
+urn:iki:toolbox:dist:{path}               → book-toolbox-dist</pre>
 </div>
 
-Those are Part I's eleven names, in the order they were bound — `ikigai-fn`'s eight, then
-this book's three chained on top, exactly as [Binding](../getting-started/binding.md)
-wrote them. The kernel in this page now binds more than Part I (the Applied parts'
-tic-tac-toe, time and spreadsheet names, after the kernel's own `urn:kernel:*` rows), so
-the list Run prints is longer than the expected output above, which is Part I's share of
+That is everything the kernel in this page binds. The kernel's own `urn:kernel:*` rows come
+first; then Part I's eleven names, in the order they were bound: `ikigai-fn`'s eight, then
+this book's three chained on top, exactly as [Binding](../getting-started/binding.md) wrote
+them. After those come the Applied parts' tic-tac-toe, time and spreadsheet names, and the
+names "Checking a resource" uses. A host built from Part I alone lists only Part I's share of
 it. A full CLI lists a few hundred, many served over a socket from another
 process — which is [Part III](../beyond/socket.md).
 

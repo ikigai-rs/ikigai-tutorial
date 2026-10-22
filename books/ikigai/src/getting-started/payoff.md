@@ -190,7 +190,7 @@ trace  urn:iki:tutorial:camel-title
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 &#32;
-urn:iki:tutorial:camel-title   camel-title · computed · ThreadId(1) · —   → 25b  resourceOrientedComputing
+urn:iki:tutorial:camel-title   camel-title · computed · ThreadId(1) · —   → 16b  goldenThreadsCut
 └─ urn:iki:tutorial:title   title · computed · ThreadId(1) · —</pre>
 </div>
 
@@ -199,8 +199,9 @@ cutting somebody else's thread — so the trace shows a real resolution rather t
 hit with no children. `trace` is `issue_traced` with the engine's own tree renderer: the
 child is indented under its parent, and each node says whether it was computed or served.
 (The `—` is the duration: this kernel has no clock, and it says so rather than guessing;
-`ThreadId(1)` is the browser's one thread. Run it after the cell above and the byte count
-and the text change, because the title did — same kernel.)
+`ThreadId(1)` is the browser's one thread. The text is `goldenThreadsCut` because the cell
+above wrote the title, in the same kernel; run this one first, on a fresh page, and it reads
+`25b  resourceOrientedComputing`.)
 
 ## 4. Described
 

@@ -39,11 +39,17 @@
 // `axe.mjs` gates on: here that includes `color-contrast` and `link-in-text-block`, which
 // only a layout can judge. Best-practice rules are reported by `--survey` and do not gate.
 // `print.html` and `toc.html` are skipped, as everywhere else.
+//
+// Then, in the same browser, `cells.mjs` (ledger #2109): every Run cell run in page order on a
+// fresh load must be marked "as the chapter shows", and "Run all above" must do what it says. It
+// is not an axe rule, but it needs this browser and this site, and it gates the same deploy, so
+// it runs here and its failures count with the violations. `--survey` skips it.
 import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, relative, extname } from "node:path";
 import { createRequire } from "node:module";
 import { chromium } from "playwright-core";
 import { ORIGIN, pages } from "./book-dom.mjs";
+import { checkCells } from "./cells.mjs";
 
 const require = createRequire(import.meta.url);
 const axeSource = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
@@ -251,7 +257,14 @@ for (const { out, err, failures } of await Promise.all(THEMES.map(auditTheme))) 
     err.forEach((line) => console.error(line));
     violations += failures;
 }
+let cellFailures = 0;
+if (!survey) {
+    const { failures, summary } = await checkCells(browser, siteArg);
+    failures.forEach((line) => console.error(line));
+    console.log(summary);
+    cellFailures = failures.length;
+}
 await browser.close();
 
 console.log(`axe-core in a real browser: ${all.length * THEMES.length} page loads (${all.length} pages × ${THEMES.length} themes), ${violations} gating violation(s)`);
-process.exit(violations ? 1 : 0);
+process.exit(violations || cellFailures ? 1 : 0);
