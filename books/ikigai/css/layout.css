@@ -5,7 +5,7 @@
  * the reason for the extra). On a screen narrower than the new maximum nothing changes: the
  * column still fills what is there. */
 :root {
-    --content-max-width: 1100px;
+    --content-max-width: 1280px;
 }
 
 main > p,
