@@ -419,6 +419,18 @@ ikigai-http = "0.3.0"
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
 # localhost. "2" is that example's line; a caret, so <3.0.0.
 ureq = { version = "2", default-features = false }
+# "Checking a resource" (ledger #2024): the RDF Toolbox's names, `urn:toolbox:check:{iri}` and
+# `urn:toolbox:input:{iri}`, the Turtle face it reads under the caller's capability. 0.1.0 is the
+# first release, and the floor; it needs core ^0.1.89 and fn ^0.5, both below the pins here. The
+# crate holds no build: the page and its WebAssembly engine are a directory a host binds (its
+# `build.sh`), and nothing here builds or binds one. A 0.x caret: also a ceiling (<0.2.0).
+ikigai-toolbox = "0.1.0"
+# The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: the
+# subset validator (`core_shacl`), which covers closed shapes (`sh:closed`, `sh:ignoredProperties`)
+# and every constraint the chapter's shapes use, with no rudof and no network stack (ikigai-shacl's
+# README counts 87 packages against the default build's 246). 0.3.7 is the published head when the chapter was
+# written (2026-10-22). A 0.x caret: also a ceiling (<0.4.0).
+ikigai-shacl = { version = "0.3.7", default-features = false }
 # The JSON faces the drafting chapter reads back (a draft's attempts, a check's findings).
 serde_json = "1"
 # The config file "Configuration" reads through `layered_paths`.

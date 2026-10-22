@@ -172,6 +172,7 @@ dependencies = [
  "book-transcripts",
  "book-wasm",
  "building-endpoints",
+ "check-resource",
  "futures",
  "hello-camel",
  "ikigai-core",
@@ -293,6 +294,19 @@ dependencies = [
  "cfg-if",
  "cpufeatures 0.3.1",
  "rand_core 0.10.1",
+]
+
+[[package]]
+name = "check-resource"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "ikigai-shacl",
+ "ikigai-toolbox",
+ "oxrdf",
+ "oxttl",
+ "serde_json",
 ]
 
 [[package]]
@@ -1248,6 +1262,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ikigai-shacl"
+version = "0.3.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "002113706e50bb013f3c549f65e509e8e81855f0506ecceb5509504ada7016ad"
+dependencies = [
+ "async-trait",
+ "ikigai-core",
+ "ikigai-store",
+ "oxigraph",
+ "oxrdf",
+ "oxsdatatypes",
+ "regex",
+ "serde",
+ "serde_json",
+ "spargebra",
+]
+
+[[package]]
 name = "ikigai-sparql"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1289,6 +1321,16 @@ dependencies = [
  "futures",
  "futures-timer",
  "ikigai-core",
+]
+
+[[package]]
+name = "ikigai-toolbox"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62403f917a2cb4e4ad0073866303eb5e8c4ea0bbf4889d28b0d5ea0031eee406"
+dependencies = [
+ "ikigai-core",
+ "ikigai-fn",
 ]
 
 [[package]]
