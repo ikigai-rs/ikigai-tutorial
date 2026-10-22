@@ -428,12 +428,17 @@ ureq = { version = "2", default-features = false }
 # crate holds no build: the page and its WebAssembly engine are a directory a host binds (its
 # `build.sh`), and nothing here builds or binds one. A 0.x caret: also a ceiling (<0.2.0).
 ikigai-toolbox = "0.1.0"
-# The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: the
-# subset validator (`core_shacl`), which covers closed shapes (`sh:closed`, `sh:ignoredProperties`)
-# and every constraint the chapter's shapes use, with no rudof and no network stack (ikigai-shacl's
-# README counts 87 packages against the default build's 246). 0.3.7 is the published head when the chapter was
-# written (2026-10-22). A 0.x caret: also a ceiling (<0.4.0).
-ikigai-shacl = { version = "0.3.7", default-features = false }
+# The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: from
+# 0.4.0 that is the CORE-only subset validator (`core_shacl`) on oxrdf and oxttl alone, which covers
+# closed shapes (`sh:closed`, `sh:ignoredProperties`) and every constraint the chapter's shapes use,
+# with no rudof, no network stack and no SPARQL (no oxigraph, spargebra or ikigai-store; ledger
+# #2107). `sh:sparql` and `sh:select` are refused by name, and the chapter's shapes use neither.
+# Nothing here may turn on shacl's `sparql` or `rudof` feature: unified into the page kernel, it
+# would bring the store back (`cargo tree -e features -i ikigai-shacl` shows none). Through 0.3.x
+# the same line linked the SPARQL engine: the ikigai Book's `book_wasm_bg.wasm` measured 8.74 MB
+# raw, 1.77 MB gzip -9 at 0.3.7 and 4.89 MB, 1.09 MB at 0.4.0 (2026-10-22, ledger #2115). A 0.x
+# caret: also a ceiling (<0.5.0).
+ikigai-shacl = { version = "0.4.0", default-features = false }
 # The JSON faces the drafting chapter reads back (a draft's attempts, a check's findings).
 serde_json = "1"
 # The config file "Configuration" reads through `layered_paths`.

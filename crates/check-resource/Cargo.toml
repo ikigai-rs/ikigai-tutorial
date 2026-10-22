@@ -16,8 +16,8 @@ path = "src/lib.rs"
 ikigai-core.workspace = true
 # `urn:toolbox:*`: the check page's names, and `urn:toolbox:input:{iri}`, the Turtle face it reads.
 ikigai-toolbox.workspace = true
-# `urn:shacl:validate`, the shapes check on the host. Default features off: the subset validator,
-# which covers closed shapes, without rudof's network stack (see the workspace pin).
+# `urn:shacl:validate`, the shapes check on the host. Default features off: the CORE-only subset
+# validator, which covers closed shapes, with no rudof and no SPARQL engine (see the workspace pin).
 ikigai-shacl.workspace = true
 # The players answer N-Triples, and a transreptor of this crate's turns them into Turtle.
 oxttl.workspace = true
