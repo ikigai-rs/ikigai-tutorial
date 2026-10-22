@@ -1,0 +1,20 @@
+# One view, and nothing else: `urn:iki:tutorial:live:picture` is another name for
+# `urn:diagram:kernel`, which the host serves outside the dynamic space. `ik:resolveAt "root"`
+# is what makes it a view: the rewritten name is asked from the root, under the caller's own
+# capability, instead of inside this alias's empty child.
+@prefix ik: <https://ikigai-rs.dev/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<urn:ikigai:space:_:1> a ik:Alias ;
+    ik:maxHops 8 ;
+    ik:rewrites <urn:ikigai:space:_:1:rule:1> ;
+    ik:space <urn:ikigai:space:_:2> .
+
+<urn:ikigai:space:_:1:rule:1> a ik:RewriteRule ;
+    ik:ruleKind "exact" ;
+    ik:logical "urn:iki:tutorial:live:picture" ;
+    ik:canonical "urn:diagram:kernel" ;
+    ik:resolveAt "root" .
+
+<urn:ikigai:space:_:2> a ik:EndpointSpace ;
+    ik:doors rdf:nil .

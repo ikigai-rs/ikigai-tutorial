@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: A new chapter in Applied, A space that changes while it runs, follows Tic-tac-toe VII. It names an empty dynamic space, adds four endpoints the book already has by writing a declaration, and watches the space's picture redraw. A removed door takes its cached answers with it, a refused change keeps the old doors, and a view gives another name to something the host serves without granting anything. A spreadsheet, VII adds the session space beside it, and Where this actually stands now names ikigai-core 0.1.110.
+
+  Pages: [A space that changes while it runs](applied/live-space.md), [A spreadsheet, VII: push](applied/spreadsheet-7.md), [Where this actually stands](modules/status.md)
+
 - **2026-10-21**: Contribute a module now explains declared failure classes, the RECOMPUTE check added in conformance 0.9 and the opt-in FAILURES check in 0.10. The your-endpoints crate runs the suite for word-count, and the page explains why a 0.10.0 pin does not receive 0.11's new default.
 
   Pages: [Contribute a module](contribute.md)

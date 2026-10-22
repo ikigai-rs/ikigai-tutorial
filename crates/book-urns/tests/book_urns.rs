@@ -96,6 +96,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             Arc::new(push::space(Arc::default())) as Arc<dyn Space>,
         ),
         (
+            "live_space::Host, after live_space::FOUR_DOORS",
+            live_space_root(),
+        ),
+        (
             "tic_tac_toe::declared::declaration_space()",
             Arc::new(tic_tac_toe::declared::declaration_space()) as Arc<dyn Space>,
         ),
@@ -108,6 +112,14 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             Arc::new(sentence_draft::space()) as Arc<dyn Space>,
         ),
     ]
+}
+
+/// The host of "A space that changes while it runs", with the chapter's first declaration
+/// bound: a dynamic space is empty until one is, and the chapter names its four doors.
+fn live_space_root() -> Arc<dyn Space> {
+    let mut host = live_space::Host::start("workshop");
+    host.write(live_space::FOUR_DOORS);
+    Arc::clone(&host.root)
 }
 
 fn a_book_host_binds(iri: &str) -> Option<&'static str> {

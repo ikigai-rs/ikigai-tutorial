@@ -45,7 +45,8 @@ a review comment.
   far as this repository can repair it: a barrier there is still a barrier for our readers.
 - **This repository's own additions to that chrome**: `css/a11y.css`, `js/a11y.js` and the cell,
   board, view and sheet styles.
-- **Generated pictures** committed into a book (today, one: the tic-tac-toe arrangement SVG).
+- **Generated pictures** committed into a book (today, three: the tic-tac-toe arrangement SVG,
+  and the two pictures of the host in "A space that changes while it runs").
 
 ### Not ours to fix, still ours to report
 
@@ -122,7 +123,7 @@ has been run.
 | The skip link and the keyboard repair to the sidebar toggle need JavaScript | both books | With JavaScript off, no skip link (SC 2.4.1) and the narrow-screen sidebar cannot be opened by keyboard (SC 2.1.1) | Reading with JavaScript on |
 | Runnable cells, boards, views and sheets need JavaScript and WebAssembly | pages with live parts | Without them nothing runs | Each cell's "Expected output" holds the listing's output |
 | Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
-| The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
+| The pictures' `alt` text is written by hand; a test holds each SVG to its source, not the `alt` text | "Tic-tac-toe, VII", "A space that changes while it runs" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
 | The browser run's Chrome is not pinned, and mdbook is unpinned on purpose | CI | A new Chrome or mdbook can turn the gate red and stop deploys until someone repairs it | none needed: a red gate is the design |
 
 No list like this is complete. Please report what you find.
@@ -147,12 +148,16 @@ yet. `book-a11y` credits the two search-box repairs only while `js/a11y.js` stil
 
 ## Generated output
 
-The one picture in a book, `books/ikigai/src/applied/tic-tac-toe-arrangement.svg`, is drawn by
+The tic-tac-toe picture, `books/ikigai/src/applied/tic-tac-toe-arrangement.svg`, is drawn by
 `ikigai_diagram::render` from `crates/tic-tac-toe`'s arrangement file and committed;
 `crates/tic-tac-toe/tests/declared.rs` fails when the committed file and the renderer's output
 differ, and names the command that recommits it. The SVG carries `role="img"`, a generated
 `<title>` and `<desc>`; the chapter embeds it as an `<img>` with a full text description in `alt`.
-Do not edit the SVG by hand.
+The two pictures in "A space that changes while it runs", `live-space-empty.svg` and
+`live-space-doors.svg` beside that chapter, are what `urn:diagram:kernel` answers in
+`crates/live-space`'s host before and after its first declaration, drawn by the same renderer;
+`crates/live-space/tests/pictures.rs` holds them the same way, and the chapter embeds each with a
+full text description in `alt`. Do not edit any of the SVGs by hand.
 
 ## Contributor requirements
 

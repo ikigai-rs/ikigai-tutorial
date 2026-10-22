@@ -33,7 +33,11 @@ lto = true
 # release changed, when a release changes what a page prints, or to keep the book on what a
 # reader's fresh `cargo add` resolves; its comment says which, and keeps the reason that set the
 # previous floor beneath it. Releases that came out after a pin was set are not listed as missing.
-# 0.1.109 is the pin, set 2026-10-21 (ledger #2006 is its own release): 0.1.105 is the floor for
+# 0.1.110 is the pin, set 2026-10-22 (ledger #2007): "A space that changes while it runs" declares a
+# view, an alias rule that resolves at the root (`ik:resolveAt "root"`, `AliasTable::exact_at_root`),
+# which 0.1.110 added; it changed nothing any other page prints (every listing and cell ran
+# unchanged at the move). The same chapter builds the first `DynamicSpace` a listing uses (0.1.109).
+# Before that the pin was 0.1.109, set 2026-10-21 (ledger #2006 is its own release): 0.1.105 is the floor for
 # what the books TEACH, because it changed behavior an endpoint relies on: the kernel fills a
 # declared `default_value` in before dispatch, and `Description::validate` refuses a defaulted
 # input marked required. Exercise 2 runs that in a checked block, where its hint used to say the default
@@ -42,7 +46,8 @@ lto = true
 # (`fails(..)`, `ik:mayFail`), a run's shared retry budget and its deadline (`IssueContext`,
 # `not_after`, `Invocation::time_left`); ikigai-throttle 0.2.0 requires it, and "Preference"
 # teaches its `Failover`. 0.1.109 adds dynamic spaces (`DynamicSpace`, `Threaded`), which the
-# status chapter names and no listing uses. The status chapter's opening names this version, and
+# status chapter names and, since 0.1.110's pin, "A space that changes while it runs" and
+# Spreadsheet VII run. The status chapter's opening names this version, and
 # `book_claims` holds it to the lock. Before that the pin was 0.1.103 (the lock had reached 0.1.108
 # as ikigai-browse 0.19.0's floor): a typed
 # selection offers the input-free actions only beside a real typed fit, so a typed query that fits
@@ -112,7 +117,7 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.109"
+ikigai-core = "0.1.110"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
 # kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.109 is the pin, paired
 # with core 0.1.109 (set 2026-10-21): since 0.1.105 it renders the ArgSpec shape (input groups,
@@ -164,12 +169,17 @@ ikigai-fn = "0.5.0"
 # calls its functions rather than mounting its spaces, so nothing a page prints moved. A 0.x caret:
 # also a ceiling (<0.3.0).
 ikigai-sexpr = { version = "0.2.3", default-features = false }
-# The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Only
-# part VII's picture test uses it (a dev-dependency), so the page pays nothing for it. 0.2.0 is
-# the pin, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
+# The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Part VII's
+# picture test uses it (a dev-dependency), and `crates/live-space` mounts its space for
+# `urn:diagram:kernel`; neither is in the page, so the page pays nothing for it. 0.2.1 is the pin,
+# set 2026-10-22 (ledger #2007): it draws `ik:DynamicSpace` as "Dynamic space", with its
+# declaration and its current inner tree, which "A space that changes while it runs" shows. It
+# also puts `xml:lang="en" lang="en"` on the root `<svg>` and adds the dynamic space's two style
+# classes, so the committed tic-tac-toe picture was redrawn at the move: those two lines changed,
+# and nothing it draws did. Before that 0.2.0 was the pin, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
 # `urn:iki:space:diagram` (ledger #987), and `render` is unchanged, so the picture is the same
 # bytes. A 0.x caret, so also a ceiling (<0.3.0).
-ikigai-diagram = "0.2.0"
+ikigai-diagram = "0.2.1"
 # 0.4.0 is the pin (set 2026-10-14): an out-of-band host call is held to its
 # session's capability (ledger #83), an unwired module channel fails at once with a typed error
 # (ledger #746), and `ModuleSessionTransport::invoke_session` returns `ikigai_core::Result`, the

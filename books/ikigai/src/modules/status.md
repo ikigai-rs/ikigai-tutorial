@@ -5,8 +5,8 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.109**, stamped on
-2026-10-21, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.110**, stamped on
+2026-10-22, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
 release on crates.io at its stamp), and its shell examples are replayed against
 `ikigai-cli` **0.1.64**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
 newest on 2026-10-14). A
@@ -127,11 +127,11 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.109. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.1.110. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
-chapters they touch. Of the six since, 0.1.104 (the principal vocabulary), 0.1.106 and
-0.1.107 change nothing a page shows, and three are worth a line, because they change what
+chapters they touch. Of the seven since, 0.1.104 (the principal vocabulary), 0.1.106 and
+0.1.107 change nothing a page shows, and four are worth a line, because they change what
 an endpoint you write can rely on:
 
 - **0.1.105 changed behavior: a declared default is filled in.** The kernel fills a
@@ -150,7 +150,13 @@ an endpoint you write can rely on:
   which [Preference](../beyond/preference.md) shows.
 - **0.1.109 — dynamic spaces.** A running kernel's arrangement can gain and lose doors
   without replacing its root: a `DynamicSpace` is rebuilt from a declaration resource, and
-  each successful bind cuts the one thread every answer it served hangs from.
+  each successful bind cuts the one thread every answer it served hangs from. [A space that changes
+  while it runs](../applied/live-space.md) builds one, and [A spreadsheet,
+  VII](../applied/spreadsheet-7.md) shows its sibling, `Threaded::session`.
+- **0.1.110 — views.** An alias rule may resolve its rewritten name at the root, under the
+  caller's own capability (`ik:resolveAt "root"`), so a dynamic space can hold another name
+  for something the host serves elsewhere, and grant nothing by it. [A space that changes
+  while it runs](../applied/live-space.md) declares one.
 
 The seventeen from 0.1.79 to 0.1.95 are one line each here, and taught where a chapter
 teaches them:
