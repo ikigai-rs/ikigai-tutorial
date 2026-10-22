@@ -79,18 +79,15 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.1.108, `ikigai-ledger` 0.12.0,
+The modules it links are published crates: `ikigai-core` 0.1.110, `ikigai-ledger` 0.12.0,
 `ikigai-store` 0.2.23, `ikigai-browse` 0.19.0, `ikigai-script` 0.3.6 and `ikigai-nl` 0.4.0. The
-book's own crates (the ones its Rust listings and in-page cells run) take the same releases but one:
-`ikigai-core` 0.1.109, one patch ahead of gonk's. So a `console` block is answered by gonk's
-releases and a listing or a cell by the book's, and no page prints differently because of the
-difference. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
+book's own crates (the ones its Rust listings and in-page cells run) take the same releases, so a
+`console` block and a listing or a cell are answered by the same modules. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
 This gonk's HTTP door lets a caller with no identity read the ledgers and write nothing (gonk
-PR 186). Every page writes as the owner over the socket, or as a client over QUIC, except two
-bridges that file only through that door: [Importing a kata ledger](bridges/kata.md) and [Filing
-roborev findings](bridges/roborev.md) show the pinned gonk refusing them, and say so, until gonk
-gives them a door with an identity.
+PR 186). Every page writes as the owner over the socket, or as a client over QUIC; the two bridges
+that file, [Filing roborev findings](bridges/roborev.md) and [Importing a kata ledger](bridges/kata.md),
+do both since gonk PR 212, and lead with a client of their own.
 
 What each move of these pins changed for a reader, and the pages that show it, is on the
 [What's new](whats-new.md) page.
