@@ -49,8 +49,8 @@ The model is this book's stub, the one [Scripts and sentences in gonk](../script
 mounts. It also answers what a browse root asks a model: a fixed review of the file below, a
 judge's check, and an explanation, told apart by the system prompt each ask carries. It logs a
 line for every ask, which is how this page shows what a commit cost. In a new empty directory, as in
-[every chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Remote
-workers](workers.md) is still running, stop it first, since this one takes the same port.
+[every chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Routing work
+to agents](routing.md) is still running, stop it first, since this one takes the same port.
 
 <!-- transcript: serve -->
 ```console
@@ -388,9 +388,9 @@ root's name, gonk's config file, paths never queued) are a `[review]` table in
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process review-every-commit
-generated the library-lending sample (python, process review-every-commit) in …/library: 61 files
+generated the library-lending sample (python, process review-every-commit) in …/library: 62 files
 next, in that directory:
-  git init, then commit everything it wrote (the one commit where every file is yours)
+  git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   git config core.hooksPath hooks/git     the post-commit review hook
@@ -406,6 +406,7 @@ $ grep '^## ' library/AGENTS.md
 ## 4. Every change through a pull request with green CI
 ## 5. Report with evidence; the dispatcher closes
 ## 6. Never a bare `#N`
+## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
 ## Review on every commit
 ## Optional: a hook for Claude Code
@@ -456,7 +457,7 @@ gonk init: …/library
   note     role                 triager: a person who decides each finding and files the ones to act on
   note     hook                 the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   ok       hook                 post-commit asks gonk to review each commit (core.hooksPath)
-  ok       ikigai               ikigai 0.1.61 at …/ikigai
+  ok       ikigai               ikigai 0.1.67 at …/ikigai
   ok       ledger               `default` (.gonk/gonk.toml)
   ok       holder               `triager` (.gonk/local.toml, this working tree only)
   ok       identity             the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

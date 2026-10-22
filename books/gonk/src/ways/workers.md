@@ -94,7 +94,11 @@ $ cp -R .config/ikigai/gonk/quic/clients/worker-2 worker-2/gonk
 
 An unattended worker has nothing to go on but the item, so the item carries the brief: what to
 do, what done means, and what evidence to bring back. The first line is the title and the rest is
-the body.
+the body. The `worker` label below marks the items for this page's two workers, which ask `next`
+by hand; it is a convenience, not a route. A label records nobody who set it, and anyone who may
+write to the ledger can add one, so the starter's unattended loop takes an item only when a
+**router** it trusts has dispatched it, in a comment gonk attributes ([Routing work to
+agents](routing.md), the next chapter).
 
 <!-- transcript: file brief-1.txt -->
 ```text
@@ -171,9 +175,12 @@ $ cd ../item-1 && your-agent "$(ikigai --connect quic://gonk.local:1062 --cert-d
 $ git push -u origin item-1-empty-word && gh pr create --fill
 ```
 
-One working tree per item, so two agents never share files; the item's text is the agent's brief;
-the push and the pull request are made as a machine user the forge lets open pull requests and
-not merge them. While the agent works, the worker renews its lease, which renews and never
+One working tree per item, so two agents never share files; the item's title and body are the
+agent's brief; the push and the pull request are made as a machine user the forge lets open pull
+requests and not merge them. The command above hands the agent everything `item:1` prints,
+comments included, which is fine for a page whose ledger only you write to and is the hazard on a
+shared one: a comment is whatever its writer typed. [Routing work to agents](routing.md) shows
+how the starter's loop gives an agent the comments as quoted data, under their authors, instead. While the agent works, the worker renews its lease, which renews and never
 takes:
 
 <!-- transcript: run -->
@@ -189,7 +196,8 @@ not handed to anyone else until a deliberate takeover (`takeover=true from=worke
 The starter repository, [`ikigai-gonk-starter`](https://github.com/ikigai-rs/ikigai-gonk-starter),
 packages this loop as `tools/worker.py`, with the scripts that set up a worker machine's accounts.
 The loop here uses none of it, so that every step stays visible; [With the
-starter](#with-the-starter), at the end, shows what it generates.
+starter](#with-the-starter), at the end, shows what it generates, and [Routing work to
+agents](routing.md) runs it: the dispatch it waits for, and one loop per agent.
 
 ### 4. Hand back with evidence
 
@@ -305,15 +313,18 @@ before anyone notices.
 Choose it when there is more work than one machine's attention, when the work is well enough
 specified to be done from a brief, and when you want the machine that writes code to be unable to
 accept its own work. If the work is not yet specified that well, a coordinating session in front
-of the workers is [Hub and spoke](hub-and-spoke.md), two chapters on.
+of the workers is [Hub and spoke](hub-and-spoke.md), three chapters on.
 
 ## With the starter
 
 The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `workers` profile is this
 chapter packaged: `tools/new.py --process workers` adds a "Worker machines" section to the
 repository's `AGENTS.md`, carries `tools/worker.py` (the claim, work, report loop above, run
-unattended) with its configuration's template and its service units, and the `just worker`
-recipes that run it. The book checks the starter at the revision in `books/gonk/starter.rev`
+unattended) with its two helpers, `tools/worker_repos.py` (which enrolls an owner's repositories
+in the worker's configuration and checks the worker's token may push to them) and
+`tools/worker_usage.py` (which reads an agent's usage against its plan's weekly limit between
+items), its configuration's template and its service units, and the `just worker` recipes that
+run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 ([Solo](solo.md#with-the-starter) says more):
 
 <!-- transcript: run -->
@@ -321,9 +332,9 @@ recipes that run it. The book checks the starter at the revision in `books/gonk/
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process workers
-generated the library-lending sample (python, process workers) in …/library: 63 files
+generated the library-lending sample (python, process workers) in …/library: 67 files
 next, in that directory:
-  git init, then commit everything it wrote (the one commit where every file is yours)
+  git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
@@ -338,6 +349,7 @@ $ grep '^## ' library/AGENTS.md
 ## 4. Every change through a pull request with green CI
 ## 5. Report with evidence; the dispatcher closes
 ## 6. Never a bare `#N`
+## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
 ## Worker machines
 ## Optional: a hook for Claude Code
@@ -346,6 +358,8 @@ library/tools:
 gonk.py
 harness.py
 worker.py
+worker_repos.py
+worker_usage.py
 
 library/worker:
 units
@@ -381,22 +395,18 @@ gonk init: …/library
   note     role      worker: an unattended machine running tools/worker.py; claims, works, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
-  ok       ikigai    ikigai 0.1.61 at …/ikigai
+  ok       ikigai    ikigai 0.1.67 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `worker-1` (.gonk/local.toml, this working tree only)
   ok       identity  urn:iki:host:gonk:client:… (from …/worker-1/gonk/client.crt)
   ok       alias     older records name it urn:iki:gonk:client:…: gonk reads that spelling as this machine too, and never mints it again
   ok       gonk      quic quic://127.0.0.1:1070 (certificates in …/worker-1/gonk) answers
+  ok       enrolled  gonk reads this identity: nothing to enroll
   ok       items     `default` holds 2 item(s), 1 open
   ok       scripts   gonk offers `urn:script:catalog`: saved queries and workflow scripts (ikigai-script)
-  failed   scripts   urn:script:default-open-items-for-artifact was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-open-items-for-artifact`; any grant under `urn:cap:script:write:` satisfies it)
-  failed   scripts   urn:script:default-open-work-by-change was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-open-work-by-change`; any grant under `urn:cap:script:write:` satisfies it)
-  failed   scripts   urn:script:default-requirements-with-open-work was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-requirements-with-open-work`; any grant under `urn:cap:script:write:` satisfies it)
-  failed   scripts   urn:script:default-next-for-artifact was refused: error: denied: capability does not grant `urn:cap:script:write:*` (declared by `urn:script:default-next-for-artifact`; any grant under `urn:cap:script:write:` satisfies it)
-  unknown  nl        could not ask gonk about `urn:nl:sparql`
+  note     scripts   this identity's grant has no script write, so the 4 saved here are not published by it: the dispatcher publishes these
+  absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
-this machine's QUIC identity, for the gonk operator to enroll (once):
-…
 agents over MCP (configure the agent with this command):
   ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir …/worker-1/gonk
 
@@ -406,15 +416,16 @@ process: workers
 no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
 ```
 
-The identity row is the name gonk's access log gives this machine, and the lines elided after it
-are the `client add` and `grants.json` an operator would use to enroll it, which step 0 already
-did. The `failed` rows are the worker grant at work: `init` offers to publish the sample's saved
-queries, and a worker may not write scripts (the dispatcher's own `init`, as the owner over the
-socket, publishes them, as [Solo](solo.md#with-the-starter) shows). The `unknown` row is this
-page's gonk mounting no model: it binds no `urn:nl:sparql` (its banner says so), and the starter
-reads that refusal as a gonk it could not ask. The `worker` row is what a worker machine still
-needs, its `.gonk/worker.toml`; setting that machine up (its accounts, the boundary its agent runs
-inside) is the starter's `worker/README.md`.
+The identity row is the name gonk's access log gives this machine, and the `enrolled` row says
+gonk already admits it, because step 0 enrolled it; for an identity gonk did not yet read, `init`
+would print the `client add` and `grants.json` an operator uses to enroll it instead. The
+`scripts` note is the worker grant at work: the sample has four saved queries to publish, and a
+worker may not write scripts, so `init` leaves them to the dispatcher (whose own `init`, as the
+owner over the socket, publishes them, as [Solo](solo.md#with-the-starter) shows) rather than
+trying and being refused. The `absent nl` row is this page's gonk mounting no model: it binds no
+`urn:nl:sparql` (its banner says so), and `init` says there is nothing to do until it does. The
+`worker` row is what a worker machine still needs, its `.gonk/worker.toml`; setting that machine
+up (its accounts, the boundary its agent runs inside) is the starter's `worker/README.md`.
 
 Profiles combine (`--process workers,spec` adds [spec first](spec-first.md)'s rules, and no
 `--process` at all means `solo,workers,spec`); only [unled audits](audits.md) and [review every

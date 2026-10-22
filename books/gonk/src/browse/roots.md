@@ -48,7 +48,7 @@ root is the shape of a typo, not something to serve as empty.
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{notes (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
 ```
@@ -174,7 +174,7 @@ watch does not track.
 ## In a browser, and from your own config
 
 The browser's way in is `/browse`, the roots the caller's grant may read. An anonymous caller
-may read none, because the anonymous grant is ledger tokens only, so what it gets is the
+may read none, because the anonymous grant is ledger read tokens only, so what it gets is the
 sign-in notice:
 
 <!-- transcript: run -->

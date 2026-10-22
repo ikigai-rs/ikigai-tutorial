@@ -8,7 +8,7 @@ There are three, and each authenticates something different.
 
 | door | reached by | authenticates | the capability it grants |
 | --- | --- | --- | --- |
-| HTTP | a browser, `curl`, on **loopback only** | that the request is from this machine and not cross-site (the `Host`; for a write the `Origin`; for a read from another page, that it navigated here rather than loading this as an image, script, frame or `fetch`, and then only the read half of the grant); a passkey session if there is one | the anonymous grant (read and write of the ledgers `gonk.http.ledger` names, `default` unless told otherwise), plus a signed-in passkey's grant |
+| HTTP | a browser, `curl`, on **loopback only** | that the request is from this machine and not cross-site (the `Host`; for a write the `Origin`; for a read from another page, that it navigated here rather than loading this as an image, script, frame or `fetch`, and then only the read half of the grant); a passkey session if there is one | the anonymous grant (read, and only read, of the ledgers `gonk.http.ledger` names, `default` unless told otherwise), plus a signed-in passkey's grant |
 | socket | another process of **the same user** (`ikigai --mount`) | the socket file's owner-only mode, and the peer's user id | root (the owner can read the store's files anyway), or what an owner process narrowed itself to with `cap seal` |
 | QUIC | another **machine** (`ikigai --connect quic://…`) | a client certificate, pinned by fingerprint, over mutual TLS — no certificate authority | the grant its fingerprint is enrolled under, and a name for the client, `urn:iki:host:gonk:client:<fingerprint>` |
 
@@ -48,13 +48,18 @@ read back:
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
-  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read+write: default; 0 passkey(s); anonymous SPARQL budget 1000 ms
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   socket  …/.ikigai/gonk.sock — owner only
   quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
+          client  laptop  …  …/.config/ikigai/gonk/quic/clients/laptop/client.crt  trusted and enrolled
   log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
 …
 ```
+
+The `http` line says what an anonymous caller at that door may do: read the `default` ledger, and
+nothing else. The `quic` line is followed by one line per trusted certificate: the grant name,
+the fingerprint's first sixteen hex digits, the certificate file, and whether it is enrolled.
 
 `--port` moves both network doors: HTTP on TCP 1070, loopback only, and QUIC on UDP 1070, every
 interface, because a QUIC door is for other machines. TCP 1070 and UDP 1070 are different ports,
@@ -72,28 +77,32 @@ than run with the door silently shut.
 $ curl -s http://127.0.0.1:1070/iki/ledger/items
 no items match
 $ curl -s -X POST --data-binary 'From the HTTP door' http://127.0.0.1:1070/iki/ledger/append
-#1 urn:iki:ledger:default:item:…
+denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:append`; any grant under `urn:cap:ledger:write:` satisfies it)
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append From the socket'
-#2 urn:iki:ledger:default:item:…
+#1 urn:iki:ledger:default:item:…
 
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'sink urn:iki:ledger:append From QUIC' -c 'source urn:iki:ledger:items'
-#3 urn:iki:ledger:default:item:…
+#2 urn:iki:ledger:default:item:…
 
 [uncacheable]
-   #3  open    p-  From QUIC
-   #2  open    p-  From the socket
-   #1  open    p-  From the HTTP door
+   #2  open    p-  From QUIC
+   #1  open    p-  From the socket
 
-3 item(s)
+2 item(s)
 
 [uncacheable]
 — batch: 2 commands · 2 uncacheable
 ```
 
-Three doors, one ledger. The socket and QUIC clients are the same program, `ikigai`, in its two
-remote forms: `--mount` composes gonk's resources into a local kernel under a prefix of your
-choosing (here `urn:gk:`), and `--connect` sends every command to the server as it is typed, so
+Three doors, one ledger, and two items in it. The anonymous HTTP caller read the ledger and was
+refused the write: since gonk PR 186 (ledger #1687) the anonymous grant reads the ledgers and
+writes nothing, because any process on this machine, or on any machine a reverse tunnel puts the
+door on, could otherwise file an item that an unattended worker would read as instructions.
+Filing over HTTP takes an identity, a signed-in passkey ([Who you are, and what that
+grants](../ledger/browser.md#who-you-are-and-what-that-grants)). The socket and QUIC clients are
+the same program, `ikigai`, in its two remote forms: `--mount` composes gonk's resources into a
+local kernel under a prefix of your choosing (here `urn:gk:`), and `--connect` sends every command to the server as it is typed, so
 the names are gonk's own.
 
 ## What gonk knew
@@ -104,8 +113,7 @@ Every request a door dispatches is one line in the access log, on standard error
 <!-- transcript: run -->
 ```console
 $ grep ' gonk:Access ' gonk.log
-… gonk:Access urn:iki:ledger:items door=http verb=source outcome=ok bytes=… dur=… principal=- q=-
-… gonk:Access urn:iki:ledger:append door=http verb=sink outcome=ok bytes=… dur=… principal=anon q=-
+… gonk:Access urn:iki:ledger:items door=http verb=source outcome=ok bytes=… dur=… principal=- q=as=text/plain&deferred=include&holder=any&limit=50&offset=0&status=open
 … gonk:Access urn:iki:ledger:append door=socket verb=sink outcome=ok bytes=… dur=… principal=owner q=-
 … gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 … gonk:Access urn:iki:ledger:items door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
@@ -113,17 +121,26 @@ $ grep 'quic client' gonk.log
 ikigai-gonk: quic client … → grant "laptop"
 ```
 
-`door=` is which door, and `principal=` is who the door could say was asking:
+Four lines for five requests: the refused HTTP write has none, for the reason
+[below](#a-refusal-with-no-line). `door=` is which door, and `principal=` is who the door could
+say was asking:
 
-- **HTTP**: `anon` on an anonymous write and `-` on an anonymous read; a signed-in passkey's IRI
+- **HTTP**: `-` on an anonymous read (and `anon` on an anonymous write the door refuses at its
+  edge, such as a cross-site one); a signed-in passkey's IRI
   on **every** request, reads included. That last part is new in the gonk this book pins (gonk
   PR 122): before it the HTTP library told the door who a write was from and never a read, so a
   signed-in read was logged `-` too.
 - **socket**: `owner`, always — there is exactly one user it lets in.
 - **QUIC**: the client's name, `urn:iki:host:gonk:client:<fingerprint>`, on **every** request, reads
   included. The certificate authenticated the connection, so the door knows which client is
-  asking whatever it asks. The connection line below the access lines says the same thing in
-  short (the fingerprint's first sixteen hex digits) with the grant it mapped to.
+  asking whatever it asks. The connection line below the access lines says the same thing with
+  the grant it mapped to.
+
+`q=` is the request's arguments as served, and on HTTP only (`-` on the other doors). The `curl`
+read sent none, yet its line carries six: the kernel fills in every default the resource
+declares before dispatching (`ikigai-core` 0.1.104 and later, ledger #19), as the arguments a
+caller spelling them out would send, so the line says what the read actually ran with, the first
+50 open items as plain text, whether or not the caller typed any of it.
 
 The QUIC name is not only in the log. The door mints it into the request's **capability**, as
 core's principal scope (`urn:cap:principal:<iri>`, `ikigai-core` 0.1.93), and that is where gonk
@@ -138,8 +155,8 @@ author is refused:
 
 <!-- transcript: run -->
 ```console
-$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'source urn:iki:ledger:item:3' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not mine to sign'
-   #3  open    p-  From QUIC
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'source urn:iki:ledger:item:2' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not mine to sign'
+   #2  open    p-  From QUIC
   iri:      urn:iki:ledger:default:item:…
   filed:    … by urn:iki:host:gonk:client:…
   updated:  …
@@ -162,9 +179,14 @@ spelling of *another* machine's fingerprint is refused like the new one, and the
 both spellings of one fingerprint as one actor, in the current form. Enrollment is unchanged:
 `clients.json` is keyed by fingerprint, so an enrolled certificate needs nothing redone.
 
-`outcome=` is what the resource answered (`ok`, `denied`, `not-found`, …). One kind of refusal
-writes **no** line: a request the door's own kernel refuses before dispatching it, because the
-caller's capability does not even cover the family the name belongs to. That refusal is still
+### A refusal with no line
+
+`outcome=` is `ok`, or the kind of error the resource answered with: `denied`, `not-found`,
+`invalid-argument`, `refused`, `over-budget`, `unsupported`, and `retry-after` for a run a rate
+limit turned away (written `endpoint` before `ikigai-throttle` 0.2.0 typed that refusal). One
+kind of refusal writes **no** line: a request the door's own kernel refuses before dispatching
+it, because the caller's capability does not cover the token the resource declares. That is
+what happened to the anonymous HTTP write above, and to this QUIC read. The refusal is still
 returned to the caller, with the token it wanted:
 
 <!-- transcript: run -->

@@ -10,6 +10,12 @@ It is one command, `ikigai-gonk roborev file`, which roborev runs from a hook wh
 completes. This page runs it by hand, against a review saved to a file, which is exactly what
 the hook hands it.
 
+⚠ Against the gonk this book pins, the command plans and does not file. It files through gonk's
+HTTP door as that door's anonymous loopback caller, and since gonk PR 186 (ledger #1687) that
+caller reads the ledgers and writes nothing; the command has no signed-in or socket path yet. So
+its dry run works and every filing below is refused with `403`, which the transcripts show.
+Through gonk 3edf830 the same door wrote too, and this page filed the findings.
+
 ## A review, as roborev hands it over
 
 roborev's agent returns a structured document, and what a hook receives is that document
@@ -81,8 +87,12 @@ running, stop it first, since this one takes the same port:
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
 ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+  http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
 ```
+
+The `http` line's `anonymous read: default` is the grant the command will run under: the
+`default` ledger's read tokens, and no write.
 
 `--dry-run` prints what it would file, each append's arguments with the key among them, and
 touches nothing. It does not ask gonk anything, so it says `would file` for a finding that is
@@ -132,42 +142,27 @@ Each line of that is a decision the command made, and each is worth reading once
   problem's words with their whitespace collapsed. It is filed as the append's `key` and again
   as an `about`, and it is how the ledger knows a finding is already filed.
 
-Now for real:
+Now for real, and the item it would have filed first:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root demo --repo-path /work/demo --job 42 --sha 1a2b3c4 --agent codex --findings - < review.md
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
-filed    critical #1 `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…
-filed    high     #2 On the final attempt the error is logged and `Ok(())` is returned.
-filed    medium   #3 The retry delay is a fixed 100 ms, so two writers retrying together collide on every attempt.
+ikigai-gonk: gonk refused POST /iki/ledger/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
 $ curl -s http://127.0.0.1:1070/iki/ledger/item/1
-   #1  open    p0  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…  [critical roborev]
-  iri:      urn:iki:ledger:default:item:…
-  key:      urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
-  filed:    … by roborev
-  updated:  …
-  revision: 1a2b3c4
-  about:    urn:repo:demo:file:src/retry.rs
-  about:    urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
-
-  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer that holds the RocksDB lock for longer than the caller waits (a second `ikigai-gonk` on the same store) spins this loop forever at 100% CPU.
-
-  Fix: Bound the loop (five attempts with backoff) and return the last `Busy` to the caller.
-
-  - severity: critical
-  - location: /work/demo/src/retry.rs:41-58
-  - commit: 1a2b3c4
-  - roborev job: 42 (`roborev show 42`)
-  - agent: codex
-  - reported by: codex, claude-code
-  - key: urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
+not found: no ledger item #1
 ```
 
-The title is the problem's first line, cut near a hundred characters; the body keeps the whole
-problem, the fix, and where it came from. The item is an ordinary ledger item from here on:
-`next` ranks it, a person claims it, and closing it is a decision with a reason rather than a
-report scrolling away.
+The low finding is skipped before gonk is asked anything; the first append, the critical
+finding's, is refused, and the command stops there, so nothing is filed and there is no item #1.
+The refusal names the scope the append needed and says why this command cannot file.
+
+Where it can file, each finding becomes an item whose title is the problem's first line, cut near
+a hundred characters, and whose body keeps the whole problem, the fix, and where it came from:
+the location, commit, roborev job, agent, who reported it, and the key, with the `about` and
+`revision` the dry run planned. The item is an ordinary ledger item from there on: `next` ranks
+it, a person claims it, and closing it is a decision with a reason rather than a report scrolling
+away.
 
 ## The hook
 
@@ -187,15 +182,14 @@ root's name match; otherwise write the root's name in. (The URL is a real gonk's
 because that is what your hook will name. The page uses 1070.)
 
 So the hook's own invocation, for the review above, is this. It is the third time this page has
-handed gonk the same review, and it files nothing:
+handed gonk the same review; over findings already filed it would print `already` for each, with
+the item's number and status, and file nothing. Here it is refused as the run above was:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger default --root 'demo' --repo-path '/work/demo' --job '42' --sha '1a2b3c4' --agent 'codex' --findings "$(cat review.md)"
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
-already  critical #1 (open) urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
-already  high     #2 (open) urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
-already  medium   #3 (open) urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
+ikigai-gonk: gonk refused POST /iki/ledger/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
 ```
 
 Each finding is **one** request, a keyed append (`append key=…`): the ledger checks the key and
@@ -220,20 +214,20 @@ not a structured review (a fix or task job?): nothing to file
 ## Whose ledger it files into
 
 The command speaks to gonk's HTTP door as its anonymous loopback caller, which holds the read
-and write tokens of the ledgers in `gonk.http.ledger` and nothing else. The keyed append is a
-write, and the door grants a listed ledger's read and write together. A ledger the door does not
-grant is refused at that first append, and the command stops with exit status 1 and names the
-setting:
+tokens of the ledgers in `gonk.http.ledger` and nothing else. The keyed append is a write, so on
+this gonk every ledger is refused at that first append, listed or not, and the command stops with
+exit status 1. A ledger the door does not list is refused the same way, with the same message:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk roborev file --gonk http://127.0.0.1:1070 --ledger reviews --root demo --findings - < review.md
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
-ikigai-gonk: gonk refused POST /iki/ledger/reviews/append (403): denied: this capability does not hold `urn:cap:ledger:write:reviews`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them. The HTTP door grants an anonymous loopback caller the read and write tokens of the ledgers in `gonk.http.ledger` and nothing else; filing needs both (`ikigai-gonk grants <ledger> write` prints them, and listing the ledger there grants them)
+ikigai-gonk: gonk refused POST /iki/ledger/reviews/append (403): denied: capability does not grant `urn:cap:ledger:write:*` (declared by `urn:iki:ledger:reviews:append`; any grant under `urn:cap:ledger:write:` satisfies it). The HTTP door grants an anonymous loopback caller the READ tokens of the ledgers in `gonk.http.ledger` and nothing else; since ledger #1687 it writes nothing, and this command files through that door alone, so it can read (a dry run) but not file into a gonk from that release on
 ```
 
-To keep findings in a ledger of their own, list it beside `default` in the config home's
-`config.toml` and restart gonk:
+To have the door serve findings from a ledger of their own (and, once the command can file
+again, to file into it), list it beside `default` in the config home's `config.toml` and restart
+gonk:
 
 ```toml
 gonk.http.ledger = "default"

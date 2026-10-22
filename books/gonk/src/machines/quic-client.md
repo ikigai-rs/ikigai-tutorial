@@ -132,7 +132,9 @@ through, and the ledger itself refuses it, because the token names a different l
 A certificate the server was never told to trust gets nothing. Mint one with no grant, after the
 server started. The hint it prints names the grant's shape rather than a grant, because a
 command copied from it could narrow a client's existing authority (it printed a fixed
-`--ledger default=write` until gonk PR 106, ledger #918):
+`--ledger default=write` until gonk PR 106, ledger #918). Its list of roles includes `audit`,
+which reads a ledger's graveyard of deleted items and writes nothing (gonk PR 167, ledger #1611;
+before it that read came only with `purge`):
 
 <!-- transcript: run -->
 ```console
@@ -141,7 +143,7 @@ client `stranger`  …/.config/ikigai/gonk/quic/clients/stranger
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
   NOT enrolled — a trusted certificate with no grant is refused. Enroll it:
-    ikigai-gonk client add stranger --ledger <ledger>=<read|worker|write|delete|purge>
+    ikigai-gonk client add stranger --ledger <ledger>=<read|audit|worker|write|delete|purge>
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -241,8 +243,8 @@ $ ikigai-gonk client add laptop --rotate --port 1070 --config-home "$PWD/.config
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     under grant `laptop`, unchanged — the old certificate's … moved to this one
-  ROTATED      the old certificate … was unenrolled — a client still holding the old bundle is refused from its next connection; give it this one
+  enrolled     under grant `laptop`, unchanged — the old certificate's enrollment moved to this one
+  ROTATED      the old certificate … was unenrolled — a client still holding the old bundle is refused from its next call; give it this one
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -250,7 +252,10 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'source urn:i
 error: unavailable: quic transport: …
 ```
 
-The old bundle is refused at once: admission is decided per connection, from `clients.json`.
+The old bundle is refused at once: admission is decided on every call, from `clients.json` and
+`grants.json` as they read then, so even a connection already open is refused from its next call
+(since gonk PR 175, ledger #1710; before it, a client that kept its connection alive kept its old
+authority until gonk restarted).
 The new one is not trusted until gonk restarts, because the certificates it trusts are read at
 startup; so a rotation is a restart and a copy of the new bundle to the client.
 

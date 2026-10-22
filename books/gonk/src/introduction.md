@@ -79,16 +79,18 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.1.99, `ikigai-ledger` 0.11.1,
-`ikigai-store` 0.2.21, `ikigai-browse` 0.18.8, `ikigai-script` 0.3.3 and `ikigai-nl` 0.4.0. The
-book's own crates (the ones its Rust listings and in-page cells run) take the newest releases, one
-step ahead of that: `ikigai-core` 0.1.109, `ikigai-ledger` 0.12.0, `ikigai-store` 0.2.23,
-`ikigai-browse` 0.19.0 and `ikigai-script` 0.3.6. So a `console` block is answered by gonk's
-releases and a listing or a cell by the newer ones. Only one page prints differently because of it: [Two teams, one gonk](teams/two-teams.md#the-managers-join)
-sends gonk a query whose `GRAPH` names a graph outside its set, which the newer store refuses and
-gonk's store, one release short, answers with an empty result, and the page says so. The other
-differences (a ledger item's `children` in its JSON face, and a trace of the kernel's own
-operations) appear on no page. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
+The modules it links are published crates: `ikigai-core` 0.1.108, `ikigai-ledger` 0.12.0,
+`ikigai-store` 0.2.23, `ikigai-browse` 0.19.0, `ikigai-script` 0.3.6 and `ikigai-nl` 0.4.0. The
+book's own crates (the ones its Rust listings and in-page cells run) take the same releases but one:
+`ikigai-core` 0.1.109, one patch ahead of gonk's. So a `console` block is answered by gonk's
+releases and a listing or a cell by the book's, and no page prints differently because of the
+difference. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
+
+This gonk's HTTP door lets a caller with no identity read the ledgers and write nothing (gonk
+PR 186). Every page writes as the owner over the socket, or as a client over QUIC, except two
+bridges that file only through that door: [Importing a kata ledger](bridges/kata.md) and [Filing
+roborev findings](bridges/roborev.md) show the pinned gonk refusing them, and say so, until gonk
+gives them a door with an identity.
 
 What each move of these pins changed for a reader, and the pages that show it, is on the
 [What's new](whats-new.md) page.
@@ -104,15 +106,13 @@ is installed from this repository:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial model-stub
 ```
 
-From [Over the socket](agent/socket.md) on, a page also runs `ikigai`, the command-line host,
+From [A ledger of your own](ledger/your-own.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
-way. It is 0.1.61, the release whose transports the pinned gonk was built with, so it speaks the
-same wire, and its own `ikigai-core` (0.1.99, as gonk's) words a refusal at a family scope the way
-gonk does, which [Over the socket](agent/socket.md) prints. (The rule takes what gonk links, and the book's own crates take 0.1.63.
-0.1.62 to 0.1.65 change no wire. Wire v9 arrived in 0.1.66: it carries the newer failure
-classes typed and a run's time left across a mount, and it still offers v8, so a newer
-`ikigai` and this gonk settle on v8 and talk as before.) The QUIC keep-alive a client
+way. It is 0.1.67, the release whose transports the pinned gonk was built with, so the two speak the
+same wire (v9, which carries the newer failure classes typed and a run's time left across a mount).
+The book's own crates take 0.1.63 for the in-page kernel's grammar; that is a different program and
+no page runs it as `ikigai`. The QUIC keep-alive a client
 sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
 model drafting or explaining) is not lost over `quic://`.
 

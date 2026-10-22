@@ -264,8 +264,9 @@ or on another machine, hold less than everything, and be unable to close its own
 
 The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter) packages this process as a
 **profile**, `solo`: its `tools/new.py --process solo` generates a repository (a library-lending
-sample, with its specs) whose `AGENTS.md` holds the rules above and no others, and whose
-`.gonk/process.toml` records the process for `tools/gonk.py` to read back. The book checks the
+sample, with its specs) whose `AGENTS.md` holds the rules above and no other profile's, and whose
+`.gonk/process.toml` records the process for `tools/gonk.py` to read back. `new.py` says to
+`git init -b main`, because the starter's worker loop branches from `origin/main`. The book checks the
 starter at one revision, held in one file (`books/gonk/starter.rev`) the way [the gonk it
 pins](../introduction.md#which-gonk) is. (`LC_ALL=C`, so the listing's order is the same on every
 machine.)
@@ -275,9 +276,9 @@ machine.)
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 59 files
+generated the library-lending sample (python, process solo) in …/library: 60 files
 next, in that directory:
-  git init, then commit everything it wrote (the one commit where every file is yours)
+  git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
@@ -289,6 +290,7 @@ $ LC_ALL=C ls -A library
 .github
 .gitignore
 .gonk
+ACCESSIBILITY.md
 AGENTS.md
 CLAUDE.md
 README.md
@@ -308,6 +310,7 @@ $ grep '^## ' library/AGENTS.md
 ## 4. Every change through a pull request with green CI
 ## 5. Report with evidence; the dispatcher closes
 ## 6. Never a bare `#N`
+## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
 ## Optional: a hook for Claude Code
 $ cat library/.gonk/process.toml
@@ -325,7 +328,10 @@ summary = "one person and their agent: you are your own dispatcher, and close af
 roles = ["you: both the dispatcher and whoever does the work"]
 ```
 
-`AGENTS.md`'s numbered sections are this chapter's guides, and `CLAUDE.md` is a link to it. The one
+`AGENTS.md`'s numbered sections 1 to 6 are this chapter's guides, and `CLAUDE.md` is a link to it.
+Section 7 is one every generated repository carries, whatever its profile: read the repository's
+`ACCESSIBILITY.md` (what the project shows people, and how that is tested) before changing a page,
+terminal text or anything else people see, and never claim testing that did not happen. The one
 hook every profile carries, `claude:require-claim`, is an optional Claude Code hook that refuses an
 edit while the working tree holds no claim; it is off until its settings are merged. `init` names
 the ledger, the socket and the holder this working tree claims under, then asks this page's gonk:
@@ -341,7 +347,7 @@ gonk init: …/library
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.61 at …/ikigai
+  ok       ikigai    ikigai 0.1.67 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `agent` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

@@ -268,15 +268,17 @@ number,title
 $ curl -s 'http://localhost:1070/script/open-by-label/result?label=urgent'
 {"head":{"vars":["number","title"]},"results":{"bindings":[]}}
 $ curl -s -w ' (%{http_code})\n' 'http://localhost:1070/script/open-by-label/result?label=later'
-endpoint error: rate-limited: `urn:iki:gonk:anonymous:runs` is capped at 3/60s — retry after …s (500)
+retry after … ms: rate-limited: `urn:iki:gonk:anonymous:runs` is capped at 3 per 60s (429)
 ```
 
 Four requests and three runs: the first triage run, the recomputed one and `urgent` (no item
 carries that label, so the answer is empty SPARQL JSON, the face when no `as=` is asked for) fill
 the window, and `later` is refused, naming the window and when a slot frees.
 (Each run is also held to the anonymous SPARQL budget, 1 s by default, as the anonymous caller's
-own `/sparql` is.) ⚠ The refusal arrives as `500`; a `429` with `Retry-After` would say the same
-thing to a client that does not read the body.
+own `/sparql` is.) The refusal is a `429 Too Many Requests`, and its `Retry-After` header says
+the same wait in whole seconds, so a client that does not read the body still knows when to come
+back. (Through the gonk this book pinned before, the same refusal arrived as a `500`, with no
+header; gonk's `anonymous_runs_1210` test checks the `429` and its header.)
 
 ## Drafting: who may, and what it costs
 
@@ -314,16 +316,16 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
 left out: parts= did not ask for it (103 offered)
-urn:ikigai:vocab: 199 of 199
+urn:ikigai:vocab: 224 of 224
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)"'
-urn:ikigai:vocab: 0 of 199
+urn:ikigai:vocab: 0 of 224
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 ```
 
-Unfocused, the model would be shown all 199 terms of the vocabulary; focused on the ledger graph,
+Unfocused, the model would be shown all 224 terms of the vocabulary; focused on the ledger graph,
 the graph's own shape and the example that reads it, and no term, since none mentions the graph.
 
 Every draft on this page passes `focus=` all the same: what the model is not shown, it cannot
@@ -511,9 +513,13 @@ asked.
 ```console
 $ printf 'all the open items' | ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/bot -c 'sink urn:nl:sparql save=team-open-p2 focus=urn:iki:ledger:graph:default'
 error: invalid argument `save`: urn:script:team-open-p2 is a published script, and a draft saved there would replace it; choose another name
+       `save`: The script name to save the draft under (needs `urn:cap:script:write:{save}`); `nl-sparql-` and a digest of the drafting when absent, which a script host from ikigai-script 0.3.0 lets a caller holding `urn:cap:script:write:nl-sparql-*` save. A published script is never replaced.
 $ grep -c ': all the open items$' model.log
 0
 ```
+
+The refusal's second line is the `save` argument's own description, which `ikigai` prints under
+an invalid argument; the model log shows the model was never asked.
 
 ## The same, signed in
 
