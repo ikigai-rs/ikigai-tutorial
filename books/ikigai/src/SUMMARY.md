@@ -28,6 +28,7 @@
 - [Transreption](building/transreption.md)
 - [Multi-verb endpoints](building/multi-verb.md)
 - [The graph face](building/graph-face.md)
+- [Checking a resource](building/checking.md)
 - [Testing an endpoint hermetically](building/hermetic.md)
 
 # Loadable modules

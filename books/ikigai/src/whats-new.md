@@ -11,6 +11,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [A space that changes while it runs](applied/live-space.md)
 
+- **2026-10-22**: A new chapter in Building endpoints, Checking a resource, follows The graph face. Any resource with a Turtle face can be checked: the RDF Toolbox reads it under your own capability, and closed SHACL shapes turn a property nobody declared into a finding. It ends on how a check differs from urn:kernel:validate, which checks a request before it runs. The repositories page now lists ikigai-toolbox.
+
+  Pages: [Checking a resource](building/checking.md), [The repositories](repositories.md)
+
 - **2026-10-22**: A new chapter in Applied, A space that changes while it runs, follows Tic-tac-toe VII. It names an empty dynamic space, adds four endpoints the book already has by writing a declaration, and watches the space's picture redraw. A removed door takes its cached answers with it, a refused change keeps the old doors, and a view gives another name to something the host serves without granting anything. A spreadsheet, VII adds the session space beside it, and Where this actually stands now names ikigai-core 0.1.110.
 
   Pages: [A space that changes while it runs](applied/live-space.md), [A spreadsheet, VII: push](applied/spreadsheet-7.md), [Where this actually stands](modules/status.md)
