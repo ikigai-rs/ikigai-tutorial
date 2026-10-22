@@ -119,10 +119,14 @@
     font-weight: 600;
 }
 
+/* The commands of a run, one per line as typed, on their own line under "run N". */
 .ikigai-run-entry-cmd {
+    display: block;
+    flex-basis: 100%;
     background: transparent;
     padding: 0;
     color: var(--fg);
+    white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 

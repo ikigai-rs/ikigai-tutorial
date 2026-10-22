@@ -312,7 +312,8 @@
             var item = el("li", "ikigai-run-entry");
             var head = el("div", "ikigai-run-entry-head");
             head.appendChild(el("span", "ikigai-run-entry-n", "run " + runs));
-            head.appendChild(el("code", "ikigai-run-entry-cmd", commandText.replace(/\n/g, " ⏎ ")));
+            // One command per line, as it was typed: joining them with a symbol made a long run unreadable.
+            head.appendChild(el("code", "ikigai-run-entry-cmd", commandText));
             head.appendChild(el("span", "ikigai-run-entry-meta",
                 (verdict || "no cache verdict") + " · " + elapsed.toFixed(1) + " ms"));
             item.appendChild(head);
