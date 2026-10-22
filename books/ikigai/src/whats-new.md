@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: All five steps of A space that changes while it runs now run in the page. Two new Run cells follow the first three in the same live host: a declaration naming an endpoint the host never registered, refused while the old doors keep answering from the cache, and a view onto the host's picture, which a caller with a narrowed capability is refused through in the same words as directly. The picture is redrawn after each.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-22**: A space that changes while it runs now runs in the page. Its first three steps are Run cells in a live host of their own: the empty space and its status, a write that adds four doors, and a door removed along with its cached answer. The picture of the host is redrawn after each one, with a description that changes with it. The chapter also states two more known limits: a rebuild loop under a narrowed capability can miss a write, and the status door is not in the picture.
 
   Pages: [A space that changes while it runs](applied/live-space.md)
