@@ -1,0 +1,17 @@
+/* The page's width. mdbook's default (--content-max-width: 750px) leaves much of a wide screen
+ * empty while code listings, Run cells and their output scroll or wrap inside it. Code needs the
+ * width; prose does not, so the column widens and paragraphs and list items keep a readable
+ * measure of about 90 characters (WCAG 1.4.8 asks 80 for AAA; this book targets AA, and code is
+ * the reason for the extra). On a screen narrower than the new maximum nothing changes: the
+ * column still fills what is there. */
+:root {
+    --content-max-width: 1280px;
+}
+
+main > p,
+main > ul,
+main > ol,
+main > blockquote,
+main li > p {
+    max-width: 90ch;
+}
