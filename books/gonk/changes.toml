@@ -16,6 +16,12 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-21"
+summary = "The introduction names ikigai-core 0.1.109 as the book's own crates' kernel, and says what changed in the wire since the pinned ikigai: wire v9 arrived in ikigai-cli 0.1.66, and it still offers v8, so a newer ikigai and the pinned gonk talk as before."
+pages = ["introduction.md"]
+maintenance = true
+
+[[change]]
 date = "2026-10-19"
 summary = "The introduction names the newer releases the book's own crates take: ikigai-core 0.1.108 and ikigai-browse 0.19.0, whose review stops at the first refusal or rate limit from the model. The stub model does neither, so no page prints differently."
 pages = ["introduction.md"]

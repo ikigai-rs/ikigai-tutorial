@@ -44,11 +44,11 @@ ikigai-vocab.workspace = true
 # loop rather than block the page. 0.1.29 is the floor because the spreadsheet's part VI uses
 # what it added: `as-of=<instant>` on a line, which resolves the line in a temporal corridor
 # built from doors the host supplies (`Engine::with_as_of_doors`), and hands the resolver that
-# line's chain (`Resolver::issue_as_async_in`). 0.1.63 is the pin because it is the cli crates'
-# published head; the workspace locks every cli crate at one version, so this one follows, and the
-# ikigai Book's REPL transcripts replay against the same release (`books/ikigai/ikigai-cli.version`),
-# so a cell and a transcript render alike (the installed 0.1.63 binary links core 0.1.103, as the
-# cells do). 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
+# line's chain (`Resolver::issue_as_async_in`). 0.1.63 is the pin (set 2026-10-14); the workspace
+# locks every cli crate at one version, so this one follows. The ikigai Book's REPL transcripts
+# replay `ikigai` 0.1.64 (`books/ikigai/ikigai-cli.version`), which links core 0.1.103 while the
+# cells link 0.1.109; every transcript and cell replayed unchanged across that gap, and closing it
+# means wire v9 (cli 0.1.66), which is ledger #2060's pass. 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
 # keeps its first line and gains the argument's contract beneath it, read from the target's JSON
 # `Meta`, with "pipe a value in or pass name=…" when a pipe or positional value would fill it
 # (ledger #1499). (The gonk Book's pinned gonk links 0.1.61. 0.1.62 changed

@@ -7,6 +7,14 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-21**: A correction: since ikigai-core 0.1.105 the kernel fills a declared default in before your endpoint runs, and a description that marks a defaulted input required is refused. The second getting-started exercise and Contribute a module said the opposite; the exercise now shows it in a block that runs on every build.
+
+  Pages: [Exercises: getting started](getting-started/exercises.md), [Contribute a module](contribute.md)
+
+- **2026-10-21**: The book now builds against ikigai-core 0.1.109. Where this actually stands names what 0.1.105, 0.1.108 and 0.1.109 changed (defaults filled in, failure classes, a run's deadline, dynamic spaces), Preferential resolution says a prefer-mount now also falls through when the peer says to retry later (ikigai-throttle 0.2.0), Who is asking says the handshake offers a range of wire versions, and the install steps say a release fixing a TLS advisory is coming.
+
+  Pages: [Where this actually stands](modules/status.md), [Preferential resolution](beyond/preference.md), [Who is asking](beyond/identity.md), [Twenty minutes, nothing compiled](front-door/cli.md), [Running it](getting-started/running-it.md)
+
 - **2026-10-19**: The book now builds against ikigai-core 0.1.108, which a newer ikigai-browse requires; Where this actually stands says so, and that every listing and cell runs unchanged on the five kernel releases since 0.1.103.
 
   Pages: [Where this actually stands](modules/status.md)

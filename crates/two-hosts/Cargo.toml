@@ -21,8 +21,8 @@ ikigai-core.workspace = true
 # would rot silently. 0.1.41 because that release added `Session.principal`, a public field, so
 # the `Session { … }` literal in `src/identity.rs` names it: under the old "0.1.18" a fresh resolve
 # took 0.1.41 and the listing the book prints no longer compiled. 0.1.63 is the pin for both and
-# for `ikigai-resolve` below: the cli crates' published head and the release the ikigai Book's
-# REPL transcripts replay against. The gonk Book's pinned gonk links 0.1.61; 0.1.63 changed no
+# for `ikigai-resolve` below (set 2026-10-14). Wire v9 (0.1.66) is newer and not taken: it would
+# move the wire the book's transcripts replay, which is ledger #2060's pass. The gonk Book's pinned gonk links 0.1.61; 0.1.63 changed no
 # transport crate's source and 0.1.62 changed no wire, and 0.1.57 to 0.1.61 changed only HTTP
 # doors (a DELETE answers with its body, an `Expect: 100-continue` is invited, a dead listener
 # ends the accept loop on Windows).
@@ -31,8 +31,13 @@ ikigai-quic = "0.1.63"
 # `MountedRemote` (the alias/override composition) and the `Resolver` surface a
 # connected peer presents.
 ikigai-resolve = "0.1.63"
-# `Failover` — what `--prefer` is made of. 0.1.11, the published head.
-ikigai-throttle = "0.1.11"
+# `Failover` — what `--prefer` is made of. 0.2.0 is the floor (set 2026-10-21) because "Preference"
+# teaches what it changed: `Failover` decides by core 0.1.108's `Error::class()`, advancing on a
+# transient OR a retry-after failure of an idempotent verb (`Verb::is_idempotent`), and returns
+# every other class unchanged; `src/mounts.rs` tests both. With a run's retry budget configured,
+# each advance spends from it; no host here configures one. The old pin "0.1.11" was a ceiling
+# below 0.2. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-throttle = "0.2.0"
 async-trait = "0.1"
 futures.workspace = true
 

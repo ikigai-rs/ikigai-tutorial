@@ -5,8 +5,8 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.108**, stamped on
-2026-10-19, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.109**, stamped on
+2026-10-21, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
 release on crates.io at its stamp), and its shell examples are replayed against
 `ikigai-cli` **0.1.64**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
 newest on 2026-10-14). A
@@ -114,19 +114,46 @@ on 2026-10-10; the probe re-checks `ikigai-module` 0.4.0 and
 the work: since `ikigai-xslt` 0.2.1 every transform is answered
 within a time budget, five seconds, with a typed `Timeout`, and the crate says plainly that
 the work past the deadline is **abandoned, never stopped** (checked at
-`ikigai-xslt` 0.3.0) — the caller is released and the thread keeps running. Treat this
+`ikigai-xslt` 0.3.0) — the caller is released and the thread keeps running. Since
+`ikigai-core` 0.1.108 a deadline can also belong to the whole *run*: a door that issues
+with an `IssueContext` gives it a `not_after`, every sub-request inherits it and may only
+shorten it, and an endpoint or an overlay reads what is left with `Invocation::time_left`
+(an overlay that would wait for a retry checks the wait fits first). Wire v9, from
+`ikigai-cli` 0.1.66, carries the time left across a mount, so a peer's work is held to the
+caller's deadline too. It is still a deadline on the answer: the run is told how long it
+has, and nothing stops a computation that ignores it, so abandoned-never-stopped holds. Treat this
 section as the direction and the table above as the state, and do not plan a deployment on
 the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.108. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.1.109. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
-chapters they touch, and the five since (0.1.104 to 0.1.108) came in as the floor of a newer
-`ikigai-browse`, with every listing and cell in the book running unchanged on them; none of
-those thirteen is listed here. Each of the seventeen is one
-line here, and taught where a chapter teaches it:
+chapters they touch. Of the six since, 0.1.104 (the principal vocabulary), 0.1.106 and
+0.1.107 change nothing a page shows, and three are worth a line, because they change what
+an endpoint you write can rely on:
+
+- **0.1.105 changed behavior: a declared default is filled in.** The kernel fills a
+  declared `default_value` into the request before dispatch, so an endpoint reads an
+  omitted optional argument as its default rather than as `MissingArgument`. A default
+  makes its input optional, and `Description::validate` refuses a description that marks a
+  defaulted input required anyway. Before it, every endpoint
+  applied its own default by hand. Exercise 2 of [Exercises](../getting-started/exercises.md)
+  runs it.
+- **0.1.108 — failures have a class.** `Error::class()` sorts every error into transient,
+  retry-after, over-budget, denied, refused, permanent or unknown (new variants
+  `RetryAfter`, `OverBudget` and `Refused` among them); `Verb::is_idempotent` says which
+  verbs may be re-issued; an action may state the classes it fails with (`fails(..)`,
+  `ik:mayFail` in its contract); a run may carry a shared retry budget, granted as
+  `urn:cap:retry:<n>`, and a deadline, above. `ikigai-throttle` 0.2.0 decides by the class,
+  which [Preference](../beyond/preference.md) shows.
+- **0.1.109 — dynamic spaces.** A running kernel's arrangement can gain and lose doors
+  without replacing its root: a `DynamicSpace` is rebuilt from a declaration resource, and
+  each successful bind cuts the one thread every answer it served hangs from.
+
+The seventeen from 0.1.79 to 0.1.95 are one line each here, and taught where a chapter
+teaches them:
 
 - **0.1.79 — documents and tests only.** The check of what a wall keeps out answers only for
   what the graph shows in full, and a second query lists the paths it cannot answer for.

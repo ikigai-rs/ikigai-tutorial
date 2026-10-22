@@ -245,6 +245,53 @@ mod tests {
         assert!(matches!(error, Error::Denied(_)), "{error:?}");
     }
 
+    /// A peer that says "not before thirty seconds" is limited, not wrong, and another
+    /// target is not limited by it: since ikigai-throttle 0.2.0 a `RetryAfter` falls
+    /// through like a transient failure. `Failover` decides by `Error::class()`.
+    #[test]
+    fn a_prefer_mount_falls_back_when_the_peer_says_retry_later() {
+        let (peer, calls) = dead(|detail| Error::RetryAfter {
+            delay: Some(std::time::Duration::from_secs(30)),
+            detail,
+        });
+        let space = prefer(
+            "urn:iki:tutorial:",
+            "test://peer",
+            peer,
+            local_space(Arc::new(AtomicUsize::new(0))),
+        );
+
+        let answer = issue(space, Verb::Source, "urn:iki:tutorial:camel-case")
+            .expect("a rate-limited peer falls through to local");
+
+        assert_eq!(answer, "answered locally");
+        assert!(calls.load(Ordering::SeqCst) > 0, "the peer is tried first");
+    }
+
+    /// A remote authority that refused the credential is an answer about authority, as a
+    /// denial is, and an error whose class is unknown is not known to be safe to repeat:
+    /// both propagate rather than fall through.
+    #[test]
+    fn a_prefer_mount_does_not_swallow_a_refusal_or_an_unknown_failure() {
+        for (error, expect) in [
+            (Error::Refused as fn(String) -> Error, "refused"),
+            (Error::Endpoint as fn(String) -> Error, "unknown"),
+        ] {
+            let (peer, _) = dead(error);
+            let space = prefer(
+                "urn:iki:tutorial:",
+                "test://peer",
+                peer,
+                local_space(Arc::new(AtomicUsize::new(0))),
+            );
+
+            let error = issue(space, Verb::Source, "urn:iki:tutorial:camel-case")
+                .expect_err("this class must propagate");
+
+            assert_eq!(error.class().to_string(), expect, "{error:?}");
+        }
+    }
+
     /// A `Sink` is not replayed on another target, even for a transient failure: the
     /// write may already have happened on the far side of a broken connection, and
     /// doing it again here is not the same as doing it once.

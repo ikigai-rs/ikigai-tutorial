@@ -16,6 +16,16 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-21"
+summary = "A correction: since ikigai-core 0.1.105 the kernel fills a declared default in before your endpoint runs, and a description that marks a defaulted input required is refused. The second getting-started exercise and Contribute a module said the opposite; the exercise now shows it in a block that runs on every build."
+pages = ["getting-started/exercises.md", "contribute.md"]
+
+[[change]]
+date = "2026-10-21"
+summary = "The book now builds against ikigai-core 0.1.109. Where this actually stands names what 0.1.105, 0.1.108 and 0.1.109 changed (defaults filled in, failure classes, a run's deadline, dynamic spaces), Preferential resolution says a prefer-mount now also falls through when the peer says to retry later (ikigai-throttle 0.2.0), Who is asking says the handshake offers a range of wire versions, and the install steps say a release fixing a TLS advisory is coming."
+pages = ["modules/status.md", "beyond/preference.md", "beyond/identity.md", "front-door/cli.md", "getting-started/running-it.md"]
+
+[[change]]
 date = "2026-10-19"
 summary = "The book now builds against ikigai-core 0.1.108, which a newer ikigai-browse requires; Where this actually stands says so, and that every listing and cell runs unchanged on the five kernel releases since 0.1.103."
 pages = ["modules/status.md"]
