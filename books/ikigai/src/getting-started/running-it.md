@@ -60,9 +60,9 @@ cargo install ikigai-cli --locked
 > with something that is not this. `--locked` builds against the dependency versions the
 > release was tested with rather than whatever the registry resolves today.
 >
-> The other side of `--locked`: it also holds you to that release's flaws. Every `ikigai-cli`
-> published so far locks `rustls-webpki` 0.103.15, which has a security advisory
-> (RUSTSEC-2026-0382), and a release with the fix is coming.
+> The other side of `--locked`: it also holds you to that release's flaws. `ikigai-cli`
+> 0.1.68 is the first release whose lockfile fixes the `rustls-webpki` advisory
+> (RUSTSEC-2026-0382), using 0.103.16 instead of 0.103.15. Install 0.1.68 or later.
 
 To reach a kernel on another machine over QUIC, add `--features quic`;
 [Install](../front-door/cli.md#0-install) says why.

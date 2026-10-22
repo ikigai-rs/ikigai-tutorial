@@ -189,6 +189,10 @@ assert_eq!(left_out.bytes, b" ");
 let spelled = ask().with_arg("separator", ArgRef::Inline(b",".to_vec()));
 assert_eq!(block_on(kernel.issue(spelled, &root)).unwrap().bytes, b",");
 
+// An explicitly empty value also wins over the nonempty default.
+let empty = ask().with_arg("separator", ArgRef::Inline(Vec::new()));
+assert_eq!(block_on(kernel.issue(empty, &root)).unwrap().bytes, b"");
+
 // A default is what an omitted input assumes, so declaring one makes the input optional...
 let separator = ArgSpec::new("separator").default_value(" ");
 assert!(!separator.required);
