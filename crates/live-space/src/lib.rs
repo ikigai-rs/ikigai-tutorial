@@ -42,9 +42,14 @@ pub use hello_camel::TitleState;
 /// Where the dynamic space's declaration lives. A write to it is a change to the space.
 pub const DECLARATION: &str = "urn:iki:tutorial:live:declaration";
 
-/// `view.ttl`: a declaration holding one view, `urn:iki:tutorial:live:picture`, onto
-/// `urn:diagram:kernel`. Turtle, because the s-expression form cannot say `resolveAt` yet.
-pub const VIEW: &str = include_str!("../view.ttl");
+/// `view.arrangement`: a declaration holding one view, `urn:iki:tutorial:live:picture`, onto
+/// `urn:diagram:kernel`, as the s-expression the chapter writes. `:resolve-at root` is what makes
+/// the rule a view (ikigai-sexpr 0.2.4 reads and prints it).
+pub const VIEW: &str = include_str!("../view.arrangement");
+
+/// `view.ttl`: the same declaration as [`VIEW`], as the `ik:` Turtle core reads, where the view
+/// is `ik:resolveAt "root"`.
+pub const VIEW_TURTLE: &str = include_str!("../view.ttl");
 
 /// The first declaration the chapter writes: all four endpoints, bound.
 pub const FOUR_DOORS: &str = r#"(endpoints
@@ -60,10 +65,23 @@ pub struct DeclarationState {
     text: Mutex<Option<String>>,
 }
 
+/// Whether `written` is an s-expression: past whitespace and `;` line comments (which Turtle,
+/// whose comments start with `#`, never has), it opens with `(`.
+fn is_arrangement(written: &str) -> bool {
+    let mut rest = written.trim_start();
+    while let Some(comment) = rest.strip_prefix(';') {
+        rest = comment
+            .split_once('\n')
+            .map_or("", |(_, after)| after)
+            .trim_start();
+    }
+    rest.starts_with('(')
+}
+
 /// `live-declaration`: the dynamic space's declaration. `Sink` replaces it with `content`;
-/// `Source` answers it as Turtle, reading an s-expression (its first character is `(`)
-/// through ikigai-sexpr and passing anything else through as Turtle already. Not found
-/// until it is first written.
+/// `Source` answers it as Turtle, reading an s-expression (its first character past whitespace
+/// and `;` comments is `(`) through ikigai-sexpr and passing anything else through as Turtle
+/// already. Not found until it is first written.
 ///
 /// The read is cacheable, so it hangs from its own name, and the kernel cuts that thread
 /// after every write: the host's loop hears the write as that cut.
@@ -82,7 +100,7 @@ pub fn declaration(state: Arc<DeclarationState>) -> FnEndpoint {
                 let Some(written) = text.as_deref() else {
                     return Err(Error::NotFound(inv.request.target.as_str().to_string()));
                 };
-                let turtle = if written.trim_start().starts_with('(') {
+                let turtle = if is_arrangement(written) {
                     arrangement_to_topology(written)
                         .map_err(|e| Error::Endpoint(format!("not an arrangement: {e}")))?
                         .to_turtle()

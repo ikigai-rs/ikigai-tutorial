@@ -471,25 +471,31 @@ That is a **view**. This declaration is one view and nothing else. A declaration
 space, so a host that wrote it over the four doors would lose them; the listing below starts
 from an empty space:
 
+```text
+{{#include ../../../../crates/live-space/view.arrangement}}
+```
+
+`:resolve-at root` is what makes the rule a view; without it, the rule resolves in its own
+child, as every rule did before. The declaration's `Source` answers it as the Turtle core
+reads, where the same word is `ik:resolveAt "root"`:
+
 ```turtle
 {{#include ../../../../crates/live-space/view.ttl}}
 ```
 
-It is Turtle, not an s-expression: the s-expression form (`ikigai-sexpr` 0.2.3) cannot write
-`resolveAt` yet. Printing this declaration as an s-expression drops it, and turns the view
-into an ordinary rule, so this chapter writes the Turtle core reads, which says it. The
-listing checks that the printer still drops it, so a release that fixes this will fail the
-build here until the chapter is updated:
+The two are one declaration. `ikigai-sexpr` 0.2.4 reads and prints `:resolve-at`, so the
+s-expression goes to Turtle and back without losing the view, and the listing checks that
+round trip as well as the view itself:
 
 <!-- urn-gate: illustration urn:iki:tutorial:live:picture — the view the declaration in
-     crates/live-space/view.ttl binds, in this chapter's host only. -->
+     crates/live-space/view.arrangement binds, in this chapter's host only. -->
 
 ```rust
 # extern crate live_space;
 # extern crate ikigai_core;
 # extern crate ikigai_sexpr;
 use ikigai_core::{Capability, Error, Topology};
-use live_space::{source, Host, VIEW};
+use live_space::{source, Host, VIEW, VIEW_TURTLE};
 
 let mut host = Host::start("workshop");
 host.write(VIEW);
@@ -510,10 +516,12 @@ let through = host.read_as(view(), &listener);
 assert!(matches!(direct, Err(Error::Denied(_))));
 assert_eq!(direct.unwrap_err().to_string(), through.unwrap_err().to_string());
 
-// The s-expression printer cannot write `resolveAt` yet (ikigai-sexpr 0.2.3).
-let printed =
-    ikigai_sexpr::topology_to_arrangement(&Topology::from_turtle(VIEW).unwrap()).unwrap();
-assert!(!printed.contains("root"));
+// The s-expression and the Turtle are one declaration, and the round trip keeps the view.
+let read = ikigai_sexpr::arrangement_to_topology(VIEW).unwrap();
+assert_eq!(read, Topology::from_turtle(VIEW_TURTLE).unwrap());
+let printed = ikigai_sexpr::topology_to_arrangement(&read).unwrap();
+assert!(printed.contains(":resolve-at root"));
+assert_eq!(ikigai_sexpr::arrangement_to_topology(&printed).unwrap(), read);
 ```
 
 A view can only read what the caller could already read. Its forwarding endpoint declares no
@@ -523,18 +531,15 @@ it. The view's answer is a cache entry of its own that depends on the target's: 
 `urn:kernel:bindings` redraws both. Inside a dynamic space it also hangs from the space's
 thread, so the next change to the declaration cuts it, like everything else the space served.
 
-In the page, the declaration is the Turtle above, comments dropped, on one line. Here it is
-not written into an empty space but over the three doors the cells above left, and a
+In the page, the declaration is the s-expression above, comments dropped, on one line. Here it
+is not written into an empty space but over the three doors the cells above left, and a
 declaration is the whole space, so they go. After the write: the status, a `trace` of the
 view (its answer is the picture, so the trace shows the first bytes of it, and the
 sub-request the view made at the root), and then the refused caller. `cap` narrows the
 cell's session to `urn:cap:kernel:listen`, both names are refused in the same words, and
 `cap reset` widens the session back to root:
 
-<!-- urn-gate: illustration urn:ikigai:space:_:1:rule:1 — the node name of the view's rule in
-     the declaration the cell writes (view.ttl). A node of the declaration, not a resource. -->
-
-<div class="ikigai-run" data-live='workshop' data-cmd='sink urn:iki:tutorial:live:declaration @prefix ik: <https://ikigai-rs.dev/ns#> . @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . <urn:ikigai:space:_:1> a ik:Alias ; ik:maxHops 8 ; ik:rewrites <urn:ikigai:space:_:1:rule:1> ; ik:space <urn:ikigai:space:_:2> . <urn:ikigai:space:_:1:rule:1> a ik:RewriteRule ; ik:ruleKind "exact" ; ik:logical "urn:iki:tutorial:live:picture" ; ik:canonical "urn:diagram:kernel" ; ik:resolveAt "root" . <urn:ikigai:space:_:2> a ik:EndpointSpace ; ik:doors rdf:nil .
+<div class="ikigai-run" data-live='workshop' data-cmd='sink urn:iki:tutorial:live:declaration (alias (exact "urn:iki:tutorial:live:picture" "urn:diagram:kernel" :resolve-at root) (endpoints))
 source urn:iki:space:dynamic:workshop:status
 trace urn:iki:tutorial:live:picture
 cap urn:cap:kernel:listen
@@ -545,7 +550,7 @@ cap reset'>
 [uncacheable]
 space: urn:iki:space:dynamic:workshop
 declaration: urn:iki:tutorial:live:declaration
-in force: b3:31df2f3b828cdc1563379ad1328b8f8d980294e493b9b7cf58931d839606c483
+in force: b3:401d33fef281fe3eba936a037cd2aa691a44f5105f53bc408daec623d9c31991
 installs: 3
 refused: nothing since the last bind
 [uncacheable]
@@ -580,7 +585,6 @@ shows it too.
   last to bind wins. A host runs one.
 - **No sealing levels.** A level that seals names is refused in a dynamic space, because a
   running kernel's seals are fixed when it is built.
-- **Views are Turtle only** until `ikigai-sexpr` can print and read `resolveAt`.
 - **A loop under a narrowed capability can miss a write** (ledger #2048). `drive` hears a
   write to the declaration only through an answer cached under its own capability that hangs
   from the declaration's thread. Under root it hears every write. Under a narrower capability

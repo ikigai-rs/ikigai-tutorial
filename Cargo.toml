@@ -161,14 +161,17 @@ ikigai-fn = "0.5.0"
 # because it added `arrangement_space()`, which mounts the arrangement surface alone, and the `full`
 # feature, off here: nothing in the tutorial mounts the query or graph compilers or the code-graph
 # codec, so the page compiles neither `sha2` nor `oxrdfio` (ledger #649). 0.1.4 added the
-# arrangement surface at all. 0.2.3 is the pin (set 2026-10-14): 0.2.1 to 0.2.3
-# bound the code-graph decoder by depth and by size and hash each node once in the encoder (ledger
+# arrangement surface at all. 0.2.4 is the pin (set 2026-10-22, ledger #2110): it reads and prints
+# an alias rule's `ik:resolveAt "root"` as `:resolve-at root` (ikigai-sexpr#25, ledger #2085), so
+# "A space that changes while it runs" writes its view as an s-expression; 0.2.3 dropped it and
+# turned the view into an ordinary rule. Before that the pin was 0.2.3 (set 2026-10-14): 0.2.1 to
+# 0.2.3 bound the code-graph decoder by depth and by size and hash each node once in the encoder (ledger
 # #1326, #1331, #1332), all behind the `full` feature this book leaves off. Before that the pin was
 # 0.2.0, the published head past the old pin's 0.x ceiling (<0.2.0): its one change is that both its
 # spaces name themselves (`urn:iki:space:sexpr`, `…:sexpr:arrangement`, ledger #987), and the book
 # calls its functions rather than mounting its spaces, so nothing a page prints moved. A 0.x caret:
 # also a ceiling (<0.3.0).
-ikigai-sexpr = { version = "0.2.3", default-features = false }
+ikigai-sexpr = { version = "0.2.4", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Part VII's
 # picture test uses it (a dev-dependency), and `crates/live-space` mounts its space for
 # `urn:diagram:kernel`; neither is in the page, so the page pays nothing for it. 0.2.1 is the pin,
