@@ -103,8 +103,124 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // `.arrangement` as Turtle. `urn:iki:tutorial:ttt:arrangement:*`,
         // `urn:iki:tutorial:ttt:build` and `urn:sexpr:arrangement-*` overlap nothing above.
         Arc::new(tic_tac_toe::declared::declaration_space()),
+        // "Checking a resource": its two players, their transreptor and shapes, the RDF
+        // Toolbox's names (`urn:toolbox:*`) and the shapes check (`urn:shacl:*`). Then the
+        // toolbox's build, at `urn:iki:toolbox:dist:{path}`: in the page, the copy the book
+        // publishes beside itself; built natively, nothing (see `dist_space`).
+        Arc::new(check_resource::space()),
+        dist_space(),
     ])
 }
+
+// ANCHOR: dist
+/// Where the toolbox reads its build, `urn:iki:toolbox:dist:{path}` (`ikigai_toolbox::DIST`):
+/// in the page, the published copy of `ikigai-toolbox`'s `build.sh` output, which pages.yml
+/// puts in `toolbox/` beside the book's root and which the browser fetches only when a name
+/// asks for one of its files. So `urn:toolbox:check:{iri}` composes in the page, from the
+/// build's own template, and nothing is fetched until a reader opens a check.
+///
+/// The kernel's futures must be `Send` and a browser fetch is not, so the fetch runs as a task
+/// of the page's own (`spawn_local`) and hands its answer back over a channel, which is.
+#[cfg(target_family = "wasm")]
+fn dist_space() -> Arc<dyn Space> {
+    use ikigai_core::{AsyncFnEndpoint, Description, EndpointSpace, InvokeFuture, UriTemplate};
+    let fetched = AsyncFnEndpoint::new(
+        "book-toolbox-dist",
+        |inv: &ikigai_core::Invocation<'_>| -> InvokeFuture<'_> {
+            let path = inv.bindings.get("path").unwrap_or_default().to_string();
+            let (answer, answered) = futures::channel::oneshot::channel();
+            wasm_bindgen_futures::spawn_local(async move {
+                let _ = answer.send(fetch_published(&path).await);
+            });
+            Box::pin(async move {
+                answered
+                    .await
+                    .unwrap_or_else(|_| Err(Error::Endpoint("the fetch was dropped".into())))
+            })
+        },
+    )
+    .with_description(
+        Description::new("book-toolbox-dist")
+            .title("The toolbox build this book publishes")
+            .summary(
+                "One file of the RDF Toolbox build published beside this book (`toolbox/`), \
+                 fetched by the browser when it is asked for.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output("application/octet-stream"),
+    );
+    Arc::new(EndpointSpace::new().bind(
+        UriTemplate::parse("urn:iki:toolbox:dist:{path}").expect("a constant template"),
+        fetched,
+    ))
+}
+
+/// Built natively there is no published build to fetch, so nothing is bound there: a check
+/// page fails on its template exactly as the chapter's own host's does.
+#[cfg(not(target_family = "wasm"))]
+fn dist_space() -> Arc<dyn Space> {
+    Arc::new(ikigai_core::EndpointSpace::new())
+}
+
+/// The bytes of `toolbox/{path}` beside the book's root, as the browser fetches them. A name
+/// that is not one plain file name is not found without a request: the toolbox asks only for
+/// the files on its allowlist, and nothing else under the site is the dist's to serve.
+#[cfg(target_family = "wasm")]
+async fn fetch_published(path: &str) -> Result<Representation, Error> {
+    use js_sys::{Function, Promise, Reflect, Uint8Array};
+    use wasm_bindgen_futures::JsFuture;
+    #[wasm_bindgen]
+    extern "C" {
+        #[wasm_bindgen(js_name = fetch)]
+        fn fetch_url(url: &str) -> Promise;
+    }
+    let plain = !path.is_empty()
+        && !path.starts_with('.')
+        && path
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'));
+    if !plain {
+        return Err(Error::NotFound(format!(
+            "urn:iki:toolbox:dist:{path}: not a file of the published build"
+        )));
+    }
+    let failed = |e: JsValue| Error::Endpoint(format!("toolbox/{path}: {e:?}"));
+    // Where the build is published, as `js/toolbox.js` says (`window.ikigaiToolboxBase`, the
+    // absolute path of `toolbox/` beside the book's root). mdbook's `path_to_root` would do,
+    // but it is a `const` in the page's head, which is not a property of the global object.
+    let base = Reflect::get(&js_sys::global(), &JsValue::from_str("ikigaiToolboxBase"))
+        .ok()
+        .and_then(|v| v.as_string())
+        .ok_or_else(|| {
+            Error::NotFound(format!(
+                "urn:iki:toolbox:dist:{path}: this page does not say where the toolbox build is \
+                 published (js/toolbox.js sets window.ikigaiToolboxBase)"
+            ))
+        })?;
+    let url = format!("{base}{path}");
+    let response = JsFuture::from(fetch_url(&url)).await.map_err(failed)?;
+    let field = |name: &str| Reflect::get(&response, &JsValue::from_str(name));
+    if !field("ok").map_err(failed)?.as_bool().unwrap_or(false) {
+        let status = field("status").map_err(failed)?.as_f64().unwrap_or(0.0);
+        return Err(Error::NotFound(format!("{url}: HTTP {status}")));
+    }
+    let read: Function = field("arrayBuffer")
+        .map_err(failed)?
+        .dyn_into()
+        .map_err(failed)?;
+    let pending: Promise = read
+        .call0(&response)
+        .map_err(failed)?
+        .dyn_into()
+        .map_err(failed)?;
+    let buffer = JsFuture::from(pending).await.map_err(failed)?;
+    Ok(Representation::new(
+        ikigai_core::ReprType::new("application/octet-stream"),
+        Uint8Array::new(&buffer).to_vec(),
+    ))
+}
+// ANCHOR_END: dist
 
 // ANCHOR: as_of_doors
 /// The doors a temporal corridor binds on this page, for every line that says `as-of=`: the
@@ -1333,8 +1449,14 @@ mod tests {
     /// stopped at the time `times` gives for `i`, if it gives one. Index 0's time is also the
     /// time the page loads at.
     fn run_chapter_at(file: &str, expected_cells: usize, times: &[(usize, u64)]) -> Vec<String> {
+        // A bare file name is an Applied chapter's; anything else is a path under `src/`.
+        let file_in_src = if file.contains('/') {
+            file.to_string()
+        } else {
+            format!("applied/{file}")
+        };
         let path = format!(
-            "{}/../../books/ikigai/src/applied/{file}",
+            "{}/../../books/ikigai/src/{file_in_src}",
             env!("CARGO_MANIFEST_DIR")
         );
         let chapter = std::fs::read_to_string(&path).expect("the chapter is readable");
@@ -1739,6 +1861,38 @@ mod tests {
     /// the host never registered, refused, with the last good doors and what they served kept;
     /// and a view onto `urn:diagram:kernel`, which a caller narrowed below
     /// `urn:cap:kernel:inspect` is refused through in the same words as directly.
+    /// "Checking a resource": a Turtle face read with and without the scope, then the two
+    /// players checked against the closed shapes, in the page's kernel.
+    #[test]
+    fn the_checking_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("building/checking.md", 3);
+        assert!(t[0].contains("ttt:name \"Ada\""), "{}", t[0]);
+        assert!(t[0].contains("error: denied:"), "{}", t[0]);
+        // X conforms; O's one result is the property the closed shape does not name.
+        assert!(t[1].contains("\"conforms\": true"), "{}", t[1]);
+        assert!(
+            t[1].contains("sh:resultPath <http://example.org/ttt#wins>"),
+            "{}",
+            t[1]
+        );
+        // A narrowed caller checks nothing: the player refuses before any shapes are read.
+        assert!(t[2].contains("error: denied:"), "{}", t[2]);
+
+        // "Run it again": the reader's face is served from the cache the second time, because
+        // the cache keys on the capability as well as the name.
+        let page = Page::new();
+        let engine = page.engine(None).expect("the root's engine");
+        let line = "source urn:toolbox:input:urn:iki:tutorial:check:player:x";
+        let cell = |engine: &Engine| -> String {
+            ["cap urn:cap:tutorial:players:read", line, "cap reset"]
+                .iter()
+                .map(|l| render(&action_to_json(engine.eval(l))))
+                .collect()
+        };
+        assert!(cell(&engine).contains("[computed]"));
+        assert!(cell(&engine).contains("[cached]"));
+    }
+
     #[test]
     fn the_live_space_cells_answer_as_the_chapter_says_in_page_order() {
         let t = run_chapter_in_page_order("live-space.md", 5);
@@ -2476,8 +2630,15 @@ mod tests {
             serde_json::from_str(&action_to_json(engine.eval("source urn:kernel:topology")))
                 .unwrap();
         let turtle = reply["text"].as_str().unwrap();
-        assert_eq!(turtle.matches(" a ik:Alias ").count(), 1, "{turtle}");
-        assert_eq!(turtle.matches(" a ik:RewriteRule ").count(), 8, "{turtle}");
+        // Two aliases on the page: the game's, with its eight rules, and the RDF Toolbox's
+        // ("Checking a resource"), with two (`urn:toolbox:manifest`, `urn:toolbox:template:page`).
+        assert_eq!(turtle.matches(" a ik:Alias ").count(), 2, "{turtle}");
+        assert_eq!(turtle.matches(" a ik:RewriteRule ").count(), 10, "{turtle}");
+        assert_eq!(
+            turtle.matches("ik:logical \"urn:toolbox:").count(),
+            2,
+            "{turtle}"
+        );
         for pattern in [
             tic_tac_toe::STORED,
             tic_tac_toe::CELL,

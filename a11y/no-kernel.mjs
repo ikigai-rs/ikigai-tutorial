@@ -19,6 +19,9 @@
 //   sheets   no grid, no formula bar, no field: one message saying what did not load.
 //   pictures a live host's picture (`figure.ikigai-live`, `js/live.js`) keeps the committed
 //            file and its alt text, and one status line says it will not be redrawn.
+//   checks   a "check this resource" (`div.toolbox-check`, `js/toolbox.js`) stays the markup's
+//            link: visible, to the published toolbox page in a new tab, opened on the published
+//            Turtle faces (`from=` each one, under this site), with no in-place button or panel.
 //
 // WHY THIS EXISTS. `js/run.js` once filled every cell's result with the listing's expected
 // output whenever the wasm failed to load, and Brian met it on a drafts server that had lost
@@ -175,7 +178,35 @@ function checkLivePictures(doc, fail) {
     return figures.length;
 }
 
+function checkToolbox(doc, fail) {
+    const checks = doc.querySelectorAll("div.toolbox-check[data-iri]");
+    checks.forEach((check, i) => {
+        const n = `toolbox check ${i + 1}`;
+        if (check.querySelector(".toolbox-check-open, .toolbox-panel, iframe")) {
+            fail(`${n}: offers the in-place panel with no kernel to compose it`);
+        }
+        const fallback = check.querySelector(".toolbox-check-fallback");
+        const link = fallback && fallback.querySelector("a[href]");
+        if (!link || fallback.hidden) {
+            fail(`${n}: has no visible new-tab link`);
+            return;
+        }
+        if (link.getAttribute("target") !== "_blank" || !/noopener/.test(link.getAttribute("rel") || "")) {
+            fail(`${n}: its link does not open a new tab (target=_blank, rel=noopener)`);
+        }
+        const url = new URL(link.href);
+        const faces = (check.getAttribute("data-faces") || "").split(/\s+/).filter(Boolean);
+        const from = url.searchParams.getAll("from");
+        if (!/\/toolbox\/toolbox\.html$/.test(url.pathname) || faces.length === 0 ||
+            from.length !== faces.length || !faces.every((f, k) => from[k].endsWith("/" + f))) {
+            fail(`${n}: its link is not the toolbox page on the published faces: ${link.href}`);
+        }
+    });
+    return checks.length;
+}
+
 let failures = 0;
+let checksSeen = 0;
 let cellsSeen = 0;
 let boardsSeen = 0;
 let viewsSeen = 0;
@@ -236,13 +267,14 @@ for (const book of books) {
         viewsSeen += checkViews(doc, fail);
         sheetsSeen += checkSheets(doc, fail);
         picturesSeen += checkLivePictures(doc, fail);
+        checksSeen += checkToolbox(doc, fail);
         pagesSeen += 1;
         window.close();
     }
 }
 
-if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0 || picturesSeen === 0) {
-    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets and ${picturesSeen} live pictures — ` +
+if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0 || picturesSeen === 0 || checksSeen === 0) {
+    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets, ${picturesSeen} live pictures and ${checksSeen} toolbox checks — ` +
         "a check that saw nothing is not a pass (pass the drafts build too; see the header)");
     process.exit(1);
 }
@@ -250,4 +282,4 @@ if (failures) {
     console.error(`\nno-kernel: ${failures} failure${failures === 1 ? "" : "s"} across ${pagesSeen} pages`);
     process.exit(1);
 }
-console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets and ${picturesSeen} live pictures — nothing answered, every Run disabled, no picture redrawn`);
+console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets, ${picturesSeen} live pictures and ${checksSeen} toolbox checks — nothing answered, every Run disabled, no picture redrawn, every check a new-tab link`);

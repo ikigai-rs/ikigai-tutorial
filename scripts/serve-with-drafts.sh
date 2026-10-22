@@ -287,6 +287,11 @@ if [ "$kernel" = 1 ]; then
         echo "the kernel build produced no $out/wasm/book_wasm_bg.wasm" >&2
         exit 1
     fi
+    # The ikigai book's kernel opens the RDF Toolbox in place ("Checking a resource"), from the
+    # build published beside it, as pages.yml publishes it.
+    if [ "$name" = ikigai ]; then
+        "$here/scripts/build-toolbox.sh" "$out/toolbox"
+    fi
     echo "built with drafts and the in-page kernel: $out"
 else
     echo "built with drafts, WITHOUT the in-page kernel (every Run disabled): $out"

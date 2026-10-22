@@ -97,7 +97,44 @@ jobs:
           grep -q '^export function pushWaitAsync' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function pushDeadline' books/ikigai/book/wasm/book_wasm.js
           grep -q '^export function pushExpired' books/ikigai/book/wasm/book_wasm.js
+          grep -q '^export function livePictureAsync' books/ikigai/book/wasm/book_wasm.js
           grep -q 'as default' books/ikigai/book/wasm/book_wasm.js
+
+      # ── The RDF Toolbox, published beside The ikigai Book ─────────────────────
+      #
+      # "Checking a resource" opens the toolbox IN PLACE: the in-page kernel binds
+      # `urn:iki:toolbox:dist:{path}` to `toolbox/` beside the book (crates/book-wasm,
+      # `dist_space`), composes `urn:toolbox:check:{iri}` from the build's own template, and runs
+      # the page and its engine in a frame. `scripts/build-toolbox.sh` clones ikigai-toolbox at
+      # the commit `books/ikigai/toolbox.rev` pins (tag v0.1.0, the crate the book links), with its
+      # turtle-lsp submodule at ITS pin, and runs that repo's own `build.sh` (Rust 1.99.0 from
+      # turtle-lsp's rust-toolchain.toml, wasm32, node for the manifest). Only the engine's cargo
+      # build is cached, keyed by the pin, so build.sh itself runs on every event and a build that
+      # breaks fails here: nothing about this step is optional or path-filtered (field guide 9c).
+      # After the kernels, for the same reason they come after the gate: test-books.sh wipes the
+      # book. Node first: build.sh writes MANIFEST.jsonld with it, and the a11y steps need it.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: a11y/package-lock.json
+      - name: the toolbox engine's build, cached by the pinned commit
+        uses: actions/cache@v4
+        with:
+          path: target/ikigai-toolbox/*/target/engine-*
+          key: toolbox-engine-${{ runner.os }}-${{ hashFiles('books/ikigai/toolbox.rev') }}
+      - name: build the RDF Toolbox at its pin into the ikigai book (scripts/build-toolbox.sh)
+        run: ./scripts/build-toolbox.sh
+
+      # The panel loads these by name: the page composes from the template, the frame loads the
+      # page's scripts, its worker loads the engine. A missing one is a panel that never loads.
+      - name: smoke — the toolbox files the panel loads are published
+        run: |
+          for f in page.template.html toolbox.html app.js samples.js worker.js engine.js style.css tokens.css engine.wasm LICENSE.turtle-lsp MANIFEST.jsonld; do
+            test -s "books/ikigai/book/toolbox/$f"
+          done
+          grep -q 'data-inputs=' books/ikigai/book/toolbox/page.template.html
+          test -s books/ikigai/book/building/check/player-o.ttl
 
       - name: smoke — the exports run.js imports are present in the gonk book's kernel
         run: |
@@ -117,11 +154,6 @@ jobs:
       # live — and the dynamic `import()` of the wasm fails in jsdom, which exercises the
       # cells' no-kernel path (Run disabled, the reason said) rather than the kernel. Every
       # instrument gates the deploy.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: a11y/package-lock.json
       - name: axe-core over every built book (a11y/axe.mjs)
         working-directory: a11y
         run: |

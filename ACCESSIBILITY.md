@@ -39,8 +39,9 @@ a review comment.
   (light, rust, coal, navy, ayu), including the 404 page and each book's generated *What's new*
   page.
 - **The in-page kernels**: the runnable cells (`js/run.js`), the tic-tac-toe boards (`js/ttt.js`),
-  the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`) and the live host's picture
-  (`js/live.js`), with the kernel loaded and without it.
+  the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`), the live host's picture
+  (`js/live.js`) and the RDF Toolbox opened in place (`js/toolbox.js`: its control, its panel, and
+  the new-tab link that replaces both without the kernel), with the kernel loaded and without it.
 - **The site chrome mdbook provides** (sidebar, menu bar, search, theme menu, page navigation), as
   far as this repository can repair it: a barrier there is still a barrier for our readers.
 - **This repository's own additions to that chrome**: `css/a11y.css`, `js/a11y.js` and the cell,
@@ -56,6 +57,12 @@ a review comment.
   record the repair below; the remedy that removes our repair is upstream's.
 - **The vendored htmx** (`books/ikigai/src/vendor/htmx-2.0.4.min.js`) that drives the boards.
   The boards it renders are checked; htmx itself is not reviewed.
+- **The RDF Toolbox page itself** (turtle-lsp's page as `ikigai-toolbox` patches and builds it),
+  published in `toolbox/` beside The ikigai Book and opened in a frame from "Checking a
+  resource". The browser run audits it there, opened, in all five themes, and two failures it
+  found are repaired at load by `js/toolbox.js` (below). Upstream's page has not been assessed by
+  hand, and its own pages (`toolbox/toolbox.html` opened directly, as the new-tab link does) are
+  not audited on their own.
 - **GitHub's pages** (issues, pull requests, the code view of this repository), and the browsers
   and assistive technologies people use to read the books.
 
@@ -86,7 +93,7 @@ check means the site is not updated.
 | `crates/book-a11y`, structure (same run) | as above | The static HTML of every built page: `lang`, unique titles, one `h1` in `<main>`, no skipped heading level, `alt` on images, link text, unique ids, ARIA references that resolve, `th` in tables, names on buttons and inputs, the runnable cells' shape, the skip link's target. Faults reported by SC number | Anything JavaScript adds after load; `print.html`, `toc.html` |
 | `a11y/axe.mjs`: axe-core in jsdom (`pages.yml`) | axe-core 4.10.3, jsdom 26.1.0 | Every built page with the books' scripts run, so mdbook's copy buttons, the cells and the search repairs are seen. Gates on axe's WCAG 2.0/2.1/2.2 A and AA rules; best-practice rules are reported only | Color and target size (jsdom has no layout); the kernel path (the wasm import fails in jsdom, so cells are seen without a kernel) |
 | `a11y/no-kernel.mjs` (`pages.yml`) | jsdom 26.1.0 | With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message, a live host's picture left as committed with its alt text and a line saying it will not be redrawn. Published pages and drafts | Whether the message is understood; only the absence of answers is checked |
-| `a11y/axe-browser.mjs`: axe-core in a real browser (`pages.yml`) | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the log, not pinned) | The assembled site, both books, every page in all five themes, with the kernels loaded, every cell run once, every "Expected output" opened, every view started. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size` | One viewport (1280×900). States it does not open: search results, the theme menu, the collapsed sidebar, the keyboard-help popup |
+| `a11y/axe-browser.mjs`: axe-core in a real browser (`pages.yml`) | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the log, not pinned) | The assembled site, both books, every page in all five themes, with the kernels loaded, every cell run once, every "Expected output" opened, every view started, every toolbox check opened in place with its frame audited. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size` | One viewport (1280×900). States it does not open: search results, the theme menu, the collapsed sidebar, the keyboard-help popup |
 | `a11y/links.mjs` (`pages.yml`) | none | Every relative link in the assembled site lands on a page in it, including links between the two books | Fragments (`#id`) and external links |
 | `crates/book-urns`, `book_cells.rs` and the chapter-number checks (`cargo test`) | none | A blank line inside a cell's markup (which breaks the page once built); a bare "chapter N" with no link | Everything else about the prose |
 
@@ -123,6 +130,7 @@ has been run.
 | Target size measured at one viewport; reflow at 320 px was checked by reading the layout, not by an instrument | both books | A narrow screen may have small targets or horizontal scrolling nobody has measured | none |
 | The skip link and the keyboard repair to the sidebar toggle need JavaScript | both books | With JavaScript off, no skip link (SC 2.4.1) and the narrow-screen sidebar cannot be opened by keyboard (SC 2.1.1) | Reading with JavaScript on |
 | Runnable cells, boards, views and sheets need JavaScript and WebAssembly | pages with live parts | Without them nothing runs | Each cell's "Expected output" holds the listing's output |
+| The toolbox panel is a frame holding upstream's page; its tabs, editor and results are upstream's widgets, and only axe has looked at them. Its engine is 8.3 MB, loaded on the first press | "Checking a resource" | A slow first open on a slow connection; barriers inside the toolbox page no automated rule catches | The cells above it run the same check with no download; without the kernel, the toolbox opens in a new tab |
 | Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
 | The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
 | The live host's picture is redrawn in the page as an image whose `alt` is generated from the arrangement it was drawn from (`live_space::picture_text`, which a test holds the two committed pictures' `alt` to); nobody has judged whether that text reads well, and a status line announces each redraw without saying what changed in it | "A space that changes while it runs" | A long description, read again in full after every change | The cells' own output, which says what each change did |
@@ -133,7 +141,8 @@ No list like this is complete. Please report what you find.
 ## Local repairs to upstream output
 
 Each repair below changes mdbook's output at load (`js/a11y.js`) or by cascade (`css/a11y.css`)
-because the template is not ours. A repair is maintenance debt until upstream ships a fix, we adopt
+because the template is not ours; the last two change the RDF Toolbox page as `js/toolbox.js`
+writes it into its frame, for the same reason. A repair is maintenance debt until upstream ships a fix, we adopt
 it, delete the repair and the checks stay green. No upstream issue has been filed for any of them
 yet. `book-a11y` credits the two search-box repairs only while `js/a11y.js` still contains them.
 
@@ -147,6 +156,8 @@ yet. `book-a11y` credits the two search-box repairs only while `js/a11y.js` stil
 | The second "Page navigation" landmark named for wide screens | 1.3.1 (best practice) | PR #13 | the two landmarks are distinguishable upstream |
 | A tab stop on a code block or table that overflows, with the arrow keys kept for scrolling | 2.1.1 | PR #50 | mdbook makes scrollable regions focusable |
 | The search spinner stops under `prefers-reduced-motion` | 2.3.3 (AAA) | PR #13 | mdbook guards the animation |
+| The RDF Toolbox page in its panel (`js/toolbox.js`, `repair`): upstream's `--faint` text (2.34:1 light, 3.72:1 dark) mapped to the token set's `--muted` | 1.4.3 | ledger #2094 | ikigai-toolbox's `tokens.css` maps `--faint` |
+| The same page: its two hidden file inputs (`#picker`, `#folder-picker`) named | 4.1.2 | ledger #2094 | ikigai-toolbox's page names them |
 
 ## Generated output
 

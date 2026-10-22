@@ -83,6 +83,29 @@ assert_eq!(
 );
 ```
 
+This page runs the same two reads. Its kernel holds the chapter's host beside the spaces the
+book's other chapters run in, and `cap` narrows the page's session the way it narrows a shell's,
+until `cap reset` gives the authority back. Run it, then run it again: the reader's face comes
+from the cache the second time, because the cache keys on the capability as well as the name.
+
+<div class="ikigai-run" data-cmd='cap urn:cap:tutorial:players:read
+source urn:toolbox:input:urn:iki:tutorial:check:player:x
+cap reset
+cap urn:cap:tutorial:counter:write
+source urn:toolbox:input:urn:iki:tutorial:check:player:x
+cap reset'>
+<pre class="ikigai-run-expected">narrowed — capability: urn:cap:tutorial:players:read
+@prefix ttt: &lt;http://example.org/ttt#&gt; .
+&lt;urn:iki:tutorial:check:player:x&gt; a ttt:Player ;
+	ttt:name "Ada" ;
+	ttt:mark "X" .
+[computed]
+reset to identity — capability: root (full authority)
+narrowed — capability: urn:cap:tutorial:counter:write
+error: denied: capability does not grant `urn:cap:tutorial:players:read` (declared by `urn:iki:tutorial:check:player:x`)
+reset to identity — capability: root (full authority)</pre>
+</div>
+
 ## Shapes, in a paragraph
 
 [SHACL](https://www.w3.org/TR/shacl/) describes what a graph should look like, in a graph of its
@@ -139,6 +162,39 @@ assert_eq!(found[0].path.as_deref(), Some("http://example.org/ttt#wins"));
 assert_eq!(found[0].component, "http://www.w3.org/ns/shacl#ClosedConstraintComponent");
 ```
 
+The same check runs in this page, written the way a shell writes it: the Turtle face piped
+into `urn:shacl:validate`, where it fills `data`, the one required input left unnamed. X
+conforms. O's report is the graph the paragraph below describes, and its one result names the
+property: `sh:resultPath ttt:wins`, from `sh:ClosedConstraintComponent`. The toolbox's own
+engine checks the same two players further down, in [The page itself](#the-page-itself).
+
+<!-- urn-gate: illustration urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:report — the report graph's own
+     node, skolemized from the report's digest; it names a node in the answer, not a resource. -->
+<!-- urn-gate: illustration urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:result.0 — the report's one result,
+     a node in the same answer. -->
+
+<div class="ikigai-run" data-cmd='source urn:toolbox:input:urn:iki:tutorial:check:player:x | urn:shacl:validate shapes=urn:iki:tutorial:check:shapes as=application/json
+source urn:toolbox:input:urn:iki:tutorial:check:player:o | urn:shacl:validate shapes=urn:iki:tutorial:check:shapes'>
+<pre class="ikigai-run-expected">{
+  "conforms": true,
+  "violations": []
+}
+[2 computed]
+@prefix sh: &lt;http://www.w3.org/ns/shacl#&gt; .
+&lt;urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:report&gt; a sh:ValidationReport ;
+	sh:conforms false ;
+	sh:result &lt;urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:result.0&gt; .
+&lt;urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:result.0&gt; a sh:ValidationResult ;
+	sh:focusNode &lt;urn:iki:tutorial:check:player:o&gt; ;
+	sh:resultMessage "Closed constraint not satisfied" ;
+	sh:resultPath &lt;http://example.org/ttt#wins&gt; ;
+	sh:resultSeverity sh:Violation ;
+	sh:sourceConstraintComponent sh:ClosedConstraintComponent ;
+	sh:sourceShape &lt;http://example.org/ttt#PlayerShape&gt; ;
+	sh:value "3" .
+[2 computed]</pre>
+</div>
+
 The report is data, like every other answer in this book: `as=application/json` gives the
 structure above, and the default, `text/turtle`, is the same findings as a SHACL validation
 report graph you can query.
@@ -182,6 +238,38 @@ let err = block_on(check_resource::kernel().issue(Request::new(Verb::Source, pag
 assert!(matches!(err, Error::Unresolved(ref name) if name.as_str() == "urn:iki:toolbox:dist:page.template.html"));
 ```
 
+This book does bind one. It publishes a build of `ikigai-toolbox` 0.1.0 beside its pages, in
+`toolbox/`, and the page's kernel binds `urn:iki:toolbox:dist:{path}` to it: a door that asks the
+browser for `toolbox/{path}` when, and only when, a name needs one of its files.
+
+```rust,ignore
+{{#include ../../../../crates/book-wasm/src/lib.rs:dist}}
+```
+
+So the page is a host too. Pressing a "Check … here" button below asks this page's kernel for
+`urn:toolbox:check:{iri}` with `shapes=`, which composes the toolbox page from the build's own
+template. The page then does what a server's routing would do: it points the composed page's
+`/toolbox/…` files at the published build, and answers its two inputs, `/toolbox/input/{iri}`,
+with `urn:toolbox:input:{iri}` from the same kernel. The toolbox runs in a panel that opens in
+place, and its engine checks the two Turtle faces in your tab. Nothing of the toolbox is loaded
+until you press one: the first press fetches its scripts and the 8.3 MB engine, and Close (or
+Escape) puts focus back on the button.
+
+<div class="toolbox-check" data-iri='urn:iki:tutorial:check:player:o' data-shapes='urn:iki:tutorial:check:shapes' data-name='player O against the player shapes' data-faces='building/check/player-o.ttl building/check/shapes.ttl'>
+<p class="toolbox-check-fallback"><a href="../toolbox/toolbox.html?from=/ikigai-tutorial/building/check/player-o.ttl&amp;from=/ikigai-tutorial/building/check/shapes.ttl#shacl" target="_blank" rel="noopener">Check player O against the player shapes in the RDF Toolbox</a>, in a new tab, on copies of the two Turtle faces published with this page.</p>
+</div>
+
+<div class="toolbox-check" data-iri='urn:iki:tutorial:check:player:x' data-shapes='urn:iki:tutorial:check:shapes' data-name='player X against the player shapes' data-faces='building/check/player-x.ttl building/check/shapes.ttl'>
+<p class="toolbox-check-fallback"><a href="../toolbox/toolbox.html?from=/ikigai-tutorial/building/check/player-x.ttl&amp;from=/ikigai-tutorial/building/check/shapes.ttl#shacl" target="_blank" rel="noopener">Check player X against the player shapes in the RDF Toolbox</a>, in a new tab, on copies of the two Turtle faces published with this page.</p>
+</div>
+
+The SHACL tab of O's check shows the same finding as the cell above, worded by turtle-lsp. In
+the page, you hold the root of your own kernel, so the panel reads both players. Without the
+kernel (it did not load, or scripts are off), each button is a link instead, and the toolbox
+opens in a new tab on copies of the Turtle faces published beside this chapter. A test holds
+those copies equal to what the kernel answers a reader who holds the scope, but a copy is not a
+read: nothing checks your capability on a file anyone can download.
+
 gonk, the host *The gonk Book* is about, serves the page at `/toolbox` when its configuration
 names a build (`gonk.toolbox.dist`).
 
@@ -224,10 +312,23 @@ Nothing was validated against shapes there, and no player was read: the request 
 
 ## What not to assume
 
-- **This book's pages do not run the toolbox.** The listings above run under `mdbook test`, on
-  the host side. The page and its engine run in a browser, served by a host that has a build.
+- **Three places run a check here, and they are not the same.** The listings run under
+  `mdbook test`, on the host side. The cells run in your tab, in the page's kernel, with
+  `ikigai-shacl`'s subset. The panel runs the toolbox page and its engine in your tab, served by
+  the page as its host.
 - **Two engines, one question.** The page's SHACL engine is turtle-lsp's; the listings' is
   `ikigai-shacl`'s subset. Both check SHACL Core's closed shapes, but they are different code, and
   their messages differ even where their findings agree.
 - **A check sees what you may read.** A reader who cannot read a resource cannot check it, and
   the refusal is the resource's, as above. That is the design, not a gap.
+
+A caller holding some other scope checks nothing, and the refusal comes from the player, before
+any shapes are read:
+
+<div class="ikigai-run" data-cmd='cap urn:cap:tutorial:counter:write
+source urn:toolbox:input:urn:iki:tutorial:check:player:o | urn:shacl:validate shapes=urn:iki:tutorial:check:shapes
+cap reset'>
+<pre class="ikigai-run-expected">narrowed — capability: urn:cap:tutorial:counter:write
+error: denied: capability does not grant `urn:cap:tutorial:players:read` (declared by `urn:iki:tutorial:check:player:o`)
+reset to identity — capability: root (full authority)</pre>
+</div>

@@ -29,10 +29,16 @@ if (!siteArg) {
 const PREFIX = "/ikigai-tutorial/";
 const ORIGIN = "http://site.test";
 
+// The published RDF Toolbox build (`toolbox/`, scripts/build-toolbox.sh) is skipped as a SOURCE
+// of links: upstream's page, and a template whose `/toolbox/…` paths are a host's routes, not
+// files. Links INTO it (the chapter's new-tab link to `toolbox/toolbox.html`) are checked.
 function pages(dir, out = []) {
     for (const name of readdirSync(dir)) {
         const path = join(dir, name);
         if (statSync(path).isDirectory()) {
+            if (name === "toolbox" && existsSync(join(path, "engine.wasm"))) {
+                continue;
+            }
             pages(path, out);
         } else if (name.endsWith(".html")) {
             out.push(path);

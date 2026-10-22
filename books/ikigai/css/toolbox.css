@@ -1,0 +1,99 @@
+/* The RDF Toolbox opened in place — `js/toolbox.js` builds the control and the panel from
+ * `<div class="toolbox-check" data-iri='…'>`.
+ *
+ * As in run.css: every color is one of mdbook's theme variables, in the pairs the contrast gate
+ * (`crates/book-a11y`) measures, so no theme can pass the gate while the control fails it. What
+ * is inside the frame is the toolbox page's own (its `tokens.css`, palette chosen by `theme=`).
+ */
+
+.toolbox-check {
+    margin: 1.2em 0;
+}
+
+.toolbox-check-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.8rem;
+}
+
+.toolbox-check-open,
+.toolbox-panel-close {
+    font: inherit;
+    font-weight: 600;
+    padding: 0.3rem 0.9rem;
+    border: 2px solid var(--links);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+    /* WCAG 2.2 SC 2.5.8: at least 24 by 24 CSS pixels. */
+    min-height: 2rem;
+}
+
+.toolbox-check-open:hover,
+.toolbox-panel-close:hover {
+    background: var(--links);
+    color: var(--bg);
+}
+
+.toolbox-check-open:focus-visible,
+.toolbox-panel-close:focus-visible,
+.toolbox-panel-title:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+.toolbox-check-cost {
+    font-size: 0.85em;
+    color: var(--fg);
+}
+
+.toolbox-panel {
+    margin-top: 0.6rem;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    background: var(--quote-bg);
+    color: var(--fg);
+}
+
+.toolbox-panel[hidden] {
+    display: none;
+}
+
+.toolbox-panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem 0.8rem;
+    padding: 0.5rem 0.8rem;
+}
+
+.toolbox-panel-title {
+    margin: 0;
+    font-weight: 600;
+    /* An IRI is one long word: let it break rather than widen the page at 320 px. */
+    overflow-wrap: anywhere;
+}
+
+.toolbox-panel-status {
+    margin: 0;
+    padding: 0 0.8rem 0.5rem;
+    font-size: 0.85em;
+}
+
+.toolbox-panel-status:empty {
+    display: none;
+}
+
+.toolbox-frame {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 80vh;
+    min-height: 32rem;
+    border: 0;
+    border-top: 1px solid var(--table-header-bg);
+    background: var(--bg);
+}

@@ -57,11 +57,17 @@ class BookLoader extends ResourceLoader {
 
 // Every page a reader can land on. `print.html` (every chapter concatenated) and `toc.html`
 // (the sidebar as a fragment mdbook loads into pages, not a document) are skipped, as
-// book-a11y skips them.
+// book-a11y skips them. So is `toolbox/`, the RDF Toolbox build published beside The ikigai
+// Book (`scripts/build-toolbox.sh`): upstream's application, not a book page (no mdbook
+// theme, no sidebar), and its `page.template.html` is a template, not a page. It is audited
+// where a reader meets it: `axe-browser.mjs` opens it in place from "Checking a resource".
 export function pages(dir, out = []) {
     for (const name of readdirSync(dir)) {
         const path = join(dir, name);
         if (statSync(path).isDirectory()) {
+            if (name === "toolbox" && existsSync(join(path, "engine.wasm"))) {
+                continue;
+            }
             pages(path, out);
         } else if (name.endsWith(".html") && name !== "print.html" && name !== "toc.html") {
             out.push(path);
