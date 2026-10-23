@@ -12,4 +12,38 @@ jobs:
       test-args: "--all-targets"
       wasm-lib: true
 
-      wasm-packages: book-wasm gonk-book-wasm   # the books' wasm faces; two-hosts (quinn/mio) cannot build on wasm32
+      wasm-packages: book-wasm gonk-book-wasm ui-book-wasm   # the books' wasm faces; two-hosts (quinn/mio) cannot build on wasm32
+
+  # The kernel inspector (Building ikigai UIs' demo) in a real browser. Non-cargo, so local to this
+  # repository (field guide 9g). Unconditional on purpose: a path filter is a gate that silently
+  # does not run (9c).
+  #
+  # axe through ikigai-ui's reusable workflow (UI conventions D13, D18): every page the
+  # `axe_site` example writes, in every theme, under light, dark and more-contrast media, served
+  # with the door's CSP; any WCAG 2.2 A/AA violation, page error or console error fails it.
+  inspector-axe:
+    uses: ikigai-rs/ikigai-ui/.github/workflows/axe.yml@main
+    with:
+      prepare: cargo run --locked -p inspector --example axe_site -- target/inspector-site
+      site: target/inspector-site
+  # What axe does not check: 320 px reflow, the keyboard path, focus after a swap, Back, and a
+  # quiet live refetch (a11y/inspector.mjs, on the runner's installed Chrome, as axe-browser.mjs).
+  inspector-browser:
+    name: inspector in a browser (reflow, keyboard, focus, history)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: a11y/package-lock.json
+      - name: write the inspector's site
+        run: cargo run --locked -p inspector --example axe_site -- target/inspector-site
+      - name: reflow, keyboard, focus after a swap, history (a11y/inspector.mjs)
+        working-directory: a11y
+        run: |
+          npm ci
+          node inspector.mjs ../target/inspector-site

@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-22**: Where to go next points to the third book, Building ikigai UIs, which turns the cache, golden threads and arrangement this book prints as text into live pages.
+
+  Pages: [Where to go next](next.md)
+
 - **2026-10-22**: Every Run now says, beside its cache verdict, whether it printed what the chapter shows ("as the chapter shows") or not ("differs from the chapter"), so a refusal the chapter means to show no longer reads as a broken cell. A run that differs while cells above it have not run says so, and the cells of a game, a scenario or the live host in A space that changes while it runs carry a Run all above button that runs them first. The expected outputs of the fork and list cells in The REPL grammar, and of the trace in What resolution buys you, are now what the page prints when its cells run in order.
 
   Pages: [A space that changes while it runs](applied/live-space.md), [The REPL grammar](front-door/grammar.md), [What resolution buys you](getting-started/payoff.md)

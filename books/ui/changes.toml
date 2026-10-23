@@ -1,0 +1,20 @@
+# What's new in Building ikigai UIs: one entry per change a reader would notice, NEWEST FIRST.
+#
+# `crates/book-whats-new` writes src/whats-new.md from this file (./scripts/test-books.sh runs it
+# before `mdbook build`), and a test fails when the two disagree. A change to this book's pages
+# that adds or updates no entry here is refused in CI, with the entry to add.
+#
+#   date        "YYYY-MM-DD"
+#   summary     one or two sentences for a READER: what they will now find (not the commit subject)
+#   pages       the pages to read for it, as SUMMARY.md links them; titles come from SUMMARY.md
+#   removed     titles of pages that no longer exist, listed without a link (optional)
+#   maintenance true for upkeep with no news in it (a version move, a link or typo fix): kept
+#               here, left off the page (optional)
+#   commit      the commit an entry was written from; for tooling only, never shown (optional)
+#
+# A chapter that is still a stub gets no entry; it gets one when it is written.
+
+[[change]]
+date = "2026-10-22"
+summary = "A new book. It builds a kernel inspector, a small real app that shows a running kernel's cache, golden threads, topology, catalog and scheduler as pages. A page is a composed resource builds a page from a template and the resources it is filled with, Graph to page with XSLT turns the kernel's own graphs into views, Live data and history makes the views follow the kernel's cuts and gives every view a URL, and Server-rendered HTML, with htmx and push serves it all over HTTP. The chapters of Part I run in the page."
+pages = ["introduction.md", "model/composed.md", "model/xslt.md", "model/live.md", "delivery/htmx.md"]

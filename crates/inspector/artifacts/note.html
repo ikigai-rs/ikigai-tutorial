@@ -1,0 +1,10 @@
+<section id="view" class="inspect">
+<h1>A note to watch</h1>
+<p>Writing the note cuts its golden thread. Open the cache view in another tab and watch the card's entry turn <code>cut</code>.</p>
+$r{urn:iki:tutorial:inspect:demo:card}
+<form method="post" action="/inspect/note/write" hx-post="/inspect/note/write" hx-swap="none">
+<label for="note-text">The note</label>
+<textarea id="note-text" name="content" rows="3" maxlength="4096" required></textarea>
+<button type="submit">Write it</button>
+</form>
+</section>

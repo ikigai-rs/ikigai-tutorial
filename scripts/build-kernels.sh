@@ -23,6 +23,7 @@ kernel_of() {
     case "$1" in
         ikigai) echo book-wasm ;;
         gonk) echo gonk-book-wasm ;;
+        ui) echo ui-book-wasm ;;
         *) echo "" ;;
     esac
 }
