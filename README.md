@@ -148,6 +148,7 @@ host, and `crates/ui-book-wasm` the book's in-page kernel over the same crate. I
 held to snapshots, and checked by axe (ikigai-ui's reusable workflow) and in a real browser
 (`a11y/inspector.mjs`: 320 px reflow, the keyboard path, focus after a swap, Back).
 
+<!-- transcript: manual — a server that runs until it is stopped; crates/inspector-htmx/tests/host.rs runs the same binary and speaks to it -->
 ```bash
 cargo run -p inspector-htmx                         # the inspector, on 127.0.0.1:8071
 ./scripts/serve-with-drafts.sh --book ui            # the book with its in-page kernel

@@ -112,7 +112,7 @@ pub fn kernel(artifacts: Option<&Path>) -> Kernel {
     let mut extra: Vec<Arc<dyn Space>> = Vec::new();
     if let Some(dir) = artifacts {
         extra.push(Arc::new(EndpointSpace::new().bind(
-            UriTemplate::parse(&format!("{}{{path}}", inspector::DIR)).expect("a template"),
+            UriTemplate::parse(format!("{}{{path}}", inspector::DIR)).expect("a template"),
             ikigai_fs::FileEndpoint::new(dir),
         )));
     }

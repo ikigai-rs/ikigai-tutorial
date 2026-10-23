@@ -101,6 +101,8 @@ mod tests {
             .replace("&gt;", ">")
             .replace("&quot;", "\"")
             .replace("&#39;", "'")
+            // An empty output line is written `&#32;`, since a blank line would end the cell.
+            .replace("&#32;", " ")
             .replace("&amp;", "&")
     }
 

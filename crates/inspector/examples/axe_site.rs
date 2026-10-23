@@ -7,7 +7,7 @@
 //! a push stream that says only "retry much later", since a static server has no cuts to send.
 //! ikigai-ui's `.github/workflows/axe.yml` serves the directory and checks every `.html` in it.
 
-#[path = "../tests/common.rs"]
+#[path = "../tests/common/mod.rs"]
 mod common;
 
 use std::path::PathBuf;

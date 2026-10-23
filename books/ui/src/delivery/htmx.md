@@ -14,7 +14,8 @@ name. The inspector follows the same pattern, with the rules this book has colle
 
 From a checkout of this book's repository:
 
-```text
+<!-- transcript: manual — a server that runs until it is stopped; crates/inspector-htmx/tests/host.rs runs the same binary and speaks to it -->
+```bash
 cargo run -p inspector-htmx
 ```
 

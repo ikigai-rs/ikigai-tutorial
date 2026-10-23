@@ -35,7 +35,7 @@ pub fn kernel_over(dir: &Path, cacheable: bool) -> (Kernel, Capability) {
     let file = ikigai_fs::FileEndpoint::new(dir);
     let file = if cacheable { file.cacheable() } else { file };
     let space: Arc<dyn Space> = Arc::new(EndpointSpace::new().bind(
-        UriTemplate::parse(&format!("{}{{path}}", inspector::DIR)).unwrap(),
+        UriTemplate::parse(format!("{}{{path}}", inspector::DIR)).unwrap(),
         file,
     ));
     let dir = std::fs::canonicalize(dir).unwrap();

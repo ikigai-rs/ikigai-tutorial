@@ -109,10 +109,40 @@ and the page is the shell over the note's fragment, which in turn includes the c
 &lt;meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"includeIndicatorStyles":false,"h…
 &lt;title&gt;A note to watch · Inspector&lt;/title&gt;
 &lt;link rel="stylesheet" href="/ui/tokens.css"&gt;
-…
+&lt;script src="/ui/shell.js"&gt;&lt;/script&gt;
+&lt;script src="/ui/htmx" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;a class="ui-skip" href="#main"&gt;Skip to content&lt;/a&gt;
+&lt;header&gt;
+&lt;link rel="stylesheet" href="/inspect/inspector.css"&gt;
+&lt;nav aria-label="Inspector"&gt;
+&lt;a href="/inspect/cache" hx-get="/inspect/fragment/cache" hx-target="#main" hx-push-url="/inspect/cache"&gt;Cache&lt;/a&gt;
+&lt;a href="/inspect/threads" hx-get="/inspect/fragment/threads" hx-target="#main" hx-push-url="/inspect/threads"&gt;Threads&lt;/a&gt;
+&lt;a href="/inspect/topology" hx-get="/inspect/fragment/topology" hx-target="#main" hx-push-url="/inspect/topology"&gt;Topology&lt;/a&gt;
+&lt;a href="/inspect/catalog" hx-get="/inspect/fragment/catalog" hx-target="#main" hx-push-url="/inspect/catalog"&gt;Catalog&lt;/a&gt;
+&lt;a href="/inspect/scheduler" hx-get="/inspect/fragment/scheduler" hx-target="#main" hx-push-url="/inspect/scheduler"&gt;Scheduler&lt;/a&gt;
+&lt;a href="/inspect/note" hx-get="/inspect/fragment/note" hx-target="#main" hx-push-url="/inspect/note"&gt;Note&lt;/a&gt;
+&lt;/nav&gt;
+&lt;script src="/inspect/live.js" defer&gt;&lt;/script&gt;
+&#32;
+&lt;/header&gt;
+&lt;div id="status" role="status" aria-live="polite"&gt;&lt;/div&gt;
+&lt;main id="main" tabindex="-1"&gt;
+&lt;section id="view" class="inspect"&gt;
+&lt;h1&gt;A note to watch&lt;/h1&gt;
+&lt;p&gt;Writing the note cuts its golden thread. Open the cache view in another tab and watch the card's entry turn &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
+&lt;div id="note-card" class="inspect-card" hx-get="/inspect/card" hx-trigger="ikigai:cut from:body" hx-swap="outerHTML" data-ui-quiet=""&gt;
+&lt;p&gt;A &amp;lt;b&amp;gt;bold&amp;lt;/b&amp;gt; claim&lt;/p&gt;
+&lt;/div&gt;
+&#32;
+&lt;form method="post" action="/inspect/note/write" hx-post="/inspect/note/write" hx-swap="none"&gt;
+&lt;label for="note-text"&gt;The note&lt;/label&gt;
+&lt;textarea id="note-text" name="content" rows="3" maxlength="4096" required&gt;&lt;/textarea&gt;
+&lt;button type="submit"&gt;Write it&lt;/button&gt;
 &lt;/form&gt;
 &lt;/section&gt;
-
+&#32;
 &lt;/main&gt;
 &lt;/body&gt;
 &lt;/html&gt;

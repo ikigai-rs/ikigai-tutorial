@@ -33,7 +33,7 @@ The readout's default face is text, for a person at a terminal. Its graph face i
 <div class="ikigai-run" data-cmd='source urn:kernel:threads as=text/turtle'>
 <pre class="ikigai-run-expected">@prefix ik: &lt;https://ikigai-rs.dev/ns#&gt; .
 @prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
-
+&#32;
 &lt;urn:ikigai:thread:urn:iki:tutorial:inspect:demo:note&gt; a ik:GoldenThread ;
     ik:threadName "urn:iki:tutorial:inspect:demo:note" ;
     ik:cutCount "1"^^xsd:nonNegativeInteger .
