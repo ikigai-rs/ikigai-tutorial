@@ -1,0 +1,1 @@
+$r{json:query?src=shop:stock&q=.}

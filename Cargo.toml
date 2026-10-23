@@ -146,16 +146,30 @@ ikigai-vocab = "0.1.109"
 # ceiling too: "0.3.1" admitted nothing from 0.4, and the book sat behind that ceiling until
 # 2026-10-10. 0.3.1 became the floor because part VII uses what it added: `ComposeOver::named`,
 # so each of the game's views carries a name of its own, which is what a declared door binds it
-# by (an unnamed one is `composeOver`, like every other). 0.5.0 is the pin, set 2026-10-21: `$h{…}`
+# by (an unnamed one is `composeOver`, like every other). 0.6.0 is the pin, set 2026-10-23 (ledger #1800):
+# the ikigai Book teaches what it added, `urn:iki:fn:each` (a template filled once per element of a
+# JSON array), the `$j{<src> <program>}` marker (sugar for a jq selection through `urn:json:query`),
+# and `prefix_space`, a prefix table declared as data and bound into a dynamic space a host injects
+# as a corridor ("Short names in a space"). Every addition is new; `space()` now also binds
+# `urn:iki:fn:each`, which lists one more door wherever a page prints Part I's space. It requires
+# core 0.1.110, the pin above. Before that 0.5.0 was the pin, set 2026-10-21: `$h{…}`
 # replaces a C0 control other than tab, LF and CR with U+FFFD, through the new shared
 # `ikigai_fn::html` escaper (ledger #1813); no view the book composes splices one, so no page's
 # output moved.
 # The old pin "0.4.1" was a ceiling below 0.5. Before that the pin was 0.4.1: 0.4.0's one change is that `space()` names itself `urn:iki:space:fn` (ledger
 # #987), and the book binds compose behind doors of its own, and binding a door drops a space's
 # name (core 0.1.89), so no answered-by or topology a page prints moved; 0.4.1 exports
-# `MARKER_LETTERS` and `escape_markers`, which nothing here uses. A 0.x caret: also a ceiling
-# (<0.6.0).
-ikigai-fn = "0.5.0"
+# `MARKER_LETTERS` and `escape_markers`, which nothing here uses. The old pin "0.5.0" was a
+# ceiling below 0.6. A 0.x caret: also a ceiling (<0.7.0).
+ikigai-fn = "0.6.0"
+# JSON and CSV as resources, for "Transreption" and "Short names in a space": `urn:json:query` (a
+# sandboxed jq selection of any resource, read under the caller's capability, a non-JSON source
+# through the kernel's transreptors), `urn:json:from-csv` (also the registered text/csv to
+# application/json transreptor) and `urn:json:to-csv`. 0.1.0 is the first release and the floor; it
+# builds for wasm32-unknown-unknown, where a sandbox bound reached is an abort that traps the page's
+# kernel (wasm cannot unwind), so the book's in-page programs stay far inside the bounds. A 0.x
+# caret: also a ceiling (<0.2.0).
+ikigai-json = "0.1.0"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
 # transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the floor
 # because it added `arrangement_space()`, which mounts the arrangement surface alone, and the `full`

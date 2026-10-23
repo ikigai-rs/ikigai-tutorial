@@ -89,6 +89,10 @@ pub enum Context {
     /// in its LIVE HOST ("A space that changes while it runs"), a kernel of its own beside
     /// `page_kernel()` whose dynamic space a cell rebuilds. Only that host answers.
     LiveCell,
+    /// Inside the `data-cmd` of a cell that also carries `data-prefixed='…'`: a line the page
+    /// runs on `page_kernel()` with a prefix space carried as a corridor ("Short names in a
+    /// space"). The corridor is consulted ahead of the page's root, so either answers.
+    PrefixedCell,
     /// Prose, program output, a config fence — anything else. Either may answer.
     Prose,
 }
@@ -306,13 +310,14 @@ fn parse_directives(file: &str, comments: &[(usize, String)]) -> Result<Vec<Dire
 }
 
 /// The `data-cmd='…'` attributes of runnable cells, with the line each starts on, and whether
-/// the cell runs in the page's live host (`data-live='…'` in the same tag, before `data-cmd`).
+/// where the cell runs: the page's live host (`data-live='…'` in the same tag, before
+/// `data-cmd`), a prefix space on the page's kernel (`data-prefixed='…'`), or its root.
 ///
 /// Single-quoted only, by rule: a REPL line can carry double quotes (`in="a b"`), and
 /// `js/run.js` reads the attribute the same way. A double-quoted `data-cmd` is not
 /// silently skipped — it is reported, because a cell the gate cannot read is a cell it
 /// cannot vouch for.
-fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String, bool)>, String> {
+fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String, Context)>, String> {
     let mut out = Vec::new();
     let mut rest = text;
     let mut line = 1usize;
@@ -330,7 +335,14 @@ fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String, bool)>, S
             return Err(format!("{file}:{line}: unterminated data-cmd='…'"));
         };
         let tag = before.rfind('<').map_or("", |open| &before[open..]);
-        out.push((line, body[..end].to_string(), tag.contains("data-live=")));
+        let context = if tag.contains("data-live=") {
+            Context::LiveCell
+        } else if tag.contains("data-prefixed=") {
+            Context::PrefixedCell
+        } else {
+            Context::Cell
+        };
+        out.push((line, body[..end].to_string(), context));
         line += body[..end].matches('\n').count();
         rest = &body[end + 1..];
     }
@@ -348,7 +360,7 @@ pub fn scan_markdown(file: &str, text: &str) -> Result<Scan, String> {
     // Runnable cells first: their lines run in the page, and the prose scan below will
     // see the same tokens again as prose, which is fine — the cell check is the stricter
     // of the two and both must hold.
-    for (start, command, live) in cell_commands(file, &visible)? {
+    for (start, command, context) in cell_commands(file, &visible)? {
         for (offset, cmd_line) in command.lines().enumerate() {
             for token in urns_in_line(cmd_line) {
                 let head = token.split(['?', '#']).next().unwrap_or(&token).to_string();
@@ -357,11 +369,7 @@ pub fn scan_markdown(file: &str, text: &str) -> Result<Scan, String> {
                     line: start + offset,
                     is_prefix: head.ends_with(':'),
                     urn: head,
-                    context: if live {
-                        Context::LiveCell
-                    } else {
-                        Context::Cell
-                    },
+                    context,
                 });
             }
         }

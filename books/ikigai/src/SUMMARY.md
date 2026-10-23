@@ -63,6 +63,7 @@
 - [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
 - [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
 - [A space that changes while it runs](applied/live-space.md)
+- [Short names in a space](applied/prefixes.md)
 - [Time is a resource](applied/time.md)
 - [A spreadsheet, I: cells are atoms](applied/spreadsheet-1.md)
 - [A spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md)

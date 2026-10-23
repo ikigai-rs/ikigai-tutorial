@@ -1,0 +1,1 @@
+$j{shop:stock length} items, $j{shop:stock map(.count | tonumber) | add} on the shelves; out of stock: $j{shop:stock [.[] | select(.count == "0") | .item] | if length == 0 then "nothing" else join(", ") end}.

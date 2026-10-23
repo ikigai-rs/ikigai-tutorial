@@ -28,6 +28,8 @@ fn word_count_conforms() {
             "reverseList",
             "compose",
             "conditional",
+            // ikigai-fn 0.6.0's collection fill, inherited through Part I's space.
+            "each",
             "wrap",
             "split",
             "greet",

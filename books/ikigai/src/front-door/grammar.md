@@ -271,6 +271,7 @@ urn:iki:fn:toUpper                        → toUpper
 urn:iki:fn:reverseList                    → reverseList
 urn:iki:fn:compose                        → compose
 urn:iki:fn:conditional                    → conditional
+urn:iki:fn:each                           → each
 urn:demo:wrap                             → wrap
 urn:demo:split                            → split
 urn:demo:greet                            → greet
@@ -335,14 +336,25 @@ urn:toolbox:input:{iri}                   → toolbox-input
 urn:toolbox:check:{iri}                   → toolbox-check
 urn:toolbox:{name}                        → toolbox-file
 urn:shacl:validate                        → shacl-validate
-urn:iki:toolbox:dist:{path}               → book-toolbox-dist</pre>
+urn:iki:toolbox:dist:{path}               → book-toolbox-dist
+urn:iki:tutorial:shop:stock               → shop-stock
+urn:iki:tutorial:shop:prefixes            → live-declaration
+urn:iki:tutorial:shop:template:summary    → shop-template-summary
+urn:iki:tutorial:shop:template:row        → shop-template-row
+urn:iki:tutorial:shop:template:records    → shop-template-records
+urn:iki:tutorial:shop:summary             → shop-summary
+urn:iki:tutorial:shop:records             → shop-records
+urn:json:query                            → json-query
+urn:json:from-csv                         → json-from-csv
+urn:json:to-csv                           → json-to-csv</pre>
 </div>
 
 That is everything the kernel in this page binds. The kernel's own `urn:kernel:*` rows come
-first; then Part I's eleven names, in the order they were bound: `ikigai-fn`'s eight, then
+first; then Part I's twelve names, in the order they were bound: `ikigai-fn`'s nine, then
 this book's three chained on top, exactly as [Binding](../getting-started/binding.md) wrote
-them. After those come the Applied parts' tic-tac-toe, time and spreadsheet names, and the
-names "Checking a resource" uses. A host built from Part I alone lists only Part I's share of
+them. After those come the Applied parts' tic-tac-toe, time and spreadsheet names, the
+names "Checking a resource" uses, and the shop and `ikigai-json` names that "Transreption" and
+"Short names in a space" use. A host built from Part I alone lists only Part I's share of
 it. A full CLI lists a few hundred, many served over a socket from another
 process — which is [Part III](../beyond/socket.md).
 

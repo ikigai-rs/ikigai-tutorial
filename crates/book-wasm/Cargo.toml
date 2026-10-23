@@ -50,6 +50,14 @@ live-space = { path = "../live-space" }
 # they are. The toolbox's build is not a crate: the page binds it at `urn:iki:toolbox:dist:` over
 # the copy the book publishes beside itself (`toolbox/`), see `dist_space`.
 check-resource = { path = "../check-resource" }
+# "Transreption" (its CSV section) and "Short names in a space": the shop's stock (CSV), its prefix
+# table and templates (`urn:iki:tutorial:shop:*`), and through it ikigai-json's `urn:json:*`
+# (jq, and the text/csv to application/json transreptor). Neither family overlaps anything above.
+# The prefix space is not composed in: a cell carrying `data-prefixed='…'` runs in it, as a
+# corridor on the page's kernel (see `Live::prefixed`). ikigai-json builds for wasm32 as it is; on
+# wasm a sandbox bound reached aborts, which traps this kernel, so the chapters' programs stay far
+# inside the bounds and say so.
+shop = { path = "../shop" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

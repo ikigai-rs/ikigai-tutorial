@@ -1,0 +1,26 @@
+[package]
+name = "shop"
+version = "0.1.0"
+description = "The code taught by \"Transreption\"'s CSV section and the applied chapter \"Short names in a space\": a shop's stock held as CSV, read as JSON and selected with jq (ikigai-json), composed into a one-line summary through ikigai-fn's $j marker, inside a prefix table declared as data in a dynamic space."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "shop"
+path = "src/lib.rs"
+
+[dependencies]
+# `declare`: `DynamicSpace::drive`, the loop that rebinds the prefix table when it is written.
+ikigai-core = { workspace = true, features = ["declare"] }
+ikigai-vocab.workspace = true
+# `compose`, `compose_over`, `each`, the `$j` marker and `prefix_space` (0.6.0, the workspace pin).
+ikigai-fn.workspace = true
+# `urn:json:query`, `urn:json:from-csv` (the text/csv to application/json transreptor).
+ikigai-json.workspace = true
+# The declaration resource "A space that changes while it runs" wrote, reused for the prefix
+# table: Sink an s-expression, Source the `ik:` Turtle core builds a space from.
+live-space = { path = "../live-space" }
+futures.workspace = true

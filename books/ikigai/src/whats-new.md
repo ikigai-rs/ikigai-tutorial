@@ -7,6 +7,18 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-23**: A new applied chapter, Short names in a space, declares a prefix table (json: and shop:) as data in a dynamic space carried as a corridor, composes a shop's CSV stock into a one-line summary with $j markers inside it, lists the stock with urn:iki:fn:each, adds a prefix while it runs, and has a table under a reserved scheme refused. Its seven Run cells run in the page.
+
+  Pages: [Short names in a space](applied/prefixes.md), [A space that changes while it runs](applied/live-space.md)
+
+- **2026-10-23**: Transreption has a new section, A format that is not RDF: a CSV table read as JSON through ikigai-json's text/csv transreptor and selected with jq (urn:json:query), cached, and recomputed when a pipe through urn:json:to-csv writes the table back. Its three Run cells run in the page, whose kernel now links ikigai-json: that grows the page's kernel from 1.22 MB to 1.91 MB gzipped.
+
+  Pages: [Transreption](building/transreption.md)
+
+- **2026-10-23**: Tic-tac-toe, V's template language now names the two shorthands ikigai-fn 0.6 adds: `$j{<src> <program>}`, which is `$h` of a urn:json:query selection, and urn:iki:fn:each, the collection case, with a listing that fills both spellings of one `$j` to the same text.
+
+  Pages: [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
+
 - **2026-10-23**: Datasets and who may read them shows ikigai-store 0.2.25: a scoped update whose WITH names another graph is now refused before it runs, as an invalid argument naming the graph, where one of the two such updates used to succeed with +0 -0. The same move adds one store action alice may call, so the grounding in A sentence becomes a draft counts 27 actions for her.
 
   Pages: [A query's authority is its dataset](beyond/datasets.md), [A sentence becomes a draft](code/sentence.md)

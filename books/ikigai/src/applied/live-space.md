@@ -616,3 +616,7 @@ shows it.
 Tic-tac-toe VII moved where the endpoints are bound out of the code. This chapter makes that
 data live: the host's arrangement now changes the way any other resource does, by a write,
 and the cache, the status and the picture all follow from one cut.
+
+[The next chapter](prefixes.md) uses the same declaration resource and the same loop for a
+smaller job: a dynamic space that binds only a prefix table, carried as a corridor around a
+composition, so short names like `json:query` exist inside it and nowhere else.

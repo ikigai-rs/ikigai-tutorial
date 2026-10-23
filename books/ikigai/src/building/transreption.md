@@ -169,6 +169,139 @@ default and blamed on the face. At the REPL the same refusal is what
 > refusal above is only for a route that exists and is lossy; a route that does not
 > exist is a substitution, and that is unchanged.
 
+## A format that is not RDF
+
+Everything above went into Turtle or came out of it. Turtle is the pivot of a two-hop route,
+but it is not the only thing a transreptor converts. Any representation to any
+representation is the same mechanism: a declaration, and a plan the kernel makes from it.
+
+`ikigai-json` (0.1) is a module with three resources:
+
+- `urn:json:query` runs a jq program over any resource;
+- `urn:json:from-csv` reads CSV as JSON;
+- `urn:json:to-csv` goes the other way.
+
+`from-csv` declares `.transreptor(["text/csv"], ["application/json"])`, so it is also the
+kernel's route from CSV to JSON. Nothing about it involves Turtle.
+
+The data is a small shop's stock, a CSV table the way a spreadsheet exports it. It lives in
+the crate `crates/shop`, which a later chapter, [Short names in a space](../applied/prefixes.md),
+builds on. The table is an atom: `Source` answers it as `text/csv`, and `Sink` replaces it.
+
+```text
+{{#include ../../../../crates/shop/stock.csv}}
+```
+
+`urn:json:query` reads its `src` through the kernel, under the caller's capability. When the
+answer is not JSON, it asks the kernel for a transreptor chain from what was served to
+`application/json` (`Invocation::select_transreptor`, the kernel's planner, by the rules above), runs it, and gives the program the result. jq never sees CSV. Each record becomes an
+object keyed by the header row, and every value is a string, because CSV has no types and
+the converter does not guess.
+
+The page's kernel links `ikigai-json` and the shop, so these cells run here. Elements from
+the collection, one record, and a value from that record:
+
+<div class="ikigai-run" data-cmd='source urn:iki:tutorial:shop:stock
+source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[].item]"
+source urn:json:query src=urn:iki:tutorial:shop:stock q=".[2]"
+source urn:json:query src=urn:iki:tutorial:shop:stock q=".[2].count" as=text/plain'>
+<pre class="ikigai-run-expected">item,shelf,count
+flour,A,12
+sugar,A,0
+rice,B,30
+lentils,B,7
+[computed]
+[&quot;flour&quot;,&quot;sugar&quot;,&quot;rice&quot;,&quot;lentils&quot;]
+[computed]
+{&quot;item&quot;:&quot;rice&quot;,&quot;shelf&quot;:&quot;B&quot;,&quot;count&quot;:&quot;30&quot;}
+[computed]
+30
+[computed]</pre>
+</div>
+
+A program that yields one result answers that value, and `as=text/plain` answers a single
+scalar as bare text, with no quotes. That is the form a template splices, which
+[Tic-tac-toe, V](../applied/tic-tac-toe-5.md#the-template-language) comes back to.
+
+> ⚠ A `Source` of the stock with `as=application/json` still answers CSV. As the note above
+> says, `as=` on a `Source` is the endpoint's own argument, and the stock has one face.
+> The route through the transreptor is planned by whoever asks for JSON. Here that is
+> `urn:json:query`, and in the REPL it is a pipe: `source urn:iki:tutorial:shop:stock |
+> urn:json:from-csv`.
+
+### Cached, and cut by a write
+
+A query's answer is cached exactly when its read of `src` is, and it hangs from the stock's
+thread. The conversion is a step inside it, so a second query over the same table finds the
+answer cached. A query that uses a number converts the string itself (`tonumber`):
+
+<div class="ikigai-run" data-cmd='source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[] | select(.count | tonumber > 10) | .item]"
+source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[] | select(.count | tonumber > 10) | .item]"'>
+<pre class="ikigai-run-expected">[&quot;flour&quot;,&quot;rice&quot;]
+[computed]
+[&quot;flour&quot;,&quot;rice&quot;]
+[cached]</pre>
+</div>
+
+Now change the table. The line below reads the stock as JSON and keeps only what is on a
+shelf. Then it writes that back as CSV through `urn:json:to-csv` and sinks it to the stock.
+The round trip is three resources and a pipe. The `Sink` cuts the stock's thread, as every
+`Sink` does ([Golden threads in practice](../getting-started/golden-threads.md)), and both
+cached selections above go with it. The first recomputes to the same answer, since flour and
+rice are still on their shelves. The list of items, read in the first cell, recomputes without
+sugar:
+
+<div class="ikigai-run" data-cmd='source urn:json:query src=urn:iki:tutorial:shop:stock q="map(select(.count | tonumber > 0))" | urn:json:to-csv | sink urn:iki:tutorial:shop:stock
+source urn:iki:tutorial:shop:stock
+source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[] | select(.count | tonumber > 10) | .item]"
+source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[].item]"'>
+<pre class="ikigai-run-expected">ok
+[2 computed · 1 uncacheable]
+item,shelf,count
+flour,A,12
+rice,B,30
+lentils,B,7
+[computed]
+[&quot;flour&quot;,&quot;rice&quot;]
+[computed]
+[&quot;flour&quot;,&quot;rice&quot;,&quot;lentils&quot;]
+[computed]</pre>
+</div>
+
+The pipe line counts what it ran: the query and `to-csv` computed, and the `Sink`, which is
+never cached. The table came back with CRLF line ends, which is what RFC 4180 writes, and
+`from-csv` reads it the same as before. `to-csv` is declared lossy: `36` and `"36"` write the same. The
+kernel would not plan it into a route without consent, and it did not have to. The pipe
+called it by name.
+
+The same listing in Rust, against the shop's own host:
+
+```rust
+# extern crate shop;
+use shop::{source, Host, STOCK};
+
+let mut host = Host::start("shop");
+let shelved = || {
+    source(
+        "urn:json:query",
+        &[("src", STOCK), ("q", "[.[] | select(.count | tonumber > 10) | .item]")],
+    )
+};
+assert_eq!(host.read(shelved()).unwrap(), r#"["flour","rice"]"#);
+assert!(host.is_cached(&shelved()));
+
+// A write to the CSV cuts its thread, and the selection recomputes from the new table.
+host.write(STOCK, "item,shelf,count\nflour,A,9\nrice,B,30\n");
+assert!(!host.is_cached(&shelved()));
+assert_eq!(host.read(shelved()).unwrap(), r#"["rice"]"#);
+```
+
+jq here is a sandbox: `ikigai-json` rewrites the program so every step is metered, and bounds
+its size, its input, its work, its depth and its output. On a native host a bound reached is
+a typed refusal. In this page it is an abort, because WebAssembly cannot unwind, and it stops
+the page's kernel until you reload. Edit these cells freely, but keep programs small: a
+recursion or a string built a million times over is the way to find that out.
+
 ## Try it
 
 <!-- urn-gate: illustration urn:x — the subject of a hand-written Turtle document fed to

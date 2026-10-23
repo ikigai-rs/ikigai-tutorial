@@ -109,6 +109,11 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // publishes beside itself; built natively, nothing (see `dist_space`).
         Arc::new(check_resource::space()),
         dist_space(),
+        // "Transreption" and "Short names in a space": the shop's stock, prefix table and
+        // templates (`urn:iki:tutorial:shop:*`), then ikigai-json (`urn:json:*`). The shop's
+        // views fill with `urn:iki:fn:compose` and `urn:iki:fn:each`, which Part I's space binds.
+        Arc::new(shop::space(Arc::default(), Arc::default())),
+        Arc::new(shop::ikigai_json::space()),
     ])
 }
 
@@ -258,6 +263,9 @@ pub struct Live {
     kernel: Arc<Kernel>,
     space: Arc<DynamicSpace>,
     engine: Rc<Engine>,
+    /// The corridor its cells run in, for a prefix space on the page's kernel
+    /// ([`Live::prefixed`]); `None` for a host of its own.
+    corridor: Option<Scope>,
     #[cfg(not(target_family = "wasm"))]
     pool: RefCell<futures::executor::LocalPool>,
 }
@@ -265,18 +273,7 @@ pub struct Live {
 impl Live {
     /// Start the host with an empty dynamic space named `name`, and its loop.
     pub fn start(name: &str) -> Result<Live, String> {
-        // `DynamicSpace::new` panics on a name it refuses; the name comes from markup, so
-        // refuse it here, in words, instead.
-        let segment = |s: &str| {
-            !s.is_empty()
-                && s.chars()
-                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
-        };
-        if !name.split(':').all(segment) {
-            return Err(format!(
-                "`{name}` is not a dynamic space's name: one or more `:`-separated segments of a-z, 0-9 and -"
-            ));
-        }
+        Self::check_name(name)?;
         let space = Arc::new(DynamicSpace::new(
             name,
             Iri::parse(live_space::DECLARATION).expect("a constant IRI"),
@@ -304,9 +301,69 @@ impl Live {
             engine: Rc::new(Engine::new(Arc::clone(&kernel))),
             kernel,
             space,
+            corridor: None,
             #[cfg(not(target_family = "wasm"))]
             pool,
         })
+    }
+
+    // ANCHOR: prefixed
+    /// The prefix space of "Short names in a space", started on the page (`prefixed:{name}`):
+    /// `shop::prefixes(name)`, a dynamic space built from the shop's prefix table, carried as a
+    /// CORRIDOR by every line its cells run, on the page's own kernel, with its rebuild loop.
+    ///
+    /// Not a kernel of its own, unlike [`Live::start`]: the lesson here is that the short names
+    /// exist inside the corridor and nowhere else, and the page's root, one cell away, is the
+    /// "nowhere else". The loop runs on the page's kernel under root, as `shop::Host`'s does.
+    pub fn prefixed(kernel: &Arc<Kernel>, name: &str) -> Result<Live, String> {
+        Self::check_name(name)?;
+        let space = Arc::new(shop::prefixes(name));
+        let corridor = Scope::empty().with(Arc::clone(&space) as Arc<dyn Space>);
+        let (looping, on) = (Arc::clone(&space), Arc::clone(kernel));
+        let rebuild = async move {
+            let stopped = looping.drive(&on, &Capability::root()).await;
+            panic!("the prefix space's rebuild loop stopped: {stopped}");
+        };
+        #[cfg(target_family = "wasm")]
+        wasm_bindgen_futures::spawn_local(rebuild);
+        #[cfg(not(target_family = "wasm"))]
+        let pool = {
+            use futures::task::LocalSpawnExt;
+            let pool = futures::executor::LocalPool::new();
+            pool.spawner()
+                .spawn_local(rebuild)
+                .map_err(|e| e.to_string())?;
+            RefCell::new(pool)
+        };
+        Ok(Live {
+            engine: Rc::new(Engine::new(InChain::new(
+                Arc::clone(kernel),
+                corridor.clone(),
+            ))),
+            kernel: Arc::clone(kernel),
+            space,
+            corridor: Some(corridor),
+            #[cfg(not(target_family = "wasm"))]
+            pool,
+        })
+    }
+    // ANCHOR_END: prefixed
+
+    /// Refuse a dynamic space's name that `DynamicSpace::new` would panic on: the name comes
+    /// from markup, so the refusal is in words.
+    fn check_name(name: &str) -> Result<(), String> {
+        let segment = |s: &str| {
+            !s.is_empty()
+                && s.chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+        };
+        if name.split(':').all(segment) {
+            Ok(())
+        } else {
+            Err(format!(
+                "`{name}` is not a dynamic space's name: one or more `:`-separated segments of a-z, 0-9 and -"
+            ))
+        }
     }
 
     /// Let the rebuild loop catch up with every write so far: in the page, a future that
@@ -569,16 +626,21 @@ impl Page {
     /// The live host `spec` names (`live:{name}`), started on first use and kept for the life
     /// of the page; `None` for any other spec, which is a chain on the page's kernel.
     pub fn live_of(&self, chain: Option<&str>) -> Result<Option<Rc<Live>>, String> {
-        let Some(name) = chain.and_then(|spec| spec.strip_prefix("live:")) else {
+        let Some(spec) =
+            chain.filter(|spec| spec.starts_with("live:") || spec.starts_with("prefixed:"))
+        else {
             return Ok(None);
         };
-        if let Some(live) = self.live.borrow().get(name) {
+        if let Some(live) = self.live.borrow().get(spec) {
             return Ok(Some(Rc::clone(live)));
         }
-        let live = Rc::new(Live::start(name)?);
+        let live = Rc::new(match spec.strip_prefix("prefixed:") {
+            Some(name) => Live::prefixed(&self.kernel, name)?,
+            None => Live::start(&spec["live:".len()..])?,
+        });
         self.live
             .borrow_mut()
-            .insert(name.to_string(), Rc::clone(&live));
+            .insert(spec.to_string(), Rc::clone(&live));
         Ok(Some(live))
     }
 
@@ -666,6 +728,15 @@ impl Page {
 
     /// The scope of chain `spec`, or the empty chain for none.
     fn scope_of(&self, chain: Option<&str>) -> Result<Scope, String> {
+        if chain.is_some_and(|spec| spec.starts_with("prefixed:")) {
+            let live = self
+                .live_of(chain)?
+                .expect("a `prefixed:` spec names a prefix space");
+            return Ok(live
+                .corridor
+                .clone()
+                .expect("a prefix space has a corridor"));
+        }
         if chain.is_some_and(|spec| spec.starts_with("live:")) {
             return Err(
                 "a live host is a kernel of its own, not a chain on the page's: \
@@ -1345,6 +1416,7 @@ mod tests {
         attribute(tag, "data-game")
             .or_else(|| attribute(tag, "data-declared").map(|id| format!("declared:{id}")))
             .or_else(|| attribute(tag, "data-live").map(|name| format!("live:{name}")))
+            .or_else(|| attribute(tag, "data-prefixed").map(|name| format!("prefixed:{name}")))
             .or_else(|| {
                 attribute(tag, "data-scenario").map(|who| match attribute(tag, "data-as-of") {
                     Some(at) => format!("scenario:{who}@{at}"),
@@ -1621,8 +1693,12 @@ mod tests {
                 redraw();
             }
             // After a cell in a live host, `js/live.js` redraws that host's picture: a read of
-            // `urn:diagram:kernel`, which fills the host's cache like any other.
-            if let Some(live) = &live {
+            // `urn:diagram:kernel`, which fills the host's cache like any other. A prefix space
+            // (`prefixed:`) has no picture: no figure on its page names it.
+            if let Some(live) = live
+                .as_ref()
+                .filter(|_| !chain.as_deref().is_some_and(|c| c.starts_with("prefixed:")))
+            {
                 futures::executor::block_on(live.picture()).expect("the live host's picture");
             }
             transcript.push(got);
@@ -1863,6 +1939,34 @@ mod tests {
     /// `urn:cap:kernel:inspect` is refused through in the same words as directly.
     /// "Checking a resource": a Turtle face read with and without the scope, then the two
     /// players checked against the closed shapes, in the page's kernel.
+    #[test]
+    fn the_prefix_cells_answer_as_the_chapter_says() {
+        let t = run_chapter_in_page_order("prefixes.md", 7);
+        assert!(t[0].contains("in force: nothing"), "{}", t[0]);
+        // The table binds, the short names resolve in the corridor, and nowhere else.
+        assert!(t[1].contains("installs: 1\n"), "{}", t[1]);
+        assert!(t[1].contains("out of stock: sugar."), "{}", t[1]);
+        assert!(
+            t[2].starts_with("error: no endpoint resolved for shop:stock"),
+            "{}",
+            t[2]
+        );
+        // A new table cuts what the old one composed (the coarse cut).
+        assert!(t[4].contains("not cached\n"), "{}", t[4]);
+        // A refused table keeps the last good one, and cuts nothing.
+        assert!(t[6].contains("reserved scheme `file:`"), "{}", t[6]);
+        assert!(t[6].ends_with("[cached]\n"), "{}", t[6]);
+    }
+
+    #[test]
+    fn the_transreption_csv_cells_answer_as_the_chapter_says() {
+        let t = run_chapter_in_page_order("building/transreption.md", 3);
+        // CSV in, JSON out, and the selection cached until a write to the CSV cuts it.
+        assert!(t[0].starts_with("item,shelf,count\n"), "{}", t[0]);
+        assert!(t[1].ends_with("[cached]\n"), "{}", t[1]);
+        assert!(t[2].ends_with("[computed]\n"), "{}", t[2]);
+    }
+
     #[test]
     fn the_checking_cells_answer_as_the_chapter_says_in_page_order() {
         let t = run_chapter_in_page_order("building/checking.md", 3);
