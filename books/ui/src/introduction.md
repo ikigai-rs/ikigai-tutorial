@@ -15,6 +15,9 @@ the cache in [Twenty minutes, nothing compiled](../front-door/cli.html), and the
 cuts were the subject of [Golden threads in practice](../getting-started/golden-threads.html).
 Here they become pages that update while you watch.
 
+This is the third book in [the library](../library/index.html), which lists every book with who
+it is for and where to start.
+
 ## What you need
 
 - The ikigai Book's first part, or the same ideas from somewhere else: resources, spaces,
@@ -28,8 +31,11 @@ Here they become pages that update while you watch.
 ## How the book is laid out
 
 **Part I, the model**, is about views as resources, whatever delivers them: a page composed
-from parts, a graph turned into a page by XSLT, and data that changes while it is shown. The
-model does not know whether it will end up in a browser.
+from parts, a graph turned into a page by XSLT, the same kind of view over a JSON document and a
+CSV table, and data that changes while it is shown. The inspector's own views use RDF and XSLT
+because the kernel publishes its introspection as graphs; a view composes whatever form its data
+already has, and the JSON and CSV chapters show one that never meets RDF. The model does not know
+whether it will end up in a browser.
 
 **Part II, delivery targets**, takes the same model to a place a person sees it. Server-rendered
 HTML with htmx and a push stream is written; the others (GPUI, WebAssembly in the browser,

@@ -1,0 +1,10 @@
+<section id="view" class="inspect">
+<h1>Planets</h1>
+<p>One view, read from <code>urn:iki:tutorial:inspect:records:$h{{source}}</code>. The view does not know which source it was given: the same two templates show the JSON document and the CSV table.</p>
+<table class="inspect-table">
+<caption>The eight planets, from the $h{{source}} source</caption>
+<thead><tr><th scope="col">Planet</th><th scope="col">Kind</th><th scope="col">Orbit (Earth days)</th></tr></thead>
+<tbody>
+$r{urn:iki:fn:each?src=urn:iki:tutorial:inspect:records:{source}&template=urn:iki:tutorial:inspect:template:planet-row}</tbody>
+</table>
+</section>

@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-10
 
+- **2026-10-23**: Two new chapters build views over data that is not a graph: Views from JSON makes a table of the planets from a JSON document with compose templates and ikigai-fn's each, and reaches into a document with ikigai-json's jq query; Views from CSV: one model, two sources shows the same view over a CSV table, read as JSON through ikigai-json, each source with its own golden thread. Graph to page with XSLT now says why the inspector uses RDF and XSLT (the kernel already publishes its introspection as graphs) and that a view composes whatever form its data has. The inspector's navigation gains the two planet pages, and the introduction and The other books link the new library of every book.
+
+  Pages: [Views from JSON](model/views-from-json.md), [Views from CSV: one model, two sources](model/views-from-csv.md), [Graph to page with XSLT](model/xslt.md), [Introduction](introduction.md), [The other books](other-books.md), [A page is a composed resource](model/composed.md)
+
 - **2026-10-22**: A new book. It builds a kernel inspector, a small real app that shows a running kernel's cache, golden threads, topology, catalog and scheduler as pages. A page is a composed resource builds a page from a template and the resources it is filled with, Graph to page with XSLT turns the kernel's own graphs into views, Live data and history makes the views follow the kernel's cuts and gives every view a URL, and Server-rendered HTML, with htmx and push serves it all over HTTP. The chapters of Part I run in the page.
 
   Pages: [Introduction](introduction.md), [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md), [Live data and history](model/live.md), [Server-rendered HTML, with htmx and push](delivery/htmx.md)

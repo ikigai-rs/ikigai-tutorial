@@ -1,0 +1,7 @@
+# What's new in the ikigai library: one entry per change a reader would notice, NEWEST FIRST.
+# The same format as every book's (see books/ui/changes.toml for the fields).
+
+[[change]]
+date = "2026-10-23"
+summary = "The library: one page that lists the books (The ikigai Book, The gonk Book and Building ikigai UIs), with who each is for, what to read first and where to start."
+pages = ["index.md"]

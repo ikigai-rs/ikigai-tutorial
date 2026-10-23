@@ -1,0 +1,21 @@
+[book]
+title = "The ikigai library"
+authors = ["Brian Sletten"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+# Not a book to read but the list of the ones there are, published beside them: The ikigai Book
+# is the site's root (https://ikigai-rs.github.io/ikigai-tutorial/), and this is at `library/`.
+# `scripts/assemble-site.sh` reads this value to place it, as it does for every book.
+site-url = "/ikigai-tutorial/library/"
+git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
+edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/library/{path}"
+# The SAME contrast repair and layout as every book, by symlink, and the script that repairs the
+# search box. No run.js: the library has no cells, so it has no in-page kernel.
+additional-css = ["css/a11y.css", "css/layout.css"]
+additional-js = ["js/a11y.js"]
+
+[rust]
+edition = "2021"

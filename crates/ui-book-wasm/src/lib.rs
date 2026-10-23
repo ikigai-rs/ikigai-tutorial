@@ -192,6 +192,18 @@ mod tests {
         run_page_in_order("model/live.md", CELLS_LIVE);
     }
 
+    #[test]
+    fn views_from_json_answer_as_the_page_says() {
+        run_page_in_order("model/views-from-json.md", CELLS_JSON);
+    }
+
+    #[test]
+    fn views_from_csv_answer_as_the_page_says() {
+        run_page_in_order("model/views-from-csv.md", CELLS_CSV);
+    }
+
+    const CELLS_JSON: usize = 9;
+    const CELLS_CSV: usize = 9;
     const CELLS_COMPOSED: usize = 7;
     const CELLS_XSLT: usize = 8;
     const CELLS_LIVE: usize = 5;

@@ -28,6 +28,7 @@
 //! | `page:{name}` | composition | ikigai-ui's shell over the fragment (`ikigai_ui::pages`) |
 //! | `demo:note` | **atom** | the one thing here that holds state: a note you can write |
 //! | `demo:card` | composition | the note in a card, cached, so a write is a cut you can watch |
+//! | `data:planets.{json,csv}`, `fragment:planets-{source}` | atom, composition | a view of data that is NOT a graph, over two sources; see [`data`] |
 //!
 //! `{view}` is `cache`, `threads`, `topology` or `catalog`, or a detail: `entry:{id}` (one cache
 //! entry and the threads it hangs from, `{id}` the hex of its `urn:ikigai:cache:entry:{id}`) and
@@ -47,6 +48,8 @@
 //! compiled-in bytes, so a write to the file recomputes every page over it.
 
 #![forbid(unsafe_code)]
+
+pub mod data;
 
 use std::sync::{Arc, Mutex};
 
@@ -68,13 +71,15 @@ pub const FAMILY: &str = "inspect";
 pub const DIR: &str = "urn:iki:tutorial:inspect:dir:";
 
 /// The list views, in the order the header names them.
-pub const VIEWS: [&str; 6] = [
+pub const VIEWS: [&str; 8] = [
     "cache",
     "threads",
     "topology",
     "catalog",
     "scheduler",
     "note",
+    "planets-json",
+    "planets-csv",
 ];
 
 /// The capability the kernel's own readouts require. Every view of the kernel needs it, and
@@ -95,6 +100,7 @@ const XSLT: &str = "application/xslt+xml";
 const TEXT: &str = "text/plain; charset=utf-8";
 const TURTLE: &str = "text/turtle";
 const RDF_XML: &str = "application/rdf+xml";
+const JSON: &str = "application/json";
 const OCTET_STREAM: &str = "application/octet-stream";
 const XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 const IK: &str = "https://ikigai-rs.dev/ns#";
@@ -131,7 +137,7 @@ macro_rules! artifact {
 }
 
 /// Every artifact: the whole set a directory can override.
-pub const ARTIFACTS: [Artifact; 13] = [
+pub const ARTIFACTS: [Artifact; 17] = [
     artifact!("header", "inspect-header", "header.html", HTML),
     artifact!("inspector.css", "inspect-css", "inspector.css", CSS),
     artifact!("live.js", "inspect-live-js", "live.js", JS),
@@ -144,6 +150,30 @@ pub const ARTIFACTS: [Artifact; 13] = [
     ),
     artifact!("template:note", "inspect-template-note", "note.html", HTML),
     artifact!("template:card", "inspect-template-card", "card.html", HTML),
+    artifact!(
+        "template:planets",
+        "inspect-template-planets",
+        "planets.html",
+        HTML
+    ),
+    artifact!(
+        "template:records-json",
+        "inspect-template-records-json",
+        "records-json.tmpl",
+        JSON
+    ),
+    artifact!(
+        "template:records-csv",
+        "inspect-template-records-csv",
+        "records-csv.tmpl",
+        JSON
+    ),
+    artifact!(
+        "template:planet-row",
+        "inspect-template-planet-row",
+        "planet-row.html",
+        HTML
+    ),
     artifact!("xsl:cache", "inspect-xsl-cache", "cache.xsl", XSLT),
     artifact!("xsl:threads", "inspect-xsl-threads", "threads.xsl", XSLT),
     artifact!("xsl:topology", "inspect-xsl-topology", "topology.xsl", XSLT),
@@ -552,6 +582,8 @@ fn titles_endpoint() -> FnEndpoint {
             "catalog" => "Catalog".to_string(),
             "scheduler" => "Scheduler".to_string(),
             "note" => "A note to watch".to_string(),
+            "planets-json" => "Planets, from JSON".to_string(),
+            "planets-csv" => "Planets, from CSV".to_string(),
             other => match View::parse(other) {
                 Some(View::Entry(id)) => format!("Cache entry {id}"),
                 Some(View::Thread(name)) => format!("Golden thread {name}"),
@@ -678,6 +710,8 @@ pub fn space() -> EndpointSpace {
             );
         }
     }
+    // The data views, before `fragment:{view}`, so `fragment:planets-json` is theirs.
+    let space = data::space(space);
     // ANCHOR: views
     space
         .bind(template(&format!("{BASE}graph:{{view}}")), graph_endpoint())
@@ -733,6 +767,7 @@ pub fn kernel(extra: Vec<Arc<dyn Space>>) -> Kernel {
     layers.push(Arc::new(space()));
     layers.push(Arc::new(ikigai_xslt::space()));
     layers.push(Arc::new(ikigai_rdf::space()));
+    layers.push(Arc::new(ikigai_json::space()));
     Kernel::with_meta_renderer(Arc::new(Fallback::new(layers)), Arc::new(TurtleRenderer))
 }
 // ANCHOR_END: kernel

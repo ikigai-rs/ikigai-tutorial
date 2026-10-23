@@ -1,0 +1,38 @@
+# The ikigai library: one entry per book under books/, in the order the page shows them.
+#
+# `crates/book-library` writes src/index.md from this file and each book's own book.toml (its
+# title and its site-url, so neither is written twice). A book under books/ with no entry here
+# fails `cargo test` and the books gate, so the library cannot lose a book.
+#
+#   dir          the book's directory under books/
+#   description  one paragraph: what the book is
+#   audience     who it is for
+#   read_first   what to have read before it
+#   start        the page to start at, relative to the book's root (an .html path)
+#   start_title  that page's title, as the book's SUMMARY.md gives it
+
+intro = "Three books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built."
+
+[[book]]
+dir = "ikigai"
+description = "The foundation. Resources, spaces, capabilities and golden threads, from the first endpoint you write to hosts of your own, modules, scripts and the space that changes while it runs. It starts with twenty minutes at the command line, nothing compiled, and builds a game of tic-tac-toe and a spreadsheet out of resources along the way."
+audience = "Anyone new to ikigai: a developer who wants to know what a resource-oriented kernel is and how to build on one. Rust helps from the second part on."
+read_first = "Nothing. This is where to begin."
+start = "front-door/cli.html"
+start_title = "Twenty minutes, nothing compiled"
+
+[[book]]
+dir = "gonk"
+description = "gonk, the work ledger and review host, built from the pieces The ikigai Book teaches. A ledger of your own in the page and on your machine, the same ledger reached by an agent over a socket and over MCP, a repository browser with explanations from a model it mounts, and review without a reviewer."
+audience = "Anyone who wants a ledger for work shared between people and agents, and readers of The ikigai Book who want to see a real host composed from its modules."
+read_first = "Nothing is required: where a chapter leans on an idea from The ikigai Book, it links there. That book's first part makes the rest easier."
+start = "introduction.html"
+start_title = "Introduction"
+
+[[book]]
+dir = "ui"
+description = "User interfaces the ikigai way, where a view is a resource. It builds a kernel inspector, a small real app that shows a running kernel's cache, golden threads, topology and catalog as pages, then views over a JSON document and a CSV table, and delivers them over HTTP with htmx and a push stream."
+audience = "Developers building pages, dashboards or apps on ikigai, for a browser now and for other targets later."
+read_first = "The first part of The ikigai Book, for resources, spaces, capabilities and golden threads."
+start = "model/composed.html"
+start_title = "A page is a composed resource"

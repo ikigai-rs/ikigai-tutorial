@@ -221,3 +221,62 @@ fn the_page_composes_the_fragment() {
         );
     }
 }
+
+/// One model, two sources: the JSON view and the CSV view are the same table, and a write to one
+/// source recomputes its view while the other's stays cached.
+#[test]
+fn the_planets_are_one_view_over_two_sources() {
+    let kernel = kernel();
+    let table = |source: &str| {
+        let view = read(&kernel, &format!("{B}fragment:planets-{source}"), &viewer()).unwrap();
+        let at = view.find("<tbody>").expect("a body");
+        view[at..].to_string()
+    };
+    let (json, csv) = (table("json"), table("csv"));
+    assert_eq!(json, csv);
+    assert!(
+        json.contains("<th scope=\"row\">Earth</th><td>terrestrial</td><td>365</td>"),
+        "{json}"
+    );
+
+    let writer = Capability::root().attenuate([inspector::data::CAP_DATA]);
+    write(
+        &kernel,
+        &format!("{B}data:planets.csv"),
+        "name,kind,year\n<b>Ceres</b>,\"dwarf, in the belt\",1682\n",
+        &writer,
+    )
+    .unwrap();
+    let csv = table("csv");
+    assert!(
+        csv.contains("<th scope=\"row\">&lt;b&gt;Ceres&lt;/b&gt;</th><td>dwarf, in the belt</td>"),
+        "a field is escaped, and a quoted comma stays in its field: {csv}"
+    );
+    assert_eq!(table("json"), json, "the JSON view did not move");
+}
+
+/// Writing a source needs its own capability; reading the views does not need inspect.
+#[test]
+fn a_source_is_written_only_under_its_capability() {
+    let kernel = kernel();
+    let reader = Capability::root().attenuate(["urn:cap:iki:tutorial:inspect:note"]);
+    assert!(read(&kernel, &format!("{B}fragment:planets-csv"), &reader).is_ok());
+    let err = write(&kernel, &format!("{B}data:planets.json"), "[]", &reader).unwrap_err();
+    assert!(matches!(err, Error::Denied(_)), "{err}");
+}
+
+/// A source the view cannot read fails the view with the parser's reason, never a half table.
+#[test]
+fn a_broken_source_fails_its_view_and_says_why() {
+    let kernel = kernel();
+    let writer = Capability::root().attenuate([inspector::data::CAP_DATA]);
+    write(
+        &kernel,
+        &format!("{B}data:planets.json"),
+        "{\"not\": \"an array\"}",
+        &writer,
+    )
+    .unwrap();
+    let err = read(&kernel, &format!("{B}fragment:planets-json"), &viewer()).unwrap_err();
+    assert!(err.to_string().contains("not a JSON array"), "{err}");
+}

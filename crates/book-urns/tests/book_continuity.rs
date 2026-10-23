@@ -35,11 +35,10 @@ fn books() -> Vec<PathBuf> {
         .filter_map(|e| e.ok())
         .map(|e| e.path())
         .filter(|p| {
-            p.join("src/SUMMARY.md").is_file()
-                && !p
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .is_some_and(|n| n.starts_with('.'))
+            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or_default();
+            // The library (`books/library`) is one page that lists the books, not a book read in
+            // order: it has no chapters for a reader to arrive at in sequence.
+            p.join("src/SUMMARY.md").is_file() && !name.starts_with('.') && name != "library"
         })
         .collect();
     out.sort();

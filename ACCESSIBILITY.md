@@ -35,9 +35,10 @@ a review comment.
 
 ### In scope
 
-- **Both books as published**: every page `pages.yml` uploads, in each of mdbook's five themes
-  (light, rust, coal, navy, ayu), including the 404 page and each book's generated *What's new*
-  page.
+- **Every book as published, and the library page that lists them** (`books/library`, an mdbook
+  of its own so every gate below covers it): every page `pages.yml` uploads, in each of mdbook's
+  five themes (light, rust, coal, navy, ayu), including the 404 page and each book's generated
+  *What's new* page.
 - **The in-page kernels**: the runnable cells (`js/run.js`), the tic-tac-toe boards (`js/ttt.js`),
   the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`), the live host's picture
   (`js/live.js`) and the RDF Toolbox opened in place (`js/toolbox.js`: its control, its panel, and
@@ -262,6 +263,7 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-10 | axe in a real browser, every theme, made a gate | PR #97 |
 | 2026-10-15 | This file | PR #128 |
 | 2026-10-15 | Reporting asks for the `accessibility` label; `AGENTS.md` points agents here | PR #130 |
+| 2026-10-23 | The library page (`books/library`) is in scope, under the same gates as the books; the inspector's two planet tables (JSON and CSV) join its snapshots, axe run and browser checks | this change |
 
 ## References
 
