@@ -32,8 +32,8 @@ pages = ["applied/tic-tac-toe-5.md"]
 
 [[change]]
 date = "2026-10-23"
-summary = "The book moves to ikigai-fn 0.6.0, whose space also binds urn:iki:fn:each, so the list in The REPL grammar shows it, the shop's names and ikigai-json's, and Part I's host has twelve names."
-pages = ["front-door/grammar.md", "polyglot/notebook.md"]
+summary = "The book moves to ikigai-fn 0.6.0, whose space also binds urn:iki:fn:each, so the list in The REPL grammar shows it, the shop's names and ikigai-json's, The graph face's string-input query answers it too (its separator is a string), and Part I's host has twelve names."
+pages = ["front-door/grammar.md", "building/graph-face.md", "polyglot/notebook.md"]
 maintenance = true
 
 [[change]]

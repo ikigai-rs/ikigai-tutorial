@@ -38,6 +38,7 @@ cargo run -p building-endpoints -- --strings
 ```text
 camel-case
 conditional
+each
 echo
 greet
 reverseList
