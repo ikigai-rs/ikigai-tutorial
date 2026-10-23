@@ -123,6 +123,8 @@ and the page is the shell over the note's fragment, which in turn includes the c
 &lt;a href="/inspect/catalog" hx-get="/inspect/fragment/catalog" hx-target="#main" hx-push-url="/inspect/catalog"&gt;Catalog&lt;/a&gt;
 &lt;a href="/inspect/scheduler" hx-get="/inspect/fragment/scheduler" hx-target="#main" hx-push-url="/inspect/scheduler"&gt;Scheduler&lt;/a&gt;
 &lt;a href="/inspect/note" hx-get="/inspect/fragment/note" hx-target="#main" hx-push-url="/inspect/note"&gt;Note&lt;/a&gt;
+&lt;a href="/inspect/planets-json" hx-get="/inspect/fragment/planets-json" hx-target="#main" hx-push-url="/inspect/planets-json"&gt;Planets (JSON)&lt;/a&gt;
+&lt;a href="/inspect/planets-csv" hx-get="/inspect/fragment/planets-csv" hx-target="#main" hx-push-url="/inspect/planets-csv"&gt;Planets (CSV)&lt;/a&gt;
 &lt;/nav&gt;
 &lt;script src="/inspect/live.js" defer&gt;&lt;/script&gt;
 &#32;

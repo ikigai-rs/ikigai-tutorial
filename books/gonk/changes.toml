@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-23"
+summary = "The introduction links the library, a new page listing all three books with who each is for, what to read first and where to start."
+pages = ["introduction.md"]
+
+[[change]]
 date = "2026-10-22"
 summary = "The roborev and kata bridges file again. Filing roborev findings and Importing a kata ledger enroll a client of their own with `ikigai-gonk client add … --ledger …=write` and file at gonk's QUIC door with `--quic` and `--cert-dir`, so every item is authored by that client; each page also shows the owner's socket as the shortcut for a hook or import run by the user who runs gonk, and the hook line now names the certificate. A fresh machine, end to end imports kata over the socket and files the hook's finding as its client, and ends with a ledger that holds both. Every page was replayed against the newer gonk the book now pins: Explain, with a mounted model shows its new `views` line, and Scripts and sentences in gonk counts three more actions left out of the grounding."
 pages = ["bridges/roborev.md", "bridges/kata.md", "bridges/fresh-machine.md", "introduction.md", "browse/explain.md", "scripts/in-gonk.md"]

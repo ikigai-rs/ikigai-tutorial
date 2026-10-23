@@ -15,7 +15,10 @@ path = "src/lib.rs"
 [dependencies]
 ikigai-core.workspace = true
 ikigai-vocab.workspace = true
-ikigai-fn.workspace = true
+# 0.6.0, not the workspace's 0.5 line: the data views fill their row template with
+# `urn:iki:fn:each` (ledger #1800), which 0.6.0 added. A 0.x caret (<0.7.0); ikigai-ui 0.1.0 keeps
+# its own 0.5 copy, which is fine, since the two meet only as resources.
+ikigai-fn = "0.6.0"
 ikigai-ui = "0.1.0"
 ikigai-xslt = "0.3.1"
 ikigai-rdf = "0.2.5"
@@ -28,6 +31,10 @@ oxrdf.workspace = true
 # that arrives as one percent-encoded segment, and a browser form's urlencoded body.
 percent-encoding = "2.3"
 form_urlencoded = "1.2"
+# The data views read CSV as JSON through ikigai-json: `urn:json:query` over the CSV atom plans
+# its registered text/csv -> application/json transreptor (`urn:json:from-csv`). 0.1.0 is the
+# first release and the floor; a 0.x caret (<0.2.0).
+ikigai-json = "0.1.0"
 
 [dev-dependencies]
 # The UI test kit (UI conventions D18): snapshots, the contrast floor, the token lints and the

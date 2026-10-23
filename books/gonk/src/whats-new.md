@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-23**: The introduction links the library, a new page listing all three books with who each is for, what to read first and where to start.
+
+  Pages: [Introduction](introduction.md)
+
 - **2026-10-22**: The roborev and kata bridges file again. Filing roborev findings and Importing a kata ledger enroll a client of their own with `ikigai-gonk client add … --ledger …=write` and file at gonk's QUIC door with `--quic` and `--cert-dir`, so every item is authored by that client; each page also shows the owner's socket as the shortcut for a hook or import run by the user who runs gonk, and the hook line now names the certificate. A fresh machine, end to end imports kata over the socket and files the hook's finding as its client, and ends with a ledger that holds both. Every page was replayed against the newer gonk the book now pins: Explain, with a mounted model shows its new `views` line, and Scripts and sentences in gonk counts three more actions left out of the grounding.
 
   Pages: [Filing roborev findings](bridges/roborev.md), [Importing a kata ledger](bridges/kata.md), [A fresh machine, end to end](bridges/fresh-machine.md), [Introduction](introduction.md), [Explain, with a mounted model](browse/explain.md), [Scripts and sentences in gonk](scripts/in-gonk.md)

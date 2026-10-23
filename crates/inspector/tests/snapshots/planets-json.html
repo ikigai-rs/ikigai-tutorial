@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"includeIndicatorStyles":false,"historyCacheSize":10,"refreshOnHistoryMiss":true}'>
+<title>Planets, from JSON · Inspector</title>
+<link rel="stylesheet" href="/ui/tokens.css">
+<script src="/ui/shell.js"></script>
+<script src="/ui/htmx" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" defer></script>
+</head>
+<body>
+<a class="ui-skip" href="#main">Skip to content</a>
+<header>
+<link rel="stylesheet" href="/inspect/inspector.css">
+<nav aria-label="Inspector">
+<a href="/inspect/cache" hx-get="/inspect/fragment/cache" hx-target="#main" hx-push-url="/inspect/cache">Cache</a>
+<a href="/inspect/threads" hx-get="/inspect/fragment/threads" hx-target="#main" hx-push-url="/inspect/threads">Threads</a>
+<a href="/inspect/topology" hx-get="/inspect/fragment/topology" hx-target="#main" hx-push-url="/inspect/topology">Topology</a>
+<a href="/inspect/catalog" hx-get="/inspect/fragment/catalog" hx-target="#main" hx-push-url="/inspect/catalog">Catalog</a>
+<a href="/inspect/scheduler" hx-get="/inspect/fragment/scheduler" hx-target="#main" hx-push-url="/inspect/scheduler">Scheduler</a>
+<a href="/inspect/note" hx-get="/inspect/fragment/note" hx-target="#main" hx-push-url="/inspect/note">Note</a>
+<a href="/inspect/planets-json" hx-get="/inspect/fragment/planets-json" hx-target="#main" hx-push-url="/inspect/planets-json">Planets (JSON)</a>
+<a href="/inspect/planets-csv" hx-get="/inspect/fragment/planets-csv" hx-target="#main" hx-push-url="/inspect/planets-csv">Planets (CSV)</a>
+</nav>
+<script src="/inspect/live.js" defer></script>
+
+</header>
+<div id="status" role="status" aria-live="polite"></div>
+<main id="main" tabindex="-1">
+<section id="view" class="inspect">
+<h1>Planets</h1>
+<p>One view, read from <code>urn:iki:tutorial:inspect:records:json</code>. The view does not know which source it was given: the same two templates show the JSON document and the CSV table.</p>
+<table class="inspect-table">
+<caption>The eight planets, from the json source</caption>
+<thead><tr><th scope="col">Planet</th><th scope="col">Kind</th><th scope="col">Orbit (Earth days)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Mercury</th><td>terrestrial</td><td>88</td></tr>
+<tr><th scope="row">Venus</th><td>terrestrial</td><td>225</td></tr>
+<tr><th scope="row">Earth</th><td>terrestrial</td><td>365</td></tr>
+<tr><th scope="row">Mars</th><td>terrestrial</td><td>687</td></tr>
+<tr><th scope="row">Jupiter</th><td>gas giant</td><td>4333</td></tr>
+<tr><th scope="row">Saturn</th><td>gas giant</td><td>10759</td></tr>
+<tr><th scope="row">Uranus</th><td>ice giant</td><td>30687</td></tr>
+<tr><th scope="row">Neptune</th><td>ice giant</td><td>60190</td></tr>
+</tbody>
+</table>
+</section>
+
+</main>
+</body>
+</html>

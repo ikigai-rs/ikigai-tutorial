@@ -281,7 +281,12 @@ oxrdf = "0.3"
 ikigai-ledger = "0.12.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
-# RocksDB at all. 0.2.23 is the pin (set 2026-10-14): a refusal at the overdue cap
+# RocksDB at all. 0.2.25 is the pin (set 2026-10-23), because it changes what a page prints: since
+# 0.2.24 a scoped update whose `WITH` or `USING` names another graph is REFUSED as an invalid
+# argument before it runs (ledger #1606), where it was a denial on effects or an empty `+0 -0`, and
+# "Datasets and who may read them" shows both refusals. 0.2.25 repairs 0.2.24's refusal of
+# non-UTF-8 Turtle-family bytes. A stranger's fresh resolve already took 0.2.25, so the page was red
+# there before it was red here. Before that 0.2.23 was the pin (set 2026-10-14): a refusal at the overdue cap
 # names the cap, whether it is the default or the host's, the machine's parallelism, and
 # `TimeBudget::with_max_overdue`, which raises it (ledger #1500); no API change, and no page's query
 # comes near the cap. Before that the pin was 0.2.22, the published head that morning and what ledger
@@ -314,7 +319,7 @@ ikigai-ledger = "0.12.0"
 # No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
 # links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
 # #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.23", default-features = false }
+ikigai-store = { version = "0.2.25", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
 # Book's "Explain, with a mounted model" and "One-off review". 0.19.0 is the pin (set 2026-10-20;
 # later 0.19.x releases are inside the caret): the review pass and the judge loop stop at the first `Refused` or `RetryAfter`

@@ -140,7 +140,8 @@ $ git -C ikigai-gonk-starter checkout {{#include ../starter.rev}}
 The published copy is at <https://ikigai-rs.github.io/ikigai-tutorial/gonk/>, rebuilt from
 `main` on every merge, beside [The ikigai Book](https://ikigai-rs.github.io/ikigai-tutorial/),
 which teaches the kernel this one stands on. You do not need to have read it; where a chapter
-leans on an idea it explains, it links there.
+leans on an idea it explains, it links there. [The library](../library/index.html) lists every
+book, with who each is for and where to start.
 
 The book changes often. [What's new](whats-new.md) lists each change, most recent first, with
 the pages to read for it.

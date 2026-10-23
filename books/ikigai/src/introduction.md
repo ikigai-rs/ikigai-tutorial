@@ -89,6 +89,9 @@ on every merge.
 The book changes often. [What's new](whats-new.md) lists each change, most recent first, with
 the pages to read for it.
 
+It is one of three. [The library](library/index.html) lists them all, with who each is for and
+where to start.
+
 Every Rust block in these pages is compiled and run by `mdbook test`, and the longer code
 listings are **included from the crates that compile them** rather than copied. A book
 that paraphrases its own examples is a book that will eventually be wrong about them.

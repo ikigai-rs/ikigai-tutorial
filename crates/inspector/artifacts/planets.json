@@ -1,0 +1,10 @@
+[
+  { "name": "Mercury", "kind": "terrestrial", "year": 88 },
+  { "name": "Venus", "kind": "terrestrial", "year": 225 },
+  { "name": "Earth", "kind": "terrestrial", "year": 365 },
+  { "name": "Mars", "kind": "terrestrial", "year": 687 },
+  { "name": "Jupiter", "kind": "gas giant", "year": 4333 },
+  { "name": "Saturn", "kind": "gas giant", "year": 10759 },
+  { "name": "Uranus", "kind": "ice giant", "year": 30687 },
+  { "name": "Neptune", "kind": "ice giant", "year": 60190 }
+]

@@ -7,6 +7,8 @@
 
 - [A page is a composed resource](model/composed.md)
 - [Graph to page with XSLT](model/xslt.md)
+- [Views from JSON](model/views-from-json.md)
+- [Views from CSV: one model, two sources](model/views-from-csv.md)
 - [Live data and history](model/live.md)
 - [One model, many faces](model/faces.md)
 - [Artifacts: from a directory or compiled in](model/artifacts.md)

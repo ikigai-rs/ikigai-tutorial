@@ -140,7 +140,6 @@ fn a_scoped_write_lands_in_its_own_graph_or_nowhere() {
     for label in [
         "a better price, in the supplier's graph",
         "the same price, in the default graph",
-        "WITH <south>, priced from its own orders",
         "CREATE GRAPH",
     ] {
         let refused = update(&kernel, &north, NORTH, write(label));
@@ -149,10 +148,20 @@ fn a_scoped_write_lands_in_its_own_graph_or_nowhere() {
             "{label}: {refused:?}"
         );
     }
-    // A WITH whose WHERE reads only the other graph matches nothing in the private copy (which
-    // holds north alone), so nothing is written and the update reports success.
-    let quiet = update(&kernel, &north, NORTH, write("WITH <south>, reading south")).unwrap();
-    assert!(quiet.contains("+0 -0"), "{quiet}");
+    // A WITH that names another graph is a bad argument for a write scoped to north, refused
+    // before it is evaluated (ikigai-store 0.2.24), whether its template would have written south
+    // or its WHERE only reads it: the second used to succeed quietly with `+0 -0`.
+    for label in [
+        "WITH <south>, priced from its own orders",
+        "WITH <south>, reading south",
+    ] {
+        let refused = update(&kernel, &north, NORTH, write(label));
+        assert!(
+            matches!(&refused, Err(Error::InvalidArgument { name, detail })
+                if name == "content" && detail.contains("<urn:iki:tutorial:graph:south>")),
+            "{label}: {refused:?}"
+        );
+    }
     // DROP ALL empties north and nothing else.
     update(&kernel, &north, NORTH, write("DROP ALL")).unwrap();
     let left = select(&kernel, &auditor(), &both(), COSTED_ORDERS).unwrap();

@@ -7,6 +7,14 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-23**: Datasets and who may read them shows ikigai-store 0.2.25: a scoped update whose WITH names another graph is now refused before it runs, as an invalid argument naming the graph, where one of the two such updates used to succeed with +0 -0. The same move adds one store action alice may call, so the grounding in A sentence becomes a draft counts 27 actions for her.
+
+  Pages: [A query's authority is its dataset](beyond/datasets.md), [A sentence becomes a draft](code/sentence.md)
+
+- **2026-10-23**: The introduction links the library, a new page listing all three books with who each is for, what to read first and where to start.
+
+  Pages: [Introduction](introduction.md)
+
 - **2026-10-22**: Where to go next points to the third book, Building ikigai UIs, which turns the cache, golden threads and arrangement this book prints as text into live pages.
 
   Pages: [Where to go next](next.md)

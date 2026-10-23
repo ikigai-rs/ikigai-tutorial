@@ -1,0 +1,22 @@
+[package]
+name = "book-library"
+version = "0.1.0"
+description = "The library page that lists every book in this repository. Not a lesson: a generator and two checks. books/library/library.toml holds one entry per book; this writes the library's page from it and each book's own book.toml, refuses a book with no entry, and checks the assembled site links every book."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "book_library"
+path = "src/lib.rs"
+
+[[bin]]
+name = "book-library"
+path = "src/main.rs"
+
+[dependencies]
+# library.toml and each book's book.toml, read as plain tables so every mistake gets its own
+# message. The workspace's own pin.
+toml.workspace = true

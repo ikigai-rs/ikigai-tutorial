@@ -3,7 +3,8 @@ name: Build, test and deploy the books
 # The books' gates and their deploy, in one workflow, so that the tree which reaches
 # https://ikigai-rs.github.io/ikigai-tutorial/ (The ikigai Book) and
 # https://ikigai-rs.github.io/ikigai-tutorial/gonk/ (The gonk Book) and
-# https://ikigai-rs.github.io/ikigai-tutorial/ui/ (Building ikigai UIs) is the tree that just passed
+# https://ikigai-rs.github.io/ikigai-tutorial/ui/ (Building ikigai UIs) and
+# https://ikigai-rs.github.io/ikigai-tutorial/library/ (the library, which lists them) is the tree that just passed
 # `mdbook test`, the contrast gate, axe (in jsdom, and in a real browser), the no-kernel check,
 # the link check, the transcript check and the What's new check — not a second `mdbook build` that
 # could drift from the first. Every gate runs on EVERY book under `books/`, so a second book cannot be held to less
@@ -191,16 +192,20 @@ jobs:
           cd a11y
           node no-kernel.mjs ../books/*/book ../target/drafts-no-kernel
 
-      # ── One site, two books ──────────────────────────────────────────────────
+      # ── One site, every book, and the library that lists them ────────────────
       #
       # Each built book goes where its `book.toml`'s `site-url` says (the ikigai book at the
       # root, the gonk book at `gonk/`), into ONE directory, which is what is uploaded. Then
       # every relative link in that directory must land on a file in it: mdbook checks a
       # link between two chapters of one book, and nothing checks a link between the books
       # (`gonk/` from the ikigai book's "Where to go next", `../index.html` back) except this.
+      # Before it, `book-library check-site` requires the library page (`library/`, the library's
+      # own site-url) to exist in the site and to link the root of every book under `books/`, so a
+      # book missing from the library fails the deploy as well as `cargo test`.
       - name: assemble the site, and check every relative link in it (a11y/links.mjs)
         run: |
           ./scripts/assemble-site.sh target/site
+          target/books/debug/book-library check-site target/site
           cd a11y
           node links.mjs ../target/site
 

@@ -252,10 +252,10 @@ north> sink urn:iki:store:graph-update graph=urn:iki:tutorial:graph:north   (the
 error: denied: this write is scoped to graph <urn:iki:tutorial:graph:north> and the update would have written the DEFAULT graph. Nothing was applied. A statement with no `GRAPH` block goes to the default graph, which is not the scoped graph — wrap it in `GRAPH <urn:iki:tutorial:graph:north> { … }`, or hold `urn:cap:store:write` and use `urn:iki:store:update`
 
 north> sink urn:iki:store:graph-update graph=urn:iki:tutorial:graph:north   (WITH <south>, priced from its own orders)
-error: denied: this write is scoped to graph <urn:iki:tutorial:graph:north> and the update would have written graph <urn:iki:tutorial:graph:south>. Nothing was applied. A statement with no `GRAPH` block goes to the default graph, which is not the scoped graph — wrap it in `GRAPH <urn:iki:tutorial:graph:north> { … }`, or hold `urn:cap:store:write` and use `urn:iki:store:update`
+error: invalid argument `content`: this update reads <urn:iki:tutorial:graph:south> (in `WITH` or `USING`), which is not this write's graph, `graph=urn:iki:tutorial:graph:north`. `urn:iki:store:graph-update` evaluates an update against a private copy of that one graph and nothing else, so reading it would match nothing; the update is refused rather than applied, because `+0 -0` from a mistyped or forgotten graph looks exactly like an update with nothing to do. Nothing was applied: the update was not evaluated. Correct the IRI, or, holding `urn:cap:store:write` and `urn:cap:store:read`, use `urn:iki:store:update`, which reads the whole dataset
 
 north> sink urn:iki:store:graph-update graph=urn:iki:tutorial:graph:north   (WITH <south>, reading south)
-updated <urn:iki:tutorial:graph:north>: +0 -0 quads
+error: invalid argument `content`: this update reads <urn:iki:tutorial:graph:south> (in `WITH` or `USING`), which is not this write's graph, `graph=urn:iki:tutorial:graph:north`. `urn:iki:store:graph-update` evaluates an update against a private copy of that one graph and nothing else, so reading it would match nothing; the update is refused rather than applied, because `+0 -0` from a mistyped or forgotten graph looks exactly like an update with nothing to do. Nothing was applied: the update was not evaluated. Correct the IRI, or, holding `urn:cap:store:write` and `urn:cap:store:read`, use `urn:iki:store:update`, which reads the whole dataset
 
 north> sink urn:iki:store:graph-update graph=urn:iki:tutorial:graph:north   (CREATE GRAPH)
 error: denied: this write is scoped to graph <urn:iki:tutorial:graph:north> and the update created graph <urn:iki:tutorial:graph:elsewhere>. Nothing was applied. Creating or dropping another graph needs `urn:cap:store:write`
@@ -282,16 +282,16 @@ Taking them in order:
 - An order of its own lands, three quads in the workshop's graph.
 - A price in the supplier's graph is refused, and so is the same triple with no `GRAPH` block,
   which would have gone to the store's default graph: that is not the workshop's graph either.
-- `WITH <south>` sets the graph an update's templates write to, and it is refused the moment the
-  template would have written there. The check is on effects, so it does not care which of
-  SPARQL's several spellings put the quad in the wrong place.
-- `WITH <south>` whose `WHERE` reads only the supplier's graph is **not** refused. Its `WHERE` ran
-  in the private copy, which holds the workshop's graph and nothing else, matched nothing, and so
-  wrote nothing: `+0 -0`. Nothing escaped, so there was nothing to refuse. A scoped update cannot
-  read outside its graph any more than a scoped query can, but this is the one place in the
-  chapter where reaching for another graph gets an empty success instead of a refusal naming it,
-  which is the trap the read side closed in 0.2.22. A `+0 -0` from an update that was meant to
-  change something is worth a second look.
+- Both `WITH <south>` updates are refused before they run, and not as a denial: as an **invalid
+  argument**. `WITH` (and `USING`) names the graph an update reads, and an update scoped to the
+  workshop's graph that names the supplier's is asking for something the write cannot mean,
+  whatever the caller holds, because its `WHERE` runs in a private copy of the workshop's graph
+  and nothing else. That is true of the one that would have written the supplier's graph and of
+  the one whose `WHERE` only reads it. The second used to be the trap of this chapter: it ran,
+  matched nothing and reported `+0 -0`, an empty success where the read side had refused by name
+  since 0.2.22. Since ikigai-store 0.2.24 the write side names the graph too, and nothing was
+  evaluated. The other refusals in this table are still checked on effects, so they do not care
+  which of SPARQL's several spellings put a quad in the wrong place.
 - `CREATE GRAPH` writes no quad, and it is still refused: it registers a graph, and that is an
   effect outside the grant.
 - `DROP ALL` is applied, and empties **the workshop's graph alone**. The private copy held

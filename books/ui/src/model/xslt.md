@@ -7,6 +7,15 @@ document into another document by walking it, and ikigai uses it: **XSLT**. When
 graph the page is an XSLT transform, and when the input is named arguments the page is a
 compose template (UI conventions D2).
 
+The inspector uses RDF and XSLT because of where its data comes from, not because a view needs
+them. The kernel already publishes its introspection as Turtle, so the shortest path from a
+readout to a page is a stylesheet over that graph. A view composes whatever form its data already
+has. D2 says what to do with data that is ALREADY a graph; it is not a rule that data must become
+one before it can be shown. Your data may be a JSON document from an API or a CSV export from a
+spreadsheet, and the two chapters after this one build views over exactly those, with no RDF in
+them: [Views from JSON](views-from-json.md) and [Views from CSV: one model, two
+sources](views-from-csv.md).
+
 This chapter builds the threads view, then reads the four others built the same way.
 
 ## The input: a readout, as a graph
@@ -191,4 +200,4 @@ Five views, four of them graph views, and one small piece of code that turns a r
 graph a stylesheet reads. Ruled out: walking a graph in Rust to emit HTML when a stylesheet
 would do, and `disable-output-escaping` anywhere.
 
-Next, the part a static page cannot do: [Live data and history](live.md).
+Next, the same kind of view over data that is not a graph: [Views from JSON](views-from-json.md).

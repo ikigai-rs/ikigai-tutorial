@@ -23,6 +23,11 @@ CARGO_TARGET_DIR="$TARGET" cargo build
 # so a page written here and not committed turns `cargo test` red rather than going stale.
 "$TARGET/debug/book-whats-new" generate
 
+# The library's page, from books/library/library.toml and each book's book.toml, for the same
+# reason and with the same check (`crates/book-library/tests/page.rs`), which also fails when a
+# book under books/ has no entry in the library.
+"$TARGET/debug/book-library" generate
+
 status=0
 for book in books/*/; do
     name="$(basename "$book")"
