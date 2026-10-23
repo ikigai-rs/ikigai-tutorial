@@ -1,0 +1,37 @@
+[package]
+name = "inspector-htmx"
+version = "0.1.0"
+description = "The kernel inspector delivered as server-rendered HTML: a host that serves the inspector's pages and fragments over HTTP through ikigai-web, with htmx, the push stream of cuts, and the HTML door defaults."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+# Native only: an HTTP server. Not part of any wasm build (ci.yml's `wasm-packages` names the
+# books' kernels alone).
+
+[lib]
+name = "inspector_htmx"
+path = "src/lib.rs"
+
+[[bin]]
+name = "inspector-htmx"
+path = "src/main.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+inspector = { path = "../inspector" }
+# The HTTP door. 0.1.64 is the floor: it added `EdgeConfig::html_door`, the HTML door default
+# of the UI conventions (D6): the strict page CSP, an Origin check on every unsafe method, and
+# the security headers (ledger #1813). ttt-host stays on 0.1.63; the two never meet. A 0.x
+# caret, so also a ceiling (<0.2.0).
+ikigai-web = "0.1.64"
+# The directory delivery (D17): `--artifacts DIR` binds `urn:iki:tutorial:inspect:dir:{path}`
+# to a jailed FileEndpoint over DIR. 0.1.9 is the release ikigai-ui's own tests use. A 0.x
+# caret: also a ceiling (<0.2.0).
+ikigai-fs = "0.1.9"
+tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "io-util", "time"] }
+
+[dev-dependencies]
+futures.workspace = true

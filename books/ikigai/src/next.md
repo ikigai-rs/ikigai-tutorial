@@ -13,6 +13,12 @@ a durable store, the work ledger, the repository browser and ikigai's own transp
 into one server. Its book walks through each way to use it on its own, starting with a ledger
 of your own that runs in the page: [The gonk Book](gonk/index.html).
 
+## Building ikigai UIs
+
+A view is a resource too. The third book builds a kernel inspector, the cache, the golden
+threads and the arrangement this book printed as text, turned into pages that follow the
+kernel's cuts while you watch: [Building ikigai UIs](ui/index.html).
+
 ## The repositories
 
 - [`ikigai-core`](https://github.com/ikigai-rs/ikigai-core) — the kernel,

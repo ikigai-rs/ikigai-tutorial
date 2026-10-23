@@ -132,6 +132,28 @@ mdbook serve books/gonk --open                     # the prose; Run is disabled 
 ./scripts/test-transcripts.sh                      # every transcript in both books, against their pins
 ```
 
+## The third book: Building ikigai UIs
+
+**[Building ikigai UIs](books/ui)** — user interfaces where a view is a resource, taught by
+building a **kernel inspector**: the cache, golden threads, topology, catalog and scheduler of a
+running kernel, as pages that follow the kernel's cuts. Part I is the model (a page as a
+composed resource, graph to page with XSLT, live data and history), Part II the delivery
+targets (server-rendered HTML with htmx and push is written; GPUI, WebAssembly, WebTransport and
+the terminal are reserved), Part III components. Published at
+**<https://ikigai-rs.github.io/ikigai-tutorial/ui/>**, by the same run and through the same gates.
+
+The inspector is split the way every target will be: `crates/inspector` is the model and its
+artifacts (XSLT stylesheets, compose templates, one atom), `crates/inspector-htmx` the thin HTTP
+host, and `crates/ui-book-wasm` the book's in-page kernel over the same crate. Its pages are
+held to snapshots, and checked by axe (ikigai-ui's reusable workflow) and in a real browser
+(`a11y/inspector.mjs`: 320 px reflow, the keyboard path, focus after a swap, Back).
+
+<!-- transcript: manual — a server that runs until it is stopped; crates/inspector-htmx/tests/host.rs runs the same binary and speaks to it -->
+```bash
+cargo run -p inspector-htmx                         # the inspector, on 127.0.0.1:8071
+./scripts/serve-with-drafts.sh --book ui            # the book with its in-page kernel
+```
+
 ## The book is tested
 
 There is no separate "keep the docs up to date" chore, because there is a gate:

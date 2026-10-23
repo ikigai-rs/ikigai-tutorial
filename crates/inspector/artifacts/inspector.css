@@ -1,0 +1,20 @@
+/* The inspector's own rules. Colors come only from ikigai-ui's tokens (urn:iki:ui:tokens.css),
+   whose every pair is contrast-tested; nothing here names a color. */
+header, main { padding: 0 1rem; }
+header nav { display: flex; flex-wrap: wrap; gap: 0.25rem; padding: var(--gap) 0; border-bottom: 1px solid var(--line); }
+main { max-width: 72rem; }
+.inspect-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.inspect-table caption { text-align: left; color: var(--muted); padding: 0.25rem 0; }
+.inspect-table th, .inspect-table td { text-align: left; vertical-align: top; padding: 0.25rem 0.5rem 0.25rem 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.inspect-table a, .inspect-list a { display: inline-block; min-height: 24px; }
+.inspect-list li { margin: 0.25rem 0; overflow-wrap: anywhere; }
+.inspect-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
+.inspect-facts dd { margin: 0; overflow-wrap: anywhere; }
+.inspect-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 var(--gap); overflow-wrap: anywhere; }
+.inspect-stopgap { color: var(--muted); }
+.state-cut, .state-expired { font-weight: bold; }
+pre { overflow-x: auto; }
+code { overflow-wrap: anywhere; }
+form { display: grid; gap: 0.5rem; max-width: 36rem; margin: var(--gap) 0; }
+textarea { font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); }
+button { justify-self: start; min-height: 24px; font: inherit; color: var(--accent-fg); background: var(--accent); border: 0; border-radius: var(--radius); padding: 0.25rem 0.75rem; }

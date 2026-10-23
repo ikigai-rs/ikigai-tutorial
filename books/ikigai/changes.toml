@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-22"
+summary = "Where to go next points to the third book, Building ikigai UIs, which turns the cache, golden threads and arrangement this book prints as text into live pages."
+pages = ["next.md"]
+
+[[change]]
+date = "2026-10-22"
 summary = "The page kernel links ikigai-shacl 0.4.0's core-only validator, with no SPARQL engine, so it is 1.09 MB gzipped rather than 1.77 MB. Checking a resource's shapes check answers as before; only the digest in its report's node names changes, because 0.4.0 takes it over the report's sorted N-Triples lines."
 pages = ["building/checking.md"]
 maintenance = true

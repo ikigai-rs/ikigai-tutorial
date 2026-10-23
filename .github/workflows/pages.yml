@@ -2,7 +2,8 @@ name: Build, test and deploy the books
 
 # The books' gates and their deploy, in one workflow, so that the tree which reaches
 # https://ikigai-rs.github.io/ikigai-tutorial/ (The ikigai Book) and
-# https://ikigai-rs.github.io/ikigai-tutorial/gonk/ (The gonk Book) is the tree that just passed
+# https://ikigai-rs.github.io/ikigai-tutorial/gonk/ (The gonk Book) and
+# https://ikigai-rs.github.io/ikigai-tutorial/ui/ (Building ikigai UIs) is the tree that just passed
 # `mdbook test`, the contrast gate, axe (in jsdom, and in a real browser), the no-kernel check,
 # the link check, the transcript check and the What's new check — not a second `mdbook build` that
 # could drift from the first. Every gate runs on EVERY book under `books/`, so a second book cannot be held to less
@@ -74,7 +75,7 @@ jobs:
       # `wasm-bindgen --target web` into `wasm/` beside its book, same origin as the pages
       # that load it, under the one name `js/run.js` imports (`scripts/build-kernels.sh`
       # holds the table of which crate is which book's). Generated output; never committed.
-      - name: build the in-page kernels (crates/book-wasm, crates/gonk-book-wasm) into the books
+      - name: build the in-page kernels (crates/book-wasm, crates/gonk-book-wasm, crates/ui-book-wasm) into the books
         run: ./scripts/build-kernels.sh
 
       # A silent load failure is the failure: with the module absent every cell's Run
@@ -142,6 +143,14 @@ jobs:
           grep -q '^export function evalLineAsync' books/gonk/book/wasm/book_wasm.js
           grep -q '^export function boundNames' books/gonk/book/wasm/book_wasm.js
           grep -q 'as default' books/gonk/book/wasm/book_wasm.js
+
+      # Building ikigai UIs' kernel is `crates/ui-book-wasm`, the kernel inspector the book builds.
+      - name: smoke — the exports run.js imports are present in the ui book's kernel
+        run: |
+          test -s books/ui/book/wasm/book_wasm_bg.wasm
+          grep -q '^export function evalLineAsync' books/ui/book/wasm/book_wasm.js
+          grep -q '^export function boundNames' books/ui/book/wasm/book_wasm.js
+          grep -q 'as default' books/ui/book/wasm/book_wasm.js
 
       # ── The second accessibility instrument ───────────────────────────────
       #
