@@ -1,0 +1,8 @@
+; The shop's prefix table: two short names, each a prefix rule that resolves from the root under
+; the caller's own capability (`:resolve-at root`), over an empty space. `json:query` is
+; `urn:json:query`, and `shop:stock` is `urn:iki:tutorial:shop:stock`. ikigai-fn's
+; `prefix_check` refuses any other shape, and any prefix under a scheme the host's own names use.
+(alias
+  (prefix "json:" "urn:json:" :resolve-at root)
+  (prefix "shop:" "urn:iki:tutorial:shop:" :resolve-at root)
+  (endpoints))

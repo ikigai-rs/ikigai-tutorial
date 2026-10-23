@@ -88,6 +88,67 @@ for a missing argument. The game needs none, because a cell already answers `-` 
 square. (The spreadsheet's evaluator falls back on a `NotFound` in code, not in a template, and
 its [part V](spreadsheet-5.md) shows what the cache makes of a fallback.)
 
+**Shorthand: `$j` and `each`.** A marker is a resource name and a way to splice it, so a
+shorter spelling of a name is a shorter marker, and nothing else is new. `ikigai-fn` 0.6 has
+two. The game needs neither, but they are the same idea made convenient:
+
+- `$j{<src> <program>}` is `$h{urn:json:query?src=<src>&q=<program>&as=text/plain}`: a jq
+  selection of `src`, spliced as escaped text. `urn:json:query` is
+  [Transreption](../building/transreption.md#a-format-that-is-not-rdf)'s, so `src` may be CSV
+  as well as JSON. The program runs to the marker's closing brace, as written, with no
+  percent-encoding, and no template argument ever reaches it.
+- `urn:iki:fn:each` is the collection case: it fills one template once per element of a JSON
+  array, an object's fields as the template's `{arguments}`. Element data reaches the output
+  only through `$h` or `$j`, so a field is data and never a request, which is the rule above.
+
+The two templates in the listing below fill to the same text, because they are the same
+request:
+
+<!-- urn-gate: illustration urn:example:sugar — a template the listing below binds in a kernel
+     of its own, to fill beside the next one. Bound nowhere else. -->
+<!-- urn-gate: illustration urn:example:spelled-out — the same marker spelled out, bound by the
+     same listing only. -->
+
+```rust
+# extern crate shop;
+# extern crate ikigai_core;
+# extern crate futures;
+use std::sync::Arc;
+use futures::executor::block_on;
+use ikigai_core::{
+    ArgRef, Capability, EndpointSpace, Exact, Fallback, FnEndpoint, Iri, Kernel, ReprType,
+    Representation, Request, Space, Verb,
+};
+
+let text = |body: &'static str| {
+    FnEndpoint::new("fixed", move |_| {
+        Ok(Representation::new(ReprType::new("text/plain"), body.as_bytes().to_vec()))
+    })
+};
+let templates = EndpointSpace::new()
+    .bind(Exact::new("urn:example:sugar"), text("$j{urn:iki:tutorial:shop:stock length}"))
+    .bind(
+        Exact::new("urn:example:spelled-out"),
+        text("$h{urn:json:query?src=urn:iki:tutorial:shop:stock&q=length&as=text/plain}"),
+    );
+let kernel = Kernel::new(Arc::new(Fallback::new(vec![
+    Arc::new(templates) as Arc<dyn Space>,
+    Arc::new(shop::root(Arc::default(), Arc::default())),
+])));
+let fill = |template: &str| {
+    let request = Request::new(Verb::Source, Iri::parse("urn:iki:fn:compose").unwrap())
+        .with_arg("src", ArgRef::Inline(template.as_bytes().to_vec()));
+    let answer = block_on(kernel.issue(request, &Capability::root())).unwrap();
+    String::from_utf8(answer.bytes).unwrap()
+};
+// The stock has four records; both spellings ask the same question.
+assert_eq!(fill("urn:example:sugar"), "4");
+assert_eq!(fill("urn:example:spelled-out"), "4");
+```
+
+[Short names in a space](prefixes.md), later in the book, composes a one-line summary of
+that stock with `$j` and lists it with `each`.
+
 **A template bound at a name.** A view is a template bound at a name of its own.
 `ikigai_fn::compose_over(src)` is the composer with its template fixed, and the variables the
 name captures are the template's arguments:

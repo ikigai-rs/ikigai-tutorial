@@ -81,6 +81,10 @@
 // the cell rebuilds by writing its declaration. `js/live.js` redraws that host's picture after
 // every such cell.
 //
+// Or a PREFIX SPACE ("Short names in a space"): `data-prefixed='shop'` runs its lines on the page's
+// kernel with that dynamic space carried as a corridor (chain `prefixed:shop`), so the short names
+// its prefix table declares resolve in the cell and nowhere else on the page.
+//
 // THE CHAPTER ASSUMES THE CELLS ABOVE RAN. A chapter's cells are steps, and its "Expected output"
 // for each is what that cell answers when the cells above it on the page have run, once, in order,
 // in this page load. A reader who starts at step 3 meets a host (or a game, a sheet) that never saw
@@ -233,6 +237,7 @@
         var scenario = cell.getAttribute("data-scenario");
         var declared = cell.getAttribute("data-declared");
         var live = cell.getAttribute("data-live");
+        var prefixed = cell.getAttribute("data-prefixed");
         var asOf = cell.getAttribute("data-as-of");
         var at = cell.getAttribute("data-at");
         // The chain the cell runs in, spelled as the page's kernel reads it. (Not `chain`: the
@@ -240,10 +245,12 @@
         var chainSpec = game ||
             (declared ? "declared:" + declared : null) ||
             (live ? "live:" + live : null) ||
+            (prefixed ? "prefixed:" + prefixed : null) ||
             (scenario ? "scenario:" + scenario + (asOf ? "@" + asOf : "") : null);
         var where = game ? ", in game " + game
             : declared ? ", in game " + declared + " built from the file"
             : live ? ", in the live host (dynamic space " + live + ")"
+            : prefixed ? ", in the prefix space " + prefixed
             : scenario ? ", in " + scenario + "'s scenario" +
                 (asOf ? " over the sheet as of " + asOf : "")
             : "";

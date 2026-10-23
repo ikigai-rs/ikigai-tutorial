@@ -95,6 +95,6 @@ compare; the difference is the argument, measured. And the property path
 multi-verb endpoint's inputs hang off its action nodes.
 
 > ⚠ The catalog you get is the catalog of the host you connected to. The CLI's is a few
-> hundred endpoints from a dozen crates; the tutorial host's is eleven. Both are the same
+> hundred endpoints from a dozen crates; the tutorial host's is twelve. Both are the same
 > shape, and a query written against one runs against the other — but the answer is a fact
 > about a host, not about ikigai.

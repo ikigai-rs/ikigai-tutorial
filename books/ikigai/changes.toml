@@ -17,6 +17,27 @@
 
 [[change]]
 date = "2026-10-23"
+summary = "A new applied chapter, Short names in a space, declares a prefix table (json: and shop:) as data in a dynamic space carried as a corridor, composes a shop's CSV stock into a one-line summary with $j markers inside it, lists the stock with urn:iki:fn:each, adds a prefix while it runs, and has a table under a reserved scheme refused. Its seven Run cells run in the page."
+pages = ["applied/prefixes.md", "applied/live-space.md"]
+
+[[change]]
+date = "2026-10-23"
+summary = "Transreption has a new section, A format that is not RDF: a CSV table read as JSON through ikigai-json's text/csv transreptor and selected with jq (urn:json:query), cached, and recomputed when a pipe through urn:json:to-csv writes the table back. Its three Run cells run in the page, whose kernel now links ikigai-json: that grows the page's kernel from 1.22 MB to 1.91 MB gzipped."
+pages = ["building/transreption.md"]
+
+[[change]]
+date = "2026-10-23"
+summary = "Tic-tac-toe, V's template language now names the two shorthands ikigai-fn 0.6 adds: `$j{<src> <program>}`, which is `$h` of a urn:json:query selection, and urn:iki:fn:each, the collection case, with a listing that fills both spellings of one `$j` to the same text."
+pages = ["applied/tic-tac-toe-5.md"]
+
+[[change]]
+date = "2026-10-23"
+summary = "The book moves to ikigai-fn 0.6.0, whose space also binds urn:iki:fn:each, so the list in The REPL grammar shows it, the shop's names and ikigai-json's, and Part I's host has twelve names."
+pages = ["front-door/grammar.md", "polyglot/notebook.md"]
+maintenance = true
+
+[[change]]
+date = "2026-10-23"
 summary = "Datasets and who may read them shows ikigai-store 0.2.25: a scoped update whose WITH names another graph is now refused before it runs, as an invalid argument naming the graph, where one of the two such updates used to succeed with +0 -0. The same move adds one store action alice may call, so the grounding in A sentence becomes a draft counts 27 actions for her."
 pages = ["beyond/datasets.md", "code/sentence.md"]
 

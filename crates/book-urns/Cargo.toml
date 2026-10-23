@@ -29,6 +29,7 @@ spreadsheet = { path = "../spreadsheet" }
 push = { path = "../push" }
 # "A space that changes while it runs": its host, after the chapter's first declaration bound.
 live-space = { path = "../live-space" }
+shop = { path = "../shop" }
 # "Checking a resource": its host, with the toolbox's and the shapes check's spaces mounted.
 check-resource = { path = "../check-resource" }
 # The section "Code and language as resources": the script host, and the drafting host that

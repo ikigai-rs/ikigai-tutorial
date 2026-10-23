@@ -100,6 +100,14 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             live_space_root(),
         ),
         (
+            "shop::root()",
+            Arc::new(shop::root(Arc::default(), Arc::default())) as Arc<dyn Space>,
+        ),
+        (
+            "shop::prefixes(\"shop\"), the prefix space a cell carries as a corridor",
+            Arc::new(shop::prefixes("shop")) as Arc<dyn Space>,
+        ),
+        (
             "tic_tac_toe::declared::declaration_space()",
             Arc::new(tic_tac_toe::declared::declaration_space()) as Arc<dyn Space>,
         ),
@@ -304,6 +312,7 @@ fn describe(mention: &Mention) -> String {
         Context::Rust => "a Rust example",
         Context::Cell => "a runnable cell",
         Context::LiveCell => "a runnable cell in the page's live host",
+        Context::PrefixedCell => "a runnable cell in the page's prefix space",
         Context::Prose => "prose",
     };
     format!("{} ({where_from}) names {}", mention.site(), mention.urn)
@@ -418,6 +427,18 @@ fn every_name_the_book_prints_resolves_somewhere_real() {
                     failures.push(format!(
                         "{}: the page's live host does not bind it, even after the chapter's \
                          first declaration, so Run would fail.",
+                        describe(mention)
+                    ));
+                }
+            }
+            // A cell carrying `data-prefixed` runs on the page's kernel with the prefix space
+            // of "Short names in a space" ahead of its root, as a corridor: either answers.
+            Context::PrefixedCell => {
+                if !the_in_page_kernel_answers(&mention.urn)
+                    && !binds(&shop::prefixes("shop"), &mention.urn)
+                {
+                    failures.push(format!(
+                        "{}: neither the in-page kernel nor the prefix space binds it, so                          Run would fail.",
                         describe(mention)
                     ));
                 }
