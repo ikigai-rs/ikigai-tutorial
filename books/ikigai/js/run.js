@@ -81,6 +81,25 @@
 // the cell rebuilds by writing its declaration. `js/live.js` redraws that host's picture after
 // every such cell.
 //
+// THE CHAPTER ASSUMES THE CELLS ABOVE RAN. A chapter's cells are steps, and its "Expected output"
+// for each is what that cell answers when the cells above it on the page have run, once, in order,
+// in this page load. A reader who starts at step 3 meets a host (or a game, a sheet) that never saw
+// steps 1 and 2, and an answer like `error: no endpoint resolved for …` that read as a broken page
+// though the chapter was right (Brian, 2026-10-22, ledger #2109). So every run is COMPARED with the
+// cell's expected output and says, in words beside its cache verdict, "as the chapter shows" or
+// "differs from the chapter": an expected refusal is then plainly expected, and a real difference
+// stands out. A run that differs while cells above it have not run says so, and how many. A cell
+// that runs in a chain (a game, a scenario, a declared game, a live host) also carries "Run all
+// above", which runs, in page order, every cell above it that has not run yet, as the chapter has
+// them; it does not run the cell itself, whose Run is still the reader's to press. The comparison
+// ignores blank lines (a cell's markup cannot hold one) and trailing spaces, and reads `…` in the
+// expected output as the chapters always meant it: any text, up to the end of that line (a hash,
+// an id, a time). Nothing is compared after the command was edited, nor on a page that runs on
+// the browser's clock (a bare `data-clock`), whose answers are the reader's own time.
+// `a11y/cells.mjs` (inside the browser axe run) runs every cell of every page in page order and
+// requires "as the chapter shows" of each, so the expected outputs stay what a reader who reads in
+// order gets.
+//
 // A page may keep a STORY CLOCK: `data-clock='2026-09-22T12:00Z'` (an instant, where a plain
 // `data-clock` asks for the browser's clock) builds the page's kernel with a clock stopped
 // there, and a cell carrying `data-at='…'` moves it before it runs. Every reader's page then
@@ -160,6 +179,19 @@
             .filter(function (l) { return l.length > 0; });
     }
 
+    // Whether a run printed what the chapter's expected output shows: blank lines and trailing
+    // spaces ignored, and `…` in the expected output standing for any text up to the line's end.
+    function sameLines(text) {
+        return text.split("\n").map(function (l) { return l.replace(/\s+$/, ""); })
+            .filter(function (l) { return l.length > 0; }).join("\n");
+    }
+    function asTheChapterShows(output, expected) {
+        var pattern = sameLines(expected).split("…").map(function (part) {
+            return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }).join("[^\\n]*");
+        return new RegExp("^" + pattern + "$").test(sameLines(output));
+    }
+
     // One status line for the page, before the first cell: loading, ready, or absent.
     // One region rather than one per cell, so a screen reader hears it once (WCAG 2.2
     // SC 4.1.3 Status Messages).
@@ -181,6 +213,19 @@
     }
 
     var cellCount = 0;
+    // Every cell on the page, in page order: what "Run all above" runs, and what a run that differs
+    // from the chapter counts when it says how many cells above it have not run.
+    var cells = [];
+    // A page on the browser's clock answers with the reader's own time: nothing to compare.
+    var browserClock = false;
+
+    function notRunAbove(index) {
+        return cells.slice(0, index).filter(function (c) { return !c.ran; });
+    }
+
+    function plural(n, one, many) {
+        return n + " " + (n === 1 ? one : many);
+    }
 
     function install(cell) {
         var original = cell.getAttribute("data-cmd") || "";
@@ -209,6 +254,9 @@
         var expectedText = expected ? expected.textContent : "";
         cellCount += 1;
         var id = "ikigai-run-" + cellCount;
+        var self = { ran: false, execute: null };
+        var index = cells.length;
+        cells.push(self);
 
         cell.textContent = "";
 
@@ -239,7 +287,17 @@
         var clear = el("button", "ikigai-run-secondary", "Clear history");
         clear.type = "button";
         clear.hidden = true;
+        // Only a cell in a chain, with a cell above it: those are the chapters whose steps build
+        // on each other in a state of their own (a game, a scenario, a live host).
+        var above = null;
+        if (chainSpec && index > 0) {
+            above = el("button", "ikigai-run-secondary", "Run all above");
+            above.type = "button";
+        }
         buttons.appendChild(run);
+        if (above) {
+            buttons.appendChild(above);
+        }
         buttons.appendChild(reset);
         buttons.appendChild(clear);
 
@@ -297,6 +355,10 @@
             run.disabled = true;
             // A disabled button with no reason reads as broken; the caption is the reason.
             run.setAttribute("aria-describedby", caption.id);
+            if (above) {
+                above.disabled = true;
+                above.setAttribute("aria-describedby", caption.id);
+            }
         }
         load().catch(markUnavailable);
 
@@ -307,7 +369,7 @@
         cell.appendChild(history);
         var runs = 0;
 
-        function record(commandText, output, verdict, elapsed) {
+        function record(commandText, output, verdict, elapsed, mark) {
             runs += 1;
             var item = el("li", "ikigai-run-entry");
             var head = el("div", "ikigai-run-entry-head");
@@ -315,7 +377,7 @@
             // One command per line, as it was typed: joining them with a symbol made a long run unreadable.
             head.appendChild(el("code", "ikigai-run-entry-cmd", commandText));
             head.appendChild(el("span", "ikigai-run-entry-meta",
-                (verdict || "no cache verdict") + " · " + elapsed.toFixed(1) + " ms"));
+                (verdict || "no cache verdict") + " · " + mark + " · " + elapsed.toFixed(1) + " ms"));
             item.appendChild(head);
             item.appendChild(el("pre", "ikigai-run-entry-out", output));
             history.appendChild(item);
@@ -323,20 +385,53 @@
             clear.hidden = false;
         }
 
+        // What a run is beside the chapter: the mark in its history entry, and the caption's words.
+        function compare(lines, output) {
+            if (lines.join("\n") !== linesOf(original).join("\n")) {
+                return { mark: "edited, not compared with the chapter", says: "" };
+            }
+            var behind = notRunAbove(index).length;
+            var first = behind === 0 ? "" :
+                ", which runs this cell after the cells above it, and " +
+                plural(behind, "cell", "cells") + " above " + (behind === 1 ? "has" : "have") +
+                " not run in this page yet: " +
+                (above ? "press “Run all above”, then run this again"
+                    : "run " + (behind === 1 ? "it" : "them") + " first, then run this again");
+            if (browserClock) {
+                return {
+                    mark: "not compared: this page runs on your clock",
+                    says: "; this page runs on your browser's clock, so its times are yours, not " +
+                        "the chapter's" + first
+                };
+            }
+            if (asTheChapterShows(output, expectedText)) {
+                return { mark: "as the chapter shows", says: "; as the chapter shows (under “Expected output”)" };
+            }
+            var says = "; this differs from the chapter (under “Expected output”)";
+            if (behind > 0) {
+                says += first;
+            } else if (runs > 0) {
+                // (Called before this run is recorded: `runs` counts the runs before it.)
+                says += ", which shows this cell's first run";
+            }
+            return { mark: "differs from the chapter", says: says };
+        }
+
+        // Runs the command; the promise settles when the run has, whatever it answered.
         function execute() {
             // Enter in the field reaches here without the (disabled) button.
             if (unavailable) {
-                return;
+                return Promise.resolve();
             }
             var lines = linesOf(field.value);
             if (lines.length === 0) {
                 caption.textContent = "nothing to run — the command is empty; Reset restores the chapter's";
-                return;
+                return Promise.resolve();
             }
             run.disabled = true;
             caption.textContent = "running…";
             var started = now();
-            load().then(function (mod) {
+            return load().then(function (mod) {
                 if (at) {
                     mod.setStoryClock(at);
                 }
@@ -361,9 +456,11 @@
                 }, Promise.resolve()).then(function () {
                     var elapsed = now() - started;
                     pane.textContent = acc;
-                    record(lines.join("\n"), acc, verdicts.join(" · "), elapsed);
+                    self.ran = true;
+                    var against = compare(lines, acc);
+                    record(lines.join("\n"), acc, verdicts.join(" · "), elapsed, against.mark);
                     caption.textContent = "run " + runs + " — from the kernel in this page" +
-                        (runs > 1 ? "; compare it with the runs below" : "");
+                        against.says + (runs > 1 ? "; compare it with the runs below" : "");
                     run.disabled = false;
                     // A cell may have changed a game a board on this page shows; the board
                     // is a copy the kernel cannot cut, so say that something ran (ttt.js).
@@ -382,6 +479,42 @@
                     "the page failed while running this (" + (err && err.message ? err.message : err) +
                     ") — no result; the listing's output is under “Expected output”";
                 run.disabled = false;
+            });
+        }
+
+        self.execute = execute;
+
+        // "Run all above": every cell above this one that has not run in this page yet, one at a
+        // time, in page order, each with its own command as it now stands, and its result in its
+        // own pane. Then this cell says what was done; its own Run is still the reader's.
+        if (above) {
+            above.addEventListener("click", function () {
+                var pending = notRunAbove(index);
+                if (pending.length === 0) {
+                    caption.textContent = "every cell above has already run in this page; press Run";
+                    return;
+                }
+                above.disabled = true;
+                caption.textContent = "running the " + plural(pending.length, "cell", "cells") +
+                    " above that had not run…";
+                pending.reduce(function (chain, c) {
+                    return chain.then(function () { return c.execute(); });
+                }, Promise.resolve()).then(function () {
+                    if (unavailable) {
+                        return;
+                    }
+                    above.disabled = false;
+                    var left = notRunAbove(index).length;
+                    caption.textContent = "ran the " + plural(pending.length, "cell", "cells") +
+                        " above that had not run" +
+                        (left > 0 ? " (" + left + " of them did not finish; see each one's result)" : "") +
+                        (self.ran
+                            ? "; this cell ran before them, and what it did is still in this page's " +
+                              "kernel, so its next run may still differ from the chapter (reloading " +
+                              "the page starts over)"
+                            : "") +
+                        "; now press Run";
+                });
             });
         }
 
@@ -424,14 +557,16 @@
     }
 
     function installAll() {
-        var cells = document.querySelectorAll("div.ikigai-run[data-cmd]");
-        if (cells.length === 0) {
+        var found = document.querySelectorAll("div.ikigai-run[data-cmd]");
+        if (found.length === 0) {
             return;
         }
-        for (var i = 0; i < cells.length; i++) {
-            install(cells[i]);
+        var clocked = document.querySelector("[data-clock]");
+        browserClock = !!clocked && !clocked.getAttribute("data-clock");
+        for (var i = 0; i < found.length; i++) {
+            install(found[i]);
         }
-        announceKernel(cells[0]);
+        announceKernel(found[0]);
     }
 
     if (document.readyState === "loading") {
