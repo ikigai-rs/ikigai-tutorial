@@ -168,9 +168,9 @@ conforms. O's report is the graph the paragraph below describes, and its one res
 property: `sh:resultPath ttt:wins`, from `sh:ClosedConstraintComponent`. The toolbox's own
 engine checks the same two players further down, in [The page itself](#the-page-itself).
 
-<!-- urn-gate: illustration urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:report — the report graph's own
+<!-- urn-gate: illustration urn:ikigai:shacl:report:b3:1258eb4246e33211b9d99fd84328c8723a8aae4c2627e1c1973fca3041184544:report — the report graph's own
      node, skolemized from the report's digest; it names a node in the answer, not a resource. -->
-<!-- urn-gate: illustration urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:result.0 — the report's one result,
+<!-- urn-gate: illustration urn:ikigai:shacl:report:b3:1258eb4246e33211b9d99fd84328c8723a8aae4c2627e1c1973fca3041184544:result.0 — the report's one result,
      a node in the same answer. -->
 
 <div class="ikigai-run" data-cmd='source urn:toolbox:input:urn:iki:tutorial:check:player:x | urn:shacl:validate shapes=urn:iki:tutorial:check:shapes as=application/json
@@ -181,10 +181,10 @@ source urn:toolbox:input:urn:iki:tutorial:check:player:o | urn:shacl:validate sh
 }
 [2 computed]
 @prefix sh: &lt;http://www.w3.org/ns/shacl#&gt; .
-&lt;urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:report&gt; a sh:ValidationReport ;
+&lt;urn:ikigai:shacl:report:b3:1258eb4246e33211b9d99fd84328c8723a8aae4c2627e1c1973fca3041184544:report&gt; a sh:ValidationReport ;
 	sh:conforms false ;
-	sh:result &lt;urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:result.0&gt; .
-&lt;urn:ikigai:shacl:report:b3:5c7e60ea532b7fd35e7dc271a518183cd186f3f88190783e7251ef1b29fd8d3a:result.0&gt; a sh:ValidationResult ;
+	sh:result &lt;urn:ikigai:shacl:report:b3:1258eb4246e33211b9d99fd84328c8723a8aae4c2627e1c1973fca3041184544:result.0&gt; .
+&lt;urn:ikigai:shacl:report:b3:1258eb4246e33211b9d99fd84328c8723a8aae4c2627e1c1973fca3041184544:result.0&gt; a sh:ValidationResult ;
 	sh:focusNode &lt;urn:iki:tutorial:check:player:o&gt; ;
 	sh:resultMessage "Closed constraint not satisfied" ;
 	sh:resultPath &lt;http://example.org/ttt#wins&gt; ;
