@@ -24,12 +24,12 @@ that machinery, run against gonk.
 
 ```text
   repository: openspec/                         gonk
-  ┌──────────────────────────────────┐          ┌─────────────────────────────────┐
-  │ specs/       what the system does│          │ ledger: one item per open task  │
-  │ changes/add-undo/                │  seed ──▶│   key  = the task's IRI         │
-  │   proposal.md, specs/, tasks.md  │          │   about = the task, the req.    │
-  │ changes/archive/…                │◀─ boxes ─│   1.2 ─blocks─▶ 1.3 ─blocks─▶ 2.1│
-  └──────────────────────────────────┘  checked └─────────────────────────────────┘
+  ┌──────────────────────────────────┐          ┌───────────────────────────────────┐
+  │ specs/       what the system does│          │ ledger: one item per open task    │
+  │ changes/add-undo/                │  seed ──▶│   key  = the task's IRI           │
+  │   proposal.md, specs/, tasks.md  │          │   about = the task, the req.      │
+  │ changes/archive/…                │◀─ boxes ─│   1.2 ─blocks─▶ 1.3 ─blocks─▶ 2.1 │
+  └──────────────────────────────────┘  checked └───────────────────────────────────┘
                  ▲                        in the same PR as the code
                  └──── one pull request per task ────── a worker, from `next`
 ```

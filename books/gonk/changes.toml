@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-10-24"
+summary = "The one-machine picture keeps everything on the machine inside its box, with the push to the forge leaving through its edge, and the spec-first picture's ledger box is wide enough for its longest line."
+pages = ["ways/solo.md", "ways/spec-first.md"]
+maintenance = true
+
+[[change]]
+date = "2026-10-24"
 summary = "The routing chapter's worker configuration edits work with both macOS and Linux sed."
 pages = ["ways/routing.md"]
 maintenance = true

@@ -10,17 +10,17 @@ a user-experience surface, and it is written **once** so that every page gets bo
 ## What a door is responsible for
 
 ```text
-        request  ──▶  ┌──────────────────────────────────────────┐
-                      │                 the door                  │
-                      │                                            │
+        request  ──▶  ┌───────────────────────────────────────────┐
+                      │                  the door                 │
+                      │                                           │
    proof (passkey,    │  1. authenticate → mint a principal       │
    certificate,       │  2. admit by Origin; mutations need       │
    token)             │     Origin + SameSite (never a bare GET)  │
-                      │  3. resolve under exactly that authority   │
-                      │  4. set security headers (CSP, …)          │
-                      │  5. escape every value into the page       │
-                      │                                            │
-                      └───────────────────┬──────────────────────┘
+                      │  3. resolve under exactly that authority  │
+                      │  4. set security headers (CSP, …)         │
+                      │  5. escape every value into the page      │
+                      │                                           │
+                      └───────────────────┬───────────────────────┘
                                           │
                        page  ◀────────────┘   (or a legible refusal,
                                                never a 200 success shell)
