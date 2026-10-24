@@ -16,6 +16,12 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-24"
+summary = "The routing chapter's worker configuration edits work with both macOS and Linux sed."
+pages = ["ways/routing.md"]
+maintenance = true
+
+[[change]]
 date = "2026-10-23"
 summary = "The introduction links the library, a new page listing all three books with who each is for, what to read first and where to start."
 pages = ["introduction.md"]
