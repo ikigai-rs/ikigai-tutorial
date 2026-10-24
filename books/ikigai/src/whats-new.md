@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-24**: A new appendix, The kernel in the browser, shows how the page builds the kernel behind every Run button, compares what the browser gives a kernel with what a native host gives one, and explains why a crate takes its clock and timers from its host. It covers the bridge that lets the kernel await browser promises, and what fails at run time rather than at build time. Its two Run cells show a page with no clock.
+
+  Pages: [Appendix: the kernel in the browser](browser.md)
+
 - **2026-10-23**: A new applied chapter, Short names in a space, declares a prefix table (json: and shop:) as data in a dynamic space carried as a corridor, composes a shop's CSV stock into a one-line summary with $j markers inside it, lists the stock with urn:iki:fn:each, adds a prefix while it runs, and has a table under a reserved scheme refused. Its seven Run cells run in the page.
 
   Pages: [Short names in a space](applied/prefixes.md), [A space that changes while it runs](applied/live-space.md)

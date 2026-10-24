@@ -63,6 +63,28 @@ fn main() -> ExitCode {
         return ExitCode::FAILURE;
     }
 
+    // Text diagrams: every box a chapter draws in a code block closes, in the columns it
+    // opened in (`book_a11y::diagrams`). Read from the chapters' sources, not the built
+    // pages, so a fault names the line to fix.
+    match book_a11y::diagrams::check_book(&book) {
+        Ok(faults) if faults.is_empty() => {}
+        Ok(faults) => {
+            eprintln!(
+                "book-a11y: {} place{} where a text diagram's box does not close:",
+                faults.len(),
+                if faults.len() == 1 { "" } else { "s" }
+            );
+            for fault in &faults {
+                eprintln!("  {}", fault.report());
+            }
+            return ExitCode::FAILURE;
+        }
+        Err(e) => {
+            eprintln!("book-a11y: {e}");
+            return ExitCode::from(2);
+        }
+    }
+
     // Structure: every built page, against the checks a parser can decide.
     let structural = match check_structure(&book, survey) {
         Ok(faults) => faults,

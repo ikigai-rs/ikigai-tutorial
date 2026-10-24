@@ -23,6 +23,11 @@ maintenance = true
 
 [[change]]
 date = "2026-10-24"
+summary = "A new appendix, The kernel in the browser, shows how the page builds the kernel behind every Run button, compares what the browser gives a kernel with what a native host gives one, and explains why a crate takes its clock and timers from its host. It covers the bridge that lets the kernel await browser promises, and what fails at run time rather than at build time. Its two Run cells show a page with no clock."
+pages = ["browser.md"]
+
+[[change]]
+date = "2026-10-24"
 summary = "The Introduction counts tic-tac-toe's seven parts, I to VII, rather than six, and its walk-through of them now ends with Part VII, the game's arrangement written down as one file."
 pages = ["introduction.md"]
 maintenance = true

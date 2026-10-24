@@ -51,7 +51,9 @@
     if (boards.length === 0) {
         return;
     }
-    var root = typeof path_to_root === "string" ? path_to_root : "./";
+    // Resolved against the page: `import()` resolves a relative path against this script's
+    // URL, and `path_to_root` is "" on a page at the book's root.
+    var root = new URL((typeof path_to_root === "string" && path_to_root) || "./", document.baseURI).href;
 
     function loadHtmx() {
         if (window.htmx) {

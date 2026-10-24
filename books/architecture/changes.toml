@@ -13,6 +13,12 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-10-24"
+summary = "The overlay stack and the door are drawn with boxes that close: every right side now lines up with its corner."
+pages = ["overlays/overlays.md", "door/door.md"]
+maintenance = true
+
+[[change]]
 date = "2026-10-23"
 summary = "A new book. It teaches the ikigai architecture as one substrate read two ways: the patterns a person operates are the patterns that authorize and confine them. An introduction sets out resource-oriented computing and how it generalizes the Web, then six parts carry one worked resource, a ledger item, through the capability spine and the manifold-driven UI, the door, the overlay chain, the economics of golden threads and caching, and presence and the audit axis. The capability and economics chapters run in the page: you narrow your own authority and watch an action leave the manifold, and you cut a golden thread and watch a view recompute."
 pages = ["introduction.md", "substrate/two-faces.md", "spine/spine.md", "spine/manifold.md", "economics/economics.md"]

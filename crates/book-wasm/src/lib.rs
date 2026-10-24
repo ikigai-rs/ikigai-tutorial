@@ -438,6 +438,7 @@ pub fn page_kernel_with_clock(clock: Option<Arc<dyn Clock>>) -> Kernel {
 }
 // ANCHOR_END: page_kernel_with_clock
 
+// ANCHOR: page_kernel_over
 /// [`page_kernel_with_clock`], over the sheet's inputs in `inputs` and push's registry in
 /// `listening`. The caller attaches the kernel to `listening` once it is in an `Arc`.
 fn page_kernel_over(
@@ -454,6 +455,7 @@ fn page_kernel_over(
         None => kernel,
     }
 }
+// ANCHOR_END: page_kernel_over
 
 // ANCHOR: browser_clock
 /// The browser's clock: `Date.now()`, milliseconds since 1970. `std::time` has no clock on
@@ -1965,6 +1967,17 @@ mod tests {
         assert!(t[0].starts_with("item,shelf,count\n"), "{}", t[0]);
         assert!(t[1].ends_with("[cached]\n"), "{}", t[1]);
         assert!(t[2].ends_with("[computed]\n"), "{}", t[2]);
+    }
+
+    #[test]
+    fn the_browser_appendix_cells_answer_as_it_says() {
+        // `./` makes it a path under `src/`: the appendix is not an Applied chapter.
+        let t = run_chapter_in_page_order("./browser.md", 2);
+        // The appendix's page asks for no clock, so the time endpoint refuses and says why.
+        assert!(t[0].contains("this kernel has no clock"), "{}", t[0]);
+        // And a trace has no durations to print.
+        assert!(t[1].contains("urn:iki:tutorial:title"), "{}", t[1]);
+        assert!(t[1].contains(" · —"), "{}", t[1]);
     }
 
     #[test]

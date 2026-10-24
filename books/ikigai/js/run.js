@@ -112,9 +112,10 @@
 (function () {
     "use strict";
 
-    // mdbook defines `path_to_root` in every page's head; the wasm lives beside the
-    // book's root, in `wasm/`.
-    var root = typeof path_to_root === "string" ? path_to_root : "./";
+    // mdbook defines `path_to_root` in every page's head ("" on a page at the root); the wasm
+    // lives beside the book's root, in `wasm/`. Resolved against the PAGE, because `import()`
+    // resolves a relative path against this script's URL (`js/`), not the page's.
+    var root = new URL((typeof path_to_root === "string" && path_to_root) || "./", document.baseURI).href;
 
     var kernel = null;   // resolves to the wasm module's exports, or rejects once
     function load() {
