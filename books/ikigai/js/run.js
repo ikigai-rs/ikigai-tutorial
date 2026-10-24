@@ -85,6 +85,11 @@
 // kernel with that dynamic space carried as a corridor (chain `prefixed:shop`), so the short names
 // its prefix table declares resolve in the cell and nowhere else on the page.
 //
+// Or a RESILIENCE HARNESS (The ikigai Architecture's "Spaces that wrap spaces"):
+// `data-harness='overlays'` runs its lines in a harness of its own (chain `harness:overlays`), the
+// throttle overlays around a stub the reader controls; `js/harness.js` redraws its picture and
+// says what its governors hold after every such cell.
+//
 // THE CHAPTER ASSUMES THE CELLS ABOVE RAN. A chapter's cells are steps, and its "Expected output"
 // for each is what that cell answers when the cells above it on the page have run, once, in order,
 // in this page load. A reader who starts at step 3 meets a host (or a game, a sheet) that never saw
@@ -252,6 +257,7 @@
         var declared = cell.getAttribute("data-declared");
         var live = cell.getAttribute("data-live");
         var prefixed = cell.getAttribute("data-prefixed");
+        var harness = cell.getAttribute("data-harness");
         var asOf = cell.getAttribute("data-as-of");
         var at = cell.getAttribute("data-at");
         // The chain the cell runs in, spelled as the page's kernel reads it. (Not `chain`: the
@@ -260,11 +266,13 @@
             (declared ? "declared:" + declared : null) ||
             (live ? "live:" + live : null) ||
             (prefixed ? "prefixed:" + prefixed : null) ||
+            (harness ? "harness:" + harness : null) ||
             (scenario ? "scenario:" + scenario + (asOf ? "@" + asOf : "") : null);
         var where = game ? ", in game " + game
             : declared ? ", in game " + declared + " built from the file"
             : live ? ", in the live host (dynamic space " + live + ")"
             : prefixed ? ", in the prefix space " + prefixed
+            : harness ? ", in the resilience harness (" + harness + ")"
             : scenario ? ", in " + scenario + "'s scenario" +
                 (asOf ? " over the sheet as of " + asOf : "")
             : "";

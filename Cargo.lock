@@ -36,6 +36,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "architecture-book-wasm"
+version = "0.1.0"
+dependencies = [
+ "book-transcripts",
+ "console_error_panic_hook",
+ "futures",
+ "ikigai-core",
+ "ikigai-engine",
+ "js-sys",
+ "ledger-host",
+ "resilience-harness",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "arraydeque"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2607,6 +2624,18 @@ name = "regex-syntax"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
+
+[[package]]
+name = "resilience-harness"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures",
+ "ikigai-core",
+ "ikigai-diagram",
+ "ikigai-throttle",
+ "ikigai-vocab",
+]
 
 [[package]]
 name = "ring"

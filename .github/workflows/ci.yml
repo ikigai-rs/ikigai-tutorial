@@ -12,7 +12,7 @@ jobs:
       test-args: "--all-targets"
       wasm-lib: true
 
-      wasm-packages: book-wasm gonk-book-wasm ui-book-wasm   # the books' wasm faces; two-hosts (quinn/mio) cannot build on wasm32
+      wasm-packages: book-wasm gonk-book-wasm ui-book-wasm architecture-book-wasm   # the books' wasm faces; two-hosts (quinn/mio) cannot build on wasm32
 
   # The kernel inspector (Building ikigai UIs' demo) in a real browser. Non-cargo, so local to this
   # repository (field guide 9g). Unconditional on purpose: a path filter is a gate that silently

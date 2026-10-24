@@ -18,9 +18,11 @@ edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/book
 # script for every book. `crates/book-a11y` measures the cascade this book really loads.
 additional-css = ["css/a11y.css", "css/layout.css", "css/run.css"]
 # run.js loads `wasm/book_wasm.js` beside this book's root: for this book that is
-# `crates/gonk-book-wasm`, the work ledger over an in-memory store, bound under the same file
-# name. The same ledger The gonk Book teaches is the worked resource this book reads two ways.
-additional-js = ["js/a11y.js", "js/run.js"]
+# `crates/architecture-book-wasm`, bound under the same file name: the work ledger over an
+# in-memory store (the same ledger The gonk Book teaches is the worked resource this book reads
+# two ways), and the resilience harness "Spaces that wrap spaces" drives. `js/harness.js` is this
+# book's own (not a link): the harness's picture, its words and its controls.
+additional-js = ["js/a11y.js", "js/run.js", "js/harness.js"]
 
 [output.html.fold]
 enable = true
