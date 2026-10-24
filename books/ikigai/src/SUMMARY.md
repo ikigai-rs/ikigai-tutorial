@@ -94,3 +94,4 @@
 [Glossary](glossary.md)
 [The repositories](repositories.md)
 [Contribute a module](contribute.md)
+[Appendix: the kernel in the browser](browser.md)
