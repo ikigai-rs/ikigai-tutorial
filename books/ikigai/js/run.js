@@ -97,9 +97,10 @@
 // above", which runs, in page order, every cell above it that has not run yet, as the chapter has
 // them; it does not run the cell itself, whose Run is still the reader's to press. The comparison
 // ignores blank lines (a cell's markup cannot hold one) and trailing spaces, and reads `…` in the
-// expected output as the chapters always meant it: any text, up to the end of that line (a hash,
-// an id, a time). Nothing is compared after the command was edited, nor on a page that runs on
-// the browser's clock (a bare `data-clock`), whose answers are the reader's own time.
+// expected output as any text on that line (a hash, an id, a time), or zero or more lines
+// when `…` is the whole line, just as the native transcript matcher does. Nothing is compared
+// after the command was edited, nor on a page that runs on the browser's clock (a bare
+// `data-clock`), whose answers are the reader's own time.
 // `a11y/cells.mjs` (inside the browser axe run) runs every cell of every page in page order and
 // requires "as the chapter shows" of each, so the expected outputs stay what a reader who reads in
 // order gets.
@@ -183,17 +184,29 @@
             .filter(function (l) { return l.length > 0; });
     }
 
-    // Whether a run printed what the chapter's expected output shows: blank lines and trailing
-    // spaces ignored, and `…` in the expected output standing for any text up to the line's end.
+    // Same rule as book_transcripts::matches: ignore blank lines and trailing spaces;
+    // a whole-line `…` matches zero or more lines, an inline `…` only text on its line.
     function sameLines(text) {
         return text.split("\n").map(function (l) { return l.replace(/\s+$/, ""); })
-            .filter(function (l) { return l.length > 0; }).join("\n");
+            .filter(function (l) { return l.length > 0; });
     }
     function asTheChapterShows(output, expected) {
-        var pattern = sameLines(expected).split("…").map(function (part) {
-            return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        }).join("[^\\n]*");
-        return new RegExp("^" + pattern + "$").test(sameLines(output));
+        var want = sameLines(expected), got = sameLines(output);
+        function matches(e, a) {
+            if (e === want.length) return a === got.length;
+            if (want[e].trim() === "…") {
+                for (var skip = a; skip <= got.length; skip++) {
+                    if (matches(e + 1, skip)) return true;
+                }
+                return false;
+            }
+            if (a === got.length) return false;
+            var pattern = want[e].split("…").map(function (part) {
+                return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            }).join("[^\\n]*");
+            return new RegExp("^" + pattern + "$").test(got[a]) && matches(e + 1, a + 1);
+        }
+        return matches(0, 0);
     }
 
     // One status line for the page, before the first cell: loading, ready, or absent.
