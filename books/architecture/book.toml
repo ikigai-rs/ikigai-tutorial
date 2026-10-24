@@ -1,0 +1,30 @@
+[book]
+title = "The ikigai Architecture"
+authors = ["Brian Sletten"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+# The fourth book of this repository, published beside the others: The ikigai Book is the
+# site's root (https://ikigai-rs.github.io/ikigai-tutorial/), The gonk Book is at `gonk/`,
+# Building ikigai UIs is at `ui/`, and this one is at `architecture/`.
+# `scripts/assemble-site.sh` reads this value to place the built book, and the 404 page finds
+# its assets from it.
+site-url = "/ikigai-tutorial/architecture/"
+git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
+edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/architecture/{path}"
+# The SAME files as The ikigai Book's, by symlink: one contrast repair and one runnable-cell
+# script for every book. `crates/book-a11y` measures the cascade this book really loads.
+additional-css = ["css/a11y.css", "css/layout.css", "css/run.css"]
+# run.js loads `wasm/book_wasm.js` beside this book's root: for this book that is
+# `crates/gonk-book-wasm`, the work ledger over an in-memory store, bound under the same file
+# name. The same ledger The gonk Book teaches is the worked resource this book reads two ways.
+additional-js = ["js/a11y.js", "js/run.js"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[rust]
+edition = "2021"

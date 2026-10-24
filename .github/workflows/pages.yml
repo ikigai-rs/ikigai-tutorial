@@ -153,6 +153,16 @@ jobs:
           grep -q '^export function boundNames' books/ui/book/wasm/book_wasm.js
           grep -q 'as default' books/ui/book/wasm/book_wasm.js
 
+      # The ikigai Architecture reuses the gonk book's kernel (the work ledger over an in-memory
+      # store): the same ledger it reads two ways, bound into this book under the one name run.js
+      # imports (scripts/build-kernels.sh maps architecture → gonk-book-wasm).
+      - name: smoke — the exports run.js imports are present in the architecture book's kernel
+        run: |
+          test -s books/architecture/book/wasm/book_wasm_bg.wasm
+          grep -q '^export function evalLineAsync' books/architecture/book/wasm/book_wasm.js
+          grep -q '^export function boundNames' books/architecture/book/wasm/book_wasm.js
+          grep -q 'as default' books/architecture/book/wasm/book_wasm.js
+
       # ── The second accessibility instrument ───────────────────────────────
       #
       # `book-a11y` (inside test-books.sh) measures contrast and checks the STATIC

@@ -36,3 +36,11 @@ audience = "Developers building pages, dashboards or apps on ikigai, for a brows
 read_first = "The first part of The ikigai Book, for resources, spaces, capabilities and golden threads."
 start = "model/composed.html"
 start_title = "A page is a composed resource"
+
+[[book]]
+dir = "architecture"
+description = "How ikigai is put together, taught as one substrate read two ways: the patterns a person operates are the patterns that authorize and confine them. It opens with resource-oriented computing and how it generalizes the Web, then carries one worked resource, a ledger item, through the capability spine and the manifold-driven UI, the door, the overlay chain, the economics of golden threads and caching, and presence and the audit axis."
+audience = "Readers of The ikigai Book who can write against the kernel and want to see how the pieces fit, and why the pieces that confine are the pieces that serve."
+read_first = "The ikigai Book, for resources, spaces, capabilities and golden threads, and its chapters on dynamic spaces, which the overlay chain is built from."
+start = "introduction.html"
+start_title = "Introduction"
