@@ -56,9 +56,10 @@ told.
 
 **Applied** builds one small application end to end, the way resource-oriented design says
 to: name the resources first, write code only for what has to hold something, and compose the
-rest. The application is tic-tac-toe, in six parts numbered on their own, I to VI. They take
+rest. The application is tic-tac-toe, in seven parts numbered on their own, I to VII. They take
 the game from a model on paper to atoms, lines, rules, many games at once, a board you can
-play in the page, and finally the same game held and served from Python and TypeScript. Then
+play in the page, the same game held and served from Python and TypeScript, and finally its
+arrangement written down as data, one file the kernel builds the game from. Then
 **Time is a resource** takes the first step past composition: an answer that goes out of date
 with nobody writing, a clock the host gives the kernel, and a page that polls it. A
 **spreadsheet**, in seven more parts, builds something a little bigger the same way: cells as
