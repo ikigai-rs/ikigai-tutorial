@@ -1199,12 +1199,14 @@ dependencies = [
 
 [[package]]
 name = "ikigai-diagram"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9faa2c2f24ceaad9e2c47086effb1680655a7bb248d57732fb7eb3ce7b171bda"
+checksum = "01d3818ef967f2d57192f78a2df380fd76de6202c4f9f0a03b5eb8da6c32e9a1"
 dependencies = [
  "ikigai-core",
  "ikigai-fn 0.5.0",
+ "oxrdf",
+ "oxttl",
 ]
 
 [[package]]
@@ -1502,9 +1504,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-throttle"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f92c712b5ea9f494260899de166be80f6049990585333be02f8683250465b85"
+checksum = "e0c1c1659ae788fbe2629cf7b433e32e1c79cea2676fb6050c831c6d99435add"
 dependencies = [
  "async-lock",
  "async-trait",

@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-10-24"
+summary = "A space that changes while it runs draws ikigai-diagram 0.2.2's space, which now has four doors: the two the chapter uses, and urn:diagram:state and urn:diagram:state:arrangement, which draw governors' state over an arrangement. Its two pictures, their text alternatives and its door counts follow."
+pages = ["applied/live-space.md"]
+maintenance = true
+
+[[change]]
+date = "2026-10-24"
 summary = "The Introduction counts tic-tac-toe's seven parts, I to VII, rather than six, and its walk-through of them now ends with Part VII, the game's arrangement written down as one file."
 pages = ["introduction.md"]
 maintenance = true
