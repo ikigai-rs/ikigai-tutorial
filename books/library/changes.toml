@@ -3,5 +3,10 @@
 
 [[change]]
 date = "2026-10-23"
+summary = "A fourth book joins the list: The ikigai Architecture, which teaches how ikigai is put together as one substrate read two ways."
+pages = ["index.md"]
+
+[[change]]
+date = "2026-10-23"
 summary = "The library: one page that lists the books (The ikigai Book, The gonk Book and Building ikigai UIs), with who each is for, what to read first and where to start."
 pages = ["index.md"]

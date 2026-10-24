@@ -28,4 +28,12 @@ User interfaces the ikigai way, where a view is a resource. It builds a kernel i
 - **Read first:** The first part of The ikigai Book, for resources, spaces, capabilities and golden threads.
 - **Start at:** [A page is a composed resource](../ui/model/composed.html)
 
+## The ikigai Architecture
+
+How ikigai is put together, taught as one substrate read two ways: the patterns a person operates are the patterns that authorize and confine them. It opens with resource-oriented computing and how it generalizes the Web, then carries one worked resource, a ledger item, through the capability spine and the manifold-driven UI, the door, the overlay chain, the economics of golden threads and caching, and presence and the audit axis. [Open The ikigai Architecture](../architecture/index.html).
+
+- **Who it is for:** Readers of The ikigai Book who can write against the kernel and want to see how the pieces fit, and why the pieces that confine are the pieces that serve.
+- **Read first:** The ikigai Book, for resources, spaces, capabilities and golden threads, and its chapters on dynamic spaces, which the overlay chain is built from.
+- **Start at:** [Introduction](../architecture/introduction.html)
+
 The books are built, tested and published together, from one repository: <https://github.com/ikigai-rs/ikigai-tutorial>.

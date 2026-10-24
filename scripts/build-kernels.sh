@@ -24,6 +24,7 @@ kernel_of() {
         ikigai) echo book-wasm ;;
         gonk) echo gonk-book-wasm ;;
         ui) echo ui-book-wasm ;;
+        architecture) echo gonk-book-wasm ;;
         *) echo "" ;;
     esac
 }

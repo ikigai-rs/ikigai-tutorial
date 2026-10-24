@@ -1,0 +1,18 @@
+# What's new in The ikigai Architecture: one entry per change a reader would notice, NEWEST FIRST.
+#
+# `crates/book-whats-new` writes src/whats-new.md from this file (./scripts/test-books.sh runs it
+# before `mdbook build`), and a test fails when the two disagree. A change to this book's pages
+# that adds or updates no entry here is refused in CI, with the entry to add.
+#
+#   date        "YYYY-MM-DD"
+#   summary     one or two sentences for a READER: what they will now find (not the commit subject)
+#   pages       the pages to read for it, as SUMMARY.md links them; titles come from SUMMARY.md
+#   removed     titles of pages that no longer exist, listed without a link (optional)
+#   maintenance true for upkeep with no news in it (a version move, a link or typo fix): kept
+#               here, left off the page (optional)
+#   commit      the commit an entry was written from; for tooling only, never shown (optional)
+
+[[change]]
+date = "2026-10-23"
+summary = "A new book. It teaches the ikigai architecture as one substrate read two ways: the patterns a person operates are the patterns that authorize and confine them. An introduction sets out resource-oriented computing and how it generalizes the Web, then six parts carry one worked resource, a ledger item, through the capability spine and the manifold-driven UI, the door, the overlay chain, the economics of golden threads and caching, and presence and the audit axis. The capability and economics chapters run in the page: you narrow your own authority and watch an action leave the manifold, and you cut a golden thread and watch a view recompute."
+pages = ["introduction.md", "substrate/two-faces.md", "spine/spine.md", "spine/manifold.md", "economics/economics.md"]
