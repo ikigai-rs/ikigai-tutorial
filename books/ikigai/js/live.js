@@ -13,6 +13,12 @@
 // picture (`livePictureAsync`: `urn:diagram:kernel`, read through the host's cache like any other
 // read) and draws it in place of the one on the page.
 //
+// THE NEXT CELL WAITS FOR THE REDRAW. The redraw reads the host, so it is part of the order the
+// chapter's outputs assume: after one cell, before the next. It goes to the event's `hold`, and
+// `js/run.js` runs nothing more in this host until it has landed. Left to race, a redraw that
+// landed after the next cell's write had cut the picture filled the cache again, and that
+// cell's `trace` read the picture `cached` where the chapter shows `computed` (ledger #2191).
+//
 // THE TEXT ALTERNATIVE CHANGES WITH THE PICTURE. The kernel answers the picture together with
 // its `alt`, written by `live_space::picture_text` from the same arrangement the picture is drawn
 // from, so the words are never older than the boxes. The committed picture's `alt` is that same
@@ -103,7 +109,10 @@
 
         document.addEventListener("ikigai:cell-ran", function (event) {
             if (event.detail && event.detail.chain === "live:" + name) {
-                draw();
+                var drawing = draw();
+                if (typeof event.detail.hold === "function") {
+                    event.detail.hold(drawing);
+                }
             }
         });
     }
