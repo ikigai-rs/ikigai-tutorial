@@ -168,6 +168,10 @@ There is no separate "keep the docs up to date" chore, because there is a gate:
 ./scripts/test-books.sh
 ```
 
+The script also needs Node.js 22 for the runnable-cell matcher and routing-command regression
+tests. Those tests use Node's built-in test runner and need no npm packages. The matcher cases
+are shared with `cargo test -p book-transcripts`; routing edits use the machine's own sed.
+
 `mdbook test` compiles and runs **every Rust block in the book** against the real crates,
 and CI runs it on every push — the deploy to the URL above is downstream of that same job
 (`.github/workflows/pages.yml`), so a red book never publishes. The longer listings are not

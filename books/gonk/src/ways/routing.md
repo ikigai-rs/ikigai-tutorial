@@ -137,7 +137,7 @@ appends the block it would write:
 
 <!-- transcript: run -->
 ```console
-$ cd lawnboy/gonk-worker && for a in claude codex; do sed -i "s|^routers = .*|routers = [\"$(cat ../../hub.principal)\"]|" .gonk/worker-$a.toml; printf '\n[repos.library]\nremote = "https://github.com/acme/library.git"\n' >> .gonk/worker-$a.toml; done
+$ cd lawnboy/gonk-worker && for a in claude codex; do sed -i.bak "s|^routers = .*|routers = [\"$(cat ../../hub.principal)\"]|" .gonk/worker-$a.toml && rm .gonk/worker-$a.toml.bak; printf '\n[repos.library]\nremote = "https://github.com/acme/library.git"\n' >> .gonk/worker-$a.toml; done
 $ cd lawnboy/gonk-worker && grep '^routers ' .gonk/worker-claude.toml
 routers = ["urn:iki:host:gonk:client:…"]
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
@@ -270,7 +270,7 @@ operator adds it, it is:
 
 <!-- transcript: run -->
 ```console
-$ cd lawnboy/gonk-worker && sed -i 's|^routers = \["\(.*\)"\]|routers = ["\1", "urn:iki:gonk:passkey:QWRh"]|' .gonk/worker-claude.toml
+$ cd lawnboy/gonk-worker && sed -i.bak 's|^routers = \["\(.*\)"\]|routers = ["\1", "urn:iki:gonk:passkey:QWRh"]|' .gonk/worker-claude.toml && rm .gonk/worker-claude.toml.bak
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #1  repo:library  initials panics on an empty word
 take  #2  repo:library  Document initials in the README

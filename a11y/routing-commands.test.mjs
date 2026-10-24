@@ -7,7 +7,7 @@ import { test } from "node:test";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const page = readFileSync(new URL("../books/gonk/src/ways/routing.md", import.meta.url), "utf8");
-const commands = page.split("\n").filter(line => line.startsWith("$ cd lawnboy/gonk-worker && ") && line.includes("sed "));
+const commands = page.split("\n").filter(line => line.startsWith("$ cd lawnboy/gonk-worker && ") && line.includes("sed -i"));
 
 test("routing config edits work with the platform's sed", () => {
     assert.equal(commands.length, 2);
