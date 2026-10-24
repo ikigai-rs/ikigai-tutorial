@@ -2105,17 +2105,24 @@ mod tests {
             let open = rest.find("alt=\"").unwrap() + "alt=\"".len();
             rest[open..open + rest[open..].find('"').unwrap()].to_string()
         };
-        let committed = |file: &str| {
-            std::fs::read_to_string(format!(
+        // With BOOK_PICTURES_WRITE set, each picture is written from what was drawn and its alt
+        // text printed, for the chapter, before it is compared: how the committed pictures are
+        // redrawn when ikigai-diagram changes what it draws.
+        let committed = |file: &str, drawn: &str, alt: &str| {
+            let path = format!(
                 "{}/../../books/ikigai/src/applied/{file}",
                 env!("CARGO_MANIFEST_DIR")
-            ))
-            .unwrap()
+            );
+            if std::env::var_os("BOOK_PICTURES_WRITE").is_some() {
+                std::fs::write(&path, drawn).unwrap();
+                println!("{file} alt:\n{alt}\n");
+            }
+            std::fs::read_to_string(path).unwrap()
         };
 
         let (svg, alt, installs) = draw();
         assert_eq!(installs, 0);
-        assert_eq!(svg, committed("live-space-empty.svg"));
+        assert_eq!(svg, committed("live-space-empty.svg", &svg, &alt));
         assert_eq!(alt_of("live-space-empty.svg"), alt);
 
         let engine = page.engine(Some("live:workshop")).unwrap();
@@ -2133,7 +2140,7 @@ mod tests {
         );
         let (svg, alt, installs) = draw();
         assert_eq!(installs, 1);
-        assert_eq!(svg, committed("live-space-doors.svg"));
+        assert_eq!(svg, committed("live-space-doors.svg", &svg, &alt));
         assert_eq!(alt_of("live-space-doors.svg"), alt);
     }
 

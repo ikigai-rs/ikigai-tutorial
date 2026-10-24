@@ -59,8 +59,9 @@ The declaration lives at a name of its own:
 `Sink` writes an arrangement there, in the s-expression form Tic-tac-toe VII's file is
 written in; `Source` answers it as the `ik:` Turtle core builds from. The host's root is
 three layers: the declaration, then `ikigai-diagram`'s space (`urn:diagram:kernel`, the
-picture Tic-tac-toe VII drew from a file, here drawn from the running kernel), then the
-dynamic space:
+picture Tic-tac-toe VII drew from a file, here drawn from the running kernel, beside the
+`urn:diagram:state` pair that draws governors' state over an arrangement, which this chapter does
+not use), then the dynamic space:
 
 ```rust,ignore
 {{#include ../../../../crates/live-space/src/lib.rs:kernel}}
@@ -147,7 +148,7 @@ again and draws the answer here, with a text alternative written from the same a
 
 <figure class="ikigai-live" data-live='workshop' style="margin: 1em 0">
 <a href="live-space-empty.svg"><img src="live-space-empty.svg"
-     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 2 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with no doors."></a>
+     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 4 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel; urn:diagram:state, answered by diagram-state; urn:diagram:state:arrangement, answered by diagram-state-arrangement. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with no doors."></a>
 <figcaption>The host before anything is declared: <code>urn:diagram:kernel</code>, as the
 host in <code>crates/live-space</code> answers it. Select the picture to open it at full
 size.</figcaption>
@@ -170,7 +171,7 @@ use live_space::{source, Host};
 let mut host = Host::start("workshop");
 let picture = || source("urn:diagram:kernel", &[]);
 let before = host.read(picture()).unwrap();
-assert!(before.contains("3 doors across 3 endpoint spaces"));
+assert!(before.contains("5 doors across 3 endpoint spaces"));
 
 host.write(
     r#"(endpoints
@@ -201,7 +202,7 @@ assert!(status.ends_with("refused: nothing since the last bind\n"));
 // The picture was cut by the bind, and redraws with the four new doors.
 assert!(!host.is_cached(&picture()));
 let after = host.read(picture()).unwrap();
-assert!(after.contains("7 doors across 3 endpoint spaces"));
+assert!(after.contains("9 doors across 3 endpoint spaces"));
 assert!(after.contains("door 4: urn:iki:tutorial:upper (exact) is answered by toUpper"));
 ```
 
@@ -242,7 +243,7 @@ nobody asks for. The next read draws this:
 
 <figure style="margin: 1em 0">
 <a href="live-space-doors.svg"><img src="live-space-doors.svg"
-     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 2 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with 4 doors, tried in order: urn:iki:tutorial:camel-case, answered by camel-case; urn:iki:tutorial:title, answered by title; urn:iki:tutorial:camel-title, answered by camel-title; urn:iki:tutorial:upper, answered by toUpper."></a>
+     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 4 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel; urn:diagram:state, answered by diagram-state; urn:diagram:state:arrangement, answered by diagram-state-arrangement. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with 4 doors, tried in order: urn:iki:tutorial:camel-case, answered by camel-case; urn:iki:tutorial:title, answered by title; urn:iki:tutorial:camel-title, answered by camel-title; urn:iki:tutorial:upper, answered by toUpper."></a>
 <figcaption>The host after one write to its declaration. A test in
 <code>crates/live-space</code> holds both pictures to what the host draws.</figcaption>
 </figure>
@@ -558,7 +559,7 @@ trace  urn:iki:tutorial:live:picture
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 &#32;
-urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 7909b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
+urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 8821b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
 └─ urn:diagram:kernel   diagram-kernel · computed · ThreadId(1) · — · answered-by=urn:iki:space:diagram
    └─ urn:kernel:topology   kernel-topology · computed · ThreadId(1) · —
 narrowed — capability: urn:cap:kernel:listen
@@ -610,7 +611,7 @@ shows it.
 | the space | `urn:iki:space:dynamic:workshop` | core's `DynamicSpace`: empty until a declaration binds, rebuilt on every write, one thread for everything it served |
 | its status | `urn:iki:space:dynamic:workshop:status` | live state: what is in force, how many binds, the last refusal and where |
 | the loop | `DynamicSpace::drive` | a future the host runs: hear the declaration's cut, read, check, bind |
-| the picture | `urn:diagram:kernel` | ikigai-diagram 0.2.1: the host's arrangement, cached and redrawn when a bind cuts `urn:kernel:bindings` |
+| the picture | `urn:diagram:kernel` | ikigai-diagram 0.2.2: the host's arrangement, cached and redrawn when a bind cuts `urn:kernel:bindings` |
 | a view | `view.ttl` | data: an alias rule that resolves at the root, and grants nothing |
 
 Tic-tac-toe VII moved where the endpoints are bound out of the code. This chapter makes that

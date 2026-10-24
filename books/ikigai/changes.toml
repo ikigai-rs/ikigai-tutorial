@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-10-24"
+summary = "A space that changes while it runs draws ikigai-diagram 0.2.2's space, which now has four doors: the two the chapter uses, and urn:diagram:state and urn:diagram:state:arrangement, which draw governors' state over an arrangement. Its two pictures, their text alternatives and its door counts follow."
+pages = ["applied/live-space.md"]
+maintenance = true
+
+[[change]]
+date = "2026-10-24"
 summary = "A new appendix, The kernel in the browser, shows how the page builds the kernel behind every Run button, compares what the browser gives a kernel with what a native host gives one, and explains why a crate takes its clock and timers from its host. It covers the bridge that lets the kernel await browser promises, and what fails at run time rather than at build time. Its two Run cells show a page with no clock."
 pages = ["browser.md"]
 
