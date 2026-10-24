@@ -1,0 +1,19 @@
+# name	verdict	expected	actual (literal \n and \t encode whitespace)
+whole-line multiple	1	a\n…\nd	a\nb\nc\nd
+whole-line zero	1	a\n…\nd	a\nd
+only ellipsis empty	1	…	
+only ellipsis many	1	…	a\nb
+leading	1	…\nd	a\nb\nd
+trailing	1	a\n…	a\nb\nc
+adjacent	1	a\n…\n…\nd	a\nd
+backtracking	1	…\nx …	a\nx 1\nx 2
+inline	1	id: …!	id: 123!
+inline cannot cross lines	0	a…d	ab\ncd
+anchored start	0	a	b\na
+anchored end	0	a	a\nb
+regex literal	1	[x].* (a)?	[x].* (a)?
+no overlap	0	ab…ba	aba
+empty	1		
+blank and trailing	1	a  \n\n…\nd\t	a\nb\nc\nd\n
+indentation matters	0	 a	a
+indented ellipsis	1	a\n  …\nd	a\nb\nc\nd

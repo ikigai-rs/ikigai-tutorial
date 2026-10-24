@@ -13,6 +13,10 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
+# The browser and native matchers read the same cases. Also exercise the routing
+# chapter's config edits with the platform's sed (GNU on Linux, BSD on macOS).
+node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs
+
 TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"
 CARGO_TARGET_DIR="$TARGET" cargo build
