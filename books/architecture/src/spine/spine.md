@@ -31,7 +31,7 @@ to write:
 </div>
 
 <div class="ikigai-run" data-cmd='sink urn:iki:ledger:comment item=1 A note that will not land'>
-<pre class="ikigai-run-expected">denied: capability does not grant `urn:cap:store:write:graph:*` (declared by `urn:iki:ledger:comment`; any grant under `urn:cap:store:write:graph:` satisfies it)</pre>
+<pre class="ikigai-run-expected">error: denied: capability does not grant `urn:cap:store:write:graph:*` (declared by `urn:iki:ledger:comment`; any grant under `urn:cap:store:write:graph:` satisfies it)</pre>
 </div>
 
 Two things to notice. The refusal is a **Denied**, not a broken write and not a silent no-op: the

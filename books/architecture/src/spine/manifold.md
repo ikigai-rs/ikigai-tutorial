@@ -16,18 +16,57 @@ ledger action, every store query, the kernel's own meta endpoints.
 </div>
 
 <div class="ikigai-run" data-cmd='source urn:kernel:actions'>
-<pre class="ikigai-run-expected">urn:iki:ledger:{ledger}:append
-urn:iki:ledger:{ledger}:comment
-urn:iki:ledger:{ledger}:close
+<pre class="ikigai-run-expected">urn:iki:ledger:lifecycle:{name}
+urn:iki:ledger:policy:{name}
+urn:iki:store:graphs
+urn:iki:store:info
+urn:kernel:actions
+urn:kernel:aliases
+urn:kernel:cache
+urn:kernel:cached
+urn:kernel:catalog
+urn:kernel:constraint
+urn:kernel:cut
+urn:kernel:dependents
+urn:kernel:explain
+urn:kernel:scheduler
+urn:kernel:threads
+urn:kernel:topology
+urn:kernel:uncached
+urn:kernel:validate
+urn:iki:ledger:ledgers
+urn:iki:ledger:{ledger}:item:{id}
+urn:iki:ledger:{ledger}:item:{id}:about
+urn:iki:ledger:{ledger}:item:{id}:closed
+urn:iki:ledger:{ledger}:item:{id}:holder:{holder}
+urn:iki:ledger:{ledger}:item:{id}:state:{value}
+urn:iki:ledger:{ledger}:label
+urn:iki:store:graph-info
+urn:iki:store:graph-update
+urn:iki:store:update
+urn:iki:ledger:{ledger}:defer
+urn:iki:ledger:{ledger}:doctor
+urn:iki:ledger:{ledger}:item:{id}:state
+urn:iki:store:load
 urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:link
-urn:iki:ledger:{ledger}:next
-urn:iki:ledger:{ledger}:items
-urn:iki:ledger:{ledger}:count
-urn:iki:ledger:{ledger}:item:{id}
-urn:iki:store:graph-update
+urn:iki:ledger:{ledger}:purge
+urn:iki:ledger:{ledger}:reopen
+urn:iki:store:dump
+urn:iki:ledger:{ledger}:close
+urn:iki:store:ask
+urn:iki:store:construct
+urn:iki:store:describe
+urn:iki:store:graph-ask
+urn:iki:store:graph-construct
+urn:iki:store:graph-describe
 urn:iki:store:graph-select
-… (and the kernel's meta endpoints: urn:kernel:actions, urn:kernel:catalog, urn:kernel:validate, …)
+urn:iki:store:select
+urn:iki:ledger:{ledger}:comment
+urn:iki:ledger:{ledger}:next
+urn:iki:ledger:{ledger}:append
+urn:iki:ledger:{ledger}:count
+urn:iki:ledger:{ledger}:items
 [computed]</pre>
 </div>
 
@@ -39,14 +78,26 @@ and ask again:
 </div>
 
 <div class="ikigai-run" data-cmd='source urn:kernel:actions'>
-<pre class="ikigai-run-expected">urn:iki:ledger:{ledger}:next
-urn:iki:ledger:{ledger}:items
-urn:iki:ledger:{ledger}:count
-urn:iki:ledger:{ledger}:item:{id}
-urn:iki:store:graph-select
+<pre class="ikigai-run-expected">urn:iki:ledger:lifecycle:{name}
+urn:iki:ledger:policy:{name}
+urn:iki:store:graphs
 urn:kernel:actions
 urn:kernel:validate
-… (the read views and the ungated meta endpoints — and nothing else)
+urn:iki:ledger:ledgers
+urn:iki:ledger:{ledger}:item:{id}
+urn:iki:ledger:{ledger}:item:{id}:closed
+urn:iki:ledger:{ledger}:item:{id}:holder:{holder}
+urn:iki:ledger:{ledger}:item:{id}:state:{value}
+urn:iki:store:graph-info
+urn:iki:ledger:{ledger}:doctor
+urn:iki:ledger:{ledger}:item:{id}:state
+urn:iki:store:graph-ask
+urn:iki:store:graph-construct
+urn:iki:store:graph-describe
+urn:iki:store:graph-select
+urn:iki:ledger:{ledger}:next
+urn:iki:ledger:{ledger}:count
+urn:iki:ledger:{ledger}:items
 [computed]</pre>
 </div>
 
