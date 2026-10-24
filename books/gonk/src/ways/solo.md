@@ -23,13 +23,15 @@ gonk itself, or held to less than everything, is the next chapter's.
 
 ```text
   one machine
-  ┌───────────────────────────────────────────────────────────────┐
-  │  you ──┐                                                      │
-  │        ├── ikigai --mount urn:gk:=…/gonk.sock ──▶ gonk ──▶ store
-  │  agent ┘          (the owner-only socket)          │          │
-  │                                                    └─▶ model (optional, mounted)
-  │  git: a branch per item ──push──▶ the forge: pull request + CI │
-  └───────────────────────────────────────────────────────────────┘
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │  you ──┐                                                                 │
+  │        ├── ikigai --mount urn:gk:=…/gonk.sock ──▶ gonk ──▶ store         │
+  │  agent ┘          (the owner-only socket)          │                     │
+  │                                                    └─▶ model (optional)  │
+  │                                                                          │
+  │  git: a branch per item ────────────┐                                    │
+  └─────────────────────────────────────┼────────────────────────────────────┘
+                                        └──push──▶ the forge: pull request + CI
 ```
 
 The forge (GitHub, say) is the one thing not on the machine; this page cannot reach it, and the

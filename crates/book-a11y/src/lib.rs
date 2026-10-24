@@ -25,6 +25,7 @@
 //! Holding an icon to the text floor would be inventing a rule; holding text to the icon
 //! floor would be missing the point.
 
+pub mod diagrams;
 pub mod structure;
 
 use std::collections::BTreeMap;
