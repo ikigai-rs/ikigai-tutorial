@@ -402,26 +402,17 @@
             return '"' + text.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
         }
 
-        // Read the stage as it is now: the picture in each scheme (with `before=` what
-        // data-before answered at the last read, so the picture marks what changed since), the
-        // words, what data-before answers now, the facts.
+        // What the current stage's picture was marked against (data-before's answer then).
+        var drawnWith = null;
+
+        // Read the stage as it is now: the words, what data-before answers, the facts, and then
+        // the picture in each scheme. With data-before, a step that moved something draws the
+        // picture marked against the last read (`before=`), and one that moved nothing draws it
+        // exactly as the current stage was drawn: the same request, so a step that cut nothing
+        // finds it in the cache.
         function read(mod) {
-            var stage = { pictures: {}, cache: "", facts: [], before: null };
-            var reads = schemes.map(function (scheme) {
-                return function () {
-                    var line = scheme ? pictureLine.replace(/\{scheme\}/g, scheme) : pictureLine;
-                    if (beforeLine && seen.before !== null) {
-                        line += " before=" + quote(seen.before);
-                    }
-                    return evalLine(mod, line).then(function (reply) {
-                        if (reply.kind !== "output") {
-                            throw new Error("the picture did not draw: " + reply.text);
-                        }
-                        stage.pictures[scheme || "only"] = reply.text;
-                        stage.cache = stage.cache || reply.cache;
-                    });
-                };
-            });
+            var stage = { pictures: {}, cache: "", facts: [], before: null, moved: false };
+            var reads = [];
             reads.push(function () {
                 return evalLine(mod, wordsLine).then(function (reply) {
                     stage.words = reply.kind === "error" ? "error: " + reply.text : reply.text;
@@ -438,6 +429,31 @@
                 reads.push(function () {
                     return evalLine(mod, item.getAttribute("data-cmd")).then(function (reply) {
                         stage.facts.push(factText(item, factValue(item, reply)));
+                    });
+                });
+            });
+            reads.push(function () {
+                if (beforeLine) {
+                    stage.moved = !same(stage.words, seen.words) ||
+                        (seen.before !== null && stage.before !== seen.before);
+                    if (stage.moved) {
+                        drawnWith = seen.before;
+                    }
+                }
+                return Promise.resolve();
+            });
+            schemes.forEach(function (scheme) {
+                reads.push(function () {
+                    var line = scheme ? pictureLine.replace(/\{scheme\}/g, scheme) : pictureLine;
+                    if (beforeLine && drawnWith !== null) {
+                        line += " before=" + quote(drawnWith);
+                    }
+                    return evalLine(mod, line).then(function (reply) {
+                        if (reply.kind !== "output") {
+                            throw new Error("the picture did not draw: " + reply.text);
+                        }
+                        stage.pictures[scheme || "only"] = reply.text;
+                        stage.cache = stage.cache || reply.cache;
                     });
                 });
             });
@@ -513,11 +529,10 @@
                 }
                 var before = seen.words;
                 var light = stage.pictures[schemes[0] || "only"];
-                // With data-before the picture marks what changed since the last read, so it
-                // differs whenever the board does: compare what data-before answers instead.
-                var moved = !same(stage.words, seen.words) || (beforeLine
-                    ? seen.before !== null && stage.before !== seen.before
-                    : seen.picture !== null && light !== seen.picture);
+                // With data-before the picture is marked, so it is not what says a stage moved:
+                // read() judged that by the words and data-before's answer.
+                var moved = beforeLine ? stage.moved : !same(stage.words, seen.words) ||
+                    (seen.picture !== null && light !== seen.picture);
                 seen = { words: stage.words, picture: light, before: stage.before };
                 if (!moved) {
                     status.textContent = step.lead + "No change: this step moved nothing the picture " +

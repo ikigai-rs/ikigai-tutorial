@@ -337,22 +337,17 @@ impl Viewer {
         }
     }
 
-    /// Read the viewer's stage as `js/stages.js` reads it after a step: the picture in each
-    /// scheme (marked against `before`, what `data-before` answered at the last read, when
-    /// the viewer names one), then the words, then `data-before`, then each fact. `eval` runs
-    /// one line in the viewer's chain.
+    /// Read the viewer's stage as `js/stages.js` reads it after a step: the words, then
+    /// `data-before`, then each fact, then the picture in each scheme, marked against `before`
+    /// when the viewer names `data-before`. `eval` runs one line in the viewer's chain.
     pub fn read(&self, eval: &dyn Fn(&str) -> Reply, before: Option<&str>) -> Snapshot {
-        let mut pictures = Vec::new();
-        let mut cache = String::new();
-        for scheme in self.schemes() {
-            let line = self.picture_line(scheme, before);
-            let r = eval(&line);
-            assert_eq!(r.kind, "output", "`{line}` drew no picture: {r:?}");
-            if cache.is_empty() {
-                cache = r.cache.clone();
-            }
-            pictures.push((scheme, r.text));
-        }
+        let mut now = self.read_state(eval);
+        self.read_pictures(eval, before, &mut now);
+        now
+    }
+
+    /// The words, what `data-before` answers and the facts, with no picture yet.
+    fn read_state(&self, eval: &dyn Fn(&str) -> Reply) -> Snapshot {
         let words = eval(&self.words).said();
         let before = self.before.as_ref().map(|line| {
             let r = eval(line);
@@ -373,11 +368,29 @@ impl Viewer {
             })
             .collect();
         Snapshot {
-            pictures,
-            cache,
+            pictures: Vec::new(),
+            cache: String::new(),
             words,
             before,
             facts,
+        }
+    }
+
+    /// The picture in each scheme, marked against `before`, into `now`.
+    fn read_pictures(
+        &self,
+        eval: &dyn Fn(&str) -> Reply,
+        before: Option<&str>,
+        now: &mut Snapshot,
+    ) {
+        for scheme in self.schemes() {
+            let line = self.picture_line(scheme, before);
+            let r = eval(&line);
+            assert_eq!(r.kind, "output", "`{line}` drew no picture: {r:?}");
+            if now.cache.is_empty() {
+                now.cache = r.cache.clone();
+            }
+            now.pictures.push((scheme, r.text));
         }
     }
 
@@ -387,6 +400,7 @@ impl Viewer {
         Reading {
             viewer: self,
             seen: Snapshot::start(self),
+            drawn_with: None,
         }
     }
 
@@ -434,19 +448,37 @@ impl Viewer {
     }
 }
 
-/// The viewer's reads after each step, as `js/stages.js` makes them: each picture marked
-/// against what `data-before` answered at the read before.
+/// The viewer's reads after each step, as `js/stages.js` makes them.
+///
+/// With `data-before`, a step that makes a stage draws its picture marked against the stage
+/// before (what `data-before` answered at the last read), and a step that changes nothing
+/// draws it exactly as the current stage was drawn, so that read is the same request, and a
+/// step that cut nothing finds it in the cache.
 pub struct Reading<'v> {
     viewer: &'v Viewer,
     /// What the last read saw.
     pub seen: Snapshot,
+    /// What the current stage's picture was marked against.
+    drawn_with: Option<String>,
 }
 
 impl Reading<'_> {
     /// Read the viewer now, and say whether that is a new stage after the last read.
     pub fn step(&mut self, eval: &dyn Fn(&str) -> Reply) -> (Snapshot, bool) {
-        let now = self.viewer.read(eval, self.seen.before.as_deref());
-        let moved = now.moved_from(&self.seen);
+        let viewer = self.viewer;
+        let mut now = viewer.read_state(eval);
+        let moved = if viewer.before.is_some() {
+            let moved = !same_words(&now.words, &self.seen.words)
+                || (self.seen.before.is_some() && self.seen.before != now.before);
+            if moved {
+                self.drawn_with = self.seen.before.clone();
+            }
+            viewer.read_pictures(eval, self.drawn_with.as_deref(), &mut now);
+            moved
+        } else {
+            viewer.read_pictures(eval, None, &mut now);
+            now.moved_from(&self.seen)
+        };
         self.seen = now.clone();
         (now, moved)
     }
