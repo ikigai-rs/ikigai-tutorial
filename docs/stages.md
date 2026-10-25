@@ -80,6 +80,8 @@ The viewer's attributes:
 | `data-picture` | yes | A line whose answer is SVG: the picture. `{scheme}` in it is replaced by `light` and by `dark`, and both copies are kept; without it the line is asked once. |
 | `data-words` | yes | A line whose answer says the stage in words (a text face). What changed is computed from it, and a stage's match is judged by it. |
 | `data-before` | no | A line read after every step, after the words, whose answer is handed to the NEXT read of the picture as `before="…"` (quoted, `\` and `"` escaped): a picture that can mark what changed since an earlier state (ikigai-diagram 0.2.4's `urn:diagram:state`, with `urn:throttle:state as=text/turtle`) marks it. With it, a step makes a stage when the words or this answer moved, not when the picture did (a marked picture differs whenever the board does), and the picture is read last: a step that made a stage draws it marked against the last read, and a step that moved nothing draws it exactly as the current stage was drawn, so that read is the same request and a step that cut nothing finds it in the cache. The first step after the page loads has no earlier answer, so the first stage a reader makes is unmarked; the committed stages are drawn by the native test against the stage before. |
+| `data-overview` | no | A line whose answer is SVG: the kernel's state above the tabs (`{scheme}` as for `data-picture`). It is read after every step, last, and drawn into the figure `data-overview-target` names, in place of the picture that figure commits, with a caption that says whether the read was a cache hit. The picture below the tabs stays the open tab's stage. |
+| `data-overview-target`, `data-overview-alt` | with `data-overview` | The `id` of the figure above the tabs, and the alt text of the picture drawn into it (it describes the kernel as it is now, not as the committed picture was). |
 | `data-chain` | no | The chain the lines run in, as a cell names it (`harness:overlays` for `data-harness='overlays'`, `live:workshop` for `data-live='workshop'`). Without it, the page's own kernel. Cells in the same chain are the viewer's steps. |
 | `data-alt` | no | What the picture draws, in words: every picture's alt text is this, then "At this stage:" and the words. |
 | `data-tabs-label`, `data-controls-label` | no | The accessible names of the tab list and of the row of buttons. |
@@ -117,9 +119,11 @@ Before the first step it compares with the first stage's committed words: nothin
 **One picture, below the tabs.** Once the kernel loads, a tab holds its step and the viewer shows
 one picture below the tabs (`div.ikigai-stages-shown`, a labeled region) for whichever tab is open.
 A tab whose step ran shows what that step drew: what the step did, the picture, what changed, the
-facts and the words. A tab whose step has not run shows the kernel as it is now, which is where its
-step starts, with the chapter's own picture of the stage behind a closed disclosure; the first tab,
-before any step, shows the picture as the page loads it. Switching tabs asks the kernel nothing:
+facts and the words. The first tab, whose stage is the page as it loads, always shows that picture.
+A tab the reader went past without running its step shows the chapter's picture of its stage, said
+to be the chapter's, never the kernel's later state. A tab ahead of the reader shows the kernel as
+it is now, which is where its step starts, with the chapter's own picture of the stage behind a
+closed disclosure. Switching tabs asks the kernel nothing:
 every picture shown is one a step already drew. Each tab's committed result is hidden while the
 picture below stands in for it, and a pointer ("The picture for this stage is below the tabs.")
 takes its place; until the kernel loads, without it, and in print, each tab shows its own committed

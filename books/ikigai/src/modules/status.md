@@ -5,8 +5,8 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.110**, stamped on
-2026-10-22, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
+them is a claim, not a fact. This book builds against `ikigai-core` **0.1.112**, stamped on
+2026-10-25, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
 release on crates.io at its stamp), and its shell examples are replayed against
 `ikigai-cli` **0.1.64**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
 newest on 2026-10-14). A
@@ -127,12 +127,12 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.110. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.1.112. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
-chapters they touch. Of the seven since, 0.1.104 (the principal vocabulary), 0.1.106 and
-0.1.107 change nothing a page shows, and four are worth a line, because they change what
-an endpoint you write can rely on:
+chapters they touch. Of the nine since, 0.1.104 (the principal vocabulary), 0.1.106 and
+0.1.107 change nothing a page shows, and six are worth a line, because they change what
+an endpoint you write can rely on, or what a page shows:
 
 - **0.1.105 changed behavior: a declared default is filled in.** The kernel fills a
   declared `default_value` into the request before dispatch, so an endpoint reads an
@@ -157,6 +157,14 @@ an endpoint you write can rely on:
   caller's own capability (`ik:resolveAt "root"`), so a dynamic space can hold another name
   for something the host serves elsewhere, and grant nothing by it. [A space that changes
   while it runs](../applied/live-space.md) declares one.
+- **0.1.111 — Turtle faces for the scheduler and the constraint window.**
+  `urn:kernel:scheduler` and `urn:kernel:constraint` answer `as=text/turtle` as well as text.
+- **0.1.112 — a face that is not offered is refused, and Turtle literals are shared.** The
+  kernel's own operations declare the faces they serve, and refuse any other `as=` rather
+  than answering text under another name; a trace therefore shows a face the caller left out
+  as `defaulted=as`, as [A space that changes while it runs](../applied/live-space.md) shows
+  under its view. `turtle_literal` and `escape_literal` are exported, so a module writes a
+  Turtle string the way core does instead of carrying an RDF library for it.
 
 The seventeen from 0.1.79 to 0.1.95 are one line each here, and taught where a chapter
 teaches them:

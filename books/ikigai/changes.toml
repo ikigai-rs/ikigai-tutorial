@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-25"
+summary = "In \"A space that changes while it runs\", the whole host drawn above the tabs now follows your kernel: every step redraws it (from the cache when the step cut nothing), so it is always the kernel as it is now. Going back to a tab you have passed shows that stage again, not your kernel's later state. The book now builds against ikigai-core 0.1.112: Status says what 0.1.111 and 0.1.112 changed, a trace shows a face the caller left out as defaulted, and the grounding in \"A sentence becomes a draft\" counts the larger vocabulary."
+pages = ["modules/status.md", "applied/live-space.md", "code/sentence.md"]
+
+[[change]]
+date = "2026-10-25"
 summary = "The stages of \"A space that changes while it runs\" now work as one box: each tab holds its step, the cell to run and what it answers, scrolling in place, and one picture of the space sits right below the tabs. Before you run a tab the picture is your host as it is now; run it and watch the picture change, with what changed marked. Switching back to a tab shows what its step drew, from the cache, and the chapter explains why no picture is drawn twice. The whole host is drawn above the tabs, and the Rust listings for every stage now follow them. A new page, The other books, links the gonk Book, Building ikigai UIs, The ikigai Architecture and the library; \"Where to go next\" now includes the Architecture book and the library too."
 pages = ["applied/live-space.md", "other-books.md", "next.md"]
 

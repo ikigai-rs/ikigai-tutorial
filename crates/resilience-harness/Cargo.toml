@@ -17,9 +17,11 @@ ikigai-core.workspace = true
 ikigai-vocab.workspace = true
 ikigai-diagram.workspace = true
 # The governors and their state face: `StateBoard`, `observed`, `with_clock` and `with_timer`,
-# which 0.2.1 gives every governor that measures or waits on time (ledger #1507, #2189). The
-# same pin `crates/two-hosts` states. A 0.x caret, so also a ceiling (<0.3.0).
-ikigai-throttle = "0.2.1"
+# which 0.2.1 gives every governor that measures or waits on time (ledger #1507, #2189). 0.2.2:
+# the state face's Turtle, which the stages viewer hands the picture as `before=`, writes its
+# strings with core's `turtle_literal` (ledger #2184), and the page's wasm build carries no RDF
+# library for it. The same pin `crates/two-hosts` states. A 0.x caret, so also a ceiling (<0.3.0).
+ikigai-throttle = "0.2.2"
 # `Timer::sleep` is an `async_trait` method: the harness's timer implements it.
 async-trait = "0.1"
 futures.workspace = true

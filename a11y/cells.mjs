@@ -115,9 +115,15 @@ async function stagePicture(page, i) {
         while (Date.now() < deadline) {
             const shown = viewer && viewer.querySelector(".ikigai-stages-shown");
             const caption = shown && shown.querySelector(".ikigai-stages-shown-caption");
+            // A viewer with a picture above the tabs (`data-overview`) redraws that one too.
+            const overview = viewer && viewer.getAttribute("data-overview")
+                ? document.getElementById(viewer.getAttribute("data-overview-target") || "")
+                : null;
+            const overviewDrawn = !viewer || !viewer.getAttribute("data-overview") ||
+                (overview && overview.querySelector('img[src^="blob:"]'));
             if (shown && !shown.hidden && (!section || !section.hidden) &&
                 shown.querySelector('.ikigai-stage-picture img[src^="blob:"]') &&
-                caption && /^After this (tab's )?step:/.test(caption.textContent)) {
+                caption && /^After this (tab's )?step:/.test(caption.textContent) && overviewDrawn) {
                 return null;
             }
             await new Promise((r) => setTimeout(r, 50));
