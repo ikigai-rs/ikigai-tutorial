@@ -87,8 +87,9 @@
 //
 // Or a RESILIENCE HARNESS (The ikigai Architecture's "Spaces that wrap spaces"):
 // `data-harness='overlays'` runs its lines in a harness of its own (chain `harness:overlays`), the
-// throttle overlays around a stub the reader controls; `js/harness.js` redraws its picture and
-// says what its governors hold after every such cell.
+// throttle overlays around a stub the reader controls; `js/harness.js` asks after every such cell
+// whether it made a new stage. Every cell that ran says so with an `ikigai:cell-ran` event on the
+// document, whose detail names its chain, its game, the cell's element and the lines it ran.
 //
 // THE CHAPTER ASSUMES THE CELLS ABOVE RAN. A chapter's cells are steps, and its "Expected output"
 // for each is what that cell answers when the cells above it on the page have run, once, in order,
@@ -494,7 +495,7 @@
                     // A cell may have changed a game a board on this page shows; the board
                     // is a copy the kernel cannot cut, so say that something ran (ttt.js).
                     document.dispatchEvent(new CustomEvent("ikigai:cell-ran", {
-                        detail: { game: game, chain: chainSpec }
+                        detail: { game: game, chain: chainSpec, cell: cell, lines: lines }
                     }));
                 });
             }, markUnavailable).catch(function (err) {

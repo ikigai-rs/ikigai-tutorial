@@ -156,12 +156,11 @@ jobs:
       # The ikigai Architecture's kernel is `crates/architecture-book-wasm`: the work ledger over an
       # in-memory store (the same ledger it reads two ways) and the resilience harness "Spaces that
       # wrap spaces" drives, bound under the one name run.js imports.
-      - name: smoke — the exports run.js and harness.js import are present in the architecture book's kernel
+      - name: smoke — the exports run.js and stages.js import are present in the architecture book's kernel
         run: |
           test -s books/architecture/book/wasm/book_wasm_bg.wasm
           grep -q '^export function evalLineAsync' books/architecture/book/wasm/book_wasm.js
           grep -q '^export function evalLineInChainAsync' books/architecture/book/wasm/book_wasm.js
-          grep -q '^export function harnessPictureAsync' books/architecture/book/wasm/book_wasm.js
           grep -q '^export function boundNames' books/architecture/book/wasm/book_wasm.js
           grep -q 'as default' books/architecture/book/wasm/book_wasm.js
 

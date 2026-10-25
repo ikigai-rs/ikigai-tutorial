@@ -32,7 +32,9 @@
 //!   and `Retry` waits on: virtual time on the harness clock, not the browser's.
 //! - **Composed, not written.** The breaker's state, `urn:throttle:state` and
 //!   `urn:throttle:state:breaker` (throttle's `StateBoard`, mounted beside the stack); the
-//!   picture, `urn:diagram:state` (ikigai-diagram over this host's own topology).
+//!   picture, `urn:diagram:state` (ikigai-diagram over this host's own topology), in either
+//!   scheme (`scheme=light|dark`, ikigai-diagram 0.2.3). The chapter's stages are the
+//!   generic stages viewer over these names (`js/stages.js`): no code here knows about stages.
 //!
 //! Resource ratio: three endpoints written (mode, clock, upstream; the call is the upstream
 //! endpoint bound at a second name, behind three published overlays built in code), and three
@@ -420,12 +422,12 @@ impl Default for Harness {
     }
 }
 
-/// The picture's text alternative: what it draws, in words. The state is the board's own
-/// words, which a page says in its live region rather than in this `alt`, so the two are
-/// never out of step.
+/// What the picture draws, in words: the first half of every stage's text alternative. The
+/// chapter's stages viewer (`js/stages.js`) gives it as `data-alt` and adds the board's words at
+/// each stage, so a stage's picture says its own state.
 pub const PICTURE_ALT: &str = "The resilience harness, drawn: the governed call \
     urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with \
     urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and \
     urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's \
     space. The circuit breaker's state is drawn in the governed space's box and said in words \
-    in the status line below the picture.";
+    below the picture.";

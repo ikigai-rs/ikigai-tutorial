@@ -19,10 +19,11 @@
 //   sheets   no grid, no formula bar, no field: one message saying what did not load.
 //   pictures a live host's picture (`figure.ikigai-live`, `js/live.js`) keeps the committed
 //            file and its alt text, and one status line says it will not be redrawn.
-//   harness  a resilience harness (`figure.ikigai-harness`, `js/harness.js`, The ikigai
-//            Architecture) keeps the committed picture and its alt text, offers no control (its
-//            list stays hidden, no button is built), and one status line says the kernel did
-//            not load.
+//   stages   a stages viewer (`.ikigai-stages`, `js/stages.js`; today the resilience harness in
+//            The ikigai Architecture) still shows its stages as tabs, one selected, each stage
+//            with its committed picture(s) and their alt text and what changed in words; offers no
+//            control (its list stays hidden, no button is built but the tabs and the cells' own),
+//            and one status line says the kernel did not load.
 //   checks   a "check this resource" (`div.toolbox-check`, `js/toolbox.js`) stays the markup's
 //            link: visible, to the published toolbox page in a new tab, opened on the published
 //            Turtle faces (`from=` each one, under this site), with no in-place button or panel.
@@ -182,30 +183,51 @@ function checkLivePictures(doc, fail) {
     return figures.length;
 }
 
-function checkHarnesses(doc, fail) {
-    const figures = doc.querySelectorAll("figure.ikigai-harness[data-harness]");
-    figures.forEach((figure, i) => {
-        const n = `harness ${i + 1}`;
-        const img = figure.querySelector("img");
-        if (!img || !/\.svg$/.test(img.getAttribute("src") || "")) {
-            fail(`${n}: does not show its committed picture: ${JSON.stringify(img && img.getAttribute("src"))}`);
+function checkStages(doc, fail) {
+    const viewers = doc.querySelectorAll(".ikigai-stages[data-picture]");
+    viewers.forEach((viewer, i) => {
+        const n = `stages viewer ${i + 1}`;
+        const stages = viewer.querySelectorAll(":scope > section.ikigai-stage");
+        if (stages.length === 0) {
+            fail(`${n}: shows no stage`);
         }
-        if (!img || !(img.getAttribute("alt") || "").trim()) {
-            fail(`${n}: has no text alternative`);
+        stages.forEach((stage, k) => {
+            const s = `${n}, stage ${k + 1}`;
+            const imgs = stage.querySelectorAll(".ikigai-stage-picture img");
+            if (imgs.length === 0 || [...imgs].some((img) => !/\.svg$/.test(img.getAttribute("src") || ""))) {
+                fail(`${s}: does not show its committed picture: ${JSON.stringify([...imgs].map((img) => img.getAttribute("src")))}`);
+            }
+            imgs.forEach((img) => {
+                if (!(img.getAttribute("alt") || "").trim()) {
+                    fail(`${s}: a picture has no text alternative`);
+                }
+            });
+            if (!/What changed:/.test(stage.textContent)) {
+                fail(`${s}: does not say what changed`);
+            }
+        });
+        // The stages are tabs with or without a kernel: no kernel is needed to show a picture.
+        const tabs = viewer.querySelectorAll('[role="tablist"] [role="tab"]');
+        if (tabs.length !== stages.length) {
+            fail(`${n}: ${tabs.length} tabs for ${stages.length} stages`);
         }
-        if (figure.querySelector("button")) {
+        if (viewer.querySelectorAll('[role="tab"][aria-selected="true"]').length !== 1) {
+            fail(`${n}: not exactly one stage selected`);
+        }
+        // No control: the only buttons are the tabs and the cells' own (checked as cells).
+        if ([...viewer.querySelectorAll("button")].some((b) => b.getAttribute("role") !== "tab" && !b.closest(".ikigai-run"))) {
             fail(`${n}: offers a control with no kernel to run it`);
         }
-        const list = figure.querySelector(".ikigai-harness-controls");
+        const list = viewer.querySelector(".ikigai-stages-controls");
         if (list && !list.hidden) {
             fail(`${n}: shows its list of controls with no kernel to run them`);
         }
-        const notes = figure.querySelectorAll(".ikigai-harness-status");
+        const notes = viewer.querySelectorAll(".ikigai-stages-status");
         if (notes.length !== 1 || !DID_NOT_LOAD.test(notes[0].textContent)) {
-            fail(`${n}: does not say the kernel did not load: ${JSON.stringify(figure.textContent.trim())}`);
+            fail(`${n}: does not say the kernel did not load: ${JSON.stringify(notes[0] && notes[0].textContent)}`);
         }
     });
-    return figures.length;
+    return viewers.length;
 }
 
 function checkToolbox(doc, fail) {
@@ -242,7 +264,7 @@ let boardsSeen = 0;
 let viewsSeen = 0;
 let sheetsSeen = 0;
 let picturesSeen = 0;
-let harnessesSeen = 0;
+let stagesSeen = 0;
 let pagesSeen = 0;
 for (const book of books) {
     for (const path of pages(book)) {
@@ -269,7 +291,7 @@ for (const book of books) {
                 .every((v) => DID_NOT_LOAD.test(v.textContent));
             const picturesDone = [...d.querySelectorAll("figure.ikigai-live[data-live]")]
                 .every((f) => DID_NOT_LOAD.test(f.textContent));
-            const harnessesDone = [...d.querySelectorAll("figure.ikigai-harness[data-harness]")]
+            const harnessesDone = [...d.querySelectorAll(".ikigai-stages[data-picture] .ikigai-stages-status")]
                 .every((f) => DID_NOT_LOAD.test(f.textContent));
             return cellsDone && boardsDone && viewsDone && sheetsDone && picturesDone && harnessesDone;
         });
@@ -300,15 +322,15 @@ for (const book of books) {
         viewsSeen += checkViews(doc, fail);
         sheetsSeen += checkSheets(doc, fail);
         picturesSeen += checkLivePictures(doc, fail);
-        harnessesSeen += checkHarnesses(doc, fail);
+        stagesSeen += checkStages(doc, fail);
         checksSeen += checkToolbox(doc, fail);
         pagesSeen += 1;
         window.close();
     }
 }
 
-if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0 || picturesSeen === 0 || harnessesSeen === 0 || checksSeen === 0) {
-    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets, ${picturesSeen} live pictures, ${harnessesSeen} harnesses and ${checksSeen} toolbox checks — ` +
+if (cellsSeen === 0 || boardsSeen === 0 || viewsSeen === 0 || sheetsSeen === 0 || picturesSeen === 0 || stagesSeen === 0 || checksSeen === 0) {
+    console.error(`no-kernel: saw ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets, ${picturesSeen} live pictures, ${stagesSeen} stages viewers and ${checksSeen} toolbox checks — ` +
         "a check that saw nothing is not a pass (pass the drafts build too; see the header)");
     process.exit(1);
 }
@@ -316,4 +338,4 @@ if (failures) {
     console.error(`\nno-kernel: ${failures} failure${failures === 1 ? "" : "s"} across ${pagesSeen} pages`);
     process.exit(1);
 }
-console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets, ${picturesSeen} live pictures, ${harnessesSeen} harnesses and ${checksSeen} toolbox checks — nothing answered, every Run disabled, no picture redrawn, no harness control offered, every check a new-tab link`);
+console.log(`no-kernel: ${pagesSeen} pages, ${cellsSeen} cells, ${boardsSeen} boards, ${viewsSeen} views, ${sheetsSeen} sheets, ${picturesSeen} live pictures, ${stagesSeen} stages viewers and ${checksSeen} toolbox checks — nothing answered, every Run disabled, no picture redrawn, no stages control offered, every check a new-tab link`);

@@ -41,15 +41,24 @@ a review comment.
   *What's new* page.
 - **The in-page kernels**: the runnable cells (`js/run.js`), the tic-tac-toe boards (`js/ttt.js`),
   the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`), the live host's picture
-  (`js/live.js`) and the RDF Toolbox opened in place (`js/toolbox.js`: its control, its panel, and
-  the new-tab link that replaces both without the kernel), with the kernel loaded and without it.
+  (`js/live.js`), the stages viewer (`js/stages.js`) and the RDF Toolbox opened in place
+  (`js/toolbox.js`: its control, its panel, and the new-tab link that replaces both without the
+  kernel), with the kernel loaded and without it.
 - **The site chrome mdbook provides** (sidebar, menu bar, search, theme menu, page navigation), as
   far as this repository can repair it: a barrier there is still a barrier for our readers.
 - **This repository's own additions to that chrome**: `css/a11y.css`, `js/a11y.js` and the cell,
   board, view and sheet styles.
-- **Generated pictures** committed into a book (today, three: the tic-tac-toe arrangement SVG,
-  and the two pictures of the host in "A space that changes while it runs"), and the one a page
-  draws (the live host's picture in that chapter, redrawn after each of its cells).
+- **Generated pictures** committed into a book (the tic-tac-toe arrangement SVG, the two pictures
+  of the host in "A space that changes while it runs", and the resilience harness's six stages in
+  The ikigai Architecture's "Spaces that wrap spaces", each in a light and a dark copy), and the
+  ones a page draws (the live host's picture in that chapter, redrawn after each of its cells; a
+  stage of the harness a reader makes, kept in its own tab).
+- **The stages viewer** (`js/stages.js`, `css/stages.css`, one copy every book can load; today
+  the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern
+  (arrow keys, Home and End), one polite status region, what changed said in words with the
+  changed words marked, the reader's own stages appended. Only the selected stage is in the
+  page's rendered content, so the browser axe run audits the first stage's panel and the tabs,
+  not the other panels; the structure gate and the no-kernel check read every panel's markup.
 
 ### Not ours to fix, still ours to report
 

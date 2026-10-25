@@ -1,0 +1,1 @@
+../../ikigai/js/stages.js
