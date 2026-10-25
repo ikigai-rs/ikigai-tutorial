@@ -26,8 +26,10 @@
 //! A cell may also run in a **live host** (`data-live='workshop'`, "A space that changes while
 //! it runs"): not a chain on the page's kernel but a kernel of its own, [`Live`], whose dynamic
 //! space the cell rebuilds by writing its declaration. Its rebuild loop runs on the page's
-//! event loop (`wasm_bindgen_futures::spawn_local`), and its picture is redrawn after every
-//! cell that runs in it ([`live_picture_async`]).
+//! event loop (`wasm_bindgen_futures::spawn_local`). Its picture is a stages viewer's
+//! (`js/stages.js`, `docs/stages.md`): after every cell that runs in it, the viewer reads the
+//! picture and its words as lines in the same host (`evalLineInChainAsync`, chain
+//! `live:{name}`), and a cell that changes them makes a stage.
 //!
 //! Built for `wasm32-unknown-unknown` by `pages.yml` and bound with `wasm-bindgen --target
 //! web`; the output lands in the built book under `wasm/` and is never committed. The crate
@@ -242,8 +244,8 @@ pub fn as_of_doors(inputs: Arc<InputStore>) -> Arc<dyn Space> {
 
 // ANCHOR: live
 /// The host of "A space that changes while it runs", started on the page: `live_space`'s root
-/// (its declaration, `urn:diagram:kernel`, then a dynamic space over the four-endpoint
-/// registry) in a kernel of its own, the engine its cells run in, and the rebuild loop.
+/// (its declaration and the dynamic space's words, `urn:diagram:kernel`, then a dynamic space
+/// over the four-endpoint registry) in a kernel of its own, the engine its cells run in, and the rebuild loop.
 ///
 /// A kernel of its own, not a chain on the page's: a chain is a corridor stacked AHEAD of the
 /// page's root, so a name an empty dynamic space does not bind would fall through to the root,
@@ -260,8 +262,6 @@ pub fn as_of_doors(inputs: Arc<InputStore>) -> Arc<dyn Space> {
 /// That is `Host::write`'s `run_until_stalled`, in the page. Built natively (the workspace's
 /// tests), the loop runs on a `LocalPool` and settling is exactly that.
 pub struct Live {
-    kernel: Arc<Kernel>,
-    space: Arc<DynamicSpace>,
     engine: Rc<Engine>,
     /// The corridor its cells run in, for a prefix space on the page's kernel
     /// ([`Live::prefixed`]); `None` for a host of its own.
@@ -298,9 +298,7 @@ impl Live {
             RefCell::new(pool)
         };
         Ok(Live {
-            engine: Rc::new(Engine::new(Arc::clone(&kernel))),
-            kernel,
-            space,
+            engine: Rc::new(Engine::new(kernel)),
             corridor: None,
             #[cfg(not(target_family = "wasm"))]
             pool,
@@ -340,8 +338,6 @@ impl Live {
                 Arc::clone(kernel),
                 corridor.clone(),
             ))),
-            kernel: Arc::clone(kernel),
-            space,
             corridor: Some(corridor),
             #[cfg(not(target_family = "wasm"))]
             pool,
@@ -386,25 +382,6 @@ impl Live {
     /// The engine this host's cells run in.
     pub fn engine(&self) -> Rc<Engine> {
         Rc::clone(&self.engine)
-    }
-
-    /// The host's picture, `urn:diagram:kernel`, read the way a cell reads it (root, through
-    /// the cache), with its text alternative written from the same topology it is drawn from,
-    /// and how many declarations have bound.
-    pub async fn picture(&self) -> Result<(String, String, u64), String> {
-        let read = Request::new(
-            Verb::Source,
-            Iri::parse("urn:diagram:kernel").expect("a constant IRI"),
-        );
-        let svg = Kernel::issue(&self.kernel, read, &Capability::root())
-            .await
-            .map_err(|e| e.to_string())?;
-        let alt = live_space::picture_text(&self.kernel.topology());
-        Ok((
-            String::from_utf8_lossy(&svg.bytes).into_owned(),
-            alt,
-            self.space.status().installs,
-        ))
     }
 }
 
@@ -1088,31 +1065,6 @@ pub fn issue_with_args_async(
     })
 }
 
-/// The picture of live host `name` (`live:{name}`), as it is now: what `js/live.js` draws
-/// after every cell that ran in that host. Resolves to `{ "svg", "alt", "installs" }`, or
-/// `{ "error" }`. `alt` is [`live_space::picture_text`], from the topology the picture is drawn
-/// from, so the text alternative changes exactly when the picture does.
-#[wasm_bindgen(js_name = livePictureAsync)]
-pub fn live_picture_async(name: String) -> js_sys::Promise {
-    let live = PAGE.with(|page| page.live_of(Some(&format!("live:{name}"))));
-    wasm_bindgen_futures::future_to_promise(async move {
-        let json = match live {
-            Ok(Some(live)) => {
-                live.settle().await;
-                match live.picture().await {
-                    Ok((svg, alt, installs)) => {
-                        serde_json::json!({ "svg": svg, "alt": alt, "installs": installs })
-                    }
-                    Err(error) => serde_json::json!({ "error": error }),
-                }
-            }
-            Ok(None) => unreachable!("a `live:` spec names a live host"),
-            Err(error) => serde_json::json!({ "error": error }),
-        };
-        Ok(JsValue::from_str(&json.to_string()))
-    })
-}
-
 // ANCHOR: push_exports
 /// A read of `view` in the root's chain, as [`issue_async`] makes it, for a sheet that LISTENS
 /// (`data-push`, part VII): the page also remembers what the answer carried ([`Page::drew`]),
@@ -1398,8 +1350,11 @@ mod tests {
     /// output.
     #[derive(Debug)]
     struct RunCell {
+        /// Where the cell's markup starts in the chapter.
+        at: usize,
         chain: Option<String>,
-        at: Option<String>,
+        /// The instant it runs at on a page with a story clock (`data-at`).
+        at_instant: Option<String>,
         command: String,
         expected: String,
     }
@@ -1441,7 +1396,16 @@ mod tests {
         let mut rest = chapter;
         while let Some(at) = rest.find("data-cmd='") {
             // The cell's other attributes sit in the same tag, before `data-cmd`.
-            let tag = &rest[rest[..at].rfind("<div").expect("a cell is a <div>")..at];
+            let div = rest[..at].rfind('<').expect("a cell is a <div>");
+            // A stages viewer's facts and controls carry a `data-cmd` too, on an `<li>`: they
+            // are not cells.
+            if !rest[div..].starts_with("<div") {
+                let skip = at + "data-cmd='".len();
+                rest = &rest[skip + rest[skip..].find('\'').expect("a closed data-cmd")..];
+                continue;
+            }
+            let tag = &rest[div..at];
+            let cell_at = chapter.len() - rest.len() + div;
             let chain = chain_of(tag);
             let after = &rest[at + "data-cmd='".len()..];
             let end = after.find('\'').expect("a closed data-cmd");
@@ -1450,8 +1414,9 @@ mod tests {
             let pre = after.find(open).expect("an expected <pre> after the cell") + open.len();
             let close = after[pre..].find("</pre>").expect("a closed <pre>") + pre;
             found.push(RunCell {
+                at: cell_at,
                 chain,
-                at: attribute(tag, "data-at"),
+                at_instant: attribute(tag, "data-at"),
                 command,
                 expected: unescape(&after[pre..close]),
             });
@@ -1536,6 +1501,7 @@ mod tests {
         let chapter = std::fs::read_to_string(&path).expect("the chapter is readable");
         let cells = cells(&chapter);
         assert_eq!(cells.len(), expected_cells, "{file}'s cells: {cells:#?}");
+        let viewers = book_transcripts::stages::viewers(&chapter);
         let clocked = chapter.contains("data-clock");
         assert!(
             clocked || times.is_empty(),
@@ -1555,7 +1521,7 @@ mod tests {
             if let Some((_, millis)) = times.iter().find(|(cell, _)| *cell == i) {
                 clock.set(*millis);
             }
-            if let Some(instant) = cells[i].at.as_deref() {
+            if let Some(instant) = cells[i].at_instant.as_deref() {
                 clock.set(time_resource::millis_at(instant, 0));
             }
         };
@@ -1694,14 +1660,11 @@ mod tests {
             if chain.is_none() {
                 redraw();
             }
-            // After a cell in a live host, `js/live.js` redraws that host's picture: a read of
-            // `urn:diagram:kernel`, which fills the host's cache like any other. A prefix space
-            // (`prefixed:`) has no picture: no figure on its page names it.
-            if let Some(live) = live
-                .as_ref()
-                .filter(|_| !chain.as_deref().is_some_and(|c| c.starts_with("prefixed:")))
-            {
-                futures::executor::block_on(live.picture()).expect("the live host's picture");
+            // After a cell in a stages viewer's chain, `js/stages.js` reads the viewer's lines in
+            // that chain (its picture in each scheme, its words, its facts), which fill the cache
+            // like any other read.
+            for viewer in viewers.iter().filter(|v| v.chain == *chain) {
+                viewer.read(&|line| reply_in(&page, viewer.chain.as_deref(), line));
             }
             transcript.push(got);
         }
@@ -2081,67 +2044,100 @@ mod tests {
         );
     }
 
-    /// The live host's picture, redrawn in the page: its text alternative is
-    /// `live_space::picture_text` of the topology it was drawn from, and the chapter's two
-    /// committed pictures carry exactly that text as their `alt`.
-    #[test]
-    fn the_live_pictures_alt_text_is_the_pictures_own() {
-        let page = Page::new();
-        let live = page.live_of(Some("live:workshop")).unwrap().unwrap();
-        let draw = || {
-            futures::executor::block_on(live.settle());
-            futures::executor::block_on(live.picture()).unwrap()
-        };
-        let chapter = std::fs::read_to_string(format!(
-            "{}/../../books/ikigai/src/applied/live-space.md",
-            env!("CARGO_MANIFEST_DIR")
-        ))
-        .unwrap();
-        let alt_of = |file: &str| {
-            let at = chapter
-                .find(&format!("<img src=\"{file}\""))
-                .expect("the picture");
-            let rest = &chapter[at..];
-            let open = rest.find("alt=\"").unwrap() + "alt=\"".len();
-            rest[open..open + rest[open..].find('"').unwrap()].to_string()
-        };
-        // With BOOK_PICTURES_WRITE set, each picture is written from what was drawn and its alt
-        // text printed, for the chapter, before it is compared: how the committed pictures are
-        // redrawn when ikigai-diagram changes what it draws.
-        let committed = |file: &str, drawn: &str, alt: &str| {
-            let path = format!(
-                "{}/../../books/ikigai/src/applied/{file}",
-                env!("CARGO_MANIFEST_DIR")
-            );
-            if std::env::var_os("BOOK_PICTURES_WRITE").is_some() {
-                std::fs::write(&path, drawn).unwrap();
-                println!("{file} alt:\n{alt}\n");
+    /// One line in `chain` on `page`, as the page sends it (`evalLineInChainAsync`): a live
+    /// host's loop catches up before the line and after it.
+    fn reply_in(page: &Page, chain: Option<&str>, line: &str) -> book_transcripts::stages::Reply {
+        let engine = page.engine(chain).expect("a valid chain");
+        let live = page.live_of(chain).expect("a valid chain");
+        let settle = || {
+            if let Some(live) = &live {
+                futures::executor::block_on(live.settle());
             }
-            std::fs::read_to_string(path).unwrap()
         };
+        settle();
+        let json: serde_json::Value =
+            serde_json::from_str(&action_to_json(engine.eval(line))).unwrap();
+        settle();
+        let text = |key: &str| json[key].as_str().unwrap_or_default().to_string();
+        book_transcripts::stages::Reply {
+            kind: text("kind"),
+            text: text("text"),
+            cache: text("cache"),
+        }
+    }
 
-        let (svg, alt, installs) = draw();
-        assert_eq!(installs, 0);
-        assert_eq!(svg, committed("live-space-empty.svg", &svg, &alt));
-        assert_eq!(alt_of("live-space-empty.svg"), alt);
+    /// "A space that changes while it runs" shows the whole host once, before anything is
+    /// declared: `live-space-host.svg` is `urn:diagram:kernel` as a fresh live host answers it,
+    /// byte for byte. `BOOK_PICTURES_WRITE=1` rewrites it when ikigai-diagram changes what it
+    /// draws.
+    #[test]
+    fn the_live_host_picture_is_what_a_fresh_host_draws() {
+        let path = format!(
+            "{}/../../books/ikigai/src/applied/live-space-host.svg",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let page = Page::new();
+        let drawn = reply_in(&page, Some("live:workshop"), "source urn:diagram:kernel");
+        assert_eq!(drawn.kind, "output", "{drawn:?}");
+        if std::env::var_os("BOOK_PICTURES_WRITE").is_some() {
+            std::fs::write(&path, &drawn.text).unwrap();
+        }
+        assert!(
+            std::fs::read_to_string(&path).unwrap() == drawn.text,
+            "live-space-host.svg is not what a fresh host draws: rerun with BOOK_PICTURES_WRITE=1"
+        );
+        assert!(drawn.text.contains("6 doors across 3 endpoint spaces"));
+    }
 
-        let engine = page.engine(Some("live:workshop")).unwrap();
-        let write = format!(
-            "sink {} {}",
-            live_space::DECLARATION,
-            live_space::FOUR_DOORS
-                .split_whitespace()
-                .collect::<Vec<_>>()
-                .join(" ")
+    /// "A space that changes while it runs" in stages: the chapter's cells, in page order on
+    /// one fresh page, make exactly the stages its viewer commits, each in its own section, and
+    /// each stage's result block and pictures (light and dark) are what the live host answers.
+    /// `BOOK_PICTURES_WRITE=1` rewrites the pictures that differ; a result block that differs is
+    /// printed (`book_transcripts::stages::walkthrough`).
+    #[test]
+    fn the_live_space_stages_are_the_walkthrough_as_the_host_draws_it() {
+        use book_transcripts::stages::{viewers, walkthrough, Pictures, Step};
+        let dir = std::path::PathBuf::from(format!(
+            "{}/../../books/ikigai/src/applied",
+            env!("CARGO_MANIFEST_DIR")
+        ));
+        let chapter = std::fs::read_to_string(dir.join("live-space.md")).unwrap();
+        let found = viewers(&chapter);
+        assert_eq!(found.len(), 1, "the chapter's viewers: {found:#?}");
+        let viewer = &found[0];
+        assert_eq!(viewer.chain.as_deref(), Some("live:workshop"));
+        let steps: Vec<Step> = cells(&chapter)
+            .into_iter()
+            .map(|c| Step {
+                at: c.at,
+                chain: c.chain,
+                cmd: c.command,
+            })
+            .collect();
+        let chain = viewer.chain.as_deref();
+        // A unit test has no CARGO_TARGET_TMPDIR: a picture that differs goes to the system's.
+        let out = std::env::temp_dir().join("ikigai-tutorial-live-space-stages");
+        std::fs::create_dir_all(&out).unwrap();
+        let (fresh, page) = (Page::new(), Page::new());
+        let run = |step: &Step| -> String {
+            book_transcripts::stages::lines(&step.cmd)
+                .into_iter()
+                .map(|line| reply_in(&page, step.chain.as_deref(), line).render())
+                .collect()
+        };
+        let (problems, _) = walkthrough(
+            viewer,
+            &steps,
+            &|line| reply_in(&fresh, chain, line),
+            &run,
+            &|line| reply_in(&page, chain, line),
+            &Pictures {
+                dir: &dir,
+                stem: "live-space-stage",
+                out: &out,
+            },
         );
-        assert_eq!(
-            render(&action_to_json(engine.eval(&write))),
-            "ok\n[uncacheable]\n"
-        );
-        let (svg, alt, installs) = draw();
-        assert_eq!(installs, 1);
-        assert_eq!(svg, committed("live-space-doors.svg", &svg, &alt));
-        assert_eq!(alt_of("live-space-doors.svg"), alt);
+        assert!(problems.is_empty(), "{}", problems.join("\n\n"));
     }
 
     #[test]

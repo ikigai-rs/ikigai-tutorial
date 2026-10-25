@@ -84,6 +84,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 pub mod runs;
+pub mod stages;
 
 /// The line prefix a transcript's commands carry.
 pub const PROMPT: &str = "$ ";

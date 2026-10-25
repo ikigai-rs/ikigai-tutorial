@@ -13,25 +13,25 @@
 //! * [`registry`] — four endpoints the book already has, by the names they give themselves:
 //!   Part I's `camel-case`, `title` and `camel-title`, and ikigai-fn's `toUpper`. Nothing is
 //!   bound to them until a declaration says where.
-//! * [`kernel`] — a host: the declaration and `urn:diagram:kernel` in a fixed space of its
-//!   own, then the dynamic space, behind it. The root never changes; the dynamic space's
+//! * [`kernel`] — a host: the declaration and its words ([`WORDS`]) in a fixed space of their
+//!   own, then `urn:diagram:kernel`'s space, then the dynamic space, behind them. The root never changes; the dynamic space's
 //!   doors do.
 //!
 //! * [`Host`] — the three, started: the space named, the host's loop (`DynamicSpace::drive`)
 //!   running on a [`LocalPool`], and a write that lets the loop catch up before it returns,
 //!   so the chapter's listings read like a REPL session.
-//! * [`picture_text`] — the picture in words: the text alternative for `urn:diagram:kernel`,
-//!   written from the same topology the picture is drawn from, so a page that redraws the
-//!   picture can keep its `alt` true.
+//! * [`words`] — the dynamic space in words, at [`WORDS`]: read from the same topology the
+//!   picture is drawn from, so a page that shows the picture can say what it shows, and what
+//!   changed, without a word written by hand.
 
 use std::sync::{Arc, Mutex};
 
 use futures::executor::{block_on, LocalPool};
 use futures::task::LocalSpawnExt;
 use ikigai_core::{
-    ArgRef, Capability, DynamicSpace, EndpointSpace, Error, Exact, Fallback, FnEndpoint,
-    Invocation, Iri, Kernel, MatchKind, Registry, ReprType, Representation, Request, ResolveAt,
-    Space, SpaceKind, Topology, Verb,
+    ArgRef, AsyncFnEndpoint, Capability, Description, DynamicSpace, EndpointSpace, Error, Exact,
+    Fallback, FnEndpoint, Invocation, Iri, Kernel, MatchKind, Registry, ReprType, Representation,
+    Request, ResolveAt, Space, SpaceKind, Topology, Verb,
 };
 use ikigai_sexpr::arrangement_to_topology;
 use ikigai_vocab::TurtleRenderer;
@@ -41,6 +41,10 @@ pub use hello_camel::TitleState;
 // ANCHOR: names
 /// Where the dynamic space's declaration lives. A write to it is a change to the space.
 pub const DECLARATION: &str = "urn:iki:tutorial:live:declaration";
+
+/// Where the host says its dynamic space in words ([`words`]): what the page's stages viewer
+/// compares from one stage to the next.
+pub const WORDS: &str = "urn:iki:tutorial:live:arrangement";
 
 /// `view.arrangement`: a declaration holding one view, `urn:iki:tutorial:live:picture`, onto
 /// `urn:diagram:kernel`, as the s-expression the chapter writes. `:resolve-at root` is what makes
@@ -135,14 +139,16 @@ pub fn registry(title: Arc<TitleState>) -> Registry {
 // ANCHOR_END: registry
 
 // ANCHOR: kernel
-/// The root of a host for `dynamic`: the declaration, then the picture of the host's own arrangement,
-/// then the dynamic space. The layers are consulted in order, so a door the declaration
+/// The root of a host for `dynamic`: the declaration and the dynamic space in words, then the
+/// picture of the host's own arrangement, then the dynamic space. The layers are consulted in order, so a door the declaration
 /// binds can never shadow the declaration itself.
 pub fn root(
     declaration_state: Arc<DeclarationState>,
     dynamic: Arc<DynamicSpace>,
 ) -> Arc<dyn Space> {
-    let fixed = EndpointSpace::new().bind(Exact::new(DECLARATION), declaration(declaration_state));
+    let fixed = EndpointSpace::new()
+        .bind(Exact::new(DECLARATION), declaration(declaration_state))
+        .bind(Exact::new(WORDS), words());
     Arc::new(Fallback::new(vec![
         Arc::new(fixed),
         Arc::new(ikigai_diagram::space()),
@@ -156,26 +162,90 @@ pub fn kernel(root: Arc<dyn Space>) -> Kernel {
 }
 // ANCHOR_END: kernel
 
-// ANCHOR: picture_text
-/// The host's arrangement in words, from `topology` (what `urn:kernel:topology` answers, and
-/// `urn:diagram:kernel` draws): the text alternative for the picture. The page sets it as the
-/// picture's `alt` every time it redraws one, and the chapter's two committed pictures carry
-/// it as theirs, so the words are never written by hand and cannot drift from the boxes.
-pub fn picture_text(topology: &Topology) -> String {
-    let mut text = String::from("The host's arrangement as nested boxes. ");
-    match (&topology.kind, topology.children.as_slice()) {
-        (SpaceKind::Chain { .. }, [root]) => {
-            text.push_str("A chain holds the root, ");
-            text.push_str(&space_text(root));
-        }
-        _ => text.push_str(&capitalized(&space_text(topology))),
-    }
-    text.push('.');
-    text
+// ANCHOR: words
+/// `live-arrangement`, at [`WORDS`]: every dynamic space in the host's arrangement, in words, one
+/// line for each space it holds and each door or rule, indented by depth. It reads
+/// `urn:kernel:topology` through the kernel, so it says what is IN FORCE (a refused declaration
+/// changes nothing here) and it is cached and cut exactly as `urn:diagram:kernel` is: a bind cuts
+/// `urn:kernel:bindings`, which both hang from. A page's stages viewer reads it as the picture's
+/// words: what changed from one stage to the next is a comparison of these lines, and the
+/// picture's text alternative is made from them, so the words are never written by hand and
+/// cannot drift from the boxes.
+///
+/// The space before anything is declared, and after the first write:
+///
+/// ```
+/// # extern crate live_space;
+/// use live_space::{source, Host, FOUR_DOORS, WORDS};
+///
+/// let mut host = Host::start("workshop");
+/// assert_eq!(
+///     host.read(source(WORDS, &[])).unwrap(),
+///     "dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration\n\
+///      \x20 holding: an endpoint space with no doors\n"
+/// );
+/// host.write(FOUR_DOORS);
+/// assert_eq!(
+///     host.read(source(WORDS, &[])).unwrap(),
+///     "dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration\n\
+///      \x20 holding: an endpoint space with 4 doors, tried in order\n\
+///      \x20   door urn:iki:tutorial:camel-case, answered by camel-case\n\
+///      \x20   door urn:iki:tutorial:title, answered by title\n\
+///      \x20   door urn:iki:tutorial:camel-title, answered by camel-title\n\
+///      \x20   door urn:iki:tutorial:upper, answered by toUpper\n"
+/// );
+/// ```
+pub fn words() -> AsyncFnEndpoint {
+    AsyncFnEndpoint::new("live-arrangement", |inv| {
+        Box::pin(async move {
+            let topology = Iri::parse("urn:kernel:topology").expect("a constant IRI");
+            let turtle = inv.source(&topology).await?;
+            let tree = std::str::from_utf8(&turtle.bytes)
+                .ok()
+                .and_then(|text| Topology::from_turtle(text).ok())
+                .ok_or_else(|| Error::Endpoint("urn:kernel:topology did not parse".into()))?;
+            let mut lines = Vec::new();
+            dynamic_spaces(&tree, &mut lines);
+            Ok(Representation::new(
+                ReprType::new("text/plain").with_param("charset", "utf-8"),
+                lines.concat().into_bytes(),
+            )
+            .cacheable())
+        })
+    })
+    .with_description(
+        Description::new("live-arrangement")
+            .title("The host's dynamic spaces, in words")
+            .summary(
+                "Every dynamic space in urn:kernel:topology, in words: one line for the space, \
+                 then one for each space it holds and each door or rule, indented by depth. \
+                 What is in force, cached until a bind cuts urn:kernel:bindings.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .requires("urn:cap:kernel:inspect")
+            .output("text/plain"),
+    )
 }
 
-/// One space in words, starting lowercase: `a fallback of 3 layers. Layer 1 is …`.
-fn space_text(node: &Topology) -> String {
+/// Each dynamic space under `node`, in words.
+fn dynamic_spaces(node: &Topology, lines: &mut Vec<String>) {
+    if let SpaceKind::Dynamic { .. } = node.kind {
+        space_lines(node, 0, None, lines);
+        return;
+    }
+    for child in &node.children {
+        dynamic_spaces(child, lines);
+    }
+}
+
+/// One space as lines: `{role}: {what it is}`, then its doors or rules and what it holds, two
+/// spaces deeper. The words before the first `: ` say where the line is (the viewer pairs a line
+/// with the one it replaced by them), and the words after say what is there. A door or a rule is
+/// its own line, new or gone as a whole, and says its IRI with no colon after it, so the IRI
+/// reads as itself.
+fn space_lines(node: &Topology, depth: usize, role: Option<&str>, lines: &mut Vec<String>) {
+    let indent = "  ".repeat(depth);
     let named = |what: &str| match &node.id {
         // A declaration's anonymous nodes are numbered by core, not named by anyone.
         Some(id) if !id.as_str().starts_with("urn:ikigai:space:_:") => {
@@ -184,81 +254,74 @@ fn space_text(node: &Topology) -> String {
         _ if what.starts_with(['a', 'e', 'i', 'o', 'u']) => format!("an {what}"),
         _ => format!("a {what}"),
     };
+    let mut line = |what: String| {
+        lines.push(match role {
+            Some(role) => format!("{indent}{role}: {what}\n"),
+            None => format!("{indent}{what}\n"),
+        })
+    };
     match &node.kind {
+        SpaceKind::Dynamic { declaration } => {
+            let id = node.id.as_ref().map_or("", |id| id.as_str());
+            line(format!(
+                "dynamic space {id}, built from {}",
+                declaration.as_str()
+            ));
+            for inner in &node.children {
+                space_lines(inner, depth + 1, Some("holding"), lines);
+            }
+        }
         SpaceKind::Fallback => {
-            let mut text = format!(
+            line(format!(
                 "{} of {}",
                 named("fallback"),
                 count(node.children.len(), "layer", "layers")
-            );
+            ));
             for (i, layer) in node.children.iter().enumerate() {
-                text.push_str(&format!(". Layer {} is {}", i + 1, space_text(layer)));
+                space_lines(layer, depth + 1, Some(&format!("layer {}", i + 1)), lines);
             }
-            text
         }
         SpaceKind::EndpointSpace { doors } => {
-            let space = match &node.id {
-                Some(id) if !id.as_str().starts_with("urn:ikigai:space:_:") => {
-                    format!("the space {}, an endpoint space", id.as_str())
-                }
-                _ => "an endpoint space".to_string(),
-            };
-            if doors.is_empty() {
-                return format!("{space} with no doors");
-            }
-            let listed: Vec<String> = doors
-                .iter()
-                .map(|door| {
-                    let how = match door.kind {
-                        MatchKind::Exact => String::new(),
-                        other => format!(" ({})", format!("{other:?}").to_lowercase()),
-                    };
-                    format!("{}{how}, answered by {}", door.pattern, door.endpoint)
-                })
-                .collect();
             let order = if doors.len() > 1 {
                 ", tried in order"
             } else {
                 ""
             };
-            format!(
-                "{space} with {}{order}: {}",
-                count(doors.len(), "door", "doors"),
-                listed.join("; ")
-            )
-        }
-        SpaceKind::Dynamic { declaration } => {
-            let inner = match node.children.as_slice() {
-                [inner] => format!(", holding {}", space_text(inner)),
-                _ => String::new(),
+            let how_many = match doors.len() {
+                0 => "no doors".to_string(),
+                n => count(n, "door", "doors"),
             };
-            format!(
-                "{}, built from {}{inner}",
-                named("dynamic space"),
-                declaration.as_str()
-            )
+            line(format!(
+                "{} with {how_many}{order}",
+                named("endpoint space")
+            ));
+            for door in doors {
+                let how = match door.kind {
+                    MatchKind::Exact => String::new(),
+                    other => format!(" ({})", format!("{other:?}").to_lowercase()),
+                };
+                lines.push(format!(
+                    "{indent}  door {}{how}, answered by {}\n",
+                    door.pattern, door.endpoint
+                ));
+            }
         }
         SpaceKind::Alias { rules, .. } => {
-            let listed: Vec<String> = rules
-                .iter()
-                .map(|rule| {
-                    let at = match rule.at {
-                        ResolveAt::Root => ", asked again from the root",
-                        _ => "",
-                    };
-                    format!("{} to {}{at}", rule.from, rule.to)
-                })
-                .collect();
-            let inner = match node.children.as_slice() {
-                [inner] => format!(", over {}", space_text(inner)),
-                _ => String::new(),
-            };
-            format!(
-                "{} with {}: {}{inner}",
+            line(format!(
+                "{} with {}",
                 named("alias"),
-                count(rules.len(), "rule", "rules"),
-                listed.join("; ")
-            )
+                count(rules.len(), "rule", "rules")
+            ));
+            for rule in rules {
+                let at = match rule.at {
+                    ResolveAt::Root => ", asked again from the root",
+                    _ => "",
+                };
+                lines.push(format!("{indent}  rule {} to {}{at}\n", rule.from, rule.to));
+            }
+            for inner in &node.children {
+                space_lines(inner, depth + 1, Some("over"), lines);
+            }
         }
         other => {
             let kind = format!("{other:?}");
@@ -267,7 +330,7 @@ fn space_text(node: &Topology) -> String {
                 .next()
                 .unwrap_or("space")
                 .to_lowercase();
-            format!("{} space", named(&kind)).replace("space space", "space")
+            line(format!("{} space", named(&kind)).replace("space space", "space"));
         }
     }
 }
@@ -278,15 +341,7 @@ fn count(n: usize, one: &str, many: &str) -> String {
         n => format!("{n} {many}"),
     }
 }
-
-fn capitalized(text: &str) -> String {
-    let mut chars = text.chars();
-    match chars.next() {
-        Some(first) => first.to_uppercase().chain(chars).collect(),
-        None => String::new(),
-    }
-}
-// ANCHOR_END: picture_text
+// ANCHOR_END: words
 
 /// A `Source` of `iri`, with `args` inline: the request every listing reads with.
 pub fn source(iri: &str, args: &[(&str, &str)]) -> Request {

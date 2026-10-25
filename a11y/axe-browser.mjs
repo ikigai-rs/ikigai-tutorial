@@ -137,13 +137,11 @@ async function start(page) {
         }
     });
     // Settled: no cell still running, and a polling view has had time to answer at least once.
-    // A live host's picture (`js/live.js`) is redrawn after its cells ran: wait for each one to
-    // say so, so axe sees the redrawn picture and the alt text it came with. A resilience
-    // stages viewer (`js/stages.js`) likewise, once its cells ran and it says what the last one made.
+    // A stages viewer (`js/stages.js`: the resilience harness, the live host) reads its picture
+    // after its cells ran: wait for each one to say what the last one made, so axe sees the
+    // stages and the alt text they came with.
     await page.waitForFunction(() =>
         [...document.querySelectorAll(".ikigai-run-caption")].every((c) => c.textContent !== "running…") &&
-        [...document.querySelectorAll("figure.ikigai-live .ikigai-live-status")]
-            .every((s) => /redrawn \(|could not be redrawn/.test(s.textContent)) &&
         [...document.querySelectorAll(".ikigai-stages .ikigai-stages-status")]
             .every((s) => /No change|New stage|matches stage|could not be read/.test(s.textContent)),
         null, { timeout: 30000 });

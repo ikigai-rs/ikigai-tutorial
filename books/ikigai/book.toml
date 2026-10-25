@@ -19,7 +19,7 @@ edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/book
 # Loaded after mdbook's own palette, which is what lets the contrast repairs in that file
 # win by cascade order rather than by forking the theme. `crates/book-a11y` measures the
 # result and CI runs it — see scripts/test-books.sh.
-additional-css = ["css/a11y.css", "css/layout.css", "css/run.css", "css/ttt.css", "css/view.css", "css/sheet.css", "css/toolbox.css"]
+additional-css = ["css/a11y.css", "css/layout.css", "css/run.css", "css/ttt.css", "css/view.css", "css/sheet.css", "css/toolbox.css", "css/stages.css"]
 # run.js turns `<div class="ikigai-run" data-cmd='…'>` into a runnable cell backed by the
 # book's own kernel (`crates/book-wasm`, built by pages.yml into `wasm/` beside this
 # book's output). With the wasm absent the cell cannot run: Run is disabled, the result
@@ -31,13 +31,14 @@ additional-css = ["css/a11y.css", "css/layout.css", "css/run.css", "css/ttt.css"
 # (the clock in "Time is a resource"), with a pause and a count of what the polling cost.
 # sheet.js does the same for `<div class="sheet-play" data-shell='…'>`, the spreadsheet arc's
 # sheet: a grid and a formula bar whose form fields reach the kernel as named arguments.
-# live.js redraws `<figure class="ikigai-live" data-live='…'>`, the picture of a live host, after
-# every cell that ran in that host ("A space that changes while it runs").
+# stages.js shows `<div class="ikigai-stages" …>`, a picture a chapter's steps change, as numbered
+# tabs ("A space that changes while it runs"; the contract is docs/stages.md). One copy serves every
+# book: the architecture book links to this one.
 # toolbox.js opens the RDF Toolbox in place on `<div class="toolbox-check" data-iri='…'>`
 # ("Checking a resource"): the page's kernel composes the check page and answers its inputs, and
 # the toolbox build published beside the book (`toolbox/`, scripts/build-toolbox.sh) runs in a
 # frame. Without the kernel, the markup's new-tab link stays.
-additional-js = ["js/a11y.js", "js/run.js", "js/ttt.js", "js/view.js", "js/sheet.js", "js/live.js", "js/toolbox.js"]
+additional-js = ["js/a11y.js", "js/run.js", "js/ttt.js", "js/view.js", "js/sheet.js", "js/toolbox.js", "js/stages.js"]
 
 [output.html.fold]
 enable = true

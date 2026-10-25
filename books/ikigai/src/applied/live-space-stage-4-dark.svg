@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:lang="en" lang="en" width="960" height="216" viewBox="0 0 960 216" role="img" aria-labelledby="ikd-6eaa7c1f9412f58e-title ikd-6eaa7c1f9412f58e-desc" class="ikd">
+<title id="ikd-6eaa7c1f9412f58e-title">Space arrangement: urn:iki:space:dynamic:workshop</title>
+<desc id="ikd-6eaa7c1f9412f58e-desc">An arrangement whose outermost space is a dynamic space. In all: 1 dynamic space, 1 alias; and 0 doors across 1 endpoint space, with 1 alias rule.</desc>
+<style>.ikd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:13px}.ikd-b{font-weight:700}.ikd-hole{stroke-dasharray:6 4}.ikd-dim{stroke-dasharray:2 3}.ikd-bg{fill:#0d1117}.ikd-box{fill:#0d1117}.ikd-x{fill:#e6edf3}.ikd-m{fill:#9198a1}.ikd-k-chain{stroke:#9198a1}.ikd-t-chain{fill:#161b22}.ikd-k-fallback{stroke:#4493f8}.ikd-t-fallback{fill:#0c1f3a}.ikd-k-mount{stroke:#3fb950}.ikd-t-mount{fill:#0d2416}.ikd-k-dynamic{stroke:#3fb950}.ikd-t-dynamic{fill:#0d2416}.ikd-k-alias{stroke:#ab7df8}.ikd-t-alias{fill:#1d1533}.ikd-k-limit{stroke:#f85149}.ikd-t-limit{fill:#2a1214}.ikd-k-level{stroke:#d29922}.ikd-t-level{fill:#261e0c}.ikd-k-endpoints{stroke:#39c5cf}.ikd-t-endpoints{fill:#0b2326}.ikd-k-opaque{stroke:#768390}.ikd-t-opaque{fill:#161b22}.ikd-k-rewrite{stroke:#db6d28}.ikd-t-rewrite{fill:#28190d}.ikd-k-confine{stroke:#f0883e}.ikd-t-confine{fill:#28190d}.ikd-k-unknown{stroke:#9198a1}.ikd-t-unknown{fill:#161b22}.ikd-k-problem{stroke:#f85149}.ikd-t-problem{fill:#2a1214}.ikd-mk-exact{fill:#9198a1}.ikd-mk-template{fill:#4493f8}.ikd-mk-prefix{fill:#3fb950}.ikd-mk-custom{fill:#f85149}</style>
+<rect class="ikd-bg" width="960" height="216"/>
+<g>
+<rect class="ikd-box" x="16" y="16" width="928" height="184" rx="4"/>
+<rect class="ikd-t-dynamic" x="17" y="17" width="926" height="46" rx="3"/>
+<text x="24" y="34"><tspan class="ikd-x ikd-b">Dynamic space</tspan><tspan class="ikd-x">  urn:iki:tutorial:live:declaration</tspan></text>
+<text x="24" y="54"><tspan class="ikd-m">urn:iki:space:dynamic:workshop</tspan></text>
+<g>
+<rect class="ikd-box" x="32" y="72" width="904" height="120" rx="4"/>
+<rect class="ikd-t-alias" x="33" y="73" width="902" height="26" rx="3"/>
+<text x="40" y="90"><tspan class="ikd-x ikd-b">Alias</tspan><tspan class="ikd-x">  1 rule tried in order; at most 8 hops</tspan></text>
+<g><title>rule 1 (exact): urn:iki:tutorial:live:picture rewrites to urn:diagram:kernel</title>
+<text x="40" y="118"><tspan class="ikd-m">1</tspan></text>
+<text x="56" y="118"><tspan class="ikd-mk-exact">exact</tspan></text>
+<text x="112" y="118"><tspan class="ikd-x">urn:iki:tutorial:live:picture</tspan></text>
+<text x="352" y="118"><tspan class="ikd-m">→</tspan></text>
+<text x="368" y="118"><tspan class="ikd-x">urn:diagram:kernel</tspan></text>
+</g>
+<g>
+<rect class="ikd-box" x="48" y="128" width="880" height="56" rx="4"/>
+<rect class="ikd-t-endpoints" x="49" y="129" width="878" height="26" rx="3"/>
+<text x="56" y="146"><tspan class="ikd-x ikd-b">Endpoints</tspan><tspan class="ikd-x">  0 doors tried in order; the first match wins</tspan></text>
+<text x="56" y="174"><tspan class="ikd-m">no doors</tspan></text>
+<rect class="ikd-k-endpoints" x="48" y="128" width="880" height="56" rx="4" fill="none" stroke-width="1.5"/>
+</g>
+<rect class="ikd-k-alias" x="32" y="72" width="904" height="120" rx="4" fill="none" stroke-width="1.5"/>
+</g>
+<rect class="ikd-k-dynamic" x="16" y="16" width="928" height="184" rx="4" fill="none" stroke-width="1.5"/>
+</g>
+</svg>

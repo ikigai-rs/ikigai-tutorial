@@ -27,7 +27,8 @@ lines in it: the root `crates/live-space` builds, with an empty dynamic space ca
 beside the one the book's other cells share, because that one already binds Part I's names,
 and an empty space would not look empty in front of them. Its rebuild loop is the chapter's
 `drive`, running on the page's own event loop. Run the cells in order: each one changes the
-host the next one reads.
+host the next one reads. The four parts of the chapter that change the space are numbered
+**stages**, one tab each, with the space drawn as it was after each one ([below](#the-space-in-stages)).
 
 ## The host
 
@@ -57,11 +58,13 @@ The declaration lives at a name of its own:
 ```
 
 `Sink` writes an arrangement there, in the s-expression form Tic-tac-toe VII's file is
-written in; `Source` answers it as the `ik:` Turtle core builds from. The host's root is
-three layers: the declaration, then `ikigai-diagram`'s space (`urn:diagram:kernel`, the
-picture Tic-tac-toe VII drew from a file, here drawn from the running kernel, beside the
-`urn:diagram:state` pair that draws governors' state over an arrangement, which this chapter does
-not use), then the dynamic space:
+written in; `Source` answers it as the `ik:` Turtle core builds from. Beside it is the dynamic
+space in words, `urn:iki:tutorial:live:arrangement`: a line for the space, and one for each
+space and door it holds, read from the kernel's topology, so it says what is in force rather
+than what was last written. The host's root is three layers: those two, then `ikigai-diagram`'s
+space (`urn:diagram:kernel`, the picture Tic-tac-toe VII drew from a file, here drawn from the
+running kernel, beside the `urn:diagram:state` pair that draws governors' state over an
+arrangement, which this chapter does not use), then the dynamic space:
 
 ```rust,ignore
 {{#include ../../../../crates/live-space/src/lib.rs:kernel}}
@@ -93,6 +96,52 @@ order:
 
 The write is an ordinary `Sink`. The kernel cuts the declaration's thread after it, as it
 does after every write, and the loop hears that cut. Nothing else tells the space to change.
+
+Here is the whole host as `urn:diagram:kernel` draws it before anything is declared:
+
+<figure style="margin: 1em 0">
+<a href="live-space-host.svg"><img src="live-space-host.svg"
+     alt="The host's arrangement as nested boxes: a chain holding the root, a fallback of the three layers the paragraphs above name. The first layer holds the declaration and its words, the second the diagram's four doors, and the third, the dynamic space urn:iki:space:dynamic:workshop, holds an endpoint space with no doors."></a>
+<figcaption>The host before anything is declared: <code>urn:diagram:kernel</code>, as the
+host in <code>crates/live-space</code> answers it, held to it byte for byte by a test. Select
+the picture to open it at full size.</figcaption>
+</figure>
+
+The third layer is the dynamic space: its name, the declaration it is built from, and inside
+it, an endpoint space with no doors. The status door is not drawn. The space answers it
+itself, ahead of anything a declaration binds, so no declaration can shadow it.
+
+## The space, in stages
+
+Only the third layer changes, so the stages draw only it: `focus=` on `urn:diagram:kernel`
+(ikigai-diagram 0.2.4) draws one space and what it encloses, which is also what keeps the
+picture legible on a narrow screen. A stage is the space after a step that changed it, and each
+one is a numbered tab. Read a tab from the top: the steps that make the stage, as listings and
+cells, then what the last cell did: which cell made the stage, what changed since the stage
+before (the space's words, `urn:iki:tutorial:live:arrangement`, compared line by line with the
+stage before's: the words that differ are marked, and what they replaced is said beside them),
+the facts at that stage, the picture as it was, and the words in full. A cell that changes nothing
+the space holds makes no stage. The line above the tabs keeps two facts current, each read from
+the space's status door after every cell: how many declarations have bound, and the last
+refusal.
+
+The pictures here are files the host drew natively, held to it byte for byte by a test, so they
+show before the page's kernel loads, without it, and in print. In the page, after every cell you
+run in the live host, the stages viewer (`js/stages.js`) reads the picture and the words in that
+host as your own lines would, so a cell that cut nothing finds the picture in the cache. A cell
+that changes the space to its own stage's words says your kernel reached that stage; one that
+changes it to anything else adds a stage of yours after the chapter's.
+
+<div class="ikigai-stages" data-chain='live:workshop'
+     data-picture='source urn:diagram:kernel scheme={scheme} focus=urn:iki:space:dynamic:workshop'
+     data-words='source urn:iki:tutorial:live:arrangement'
+     data-tabs-label='Stages of the dynamic space'
+     data-alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn.">
+<ul class="ikigai-stages-facts">
+<li data-cmd='source urn:iki:space:dynamic:workshop:status' data-line='4'>installs: 0</li>
+<li data-cmd='source urn:iki:space:dynamic:workshop:status' data-line='5'>refused: the declaration could not be read: not found: urn:iki:tutorial:live:declaration</li>
+</ul>
+<section class="ikigai-stage" data-label="empty">
 
 ## An empty space, with a name
 
@@ -142,21 +191,17 @@ refused: the declaration could not be read: not found: urn:iki:tutorial:live:dec
 error: no endpoint resolved for urn:iki:tutorial:camel-case</pre>
 </div>
 
-Here is the host as `urn:diagram:kernel` draws it now. In the page, this picture is the live
-host's: after every cell that runs in it, the page asks the host for `urn:diagram:kernel`
-again and draws the answer here, with a text alternative written from the same arrangement.
+The space as it starts, which is the first stage:
 
-<figure class="ikigai-live" data-live='workshop' style="margin: 1em 0">
-<a href="live-space-empty.svg"><img src="live-space-empty.svg"
-     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 4 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel; urn:diagram:state, answered by diagram-state; urn:diagram:state:arrangement, answered by diagram-state-arrangement. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with no doors."></a>
-<figcaption>The host before anything is declared: <code>urn:diagram:kernel</code>, as the
-host in <code>crates/live-space</code> answers it. Select the picture to open it at full
-size.</figcaption>
-</figure>
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">installs: 0 · refused: the declaration could not be read: not found: urn:iki:tutorial:live:declaration</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="live-space-stage-1-light.svg"><img src="live-space-stage-1-light.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an endpoint space with no doors."></a><a class="ikigai-scheme-dark" href="live-space-stage-1-dark.svg"><img src="live-space-stage-1-dark.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an endpoint space with no doors."></a></p>
+<pre class="ikigai-stage-words">dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration
+  holding: an endpoint space with no doors</pre>
+</div>
 
-The third layer is the dynamic space: its name, the declaration it is built from, and inside
-it, an endpoint space with no doors. The status door is not drawn. The space answers it
-itself, ahead of anything a declaration binds, so no declaration can shadow it.
+</section>
+<section class="ikigai-stage" data-label="four doors">
 
 ## Doors, added by a write
 
@@ -171,7 +216,7 @@ use live_space::{source, Host};
 let mut host = Host::start("workshop");
 let picture = || source("urn:diagram:kernel", &[]);
 let before = host.read(picture()).unwrap();
-assert!(before.contains("5 doors across 3 endpoint spaces"));
+assert!(before.contains("6 doors across 3 endpoint spaces"));
 
 host.write(
     r#"(endpoints
@@ -202,7 +247,7 @@ assert!(status.ends_with("refused: nothing since the last bind\n"));
 // The picture was cut by the bind, and redraws with the four new doors.
 assert!(!host.is_cached(&picture()));
 let after = host.read(picture()).unwrap();
-assert!(after.contains("9 doors across 3 endpoint spaces"));
+assert!(after.contains("10 doors across 3 endpoint spaces"));
 assert!(after.contains("door 4: urn:iki:tutorial:upper (exact) is answered by toUpper"));
 ```
 
@@ -212,7 +257,7 @@ composes as before. The status counts one install. Its `in force` line is now th
 the declaration that bound.
 
 In the page, the write is a `sink` to the declaration, on one line, and the reads after it
-are the listing's. Run it after the cell above, then look at the picture above that cell:
+are the listing's. Run it after the cell above:
 
 <div class="ikigai-run" data-live='workshop' data-cmd='sink urn:iki:tutorial:live:declaration (endpoints (door "urn:iki:tutorial:camel-case" camel-case) (door "urn:iki:tutorial:title" title) (door "urn:iki:tutorial:camel-title" camel-title) (door "urn:iki:tutorial:upper" toUpper))
 source urn:iki:tutorial:camel-case in="resource oriented computing"
@@ -235,22 +280,32 @@ refused: nothing since the last bind
 [uncacheable]</pre>
 </div>
 
+The write bound, so the space changed, and this is the second stage:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">installs: 1 · refused: nothing since the last bind</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="live-space-stage-2-light.svg"><img src="live-space-stage-2-light.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an endpoint space with 4 doors, tried in order; door urn:iki:tutorial:camel-case, answered by camel-case; door urn:iki:tutorial:title, answered by title; door urn:iki:tutorial:camel-title, answered by camel-title; door urn:iki:tutorial:upper, answered by toUpper."></a><a class="ikigai-scheme-dark" href="live-space-stage-2-dark.svg"><img src="live-space-stage-2-dark.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an endpoint space with 4 doors, tried in order; door urn:iki:tutorial:camel-case, answered by camel-case; door urn:iki:tutorial:title, answered by title; door urn:iki:tutorial:camel-title, answered by camel-title; door urn:iki:tutorial:upper, answered by toUpper."></a></p>
+<pre class="ikigai-stage-words">dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration
+  holding: an endpoint space with 4 doors, tried in order
+    door urn:iki:tutorial:camel-case, answered by camel-case
+    door urn:iki:tutorial:title, answered by title
+    door urn:iki:tutorial:camel-title, answered by camel-title
+    door urn:iki:tutorial:upper, answered by toUpper</pre>
+</div>
+
 The picture changed without anyone asking for it to change. `urn:diagram:kernel` is a
 pure function of `urn:kernel:topology`, so it is cached, and the topology hangs from the
 kernel's bindings thread, `urn:kernel:bindings`. A successful bind cuts that thread. That cut
 is the only thing that makes the picture stale: nothing polls, and nothing redraws a picture
-nobody asks for. The next read draws this:
+nobody asks for. The words hang from the same thread, for the same reason, and the page's next
+read of each draws the stage above.
 
-<figure style="margin: 1em 0">
-<a href="live-space-doors.svg"><img src="live-space-doors.svg"
-     alt="The host's arrangement as nested boxes. A chain holds the root, a fallback of 3 layers. Layer 1 is an endpoint space with 1 door: urn:iki:tutorial:live:declaration, answered by live-declaration. Layer 2 is the space urn:iki:space:diagram, an endpoint space with 4 doors, tried in order: urn:diagram:arrangement, answered by diagram-arrangement; urn:diagram:kernel, answered by diagram-kernel; urn:diagram:state, answered by diagram-state; urn:diagram:state:arrangement, answered by diagram-state-arrangement. Layer 3 is the dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration, holding an endpoint space with 4 doors, tried in order: urn:iki:tutorial:camel-case, answered by camel-case; urn:iki:tutorial:title, answered by title; urn:iki:tutorial:camel-title, answered by camel-title; urn:iki:tutorial:upper, answered by toUpper."></a>
-<figcaption>The host after one write to its declaration. A test in
-<code>crates/live-space</code> holds both pictures to what the host draws.</figcaption>
-</figure>
+A page that listens for that thread (see [A spreadsheet, VII](spreadsheet-7.md), later in the
+book) would redraw the picture the moment a change binds, with nobody running anything. That is
+push, and the bindings thread is what it would listen to.
 
-A page that shows this picture and listens for that thread (see
-[A spreadsheet, VII](spreadsheet-7.md), later in the book) would redraw it the moment a
-change binds. That is push, and the bindings thread is what it would listen to.
+</section>
+<section class="ikigai-stage" data-label="three doors">
 
 ## A door removed, and what it served
 
@@ -344,6 +399,18 @@ dependents of urn:iki:space:dynamic:workshop  (cut 2 times)
 [uncacheable]</pre>
 </div>
 
+The door is gone from the space, which makes the third stage:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">installs: 2 · refused: nothing since the last bind</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="live-space-stage-3-light.svg"><img src="live-space-stage-3-light.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an endpoint space with 3 doors, tried in order; door urn:iki:tutorial:camel-case, answered by camel-case; door urn:iki:tutorial:title, answered by title; door urn:iki:tutorial:upper, answered by toUpper."></a><a class="ikigai-scheme-dark" href="live-space-stage-3-dark.svg"><img src="live-space-stage-3-dark.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an endpoint space with 3 doors, tried in order; door urn:iki:tutorial:camel-case, answered by camel-case; door urn:iki:tutorial:title, answered by title; door urn:iki:tutorial:upper, answered by toUpper."></a></p>
+<pre class="ikigai-stage-words">dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration
+  holding: an endpoint space with 3 doors, tried in order
+    door urn:iki:tutorial:camel-case, answered by camel-case
+    door urn:iki:tutorial:title, answered by title
+    door urn:iki:tutorial:upper, answered by toUpper</pre>
+</div>
+
 The `(cut 1 time)` is the first bind. A space's thread is cut by every bind, including the
 one that filled it.
 
@@ -410,14 +477,15 @@ assert!(matches!(
 
 In the page, after the cell above: read `camel-case` (computed again, because the last cell's
 write cut what the space had served), write the refused declaration on one line, ask the
-status, read `camel-case` again, ask whether the picture is still cached, and try the door
-the refused declaration wanted:
+status, read `camel-case` again, ask whether the stage's picture is still cached (the light
+one, exactly as the stages viewer asks for it), and try the door the refused declaration
+wanted:
 
 <div class="ikigai-run" data-live='workshop' data-cmd='source urn:iki:tutorial:camel-case in="resource oriented computing"
 sink urn:iki:tutorial:live:declaration (endpoints (door "urn:iki:tutorial:upper" toUpper) (door "urn:iki:tutorial:reverse" lisp-reverse))
 source urn:iki:space:dynamic:workshop:status
 source urn:iki:tutorial:camel-case in="resource oriented computing"
-cache urn:diagram:kernel
+cache urn:diagram:kernel scheme=light focus=urn:iki:space:dynamic:workshop
 source urn:iki:tutorial:reverse in="a b"'>
 <pre class="ikigai-run-expected">resourceOrientedComputing
 [computed]
@@ -440,8 +508,10 @@ error: no endpoint resolved for urn:iki:tutorial:reverse</pre>
 `installs: 2` counts the two declarations the cells above bound; the refused one is not
 among them. The `in force` digest is still the last good one's, and `camel-case`, read just
 before the write, is served from the cache after it. So is the picture: the refusal cut
-neither the space's thread nor the kernel's bindings, so the picture above, redrawn after
-this cell, is the same three doors it showed before it.
+neither the space's thread nor the kernel's bindings, so the picture and the words are the
+same three doors they were before it. **No change**, then: this cell makes no stage. The
+line above the tabs moves, because the status says what was refused, but nothing the space
+holds did.
 
 The refusal is the one Tic-tac-toe VII's `undo` declaration met, word for word, because it is
 the same check. Here it does not stop anything. The doors that bound last stay in force, a
@@ -458,6 +528,9 @@ There is no capability for changing a dynamic space. The authority to change it 
 authority to write its declaration, which whatever store holds the declaration already
 grants or refuses. This host's declaration takes any write from root, and a real host would
 put it behind a store that checks.
+
+</section>
+<section class="ikigai-stage" data-label="a view">
 
 ## A view: a name for a name the host already serves
 
@@ -559,7 +632,7 @@ trace  urn:iki:tutorial:live:picture
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 &#32;
-urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 8821b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
+urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 9291b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
 └─ urn:diagram:kernel   diagram-kernel · computed · ThreadId(1) · — · answered-by=urn:iki:space:diagram defaulted=scheme
    └─ urn:kernel:topology   kernel-topology · computed · ThreadId(1) · —
 narrowed — capability: urn:cap:kernel:listen
@@ -571,12 +644,24 @@ reset to identity — capability: root (full authority)</pre>
 The trace is the view at work: the dynamic space answered the name, and its answer came from
 a sub-request for `urn:diagram:kernel`, which the diagram's space answered at the root. The
 two refusals are the same line, word for word: the view added no authority, and it took none
-away either. `cap reset` matters to the cells that come after this one, not to the picture:
-the page redraws the picture under root, whatever a cell's session holds.
+away either. `cap reset` matters to what comes after this cell: the stages viewer reads the
+picture and the words as lines in the cell's own session, which a cell left narrowed would
+leave unable to read either.
 
-The view's own answer, the picture, now shows the alias as the dynamic space's only content.
-That is the `1 rule` the listing checks for, and the picture above, redrawn after the cell,
-shows it too.
+The view is now the dynamic space's only content. That is the `1 rule` the listing checks
+for, and the fourth stage:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">installs: 3 · refused: nothing since the last bind</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="live-space-stage-4-light.svg"><img src="live-space-stage-4-light.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an alias with 1 rule; rule urn:iki:tutorial:live:picture to urn:diagram:kernel, asked again from the root; over: an endpoint space with no doors."></a><a class="ikigai-scheme-dark" href="live-space-stage-4-dark.svg"><img src="live-space-stage-4-dark.svg" alt="The live host's dynamic space urn:iki:space:dynamic:workshop, drawn as nested boxes: the space and the declaration it is built from, and inside it what it holds now. The host's other two layers are not drawn. At this stage: dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration; holding: an alias with 1 rule; rule urn:iki:tutorial:live:picture to urn:diagram:kernel, asked again from the root; over: an endpoint space with no doors."></a></p>
+<pre class="ikigai-stage-words">dynamic space urn:iki:space:dynamic:workshop, built from urn:iki:tutorial:live:declaration
+  holding: an alias with 1 rule
+    rule urn:iki:tutorial:live:picture to urn:diagram:kernel, asked again from the root
+    over: an endpoint space with no doors</pre>
+</div>
+
+</section>
+</div>
 
 ## What it does not do yet
 
@@ -595,7 +680,7 @@ shows it too.
   runs its loop under root; a host that narrows it must refresh on a signal of its own.
 - **The status door is not in the topology** (ledger #2049). `…:status` answers, and the
   space's entries (so the kernel's catalog) list it, but `DynamicSpace`'s topology reports only
-  the inner space. Neither picture above shows it, and a reader who learns the host from its
+  the inner space. No picture above shows it, nor do the words, and a reader who learns the host from its
   picture cannot find it.
 
 The same mechanism, one thread per space, also gives a server a cheap way to forget a
@@ -611,7 +696,8 @@ shows it.
 | the space | `urn:iki:space:dynamic:workshop` | core's `DynamicSpace`: empty until a declaration binds, rebuilt on every write, one thread for everything it served |
 | its status | `urn:iki:space:dynamic:workshop:status` | live state: what is in force, how many binds, the last refusal and where |
 | the loop | `DynamicSpace::drive` | a future the host runs: hear the declaration's cut, read, check, bind |
-| the picture | `urn:diagram:kernel` | ikigai-diagram 0.2.2: the host's arrangement, cached and redrawn when a bind cuts `urn:kernel:bindings` |
+| the picture | `urn:diagram:kernel` | ikigai-diagram 0.2.4: the host's arrangement, cached and redrawn when a bind cuts `urn:kernel:bindings`; `focus=` draws one space of it |
+| the words | `urn:iki:tutorial:live:arrangement` | a composition: the dynamic space in words, read from the same topology, cached and cut with the picture |
 | a view | `view.ttl` | data: an alias rule that resolves at the root, and grants nothing |
 
 Tic-tac-toe VII moved where the endpoints are bound out of the code. This chapter makes that

@@ -36,7 +36,9 @@
 // WHAT CHANGED is computed here, for every stage after the first, by comparing its words with
 // the stage before's, line by line: a line that is new, one that is gone, and a line that
 // replaced another with the words that differ marked (<mark>, and the old line said beside it,
-// so never by color alone). A control may add its own sentence (`data-note`), and a chapter's
+// so never by color alone). A new line replaced the gone line that begins with the same words
+// before its first ": " (where the line is: `layer 1`, a circuit's name); lines left over on
+// both sides in equal numbers are paired in order. A control may add its own sentence (`data-note`), and a chapter's
 // stage may hold one (`p.ikigai-stage-note`), but the comparison is always there.
 //
 // A PICTURE IS SHOWN, NEVER REDRAWN. A tab keeps its stage's picture as it was. When the picture
@@ -180,10 +182,29 @@
             return p;
         }
         var list = el("ul", "ikigai-stage-changes");
-        var paired = gone.length === added.length;
+        // Which gone line each new line replaced: first the one that says the same place in the
+        // same words (the words before the first ": ", `layer 1`, a circuit's name), then, when
+        // as many lines are left on each side, the rest in order. Anything else is new or gone.
+        var keyOf = function (line) {
+            var at = line.indexOf(": ");
+            return at > 0 ? line.slice(0, at) : null;
+        };
+        var replaced = added.map(function () { return null; });
+        var left = gone.slice();
+        added.forEach(function (line, k) {
+            var key = keyOf(line);
+            var match = key === null ? -1 : left.findIndex(function (old) { return keyOf(old) === key; });
+            if (match >= 0) {
+                replaced[k] = left.splice(match, 1)[0];
+            }
+        });
+        var unpaired = replaced.filter(function (old) { return old === null; }).length;
+        if (unpaired > 0 && unpaired === left.length) {
+            replaced = replaced.map(function (old) { return old !== null ? old : left.shift(); });
+        }
         added.forEach(function (line, k) {
             var li = el("li");
-            var old = paired ? gone[k] : null;
+            var old = replaced[k];
             li.appendChild(document.createTextNode(old !== null ? "Now: " : "New: "));
             (old !== null ? wordDiff(old, line) : [{ text: line, changed: true }]).forEach(function (run, r) {
                 if (r > 0) {
@@ -199,11 +220,9 @@
             }
             list.appendChild(li);
         });
-        if (!paired) {
-            gone.forEach(function (line) {
-                list.appendChild(el("li", null, "Gone: " + line));
-            });
-        }
+        left.forEach(function (line) {
+            list.appendChild(el("li", null, "Gone: " + line));
+        });
         p.appendChild(list);
         return p;
     }
@@ -309,10 +328,10 @@
             return pre ? pre.textContent : "";
         }
 
-        // A chapter's stage: its tab, what made it (the last step above its result: a cell, or
-        // nothing for the first), and what changed since the stage before.
+        // A chapter's stage: its tab, what made it (the last step above its result, a cell; the
+        // page's loading for the first), and what changed since the stage before.
         var previous = null;
-        sections.forEach(function (section) {
+        sections.forEach(function (section, k) {
             addTab(section);
             var result = section.querySelector(".ikigai-stage-result");
             if (!result) {
@@ -323,7 +342,9 @@
                     return cell.compareDocumentPosition(result) & Node.DOCUMENT_POSITION_FOLLOWING;
                 });
             var made = el("p", "ikigai-stage-made");
-            var last = steps[steps.length - 1];
+            // The first stage is the kernel as the page loads it: a cell in it changes nothing
+            // (the native test holds that), so it never made the stage.
+            var last = k === 0 ? null : steps[steps.length - 1];
             if (last) {
                 made.appendChild(document.createTextNode("Made by "));
                 linesOf(last.getAttribute("data-cmd")).forEach(function (line, k) {

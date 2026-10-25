@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-25**: A space that changes while it runs now shows its dynamic space in four numbered stages, one tab each: empty, four doors, three doors, and a view. Each tab draws the space as it was (light and dark), says what changed since the stage before in words, and keeps the cells that made it; a refused change makes no stage. The host gains `urn:iki:tutorial:live:arrangement`, the space in words, and the whole host is drawn once, before anything is declared.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-24**: A new appendix, The kernel in the browser, shows how the page builds the kernel behind every Run button, compares what the browser gives a kernel with what a native host gives one, and explains why a crate takes its clock and timers from its host. It covers the bridge that lets the kernel await browser promises, and what fails at run time rather than at build time. Its two Run cells show a page with no clock.
 
   Pages: [Appendix: the kernel in the browser](browser.md)

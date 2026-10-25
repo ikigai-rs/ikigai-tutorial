@@ -311,7 +311,8 @@ fn parse_directives(file: &str, comments: &[(usize, String)]) -> Result<Vec<Dire
 
 /// The `data-cmd='…'` attributes of runnable cells, with the line each starts on, and whether
 /// where the cell runs: the page's live host (`data-live='…'` in the same tag, before
-/// `data-cmd`), a prefix space on the page's kernel (`data-prefixed='…'`), or its root.
+/// `data-cmd`, or a stages viewer's `data-chain='live:…'` around a fact or a control), a prefix
+/// space on the page's kernel (`data-prefixed='…'`), or its root.
 ///
 /// Single-quoted only, by rule: a REPL line can carry double quotes (`in="a b"`), and
 /// `js/run.js` reads the attribute the same way. A double-quoted `data-cmd` is not
@@ -335,7 +336,20 @@ fn cell_commands(file: &str, text: &str) -> Result<Vec<(usize, String, Context)>
             return Err(format!("{file}:{line}: unterminated data-cmd='…'"));
         };
         let tag = before.rfind('<').map_or("", |open| &before[open..]);
-        let context = if tag.contains("data-live=") {
+        // A stages viewer's facts and controls (`<li data-cmd=…>`, `js/stages.js`) run in the
+        // viewer's chain: `data-chain='live:…'` is the page's live host.
+        let viewer = tag
+            .starts_with("<li")
+            .then(|| {
+                let whole = &text[..text.len() - rest.len() + at];
+                whole.rfind("<div class=\"ikigai-stages\"").map(|v| {
+                    let open = &whole[v..];
+                    &open[..open.find('>').unwrap_or(open.len())]
+                })
+            })
+            .flatten()
+            .unwrap_or("");
+        let context = if tag.contains("data-live=") || viewer.contains("data-chain='live:") {
             Context::LiveCell
         } else if tag.contains("data-prefixed=") {
             Context::PrefixedCell

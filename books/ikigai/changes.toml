@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-25"
+summary = "A space that changes while it runs now shows its dynamic space in four numbered stages, one tab each: empty, four doors, three doors, and a view. Each tab draws the space as it was (light and dark), says what changed since the stage before in words, and keeps the cells that made it; a refused change makes no stage. The host gains `urn:iki:tutorial:live:arrangement`, the space in words, and the whole host is drawn once, before anything is declared."
+pages = ["applied/live-space.md"]
+
+[[change]]
 date = "2026-10-24"
 summary = "One trace in \"A space that changes while it runs\" now shows the picture's colors defaulting (`defaulted=scheme`): ikigai-diagram 0.2.3 lets a page ask for light or dark colors."
 pages = ["applied/live-space.md"]

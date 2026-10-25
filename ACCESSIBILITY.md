@@ -40,21 +40,20 @@ a review comment.
   five themes (light, rust, coal, navy, ayu), including the 404 page and each book's generated
   *What's new* page.
 - **The in-page kernels**: the runnable cells (`js/run.js`), the tic-tac-toe boards (`js/ttt.js`),
-  the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`), the live host's picture
-  (`js/live.js`), the stages viewer (`js/stages.js`) and the RDF Toolbox opened in place
+  the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`), the stages viewer
+  (`js/stages.js`) and the RDF Toolbox opened in place
   (`js/toolbox.js`: its control, its panel, and the new-tab link that replaces both without the
   kernel), with the kernel loaded and without it.
 - **The site chrome mdbook provides** (sidebar, menu bar, search, theme menu, page navigation), as
   far as this repository can repair it: a barrier there is still a barrier for our readers.
 - **This repository's own additions to that chrome**: `css/a11y.css`, `js/a11y.js` and the cell,
   board, view and sheet styles.
-- **Generated pictures** committed into a book (the tic-tac-toe arrangement SVG, the two pictures
-  of the host in "A space that changes while it runs", and the resilience harness's six stages in
-  The ikigai Architecture's "Spaces that wrap spaces", each in a light and a dark copy), and the
-  ones a page draws (the live host's picture in that chapter, redrawn after each of its cells; a
-  stage of the harness a reader makes, kept in its own tab).
+- **Generated pictures** committed into a book (the tic-tac-toe arrangement SVG, the live host in
+  "A space that changes while it runs" with its dynamic space's four stages, and the resilience
+  harness's six stages in The ikigai Architecture's "Spaces that wrap spaces", each stage in a
+  light and a dark copy), and the ones a page draws (a stage a reader makes, kept in its own tab).
 - **The stages viewer** (`js/stages.js`, `css/stages.css`, one copy every book can load; today
-  the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern
+  the live host in The ikigai Book and the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern
   (arrow keys, Home and End), one polite status region, what changed said in words with the
   changed words marked, the reader's own stages appended. Only the selected stage is in the
   page's rendered content, so the browser axe run audits the first stage's panel and the tabs,
@@ -144,7 +143,7 @@ has been run.
 | The toolbox panel is a frame holding upstream's page; its tabs, editor and results are upstream's widgets, and only axe has looked at them. Its engine is 8.3 MB, loaded on the first press | "Checking a resource" | A slow first open on a slow connection; barriers inside the toolbox page no automated rule catches | The cells above it run the same check with no download; without the kernel, the toolbox opens in a new tab |
 | Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
 | The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
-| The live host's picture is redrawn in the page as an image whose `alt` is generated from the arrangement it was drawn from (`live_space::picture_text`, which a test holds the two committed pictures' `alt` to); nobody has judged whether that text reads well, and a status line announces each redraw without saying what changed in it | "A space that changes while it runs" | A long description, read again in full after every change | The cells' own output, which says what each change did |
+| A stage's picture's `alt` is the viewer's description followed by the stage's words in full (for the live host, `urn:iki:tutorial:live:arrangement`, one clause per door); nobody has judged whether that reads well, and it is read again in full on every tab | "A space that changes while it runs", "Spaces that wrap spaces" | A long description, repeated per stage | Each stage's "What changed", which says only the difference |
 | The browser run's Chrome is not pinned, and mdbook is unpinned on purpose | CI | A new Chrome or mdbook can turn the gate red and stop deploys until someone repairs it | none needed: a red gate is the design |
 
 No list like this is complete. Please report what you find.
@@ -177,11 +176,12 @@ The tic-tac-toe picture, `books/ikigai/src/applied/tic-tac-toe-arrangement.svg`,
 `crates/tic-tac-toe/tests/declared.rs` fails when the committed file and the renderer's output
 differ, and names the command that recommits it. The SVG carries `role="img"`, a generated
 `<title>` and `<desc>`; the chapter embeds it as an `<img>` with a full text description in `alt`.
-The two pictures in "A space that changes while it runs", `live-space-empty.svg` and
-`live-space-doors.svg` beside that chapter, are what `urn:diagram:kernel` answers in
-`crates/live-space`'s host before and after its first declaration, drawn by the same renderer;
-`crates/live-space/tests/pictures.rs` holds them the same way, and the chapter embeds each with a
-full text description in `alt`. Do not edit any of the SVGs by hand.
+The pictures in "A space that changes while it runs" are what the live host in the page answers:
+`live-space-host.svg` is `urn:diagram:kernel` before anything is declared, and
+`live-space-stage-{n}-{light,dark}.svg` are each stage's focused picture. `crates/book-wasm`'s
+tests hold them byte for byte, with the stages' words, facts and text alternatives
+(`book_transcripts::stages`, the check every stages viewer shares); `BOOK_PICTURES_WRITE=1` on
+those tests rewrites the pictures that differ. Do not edit any of the SVGs by hand.
 
 ## Contributor requirements
 
