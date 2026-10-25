@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-25**: The stages of "Spaces that wrap spaces" now work as one box: each tab holds its step and its answers, scrolling in place, and one picture of the harness sits right below the tabs. Before you run a tab it is the harness as it is now; run it, or press a button, and watch the picture change. Switching back to a tab shows what its step drew, from the cache.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-10-25**: In "Spaces that wrap spaces", the picture now appears right under the button or cell you just pressed, drawn by the harness after that step, with what changed. A row of stage buttons above it shows any stage's picture in the same place, so you can compare two states without scrolling to the tabs.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md)

@@ -2,7 +2,7 @@
 
 # The ikigai library
 
-Three books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built.
+Four books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built.
 
 ## The ikigai Book
 

@@ -114,16 +114,21 @@ no thread reads the picture from the cache, and the viewer says so). Then:
 
 Before the first step it compares with the first stage's committed words: nothing is read on load.
 
-**The picture is shown where the step is.** After every step, the viewer also fills a card
-(`div.ikigai-stage-now`, a labeled group) right below what was pressed: under the row of buttons
-(one card the buttons share), or under a cell's Run button (`form.ikigai-run-head`, ahead of the
-lines' own answers; one card per cell, refilled by its next run). The card says what the step did,
-then holds a row of stage buttons (`aria-pressed`, one per tab, the stage the reader's kernel is
-at pressed), the picture the kernel just drew, what changed and the facts. A stage button shows
-that stage's committed picture, what changed and facts in the same place, copied from its tab, so
-nothing is asked of the kernel; the pressed one shows the kernel's own picture again. The buttons
-sit above the picture, so flipping between stages never moves them. The card is not a live region:
-the status region already says the step's outcome once.
+**One picture, below the tabs.** Once the kernel loads, a tab holds its step and the viewer shows
+one picture below the tabs (`div.ikigai-stages-shown`, a labeled region) for whichever tab is open.
+A tab whose step ran shows what that step drew: what the step did, the picture, what changed, the
+facts and the words. A tab whose step has not run shows the kernel as it is now, which is where its
+step starts, with the chapter's own picture of the stage behind a closed disclosure; the first tab,
+before any step, shows the picture as the page loads it. Switching tabs asks the kernel nothing:
+every picture shown is one a step already drew. Each tab's committed result is hidden while the
+picture below stands in for it, and a pointer ("The picture for this stage is below the tabs.")
+takes its place; until the kernel loads, without it, and in print, each tab shows its own committed
+result instead.
+
+**A tab stays in its box.** The tab panel is bounded (60% of the viewport) and scrolls in place, so
+the picture below is never more than a box away from the step that drew it. Write a stage's section
+with that in mind: a sentence or two, the cells, and what their answers mean; put long explanations
+and native listings after the viewer.
 
 **What changed** compares a stage's words with the stage before's, line by line. A line that
 replaced another is shown with the words that differ marked (`<mark>`) and the words they

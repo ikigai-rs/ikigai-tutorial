@@ -94,4 +94,5 @@
 [Glossary](glossary.md)
 [The repositories](repositories.md)
 [Contribute a module](contribute.md)
+[The other books](other-books.md)
 [Appendix: the kernel in the browser](browser.md)

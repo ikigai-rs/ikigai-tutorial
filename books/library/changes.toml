@@ -2,6 +2,11 @@
 # The same format as every book's (see books/ui/changes.toml for the fields).
 
 [[change]]
+date = "2026-10-25"
+summary = "The library's opening now counts four books, as it lists."
+pages = ["index.md"]
+
+[[change]]
 date = "2026-10-23"
 summary = "A fourth book joins the list: The ikigai Architecture, which teaches how ikigai is put together as one substrate read two ways."
 pages = ["index.md"]

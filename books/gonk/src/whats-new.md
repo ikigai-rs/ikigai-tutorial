@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-25**: The closing page is now The other books: it links The ikigai Book, Building ikigai UIs, The ikigai Architecture and the library, which lists all four.
+
+  Pages: [The other books](ikigai-book.md)
+
 - **2026-10-23**: The introduction links the library, a new page listing all three books with who each is for, what to read first and where to start.
 
   Pages: [Introduction](introduction.md)
@@ -153,4 +157,4 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 - **2026-10-06**: The gonk Book opens: an introduction to gonk as one binary that holds a durable store and serves a work ledger, and a first chapter, A ledger of your own, that files, claims, closes and asks what to do next three ways: in the page, in a kernel of your own, and against a gonk you start.
 
-  Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The ikigai Book](ikigai-book.md)
+  Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The other books](ikigai-book.md)

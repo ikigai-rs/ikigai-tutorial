@@ -15,8 +15,8 @@
 // fresh load, and requires that mark (or, on a page that runs on the browser's clock, the mark
 // saying it was not compared) of each. A chapter whose expected output was written for a cell run
 // on its own, or a kernel that moved under a chapter, fails here, with the difference printed.
-// A cell in a stages viewer's chain must also show the picture it drew right under its Run button
-// (Brian, 2026-10-25: a step whose picture is a scroll away is a step whose picture goes unseen).
+// A cell in a stages viewer's chain must also leave its tab open with the picture it drew below the
+// tabs (Brian, 2026-10-25: a step whose picture is not beside it is a step whose picture goes unseen).
 //
 // Then the two things a reader who does NOT read in order meets (Brian, 2026-10-22: step 3 of
 // "A space that changes while it runs" without step 2). For every cell that offers "Run all above",
@@ -96,8 +96,8 @@ async function press(page, i, which) {
     }, { i, which });
 }
 
-// In the page: when cell `i` runs in a stages viewer's chain, wait for the viewer's card under its
-// Run button to hold a picture. Returns a problem, or null (also for a cell in no viewer's chain).
+// In the page: when cell `i` runs in a stages viewer's chain, wait for the picture below the tabs
+// to be the one its step drew. Returns a problem, or null (also for a cell in no viewer's chain).
 async function stagePicture(page, i) {
     return page.evaluate(async (i) => {
         const cell = document.querySelectorAll("div.ikigai-run")[i];
@@ -108,17 +108,22 @@ async function stagePicture(page, i) {
         if (!inChain) {
             return null;
         }
+        // The cell's tab is the open one, and the picture below the tabs is what this step drew.
+        const viewer = cell.closest(".ikigai-stages");
+        const section = cell.closest("section.ikigai-stage");
         const deadline = Date.now() + 15000;
         while (Date.now() < deadline) {
-            const head = cell.querySelector(".ikigai-run-head");
-            const card = head && head.nextElementSibling;
-            if (card && card.classList.contains("ikigai-stage-now") && card.querySelector(".ikigai-stage-picture img")) {
+            const shown = viewer && viewer.querySelector(".ikigai-stages-shown");
+            const caption = shown && shown.querySelector(".ikigai-stages-shown-caption");
+            if (shown && !shown.hidden && (!section || !section.hidden) &&
+                shown.querySelector('.ikigai-stage-picture img[src^="blob:"]') &&
+                caption && /^After this (tab's )?step:/.test(caption.textContent)) {
                 return null;
             }
             await new Promise((r) => setTimeout(r, 50));
         }
         const status = [...document.querySelectorAll(".ikigai-stages-status")].map((s) => s.textContent).join(" | ");
-        return `no picture under its Run button (the viewer said: ${JSON.stringify(status)})`;
+        return `the picture below the tabs is not what this step drew (the viewer said: ${JSON.stringify(status)})`;
     }, i);
 }
 
@@ -168,9 +173,8 @@ export async function checkCells(browser, siteArg) {
             if (!r.meta.includes(AS_SHOWN) && !r.meta.includes(NOT_COMPARED)) {
                 failures.push(`${rel} cell ${i + 1}, run in page order: "${r.meta}" — ${difference(r.out, r.expected)}`);
             }
-            // A cell in a stages viewer's chain shows the picture it drew right under its Run
-            // button (`div.ikigai-stage-now`, js/stages.js), so a reader never scrolls to the tabs
-            // to see what a step did.
+            // A cell in a stages viewer's chain leaves its tab open with the picture it drew below
+            // the tabs (`div.ikigai-stages-shown`, js/stages.js).
             const picture = await stagePicture(page, i);
             if (picture !== null) {
                 failures.push(`${rel} cell ${i + 1}, run in page order: ${picture}`);
