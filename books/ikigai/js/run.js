@@ -79,7 +79,11 @@
 // Or a LIVE HOST ("A space that changes while it runs"): `data-live='workshop'` runs its lines in
 // a host of its own (chain `live:workshop`), a kernel beside the page's one whose dynamic space
 // the cell rebuilds by writing its declaration. `js/live.js` redraws that host's picture after
-// every such cell.
+// every such cell. The redraw is a READ of the host (`urn:diagram:kernel`, through its cache), so
+// it must land before the next cell's lines, or a cut in them comes before the read and the
+// cell's `trace` says `cached` where the chapter says `computed` (ledger #2191). So a script that
+// starts work on a chain when a cell ran there hands it to `ikigai:cell-ran`'s `hold`, and the
+// next run in that chain waits for it first.
 //
 // Or a PREFIX SPACE ("Short names in a space"): `data-prefixed='shop'` runs its lines on the page's
 // kernel with that dynamic space carried as a corridor (chain `prefixed:shop`), so the short names
@@ -240,6 +244,9 @@
     // Every cell on the page, in page order: what "Run all above" runs, and what a run that differs
     // from the chapter counts when it says how many cells above it have not run.
     var cells = [];
+    // What the next run in a chain waits for, by chain: the work scripts held when a cell last ran
+    // in it (`ikigai:cell-ran`'s `hold`; `js/live.js`'s redraw). Never rejects.
+    var held = {};
     // A page on the browser's clock answers with the reader's own time: nothing to compare.
     var browserClock = false;
 
@@ -460,8 +467,12 @@
             }
             run.disabled = true;
             caption.textContent = "running…";
-            var started = now();
-            return load().then(function (mod) {
+            var started;
+            var before = (chainSpec && held[chainSpec]) || Promise.resolve();
+            return before.then(function () {
+                started = now();
+                return load();
+            }).then(function (mod) {
                 if (at) {
                     mod.setStoryClock(at);
                 }
@@ -494,9 +505,22 @@
                     run.disabled = false;
                     // A cell may have changed a game a board on this page shows; the board
                     // is a copy the kernel cannot cut, so say that something ran (ttt.js).
+                    // What a listener holds, the chain's next run waits for (`held`).
+                    var holds = [];
                     document.dispatchEvent(new CustomEvent("ikigai:cell-ran", {
-                        detail: { game: game, chain: chainSpec, cell: cell, lines: lines }
+                        detail: {
+                            game: game,
+                            chain: chainSpec,
+                            cell: cell,
+                            lines: lines,
+                            hold: function (work) {
+                                holds.push(Promise.resolve(work).catch(function () {}));
+                            }
+                        }
                     }));
+                    if (chainSpec && holds.length > 0) {
+                        held[chainSpec] = Promise.all([held[chainSpec]].concat(holds));
+                    }
                 });
             }, markUnavailable).catch(function (err) {
                 // The kernel loaded, and something in the page's own path failed while
