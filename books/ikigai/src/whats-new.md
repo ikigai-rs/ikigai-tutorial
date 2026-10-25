@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-25**: In "A space that changes while it runs", the picture of the space now appears right under the Run button of the cell you just ran, drawn by your host after that cell, with what changed. A row of stage buttons above it shows any stage's picture in the same place, so you can compare two stages without scrolling.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-25**: A space that changes while it runs now shows its dynamic space in four numbered stages, one tab each: empty, four doors, three doors, and a view. Each tab draws the space as it was (light and dark), says what changed since the stage before in words, and keeps the cells that made it; a refused change makes no stage. The host gains `urn:iki:tutorial:live:arrangement`, the space in words, and the whole host is drawn once, before anything is declared.
 
   Pages: [A space that changes while it runs](applied/live-space.md)

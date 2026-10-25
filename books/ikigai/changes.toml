@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-25"
+summary = "In \"A space that changes while it runs\", the picture of the space now appears right under the Run button of the cell you just ran, drawn by your host after that cell, with what changed. A row of stage buttons above it shows any stage's picture in the same place, so you can compare two stages without scrolling."
+pages = ["applied/live-space.md"]
+
+[[change]]
+date = "2026-10-25"
 summary = "The book's in-page kernel's tests replay a stages viewer the way the page now reads one, ahead of the architecture book's harness marking what changed in its pictures; nothing on these pages changes."
 pages = ["applied/spreadsheet-6.md", "applied/spreadsheet-7.md", "applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md", "applied/time.md", "browser.md", "building/checking.md"]
 maintenance = true

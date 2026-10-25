@@ -128,9 +128,11 @@ refusal.
 The pictures here are files the host drew natively, held to it byte for byte by a test, so they
 show before the page's kernel loads, without it, and in print. In the page, after every cell you
 run in the live host, the stages viewer (`js/stages.js`) reads the picture and the words in that
-host as your own lines would, so a cell that cut nothing finds the picture in the cache. A cell
-that changes the space to its own stage's words says your kernel reached that stage; one that
-changes it to anything else adds a stage of yours after the chapter's.
+host as your own lines would, so a cell that cut nothing finds the picture in the cache, and
+shows the picture your host just drew right under the cell's Run button, with what changed and
+a row of stage buttons that shows any stage's picture in the same place. A cell that changes the
+space to its own stage's words says your kernel reached that stage; one that changes it to
+anything else adds a stage of yours after the chapter's.
 
 <div class="ikigai-stages" data-chain='live:workshop'
      data-picture='source urn:diagram:kernel scheme={scheme} focus=urn:iki:space:dynamic:workshop'

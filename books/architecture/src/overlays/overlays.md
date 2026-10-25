@@ -179,9 +179,11 @@ its state word (`OPEN (was CLOSED)`, `(new)`), and the words in the picture begi
 changed. The chapter's pictures are marked against the stage before; the first stage you make
 yourself is not marked, because the page reads nothing until you take a step.
 
-**The buttons are yours.** They drive the same harness the cells do. A press that changes the picture
-adds a stage after the chapter's, numbered on, and opens it, so you can flip
-between any two states the harness has been in.
+**The buttons are yours.** They drive the same harness the cells do. After every press, and every
+cell you run, the picture the harness just drew appears right under what you pressed, with what
+changed and a row of stage buttons: press one to show that stage's picture in the same place, so
+you can compare any two states without scrolling. A press that changes the picture also adds a
+stage after the chapter's, numbered on, and opens its tab.
 
 **Why flipping back costs nothing.** A stage's picture is `urn:diagram:state`, a pure composition
 of two resources: the harness's topology and the governors' board. It is cacheable, and it hangs

@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-25**: In "Spaces that wrap spaces", the picture now appears right under the button or cell you just pressed, drawn by the harness after that step, with what changed. A row of stage buttons above it shows any stage's picture in the same place, so you can compare two states without scrolling to the tabs.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-10-25**: "Spaces that wrap spaces" now drives Failover and the bulkhead too, in six more stages. Call a service whose primary is slow and watch the failover move to its backup, mend it and watch the route move back; then start five calls at once and watch a two-slot bulkhead run two and park three, and drain them as you move the harness clock, each call answering at its true time. Every stage's picture now marks what changed since the stage before, and the line above the tabs keeps the failover's route and the bulkhead in view as well as the circuit.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md)
