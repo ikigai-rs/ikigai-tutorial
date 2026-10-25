@@ -560,7 +560,7 @@ trace  urn:iki:tutorial:live:picture
   transport   embedded · in-process
 &#32;
 urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 8821b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
-└─ urn:diagram:kernel   diagram-kernel · computed · ThreadId(1) · — · answered-by=urn:iki:space:diagram
+└─ urn:diagram:kernel   diagram-kernel · computed · ThreadId(1) · — · answered-by=urn:iki:space:diagram defaulted=scheme
    └─ urn:kernel:topology   kernel-topology · computed · ThreadId(1) · —
 narrowed — capability: urn:cap:kernel:listen
 error: denied: capability does not grant `urn:cap:kernel:inspect` (declared by `urn:diagram:kernel`)

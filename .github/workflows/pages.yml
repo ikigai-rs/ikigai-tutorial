@@ -76,7 +76,7 @@ jobs:
       # `wasm-bindgen --target web` into `wasm/` beside its book, same origin as the pages
       # that load it, under the one name `js/run.js` imports (`scripts/build-kernels.sh`
       # holds the table of which crate is which book's). Generated output; never committed.
-      - name: build the in-page kernels (crates/book-wasm, crates/gonk-book-wasm, crates/ui-book-wasm) into the books
+      - name: build the in-page kernels (crates/book-wasm, crates/gonk-book-wasm, crates/ui-book-wasm, crates/architecture-book-wasm) into the books
         run: ./scripts/build-kernels.sh
 
       # A silent load failure is the failure: with the module absent every cell's Run
@@ -153,13 +153,14 @@ jobs:
           grep -q '^export function boundNames' books/ui/book/wasm/book_wasm.js
           grep -q 'as default' books/ui/book/wasm/book_wasm.js
 
-      # The ikigai Architecture reuses the gonk book's kernel (the work ledger over an in-memory
-      # store): the same ledger it reads two ways, bound into this book under the one name run.js
-      # imports (scripts/build-kernels.sh maps architecture → gonk-book-wasm).
-      - name: smoke — the exports run.js imports are present in the architecture book's kernel
+      # The ikigai Architecture's kernel is `crates/architecture-book-wasm`: the work ledger over an
+      # in-memory store (the same ledger it reads two ways) and the resilience harness "Spaces that
+      # wrap spaces" drives, bound under the one name run.js imports.
+      - name: smoke — the exports run.js and stages.js import are present in the architecture book's kernel
         run: |
           test -s books/architecture/book/wasm/book_wasm_bg.wasm
           grep -q '^export function evalLineAsync' books/architecture/book/wasm/book_wasm.js
+          grep -q '^export function evalLineInChainAsync' books/architecture/book/wasm/book_wasm.js
           grep -q '^export function boundNames' books/architecture/book/wasm/book_wasm.js
           grep -q 'as default' books/architecture/book/wasm/book_wasm.js
 

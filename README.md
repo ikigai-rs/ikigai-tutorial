@@ -39,6 +39,9 @@ The four runs in "What resolution buys you" resolve in your browser, against the
 space the chapter's tests run against; with the wasm absent a cell cannot run — Run is
 disabled and says why — and still answers nothing (`a11y/no-kernel.mjs` pins that in CI).
 The URN gate checks the chapter's original command; what the reader types is theirs.
+A picture that a chapter's steps change, shown as numbered tabs of its stages, is
+`books/ikigai/js/stages.js`, one copy any book can load; its markup contract is
+[`docs/stages.md`](docs/stages.md).
 
 Or clone it and serve it locally:
 
@@ -523,6 +526,9 @@ crates/book-urns       not a lesson: the prose gates above, and "never quoted" i
 crates/book-a11y       likewise: the contrast gate and the skip link's target
 crates/ledger-host     The gonk Book's first chapter: the ledger and its store in a kernel
 crates/gonk-book-wasm  The gonk Book's in-page kernel (the ikigai book's is book-wasm)
+crates/resilience-harness  The ikigai Architecture's overlay chapter: real throttle governors
+                       around a stub the reader controls, on a clock the reader advances
+crates/architecture-book-wasm  The ikigai Architecture's in-page kernel (the ledger + the harness)
 crates/book-transcripts  not a lesson: the shell-transcript gate (scripts/test-transcripts.sh)
 scripts/               test-books.sh (every book), build-kernels.sh, assemble-site.sh (one
                        Pages artifact, each book where its site-url says), serve-with-drafts.sh

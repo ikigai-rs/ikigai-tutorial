@@ -1,0 +1,36 @@
+[package]
+name = "architecture-book-wasm"
+version = "0.1.0"
+description = "The ikigai Architecture's own kernel, in the page: the work ledger over an in-memory store (crates/ledger-host) for the cells that read a ledger two ways, and the resilience harness (crates/resilience-harness) for the cells and controls that drive the overlays, under the CLI's engine."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "architecture_book_wasm"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ikigai-core.workspace = true
+ledger-host = { path = "../ledger-host" }
+resilience-harness = { path = "../resilience-harness" }
+# The CLI's engine, as `crates/book-wasm` and `crates/gonk-book-wasm` take it: the same REPL
+# grammar a reader types at `ikigai`, so a cell's line means what it means at a shell.
+ikigai-engine = "0.1.63"
+futures.workspace = true
+serde_json = "1"
+# ⚠ Pinned EXACTLY, to the version the other kernels pin and pages.yml installs the
+# `wasm-bindgen-cli` for: the generated JS and the wasm must agree on their ABI, and a
+# mismatch is a page whose cells silently fail to load. Bump all of them or none.
+wasm-bindgen = "=0.2.108"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+console_error_panic_hook = "0.1"
+
+[dev-dependencies]
+# The matcher the transcript gate uses, so a cell's expected output can say `…` where an id
+# is minted, exactly as a transcript does.
+book-transcripts = { path = "../book-transcripts" }

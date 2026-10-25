@@ -7,6 +7,14 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-24**: "Spaces that wrap spaces" now walks through the resilience harness in numbered stages. Each tab holds a step to run beside what it did: the breaker's state as the harness drew it at that stage, in the colors of the book's theme, what changed since the stage before (marked, and said in words), and the harness time. Your own button presses add stages of your own after the chapter's, so you can flip between any two states, and a line above the tabs keeps the upstream's mode, the circuit and the harness time in view. The chapter also explains why showing a stage again costs nothing: its picture is cached until a governor's state changes.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
+- **2026-10-24**: "Spaces that wrap spaces" now runs in the page: a resilience harness puts the real throttle governors around a stub dependency you control. Set it failing and watch the circuit breaker trip, wait out the cooldown and watch the probe close it, watch a retry spend the run's budget, and watch a timeout fire and trip the breaker too, with the arrangement and the breaker's state drawn live beside buttons that drive it. Time is the harness's own clock, so every run answers what the chapter shows.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-10-23**: A new book. It teaches the ikigai architecture as one substrate read two ways: the patterns a person operates are the patterns that authorize and confine them. An introduction sets out resource-oriented computing and how it generalizes the Web, then six parts carry one worked resource, a ledger item, through the capability spine and the manifold-driven UI, the door, the overlay chain, the economics of golden threads and caching, and presence and the audit axis. The capability and economics chapters run in the page: you narrow your own authority and watch an action leave the manifold, and you cut a golden thread and watch a view recompute.
 
   Pages: [Introduction](introduction.md), [One mechanism, read two ways](substrate/two-faces.md), [Resolve the viewer's authority once](spine/spine.md), [The manifold, and the UI that falls out of it](spine/manifold.md), [Golden threads and the cost of a read](economics/economics.md)

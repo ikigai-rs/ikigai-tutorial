@@ -16,11 +16,14 @@ git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
 edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/architecture/{path}"
 # The SAME files as The ikigai Book's, by symlink: one contrast repair and one runnable-cell
 # script for every book. `crates/book-a11y` measures the cascade this book really loads.
-additional-css = ["css/a11y.css", "css/layout.css", "css/run.css"]
+additional-css = ["css/a11y.css", "css/layout.css", "css/run.css", "css/stages.css"]
 # run.js loads `wasm/book_wasm.js` beside this book's root: for this book that is
-# `crates/gonk-book-wasm`, the work ledger over an in-memory store, bound under the same file
-# name. The same ledger The gonk Book teaches is the worked resource this book reads two ways.
-additional-js = ["js/a11y.js", "js/run.js"]
+# `crates/architecture-book-wasm`, bound under the same file name: the work ledger over an
+# in-memory store (the same ledger The gonk Book teaches is the worked resource this book reads
+# two ways), and the resilience harness "Spaces that wrap spaces" drives. `js/stages.js` and
+# `css/stages.css` are The ikigai Book's too, by symlink: the stages viewer, numbered tabs of a
+# picture as a chapter's steps change it (docs/stages.md), which shows the harness's stages.
+additional-js = ["js/a11y.js", "js/run.js", "js/stages.js"]
 
 [output.html.fold]
 enable = true
