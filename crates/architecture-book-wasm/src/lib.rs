@@ -12,17 +12,17 @@
 //!   "Golden threads and the cost of a read"). One per page, shared by every plain cell.
 //! - **A resilience harness** (`data-harness='overlays'`, chain `harness:overlays`):
 //!   [`resilience_harness::Harness`], a kernel of its own, started on first use and kept for
-//!   the life of the page. Its cells, and the controls `js/harness.js` builds beside its
-//!   picture, run there, and the picture and the board's words are read from it after each
-//!   ([`harness_picture_async`]).
+//!   the life of the page. Its cells, and the controls `js/stages.js` builds beside its
+//!   stages, run there, and so do the lines that viewer reads after each step (the picture,
+//!   `urn:diagram:state scheme=…`, and the board's words): nothing here knows about stages.
 //!
 //! Why a kernel of this book's own rather than The gonk Book's, which this book used to share:
 //! the harness links `ikigai-throttle` and `ikigai-diagram`, which no page of The gonk Book
 //! uses, so sharing would grow every gonk page's download for one chapter of this book.
 //!
-//! Exports, by the names the scripts call: `evalLineAsync`, `evalLineInChainAsync`,
-//! `boundNames` (`js/run.js`) and `harnessPictureAsync` (`js/harness.js`); `pages.yml` asserts
-//! all four.
+//! Exports, by the names the scripts call: `evalLineAsync`, `evalLineInChainAsync` and
+//! `boundNames` (`js/run.js`, and `js/stages.js`, which runs its lines the same way);
+//! `pages.yml` asserts all three.
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -55,21 +55,6 @@ impl HarnessHost {
     /// The engine its lines run in.
     pub fn engine(&self) -> Rc<Engine> {
         Rc::clone(&self.engine)
-    }
-
-    /// The picture as `js/harness.js` draws it, `{ "svg", "alt", "words" }`, or `{ "error" }`.
-    pub async fn picture_json(&self) -> String {
-        let picture = self.harness.picture().await;
-        let words = self.harness.words().await;
-        match (picture, words) {
-            (Ok(svg), Ok(words)) => serde_json::json!({
-                "svg": svg,
-                "alt": resilience_harness::PICTURE_ALT,
-                "words": words,
-            }),
-            (Err(error), _) | (_, Err(error)) => serde_json::json!({ "error": error.to_string() }),
-        }
-        .to_string()
     }
 }
 
@@ -194,21 +179,6 @@ pub fn eval_line_in_chain_async(chain: String, line: String) -> js_sys::Promise 
         Ok(JsValue::from_str(
             &eval_on(&page, Some(&chain), &line).await,
         ))
-    })
-}
-
-/// The picture of harness `name` as it is now, and the board's words: what `js/harness.js`
-/// draws after every cell or control that ran in it. Resolves to `{ "svg", "alt", "words" }`,
-/// or `{ "error" }`.
-#[wasm_bindgen(js_name = harnessPictureAsync)]
-pub fn harness_picture_async(name: String) -> js_sys::Promise {
-    let host = PAGE.with(|page| page.harness(&name));
-    wasm_bindgen_futures::future_to_promise(async move {
-        let json = match host {
-            Ok(host) => host.picture_json().await,
-            Err(error) => serde_json::json!({ "error": error }).to_string(),
-        };
-        Ok(JsValue::from_str(&json))
     })
 }
 

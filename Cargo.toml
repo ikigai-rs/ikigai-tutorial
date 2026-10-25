@@ -188,8 +188,10 @@ ikigai-json = "0.1.0"
 ikigai-sexpr = { version = "0.2.4", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Part VII's
 # picture test uses it (a dev-dependency), and `crates/live-space` mounts its space for
-# `urn:diagram:kernel`; neither is in the page, so the page pays nothing for it. 0.2.2 is the pin,
-# set 2026-10-24: it adds `urn:diagram:state` and `render_with_state`, governor state drawn over the
+# `urn:diagram:kernel`; neither is in the page, so the page pays nothing for it. 0.2.3 is the pin,
+# set 2026-10-24 (ledger #2215): every picture takes `scheme=light|dark|auto` (default `auto`),
+# so the architecture book's harness asks for the colors of the theme the book is in rather than
+# the system's. 0.2.2 (set 2026-10-24) adds `urn:diagram:state` and `render_with_state`, governor state drawn over the
 # arrangement (ledger #2173), which the architecture book's resilience harness draws with (ledger
 # #2174); `render` is unchanged, so the committed pictures are the same bytes. 0.2.1 (set
 # 2026-10-22, ledger #2007) draws `ik:DynamicSpace` as "Dynamic space", with its
@@ -199,7 +201,7 @@ ikigai-sexpr = { version = "0.2.4", default-features = false }
 # and nothing it draws did. Before that 0.2.0 was the pin, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
 # `urn:iki:space:diagram` (ledger #987), and `render` is unchanged, so the picture is the same
 # bytes. A 0.x caret, so also a ceiling (<0.3.0).
-ikigai-diagram = "0.2.2"
+ikigai-diagram = "0.2.3"
 # 0.4.0 is the pin (set 2026-10-14): an out-of-band host call is held to its
 # session's capability (ledger #83), an unwired module channel fails at once with a typed error
 # (ledger #746), and `ModuleSessionTransport::invoke_session` returns `ikigai_core::Result`, the

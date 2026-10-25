@@ -139,15 +139,55 @@ the chapter.
 as a governor. That is the transparency property above at work: `Retry` and `Timeout` hold
 nothing past a single call (an attempt count, a deadline), so they have no state to draw, and
 they report the topology of the space they wrap, so the picture sees through them to the door
-they govern. The breaker's state is drawn in that space's box and said in words below it.
+they govern. The breaker's state is drawn in that space's box, the first one under the root,
+and said in words in the box below the picture. The rest of the picture is the harness's other
+doors, and they do not change.
 
-<figure class="ikigai-harness" data-harness='overlays' style="margin: 1em 0">
-<a href="harness-start.svg"><img src="harness-start.svg"
-     alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words in the status line below the picture."></a>
-<figcaption>The harness as it starts, every circuit closed: <code>urn:diagram:state</code>, as
-the harness in <code>crates/resilience-harness</code> answers it. Select the picture to open it
-at full size.</figcaption>
-<ul class="ikigai-harness-controls" hidden>
+### The walkthrough, in stages
+
+The walkthrough below is a sequence of **stages**. A stage is the harness after a step that
+changed its picture, and each one is a numbered tab. Read a tab from the top: the step that makes
+the stage, as cells you run, then what that step did: which step made it, what changed since the
+stage before (the board's words, compared line by line with the stage before's: the words that
+differ are marked, and the line they replaced is said beside them), the facts at that stage, the
+picture as it was, and the board's words in full. A step that changes nothing the picture shows
+makes no stage, and the tab it sits in says "no change" instead. Six stages, from every circuit
+closed to a circuit half-open again. (The tabs are the books' stages viewer, `js/stages.js`, which
+knows nothing about governors: the page names the line that draws the picture and the line that
+says it in words, and the viewer does the rest.)
+
+**Watch the circuit, not the upstream.** The picture draws the governors, not the stub they
+govern. Setting the stub's mode changes nothing in the picture: the breaker learns of a mode
+only when a call goes through it and fails. The line above the tabs keeps the three facts that
+change current, each read from the name that holds it after every step: the upstream's mode
+(`urn:iki:tutorial:harness:mode`), the circuit (the board, `urn:throttle:state`) and the harness
+time (`urn:iki:tutorial:harness:clock`).
+
+**The buttons are yours.** They drive the same harness the cells do. A press that changes the picture
+adds a stage after the chapter's, numbered on, and opens it, so you can flip
+between any two states the harness has been in.
+
+**Why flipping back costs nothing.** A stage's picture is `urn:diagram:state`, a pure composition
+of two resources: the harness's topology and the governors' board. It is cacheable, and it hangs
+from what it read: the board hangs from the breaker's golden thread,
+`urn:throttle:governor:breaker`, which the breaker cuts on every change its board shows (a
+failure counted, a circuit tripped or closed). A cooldown running out cuts nothing; the board's
+answer is cached only until it would run out, on the harness clock. So a stage's picture stays
+true until the state moves, and a tab is drawn once, when its stage happens, and then only
+shown: flipping back asks the kernel nothing. A step that changes nothing cuts nothing, so the
+page's read of the picture after it is a cache hit, and the page says so; stage 4 shows one in a
+trace. The chapter's six pictures are files the same harness drew natively, held to it byte for
+byte by a test, so they show before the page's kernel loads, without it, and in print; a stage
+you make is drawn by the kernel in this page when it happens. Every picture is kept in both the
+light and the dark colors (`scheme=light`, `scheme=dark`), and the page shows the one the book's
+theme needs.
+
+<div class="ikigai-stages" data-chain='harness:overlays'
+     data-picture='source urn:diagram:state scheme={scheme}'
+     data-words='source urn:throttle:state'
+     data-tabs-label='Stages of the harness' data-controls-label='Drive the harness'
+     data-alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture.">
+<ul class="ikigai-stages-controls" hidden>
 <li data-cmd='sink urn:iki:tutorial:harness:mode ok'>Set the upstream to ok</li>
 <li data-cmd='sink urn:iki:tutorial:harness:mode slow'>Set the upstream to slow</li>
 <li data-cmd='sink urn:iki:tutorial:harness:mode fail'>Set the upstream to fail</li>
@@ -165,15 +205,36 @@ source urn:iki:tutorial:harness:call
 source urn:iki:tutorial:harness:call'>Call ten times</li>
 <li data-cmd='sink urn:iki:tutorial:harness:clock 5s'>Wait 5 seconds</li>
 </ul>
-</figure>
+<ul class="ikigai-stages-facts">
+<li data-cmd='source urn:iki:tutorial:harness:mode' data-label='upstream'>upstream: ok</li>
+<li data-cmd='source urn:throttle:state' data-line='3' data-none='no circuit has failed yet'>no circuit has failed yet</li>
+<li data-cmd='source urn:iki:tutorial:harness:clock'>the harness clock reads 0s</li>
+</ul>
+<section class="ikigai-stage" data-label="closed">
 
-The buttons and the cells drive the same harness. The cells below assume you run them in order
-on a fresh page; if you have pressed the buttons first, the cells answer from where you left the
-harness, and say they differ from the chapter. Reloading the page starts it over.
+#### Stage 1: the start
 
-### The breaker trips
+The harness as it starts. No call has been made, so no circuit has failed, and the breaker holds
+nothing but its settings.
 
-Set the stub failing:
+The cells in the stages assume you run them in order on a fresh page. If you have pressed the
+buttons first, the cells answer from where you left the harness and say they differ from the
+chapter, and a cell that then changes something adds a stage of yours. Reloading the page starts
+the harness over.
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">upstream: ok · no circuit has failed yet · the harness clock reads 0s</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="harness-stage-1-light.svg"><img src="harness-stage-1-light.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s."></a><a class="ikigai-scheme-dark" href="harness-stage-1-dark.svg"><img src="harness-stage-1-dark.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s."></a></p>
+<pre class="ikigai-stage-words">throttle state: 1 governor visible
+breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s</pre>
+</div>
+
+</section>
+<section class="ikigai-stage" data-label="open">
+
+#### Stage 2: the breaker trips
+
+Set the stub failing. This changes nothing in the picture: the mode is the stub's.
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='sink urn:iki:tutorial:harness:mode fail'>
 <pre class="ikigai-run-expected">the upstream is now fail
@@ -188,8 +249,17 @@ Make one governed call. It fails, but look at the call number:
 
 One call from you was three calls to the stub. `unavailable` is transient, so `Retry` re-issued
 it, twice, until the run's budget of 2 re-issues was spent; and the breaker below it counted
-every one of the three failures. Three is its threshold, so the circuit is now open. The board
-says so:
+every one of the three failures. Three is its threshold, so the circuit is now open:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">upstream: fail · circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures · the harness clock reads 0s</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="harness-stage-2-light.svg"><img src="harness-stage-2-light.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures."></a><a class="ikigai-scheme-dark" href="harness-stage-2-dark.svg"><img src="harness-stage-2-dark.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures."></a></p>
+<pre class="ikigai-stage-words">throttle state: 1 governor visible
+breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
+  circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures</pre>
+</div>
+
+The board says so, in words:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='source urn:throttle:state:breaker'>
 <pre class="ikigai-run-expected">breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
@@ -206,8 +276,13 @@ Call again:
 No call number: this one never reached the stub. An open circuit fails fast, and it says when to
 come back (the cooldown left) as a `retry after`, the same class a `429` is. `Retry` saw that
 class too, and returned it unchanged, because 5 seconds is longer than it is allowed to wait.
+**No change**: a refusal is not a failure the breaker counts, so nothing it shows moved, and this
+step makes no stage.
 
-### The probe
+</section>
+<section class="ikigai-stage" data-label="half-open">
+
+#### Stage 3: the probe
 
 Wait out the cooldown. The circuit is now half-open: the next call is let through as a probe.
 
@@ -222,7 +297,22 @@ breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips
 
 Nothing wrote the board between the last two reads of it, and the second was still computed
 afresh: the board's answer was cached only until the cooldown would run out, measured on the
-same clock, so moving the clock past it was enough. Now mend the stub and make the probe call:
+same clock, so moving the clock past it was enough. Time alone made this stage:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">upstream: fail · circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures · the harness clock reads 5s</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="harness-stage-3-light.svg"><img src="harness-stage-3-light.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures."></a><a class="ikigai-scheme-dark" href="harness-stage-3-dark.svg"><img src="harness-stage-3-dark.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures."></a></p>
+<pre class="ikigai-stage-words">throttle state: 1 governor visible
+breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
+  circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures</pre>
+</div>
+
+</section>
+<section class="ikigai-stage" data-label="closed">
+
+#### Stage 4: the probe closes the circuit
+
+Mend the stub and make the probe call:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='sink urn:iki:tutorial:harness:mode ok
 source urn:iki:tutorial:harness:call
@@ -239,7 +329,15 @@ breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips
 Call 4: the probe reached the stub, it answered, and the circuit closed. Had the stub still been
 failing, the probe's failure would have opened the circuit again for another cooldown.
 
-### The retry spends its budget
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">upstream: ok · circuit `urn:iki:tutorial:harness:call`: closed, 0 consecutive transient failures · the harness clock reads 5s</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="harness-stage-4-light.svg"><img src="harness-stage-4-light.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: closed, 0 consecutive transient failures."></a><a class="ikigai-scheme-dark" href="harness-stage-4-dark.svg"><img src="harness-stage-4-dark.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: closed, 0 consecutive transient failures."></a></p>
+<pre class="ikigai-stage-words">throttle state: 1 governor visible
+breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
+  circuit `urn:iki:tutorial:harness:call`: closed, 0 consecutive transient failures</pre>
+</div>
+
+##### No change: the retry spends its budget
 
 Now make the stub push back: `limited` answers `retry after 1000 ms`. This time trace the call,
 so you can see inside it:
@@ -262,27 +360,39 @@ urn:iki:tutorial:harness:call   error: retry after 1000 ms: upstream limited (ca
 Read it from the inside out. The stub reads its mode once per call, and there are three reads
 under the one call you made: three attempts, calls 5, 6 and 7. (The first read is computed
 because setting the mode a line earlier cut the mode's thread; the other two are served from the
-cache.) A one-second delay fits inside
-`Retry`'s two-second bound, so it waited each one out before re-issuing, and the call took
-2000 ms of harness time: two waits, two re-issues, and then the budget of 2 was spent and the
-third `retry after` came back to you. `Retry` would have made 5 attempts; the run's budget is
-what stopped it. And the breaker, which a `retry after` says nothing to, has not moved:
+cache.) A one-second delay fits inside `Retry`'s two-second bound, so it waited each one out
+before re-issuing, and the call took 2000 ms of harness time: two waits, two re-issues, and then
+the budget of 2 was spent and the third `retry after` came back to you. `Retry` would have made
+5 attempts; the run's budget is what stopped it. And the breaker, which a `retry after` says
+nothing to, has not moved:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='source urn:iki:tutorial:harness:clock
-source urn:throttle:state:breaker'>
+source urn:throttle:state:breaker
+trace urn:diagram:state scheme=light'>
 <pre class="ikigai-run-expected">the harness clock reads 7s
 [uncacheable]
 breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
   circuit `urn:iki:tutorial:harness:call`: closed, 0 consecutive transient failures
-[cached]</pre>
+[cached]
+trace  urn:diagram:state
+  client      ikigai repl  ·  capability: root (full authority)
+  transport   embedded · in-process
+&#32;
+urn:diagram:state   diagram-state · cached · … · 0ms · answered-by=urn:iki:space:diagram   → …</pre>
 </div>
 
 The clock moved the two seconds the retry waited. The board is the same answer as before, served
-from the cache: nothing a governor shows changed, so nothing cut its thread.
+from the cache: nothing a governor shows changed, so nothing cut its thread. **No change**, then,
+and the trace of the picture says the same thing from the other side: `urn:diagram:state` was
+served from the cache, because the picture this stage shows was drawn when the stage happened,
+and nothing since has cut a thread it hangs from.
 
-### The timeout
+</section>
+<section class="ikigai-stage" data-label="open">
 
-Last, make the stub slow: it now takes 10 seconds, and the call's budget is 2.
+#### Stage 5: the timeout
+
+Make the stub slow: it now takes 10 seconds, and the call's budget is 2.
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='sink urn:iki:tutorial:harness:mode slow
 source urn:iki:tutorial:harness:call'>
@@ -293,7 +403,19 @@ error: timeout: `urn:iki:tutorial:harness:call` exceeded 2000ms</pre>
 
 The timeout names the target it bounded, and its class is transient, because the overlay cannot
 tell a slow dependency (which a repeat may beat) from expensive work (which it will not). So the
-two governors above it treated it like any other transient failure:
+two governors above it treated it like any other transient failure, and the circuit opened:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">upstream: slow · circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures · the harness clock reads 13s</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="harness-stage-5-light.svg"><img src="harness-stage-5-light.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures."></a><a class="ikigai-scheme-dark" href="harness-stage-5-dark.svg"><img src="harness-stage-5-dark.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures."></a></p>
+<pre class="ikigai-stage-words">throttle state: 1 governor visible
+breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
+  circuit `urn:iki:tutorial:harness:call`: open, 3 consecutive transient failures</pre>
+</div>
+
+The picture is the same as stage 2's, because the state is: the breaker cannot tell a stalled
+dependency from a failing one, and does not need to. The clock and the board say how it got
+there:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='source urn:iki:tutorial:harness:clock
 source urn:throttle:state:breaker'>
@@ -307,7 +429,13 @@ breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips
 Six seconds: `Retry` re-issued twice from the budget, each attempt was cut off at its 2 seconds,
 and the breaker counted three transient failures and opened. A stalled dependency trips the
 breaker exactly as a failing one does, which is the point of putting the timeout *inside* it.
-For contrast, the same stub, ungoverned:
+
+</section>
+<section class="ikigai-stage" data-label="half-open">
+
+#### Stage 6: the same stub, ungoverned
+
+For contrast, call the same stub with no governor in the way:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='source urn:iki:tutorial:harness:upstream'>
 <pre class="ikigai-run-expected">ok, slowly (call 11, after 10s)
@@ -315,7 +443,20 @@ For contrast, the same stub, ungoverned:
 </div>
 
 It answers, after the full 10 seconds. Without the stack, a caller waits as long as the
-dependency takes; with it, the caller hears in 2.
+dependency takes; with it, the caller hears in 2. And those 10 seconds were harness time: the
+clock moved past the open circuit's 5-second cooldown while this call waited, so the circuit went
+half-open with nobody calling through it, the same way it did in stage 3:
+
+<div class="ikigai-stage-result">
+<p class="ikigai-stage-facts">upstream: slow · circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures · the harness clock reads 23s</p>
+<p class="ikigai-stage-picture"><a class="ikigai-scheme-light" href="harness-stage-6-light.svg"><img src="harness-stage-6-light.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures."></a><a class="ikigai-scheme-dark" href="harness-stage-6-dark.svg"><img src="harness-stage-6-dark.svg" alt="The resilience harness, drawn: the governed call urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's space. The circuit breaker's state is drawn in the governed space's box and said in words below the picture. At this stage: throttle state: 1 governor visible; breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s; circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures."></a></p>
+<pre class="ikigai-stage-words">throttle state: 1 governor visible
+breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
+  circuit `urn:iki:tutorial:harness:call`: half-open, 3 consecutive transient failures</pre>
+</div>
+
+</section>
+</div>
 
 Failover and the bulkhead (`Throttle`) are not in the harness yet. They are the next pieces of
 this chapter to run, and until then the table above is their description.

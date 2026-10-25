@@ -1,0 +1,157 @@
+/* The stages viewer (`js/stages.js`, contract in docs/stages.md): numbered tabs of a picture's
+ * stages, the steps that make them, the facts line. ONE COPY for every book, as run.css is: a
+ * book that uses it links to this file and lists it in its book.toml. Every color is a theme
+ * variable, so the contrast gate's pairs cover it, except <mark>, whose colors mdbook's themes
+ * set as a pair. */
+
+.ikigai-stages {
+    margin: 1em 0;
+}
+
+.ikigai-stages-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.5rem 0;
+}
+
+.ikigai-stages-facts,
+.ikigai-stage-facts {
+    font-family: var(--mono-font, monospace);
+    font-size: 0.9em;
+    padding: 0.3rem 0.6rem;
+    border-left: 4px solid var(--links);
+    background: var(--quote-bg);
+    color: var(--fg);
+    overflow-wrap: anywhere;
+}
+
+.ikigai-stages-status {
+    font-size: 0.9em;
+}
+
+/* The tablist wraps rather than scrolling the page sideways at 320 px. */
+.ikigai-stage-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    border-bottom: 2px solid var(--links);
+    margin-top: 0.5rem;
+}
+
+.ikigai-stage-tab {
+    font: inherit;
+    font-size: 0.9em;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--links);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+}
+
+/* The selected tab is told by its weight and a solid fill, never by color alone. */
+.ikigai-stage-tab[aria-selected="true"] {
+    background: var(--links);
+    color: var(--bg);
+    font-weight: 700;
+}
+
+.ikigai-stage-tab:focus-visible,
+.ikigai-stage:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+/* "Stage " in a tab's name, for a screen reader; the tab shows "2 · open". */
+.ikigai-stage-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.ikigai-stage {
+    padding: 0.2rem 0 0.5rem;
+}
+
+.ikigai-stage-result {
+    margin: 1em 0;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--quote-border, var(--links));
+    border-left: 4px solid var(--links);
+    background: var(--quote-bg);
+    color: var(--fg);
+}
+
+.ikigai-stage-result p {
+    margin: 0.4em 0;
+}
+
+.ikigai-stage-changes {
+    margin: 0.2em 0 0;
+}
+
+.ikigai-stage-changed mark {
+    font-weight: 700;
+    padding: 0 0.2em;
+}
+
+/* The facts list reads as one line: "upstream: fail · circuit: … · …". */
+.ikigai-stages-facts {
+    list-style: none;
+}
+
+.ikigai-stages-facts li {
+    display: inline;
+}
+
+.ikigai-stages-facts li + li::before {
+    content: " · ";
+}
+
+.ikigai-stage-words {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 0.85em;
+    margin: 0.4em 0 0;
+}
+
+.ikigai-stage-picture img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* The picture in the colors of the book's theme: light and rust are light; coal, navy and ayu
+ * are dark. Both copies are on the page, so a theme change shows the other rather than asking
+ * the kernel again. With no theme class, the light copy shows. */
+.ikigai-stage-picture a.ikigai-scheme-light,
+html.coal .ikigai-stage-picture a.ikigai-scheme-dark,
+html.navy .ikigai-stage-picture a.ikigai-scheme-dark,
+html.ayu .ikigai-stage-picture a.ikigai-scheme-dark {
+    display: inline-block;
+}
+
+.ikigai-stage-picture a.ikigai-scheme-dark,
+html.coal .ikigai-stage-picture a.ikigai-scheme-light,
+html.navy .ikigai-stage-picture a.ikigai-scheme-light,
+html.ayu .ikigai-stage-picture a.ikigai-scheme-light {
+    display: none;
+}
+
+/* In print, every stage, one after another, and no tabs to press. */
+@media print {
+    .ikigai-stage-tabs,
+    .ikigai-stages-buttons {
+        display: none;
+    }
+    .ikigai-stage[hidden] {
+        display: block !important;
+    }
+}

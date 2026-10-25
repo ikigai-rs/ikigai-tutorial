@@ -39,6 +39,9 @@ The four runs in "What resolution buys you" resolve in your browser, against the
 space the chapter's tests run against; with the wasm absent a cell cannot run — Run is
 disabled and says why — and still answers nothing (`a11y/no-kernel.mjs` pins that in CI).
 The URN gate checks the chapter's original command; what the reader types is theirs.
+A picture that a chapter's steps change, shown as numbered tabs of its stages, is
+`books/ikigai/js/stages.js`, one copy any book can load; its markup contract is
+[`docs/stages.md`](docs/stages.md).
 
 Or clone it and serve it locally:
 

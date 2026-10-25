@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-24**: "Spaces that wrap spaces" now walks through the resilience harness in numbered stages. Each tab holds a step to run beside what it did: the breaker's state as the harness drew it at that stage, in the colors of the book's theme, what changed since the stage before (marked, and said in words), and the harness time. Your own button presses add stages of your own after the chapter's, so you can flip between any two states, and a line above the tabs keeps the upstream's mode, the circuit and the harness time in view. The chapter also explains why showing a stage again costs nothing: its picture is cached until a governor's state changes.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-10-24**: "Spaces that wrap spaces" now runs in the page: a resilience harness puts the real throttle governors around a stub dependency you control. Set it failing and watch the circuit breaker trip, wait out the cooldown and watch the probe close it, watch a retry spend the run's budget, and watch a timeout fire and trip the breaker too, with the arrangement and the breaker's state drawn live beside buttons that drive it. Time is the harness's own clock, so every run answers what the chapter shows.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md)
