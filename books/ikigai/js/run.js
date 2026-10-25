@@ -78,10 +78,10 @@
 //
 // Or a LIVE HOST ("A space that changes while it runs"): `data-live='workshop'` runs its lines in
 // a host of its own (chain `live:workshop`), a kernel beside the page's one whose dynamic space
-// the cell rebuilds by writing its declaration. `js/live.js` redraws that host's picture after
-// every such cell. The redraw is a READ of the host (`urn:diagram:kernel`, through its cache), so
-// it must land before the next cell's lines, or a cut in them comes before the read and the
-// cell's `trace` says `cached` where the chapter says `computed` (ledger #2191). So a script that
+// the cell rebuilds by writing its declaration. A stages viewer (`js/stages.js`) in that chain reads
+// the host's picture and words after every such cell. Those are READS of the host (through its
+// cache), so they must land before the next cell's lines, or a cut in them comes before the read
+// and the cell's `trace` says `cached` where the chapter says `computed` (ledger #2191). So a script that
 // starts work on a chain when a cell ran there hands it to `ikigai:cell-ran`'s `hold`, and the
 // next run in that chain waits for it first.
 //
@@ -245,7 +245,7 @@
     // from the chapter counts when it says how many cells above it have not run.
     var cells = [];
     // What the next run in a chain waits for, by chain: the work scripts held when a cell last ran
-    // in it (`ikigai:cell-ran`'s `hold`; `js/live.js`'s redraw). Never rejects.
+    // in it (`ikigai:cell-ran`'s `hold`; `js/stages.js`'s reads). Never rejects.
     var held = {};
     // A page on the browser's clock answers with the reader's own time: nothing to compare.
     var browserClock = false;

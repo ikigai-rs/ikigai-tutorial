@@ -108,3 +108,7 @@ console_error_panic_hook = "0.1"
 # Tic-tac-toe's part VII: its page test prints the file's arrangement the way the build
 # resource does, to check the cell's answer is the file and not a copy of it.
 ikigai-sexpr.workspace = true
+# The stages viewer's native check (`book_transcripts::stages`), shared with the architecture
+# book's: "A space that changes while it runs" commits its stages, and a test holds them to the
+# live host.
+book-transcripts = { path = "../book-transcripts" }

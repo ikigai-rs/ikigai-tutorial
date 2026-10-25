@@ -12,8 +12,11 @@ picture, the line that says it in words, and the steps. Any book's in-page kerne
 lines (`crates/book-wasm`, `crates/architecture-book-wasm`, `crates/gonk-book-wasm` and the rest,
 through the `evalLineAsync` and `evalLineInChainAsync` exports `js/run.js` already uses).
 
-Today one chapter uses it: The ikigai Architecture's "Spaces that wrap spaces", the resilience
-harness (`books/architecture/src/overlays/overlays.md`). Read that page's markup beside this one.
+Two chapters use it. The ikigai Architecture's "Spaces that wrap spaces" steps the resilience
+harness with buttons and cells (`books/architecture/src/overlays/overlays.md`), and The ikigai
+Book's "A space that changes while it runs" steps a live host's dynamic space with cells only,
+its stages spanning the chapter's sections (`books/ikigai/src/applied/live-space.md`). Read either
+page's markup beside this one.
 
 ## Using it in a book
 
@@ -112,22 +115,32 @@ Before the first step it compares with the first stage's committed words: nothin
 
 **What changed** compares a stage's words with the stage before's, line by line. A line that
 replaced another is shown with the words that differ marked (`<mark>`) and the words they
-replaced beside it; a new line and a line that is gone are said as such. It is real text in the
+replaced beside it; a new line and a line that is gone are said as such. A new line replaced
+the gone line that begins with the same words before its first `: `, so a words line that says
+where it is first (`holding: …`, `` circuit `…`: …``) is paired with its old self however many
+lines came or went around it; the lines left over are paired in order when there are as many
+on each side, and are otherwise new and gone. Write the words with that in mind: one line per
+thing, the thing's name before the colon. It is real text in the
 panel, never color alone. The same comparison runs on the committed stages, so their "what
 changed" needs no kernel.
 
 ## Keeping the committed stages true
 
 A chapter's stages are committed: the pictures as files beside the chapter, the words and facts
-as text in the result block. **A native test holds them to the kernel**, as
-`crates/architecture-book-wasm/tests/pages.rs`
-(`the_chapters_stages_are_the_walkthrough_as_the_kernel_draws_it`) does for the harness. It
-runs the page's cells in order on a fresh page, reads the viewer's lines after each the way the
-script does, and requires every cell that moves the words or the picture to sit in the next
-stage's section, every result block to be what the kernel answers, and every picture file to be
-the kernel's bytes. On a mismatch it prints the expected result blocks and writes the pictures
-beside the build with the `cp` command that commits them. Copy that test (its `Viewer`,
-`Snapshot` and `read` helpers are generic) for a new chapter.
+as text in the result block. **A native test holds them to the kernel**, and the part of it that
+is the same for every book is `book_transcripts::stages` (`crates/book-transcripts/src/stages.rs`):
+`viewers` reads the markup, `Viewer::read` reads the viewer's lines after a step the way the
+script does, and `walkthrough` runs the page's cells in order on a fresh page, reading the
+viewer's lines after each, and requires every cell that moves the words or the picture to sit in
+the next stage's section, every result block to be what the kernel answers, and every picture
+file to be the kernel's bytes. A book's test hands it a function that runs one line in the
+viewer's chain on its own kernel: `crates/architecture-book-wasm/tests/pages.rs`
+(`the_chapters_stages_are_the_walkthrough_as_the_kernel_draws_it`) for the harness,
+`crates/book-wasm` (`the_live_space_stages_are_the_walkthrough_as_the_host_draws_it`) for the
+live host. On a mismatch it prints the expected result blocks. **The pictures are written by the
+code, never by hand**: run the test with `BOOK_PICTURES_WRITE=1` and every picture that differs
+is written where the chapter keeps it; without it, they are written beside the build with the
+`cp` command that commits them.
 
 The no-kernel check (`a11y/no-kernel.mjs`) requires every viewer to keep its tabs and committed
 pictures, offer no control, and say the kernel did not load.

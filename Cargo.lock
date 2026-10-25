@@ -226,6 +226,7 @@ name = "book-wasm"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "book-transcripts",
  "check-resource",
  "console_error_panic_hook",
  "futures",
@@ -1216,9 +1217,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-diagram"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7f675e5191bd869c0a859cb2906c46e6e9c349a151d3a2a6832f49ef92ffd68"
+checksum = "7bb1074adec13237d939e0708eaa5cba957f3003c7617de8403000b6908f5260"
 dependencies = [
  "ikigai-core",
  "ikigai-fn 0.5.0",
