@@ -55,7 +55,10 @@ a review comment.
 - **The stages viewer** (`js/stages.js`, `css/stages.css`, one copy every book can load; today
   the live host in The ikigai Book and the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern
   (arrow keys, Home and End), one polite status region, what changed said in words with the
-  changed words marked, the reader's own stages appended. Only the selected stage is in the
+  changed words marked, the reader's own stages appended, and after every step the picture the
+  kernel drew in a labeled group right under that step, with a row of `aria-pressed` stage buttons
+  that show any stage's picture in the same place (not a live region: the status region says the
+  step once). Only the selected stage is in the
   page's rendered content, so the browser axe run audits the first stage's panel and the tabs,
   not the other panels; the structure gate and the no-kernel check read every panel's markup.
 

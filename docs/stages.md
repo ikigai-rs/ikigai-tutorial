@@ -114,6 +114,17 @@ no thread reads the picture from the cache, and the viewer says so). Then:
 
 Before the first step it compares with the first stage's committed words: nothing is read on load.
 
+**The picture is shown where the step is.** After every step, the viewer also fills a card
+(`div.ikigai-stage-now`, a labeled group) right below what was pressed: under the row of buttons
+(one card the buttons share), or under a cell's Run button (`form.ikigai-run-head`, ahead of the
+lines' own answers; one card per cell, refilled by its next run). The card says what the step did,
+then holds a row of stage buttons (`aria-pressed`, one per tab, the stage the reader's kernel is
+at pressed), the picture the kernel just drew, what changed and the facts. A stage button shows
+that stage's committed picture, what changed and facts in the same place, copied from its tab, so
+nothing is asked of the kernel; the pressed one shows the kernel's own picture again. The buttons
+sit above the picture, so flipping between stages never moves them. The card is not a live region:
+the status region already says the step's outcome once.
+
 **What changed** compares a stage's words with the stage before's, line by line. A line that
 replaced another is shown with the words that differ marked (`<mark>`) and the words they
 replaced beside it; a new line and a line that is gone are said as such. A new line replaced
