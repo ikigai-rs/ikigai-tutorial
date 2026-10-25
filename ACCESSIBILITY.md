@@ -50,7 +50,7 @@ a review comment.
   board, view and sheet styles.
 - **Generated pictures** committed into a book (the tic-tac-toe arrangement SVG, the live host in
   "A space that changes while it runs" with its dynamic space's four stages, and the resilience
-  harness's six stages in The ikigai Architecture's "Spaces that wrap spaces", each stage in a
+  harness's twelve stages in The ikigai Architecture's "Spaces that wrap spaces", each stage in a
   light and a dark copy), and the ones a page draws (a stage a reader makes, kept in its own tab).
 - **The stages viewer** (`js/stages.js`, `css/stages.css`, one copy every book can load; today
   the live host in The ikigai Book and the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern

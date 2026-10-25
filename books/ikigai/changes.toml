@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-10-25"
+summary = "The book's in-page kernel's tests replay a stages viewer the way the page now reads one, ahead of the architecture book's harness marking what changed in its pictures; nothing on these pages changes."
+pages = ["applied/spreadsheet-6.md", "applied/spreadsheet-7.md", "applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md", "applied/time.md", "browser.md", "building/checking.md"]
+maintenance = true
+
+[[change]]
+date = "2026-10-25"
 summary = "A space that changes while it runs now shows its dynamic space in four numbered stages, one tab each: empty, four doors, three doors, and a view. Each tab draws the space as it was (light and dark), says what changed since the stage before in words, and keeps the cells that made it; a refused change makes no stage. The host gains `urn:iki:tutorial:live:arrangement`, the space in words, and the whole host is drawn once, before anything is declared."
 pages = ["applied/live-space.md"]
 

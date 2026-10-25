@@ -136,6 +136,9 @@ pub struct Viewer {
     pub chain: Option<String>,
     pub picture: String,
     pub words: String,
+    /// `data-before`: a line whose answer, read after each step, is handed to the next read
+    /// of the picture as `before="…"`, so the picture can mark what changed since.
+    pub before: Option<String>,
     pub alt: String,
     pub facts: Vec<Fact>,
     /// The facts list as the page shows it before any step.
@@ -236,6 +239,7 @@ pub fn viewers(page: &str) -> Vec<Viewer> {
             chain: attribute(tag, "data-chain"),
             picture: attribute(tag, "data-picture").expect("a viewer names its picture"),
             words: attribute(tag, "data-words").expect("a viewer names its words"),
+            before: attribute(tag, "data-before"),
             alt: quoted(tag, "data-alt").expect("a viewer says what its picture draws"),
             facts,
             facts_shown,
@@ -257,7 +261,14 @@ pub struct Snapshot {
     /// The cache's verdict on the first picture read.
     pub cache: String,
     pub words: String,
+    /// What `data-before` answered, when the viewer names one.
+    pub before: Option<String>,
     pub facts: Vec<String>,
+}
+
+/// `text` as one quoted value of a line, the way the engine reads one: `\` and `"` escaped.
+pub fn quote(text: &str) -> String {
+    format!("\"{}\"", text.replace('\\', "\\\\").replace('"', "\\\""))
 }
 
 /// Two answers in words are the same when their lines are, trimmed, blank lines dropped.
@@ -272,14 +283,23 @@ impl Snapshot {
             pictures: Vec::new(),
             cache: String::new(),
             words: words_in(&viewer.stages[0].markup),
+            before: None,
             facts: Vec::new(),
         }
     }
 
-    /// Whether this is a new stage after `seen`: the words differ, or the picture does.
+    /// Whether this is a new stage after `seen`: the words differ, or what `data-before`
+    /// answers does, or (without `data-before`, whose picture marks changes and so differs
+    /// whenever its `before` does) the picture does.
     pub fn moved_from(&self, seen: &Snapshot) -> bool {
-        !same_words(&self.words, &seen.words)
-            || (!seen.pictures.is_empty() && seen.pictures[0].1 != self.pictures[0].1)
+        if !same_words(&self.words, &seen.words) {
+            return true;
+        }
+        match (&seen.before, &self.before) {
+            (Some(was), Some(now)) => was != now,
+            (None, Some(_)) => false,
+            _ => !seen.pictures.is_empty() && seen.pictures[0].1 != self.pictures[0].1,
+        }
     }
 }
 
@@ -305,23 +325,35 @@ impl Viewer {
         }
     }
 
-    /// Read the viewer's stage as `js/stages.js` reads it after a step: the picture in each
-    /// scheme, then the words, then each fact. `eval` runs one line in the viewer's chain.
-    pub fn read(&self, eval: &dyn Fn(&str) -> Reply) -> Snapshot {
-        let mut pictures = Vec::new();
-        let mut cache = String::new();
-        for scheme in self.schemes() {
-            let line = scheme.map_or(self.picture.clone(), |s| {
-                self.picture.replace("{scheme}", s)
-            });
-            let r = eval(&line);
-            assert_eq!(r.kind, "output", "`{line}` drew no picture: {r:?}");
-            if cache.is_empty() {
-                cache = r.cache.clone();
-            }
-            pictures.push((scheme, r.text));
+    /// The picture line in `scheme`, with `before="…"` when the viewer names `data-before`
+    /// and there is an earlier answer of it to hand on.
+    pub fn picture_line(&self, scheme: Option<&str>, before: Option<&str>) -> String {
+        let line = scheme.map_or(self.picture.clone(), |s| {
+            self.picture.replace("{scheme}", s)
+        });
+        match (&self.before, before) {
+            (Some(_), Some(earlier)) => format!("{line} before={}", quote(earlier)),
+            _ => line,
         }
+    }
+
+    /// Read the viewer's stage as `js/stages.js` reads it after a step: the words, then
+    /// `data-before`, then each fact, then the picture in each scheme, marked against `before`
+    /// when the viewer names `data-before`. `eval` runs one line in the viewer's chain.
+    pub fn read(&self, eval: &dyn Fn(&str) -> Reply, before: Option<&str>) -> Snapshot {
+        let mut now = self.read_state(eval);
+        self.read_pictures(eval, before, &mut now);
+        now
+    }
+
+    /// The words, what `data-before` answers and the facts, with no picture yet.
+    fn read_state(&self, eval: &dyn Fn(&str) -> Reply) -> Snapshot {
         let words = eval(&self.words).said();
+        let before = self.before.as_ref().map(|line| {
+            let r = eval(line);
+            assert_eq!(r.kind, "output", "`{line}` answered {r:?}");
+            r.text
+        });
         let facts = self
             .facts
             .iter()
@@ -336,10 +368,39 @@ impl Viewer {
             })
             .collect();
         Snapshot {
-            pictures,
-            cache,
+            pictures: Vec::new(),
+            cache: String::new(),
             words,
+            before,
             facts,
+        }
+    }
+
+    /// The picture in each scheme, marked against `before`, into `now`.
+    fn read_pictures(
+        &self,
+        eval: &dyn Fn(&str) -> Reply,
+        before: Option<&str>,
+        now: &mut Snapshot,
+    ) {
+        for scheme in self.schemes() {
+            let line = self.picture_line(scheme, before);
+            let r = eval(&line);
+            assert_eq!(r.kind, "output", "`{line}` drew no picture: {r:?}");
+            if now.cache.is_empty() {
+                now.cache = r.cache.clone();
+            }
+            now.pictures.push((scheme, r.text));
+        }
+    }
+
+    /// A reader of this viewer, as the page is one: what it last saw, starting from the
+    /// first stage's committed words.
+    pub fn reading(&self) -> Reading<'_> {
+        Reading {
+            viewer: self,
+            seen: Snapshot::start(self),
+            drawn_with: None,
         }
     }
 
@@ -384,6 +445,42 @@ impl Viewer {
             "<div class=\"ikigai-stage-result\">\n{facts_line}<p class=\"ikigai-stage-picture\">{pictures}</p>\n<pre class=\"ikigai-stage-words\">{}</pre>\n</div>",
             escape(words)
         )
+    }
+}
+
+/// The viewer's reads after each step, as `js/stages.js` makes them.
+///
+/// With `data-before`, a step that makes a stage draws its picture marked against the stage
+/// before (what `data-before` answered at the last read), and a step that changes nothing
+/// draws it exactly as the current stage was drawn, so that read is the same request, and a
+/// step that cut nothing finds it in the cache.
+pub struct Reading<'v> {
+    viewer: &'v Viewer,
+    /// What the last read saw.
+    pub seen: Snapshot,
+    /// What the current stage's picture was marked against.
+    drawn_with: Option<String>,
+}
+
+impl Reading<'_> {
+    /// Read the viewer now, and say whether that is a new stage after the last read.
+    pub fn step(&mut self, eval: &dyn Fn(&str) -> Reply) -> (Snapshot, bool) {
+        let viewer = self.viewer;
+        let mut now = viewer.read_state(eval);
+        let moved = if viewer.before.is_some() {
+            let moved = !same_words(&now.words, &self.seen.words)
+                || (self.seen.before.is_some() && self.seen.before != now.before);
+            if moved {
+                self.drawn_with = self.seen.before.clone();
+            }
+            viewer.read_pictures(eval, self.drawn_with.as_deref(), &mut now);
+            moved
+        } else {
+            viewer.read_pictures(eval, None, &mut now);
+            now.moved_from(&self.seen)
+        };
+        self.seen = now.clone();
+        (now, moved)
     }
 }
 
@@ -459,7 +556,7 @@ pub fn walkthrough(
         }
     };
 
-    let start = viewer.read(fresh);
+    let start = viewer.read(fresh, None);
     check(1, &start, &mut problems);
     if viewer.facts_shown != start.facts {
         problems.push(format!(
@@ -469,7 +566,11 @@ pub fn walkthrough(
     }
 
     let mut printed = Vec::new();
-    let mut seen = Snapshot::start(viewer);
+    // The committed stages are marked against the stage before; stage 1's board is the
+    // fresh page's. (In the page, the first step's stage has no earlier read to be marked
+    // against: the viewer reads nothing on load.)
+    let mut reading = viewer.reading();
+    reading.seen.before = start.before.clone();
     let mut number = 1;
     for (i, step) in steps.iter().enumerate() {
         let out = run(step);
@@ -477,13 +578,11 @@ pub fn walkthrough(
         if step.chain != viewer.chain {
             continue;
         }
-        let now = viewer.read(eval);
+        let (now, moved) = reading.step(eval);
         let within = viewer
             .stages
             .iter()
             .position(|s| s.at < step.at && step.at < s.end);
-        let moved = now.moved_from(&seen);
-        seen = now.clone();
         if !moved {
             if within.is_none() && viewer.at < step.at && step.at < viewer.end {
                 problems.push(format!("step {i} runs in the viewer outside every stage"));
@@ -564,6 +663,7 @@ mod tests {
             ],
             cache: String::new(),
             words: "a <b> & \"c\"\n".to_string(),
+            before: None,
             facts: vec!["f: x".to_string()],
         };
         let block = v.result_block(2, "s", &now);
@@ -575,6 +675,30 @@ mod tests {
         );
         assert!(block.contains("<p class=\"ikigai-stage-facts\">f: x</p>"));
         assert_eq!(unescape(&escape("<&>\"")), "<&>\"");
+    }
+
+    #[test]
+    fn a_picture_line_carries_the_earlier_answer_quoted() {
+        let page = PAGE.replace(
+            "data-words='source urn:w'",
+            "data-words='source urn:w' data-before='source urn:b as=text/turtle'",
+        );
+        let v = &viewers(&page)[0];
+        assert_eq!(v.before.as_deref(), Some("source urn:b as=text/turtle"));
+        assert_eq!(
+            v.picture_line(Some("dark"), Some("<a> <b> \"c\\d\" .\n")),
+            "source urn:p scheme=dark before=\"<a> <b> \\\"c\\\\d\\\" .\n\""
+        );
+        assert_eq!(
+            v.picture_line(Some("light"), None),
+            "source urn:p scheme=light"
+        );
+        // Without data-before, an earlier answer is never handed on.
+        let plain = &viewers(PAGE)[0];
+        assert_eq!(
+            plain.picture_line(None, Some("x")),
+            "source urn:p scheme={scheme}"
+        );
     }
 
     #[test]

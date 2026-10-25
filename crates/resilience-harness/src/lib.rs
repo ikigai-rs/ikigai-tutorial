@@ -4,15 +4,19 @@
 //! A stub upstream the reader controls, behind the REAL `ikigai-throttle` overlays, on a clock
 //! the reader advances, drawn by `ikigai-diagram` with the governors' state over it. A reader
 //! sets the upstream failing and watches the circuit breaker trip, advances the clock and
-//! watches it probe and close, and sees the retry spend its budget and the timeout fire,
-//! against the governor code every ikigai host runs. Nothing is mocked but the upstream.
+//! watches it probe and close, and sees the retry spend its budget and the timeout fire; then
+//! watches a failover move to its backup and back, and a burst of calls park behind a
+//! bulkhead and drain as the clock moves, against the governor code every ikigai host runs.
+//! Nothing is mocked but the upstream and its backup.
 //!
 //! ```text
 //! sink   urn:iki:tutorial:harness:mode fail       ok | slow | fail | limited
 //! source urn:iki:tutorial:harness:call            the governed call
 //! source urn:iki:tutorial:harness:upstream        the same stub, ungoverned
-//! sink   urn:iki:tutorial:harness:clock 5s        move the harness clock
-//! source urn:throttle:state                       what the breaker holds, in words
+//! sink   urn:iki:tutorial:harness:clock 5s        move the harness clock (and the burst's calls)
+//! source urn:iki:tutorial:harness:service         the stub, failing over to a backup
+//! sink   urn:iki:tutorial:harness:burst 5         five calls to the bulkhead's work, at once
+//! source urn:throttle:state                       what the governors hold, in words
 //! source urn:diagram:state                        the arrangement, with that state drawn on it
 //! ```
 //!
@@ -26,20 +30,29 @@
 //!   harness timer, fails transiently, or answers `RetryAfter`. No composition can manufacture
 //!   a typed failure. It numbers its calls, so an answer says whether a call reached it.
 //! - **Code, because the arrangement vocabulary cannot declare an overlay.** [`CALL`], the
-//!   stub behind `Retry(CircuitBreaker(Timeout(…)))`: the stack is built in Rust
-//!   ([`root`]), because a declared arrangement has no form for a throttle governor today.
+//!   stub behind `Retry(CircuitBreaker(Timeout(…)))`, [`SERVICE`], the stub behind
+//!   `Failover([Timeout(primary), backup])`, and [`WORK`], the stub behind a two-slot
+//!   `Throttle`: the stacks are built in Rust ([`root`]), because a declared arrangement has
+//!   no form for a throttle governor today. The backup ([`backup`]) is code for the stub's
+//!   reason: it numbers its calls.
+//! - **An atom holding work in flight.** [`BURST`]: a Sink starts calls to [`WORK`] in the
+//!   background ([`Background`]), held until the reader moves the clock. A bulkhead parks only
+//!   concurrent work, and a cell is one line at a time, so concurrency needs somewhere to live
+//!   between lines; nothing in the kernel holds an unfinished request for a caller.
 //! - **Code, because it is the platform seam.** [`time::VirtualTimer`], what `Timeout` races
 //!   and `Retry` waits on: virtual time on the harness clock, not the browser's.
 //! - **Composed, not written.** The breaker's state, `urn:throttle:state` and
 //!   `urn:throttle:state:breaker` (throttle's `StateBoard`, mounted beside the stack); the
 //!   picture, `urn:diagram:state` (ikigai-diagram over this host's own topology), in either
-//!   scheme (`scheme=light|dark`, ikigai-diagram 0.2.3). The chapter's stages are the
-//!   generic stages viewer over these names (`js/stages.js`): no code here knows about stages.
+//!   scheme (`scheme=light|dark`, ikigai-diagram 0.2.3), and marked against an earlier board
+//!   (`before=`, 0.2.4). The chapter's stages are the generic stages viewer over these names
+//!   (`js/stages.js`): no code here knows about stages.
 //!
-//! Resource ratio: three endpoints written (mode, clock, upstream; the call is the upstream
-//! endpoint bound at a second name, behind three published overlays built in code), and three
-//! resources composed and used (`urn:throttle:state`, `urn:throttle:state:{governor}` and
-//! `urn:diagram:state`; the diagram's other three doors are bound and unused).
+//! Resource ratio: five endpoints written (mode, clock, upstream, backup, burst; the call, the
+//! service's primary and the work are the upstream endpoint bound at three more names, behind
+//! five published overlays built in code), and three resources composed and used
+//! (`urn:throttle:state`, `urn:throttle:state:{governor}` and `urn:diagram:state`; the
+//! diagram's other three doors are bound and unused).
 
 pub mod time;
 
@@ -48,13 +61,13 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use ikigai_core::{
-    space_iri, ActionSpec, ArgRef, ArgSpec, AsyncFnEndpoint, Capability, Description, Endpoint,
-    EndpointSpace, Error, Exact, FailureClass, Fallback, FnEndpoint, Invocation, InvokeFuture, Iri,
-    Kernel, ReprType, Representation, Request, Result, Space, Verb,
+    space_iri, ActionSpec, ArgRef, ArgSpec, AsyncFnEndpoint, Capability, Clock, Description,
+    Endpoint, EndpointSpace, Error, Exact, FailureClass, Fallback, FnEndpoint, Invocation,
+    InvokeFuture, Iri, Kernel, ReprType, Representation, Request, Result, Space, Verb,
 };
-use ikigai_throttle::{CircuitBreaker, Retry, StateBoard, Timeout};
+use ikigai_throttle::{CircuitBreaker, Failover, Retry, StateBoard, Throttle, Timeout};
 
-use time::{span, HarnessClock, VirtualTimer};
+use time::{span, HarnessClock, Held, VirtualTimer};
 
 // ANCHOR: names
 /// The stub's mode: `ok`, `slow`, `fail` or `limited`. The only state the reader writes.
@@ -67,6 +80,17 @@ pub const CALL: &str = "urn:iki:tutorial:harness:call";
 pub const CLOCK: &str = "urn:iki:tutorial:harness:clock";
 /// The name the circuit breaker is observed under: `urn:throttle:state:breaker`.
 pub const GOVERNOR: &str = "breaker";
+/// The failover's target: the stub in a primary space, else a backup, through `Failover`.
+pub const SERVICE: &str = "urn:iki:tutorial:harness:service";
+/// The name the failover is observed under: `urn:throttle:state:failover`.
+pub const FAILOVER: &str = "failover";
+/// The bulkhead's work: the stub again, at most [`SLOTS`] calls at once, through `Throttle`.
+pub const WORK: &str = "urn:iki:tutorial:harness:work";
+/// The name the bulkhead is observed under: `urn:throttle:state:bulkhead`.
+pub const BULKHEAD: &str = "bulkhead";
+/// Sink a number of calls (1 to 10): that many calls to [`WORK`] start at once, in the
+/// background, and move only when the harness clock does.
+pub const BURST: &str = "urn:iki:tutorial:harness:burst";
 // ANCHOR_END: names
 
 // ANCHOR: settings
@@ -87,6 +111,10 @@ pub const MAX_WAIT: Duration = Duration::from_secs(2);
 pub const LIMITED_DELAY: Duration = Duration::from_secs(1);
 /// Re-issues one run may spend in all, across every overlay: the run's retry budget.
 pub const RETRY_BUDGET: u32 = 2;
+/// How many calls to [`WORK`] the bulkhead lets run at once; the rest park.
+pub const SLOTS: usize = 2;
+/// The most calls one burst may start.
+pub const MAX_BURST: usize = 10;
 // ANCHOR_END: settings
 
 /// The four things the stub can be told to be.
@@ -195,9 +223,10 @@ fn duration(written: &str) -> Option<Duration> {
 
 // ANCHOR: clock
 /// `harness-clock`: the harness's time, as how far it has moved since the harness started.
-/// Sink a duration (`5s`, `500ms`) to move it forward; it never moves back. Never cached:
-/// a governor's wait moves it too, and that is no write.
-pub fn clock(clock: Arc<HarnessClock>) -> FnEndpoint {
+/// Sink a duration (`5s`, `500ms`) to move it forward; it never moves back, and the work a
+/// burst left in flight moves with it ([`Background::run_until`]). Never cached: a governor's
+/// wait moves it too, and that is no write.
+pub fn clock(clock: Arc<HarnessClock>, background: Arc<Background>) -> FnEndpoint {
     FnEndpoint::new("harness-clock", move |inv: &Invocation<'_>| {
         match inv.request.verb {
             Verb::Sink => {
@@ -211,12 +240,22 @@ pub fn clock(clock: Arc<HarnessClock>) -> FnEndpoint {
                         ),
                     });
                 };
-                clock.advance(by);
-                Ok(text(format!(
+                let was_held = background.in_flight();
+                let target = clock
+                    .now()
+                    .as_millis()
+                    .saturating_add(u64::try_from(by.as_millis()).unwrap_or(u64::MAX));
+                let answered = background.run_until(target);
+                let moved = format!(
                     "the harness clock moved {}: it reads {}",
                     span(by),
                     span(clock.elapsed())
-                )))
+                );
+                Ok(text(if was_held == 0 {
+                    moved
+                } else {
+                    format!("{moved}; in the background, {}", background.said(answered))
+                }))
             }
             _ => Ok(text(format!("the harness clock reads {}", span(clock.elapsed())))),
         }
@@ -295,6 +334,156 @@ pub fn upstream(state: Arc<HarnessState>, timer: Arc<VirtualTimer>) -> AsyncFnEn
 }
 // ANCHOR_END: upstream
 
+// ANCHOR: backup
+/// `backup`: the failover's second space. It always answers, and numbers its own calls, so an
+/// answer says which space it came from.
+pub fn backup() -> FnEndpoint {
+    let calls = AtomicU64::new(0);
+    FnEndpoint::new("backup", move |_inv: &Invocation<'_>| {
+        let n = calls.fetch_add(1, Ordering::SeqCst) + 1;
+        Ok(text(format!("ok from the backup (backup call {n})")))
+    })
+    .with_description(
+        Description::new("backup")
+            .title("Harness backup")
+            .summary(
+                "The failover's backup: always answers, numbering its own calls, so an answer \
+                 says it came from the backup.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .output(TEXT_PLAIN),
+    )
+}
+// ANCHOR_END: backup
+
+// ANCHOR: background
+/// Work running in the background: the calls a burst started ([`BURST`]).
+///
+/// A bulkhead parks only CONCURRENT work, and a cell is one line at a time, so the harness
+/// holds the calls a burst starts here, in flight, and moves them only when the reader moves
+/// the clock ([`CLOCK`]). Each move runs them event by event ([`Held::run_until`]): the clock
+/// steps to each wait's deadline in turn, so a call that frees a slot at 10s lets the next one
+/// start at 10s, not at the end of the move. Between moves they hold their slots, and the board
+/// shows them running and parked.
+pub struct Background {
+    kernel: std::sync::OnceLock<std::sync::Weak<Kernel>>,
+    held: Held<String>,
+    timer: Arc<VirtualTimer>,
+}
+
+impl Background {
+    fn new(timer: Arc<VirtualTimer>) -> Self {
+        Background {
+            kernel: std::sync::OnceLock::new(),
+            held: Held::default(),
+            timer,
+        }
+    }
+
+    /// How many calls are in flight.
+    pub fn in_flight(&self) -> usize {
+        self.held.len()
+    }
+
+    /// Start `n` calls to [`WORK`], and run them as far as they go at the clock as it reads.
+    /// How many answered.
+    fn start(&self, n: usize) -> Result<usize> {
+        let kernel = self
+            .kernel
+            .get()
+            .and_then(std::sync::Weak::upgrade)
+            .ok_or_else(|| Error::Unavailable("the harness's kernel is not running".into()))?;
+        for _ in 0..n {
+            let kernel = Arc::clone(&kernel);
+            self.held.push(Box::pin(async move {
+                let root = Capability::root();
+                match kernel
+                    .issue(Request::new(Verb::Source, iri(WORK)), &root)
+                    .await
+                {
+                    Ok(answer) => String::from_utf8_lossy(&answer.bytes).into_owned(),
+                    Err(e) => format!("error: {e}"),
+                }
+            }));
+        }
+        Ok(self.held.stall(&self.timer).len())
+    }
+
+    /// Run the calls in flight forward to `target` (milliseconds since 1970). How many
+    /// answered.
+    pub fn run_until(&self, target: u64) -> usize {
+        self.held.run_until(&self.timer, target).len()
+    }
+
+    /// What became of the calls in flight, in words.
+    fn said(&self, answered: usize) -> String {
+        let calls = |n: usize| {
+            if n == 1 {
+                "1 call".to_string()
+            } else {
+                format!("{n} calls")
+            }
+        };
+        match (answered, self.in_flight()) {
+            (0, held) => format!("none answered and {} still in flight", calls(held)),
+            (done, 0) => format!("{} answered and none is in flight", calls(done)),
+            (done, held) => format!(
+                "{} answered and {} still in flight",
+                calls(done),
+                calls(held)
+            ),
+        }
+    }
+}
+
+/// `harness-burst`: Sink a number of calls, 1 to [`MAX_BURST`]: that many calls to [`WORK`]
+/// start at once, in the background ([`Background`]). In `slow` mode each holds a bulkhead slot
+/// for 10s of harness time, so the excess parks until the clock is moved; in `ok` mode they all
+/// answer at once. Says how many answered and how many are in flight.
+pub fn burst(background: Arc<Background>) -> FnEndpoint {
+    FnEndpoint::new("harness-burst", move |inv: &Invocation<'_>| {
+        let asked = inv.inline_str("content")?.trim().to_string();
+        let n = asked
+            .parse::<usize>()
+            .ok()
+            .filter(|n| (1..=MAX_BURST).contains(n))
+            .ok_or_else(|| Error::InvalidArgument {
+                name: "content".into(),
+                detail: format!("`{asked}` is not a number of calls from 1 to {MAX_BURST}"),
+            })?;
+        let answered = background.start(n)?;
+        let calls = if n == 1 {
+            "1 call".to_string()
+        } else {
+            format!("{n} calls")
+        };
+        Ok(text(format!(
+            "started {calls} to {WORK} at once: {}",
+            background.said(answered)
+        )))
+    })
+    .with_description(
+        Description::new("harness-burst")
+            .title("Harness burst")
+            .summary(
+                "Start several calls to urn:iki:tutorial:harness:work at once, in the \
+                 background: the bulkhead lets two run and parks the rest, and they move only \
+                 when the harness clock does.",
+            )
+            .fails(FailureClass::Permanent)
+            .verb(Verb::Sink)
+            .verb(Verb::Meta)
+            .input(
+                ArgSpec::new("content")
+                    .summary("how many calls, 1 to 10")
+                    .class(XSD_STRING),
+            )
+            .output(TEXT_PLAIN),
+    )
+}
+// ANCHOR_END: background
+
 /// The harness: its kernel, its clock, its board, and what it holds.
 pub struct Harness {
     kernel: Arc<Kernel>,
@@ -316,8 +505,9 @@ pub fn root(
     state: &Arc<HarnessState>,
     clock: &Arc<HarnessClock>,
     board: &StateBoard,
+    background: &Arc<Background>,
 ) -> Arc<dyn Space> {
-    let timer = Arc::new(VirtualTimer::new(Arc::clone(clock)));
+    let timer = Arc::clone(&background.timer);
     let stub: Arc<dyn Endpoint> = Arc::new(upstream(Arc::clone(state), Arc::clone(&timer)));
 
     let governed = EndpointSpace::new()
@@ -329,17 +519,46 @@ pub fn root(
         .observed(board, GOVERNOR)
         .expect("one governor, named once");
     let retry = Retry::new(breaker, ATTEMPTS)
-        .with_timer(timer)
+        .with_timer(timer.clone())
         .with_max_wait(MAX_WAIT);
+
+    // Failover: the stub in a primary space, bounded by the same timeout, else the backup.
+    let primary = EndpointSpace::new()
+        .bind_arc(Exact::new(SERVICE), Arc::clone(&stub))
+        .named(space_iri("tutorial:harness:primary"));
+    let spare = EndpointSpace::new()
+        .bind(Exact::new(SERVICE), backup())
+        .named(space_iri("tutorial:harness:backup"));
+    let failover = Failover::new(vec![
+        Arc::new(Timeout::new(primary, TIMEOUT).with_timer(timer.clone())) as Arc<dyn Space>,
+        Arc::new(spare),
+    ])
+    .observed(board, FAILOVER)
+    .expect("one governor, named once");
+
+    // The bulkhead: the stub again, at most SLOTS calls at once; the rest park.
+    let pool = EndpointSpace::new()
+        .bind_arc(Exact::new(WORK), Arc::clone(&stub))
+        .named(space_iri("tutorial:harness:pool"));
+    let bulkhead = Throttle::new(pool)
+        .limit(WORK, SLOTS)
+        .observed(board, BULKHEAD)
+        .expect("one governor, named once");
 
     let own = EndpointSpace::new()
         .bind(Exact::new(MODE), mode(Arc::clone(state)))
-        .bind(Exact::new(CLOCK), self::clock(Arc::clone(clock)))
+        .bind(
+            Exact::new(CLOCK),
+            self::clock(Arc::clone(clock), Arc::clone(background)),
+        )
         .bind_arc(Exact::new(UPSTREAM), stub)
+        .bind(Exact::new(BURST), burst(Arc::clone(background)))
         .named(space_iri("tutorial:harness:upstream"));
 
     Arc::new(Fallback::new(vec![
         Arc::new(retry) as Arc<dyn Space>,
+        Arc::new(failover),
+        Arc::new(bulkhead),
         Arc::new(own),
         Arc::new(board.space().named(space_iri("tutorial:harness:board"))),
         Arc::new(ikigai_diagram::space()),
@@ -353,10 +572,12 @@ impl Harness {
         let state = Arc::new(HarnessState::default());
         let clock = Arc::new(HarnessClock::default());
         let board = StateBoard::new();
+        let timer = Arc::new(VirtualTimer::new(Arc::clone(&clock)));
+        let background = Arc::new(Background::new(timer));
         // ANCHOR: kernel
         let kernel = Arc::new(
             Kernel::with_meta_renderer(
-                root(&state, &clock, &board),
+                root(&state, &clock, &board, &background),
                 Arc::new(ikigai_vocab::TurtleRenderer),
             )
             // The governors' clock and the kernel's are one, so a board answer cached
@@ -365,6 +586,9 @@ impl Harness {
             .with_retry_budget(0, RETRY_BUDGET),
         );
         board.attach(&kernel);
+        // The burst's calls are issued to the harness's own kernel: a weak handle, since the
+        // kernel holds the burst.
+        let _ = background.kernel.set(Arc::downgrade(&kernel));
         // ANCHOR_END: kernel
         Harness {
             kernel,
@@ -426,8 +650,10 @@ impl Default for Harness {
 /// chapter's stages viewer (`js/stages.js`) gives it as `data-alt` and adds the board's words at
 /// each stage, so a stage's picture says its own state.
 pub const PICTURE_ALT: &str = "The resilience harness, drawn: the governed call \
-    urn:iki:tutorial:harness:call inside its space, the stub's own space beside it with \
-    urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock and \
-    urn:iki:tutorial:harness:upstream, then the governor state board and the diagram's \
-    space. The circuit breaker's state is drawn in the governed space's box and said in words \
-    below the picture.";
+    urn:iki:tutorial:harness:call inside its space; the failover, an opaque box, since a \
+    failover reports no structure; the bulkhead's space with urn:iki:tutorial:harness:work; the \
+    stub's own space with urn:iki:tutorial:harness:mode, urn:iki:tutorial:harness:clock, \
+    urn:iki:tutorial:harness:upstream and urn:iki:tutorial:harness:burst; then the governor \
+    state board and the diagram's space. The circuit breaker's state is drawn in the governed \
+    space's box and the bulkhead's in the bulkhead's space, every governor's state is said in \
+    words below the picture, and what changed since the stage before is marked.";
