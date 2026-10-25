@@ -19,6 +19,16 @@ A view is a resource too. The third book builds a kernel inspector, the cache, t
 threads and the arrangement this book printed as text, turned into pages that follow the
 kernel's cuts while you watch: [Building ikigai UIs](ui/index.html).
 
+## The ikigai Architecture
+
+How the pieces fit: one ledger item carried through the capability spine, the door, the overlay
+chain, the economics of golden threads and caching, and the audit axis, with the patterns that
+confine shown to be the patterns that serve. Read it after this book's chapters on dynamic spaces,
+which the overlay chain is built from: [The ikigai Architecture](architecture/index.html).
+
+[The library](library/index.html) lists all four books, with who each is for, what to read first
+and where to start.
+
 ## The repositories
 
 - [`ikigai-core`](https://github.com/ikigai-rs/ikigai-core) — the kernel,

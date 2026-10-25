@@ -11,7 +11,7 @@
 #   start        the page to start at, relative to the book's root (an .html path)
 #   start_title  that page's title, as the book's SUMMARY.md gives it
 
-intro = "Three books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built."
+intro = "Four books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built."
 
 [[book]]
 dir = "ikigai"

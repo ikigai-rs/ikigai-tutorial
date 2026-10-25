@@ -56,20 +56,27 @@
 //
 // - nothing changed (the words and the picture are what the page last saw): "No change", in
 //   words, with the picture's verdict (a step that cuts nothing reads it from the cache);
-// - a control changed something: a new stage after the chapter's, numbered on, and selected
-//   (the controls sit above the tabs, so selecting it hides nothing pressed);
-// - a cell changed something to its own stage's words: that stage is the reader's too, and its
-//   panel says so; to anything else, a new stage, appended and not selected, since selecting it
-//   would hide the cell just run.
+// - a control changed something: a new stage after the chapter's, numbered on, and selected;
+// - a cell changed something to its own stage's words: the reader's kernel is at that stage;
+//   to anything else, a new stage of the reader's, and the cell's own tab says where it went.
 //
 // The first step compares with the first stage's committed words: nothing is read on load.
 //
-// THE PICTURE IS SHOWN WHERE THE STEP IS. After every step, the picture the reader's kernel just
-// drew is shown right below what was pressed (`div.ikigai-stage-now`: under the row of buttons,
-// or under the cell), with what the step changed and a row of stage buttons that shows any
-// stage's picture in that same place, so a reader compares two stages without scrolling to the
-// tabs (Brian, 2026-10-25: scrolling up and down between a step and its picture is the load).
-// Each step's card is its own: a cell keeps the card of its last run, and the buttons share one.
+// ONE PICTURE, BELOW THE TABS (Brian, 2026-10-25). A tab holds its step: a sentence or two, the
+// cell, its answers and what they mean, in a box that scrolls in place (css/stages.css bounds the
+// panel), so the picture is never more than a box away from the step. Below the tabs is one picture
+// (`div.ikigai-stages-shown`) for the selected tab, so the step and its picture sit together
+// wherever the tabs are:
+//
+// - a tab whose step ran shows the picture that step drew, what it changed and the facts;
+// - a tab whose step has not run shows the kernel as it is now, which is where its step starts,
+//   so running it is what changes the picture; the chapter's own picture of that stage is behind
+//   a closed disclosure, for a reader who only wants to look;
+// - the first tab, before any step, shows the picture as the page loads it.
+//
+// Switching tabs asks the kernel nothing: every picture shown is one a step already drew, and the
+// chapter's are files. Until the kernel loads (and without it, and in print) each tab shows its
+// own committed picture instead, inside the tab.
 //
 // ONE PERSISTENT STATUS REGION, polite, above the tabs, says each of those once.
 //
@@ -292,6 +299,7 @@
                 t.tabIndex = on ? 0 : -1;
                 document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
             });
+            render();
         }
 
         function addTab(section) {
@@ -383,6 +391,14 @@
                 target.scrollIntoView();
             }
         }
+        // The picture below the tabs, shared by every tab: hidden until the kernel loads, since
+        // until then each tab's own committed picture is the one to read (and in print, always).
+        var shown = el("div", "ikigai-stages-shown");
+        shown.setAttribute("role", "region");
+        shown.setAttribute("aria-label", root.getAttribute("data-shown-label") || "The picture for the selected stage");
+        shown.hidden = true;
+        root.appendChild(shown);
+
         select(tabs[0]);
         openHashTarget();
         window.addEventListener("hashchange", openHashTarget);
@@ -390,19 +406,6 @@
         // ── where the reader's own kernel stands ─────────────────────────────
         // What the page last saw: the first stage's committed words until the first step.
         var seen = { words: wordsOf(sections[0]), picture: null, before: null };
-
-        function note(section, text) {
-            var result = section.querySelector(".ikigai-stage-result");
-            if (!result) {
-                return;
-            }
-            var p = result.querySelector(".ikigai-stage-reached");
-            if (!p) {
-                p = el("p", "ikigai-stage-reached");
-                result.insertBefore(p, result.querySelector(".ikigai-stage-picture"));
-            }
-            p.textContent = text;
-        }
 
         // A value as one quoted word of a line, as the engine reads one: `\` and `"` escaped.
         function quote(text) {
@@ -518,116 +521,107 @@
             result.appendChild(el("pre", "ikigai-stage-words", stage.words));
             section.appendChild(result);
             section.hidden = true;
-            root.appendChild(section);
+            root.insertBefore(section, shown);
             var said = Array.prototype.map.call(what.querySelectorAll("li"), function (li) {
                 return li.textContent;
             }).join(" ") || what.textContent.replace(/^What changed:\s*/, "");
             return { n: n, tab: addTab(section), what: said };
         }
 
-        // ── the picture at the step ──────────────────────────────────────────
-        // The stage the reader's kernel is at: the first until a step moves it.
-        var at = sections[0];
-
+        // ── the picture below the tabs ───────────────────────────────────────
         function labelOf(section) {
             return section.getAttribute("data-stage") + " · " + (section.getAttribute("data-label") || "");
         }
 
-        // The card under a step: `place(card)` puts a new one where it belongs.
-        function cardAt(existing, place) {
-            if (existing) {
-                Array.prototype.forEach.call(existing.querySelectorAll("img"), function (img) {
-                    if (img.src.indexOf("blob:") === 0) {
-                        URL.revokeObjectURL(img.src);
-                    }
-                });
-                existing.textContent = "";
-                return existing;
-            }
-            var card = el("div", "ikigai-stage-now");
-            card.setAttribute("role", "group");
-            card.setAttribute("aria-label", "The picture after this step");
-            place(card);
-            return card;
+        function selected() {
+            var tab = tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0];
+            return tab ? document.getElementById(tab.getAttribute("aria-controls")) : sections[0];
         }
 
-        // Fill a step's card: what the step did, then the picture the kernel just drew with what
-        // it changed, then a button per stage that shows that stage's picture in its place.
-        function fill(card, verdict, stage, before, moved) {
-            var head = el("p", "ikigai-stage-now-verdict");
-            head.appendChild(el("strong", null, "After this step: "));
-            head.appendChild(document.createTextNode(verdict));
-            card.appendChild(head);
-            // The stage buttons come before the picture, so they stay in the same place whichever
-            // picture they show: a reader flips between stages without moving.
-            var strip = el("div", "ikigai-stage-now-strip");
-            card.appendChild(strip);
-            var view = el("div", "ikigai-stage-now-view");
-            card.appendChild(view);
+        // What each tab's own step drew the last time it ran (by section id), and the last step's.
+        var drawn = {};
+        var latest = null;
 
-            // The picture first, nearest the step, then what changed and the facts under it.
-            var live = [];
-            live.push(el("p", "ikigai-stage-now-caption", "Your kernel, now: stage " + labelOf(at) + "."));
+        function caption(text) {
+            return el("p", "ikigai-stages-shown-caption", text);
+        }
+
+        // A step's picture, as the kernel drew it: what the step did, the picture, what changed,
+        // the facts and the words.
+        function drawing(snap, lead) {
+            var nodes = [];
+            var head = caption("");
+            head.appendChild(el("strong", null, lead));
+            head.appendChild(document.createTextNode(" " + snap.verdict));
+            nodes.push(head);
             var pictures = el("p", "ikigai-stage-picture");
             schemes.forEach(function (scheme) {
-                pictures.appendChild(picture(stage, scheme, altOf(stage.words)));
+                pictures.appendChild(picture(snap.stage, scheme, altOf(snap.stage.words)));
             });
-            live.push(pictures);
-            if (moved) {
-                live.push(changed(before, stage.words));
+            nodes.push(pictures);
+            if (snap.moved) {
+                nodes.push(changed(snap.before, snap.stage.words));
             } else {
                 var still = el("p", "ikigai-stage-changed");
                 still.appendChild(el("strong", null, "What changed:"));
                 still.appendChild(document.createTextNode(" nothing the picture shows."));
-                live.push(still);
+                nodes.push(still);
             }
-            if (stage.facts.length) {
-                live.push(el("p", "ikigai-stage-facts", stage.facts.join(" · ")));
+            if (snap.stage.facts.length) {
+                nodes.push(el("p", "ikigai-stage-facts", snap.stage.facts.join(" · ")));
             }
-
-            function show(nodes) {
-                view.textContent = "";
-                nodes.forEach(function (node) { view.appendChild(node); });
-            }
-            show(live);
-
-            strip.setAttribute("role", "group");
-            strip.setAttribute("aria-label", "Show a stage's picture here");
-            strip.appendChild(el("span", "ikigai-stage-now-strip-label", "Show here:"));
-            var shown = [];
-            tabs.forEach(function (tab) {
-                var section = document.getElementById(tab.getAttribute("aria-controls"));
-                var button = el("button", "ikigai-stage-now-pick");
-                button.type = "button";
-                button.appendChild(el("span", "ikigai-stage-sr", "Stage "));
-                button.appendChild(document.createTextNode(labelOf(section)));
-                button.setAttribute("aria-pressed", section === at ? "true" : "false");
-                button.addEventListener("click", function () {
-                    shown.forEach(function (b) { b.setAttribute("aria-pressed", b === button ? "true" : "false"); });
-                    if (section === at) {
-                        show(live);
-                        return;
-                    }
-                    // Another stage, as its tab keeps it: never redrawn, so nothing is asked.
-                    var result = section.querySelector(".ikigai-stage-result");
-                    var nodes = [el("p", "ikigai-stage-now-caption", "Stage " + labelOf(section) + ", as " +
-                        (section.classList.contains("ikigai-stage-yours") ? "your kernel" : "the chapter") +
-                        " drew it.")];
-                    [".ikigai-stage-picture", ".ikigai-stage-changed", ".ikigai-stage-facts"].forEach(function (part) {
-                        var node = result && result.querySelector(part);
-                        if (node) {
-                            nodes.push(node.cloneNode(true));
-                        }
-                    });
-                    show(nodes);
-                });
-                shown.push(button);
-                strip.appendChild(button);
-            });
+            nodes.push(el("pre", "ikigai-stage-words", snap.stage.words));
+            return nodes;
         }
 
-        // After a step: read the stage, keep the facts current, and say what it made. The step
-        // is compared with what the page last saw, which is where the reader's kernel was.
+        // A chapter's stage as the chapter drew it: its committed result, never asked for again.
+        function committed(section) {
+            var result = section.querySelector(".ikigai-stage-result");
+            return result ? Array.prototype.slice.call(result.cloneNode(true).childNodes) : [];
+        }
+
+        // The chapter's picture of a stage the reader has not stepped to, kept behind a disclosure
+        // so that running the tab is what shows it.
+        function chapters(section) {
+            var details = el("details", "ikigai-stages-chapter");
+            details.appendChild(el("summary", null, "The chapter's picture of stage " + labelOf(section)));
+            committed(section).forEach(function (node) { details.appendChild(node); });
+            return details;
+        }
+
+        // Below the tabs: the selected tab's picture. A tab whose step ran shows what it drew. A
+        // tab that has not run shows the kernel as it is now, which is the state its step starts
+        // from, so running it is what changes the picture. Nothing here asks the kernel: every
+        // picture shown is one a step already drew.
+        function render(only) {
+            if (!shown || shown.hidden) {
+                return;
+            }
+            shown.textContent = "";
+            var nodes;
+            var section = selected();
+            if (only) {
+                nodes = drawing(only, "After this step:");
+            } else if (drawn[section.id]) {
+                nodes = drawing(drawn[section.id], "After this tab's step:");
+            } else if (section === sections[0] && !latest) {
+                nodes = [caption("The picture as the page loads it, which is this stage:")]
+                    .concat(committed(section));
+            } else {
+                nodes = latest
+                    ? drawing(latest, "Your kernel now, before this tab's step (run it to see what it changes). The last step:")
+                    : [caption("Your kernel now, as the page loads it, before this tab's step: run the " +
+                        "step to see what it changes.")].concat(committed(sections[0]));
+                if (!section.classList.contains("ikigai-stage-yours")) {
+                    nodes.push(chapters(section));
+                }
+            }
+            nodes.forEach(function (node) { shown.appendChild(node); });
+        }
+
+        // After a step: read the stage, keep the facts current, say what it made, and show it
+        // below the tabs. The step is compared with what the page last saw, which is where the
+        // reader's kernel was.
         function after(step) {
             return loadKernel().then(read).then(function (stage) {
                 if (facts && stage.facts.length) {
@@ -642,37 +636,47 @@
                 var moved = beforeLine ? stage.moved : !same(stage.words, seen.words) ||
                     (seen.picture !== null && light !== seen.picture);
                 seen = { words: stage.words, picture: light, before: stage.before };
-                var card = cardAt(step.card(), step.place);
+                var snap = { stage: stage, before: before, moved: moved, verdict: "" };
+                latest = snap;
+                var own = step.section;
                 if (!moved) {
                     var cache = stage.cache === "cached" ? "the picture came from the cache" :
                         "the picture was " + stage.cache + ": the first time this page asked for it";
                     status.textContent = step.lead + "No change: this step moved nothing the picture " +
                         "shows, so it makes no stage (" + cache + ").";
-                    fill(card, "no change, so no new stage (" + cache + ").", stage, before, false);
+                    snap.verdict = "no change, so no new stage (" + cache + ").";
+                    if (own) {
+                        drawn[own.id] = snap;
+                        select(document.getElementById(own.getAttribute("aria-labelledby")));
+                    } else {
+                        render(snap);
+                    }
                     return;
                 }
-                var own = step.section;
                 if (own && !own.classList.contains("ikigai-stage-yours") && same(wordsOf(own), stage.words)) {
-                    at = own;
-                    note(own, "Your kernel reached this stage too.");
                     status.textContent = step.lead + "Your kernel now matches stage " +
                         own.getAttribute("data-stage") + ".";
-                    fill(card, "your kernel reached stage " + labelOf(own) + ", as the chapter drew it.",
-                        stage, before, true);
+                    snap.verdict = "your kernel is at stage " + labelOf(own) + ", as the chapter draws it.";
+                    drawn[own.id] = snap;
+                    select(document.getElementById(own.getAttribute("aria-labelledby")));
                     return;
                 }
                 var made = addStage(stage, before, step.madeBy, step.sentence);
-                at = document.getElementById(made.tab.getAttribute("aria-controls"));
-                if (!own) {
-                    select(made.tab);
+                snap.verdict = "a new stage, " + made.n + ", of yours." + (step.sentence ? " " + step.sentence : "");
+                drawn[made.tab.getAttribute("aria-controls")] = snap;
+                if (own) {
+                    // The cell's tab keeps showing what its step drew, and says where it went.
+                    drawn[own.id] = {
+                        stage: stage, before: before, moved: true,
+                        verdict: "your kernel made a stage that is not this tab's: it is stage " + made.n +
+                            ", of yours. (Run the tabs in order on a fresh page to follow the chapter.)",
+                    };
+                    select(document.getElementById(own.getAttribute("aria-labelledby")));
                 } else {
-                    note(own, "Your kernel made stage " + made.n + " instead, which is not the one " +
-                        "this tab shows: its tab is " + made.n + ".");
+                    select(made.tab);
                 }
                 status.textContent = step.lead + "New stage " + made.n + ": " + made.what +
                     (step.sentence ? " " + step.sentence : "");
-                fill(card, "a new stage, " + made.n + ", of yours." + (step.sentence ? " " + step.sentence : ""),
-                    stage, before, true);
             }).catch(function (err) {
                 status.textContent = step.lead + "The stage could not be read (" + message(err) + ").";
             });
@@ -698,9 +702,6 @@
                 }, Promise.resolve()).then(function () {
                     return after({
                         lead: label + ": " + answers(replies) + ". ",
-                        // The buttons share one card, right under them (and the facts).
-                        card: function () { return root.querySelector(":scope > .ikigai-stage-now"); },
-                        place: function (card) { root.insertBefore(card, status); },
                         section: null,
                         sentence: sentence,
                         madeBy: { title: "after “" + label + "”", parts: [el("span", null, "the button “" + label + "”")] },
@@ -715,6 +716,18 @@
         }
 
         loadKernel().then(function () {
+            root.classList.add("ikigai-stages-live");
+            shown.hidden = false;
+            // Where a tab's own picture was, the prose before it still leads to it: point below.
+            sections.forEach(function (section) {
+                var result = section.querySelector(":scope > .ikigai-stage-result");
+                if (result) {
+                    result.parentNode.insertBefore(
+                        el("p", "ikigai-stage-pointer", "The picture for this stage is below the tabs."),
+                        result.nextSibling);
+                }
+            });
+            render();
             if (!list) {
                 status.textContent = "The kernel in this page is ready: a step that changes the " +
                     "picture adds a tab.";
@@ -760,17 +773,8 @@
             // The reads below are reads of the same kernel the next cell runs in: where run.js
             // offers it (`hold`), the chain's next run waits for them, so a cut in that cell
             // cannot land between them.
-            // A cell's card is right under its Run button (`js/run.js`'s `form.ikigai-run-head`),
-            // ahead of the lines' own answers, which can run to a screen, and its next run fills
-            // the same one. In a stage, the picture is what the step is for.
-            var answer = detail.cell.querySelector(".ikigai-run-head") || detail.cell;
             var reading = after({
                 lead: "After the cell you ran " + where + ": ",
-                card: function () {
-                    var next = answer.nextElementSibling;
-                    return next && next.classList.contains("ikigai-stage-now") ? next : null;
-                },
-                place: function (card) { answer.parentNode.insertBefore(card, answer.nextSibling); },
                 section: section,
                 sentence: null,
                 madeBy: {

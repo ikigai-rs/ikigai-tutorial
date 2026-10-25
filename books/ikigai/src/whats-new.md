@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-25**: The stages of "A space that changes while it runs" now work as one box: each tab holds its step, the cell to run and what it answers, scrolling in place, and one picture of the space sits right below the tabs. Before you run a tab the picture is your host as it is now; run it and watch the picture change, with what changed marked. Switching back to a tab shows what its step drew, from the cache, and the chapter explains why no picture is drawn twice. The whole host is drawn above the tabs, and the Rust listings for every stage now follow them. A new page, The other books, links the gonk Book, Building ikigai UIs, The ikigai Architecture and the library; "Where to go next" now includes the Architecture book and the library too.
+
+  Pages: [A space that changes while it runs](applied/live-space.md), [The other books](other-books.md), [Where to go next](next.md)
+
 - **2026-10-25**: In "A space that changes while it runs", the picture of the space now appears right under the Run button of the cell you just ran, drawn by your host after that cell, with what changed. A row of stage buttons above it shows any stage's picture in the same place, so you can compare two stages without scrolling.
 
   Pages: [A space that changes while it runs](applied/live-space.md)

@@ -1,8 +1,8 @@
 /* The stages viewer (`js/stages.js`, contract in docs/stages.md): numbered tabs of a picture's
  * stages, the steps that make them, the facts line. ONE COPY for every book, as run.css is: a
  * book that uses it links to this file and lists it in its book.toml. Every color is a theme
- * variable, so the contrast gate's pairs cover it, except <mark>, whose colors mdbook's themes
- * set as a pair. */
+ * variable, so the contrast gate's pairs cover it (the changed words' <mark> included: it is
+ * --bg on --links, the gate's link pair turned over). */
 
 .ikigai-stages {
     margin: 1em 0;
@@ -94,10 +94,10 @@
     margin: 0.4em 0;
 }
 
-/* The picture right under the step that drew it (a cell, or the row of buttons), with a row of
- * stage buttons that shows any stage's picture in its place. */
-.ikigai-stage-now {
-    margin: 0.6em 0 1em;
+/* The picture below the tabs, shared by every tab (js/stages.js, once the kernel loads). Each
+ * tab's own committed picture is then hidden: the shared one shows it, or the kernel's. */
+.ikigai-stages-shown {
+    margin: 0.8em 0 1em;
     padding: 0.5rem 0.8rem;
     border: 1px solid var(--quote-border, var(--links));
     border-left: 4px solid var(--links);
@@ -105,48 +105,40 @@
     color: var(--fg);
 }
 
-.ikigai-stage-now p {
+.ikigai-stages-shown p {
     margin: 0.4em 0;
 }
 
-.ikigai-stage-now-strip {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.3rem;
-    margin-top: 0.4rem;
+.ikigai-stages-live > section.ikigai-stage > .ikigai-stage-result {
+    display: none;
 }
 
-.ikigai-stage-now-pick {
-    font: inherit;
-    font-size: 0.9em;
-    padding: 0.2rem 0.6rem;
-    border: 1px solid var(--links);
-    border-radius: 4px;
-    background: var(--bg);
-    color: var(--links);
+/* A tab stays in its box: the panel scrolls in place, so the picture below the tabs is never
+ * more than the box's height from the step. The panel is focusable (a tabpanel), so the box
+ * scrolls from the keyboard too. */
+.ikigai-stages-live > section.ikigai-stage {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 0.4rem;
+    border-bottom: 1px solid var(--links);
+}
+
+.ikigai-stages-chapter summary {
     cursor: pointer;
-}
-
-/* The stage shown is told by its weight and a solid fill, never by color alone. */
-.ikigai-stage-now-pick[aria-pressed="true"] {
-    background: var(--links);
-    color: var(--bg);
-    font-weight: 700;
-}
-
-.ikigai-stage-now-pick:focus-visible {
-    outline: 3px solid var(--links);
-    outline-offset: 2px;
+    color: var(--links);
 }
 
 .ikigai-stage-changes {
     margin: 0.2em 0 0;
 }
 
+/* The changed words, in the pair the selected tab uses (the contrast gate holds it in every
+ * theme): mdbook's own <mark> colors fall below 4.5:1 in coal. */
 .ikigai-stage-changed mark {
     font-weight: 700;
     padding: 0 0.2em;
+    background: var(--links);
+    color: var(--bg);
 }
 
 /* The facts list reads as one line: "upstream: fail · circuit: … · …". */
@@ -194,11 +186,21 @@ html.ayu .ikigai-stage-picture a.ikigai-scheme-light {
 /* In print, every stage, one after another, and no tabs to press. */
 @media print {
     .ikigai-stage-tabs,
-    .ikigai-stages-buttons,
-    .ikigai-stage-now-strip {
+    .ikigai-stages-buttons {
         display: none;
     }
     .ikigai-stage[hidden] {
         display: block !important;
+    }
+    .ikigai-stages-shown,
+    .ikigai-stage-pointer {
+        display: none;
+    }
+    .ikigai-stages-live > section.ikigai-stage > .ikigai-stage-result {
+        display: block;
+    }
+    .ikigai-stages-live > section.ikigai-stage {
+        max-height: none;
+        overflow: visible;
     }
 }

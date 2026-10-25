@@ -7,6 +7,10 @@ What has changed in The ikigai library, most recent first: the date, what was ad
 
 ## 2026-10
 
+- **2026-10-25**: The library's opening now counts four books, as it lists.
+
+  Pages: [The ikigai library](index.md)
+
 - **2026-10-23**: A fourth book joins the list: The ikigai Architecture, which teaches how ikigai is put together as one substrate read two ways.
 
   Pages: [The ikigai library](index.md)

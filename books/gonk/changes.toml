@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-25"
+summary = "The closing page is now The other books: it links The ikigai Book, Building ikigai UIs, The ikigai Architecture and the library, which lists all four."
+pages = ["ikigai-book.md"]
+
+[[change]]
 date = "2026-10-24"
 summary = "The one-machine picture keeps everything on the machine inside its box, with the push to the forge leaving through its edge, and the spec-first picture's ledger box is wide enough for its longest line."
 pages = ["ways/solo.md", "ways/spec-first.md"]

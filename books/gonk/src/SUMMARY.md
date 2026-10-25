@@ -67,4 +67,4 @@
 
 ---
 
-[The ikigai Book](ikigai-book.md)
+[The other books](ikigai-book.md)
