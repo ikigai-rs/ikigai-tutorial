@@ -1502,6 +1502,7 @@ mod tests {
         let cells = cells(&chapter);
         assert_eq!(cells.len(), expected_cells, "{file}'s cells: {cells:#?}");
         let viewers = book_transcripts::stages::viewers(&chapter);
+        let mut readings: Vec<_> = viewers.iter().map(|v| v.reading()).collect();
         let clocked = chapter.contains("data-clock");
         assert!(
             clocked || times.is_empty(),
@@ -1663,8 +1664,10 @@ mod tests {
             // After a cell in a stages viewer's chain, `js/stages.js` reads the viewer's lines in
             // that chain (its picture in each scheme, its words, its facts), which fill the cache
             // like any other read.
-            for viewer in viewers.iter().filter(|v| v.chain == *chain) {
-                viewer.read(&|line| reply_in(&page, viewer.chain.as_deref(), line));
+            for (viewer, reading) in viewers.iter().zip(readings.iter_mut()) {
+                if viewer.chain == *chain {
+                    reading.step(&|line| reply_in(&page, viewer.chain.as_deref(), line));
+                }
             }
             transcript.push(got);
         }

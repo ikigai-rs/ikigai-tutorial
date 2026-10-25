@@ -13,6 +13,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-10-25"
+summary = "\"Spaces that wrap spaces\" now drives Failover and the bulkhead too, in six more stages. Call a service whose primary is slow and watch the failover move to its backup, mend it and watch the route move back; then start five calls at once and watch a two-slot bulkhead run two and park three, and drain them as you move the harness clock, each call answering at its true time. Every stage's picture now marks what changed since the stage before, and the line above the tabs keeps the failover's route and the bulkhead in view as well as the circuit."
+pages = ["overlays/overlays.md"]
+
+[[change]]
 date = "2026-10-24"
 summary = "\"Spaces that wrap spaces\" now walks through the resilience harness in numbered stages. Each tab holds a step to run beside what it did: the breaker's state as the harness drew it at that stage, in the colors of the book's theme, what changed since the stage before (marked, and said in words), and the harness time. Your own button presses add stages of your own after the chapter's, so you can flip between any two states, and a line above the tabs keeps the upstream's mode, the circuit and the harness time in view. The chapter also explains why showing a stage again costs nothing: its picture is cached until a governor's state changes."
 pages = ["overlays/overlays.md"]

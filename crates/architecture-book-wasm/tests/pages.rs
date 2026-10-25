@@ -10,7 +10,7 @@
 //! (`book_transcripts::stages`, which every book's stages test shares).
 
 use architecture_book_wasm::{eval_on, Page};
-use book_transcripts::stages::{self, attribute, unescape, Pictures, Reply, Snapshot, Step};
+use book_transcripts::stages::{self, attribute, unescape, Pictures, Reply, Step};
 use book_transcripts::{matches, normalize};
 use futures::executor::block_on;
 
@@ -90,12 +90,15 @@ fn run_page_in_order(file: &str, expected_cells: usize) {
     let viewers = stages::viewers(&text);
     assert_eq!(cells.len(), expected_cells, "{file}'s cells: {cells:#?}");
     let page = Page::default();
+    let mut readings: Vec<_> = viewers.iter().map(|v| v.reading()).collect();
     let mut misses = Vec::new();
     for (i, cell) in cells.iter().enumerate() {
         let printed = run(&page, cell.chain.as_deref(), &cell.cmd);
         // As `js/stages.js` does after every step in a viewer's chain: read its lines.
-        for viewer in viewers.iter().filter(|v| v.chain == cell.chain) {
-            viewer.read(&|line| reply(&page, viewer.chain.as_deref(), line));
+        for (viewer, reading) in viewers.iter().zip(readings.iter_mut()) {
+            if viewer.chain == cell.chain {
+                reading.step(&|line| reply(&page, viewer.chain.as_deref(), line));
+            }
         }
         let expected = normalize(cell.expected.lines());
         let actual = normalize(printed.lines());
@@ -114,7 +117,7 @@ fn run_page_in_order(file: &str, expected_cells: usize) {
 
 #[test]
 fn spaces_that_wrap_spaces_answers_as_the_page_says_in_page_order() {
-    run_page_in_order("overlays/overlays.md", 11);
+    run_page_in_order("overlays/overlays.md", 17);
 }
 
 #[test]
@@ -137,7 +140,10 @@ fn every_harness_control_runs_in_its_harness() {
             "Set the upstream to limited",
             "Call once",
             "Call ten times",
+            "Call the service",
+            "Start five calls at once",
             "Wait 5 seconds",
+            "Wait 10 seconds",
         ]
     );
     for control in &viewer.controls {
@@ -161,7 +167,7 @@ fn the_controls_trip_the_breaker_and_close_it_again() {
     let viewer = &stages::viewers(&chapter)[0];
     let chain = viewer.chain.as_deref();
     let page = Page::default();
-    let seen = std::cell::RefCell::new(Snapshot::start(viewer));
+    let reading = std::cell::RefCell::new(viewer.reading());
     let press = |label: &str| {
         let control = viewer
             .controls
@@ -169,11 +175,8 @@ fn the_controls_trip_the_breaker_and_close_it_again() {
             .find(|c| c.label == label)
             .unwrap_or_else(|| panic!("no control `{label}`"));
         let printed = run(&page, chain, &control.cmd);
-        let now = viewer.read(&|line| reply(&page, chain, line));
-        let moved = now.moved_from(&seen.borrow());
-        let verdict = now.cache.clone();
-        *seen.borrow_mut() = now;
-        (printed, moved, verdict)
+        let (now, moved) = reading.borrow_mut().step(&|line| reply(&page, chain, line));
+        (printed, moved, now.cache)
     };
     let board = || {
         let host = page.harness("overlays").unwrap();
