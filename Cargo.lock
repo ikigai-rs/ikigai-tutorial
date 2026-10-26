@@ -208,6 +208,7 @@ dependencies = [
  "check-resource",
  "futures",
  "hello-camel",
+ "ikigai-compress",
  "ikigai-core",
  "live-space",
  "loadable-module",
@@ -231,6 +232,7 @@ dependencies = [
  "console_error_panic_hook",
  "futures",
  "hello-camel",
+ "ikigai-compress",
  "ikigai-core",
  "ikigai-engine",
  "ikigai-resolve",
@@ -1183,6 +1185,16 @@ dependencies = [
  "syntect",
  "two-face",
  "uuid",
+]
+
+[[package]]
+name = "ikigai-compress"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8095cfcece9517ffac0755b809318bb23729d162a8457d644abc5a40a18398ae"
+dependencies = [
+ "flate2",
+ "ikigai-core",
 ]
 
 [[package]]

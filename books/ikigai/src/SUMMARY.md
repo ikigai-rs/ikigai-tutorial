@@ -81,6 +81,10 @@
 - [A sentence becomes a draft](code/sentence.md)
 - [Exercises: code and language](code/exercises.md)
 
+# Streams
+
+- [Streams, I: bytes are a representation](streams/bytes.md)
+
 # Polyglot tracks
 
 - [One wire, three languages](polyglot/index.md)

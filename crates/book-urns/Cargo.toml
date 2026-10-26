@@ -36,6 +36,9 @@ check-resource = { path = "../check-resource" }
 # mounts ikigai-nl beside it.
 script-host = { path = "../script-host" }
 sentence-draft = { path = "../sentence-draft" }
+# "Streams, I: bytes are a representation": its listings build a kernel over ikigai-compress's
+# space alone.
+ikigai-compress.workspace = true
 # The one parser for `<!-- transcript: … -->` (ledger #1075): the REPL replay reads a block's
 # declaration exactly as the console runner and the `cargo run` check do.
 book-transcripts = { path = "../book-transcripts" }
