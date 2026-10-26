@@ -170,6 +170,12 @@ ikigai-fn = "0.6.0"
 # kernel (wasm cannot unwind), so the book's in-page programs stay far inside the bounds. A 0.x
 # caret: also a ceiling (<0.2.0).
 ikigai-json = "0.1.0"
+# Bytes transrepted, for "Streams, I: bytes are a representation" (ledger #2253): `urn:compress:gzip`
+# and `urn:decompress:gzip` (and zlib), each also a registered transreptor, with a decompression
+# bound (`max-bytes`) that refuses rather than truncates. 0.2.0 is the published head and the floor;
+# it needs core ^0.1.89, below the pin here, and links only `flate2`'s pure-Rust backend, so it
+# builds for wasm32-unknown-unknown as it is. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-compress = "0.2.0"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
 # transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the floor
 # because it added `arrangement_space()`, which mounts the arrangement surface alone, and the `full`

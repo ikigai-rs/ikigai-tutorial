@@ -11,6 +11,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [A space that changes while it runs](applied/live-space.md)
 
+- **2026-10-25**: A new part on streams begins with "Streams, I: bytes are a representation": a representation is a media type and bytes, and binary is as ordinary as text. Its cells gzip the shop's stock and read it back in this page's kernel, which now links ikigai-compress, and show the decompression bound refusing rather than truncating. It ends with what a representation cannot do yet, as one whole buffer, which the pages that follow take up. The `list` in "The REPL grammar" shows the four new gzip and zlib names.
+
+  Pages: [Streams, I: bytes are a representation](streams/bytes.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-25**: In "A space that changes while it runs", the whole host drawn above the tabs now follows your kernel: every step redraws it (from the cache when the step cut nothing), so it is always the kernel as it is now. Going back to a tab you have passed shows that stage again, not your kernel's later state. The book now builds against ikigai-core 0.1.112: Status says what 0.1.111 and 0.1.112 changed, a trace shows a face the caller left out as defaulted, and the grounding in "A sentence becomes a draft" counts the larger vocabulary.
 
   Pages: [Where this actually stands](modules/status.md), [A space that changes while it runs](applied/live-space.md), [A sentence becomes a draft](code/sentence.md)

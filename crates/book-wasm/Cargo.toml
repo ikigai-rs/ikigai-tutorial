@@ -58,6 +58,10 @@ check-resource = { path = "../check-resource" }
 # wasm a sandbox bound reached aborts, which traps this kernel, so the chapters' programs stay far
 # inside the bounds and say so.
 shop = { path = "../shop" }
+# "Streams, I: bytes are a representation": ikigai-compress's gzip and zlib endpoints
+# (`urn:compress:*`, `urn:decompress:*`), which overlap nothing above. Its cells gzip the shop's
+# stock and read it back.
+ikigai-compress.workspace = true
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

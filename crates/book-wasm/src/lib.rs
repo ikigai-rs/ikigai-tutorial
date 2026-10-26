@@ -116,6 +116,9 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // views fill with `urn:iki:fn:compose` and `urn:iki:fn:each`, which Part I's space binds.
         Arc::new(shop::space(Arc::default(), Arc::default())),
         Arc::new(shop::ikigai_json::space()),
+        // "Streams, I: bytes are a representation": gzip and zlib, both ways, as resources and
+        // as transreptors (`urn:compress:*`, `urn:decompress:*`).
+        Arc::new(ikigai_compress::space()),
     ])
 }
 
@@ -1933,6 +1936,59 @@ mod tests {
         assert!(t[0].starts_with("item,shelf,count\n"), "{}", t[0]);
         assert!(t[1].ends_with("[cached]\n"), "{}", t[1]);
         assert!(t[2].ends_with("[computed]\n"), "{}", t[2]);
+    }
+
+    #[test]
+    fn the_first_streams_chapters_cells_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("streams/bytes.md", 3);
+        // The stock as text, then gzipped: bytes the cell names rather than prints.
+        assert!(t[0].starts_with("item,shelf,count\n"), "{}", t[0]);
+        assert!(
+            t[0].contains("error: output is not UTF-8 text (83 bytes)"),
+            "{}",
+            t[0]
+        );
+        // Read back as CSV, with the stock and the gzip stream above both cached.
+        assert!(t[1].ends_with("[2 cached · 1 computed]\n"), "{}", t[1]);
+        // The bound refuses, naming its limit; at the table's own size it answers the table.
+        let (refused, answered) = t[2].split_once("item,shelf,count\n").expect("two answers");
+        assert!(
+            refused.starts_with(
+                "error: invalid argument `content`: decompressed output exceeds the 59-byte limit"
+            ),
+            "{}",
+            t[2]
+        );
+        assert!(answered.contains("lentils,B,7\n"), "{}", t[2]);
+    }
+
+    /// "The REPL grammar" shows `list` in the page's kernel: every name it binds. A space added
+    /// to `page_space()` changes that answer, so the cell is held to it here, where `cargo test`
+    /// sees it, and not only by the browser run.
+    #[test]
+    fn the_grammar_list_cell_is_everything_the_page_kernel_binds() {
+        let path = format!(
+            "{}/../../books/ikigai/src/front-door/grammar.md",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let chapter = std::fs::read_to_string(&path).expect("the chapter is readable");
+        let cell = cells(&chapter)
+            .into_iter()
+            .find(|cell| cell.command == "list")
+            .expect("the chapter has a `list` cell");
+        // The toolbox's build is bound only in the page (`dist_space`); natively it is nothing.
+        let in_the_page_only = "urn:iki:toolbox:dist:{path}";
+        let expected: Vec<&str> = cell
+            .expected
+            .lines()
+            .filter(|line| !line.starts_with(in_the_page_only))
+            .collect();
+        assert_eq!(expected.len() + 1, cell.expected.lines().count());
+        let engine = ikigai_engine::Engine::new(page_kernel());
+        assert_eq!(
+            render(&action_to_json(engine.eval("list"))).trim_end(),
+            expected.join("\n")
+        );
     }
 
     #[test]
