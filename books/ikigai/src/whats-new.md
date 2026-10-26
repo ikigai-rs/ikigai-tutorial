@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-26**: The stages of "A space that changes while it runs" now hold still: below the tabs, the open stage's picture sits beside the stage before it, Before and After, with what changed from one to the other in words. "Compare with" puts any earlier stage in Before. Each picture is the one your kernel drew if that tab's step ran, or the chapter's own, said so, in a dashed frame. On a phone the two stack; long commands and answers scroll sideways instead of wrapping, and on a wide screen the page widens so the longest command fits on one line. The arrow keys on the tabs now move between tabs only; they used to open the next or previous chapter as well.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-25**: In "A space that changes while it runs", the whole host drawn above the tabs now follows your kernel: every step redraws it (from the cache when the step cut nothing), so it is always the kernel as it is now. Going back to a tab you have passed shows that stage again, not your kernel's later state. The book now builds against ikigai-core 0.1.112: Status says what 0.1.111 and 0.1.112 changed, a trace shows a face the caller left out as defaulted, and the grounding in "A sentence becomes a draft" counts the larger vocabulary.
 
   Pages: [Where this actually stands](modules/status.md), [A space that changes while it runs](applied/live-space.md), [A sentence becomes a draft](code/sentence.md)

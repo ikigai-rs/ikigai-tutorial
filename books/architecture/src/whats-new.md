@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-26**: The stages of "Spaces that wrap spaces" now hold still: below the tabs, the open stage's picture sits beside the stage before it, Before and After, with what changed from one to the other in words. "Compare with" puts any earlier stage in Before, and a stage a button makes is shown beside the stage the harness was at before the press. Each picture is the one your kernel drew if that tab's step ran, or the chapter's own, said so, in a dashed frame. On a phone the two stack; long answers scroll sideways instead of wrapping. The arrow keys on the tabs now move between tabs only; they used to open the next or previous chapter as well.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-10-25**: The stages of "Spaces that wrap spaces" now work as one box: each tab holds its step and its answers, scrolling in place, and one picture of the harness sits right below the tabs. Before you run a tab it is the harness as it is now; run it, or press a button, and watch the picture change. Switching back to a tab shows what its step drew, from the cache.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md)
