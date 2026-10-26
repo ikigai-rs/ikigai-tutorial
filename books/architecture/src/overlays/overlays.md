@@ -153,18 +153,16 @@ else's.
 ### The walkthrough, in stages
 
 The walkthrough below is a sequence of **stages**. A stage is the harness after a step that
-changed its picture, and each one is a numbered tab. A tab holds its step: a sentence or two and
-the cells you run, whose answers stay in the tab and scroll there. Below the tabs is the harness's
-picture, one picture for whichever tab is open:
+changed its picture, and each one is a numbered tab. Below the tabs, two pictures sit side by side
+(stacked on a phone): **After** is the open tab's stage, and **Before** is the stage you compare it
+with, the one just before unless you pick another under "Compare with". Under them is what changed
+from Before to After, in words (the board's words, compared line by line: the words that differ
+are marked, and the line they replaced is said beside them). Below that is the tab's step: a
+sentence or two and the cells you run.
 
-- before you run a tab, it is the harness as your page holds it now, which is where that tab's step
-  starts: run the step and watch it change (the chapter's own picture of the stage is behind a
-  disclosure, for when you only want to look);
-- after you run a tab, it is what that step drew: the picture, what changed since the step before
-  (the board's words, compared line by line: the words that differ are marked, and the line they
-  replaced is said beside them), the facts and the board's words in full.
-
-Run the tabs in order: each step starts where the one before left the harness. A step that
+Each picture says whose it is. Until you run a tab's step, its picture is the chapter's own, in a
+dashed frame; run it, and After becomes the picture your page drew, in a solid frame. Run the tabs
+in order: each step starts where the one before left the harness. A step that
 changes nothing the picture shows makes no stage, and the picture says "no change" instead. Twelve
 stages: the breaker from every circuit closed to a circuit half-open again, then the failover
 moving to its backup and back, then the bulkhead filling and draining. (The tabs are the books'
@@ -186,9 +184,9 @@ its state word (`OPEN (was CLOSED)`, `(new)`), and the words in the picture begi
 changed. The chapter's pictures are marked against the stage before; the first stage you make
 yourself is not marked, because the page reads nothing until you take a step.
 
-**The buttons are yours.** They drive the same harness the cells do, and the picture below the
-tabs shows what each press did. A press that changes the picture adds a stage after the chapter's,
-numbered on, and opens it, so you can flip between any two states the harness has been in.
+**The buttons are yours.** They drive the same harness the cells do. A press that changes the
+picture adds a stage after the chapter's, numbered on, and opens it as After, beside the stage the
+harness was at before the press, so you can compare any two states the harness has been in.
 
 **Every picture is drawn once.** A stage's picture is `urn:diagram:state`, a pure composition of
 two resources: the harness's topology and the governors' board. It is cacheable, and it hangs from
@@ -198,8 +196,8 @@ closed). A cooldown running out cuts nothing; the board's answer is cached only 
 out, on the harness clock. So a picture stays true until the state moves. After every step the
 page asks for it as your own lines would: a step that moved a governor cut its thread, so the
 picture is drawn again, once; a step that changes nothing cuts nothing, so the page's read is a
-cache hit, and the page says so (stage 4 shows one in a trace). Switching tabs asks for nothing at
-all: each tab keeps the picture its step drew. The chapter's twelve pictures are files the same
+cache hit, and the page says so (stage 4 shows one in a trace). Switching tabs, or what you
+compare with, asks for nothing at all: each tab keeps the picture its step drew. The chapter's twelve pictures are files the same
 harness drew natively, held to it byte for byte by a test, so they show before the page's kernel
 loads, without it, and in print. Every picture is kept in both the light and the dark colors
 (`scheme=light`, `scheme=dark`), and the page shows the one the book's theme needs.

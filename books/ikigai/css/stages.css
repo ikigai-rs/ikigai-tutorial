@@ -1,5 +1,5 @@
 /* The stages viewer (`js/stages.js`, contract in docs/stages.md): numbered tabs of a picture's
- * stages, the steps that make them, the facts line. ONE COPY for every book, as run.css is: a
+ * stages, the steps that make them, the facts line, and Before | After below the tabs. ONE COPY for every book, as run.css is: a
  * book that uses it links to this file and lists it in its book.toml. Every color is a theme
  * variable, so the contrast gate's pairs cover it (the changed words' <mark> included: it is
  * --bg on --links, the gate's link pair turned over). */
@@ -94,10 +94,137 @@
     margin: 0.4em 0;
 }
 
-/* The picture below the tabs, shared by every tab (js/stages.js, once the kernel loads). Each
- * tab's own committed picture is then hidden: the shared one shows it, or the kernel's. */
-.ikigai-stages-shown {
+/* A page with a stages viewer may be as wide as 1680 px (mdbook's is 750, layout.css makes it
+ * 1280), so the open tab's longest command line fits on a wide screen without scrolling.
+ * Paragraphs keep layout.css's 90ch measure. */
+html:has(.ikigai-stages) {
+    --content-max-width: 1680px;
+}
+
+/* Before | After, between the tabs and the open panel (js/stages.js, once the kernel loads).
+ * Each tab's own committed picture is then hidden: After shows it, or the kernel's. */
+.ikigai-stages-compare {
     margin: 0.8em 0 1em;
+}
+
+.ikigai-stages-compare p {
+    margin: 0.4em 0;
+}
+
+/* "Compare with": one button per stage, the ones at or after the open tab disabled, so the row
+ * keeps its place when the tab changes. Pressed is told by weight and a solid fill. */
+.ikigai-stages-against {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9em;
+}
+
+.ikigai-stages-against-label {
+    font-weight: 700;
+    margin-right: 0.2rem;
+}
+
+.ikigai-stages-against-button {
+    font: inherit;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 0.7rem;
+    border: 1px solid var(--links);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--links);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.ikigai-stages-against-button[aria-pressed="true"] {
+    background: var(--links);
+    color: var(--bg);
+    font-weight: 700;
+}
+
+/* Disabled: a stage at or after the open one. Told by the dashed border and the default cursor
+ * as well as the fade (a disabled control has no contrast requirement, SC 1.4.3). */
+.ikigai-stages-against-button:disabled {
+    border-style: dashed;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.ikigai-stages-against-button:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 2px;
+}
+
+/* The two pictures side by side, stacked (Before on top) when the column is narrower than two
+ * 520 px slots. A slot that narrow still holds its 500 px picture (below) with its padding and
+ * border, so side by side a picture never scrolls in its slot; only a phone's column makes it. */
+.ikigai-stages-pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+    gap: 1rem;
+    margin: 0.6em 0;
+}
+
+.ikigai-stages-slot {
+    margin: 0;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.5rem 0.8rem;
+    border: 2px solid var(--links);
+    border-radius: 4px;
+    background: var(--quote-bg);
+    color: var(--fg);
+}
+
+/* The chapter's picture, not the reader's kernel's: a dashed frame, and the caption says so.
+ * The picture itself is not faded: its own secondary text is 5.7:1 at full strength in the
+ * light scheme, and any fade takes it under 4.5:1 (SC 1.4.3). */
+.ikigai-stages-slot-chapter {
+    border-style: dashed;
+    border-color: var(--fg);
+}
+
+.ikigai-stages-slot-caption {
+    font-size: 0.9em;
+}
+
+.ikigai-stages-slot-note {
+    font-size: 0.85em;
+}
+
+/* A picture keeps a readable 500 px and scrolls sideways in its slot on a narrow screen; on a
+ * wide one it grows to its natural 960 px and stops. */
+.ikigai-stages-slot-picture {
+    overflow-x: auto;
+}
+
+.ikigai-stages-slot-picture .ikigai-stage-picture {
+    margin: 0;
+}
+
+.ikigai-stages-slot-picture .ikigai-stage-picture img {
+    display: block;
+    width: 100%;
+    min-width: 500px;
+    max-width: 960px;
+    height: auto;
+}
+
+/* The copy the theme needs, as a block so the picture can take the slot's width (the rules at
+ * the end of this file pick the copy; these only change how the shown one is laid out). */
+.ikigai-stages-slot .ikigai-stage-picture a.ikigai-scheme-light,
+html.coal .ikigai-stages-slot .ikigai-stage-picture a.ikigai-scheme-dark,
+html.navy .ikigai-stages-slot .ikigai-stage-picture a.ikigai-scheme-dark,
+html.ayu .ikigai-stages-slot .ikigai-stage-picture a.ikigai-scheme-dark {
+    display: block;
+}
+
+/* What changed between the two: a line is never wrapped (the words are URI-heavy), the list
+ * scrolls sideways instead. */
+.ikigai-stages-diff {
     padding: 0.5rem 0.8rem;
     border: 1px solid var(--quote-border, var(--links));
     border-left: 4px solid var(--links);
@@ -105,27 +232,47 @@
     color: var(--fg);
 }
 
-.ikigai-stages-shown p {
-    margin: 0.4em 0;
+.ikigai-stages-diff .ikigai-stage-changes {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.3rem;
 }
 
 .ikigai-stages-live > section.ikigai-stage > .ikigai-stage-result {
     display: none;
 }
 
-/* A tab stays in its box: the panel scrolls in place, so the picture below the tabs is never
- * more than the box's height from the step. The panel is focusable (a tabpanel), so the box
- * scrolls from the keyboard too. */
 .ikigai-stages-live > section.ikigai-stage {
-    max-height: 60vh;
-    overflow-y: auto;
-    padding-right: 0.4rem;
-    border-bottom: 1px solid var(--links);
+    border-top: 1px solid var(--links);
 }
 
-.ikigai-stages-chapter summary {
-    cursor: pointer;
-    color: var(--links);
+/* The open tab's cells: a command and its answer are never wrapped (a wrapped URI reads as two),
+ * they scroll sideways in their own box, and the command takes the column's whole width, its
+ * buttons under it. At 12 px (0.75em) the chapters' longest command, 226 characters, fits a
+ * 1680 px column without scrolling. */
+.ikigai-stages .ikigai-run-head {
+    grid-template-columns: 1fr;
+    grid-template-areas: "label" "cmd" "help" "buttons";
+}
+
+.ikigai-stages .ikigai-run-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.ikigai-stages .ikigai-run-cmd,
+.ikigai-stages .ikigai-run-out,
+.ikigai-stages .ikigai-run-entry-out,
+.ikigai-stages .ikigai-run-entry-cmd {
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    font-size: 0.75em;
+}
+
+/* The command keeps its last line clear of its own sideways scrollbar. */
+.ikigai-stages .ikigai-run-cmd {
+    padding-bottom: 1.1rem;
 }
 
 .ikigai-stage-changes {
@@ -192,15 +339,11 @@ html.ayu .ikigai-stage-picture a.ikigai-scheme-light {
     .ikigai-stage[hidden] {
         display: block !important;
     }
-    .ikigai-stages-shown,
+    .ikigai-stages-compare,
     .ikigai-stage-pointer {
         display: none;
     }
     .ikigai-stages-live > section.ikigai-stage > .ikigai-stage-result {
         display: block;
-    }
-    .ikigai-stages-live > section.ikigai-stage {
-        max-height: none;
-        overflow: visible;
     }
 }

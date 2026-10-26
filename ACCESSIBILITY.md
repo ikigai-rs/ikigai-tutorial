@@ -54,13 +54,16 @@ a review comment.
   light and a dark copy), and the ones a page draws (a stage a reader makes, kept in its own tab).
 - **The stages viewer** (`js/stages.js`, `css/stages.css`, one copy every book can load; today
   the live host in The ikigai Book and the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern
-  (arrow keys, Home and End), one polite status region, what changed said in words with the
-  changed words marked, the reader's own stages appended. Once the kernel loads, each tab panel is
-  a bounded box that scrolls in place (it is a focusable tabpanel, so it scrolls from the keyboard)
-  and one picture below the tabs, a labeled region, shows the open tab's stage (not a live region:
-  the status region says each step once). Only the selected stage is in the
-  page's rendered content, so the browser axe run audits the first stage's panel and the tabs,
-  not the other panels; the structure gate and the no-kernel check read every panel's markup.
+  (arrow keys, Home and End, kept from mdbook's chapter keys), one polite status region, what
+  changed said in words with the changed words marked, the reader's own stages appended. Once the
+  kernel loads, Before | After sits between the tabs and the open panel, a labeled region (not a
+  live region: the status region says each step once): a "Compare with" row of `aria-pressed`
+  buttons with 44 px targets, the two pictures as figures with captions that say whose picture
+  each is (never by the frame alone), and what changed between them in words. Commands, answers
+  and the changed lines scroll sideways rather than wrap; each box that overflows takes a tab
+  stop. Only the selected stage is in the page's rendered content, so the browser axe run audits
+  the panel and Before | After as the run leaves them, not the other panels; the structure gate
+  and the no-kernel check read every panel's markup.
 
 ### Not ours to fix, still ours to report
 
@@ -106,7 +109,7 @@ check means the site is not updated.
 | `a11y/axe.mjs`: axe-core in jsdom (`pages.yml`) | axe-core 4.10.3, jsdom 26.1.0 | Every built page with the books' scripts run, so mdbook's copy buttons, the cells and the search repairs are seen. Gates on axe's WCAG 2.0/2.1/2.2 A and AA rules; best-practice rules are reported only | Color and target size (jsdom has no layout); the kernel path (the wasm import fails in jsdom, so cells are seen without a kernel) |
 | `a11y/no-kernel.mjs` (`pages.yml`) | jsdom 26.1.0 | With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message, a live host's picture left as committed with its alt text and a line saying it will not be redrawn. Published pages and drafts | Whether the message is understood; only the absence of answers is checked |
 | `a11y/axe-browser.mjs`: axe-core in a real browser (`pages.yml`) | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the log, not pinned) | The assembled site, both books, every page in all five themes, with the kernels loaded, every cell run once, every "Expected output" opened, every view started, every toolbox check opened in place with its frame audited. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size` | One viewport (1280×900). States it does not open: search results, the theme menu, the collapsed sidebar, the keyboard-help popup |
-| `a11y/cells.mjs` (run by `axe-browser.mjs`, `pages.yml`) | playwright-core 1.63.0, the same Chrome | Every cell of every page, run in page order on a fresh load, is marked "as the chapter shows" (pages on the browser's clock are not compared); for every cell with "Run all above", a lone run that differs points at it, and the button then Run matches the chapter | Whether the marks and the hint are understood; a reader's own edits, which are never compared |
+| `a11y/cells.mjs` (run by `axe-browser.mjs`, `pages.yml`) | playwright-core 1.63.0, the same Chrome | Every cell of every page, run in page order on a fresh load, is marked "as the chapter shows" (pages on the browser's clock are not compared), and a cell in a stages viewer's chain leaves its tab open with After showing a picture the kernel drew, captioned so; for every cell with "Run all above", a lone run that differs points at it, and the button then Run matches the chapter | Whether the marks and the hint are understood; a reader's own edits, which are never compared; "Compare with" and the buttons' stages, which only a person has tried |
 | `a11y/links.mjs` (`pages.yml`) | none | Every relative link in the assembled site lands on a page in it, including links between the two books | Fragments (`#id`) and external links |
 | `crates/book-urns`, `book_cells.rs` and the chapter-number checks (`cargo test`) | none | A blank line inside a cell's markup (which breaks the page once built); a bare "chapter N" with no link | Everything else about the prose |
 
@@ -147,6 +150,7 @@ has been run.
 | Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
 | The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
 | A stage's picture's `alt` is the viewer's description followed by the stage's words in full (for the live host, `urn:iki:tutorial:live:arrangement`, one clause per door); nobody has judged whether that reads well, and it is read again in full on every tab | "A space that changes while it runs", "Spaces that wrap spaces" | A long description, repeated per stage | Each stage's "What changed", which says only the difference |
+| Before \| After shows two pictures of a stage at once; at a phone's width each keeps 500 px and scrolls sideways in its slot, and the resilience harness's pictures are 1104 px tall at their natural width, so on a phone the open tab's step is more than a screen below the tabs. The chapter's own picture is told by a dashed frame and its caption, not by fading it: the pictures' secondary text is 5.7:1 in the light scheme, and a fade would take it under 4.5:1 | "A space that changes while it runs", "Spaces that wrap spaces" | Scrolling, on a narrow screen; on a wide one the two sit side by side | Each picture's link opens it at full size |
 | The browser run's Chrome is not pinned, and mdbook is unpinned on purpose | CI | A new Chrome or mdbook can turn the gate red and stop deploys until someone repairs it | none needed: a red gate is the design |
 
 No list like this is complete. Please report what you find.
@@ -275,7 +279,8 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-10 | axe in a real browser, every theme, made a gate | PR #97 |
 | 2026-10-15 | This file | PR #128 |
 | 2026-10-15 | Reporting asks for the `accessibility` label; `AGENTS.md` points agents here | PR #130 |
-| 2026-10-23 | The library page (`books/library`) is in scope, under the same gates as the books; the inspector's two planet tables (JSON and CSV) join its snapshots, axe run and browser checks | this change |
+| 2026-10-23 | The library page (`books/library`) is in scope, under the same gates as the books; the inspector's two planet tables (JSON and CSV) join its snapshots, axe run and browser checks | PR #160 |
+| 2026-10-26 | The stages viewer shows Before \| After below the tabs; Left and Right on its tabs no longer open another chapter; `cells.mjs` checks After is the kernel's picture | this change |
 
 ## References
 
