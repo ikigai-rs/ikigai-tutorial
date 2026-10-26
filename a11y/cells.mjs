@@ -18,6 +18,8 @@
 // A cell in a stages viewer's chain must also leave its tab open with the picture it drew as After,
 // below the tabs, its caption saying the reader's kernel drew it (Brian, 2026-10-25: a step whose
 // picture is not beside it is a step whose picture goes unseen; 2026-10-26: Before | After).
+// Once a page's cells have run, each viewer's "Compare with" is driven: picking an earlier stage
+// must change Before (`compareWith`, ledger #2298).
 //
 // Then the two things a reader who does NOT read in order meets (Brian, 2026-10-22: step 3 of
 // "A space that changes while it runs" without step 2). For every cell that offers "Run all above",
@@ -140,6 +142,75 @@ async function stagePicture(page, i) {
     }, i);
 }
 
+// In the page, after its cells ran in order: drive each stages viewer's "Compare with" (a native
+// <select>, js/stages.js). On the last tab that has two stages before it, the select must offer
+// exactly the stages before the tab, default to the one just before, and, set to the first
+// stage, put that stage in Before, change "What changed" to start from it, and say so in the
+// status region; switching tabs puts it back to the stage just before. Returns problems.
+async function compareWith(page) {
+    return page.evaluate(async () => {
+        const problems = [];
+        const settle = () => new Promise((r) => setTimeout(r, 50));
+        for (const viewer of document.querySelectorAll(".ikigai-stages[data-picture]")) {
+            const compare = viewer.querySelector(".ikigai-stages-compare");
+            if (!compare || compare.hidden) {
+                continue;
+            }
+            const name = viewer.querySelector('[role="tablist"]').getAttribute("aria-label");
+            const tabs = [...viewer.querySelectorAll('[role="tab"]')];
+            const select = compare.querySelector("select");
+            const label = select && select.labels && select.labels[0];
+            if (!select || !label || label.textContent.trim() !== "Compare with" || label.hidden) {
+                problems.push(`${name}: "Compare with" is not a <select> with its visible label`);
+                continue;
+            }
+            const k = tabs.length - 1;
+            if (k < 2) {
+                continue;
+            }
+            const beforeCaption = () => compare.querySelector("figure.ikigai-stages-before figcaption").textContent;
+            const lead = () => compare.querySelector(".ikigai-stages-diff strong").textContent;
+            const status = viewer.querySelector(".ikigai-stages-status");
+            tabs[k].click();
+            await settle();
+            const options = [...select.options].map((o) => o.textContent);
+            const want = tabs.slice(0, k).map((t) => t.textContent);
+            if (JSON.stringify(options) !== JSON.stringify(want)) {
+                problems.push(`${name}, tab ${k + 1}: "Compare with" offers ${JSON.stringify(options)}, not the stages before it ${JSON.stringify(want)}`);
+                continue;
+            }
+            if (select.selectedIndex !== k - 1) {
+                problems.push(`${name}, tab ${k + 1}: "Compare with" starts at option ${select.selectedIndex + 1}, not the stage just before`);
+            }
+            const was = { caption: beforeCaption(), lead: lead() };
+            select.value = select.options[0].value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            await settle();
+            const first = tabs[0].textContent.replace(/^Stage /, "");
+            if (beforeCaption() === was.caption || !beforeCaption().includes(`stage ${first}`)) {
+                problems.push(`${name}, tab ${k + 1}: picking stage 1 in "Compare with" left Before as ${JSON.stringify(beforeCaption())}`);
+            }
+            if (lead() === was.lead || !lead().startsWith(`What changed from stage ${first} `)) {
+                problems.push(`${name}, tab ${k + 1}: picking stage 1 left "What changed" as ${JSON.stringify(lead())}`);
+            }
+            if (!status.textContent.includes(`stage ${first}`)) {
+                problems.push(`${name}, tab ${k + 1}: picking stage 1 was not said in the status region (${JSON.stringify(status.textContent)})`);
+            }
+            tabs[k - 1].click();
+            await settle();
+            if (select.selectedIndex !== k - 2) {
+                problems.push(`${name}: opening tab ${k} left "Compare with" at option ${select.selectedIndex + 1}, not the stage just before`);
+            }
+            tabs[0].click();
+            await settle();
+            if (!select.closest(".ikigai-stages-against").hidden) {
+                problems.push(`${name}: on the first tab "Compare with" is still shown, with nothing before it`);
+            }
+        }
+        return problems;
+    });
+}
+
 async function open(context, siteUrl, rel) {
     const page = await context.newPage();
     await page.goto(`${ORIGIN}${siteUrl}${rel}`, { waitUntil: "load" });
@@ -195,6 +266,9 @@ export async function checkCells(browser, siteArg) {
             if (await page.locator("div.ikigai-run").nth(i).getByRole("button", { name: "Run all above" }).count()) {
                 withAbove.push(i);
             }
+        }
+        for (const problem of await compareWith(page)) {
+            failures.push(`${rel}, after its cells ran in page order: ${problem}`);
         }
         await page.close();
 

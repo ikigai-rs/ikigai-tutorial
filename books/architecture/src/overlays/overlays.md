@@ -155,7 +155,7 @@ else's.
 The walkthrough below is a sequence of **stages**. A stage is the harness after a step that
 changed its picture, and each one is a numbered tab. Below the tabs, two pictures sit side by side
 (stacked on a phone): **After** is the open tab's stage, and **Before** is the stage you compare it
-with, the one just before unless you pick another under "Compare with". Under them is what changed
+with, the one just before unless you pick another from the "Compare with" list above them. Under them is what changed
 from Before to After, in words (the board's words, compared line by line: the words that differ
 are marked, and the line they replaced is said beside them). Below that is the tab's step: a
 sentence or two and the cells you run.

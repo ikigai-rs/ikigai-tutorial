@@ -122,7 +122,7 @@ legible on a narrow screen.
 **How to read the stages.** A stage is the space after a step that changed it, and each one is a
 numbered tab. Below the tabs, two pictures sit side by side (stacked on a phone): **After** is the
 open tab's stage, and **Before** is the stage you compare it with, the one just before unless you
-pick another under "Compare with". Under them is what changed from Before to After, in words (the
+pick another from the "Compare with" list above them. Under them is what changed from Before to After, in words (the
 space's words, `urn:iki:tutorial:live:arrangement`, compared line by line: the words that differ
 are marked, and what they replaced is said beside them). Below that is the tab's step: a sentence
 or two and a cell, whose Run button runs the step in this page's host.
