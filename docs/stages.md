@@ -4,8 +4,10 @@
 chapter's steps change as a row of **numbered tabs**, one per **stage**. A stage is the state
 after a step that changed the picture or its words. Each tab holds the steps that make the
 stage, what made it, what changed since the stage before (in words, with the changed words
-marked), and the picture as it was then, kept and never redrawn. A reader's own steps add stages
-after the chapter's, so they can flip between any two states.
+marked), and the picture as it was then, kept and never redrawn. Once the page's kernel loads,
+the open tab's stage is shown below the tabs beside an earlier one, **Before | After**, so a
+reader compares two states without anything else moving. A reader's own steps add stages after
+the chapter's, so they can compare any two states.
 
 The viewer knows nothing about what it draws. A page names, in markup, the line that draws the
 picture, the line that says it in words, and the steps. Any book's in-page kernel answers those
@@ -80,11 +82,11 @@ The viewer's attributes:
 | `data-picture` | yes | A line whose answer is SVG: the picture. `{scheme}` in it is replaced by `light` and by `dark`, and both copies are kept; without it the line is asked once. |
 | `data-words` | yes | A line whose answer says the stage in words (a text face). What changed is computed from it, and a stage's match is judged by it. |
 | `data-before` | no | A line read after every step, after the words, whose answer is handed to the NEXT read of the picture as `before="…"` (quoted, `\` and `"` escaped): a picture that can mark what changed since an earlier state (ikigai-diagram 0.2.4's `urn:diagram:state`, with `urn:throttle:state as=text/turtle`) marks it. With it, a step makes a stage when the words or this answer moved, not when the picture did (a marked picture differs whenever the board does), and the picture is read last: a step that made a stage draws it marked against the last read, and a step that moved nothing draws it exactly as the current stage was drawn, so that read is the same request and a step that cut nothing finds it in the cache. The first step after the page loads has no earlier answer, so the first stage a reader makes is unmarked; the committed stages are drawn by the native test against the stage before. |
-| `data-overview` | no | A line whose answer is SVG: the kernel's state above the tabs (`{scheme}` as for `data-picture`). It is read after every step, last, and drawn into the figure `data-overview-target` names, in place of the picture that figure commits, with a caption that says whether the read was a cache hit. The picture below the tabs stays the open tab's stage. |
+| `data-overview` | no | A line whose answer is SVG: the kernel's state above the tabs (`{scheme}` as for `data-picture`). It is read after every step, last, and drawn into the figure `data-overview-target` names, in place of the picture that figure commits, with a caption that says whether the read was a cache hit. After, below the tabs, stays the open tab's stage. |
 | `data-overview-target`, `data-overview-alt` | with `data-overview` | The `id` of the figure above the tabs, and the alt text of the picture drawn into it (it describes the kernel as it is now, not as the committed picture was). |
 | `data-chain` | no | The chain the lines run in, as a cell names it (`harness:overlays` for `data-harness='overlays'`, `live:workshop` for `data-live='workshop'`). Without it, the page's own kernel. Cells in the same chain are the viewer's steps. |
 | `data-alt` | no | What the picture draws, in words: every picture's alt text is this, then "At this stage:" and the words. |
-| `data-tabs-label`, `data-controls-label` | no | The accessible names of the tab list and of the row of buttons. |
+| `data-tabs-label`, `data-controls-label`, `data-compare-label` | no | The accessible names of the tab list, of the row of buttons and of the Before \| After region. |
 
 The parts:
 
@@ -110,29 +112,45 @@ no thread reads the picture from the cache, and the viewer says so). Then:
 
 - if the words and the picture are what it last saw, the status line says **No change** and no
   tab is added;
-- if a control changed them, a new stage is added after the chapter's and selected;
+- if a control changed them, a new stage is added after the chapter's and selected, compared with
+  the stage the kernel was at before the press;
 - if a cell changed them to its own stage's words, that stage says the reader's kernel reached it;
   otherwise a new stage is added, and not selected, so the cell stays in view.
 
+Whichever it was, a cell's own tab is opened and compared with the stage just before it.
+
 Before the first step it compares with the first stage's committed words: nothing is read on load.
 
-**One picture, below the tabs.** Once the kernel loads, a tab holds its step and the viewer shows
-one picture below the tabs (`div.ikigai-stages-shown`, a labeled region) for whichever tab is open.
-A tab whose step ran shows what that step drew: what the step did, the picture, what changed, the
-facts and the words. The first tab, whose stage is the page as it loads, always shows that picture.
-A tab the reader went past without running its step shows the chapter's picture of its stage, said
-to be the chapter's, never the kernel's later state. A tab ahead of the reader shows the kernel as
-it is now, which is where its step starts, with the chapter's own picture of the stage behind a
-closed disclosure. Switching tabs asks the kernel nothing:
-every picture shown is one a step already drew. Each tab's committed result is hidden while the
-picture below stands in for it, and a pointer ("The picture for this stage is below the tabs.")
-takes its place; until the kernel loads, without it, and in print, each tab shows its own committed
-result instead.
+**Before | After, below the tabs** (Brian, 2026-10-26). Once the kernel loads, a region
+(`div.ikigai-stages-compare`) sits between the tabs and the open tab's panel. Top to bottom:
 
-**A tab stays in its box.** The tab panel is bounded (60% of the viewport) and scrolls in place, so
-the picture below is never more than a box away from the step that drew it. Write a stage's section
-with that in mind: a sentence or two, the cells, and what their answers mean; put long explanations
-and native listings after the viewer.
+- **Compare with**: one `aria-pressed` button per stage. Those before the open tab are enabled,
+  those at or after it are disabled, so the row keeps its place as tabs change; the stage just
+  before is pressed unless the reader picks another. On the first tab a sentence says there is
+  nothing before it.
+- **Two pictures, side by side** (`figure.ikigai-stages-before`, `figure.ikigai-stages-after`), in
+  a grid that stacks them on a narrow screen, Before on top. After is the open tab's stage, Before
+  the stage picked. Each is the picture the page's kernel drew when that tab's step last ran (a
+  solid frame, captioned "as your kernel drew it", with what that step did), or else the
+  chapter's committed picture (a dashed frame, captioned "the chapter's picture", with what
+  running the step would do). When a tab's step so far moved nothing (its first cell often sets
+  something the picture does not show), its picture is the stage the kernel was still at, and the
+  caption names that stage. A picture keeps 500 px and scrolls sideways in its slot on a phone;
+  on a wide screen it grows to its natural 960 px.
+- **What changed from stage A to stage B**: the comparison below, for the two shown. Its lines are
+  never wrapped; the list scrolls sideways.
+
+The panel below holds the tab's step as the chapter wrote it. Its commands and answers are never
+wrapped either (a wrapped URI reads as two names): each scrolls sideways in its own box, and on a
+page with a viewer the content may be 1680 px wide, so at 12 px the chapters' longest command (226
+characters) fits on one line there. Switching tabs or "Compare with" asks the kernel nothing:
+every picture shown is one a step already drew, or a committed file. Each tab's committed result
+is hidden while After stands in for it, and a pointer ("The picture for this stage is below the
+tabs, as After.") takes its place; until the kernel loads, without it, and in print, each tab
+shows its own committed result instead.
+
+A box that scrolls sideways takes a tab stop while it overflows, and Left and Right in it (and on
+the tabs) are kept from mdbook, which binds them on the document to the previous and next chapter.
 
 **What changed** compares a stage's words with the stage before's, line by line. A line that
 replaced another is shown with the words that differ marked (`<mark>`) and the words they
@@ -169,6 +187,12 @@ pictures, offer no control, and say the kernel did not load.
 ## Accessibility
 
 The tabs are the ARIA tabs pattern: a `tablist`, a `tab` per stage, a `tabpanel` per section, Left
-and Right between tabs, Home and End to the ends, Tab into the panel, a visible focus ring. One
-polite status region says each step's outcome once. In print, every stage shows, one after
-another. See `ACCESSIBILITY.md` for what the checks cover.
+and Right between tabs, Home and End to the ends, a visible focus ring. From a tab, Tab reaches
+"Compare with" and the two pictures' links before the panel: the comparison is what the tab
+changed. "Compare with" buttons are 44 px targets. One polite status region says each step's
+outcome once; Before | After is a labeled region, not a live one. In print, every stage shows,
+one after another. See `ACCESSIBILITY.md` for what the checks cover.
+
+`a11y/cells.mjs` holds the viewer to the reader who runs a chapter in order: after every cell in
+a viewer's chain, its tab is open and After shows a picture the page's kernel drew (a `blob:`
+image in the copy the theme shows), captioned as the kernel's.

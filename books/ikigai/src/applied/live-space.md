@@ -120,18 +120,16 @@ Only the third layer changes, so the stages below draw only it: `focus=` on `urn
 legible on a narrow screen.
 
 **How to read the stages.** A stage is the space after a step that changed it, and each one is a
-numbered tab. A tab holds its step: a sentence or two and a cell, whose Run button runs the step in
-this page's host. What the cell answers stays in the tab and scrolls there. Below the tabs is the
-space's picture, one picture for whichever tab is open:
+numbered tab. Below the tabs, two pictures sit side by side (stacked on a phone): **After** is the
+open tab's stage, and **Before** is the stage you compare it with, the one just before unless you
+pick another under "Compare with". Under them is what changed from Before to After, in words (the
+space's words, `urn:iki:tutorial:live:arrangement`, compared line by line: the words that differ
+are marked, and what they replaced is said beside them). Below that is the tab's step: a sentence
+or two and a cell, whose Run button runs the step in this page's host.
 
-- before you run a tab, it is the space as your host holds it now, which is where that tab's step
-  starts: run the step and watch it change (the chapter's own picture of the stage is behind a
-  disclosure, for when you only want to look);
-- after you run a tab, it is what that step drew: the picture, what changed since the step before
-  (the space's words, `urn:iki:tutorial:live:arrangement`, compared line by line: the words that
-  differ are marked, and what they replaced is said beside them), the facts, and the words in full.
-
-Run the tabs in order: each step starts where the one before left the space. A cell that changes
+Each picture says whose it is. Until you run a tab's step, its picture is the chapter's own, in a
+dashed frame; run it, and After becomes the picture your host drew, in a solid frame. Run the tabs
+in order: each step starts where the one before left the space. A cell that changes
 nothing the space holds makes no stage. The line above the tabs keeps two facts current, each read
 from the space's status door after every cell: how many declarations have bound, and the last
 refusal. How each step works, as a Rust listing that runs on every build of the book, is after the
@@ -142,7 +140,8 @@ is a pure function of the kernel's topology, so the kernel caches it, and the ca
 hangs from `urn:kernel:bindings`, the thread every successful bind cuts. After every cell you run,
 the page asks for both, the whole host above and the space below, as your own lines would. A cell that bound a new declaration cut the
 thread, so the picture is drawn again, once; a cell that cut nothing gets the cached picture, and
-the page says so. Switching tabs asks for nothing at all: each tab keeps the picture its step drew.
+the page says so. Switching tabs, or what you compare with, asks for nothing at all: each tab keeps the picture
+its step drew.
 The chapter's own pictures are files the same host drew natively, held to it byte for byte by a
 test, so they show before the page's kernel loads, without it, and in print.
 

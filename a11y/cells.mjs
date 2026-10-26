@@ -15,8 +15,9 @@
 // fresh load, and requires that mark (or, on a page that runs on the browser's clock, the mark
 // saying it was not compared) of each. A chapter whose expected output was written for a cell run
 // on its own, or a kernel that moved under a chapter, fails here, with the difference printed.
-// A cell in a stages viewer's chain must also leave its tab open with the picture it drew below the
-// tabs (Brian, 2026-10-25: a step whose picture is not beside it is a step whose picture goes unseen).
+// A cell in a stages viewer's chain must also leave its tab open with the picture it drew as After,
+// below the tabs, its caption saying the reader's kernel drew it (Brian, 2026-10-25: a step whose
+// picture is not beside it is a step whose picture goes unseen; 2026-10-26: Before | After).
 //
 // Then the two things a reader who does NOT read in order meets (Brian, 2026-10-22: step 3 of
 // "A space that changes while it runs" without step 2). For every cell that offers "Run all above",
@@ -96,8 +97,10 @@ async function press(page, i, which) {
     }, { i, which });
 }
 
-// In the page: when cell `i` runs in a stages viewer's chain, wait for the picture below the tabs
-// to be the one its step drew. Returns a problem, or null (also for a cell in no viewer's chain).
+// In the page: when cell `i` runs in a stages viewer's chain, wait for its tab to be open and the
+// After picture below the tabs to be one the page's kernel drew (a `blob:` image, never the
+// chapter's committed file), captioned as the kernel's. Returns a problem, or null (also for a
+// cell in no viewer's chain).
 async function stagePicture(page, i) {
     return page.evaluate(async (i) => {
         const cell = document.querySelectorAll("div.ikigai-run")[i];
@@ -108,28 +111,32 @@ async function stagePicture(page, i) {
         if (!inChain) {
             return null;
         }
-        // The cell's tab is the open one, and the picture below the tabs is what this step drew.
+        // The cell's tab is the open one, and After (`figure.ikigai-stages-after`) is what this
+        // step drew: a picture the kernel drew, in the copy the theme shows, said to be the kernel's.
         const viewer = cell.closest(".ikigai-stages");
         const section = cell.closest("section.ikigai-stage");
         const deadline = Date.now() + 15000;
         while (Date.now() < deadline) {
-            const shown = viewer && viewer.querySelector(".ikigai-stages-shown");
-            const caption = shown && shown.querySelector(".ikigai-stages-shown-caption");
+            const compare = viewer && viewer.querySelector(".ikigai-stages-compare");
+            const after = compare && compare.querySelector("figure.ikigai-stages-after");
+            const caption = after && after.querySelector("figcaption");
+            const drawn = after && [...after.querySelectorAll('.ikigai-stage-picture img[src^="blob:"]')]
+                .some((img) => img.getClientRects().length > 0);
             // A viewer with a picture above the tabs (`data-overview`) redraws that one too.
             const overview = viewer && viewer.getAttribute("data-overview")
                 ? document.getElementById(viewer.getAttribute("data-overview-target") || "")
                 : null;
             const overviewDrawn = !viewer || !viewer.getAttribute("data-overview") ||
                 (overview && overview.querySelector('img[src^="blob:"]'));
-            if (shown && !shown.hidden && (!section || !section.hidden) &&
-                shown.querySelector('.ikigai-stage-picture img[src^="blob:"]') &&
-                caption && /^After this (tab's )?step:/.test(caption.textContent) && overviewDrawn) {
+            if (compare && !compare.hidden && (!section || !section.hidden) && drawn &&
+                caption && /^After:.*as your kernel drew it/.test(caption.textContent) && overviewDrawn) {
                 return null;
             }
             await new Promise((r) => setTimeout(r, 50));
         }
         const status = [...document.querySelectorAll(".ikigai-stages-status")].map((s) => s.textContent).join(" | ");
-        return `the picture below the tabs is not what this step drew (the viewer said: ${JSON.stringify(status)})`;
+        const after = viewer && viewer.querySelector("figure.ikigai-stages-after figcaption");
+        return `After, below the tabs, is not a picture this step drew (After says ${JSON.stringify(after ? after.textContent : "(no After)")}; the viewer said: ${JSON.stringify(status)})`;
     }, i);
 }
 
@@ -179,8 +186,8 @@ export async function checkCells(browser, siteArg) {
             if (!r.meta.includes(AS_SHOWN) && !r.meta.includes(NOT_COMPARED)) {
                 failures.push(`${rel} cell ${i + 1}, run in page order: "${r.meta}" — ${difference(r.out, r.expected)}`);
             }
-            // A cell in a stages viewer's chain leaves its tab open with the picture it drew below
-            // the tabs (`div.ikigai-stages-shown`, js/stages.js).
+            // A cell in a stages viewer's chain leaves its tab open with the picture it drew as
+            // After, below the tabs (`figure.ikigai-stages-after`, js/stages.js).
             const picture = await stagePicture(page, i);
             if (picture !== null) {
                 failures.push(`${rel} cell ${i + 1}, run in page order: ${picture}`);
