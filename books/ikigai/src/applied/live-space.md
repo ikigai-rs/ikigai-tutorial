@@ -99,10 +99,11 @@ does after every write, and the loop hears that cut. Nothing else tells the spac
 
 ## The space, in stages
 
-The kernel's state first: the whole host, as `urn:diagram:kernel` draws it before anything is
-declared:
+The kernel's state first: the whole host, as `urn:diagram:kernel` draws it. Before anything
+is declared it looks like this, and once the page's host is running, every step you take below
+redraws it here, so this picture is always the kernel as it is now:
 
-<figure style="margin: 1em 0">
+<figure id="live-host" class="ikigai-stages-overview" style="margin: 1em 0">
 <a href="live-space-host.svg"><img src="live-space-host.svg"
      alt="The host's arrangement as nested boxes: a chain holding the root, a fallback of the three layers the paragraphs above name. The first layer holds the declaration and its words, the second the diagram's four doors, and the third, the dynamic space urn:iki:space:dynamic:workshop, holds an endpoint space with no doors."></a>
 <figcaption>The host before anything is declared: <code>urn:diagram:kernel</code>, as the
@@ -111,7 +112,7 @@ the picture to open it at full size.</figcaption>
 </figure>
 
 The third layer is the dynamic space: its name, the declaration it is built from, and inside
-it, an endpoint space with no doors. The status door is not drawn. The space answers it
+it, before anything is declared, an endpoint space with no doors. The status door is not drawn. The space answers it
 itself, ahead of anything a declaration binds, so no declaration can shadow it.
 
 Only the third layer changes, so the stages below draw only it: `focus=` on `urn:diagram:kernel`
@@ -136,16 +137,18 @@ from the space's status door after every cell: how many declarations have bound,
 refusal. How each step works, as a Rust listing that runs on every build of the book, is after the
 stages.
 
-**Every picture is drawn once.** The picture is a resource like any other: `urn:diagram:kernel` is
-a pure function of the kernel's topology, so the kernel caches it, and the cached picture hangs
-from `urn:kernel:bindings`, the thread every successful bind cuts. After every cell you run, the
-page asks for the picture as your own lines would. A cell that bound a new declaration cut the
+**Every picture is drawn once.** Both pictures are resources like any other: `urn:diagram:kernel`
+is a pure function of the kernel's topology, so the kernel caches it, and the cached picture
+hangs from `urn:kernel:bindings`, the thread every successful bind cuts. After every cell you run,
+the page asks for both, the whole host above and the space below, as your own lines would. A cell that bound a new declaration cut the
 thread, so the picture is drawn again, once; a cell that cut nothing gets the cached picture, and
 the page says so. Switching tabs asks for nothing at all: each tab keeps the picture its step drew.
 The chapter's own pictures are files the same host drew natively, held to it byte for byte by a
 test, so they show before the page's kernel loads, without it, and in print.
 
 <div class="ikigai-stages" data-chain='live:workshop'
+     data-overview='source urn:diagram:kernel scheme={scheme}' data-overview-target='live-host'
+     data-overview-alt="The host's arrangement as nested boxes, as your kernel holds it now: a chain holding the root, a fallback of three layers: the declaration and its words, the diagram's four doors, and the dynamic space urn:iki:space:dynamic:workshop with what its declaration binds now, which the picture below the tabs says in words."
      data-picture='source urn:diagram:kernel scheme={scheme} focus=urn:iki:space:dynamic:workshop'
      data-words='source urn:iki:tutorial:live:arrangement'
      data-tabs-label='Stages of the dynamic space'
@@ -384,7 +387,7 @@ trace  urn:iki:tutorial:live:picture
 &#32;
 urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 9291b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
 └─ urn:diagram:kernel   diagram-kernel · computed · ThreadId(1) · — · answered-by=urn:iki:space:diagram defaulted=scheme
-   └─ urn:kernel:topology   kernel-topology · computed · ThreadId(1) · —
+   └─ urn:kernel:topology   kernel-topology · computed · ThreadId(1) · — · defaulted=as
 narrowed — capability: urn:cap:kernel:listen
 error: denied: capability does not grant `urn:cap:kernel:inspect` (declared by `urn:diagram:kernel`)
 error: denied: capability does not grant `urn:cap:kernel:inspect` (declared by `urn:diagram:kernel`)

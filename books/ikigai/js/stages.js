@@ -69,10 +69,13 @@
 // wherever the tabs are:
 //
 // - a tab whose step ran shows the picture that step drew, what it changed and the facts;
-// - a tab whose step has not run shows the kernel as it is now, which is where its step starts,
-//   so running it is what changes the picture; the chapter's own picture of that stage is behind
-//   a closed disclosure, for a reader who only wants to look;
-// - the first tab, before any step, shows the picture as the page loads it.
+// - the first tab, whose stage is the page as it loads, shows that picture, always;
+// - a tab the reader went past (a later tab's step ran, its own did not) shows the chapter's
+//   picture of its stage, said to be the chapter's: never the kernel's later state (Brian,
+//   2026-10-25: back to "closed" after running "open" still showed open);
+// - a tab ahead of the reader shows the kernel as it is now, which is where its step starts, so
+//   running it is what changes the picture; the chapter's own picture of that stage is behind a
+//   closed disclosure, for a reader who only wants to look.
 //
 // Switching tabs asks the kernel nothing: every picture shown is one a step already drew, and the
 // chapter's are files. Until the kernel loads (and without it, and in print) each tab shows its
@@ -264,6 +267,11 @@
         var pictureLine = root.getAttribute("data-picture");
         var wordsLine = root.getAttribute("data-words");
         var beforeLine = root.getAttribute("data-before");
+        // The kernel's state above the tabs: a line redrawn after every step, into a figure the
+        // chapter names (`data-overview-target`), in place of the picture it committed.
+        var overviewLine = root.getAttribute("data-overview");
+        var overview = overviewLine ? document.getElementById(root.getAttribute("data-overview-target") || "") : null;
+        var overviewSchemes = overviewLine && /\{scheme\}/.test(overviewLine) ? ["light", "dark"] : [null];
         var altBase = root.getAttribute("data-alt") || "The picture at this stage.";
         var schemes = /\{scheme\}/.test(pictureLine) ? ["light", "dark"] : [null];
         var list = root.querySelector(".ikigai-stages-controls");
@@ -467,12 +475,31 @@
                     });
                 });
             });
+            if (overview) {
+                stage.overview = {};
+                overviewSchemes.forEach(function (scheme) {
+                    reads.push(function () {
+                        var line = scheme ? overviewLine.replace(/\{scheme\}/g, scheme) : overviewLine;
+                        return evalLine(mod, line).then(function (reply) {
+                            if (reply.kind !== "output") {
+                                throw new Error("the picture above the tabs did not draw: " + reply.text);
+                            }
+                            stage.overview[scheme || "only"] = reply.text;
+                            stage.overviewCache = stage.overviewCache || reply.cache;
+                        });
+                    });
+                });
+            }
             return reads.reduce(function (done, next) { return done.then(next); }, Promise.resolve())
                 .then(function () { return stage; });
         }
 
         function picture(stage, scheme, alt) {
-            var url = URL.createObjectURL(new Blob([stage.pictures[scheme || "only"]], { type: "image/svg+xml" }));
+            return drawnPicture(stage.pictures[scheme || "only"], scheme, alt);
+        }
+
+        function drawnPicture(svg, scheme, alt) {
+            var url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
             var link = el("a", scheme ? "ikigai-scheme-" + scheme : null);
             link.href = url;
             var img = el("img");
@@ -541,6 +568,12 @@
         // What each tab's own step drew the last time it ran (by section id), and the last step's.
         var drawn = {};
         var latest = null;
+        // How far the reader's steps have reached: the highest chapter tab whose step ran.
+        var furthest = 0;
+
+        function indexOf(section) {
+            return sections.indexOf(section);
+        }
 
         function caption(text) {
             return el("p", "ikigai-stages-shown-caption", text);
@@ -604,9 +637,15 @@
                 nodes = drawing(only, "After this step:");
             } else if (drawn[section.id]) {
                 nodes = drawing(drawn[section.id], "After this tab's step:");
-            } else if (section === sections[0] && !latest) {
+            } else if (section === sections[0]) {
+                // The start: what the page loads, whatever the reader has done since.
                 nodes = [caption("The picture as the page loads it, which is this stage:")]
                     .concat(committed(section));
+            } else if (indexOf(section) >= 0 && indexOf(section) < furthest) {
+                // A stage the reader went past without running its own step here: the
+                // chapter's picture of it, said to be the chapter's.
+                nodes = [caption("Stage " + labelOf(section) + ", as the chapter draws it (its step " +
+                    "has not run in this page; a later tab's has):")].concat(committed(section));
             } else {
                 nodes = latest
                     ? drawing(latest, "Your kernel now, before this tab's step (run it to see what it changes). The last step:")
@@ -619,6 +658,36 @@
             nodes.forEach(function (node) { shown.appendChild(node); });
         }
 
+        // Above the tabs: the kernel as it is now, in place of the figure's committed picture.
+        var overviewAlt = overview && overview.querySelector("img") ? overview.querySelector("img").alt : altBase;
+        function showOverview(stage) {
+            if (!overview || !stage.overview) {
+                return;
+            }
+            var caption = overview.querySelector("figcaption");
+            Array.prototype.slice.call(overview.childNodes).forEach(function (node) {
+                if (node !== caption) {
+                    overview.removeChild(node);
+                }
+            });
+            var pictures = el("p", "ikigai-stage-picture");
+            overviewSchemes.forEach(function (scheme) {
+                pictures.appendChild(drawnPicture(stage.overview[scheme || "only"], scheme,
+                    root.getAttribute("data-overview-alt") || overviewAlt));
+            });
+            overview.insertBefore(pictures, caption);
+            if (caption) {
+                caption.textContent = "";
+                caption.appendChild(document.createTextNode("The whole host as your kernel holds it now, after " +
+                    "your last step: "));
+                caption.appendChild(el("code", null, overviewLine.replace(/\s*scheme=\{scheme\}/, "")));
+                caption.appendChild(document.createTextNode(", " + (stage.overviewCache === "cached"
+                    ? "served from the cache: nothing it hangs from was cut."
+                    : "drawn now, once: the step cut what it hangs from, or this page had not asked " +
+                      "for it yet.")));
+            }
+        }
+
         // After a step: read the stage, keep the facts current, say what it made, and show it
         // below the tabs. The step is compared with what the page last saw, which is where the
         // reader's kernel was.
@@ -629,6 +698,7 @@
                         item.textContent = stage.facts[k];
                     });
                 }
+                showOverview(stage);
                 var before = seen.words;
                 var light = stage.pictures[schemes[0] || "only"];
                 // With data-before the picture is marked, so it is not what says a stage moved:
@@ -639,6 +709,9 @@
                 var snap = { stage: stage, before: before, moved: moved, verdict: "" };
                 latest = snap;
                 var own = step.section;
+                if (own && indexOf(own) > furthest) {
+                    furthest = indexOf(own);
+                }
                 if (!moved) {
                     var cache = stage.cache === "cached" ? "the picture came from the cache" :
                         "the picture was " + stage.cache + ": the first time this page asked for it";
