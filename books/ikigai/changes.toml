@@ -17,8 +17,8 @@
 
 [[change]]
 date = "2026-10-25"
-summary = "A new part on streams begins with \"Streams, I: bytes are a representation\": a representation is a media type and bytes, and binary is as ordinary as text. Its cells gzip the shop's stock and read it back in this page's kernel, which now links ikigai-compress, and show the decompression bound refusing rather than truncating. It ends with what a representation cannot do yet, as one whole buffer, which the pages that follow take up."
-pages = ["streams/bytes.md"]
+summary = "A new part on streams begins with \"Streams, I: bytes are a representation\": a representation is a media type and bytes, and binary is as ordinary as text. Its cells gzip the shop's stock and read it back in this page's kernel, which now links ikigai-compress, and show the decompression bound refusing rather than truncating. It ends with what a representation cannot do yet, as one whole buffer, which the pages that follow take up. The `list` in \"The REPL grammar\" shows the four new gzip and zlib names."
+pages = ["streams/bytes.md", "front-door/grammar.md"]
 
 [[change]]
 date = "2026-10-25"

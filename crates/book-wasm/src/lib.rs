@@ -1962,6 +1962,35 @@ mod tests {
         assert!(answered.contains("lentils,B,7\n"), "{}", t[2]);
     }
 
+    /// "The REPL grammar" shows `list` in the page's kernel: every name it binds. A space added
+    /// to `page_space()` changes that answer, so the cell is held to it here, where `cargo test`
+    /// sees it, and not only by the browser run.
+    #[test]
+    fn the_grammar_list_cell_is_everything_the_page_kernel_binds() {
+        let path = format!(
+            "{}/../../books/ikigai/src/front-door/grammar.md",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let chapter = std::fs::read_to_string(&path).expect("the chapter is readable");
+        let cell = cells(&chapter)
+            .into_iter()
+            .find(|cell| cell.command == "list")
+            .expect("the chapter has a `list` cell");
+        // The toolbox's build is bound only in the page (`dist_space`); natively it is nothing.
+        let in_the_page_only = "urn:iki:toolbox:dist:{path}";
+        let expected: Vec<&str> = cell
+            .expected
+            .lines()
+            .filter(|line| !line.starts_with(in_the_page_only))
+            .collect();
+        assert_eq!(expected.len() + 1, cell.expected.lines().count());
+        let engine = ikigai_engine::Engine::new(page_kernel());
+        assert_eq!(
+            render(&action_to_json(engine.eval("list"))).trim_end(),
+            expected.join("\n")
+        );
+    }
+
     #[test]
     fn the_browser_appendix_cells_answer_as_it_says() {
         // `./` makes it a path under `src/`: the appendix is not an Applied chapter.
