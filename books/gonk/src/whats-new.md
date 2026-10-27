@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-27**: The other books now links Running ikigai, the operator's book for the ikigai binary this book's QUIC client chapters use, and says the library lists all five books.
+
+  Pages: [The other books](ikigai-book.md)
+
 - **2026-10-25**: The closing page is now The other books: it links The ikigai Book, Building ikigai UIs, The ikigai Architecture and the library, which lists all four.
 
   Pages: [The other books](ikigai-book.md)

@@ -2,7 +2,7 @@
 
 # The ikigai library
 
-Four books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built.
+Five books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested, and every shell session run, whenever the books are built.
 
 ## The ikigai Book
 
@@ -35,5 +35,13 @@ How ikigai is put together, taught as one substrate read two ways: the patterns 
 - **Who it is for:** Readers of The ikigai Book who can write against the kernel and want to see how the pieces fit, and why the pieces that confine are the pieces that serve.
 - **Read first:** The ikigai Book, for resources, spaces, capabilities and golden threads, and its chapters on dynamic spaces, which the overlay chain is built from.
 - **Start at:** [Introduction](../architecture/introduction.html)
+
+## Running ikigai
+
+The operator's book: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. The REPL and its modes, the config home, serving a kernel over a socket and over QUIC with certificates, composing kernels, the HTTP door, hosting layers, MCP, running unattended, logging, budgets, upgrades, and what to do when it goes wrong. Every command in it is run against a pinned release whenever the book is built. [Open Running ikigai](../operations/index.html).
+
+- **Who it is for:** Anyone who runs the ikigai binary: on their own machine, as a server for other machines, or unattended.
+- **Read first:** The first part of The ikigai Book helps, for what a resource, a capability and a golden thread are; this book links there rather than teaching them again.
+- **Start at:** [The REPL and its modes](../operations/binary/repl.html)
 
 The books are built, tested and published together, from one repository: <https://github.com/ikigai-rs/ikigai-tutorial>.

@@ -56,6 +56,19 @@
 #         into `target/ikigai-book-cli/<version>/`, a root of its own so neither book's cache
 #         key can restore or save the other's binary, and put FIRST on PATH for the test.
 #
+# Running ikigai (the Operations Book) is checked like the gonk Book, by `book-transcripts --strict`,
+# against ITS OWN pin:
+#
+#   ikigai (for Running ikigai) is `ikigai-cli` pinned in `books/operations/ikigai-cli.version`,
+#         the one file the book's introduction prints its install line and its `--version` output
+#         from, so moving the pin is a one-line change (and a book PR, since the introduction
+#         includes it). Built with `quic` AND `web`, because the book's serving chapters use the
+#         QUIC transport and the HTTP door; the features are in the directory name, so a build
+#         without them is never mistaken for one with. Installed `--locked` into
+#         `target/ikigai-ops-cli/<version>+quic+web/`, a root of its own under a cache key of its
+#         own. Its pages normalize what legitimately varies, block by block, and a server a page
+#         starts on port 0 is reached at the port it printed (`book_transcripts::normalizers`).
+#
 # The same binary then runs `crates/book-urns/tests/book_urns.rs`'s CLI-vocabulary probe
 # (ledger #1031), `#[ignore]`d for the same reason: it asks that `ikigai` for every exact name in
 # `books/ikigai/cli-vocabulary.txt`, the book's written-down claim about the CLI, so the claim is
@@ -109,6 +122,18 @@ if [ ! -x "$book_cli_root/bin/ikigai" ]; then
         --root "$book_cli_root" --target-dir "$book_cli_root/build"
 fi
 
+ops_cli="$(tr -d '[:space:]' < books/operations/ikigai-cli.version)"
+case "$ops_cli" in
+    [0-9]*.[0-9]*.[0-9]*) ;;
+    *) echo "books/operations/ikigai-cli.version is not a version: '$ops_cli'" >&2; exit 2 ;;
+esac
+ops_cli_root="target/ikigai-ops-cli/$ops_cli+quic+web"
+if [ ! -x "$ops_cli_root/bin/ikigai" ]; then
+    echo "installing ikigai-cli $ops_cli (features: quic, web) into $ops_cli_root (once per version)"
+    cargo install --locked ikigai-cli --version "=$ops_cli" --features quic,web \
+        --root "$ops_cli_root" --target-dir "$ops_cli_root/build"
+fi
+
 cargo build --quiet -p model-stub
 stub_root="target/model-stub/bin"
 mkdir -p "$stub_root"
@@ -146,6 +171,21 @@ GIT_CONFIG_COUNT=1 \
     GIT_CONFIG_KEY_0="url.$PWD/$starter.insteadOf" GIT_CONFIG_VALUE_0="$starter_url" \
     cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
     --path "$stub_root" \
+    || status=1
+
+echo "── Running ikigai (ikigai-cli $ops_cli, features quic and web) ──────────────────"
+"$ops_cli_root/bin/ikigai" --version
+cargo run --quiet -p book-transcripts -- books/operations --strict --path "$ops_cli_root/bin" \
+    || status=1
+
+# The harness's own serving fixture, with the same binary: a QUIC server on port 0 with the
+# certificates `cert generate` and `cert add-client` make, reached at the port it printed, and its
+# fingerprints held to the ones `add-client` printed. Not a book page; it proves the fixture the
+# Operations Book's serving chapters will stand on (`crates/book-transcripts/tests/runner.rs`
+# proves the same mechanism with no ikigai at all).
+echo "── the serving fixture (ikigai-cli $ops_cli): QUIC on port 0, with certificates ──────────────────"
+cargo run --quiet -p book-transcripts -- crates/book-transcripts/tests/fixtures/serving --strict \
+    --path "$ops_cli_root/bin" \
     || status=1
 
 # The test runs `ikigai` by name, so the pinned one goes first on PATH; `--version` is printed

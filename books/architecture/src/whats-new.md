@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-27**: The other books now links Running ikigai, the operator's side of the door and capabilities this book describes, and says the library lists all five books.
+
+  Pages: [The other books](other-books.md)
+
 - **2026-10-26**: In "Spaces that wrap spaces", "Compare with" is now one list, above Before and After, instead of a second row of a dozen buttons under the tabs that was hard to tell from them on a phone. It offers the stages before the open tab, a stage your buttons made among them, and starts at the stage just before; opening a tab puts it back there. When a tab's step has moved nothing yet, After now says so plainly: the stage your kernel is still at, and that the tab's step has moved nothing yet.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md)

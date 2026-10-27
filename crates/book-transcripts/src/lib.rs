@@ -33,11 +33,21 @@
 //!
 //! A declaration may run over several lines of its comment; everything up to the `-->` is read,
 //! joined by single spaces, so a reason wrapped to the page's width is kept whole. Every check
-//! that reads one, here and in the ikigai book's REPL replay, reads it with [`declared`].
+//! that reads one, here and in the ikigai book's REPL replay, reads it with [`declaration`] (or
+//! [`declared`], its kind alone).
 //!
-//! A command may carry `{{#include PATH}}` of a one-line file, which the runner expands as
-//! mdbook does when it renders the page ([`expand_includes`]): how a page names a pinned
-//! revision held in one file (`books/gonk/starter.rev`) in a command it runs.
+//! A `run`, `serve` or `continues` block may also name the [`normalizers`] its comparison
+//! applies, after a semicolon, and a page may name some once for every block on it:
+//!
+//! ```text
+//! <!-- transcript: serve; normalize port, home -->
+//! <!-- transcripts: normalize workdir -->
+//! ```
+//!
+//! A command, or a line of its output, may carry `{{#include PATH}}` of a one-line file, which
+//! the runner expands as mdbook does when it renders the page ([`expand_includes`]): how a page
+//! names a pinned revision held in one file (`books/gonk/starter.rev`) in a command it runs, or
+//! the pinned release in what `ikigai --version` prints (`books/operations/ikigai-cli.version`).
 //!
 //! A `file` block is how a page gives its commands an input (a config file, a fixture) without
 //! a heredoc: each command is one `sh -c` line, so a multi-line file cannot be typed into one,
@@ -78,11 +88,13 @@
 //! Blank lines and trailing whitespace are dropped on both sides. Then an expected line that is
 //! exactly `…` matches any run of lines, and a `…` INSIDE a line matches any run of characters
 //! on that line — which is how a transcript says "an id is minted here" or "a timestamp" without
-//! the page lying about what the reader will see. Everything else matches exactly.
+//! the page lying about what the reader will see. Everything else matches exactly, after the
+//! block's [`normalizers`], if it names any, have rewritten the shapes they name on both sides.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
+pub mod normalizers;
 pub mod runs;
 pub mod stages;
 
@@ -132,6 +144,9 @@ pub struct Block {
     pub orphans: Vec<String>,
     /// A `file` block's lines, verbatim; empty for every other kind.
     pub content: Vec<String>,
+    /// The normalizers the block's declaration names, as written (the runner resolves them, and
+    /// fails the block on a name it does not know).
+    pub normalize: Vec<String>,
 }
 
 /// Every transcript block in one page's markdown: each `console` fence with a `$ ` line, and
@@ -153,7 +168,7 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
         }
         let body = &lines[start..end];
         let above = &lines[i.saturating_sub(5)..i];
-        let kind = declared(above);
+        let Declaration { kind, normalize } = declaration(above);
         if let Kind::File(_) = kind {
             out.push(Block {
                 file: file.to_string(),
@@ -162,6 +177,7 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
                 commands: Vec::new(),
                 orphans: Vec::new(),
                 content: body.iter().map(|l| l.to_string()).collect(),
+                normalize,
             });
         } else if fence == "```console" && body.iter().any(|l| l.starts_with(PROMPT)) {
             out.push(Block {
@@ -176,6 +192,7 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
                     .map(|l| l.to_string())
                     .collect(),
                 content: Vec::new(),
+                normalize,
             });
         }
         i = end + 1;
@@ -200,6 +217,34 @@ pub fn home_declared(text: &str) -> Option<String> {
                 .to_string(),
         )
     })
+}
+
+/// The normalizers a page names for every block on it: each `<!-- transcripts: normalize a, b -->`
+/// line, as written.
+///
+/// ```
+/// use book_transcripts::page_normalizers;
+///
+/// let page = "<!-- transcripts: normalize home, workdir -->\n<!-- transcripts: home — x -->\n";
+/// assert_eq!(page_normalizers(page), ["home", "workdir"]);
+/// ```
+pub fn page_normalizers(text: &str) -> Vec<String> {
+    text.lines()
+        .filter_map(|line| {
+            let (_, rest) = line.split_once("transcripts:")?;
+            let rest = rest.trim().trim_end_matches("-->").trim();
+            Some(names(rest.strip_prefix("normalize")?))
+        })
+        .flatten()
+        .collect()
+}
+
+/// `a, b c` → `["a", "b", "c"]`: a normalize clause's names.
+fn names(list: &str) -> Vec<String> {
+    list.split(|c: char| c == ',' || c.is_whitespace())
+        .filter(|w| !w.is_empty())
+        .map(str::to_string)
+        .collect()
 }
 
 /// Every file (anything but a directory) under `home`, relative to it, sorted: what a page
@@ -234,14 +279,16 @@ pub fn safe_file_name(name: &str) -> bool {
             .all(|c| matches!(c, std::path::Component::Normal(_)))
 }
 
-/// The declaration in the lines above a fence, the nearest one winning. The search stops at
-/// the end of an earlier fence: a declaration belongs to the first block after it, never to
-/// the next one as well. A comment that does not close on its first line runs on to the line
-/// that does, so a reason wrapped over several lines is kept whole.
-///
-/// The one parser for `<!-- transcript: … -->`: the console runner, the `cargo run` check
-/// ([`runs`]) and the ikigai book's REPL replay all call it, so a marker cannot mean one thing
-/// to one check and another to the next (ledger #1075).
+/// What a block declares: its kind, and the normalizers it names.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Declaration {
+    /// How the block is checked.
+    pub kind: Kind,
+    /// The normalizers named after `; normalize`, as written.
+    pub normalize: Vec<String>,
+}
+
+/// [`declaration`]'s kind alone.
 ///
 /// ```
 /// use book_transcripts::{declared, Kind};
@@ -266,6 +313,37 @@ pub fn safe_file_name(name: &str) -> bool {
 /// );
 /// ```
 pub fn declared(above: &[&str]) -> Kind {
+    declaration(above).kind
+}
+
+/// The declaration in the lines above a fence, the nearest one winning. The search stops at
+/// the end of an earlier fence: a declaration belongs to the first block after it, never to
+/// the next one as well. A comment that does not close on its first line runs on to the line
+/// that does, so a reason wrapped over several lines is kept whole.
+///
+/// The one parser for `<!-- transcript: … -->`: the console runner, the `cargo run` check
+/// ([`runs`]) and the ikigai book's REPL replay all call it, so a marker cannot mean one thing
+/// to one check and another to the next (ledger #1075).
+///
+/// A `run`, `serve` or `continues` block may name [`normalizers`] after a semicolon. A `manual`
+/// reason or a `file` name is read whole, semicolons and all: a reason is prose.
+///
+/// ```
+/// use book_transcripts::{declaration, Kind};
+///
+/// let d = declaration(&["<!-- transcript: serve; normalize port, home -->"]);
+/// assert_eq!(d.kind, Kind::Serve);
+/// assert_eq!(d.normalize, ["port", "home"]);
+///
+/// let d = declaration(&["<!-- transcript: manual — needs a person; a terminal -->"]);
+/// assert_eq!(d.kind, Kind::Manual("needs a person; a terminal".into()));
+/// assert!(d.normalize.is_empty());
+/// ```
+pub fn declaration(above: &[&str]) -> Declaration {
+    let plain = |kind| Declaration {
+        kind,
+        normalize: Vec::new(),
+    };
     for (at, line) in above.iter().enumerate().rev() {
         if line.trim_start().starts_with("```") {
             break;
@@ -276,19 +354,26 @@ pub fn declared(above: &[&str]) -> Kind {
         let text = comment_text(rest, &above[at + 1..]);
         let rest = text.as_str();
         if let Some(name) = rest.strip_prefix("file ") {
-            return Kind::File(name.trim().to_string());
+            return plain(Kind::File(name.trim().to_string()));
         }
         if let Some(reason) = rest.strip_prefix("manual") {
             let reason = reason.trim().trim_start_matches(['—', '-', ':']).trim();
-            return Kind::Manual(reason.to_string());
+            return plain(Kind::Manual(reason.to_string()));
         }
-        return match rest {
+        let (head, clause) = rest.split_once(';').unwrap_or((rest, ""));
+        let normalize = clause
+            .trim()
+            .strip_prefix("normalize")
+            .map(names)
+            .unwrap_or_default();
+        let kind = match head.trim() {
             "serve" => Kind::Serve,
             "continues" => Kind::Continues,
             _ => Kind::Run,
         };
+        return Declaration { kind, normalize };
     }
-    Kind::Undeclared
+    plain(Kind::Undeclared)
 }
 
 /// A declaration's text: the rest of its first line and, when the comment does not close
@@ -401,16 +486,52 @@ pub fn line_matches(expected: &str, actual: &str) -> bool {
 /// Does `actual` match `expected`, line by line, where a line that is exactly `…` matches any
 /// run of lines (none included) and a `…` within a line matches any text on it?
 pub fn matches(expected: &[String], actual: &[String]) -> bool {
-    match expected.split_first() {
-        None => actual.is_empty(),
-        Some((head, rest)) if head.trim() == ANY => {
-            (0..=actual.len()).any(|skip| matches(rest, &actual[skip..]))
+    alignment(expected, actual).is_some()
+}
+
+/// How `actual` matches `expected`, if it does: for every expected line that is not a lone `…`,
+/// the index of the actual line it matched, as `(expected, actual)` pairs in order. The first
+/// alignment found is returned (a `…` takes as few lines as it can). This is what a binding
+/// normalizer learns from: the line the page shows beside the line the run printed in its place.
+///
+/// ```
+/// use book_transcripts::alignment;
+///
+/// let s = |v: &[&str]| v.iter().map(|x| x.to_string()).collect::<Vec<_>>();
+/// assert_eq!(
+///     alignment(&s(&["a", "…", "d"]), &s(&["a", "b", "c", "d"])),
+///     Some(vec![(0, 0), (2, 3)])
+/// );
+/// assert_eq!(alignment(&s(&["a"]), &s(&["b"])), None);
+/// ```
+pub fn alignment(expected: &[String], actual: &[String]) -> Option<Vec<(usize, usize)>> {
+    fn go(
+        expected: &[String],
+        e: usize,
+        actual: &[String],
+        a: usize,
+        out: &mut Vec<(usize, usize)>,
+    ) -> bool {
+        let Some(head) = expected.get(e) else {
+            return a == actual.len();
+        };
+        if head.trim() == ANY {
+            return (a..=actual.len()).any(|skip| go(expected, e + 1, actual, skip, out));
         }
-        Some((head, rest)) => match actual.split_first() {
-            Some((first, more)) => line_matches(head, first) && matches(rest, more),
-            None => false,
-        },
+        match actual.get(a) {
+            Some(first) if line_matches(head, first) => {
+                out.push((e, a));
+                if go(expected, e + 1, actual, a + 1, out) {
+                    return true;
+                }
+                out.pop();
+                false
+            }
+            _ => false,
+        }
     }
+    let mut out = Vec::new();
+    go(expected, 0, actual, 0, &mut out).then_some(out)
 }
 
 /// A command with its `{{#include PATH}}`s replaced the way mdbook replaces them when it

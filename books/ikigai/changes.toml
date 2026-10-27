@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-27"
+summary = "The other books now lists Running ikigai, a fifth book for operators: the ikigai binary and what it takes to run kernels for real."
+pages = ["other-books.md"]
+
+[[change]]
 date = "2026-10-26"
 summary = "In \"A space that changes while it runs\", \"Compare with\" is now one list, above Before and After, instead of a second row of a dozen buttons under the tabs that was hard to tell from them on a phone. It offers the stages before the open tab, a stage of your own among them, and starts at the stage just before; opening a tab puts it back there. When a tab's step has moved nothing yet, After now says so plainly: the stage your kernel is still at, and that the tab's step has moved nothing yet."
 pages = ["applied/live-space.md"]

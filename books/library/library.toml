@@ -11,7 +11,7 @@
 #   start        the page to start at, relative to the book's root (an .html path)
 #   start_title  that page's title, as the book's SUMMARY.md gives it
 
-intro = "Four books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested whenever the books are built."
+intro = "Five books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested, and every shell session run, whenever the books are built."
 
 [[book]]
 dir = "ikigai"
@@ -44,3 +44,11 @@ audience = "Readers of The ikigai Book who can write against the kernel and want
 read_first = "The ikigai Book, for resources, spaces, capabilities and golden threads, and its chapters on dynamic spaces, which the overlay chain is built from."
 start = "introduction.html"
 start_title = "Introduction"
+
+[[book]]
+dir = "operations"
+description = "The operator's book: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. The REPL and its modes, the config home, serving a kernel over a socket and over QUIC with certificates, composing kernels, the HTTP door, hosting layers, MCP, running unattended, logging, budgets, upgrades, and what to do when it goes wrong. Every command in it is run against a pinned release whenever the book is built."
+audience = "Anyone who runs the ikigai binary: on their own machine, as a server for other machines, or unattended."
+read_first = "The first part of The ikigai Book helps, for what a resource, a capability and a golden thread are; this book links there rather than teaching them again."
+start = "binary/repl.html"
+start_title = "The REPL and its modes"

@@ -4,6 +4,8 @@ name: Build, test and deploy the books
 # https://ikigai-rs.github.io/ikigai-tutorial/ (The ikigai Book) and
 # https://ikigai-rs.github.io/ikigai-tutorial/gonk/ (The gonk Book) and
 # https://ikigai-rs.github.io/ikigai-tutorial/ui/ (Building ikigai UIs) and
+# https://ikigai-rs.github.io/ikigai-tutorial/architecture/ (The ikigai Architecture) and
+# https://ikigai-rs.github.io/ikigai-tutorial/operations/ (Running ikigai) and
 # https://ikigai-rs.github.io/ikigai-tutorial/library/ (the library, which lists them) is the tree that just passed
 # `mdbook test`, the contrast gate, axe (in jsdom, and in a real browser), the no-kernel check,
 # the link check, the transcript check and the What's new check — not a second `mdbook build` that
@@ -155,6 +157,15 @@ jobs:
       # The ikigai Architecture's kernel is `crates/architecture-book-wasm`: the work ledger over an
       # in-memory store (the same ledger it reads two ways) and the resilience harness "Spaces that
       # wrap spaces" drives, bound under the one name run.js imports.
+      # Running ikigai's Run cells are The ikigai Book's kernel (`crates/book-wasm`), bound into it
+      # by `scripts/build-kernels.sh` under the one name run.js imports.
+      - name: smoke — the exports run.js imports are present in the operations book's kernel
+        run: |
+          test -s books/operations/book/wasm/book_wasm_bg.wasm
+          grep -q '^export function evalLineAsync' books/operations/book/wasm/book_wasm.js
+          grep -q '^export function boundNames' books/operations/book/wasm/book_wasm.js
+          grep -q 'as default' books/operations/book/wasm/book_wasm.js
+
       - name: smoke — the exports run.js and stages.js import are present in the architecture book's kernel
         run: |
           test -s books/architecture/book/wasm/book_wasm_bg.wasm
@@ -243,7 +254,7 @@ jobs:
         with:
           path: target/site
 
-  # ── Every transcript, in both books, against the binaries each book pins ───
+  # ── Every transcript, in every book that has them, against the binaries each book pins ───
   #
   # A `console` block in the gonk book is the page saying "type this, see that", and
   # `scripts/test-transcripts.sh` types it: it installs gonk at the revision in
@@ -259,6 +270,10 @@ jobs:
   # it for every exact name in `books/ikigai/cli-vocabulary.txt` (ledger #1031). Every PR runs
   # both, whatever it touches: a cli the pin did not move can still disagree with a page
   # someone edited.
+  # Running ikigai, the Operations Book, is replayed the gonk Book's way (`book-transcripts
+  # --strict`) against `ikigai-cli` at `books/operations/ikigai-cli.version`, built with `quic` and
+  # `web`, in its own root and cache. Its run ends with a tally: blocks run, servers started, and
+  # every block marked manual with its reason, as a share of the book (ledger #2407).
   # The "Ways of working" pages also clone the gonk starter at `books/gonk/starter.rev`; the
   # script clones it once into `target/gonk-starter/<rev>/` and points the pages' clones there.
   # Not cached: a few megabytes, seconds to fetch.
@@ -291,7 +306,14 @@ jobs:
         with:
           path: target/ikigai-book-cli/*/bin
           key: ikigai-book-cli-${{ runner.os }}-${{ hashFiles('books/ikigai/ikigai-cli.version') }}
-      - name: replay every transcript in both books, and probe the CLI vocabulary (scripts/test-transcripts.sh)
+      # Running ikigai's pin, in its own root (`target/ikigai-ops-cli/`) under its own key, built with
+      # `quic` and `web` (both in the key, so a build without them is never restored for it).
+      - name: the operations book's pinned ikigai-cli, cached by its version
+        uses: actions/cache@v4
+        with:
+          path: target/ikigai-ops-cli/*/bin
+          key: ikigai-ops-cli-${{ runner.os }}-${{ hashFiles('books/operations/ikigai-cli.version') }}-quic-web
+      - name: replay every transcript in every book, and probe the CLI vocabulary (scripts/test-transcripts.sh)
         run: ./scripts/test-transcripts.sh
 
   # ── A change to a book's pages carries a What's new entry ─────────────────

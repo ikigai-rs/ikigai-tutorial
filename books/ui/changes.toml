@@ -15,6 +15,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-10-27"
+summary = "The other books now links Running ikigai, the operator's book, and says the library lists all five books."
+pages = ["other-books.md"]
+
+[[change]]
 date = "2026-10-25"
 summary = "The other books now links The ikigai Architecture too, and says the library lists all four books."
 pages = ["other-books.md"]
