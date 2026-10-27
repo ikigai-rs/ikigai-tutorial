@@ -67,9 +67,11 @@
 // moves but what the reader asked to see). Between the tabs and the open tab's panel
 // (`div.ikigai-stages-compare`, a labeled region) are, top to bottom:
 //
-// - "Compare with": an aria-pressed button per stage, those before the open tab's enabled, those
-//   at or after it disabled, so the row never reflows; the default is the stage just before. On
-//   the first tab a sentence says there is nothing before it.
+// - "Compare with": one native <select> with its visible label (ledger #2298: a row of buttons,
+//   one per stage, under a row of tabs, read as two near-identical rows), offering the stages
+//   before the open tab, numbered and named as the tabs are. It starts at the stage just before,
+//   and opening a tab puts it back there. On the first tab a sentence says there is nothing
+//   before it, in its place.
 // - Two pictures side by side (stacked on a narrow screen, Before on top): Before is the stage
 //   picked, After the open tab's. Each is the picture the reader's kernel drew for that stage if
 //   its tab's step ran in this page, else the chapter's committed picture, and its caption says
@@ -81,7 +83,8 @@
 // step already drew, and the chapter's are files. Until the kernel loads (and without it, and in
 // print) each tab shows its own committed picture instead, inside the tab.
 //
-// ONE PERSISTENT STATUS REGION, polite, above the tabs, says each of those once.
+// ONE PERSISTENT STATUS REGION, polite, above the tabs, says each of those once, and which stage
+// Before is when the reader picks one to compare with.
 //
 // WITHOUT THE KERNEL the tabs and the committed stages still work, there are no controls (the
 // list stays hidden), and the status region says the kernel did not load. `a11y/no-kernel.mjs`
@@ -311,11 +314,12 @@
         compare.setAttribute("aria-label", root.getAttribute("data-compare-label") || "The open stage, beside an earlier one");
         compare.hidden = true;
         var againstRow = el("div", "ikigai-stages-against");
-        againstRow.setAttribute("role", "group");
-        var againstLabel = el("span", "ikigai-stages-against-label", "Compare with");
-        againstLabel.id = name + "-against-label";
-        againstRow.setAttribute("aria-labelledby", againstLabel.id);
+        var againstLabel = el("label", "ikigai-stages-against-label", "Compare with");
+        var againstSelect = el("select", "ikigai-stages-against-select");
+        againstSelect.id = name + "-against";
+        againstLabel.htmlFor = againstSelect.id;
         againstRow.appendChild(againstLabel);
+        againstRow.appendChild(againstSelect);
         var againstNote = el("p", "ikigai-stages-against-note",
             "Stage 1 is where it starts: there is nothing before it to compare it with.");
         var pair = el("div", "ikigai-stages-pair");
@@ -326,7 +330,6 @@
         compare.appendChild(diff);
         // The stage to compare the open one with (an index into `tabs`), or null: the one before.
         var against = null;
-        var againstButtons = [];
 
         function slot(kind) {
             var figure = el("figure", "ikigai-stages-slot ikigai-stages-" + kind);
@@ -342,28 +345,30 @@
         var beforeSlot = slot("before");
         var afterSlot = slot("after");
 
-        function addAgainst(n, label) {
-            var button = el("button", "ikigai-stages-against-button");
-            button.type = "button";
-            button.appendChild(el("span", "ikigai-stage-sr", "Stage "));
-            button.appendChild(document.createTextNode(n + " · " + label));
-            button.setAttribute("aria-pressed", "false");
-            button.addEventListener("click", function () {
-                against = n - 1;
-                render();
-            });
-            againstButtons.push(button);
-            againstRow.appendChild(button);
+        // "Compare with" offers the stages before tab `k`, named as the tabs are ("Stage 2 · open",
+        // a reader's own stages among them), with stage `c` picked. Tabs are only ever added at the
+        // end, so the options are made again only when the open tab has a different number of
+        // stages before it, never while the reader picks one.
+        function syncAgainst(k, c) {
+            if (againstSelect.options.length !== k) {
+                againstSelect.textContent = "";
+                for (var i = 0; i < k; i++) {
+                    var option = el("option", null, "Stage " + labelOf(sectionOf(tabs[i])));
+                    option.value = String(i);
+                    againstSelect.appendChild(option);
+                }
+            }
+            againstSelect.selectedIndex = c;
         }
 
-        // One "Compare with" button per tab, made when Before | After is first shown and as the
-        // reader's own stages add tabs.
-        function syncAgainst() {
-            while (againstButtons.length < tabs.length) {
-                var section = sectionOf(tabs[againstButtons.length]);
-                addAgainst(againstButtons.length + 1, section.getAttribute("data-label") || "");
-            }
-        }
+        // A stage picked: Before is that stage, What changed starts from it, and the status
+        // region says so. The kernel is asked nothing.
+        againstSelect.addEventListener("change", function () {
+            against = parseInt(againstSelect.value, 10);
+            render();
+            status.textContent = "Compare with: Before is now stage " + labelOf(sectionOf(tabs[against])) +
+                ", beside stage " + labelOf(sectionOf(selectedTab())) + " as After.";
+        });
 
         // Open a tab. `with` is the tab to compare it with (an index into `tabs`); without it,
         // the stage just before.
@@ -677,8 +682,8 @@
                 ? " stage " + labelOf(stage.section) + ", the chapter's picture"
                 : at === stage.section
                     ? " stage " + labelOf(stage.section) + ", as your kernel drew it"
-                    : " stage " + labelOf(at) + ", as your kernel drew it after the step of stage " +
-                      labelOf(stage.section) + " so far"));
+                    : " stage " + labelOf(at) + ", as your kernel drew it: the step of stage " +
+                      labelOf(stage.section) + " has moved nothing yet"));
             into.holder.textContent = "";
             into.holder.appendChild(stage.pictures);
             var where = indexOf(stage.section);
@@ -697,13 +702,10 @@
             if (compare.hidden) {
                 return;
             }
-            syncAgainst();
             var k = tabs.indexOf(selectedTab());
             var c = against !== null && against < k ? against : k - 1;
-            againstButtons.forEach(function (button, i) {
-                button.disabled = i >= k;
-                button.setAttribute("aria-pressed", i === c ? "true" : "false");
-            });
+            syncAgainst(k, c);
+            againstRow.hidden = k === 0;
             againstNote.hidden = k !== 0;
             var after = stageOf(k);
             fill(afterSlot, "After", after);

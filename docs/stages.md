@@ -124,10 +124,13 @@ Before the first step it compares with the first stage's committed words: nothin
 **Before | After, below the tabs** (Brian, 2026-10-26). Once the kernel loads, a region
 (`div.ikigai-stages-compare`) sits between the tabs and the open tab's panel. Top to bottom:
 
-- **Compare with**: one `aria-pressed` button per stage. Those before the open tab are enabled,
-  those at or after it are disabled, so the row keeps its place as tabs change; the stage just
-  before is pressed unless the reader picks another. On the first tab a sentence says there is
-  nothing before it.
+- **Compare with**: one native `<select>` with its visible `<label>`, offering the stages before
+  the open tab, numbered and named as the tabs are ("Stage 2 · open"), a reader's own stages
+  among them once they exist. It starts at the stage just before, and opening a tab puts it back
+  there. Picking another puts that stage in Before and redoes "What changed", asking the kernel
+  nothing, and the status region says which stage Before now is. On the first tab there is
+  nothing before it, and a sentence says so in place of the select. (Until ledger #2298 this was
+  a row of `aria-pressed` buttons, one per stage, under a row of tabs that looked the same.)
 - **Two pictures, side by side** (`figure.ikigai-stages-before`, `figure.ikigai-stages-after`), in
   a grid that stacks them on a narrow screen, Before on top. After is the open tab's stage, Before
   the stage picked. Each is the picture the page's kernel drew when that tab's step last ran (a
@@ -135,7 +138,8 @@ Before the first step it compares with the first stage's committed words: nothin
   chapter's committed picture (a dashed frame, captioned "the chapter's picture", with what
   running the step would do). When a tab's step so far moved nothing (its first cell often sets
   something the picture does not show), its picture is the stage the kernel was still at, and the
-  caption names that stage. A picture keeps 500 px and scrolls sideways in its slot on a phone;
+  caption names that stage first and then says the tab's step has moved nothing yet ("stage 3 ·
+  open, as your kernel drew it: the step of stage 4 · half-open has moved nothing yet"). A picture keeps 500 px and scrolls sideways in its slot on a phone;
   on a wide screen it grows to its natural 960 px.
 - **What changed from stage A to stage B**: the comparison below, for the two shown. Its lines are
   never wrapped; the list scrolls sideways.
@@ -189,10 +193,14 @@ pictures, offer no control, and say the kernel did not load.
 The tabs are the ARIA tabs pattern: a `tablist`, a `tab` per stage, a `tabpanel` per section, Left
 and Right between tabs, Home and End to the ends, a visible focus ring. From a tab, Tab reaches
 "Compare with" and the two pictures' links before the panel: the comparison is what the tab
-changed. "Compare with" buttons are 44 px targets. One polite status region says each step's
+changed. "Compare with" is a native select, 44 px high, in the theme's text
+and link colors, and fits a 320 px screen. One polite status region says each step's
 outcome once; Before | After is a labeled region, not a live one. In print, every stage shows,
 one after another. See `ACCESSIBILITY.md` for what the checks cover.
 
 `a11y/cells.mjs` holds the viewer to the reader who runs a chapter in order: after every cell in
 a viewer's chain, its tab is open and After shows a picture the page's kernel drew (a `blob:`
-image in the copy the theme shows), captioned as the kernel's.
+image in the copy the theme shows), captioned as the kernel's. Then, once a page's cells have
+run, it drives each viewer's "Compare with": on the last tab, the select offers exactly the stages
+before it and starts at the one just before; picking stage 1 changes Before, "What changed" and
+the status region; opening another tab puts it back; the first tab shows no select.

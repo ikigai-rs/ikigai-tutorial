@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-26**: In "A space that changes while it runs", "Compare with" is now one list, above Before and After, instead of a second row of a dozen buttons under the tabs that was hard to tell from them on a phone. It offers the stages before the open tab, a stage of your own among them, and starts at the stage just before; opening a tab puts it back there. When a tab's step has moved nothing yet, After now says so plainly: the stage your kernel is still at, and that the tab's step has moved nothing yet.
+
+  Pages: [A space that changes while it runs](applied/live-space.md)
+
 - **2026-10-26**: The stages of "A space that changes while it runs" now hold still: below the tabs, the open stage's picture sits beside the stage before it, Before and After, with what changed from one to the other in words. "Compare with" puts any earlier stage in Before. Each picture is the one your kernel drew if that tab's step ran, or the chapter's own, said so, in a dashed frame. On a phone the two stack; long commands and answers scroll sideways instead of wrapping, and on a wide screen the page widens so the longest command fits on one line. The arrow keys on the tabs now move between tabs only; they used to open the next or previous chapter as well.
 
   Pages: [A space that changes while it runs](applied/live-space.md)

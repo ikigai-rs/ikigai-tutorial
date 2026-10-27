@@ -111,49 +111,45 @@ html:has(.ikigai-stages) {
     margin: 0.4em 0;
 }
 
-/* "Compare with": one button per stage, the ones at or after the open tab disabled, so the row
- * keeps its place when the tab changes. Pressed is told by weight and a solid fill. */
+/* "Compare with": a label and one native select (ledger #2298), the select's text and border in
+ * the gate's --fg/--bg and --links/--bg pairs, a 44 px target, and never wider than the column,
+ * so a long stage name cannot scroll a 320 px page sideways. */
 .ikigai-stages-against {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.3rem 0.6rem;
     font-size: 0.9em;
+}
+
+.ikigai-stages-against[hidden] {
+    display: none;
 }
 
 .ikigai-stages-against-label {
     font-weight: 700;
-    margin-right: 0.2rem;
 }
 
-.ikigai-stages-against-button {
+.ikigai-stages-against-select {
     font: inherit;
     min-height: 44px;
-    min-width: 44px;
-    padding: 0 0.7rem;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0 0.5rem;
     border: 1px solid var(--links);
     border-radius: 4px;
     background: var(--bg);
-    color: var(--links);
+    color: var(--fg);
     cursor: pointer;
-    white-space: nowrap;
 }
 
-.ikigai-stages-against-button[aria-pressed="true"] {
-    background: var(--links);
-    color: var(--bg);
-    font-weight: 700;
+.ikigai-stages-against-select option {
+    background: var(--bg);
+    color: var(--fg);
 }
 
-/* Disabled: a stage at or after the open one. Told by the dashed border and the default cursor
- * as well as the fade (a disabled control has no contrast requirement, SC 1.4.3). */
-.ikigai-stages-against-button:disabled {
-    border-style: dashed;
-    cursor: default;
-    opacity: 0.6;
-}
-
-.ikigai-stages-against-button:focus-visible {
+.ikigai-stages-against-select:focus-visible {
     outline: 3px solid var(--links);
     outline-offset: 2px;
 }
