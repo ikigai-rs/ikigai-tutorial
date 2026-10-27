@@ -89,7 +89,7 @@ const LOCAL_EXACT: [&str; 4] = ["noughts", "licence", "enrolment", "whilst"];
 const QUOTE_MARKER: &str = "spelling: quote";
 
 /// Where we write, relative to the repository root. A file is scanned as itself.
-const ROOTS: [&str; 15] = [
+const ROOTS: [&str; 17] = [
     "README.md",
     "books/ikigai/src",
     // The gonk Book's own pages and its design note. Its css/ and js/ are symlinks to the
@@ -102,6 +102,9 @@ const ROOTS: [&str; 15] = [
     // The ikigai Architecture: its pages, and its changes.toml (its css/ and js/ are symlinks too).
     "books/architecture/src",
     "books/architecture/changes.toml",
+    // Running ikigai: its pages and its changes.toml (its css/ and js/ are symlinks too).
+    "books/operations/src",
+    "books/operations/changes.toml",
     "books/ikigai/css",
     "books/ikigai/js",
     "crates",

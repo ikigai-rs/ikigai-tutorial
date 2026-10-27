@@ -1,0 +1,30 @@
+[book]
+title = "Running ikigai"
+authors = ["Brian Sletten"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+# The fifth book of this repository, published beside the others: The ikigai Book is the site's
+# root (https://ikigai-rs.github.io/ikigai-tutorial/), The gonk Book is at `gonk/`, Building
+# ikigai UIs at `ui/`, The ikigai Architecture at `architecture/`, and this one at `operations/`.
+# `scripts/assemble-site.sh` reads this value to place the built book, and the 404 page finds its
+# assets from it.
+site-url = "/ikigai-tutorial/operations/"
+git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
+edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/operations/{path}"
+# The SAME files as The ikigai Book's, by symlink: one contrast repair and one runnable-cell
+# script for every book. `crates/book-a11y` measures the cascade this book really loads.
+additional-css = ["css/a11y.css", "css/layout.css", "css/run.css"]
+# run.js loads `wasm/book_wasm.js` beside this book's root: for this book that is The ikigai
+# Book's own kernel, `crates/book-wasm` (Part I's space, with the function library a REPL
+# chapter sources), bound under the same file name by `scripts/build-kernels.sh`.
+additional-js = ["js/a11y.js", "js/run.js"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[rust]
+edition = "2021"

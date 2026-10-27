@@ -1991,6 +1991,21 @@ mod tests {
         );
     }
 
+    /// Running ikigai's "The REPL and its modes" runs its Run cells on this kernel too (its
+    /// book.toml loads The ikigai Book's run.js, and `scripts/build-kernels.sh` binds this crate
+    /// into it), so they are held to it here, in page order. Its shell transcripts are the other
+    /// half of the chapter, checked against the pinned binary by `scripts/test-transcripts.sh`.
+    #[test]
+    fn the_operations_repl_chapters_cells_answer_as_it_says_in_page_order() {
+        // A path under The ikigai Book's `src/` that leads to the other book's page.
+        let t = run_chapter_in_page_order("../../operations/src/binary/repl.md", 3);
+        assert!(
+            t[0].ends_with("[computed]\nRESOURCE ORIENTED\n[cached]\n"),
+            "{}",
+            t[0]
+        );
+    }
+
     #[test]
     fn the_browser_appendix_cells_answer_as_it_says() {
         // `./` makes it a path under `src/`: the appendix is not an Applied chapter.

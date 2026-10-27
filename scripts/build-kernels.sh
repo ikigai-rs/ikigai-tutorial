@@ -25,6 +25,8 @@ kernel_of() {
         gonk) echo gonk-book-wasm ;;
         ui) echo ui-book-wasm ;;
         architecture) echo architecture-book-wasm ;;
+        # Running ikigai's REPL chapter sources Part I's function library: The ikigai Book's kernel.
+        operations) echo book-wasm ;;
         *) echo "" ;;
     esac
 }

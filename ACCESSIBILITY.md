@@ -281,6 +281,7 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-15 | Reporting asks for the `accessibility` label; `AGENTS.md` points agents here | PR #130 |
 | 2026-10-23 | The library page (`books/library`) is in scope, under the same gates as the books; the inspector's two planet tables (JSON and CSV) join its snapshots, axe run and browser checks | PR #160 |
 | 2026-10-26 | The stages viewer shows Before \| After below the tabs; Left and Right on its tabs no longer open another chapter; `cells.mjs` checks After is the kernel's picture | this change |
+| 2026-10-27 | Running ikigai (`books/operations`), a fifth book, is in scope under the same gates as the others; its Run cells are The ikigai Book's `js/run.js` over The ikigai Book's kernel | this change |
 
 ## References
 

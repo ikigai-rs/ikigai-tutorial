@@ -256,6 +256,16 @@ fn unacknowledged_servers(pages: &[(String, String)]) -> Vec<String> {
     out
 }
 
+/// How many list entries `SUMMARY.md` holds, linked or draft (`- [Title]()`): what a parser
+/// that is reading the outline at all must find.
+fn summary_entries(summary: &str) -> usize {
+    summary
+        .lines()
+        .map(str::trim_start)
+        .filter(|l| l.starts_with("- [") || l.starts_with("* ["))
+        .count()
+}
+
 fn book_pages(book: &Path) -> (Vec<String>, Vec<(String, String)>) {
     let src = book.join("src");
     let summary = std::fs::read_to_string(src.join("SUMMARY.md")).expect("SUMMARY.md");
@@ -263,9 +273,13 @@ fn book_pages(book: &Path) -> (Vec<String>, Vec<(String, String)>) {
         .into_iter()
         .map(|c| c.path)
         .collect();
+    // The floor is on what the parser READ, drafts included: a book whose outline is written ahead
+    // of its chapters (Running ikigai, as its arcs land) links few pages yet, and a parser that is
+    // not reading the outline finds no entries at all.
+    let entries = summary_entries(&summary);
     assert!(
-        order.len() > 3,
-        "{}: SUMMARY.md parsed to {} chapters",
+        entries > 3 && !order.is_empty(),
+        "{}: SUMMARY.md parsed to {} chapters ({entries} entries, drafts included)",
         book.display(),
         order.len()
     );

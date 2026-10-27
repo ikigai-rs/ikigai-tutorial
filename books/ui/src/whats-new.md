@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-10
 
+- **2026-10-27**: The other books now links Running ikigai, the operator's book, and says the library lists all five books.
+
+  Pages: [The other books](other-books.md)
+
 - **2026-10-25**: The other books now links The ikigai Architecture too, and says the library lists all four books.
 
   Pages: [The other books](other-books.md)

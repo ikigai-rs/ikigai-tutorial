@@ -7,6 +7,10 @@ What has changed in The ikigai library, most recent first: the date, what was ad
 
 ## 2026-10
 
+- **2026-10-27**: The library lists a fifth book, Running ikigai: the operator's book for the ikigai binary, with every command in it run against a pinned release.
+
+  Pages: [The ikigai library](index.md)
+
 - **2026-10-25**: The library's opening now counts four books, as it lists.
 
   Pages: [The ikigai library](index.md)

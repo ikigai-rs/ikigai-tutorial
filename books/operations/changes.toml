@@ -1,0 +1,18 @@
+# What's new in Running ikigai: one entry per change a reader would notice, NEWEST FIRST.
+#
+# `crates/book-whats-new` writes src/whats-new.md from this file (./scripts/test-books.sh runs it
+# before `mdbook build`), and a test fails when the two disagree. A change to this book's pages
+# that adds or updates no entry here is refused in CI, with the entry to add.
+#
+#   date        "YYYY-MM-DD"
+#   summary     one or two sentences for a READER: what they will now find (not the commit subject)
+#   pages       the pages to read for it, as SUMMARY.md links them; titles come from SUMMARY.md
+#   removed     titles of pages that no longer exist, listed without a link (optional)
+#   maintenance true for upkeep with no news in it (a version move, a link or typo fix): kept
+#               here, left off the page (optional)
+#   commit      the commit an entry was written from; for tooling only, never shown (optional)
+
+[[change]]
+date = "2026-10-27"
+summary = "A new book, for operators: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. Every command in it is run against a pinned release whenever the book is built, so its output cannot go stale. The first chapter is The REPL and its modes: the full-screen and line REPLs, a quiet session that replays from a file, -c batches and how they read stdin, pipes, maps and forks, Lisp with -e and --load, describe and help, and the same REPL attached to a served kernel with --connect. The rest of the outline is in the table of contents."
+pages = ["introduction.md", "binary/repl.md"]

@@ -25,6 +25,14 @@
 //!
 //! `--path DIR` (repeatable) is put in front of `PATH`, so a page says `ikigai-gonk`, as a
 //! reader types it, and the runner decides which build that means.
+//!
+//! ## What did not run is counted
+//!
+//! Every run ends with a tally: the blocks run and their commands, the servers started, the
+//! files written, and every block declared `manual`, each with its reason, as a share of the
+//! book's transcripts. A block that cannot run here (it needs a person, a terminal, macOS or
+//! the network) is allowed, and it is never invisible: the unrun share is in the log of every
+//! run, so a book that drifts toward "manual" says so.
 
 use std::io::{BufRead, BufReader, Read};
 use std::os::unix::process::CommandExt;
@@ -34,9 +42,10 @@ use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use book_transcripts::normalizers::{self, Bindings, Context, Normalizer};
 use book_transcripts::{
-    expand_includes, home_declared, matches, normalize, pages, refused, safe_file_name, scan_page,
-    stray_writes, Block, Command as Step, Kind, ANY,
+    alignment, expand_includes, home_declared, normalize, page_normalizers, pages, refused,
+    safe_file_name, scan_page, stray_writes, Block, Command as Step, Kind, ANY,
 };
 
 /// How long one `run` command may take before it is a failure.
@@ -99,7 +108,7 @@ fn main() -> ExitCode {
     };
 
     let mut failures: Vec<String> = Vec::new();
-    let mut ran = 0usize;
+    let mut tally = Tally::default();
     for path in files {
         let file = path
             .strip_prefix(&src)
@@ -113,21 +122,38 @@ fn main() -> ExitCode {
         }
         if options.list {
             for b in &blocks {
-                println!("{}:{} {:?}", b.file, b.line, b.kind);
+                if b.normalize.is_empty() {
+                    println!("{}:{} {:?}", b.file, b.line, b.kind);
+                } else {
+                    println!(
+                        "{}:{} {:?} normalize {}",
+                        b.file,
+                        b.line,
+                        b.kind,
+                        b.normalize.join(", ")
+                    );
+                }
                 for c in &b.commands {
                     println!("    $ {}", c.text);
                 }
             }
             continue;
         }
-        let (n, mut failed) = run_page(&options, &blocks, home_declared(&text));
-        ran += n;
+        let mut failed = run_page(
+            &options,
+            &blocks,
+            home_declared(&text),
+            &page_normalizers(&text),
+            &mut tally,
+        );
         failures.append(&mut failed);
     }
 
     if options.list {
         return ExitCode::SUCCESS;
     }
+    println!("{}", tally.report(&options.book.display().to_string()));
+    let ran = tally.commands;
     if ran == 0 && failures.is_empty() && options.strict {
         eprintln!(
             "book-transcripts: nothing ran in {} — under --strict a book with no transcript \
@@ -150,28 +176,136 @@ fn main() -> ExitCode {
     ExitCode::FAILURE
 }
 
+/// What one run of a book did, counted, so what did NOT run is as visible as what did.
+#[derive(Default)]
+struct Tally {
+    /// Blocks whose commands ran (`run`, `continues`).
+    blocks: usize,
+    /// Commands run, servers included.
+    commands: usize,
+    /// Servers a `serve` block started.
+    servers: usize,
+    /// `file` blocks written.
+    files: usize,
+    /// Every `manual` block, with its reason.
+    manual: Vec<(String, String)>,
+    /// Blocks with no declaration, skipped (never under `--strict`, where each is a failure).
+    undeclared: usize,
+}
+
+impl Tally {
+    fn report(&self, book: &str) -> String {
+        let checked = self.blocks + self.servers;
+        let total = checked + self.manual.len();
+        let share = (self.manual.len() * 100 + total / 2)
+            .checked_div(total)
+            .unwrap_or(0);
+        let mut out = format!(
+            "── {book}: {} block(s) run ({} command(s), {} server(s) started), {} file block(s) \
+             written, {} block(s) not run (manual): {share}% of {total} transcript block(s) unrun",
+            self.blocks,
+            self.commands,
+            self.servers,
+            self.files,
+            self.manual.len(),
+        );
+        if self.undeclared > 0 {
+            out.push_str(&format!(
+                "; {} undeclared block(s) skipped",
+                self.undeclared
+            ));
+        }
+        for (at, reason) in &self.manual {
+            out.push_str(&format!("\n   not run: {at} — {reason}"));
+        }
+        out
+    }
+}
+
+/// The normalizers a block's comparison applies: the page's and its own, resolved.
+fn block_normalizers(page: &[String], block: &Block) -> Result<Vec<Normalizer>, String> {
+    let mut names = page.to_vec();
+    names.extend(block.normalize.iter().cloned());
+    normalizers::resolve(&names)
+}
+
+/// Compare what a command printed (`actual`, already [`normalize`]d) with what the page says
+/// (`expected`, as written), through `ns`; and, when they match, learn what the page's recorded
+/// values stand for in this run. `open` lets anything follow (a server goes on printing).
+fn compare(
+    expected: &[String],
+    actual: &[String],
+    ns: &[Normalizer],
+    context: &Context,
+    bindings: &mut Bindings,
+    open: bool,
+) -> Result<bool, String> {
+    let expected = normalize(expected);
+    let mut want: Vec<String> = expected
+        .iter()
+        .map(|l| normalizers::apply(l, ns, context))
+        .collect();
+    if open {
+        want.push(ANY.to_string());
+    }
+    let got: Vec<String> = actual
+        .iter()
+        .map(|l| normalizers::apply(l, ns, context))
+        .collect();
+    let Some(pairs) = alignment(&want, &got) else {
+        return Ok(false);
+    };
+    for (e, a) in pairs {
+        // `learn` pairs values only when the page's line shows as many as the run's line holds,
+        // so a `…` that took a value pairs nothing rather than the wrong two.
+        if let Some(line) = expected.get(e) {
+            bindings.learn(line, &actual[a], ns)?;
+        }
+    }
+    Ok(true)
+}
+
 /// One page, one session: its blocks in order, in one scratch directory. `home` is the
-/// page's `transcripts: home` reason, if it declared one. Returns the number of commands run
-/// and the failures.
-fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize, Vec<String>) {
+/// page's `transcripts: home` reason, if it declared one; `page_ns` the normalizers it names for
+/// every block. Counts what it does in `tally`, and returns the failures.
+fn run_page(
+    options: &Options,
+    blocks: &[Block],
+    home: Option<String>,
+    page_ns: &[String],
+    tally: &mut Tally,
+) -> Vec<String> {
     let mut failures = Vec::new();
-    let mut ran = 0;
     let page = blocks.first().map(|b| b.file.as_str()).unwrap_or("?");
     if home.as_deref() == Some("") {
         failures.push(format!(
             "{page}: declares `transcripts: home` without a reason. Say what reads `~` and why \
              no flag can name it: <!-- transcripts: home — why -->"
         ));
-        return (ran, failures);
+        return failures;
     }
     let scratch = Scratch::new(home.is_some());
+    if let Err(e) = scratch.fits_a_socket() {
+        failures.push(format!("{page}: {e}"));
+        return failures;
+    }
+    let context = scratch.context();
+    let mut bindings = Bindings::default();
     let mut servers: Vec<Server> = Vec::new();
 
     for block in blocks {
         let at = format!("{}:{}", block.file, block.line);
+        let ns = match block_normalizers(page_ns, block) {
+            Ok(ns) => ns,
+            Err(e) => {
+                failures.push(format!("{at}: {e}"));
+                continue;
+            }
+        };
         match &block.kind {
             Kind::Manual(reason) => {
                 println!("skip {at} — manual: {reason}");
+                tally.manual.push((at, reason.clone()));
                 continue;
             }
             Kind::Undeclared if options.strict => {
@@ -184,11 +318,18 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
             }
             Kind::Undeclared => {
                 println!("skip {at} — undeclared (not --strict)");
+                tally.undeclared += 1;
                 continue;
             }
             Kind::File(name) => {
-                match scratch.write(name, &block.content) {
-                    Ok(()) => println!("file {at} → {name}"),
+                // A port or a fingerprint the page recorded, as this run's server bound it.
+                let content: Vec<String> =
+                    block.content.iter().map(|l| bindings.rewrite(l)).collect();
+                match scratch.write(name, &content) {
+                    Ok(()) => {
+                        println!("file {at} → {name}");
+                        tally.files += 1;
+                    }
                     Err(e) => failures.push(format!("{at}: file {name}: {e}")),
                 }
                 continue;
@@ -212,8 +353,15 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
             .iter()
             .map(|c| {
                 Ok(Step {
-                    text: expand_includes(&c.text, dir)?,
-                    expected: c.expected.clone(),
+                    // What the page recorded (a port its server bound), as this run bound it.
+                    text: bindings.rewrite(&expand_includes(&c.text, dir)?),
+                    // An output line names a pin the same way (`ikigai {{#include …version}}`),
+                    // so moving the pin stays a one-line change there too.
+                    expected: c
+                        .expected
+                        .iter()
+                        .map(|l| expand_includes(l, dir))
+                        .collect::<Result<_, _>>()?,
                 })
             })
             .collect();
@@ -237,8 +385,16 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
                 continue;
             }
             let command = &commands[0];
-            ran += 1;
-            match Server::start(&scratch, &options.paths, command) {
+            tally.commands += 1;
+            tally.servers += 1;
+            match Server::start(
+                &scratch,
+                &options.paths,
+                command,
+                &ns,
+                &context,
+                &mut bindings,
+            ) {
                 Ok(server) => {
                     println!("ok   {at} (serving: {})", command.text);
                     servers.push(server);
@@ -248,15 +404,23 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
             continue;
         }
         let mut block_ok = true;
+        tally.blocks += 1;
         for command in &commands {
-            ran += 1;
+            tally.commands += 1;
             let actual = scratch.run(&options.paths, &command.text);
             let expected = normalize(&command.expected);
-            match actual {
-                Ok(lines) if matches(&expected, &lines) => {}
-                Ok(lines) => {
+            match actual.map(|lines| {
+                let verdict = compare(&expected, &lines, &ns, &context, &mut bindings, false);
+                (lines, verdict)
+            }) {
+                Ok((_, Ok(true))) => {}
+                Ok((lines, Ok(false))) => {
                     block_ok = false;
-                    failures.push(report(&at, &command.text, &expected, &lines));
+                    failures.push(report(&at, &command.text, &expected, &lines, &ns));
+                }
+                Ok((_, Err(e))) => {
+                    block_ok = false;
+                    failures.push(format!("{at}\n    $ {}\n    {e}", command.text));
                 }
                 Err(e) => {
                     block_ok = false;
@@ -290,12 +454,26 @@ fn run_page(options: &Options, blocks: &[Block], home: Option<String>) -> (usize
             ));
         }
     }
-    (ran, failures)
+    failures
 }
 
-fn report(at: &str, command: &str, expected: &[String], actual: &[String]) -> String {
+fn report(
+    at: &str,
+    command: &str,
+    expected: &[String],
+    actual: &[String],
+    ns: &[Normalizer],
+) -> String {
+    let through = if ns.is_empty() {
+        String::new()
+    } else {
+        format!(
+            " (compared through: {})",
+            ns.iter().map(|n| n.name()).collect::<Vec<_>>().join(", ")
+        )
+    };
     format!(
-        "{at}\n    $ {command}\n    the page says:\n      {}\n    the command printed:\n      {}",
+        "{at}\n    $ {command}\n    the page says{through}:\n      {}\n    the command printed:\n      {}",
         expected.join("\n      "),
         actual.join("\n      ")
     )
@@ -308,6 +486,10 @@ struct Scratch {
     home: PathBuf,
     /// The trap, when `home` is one: anything left in it is a write the page did not declare.
     trap: Option<PathBuf>,
+    /// The page's directory and its home as first named, before canonicalizing: on macOS the
+    /// temporary directory is a symlink (`/var` → `/private/var`), and a program prints whichever
+    /// spelling it was handed. The `workdir` and `home` normalizers take both.
+    named: (PathBuf, PathBuf),
 }
 
 impl Scratch {
@@ -320,26 +502,72 @@ impl Scratch {
             .map(|d| d.as_nanos())
             .unwrap_or_default();
         let name = format!("bt{}-{}", std::process::id(), stamp % 1_000_000);
-        let dir = base.join(&name);
-        std::fs::create_dir_all(dir.join(".config")).expect("a scratch directory");
-        let dir = dir.canonicalize().expect("the scratch directory exists");
+        let named_dir = base.join(&name);
+        std::fs::create_dir_all(named_dir.join(".config")).expect("a scratch directory");
+        let dir = named_dir
+            .canonicalize()
+            .expect("the scratch directory exists");
         if home_is_the_page {
             return Scratch {
                 home: dir.clone(),
                 dir,
                 trap: None,
+                named: (named_dir.clone(), named_dir),
             };
         }
-        // Empty, and NOT given a `.config`: the config home inside it is named, never made, so
-        // whatever appears in the trap was written by a command.
-        let trap = base.join(format!("{name}-home"));
-        std::fs::create_dir_all(&trap).expect("a trap home");
-        let trap = trap.canonicalize().expect("the trap exists");
+        // Empty of FILES, and NOT given a `.config`: the config home inside it is named, never
+        // made, so whatever file appears in the trap was written by a command. It does get an
+        // empty `.local/share`, as a reader's home has one: `ikigai -e` (Steel) makes its own
+        // directory there and, when the parent is missing, prints a complaint about it on every
+        // run that a reader with an ordinary home never sees. A directory is not a write.
+        let named_trap = base.join(format!("{name}-home"));
+        std::fs::create_dir_all(named_trap.join(".local/share")).expect("a trap home");
+        let trap = named_trap.canonicalize().expect("the trap exists");
         Scratch {
             dir,
             home: trap.clone(),
             trap: Some(trap),
+            named: (named_dir, named_trap),
         }
+    }
+
+    /// The directories the `workdir` and `home` normalizers stand for, in every spelling.
+    fn context(&self) -> Context {
+        let spell = |paths: [&PathBuf; 2]| {
+            let mut out: Vec<String> = paths
+                .iter()
+                .map(|p| p.to_string_lossy().into_owned())
+                .collect();
+            out.dedup();
+            out
+        };
+        Context {
+            home: spell([&self.home, &self.named.1]),
+            workdir: spell([&self.dir, &self.named.0]),
+        }
+    }
+
+    /// A page's server may put a Unix socket in its directory, and a socket's path is capped at
+    /// 104 bytes on macOS (`sun_path`), 108 on Linux, with the failure surfacing at `bind` as a
+    /// path or permission error rather than as "too long". So the directory must leave room for
+    /// a socket's name, and the page fails here, saying why, if it does not.
+    fn fits_a_socket(&self) -> Result<(), String> {
+        const SUN_PATH: usize = 104;
+        const NAME_ROOM: usize = 24;
+        let longest = [&self.dir, &self.named.0]
+            .iter()
+            .map(|p| p.as_os_str().len())
+            .max()
+            .unwrap_or(0);
+        if longest + NAME_ROOM > SUN_PATH {
+            return Err(format!(
+                "the scratch directory {} is {longest} bytes, which leaves less than {NAME_ROOM} \
+                 for a socket's name inside the {SUN_PATH}-byte `sun_path`; run with a shorter \
+                 TMPDIR",
+                self.dir.display()
+            ));
+        }
+        Ok(())
     }
 
     /// Write a `file` block: its lines, each ending in a newline, at `name` under the scratch
@@ -436,7 +664,17 @@ struct Server {
 impl Server {
     /// Start it, and wait until what it has printed matches the page's lines (anything after
     /// them is allowed: a server goes on printing).
-    fn start(scratch: &Scratch, paths: &[PathBuf], command: &Step) -> Result<Server, String> {
+    ///
+    /// The banner is compared through the block's normalizers, and what it binds (the port a
+    /// server started on port 0 chose) is learned into `bindings` for the rest of the page.
+    fn start(
+        scratch: &Scratch,
+        paths: &[PathBuf],
+        command: &Step,
+        ns: &[Normalizer],
+        context: &Context,
+        bindings: &mut Bindings,
+    ) -> Result<Server, String> {
         // `exec`, so the process this holds IS the server: killing a shell that forked it
         // would leave the server running, holding its port, after the page is done. And its
         // own process GROUP, which is what `stop` signals: a serve line that is a pipeline
@@ -453,13 +691,29 @@ impl Server {
             child.stdout.take().expect("piped"),
             child.stderr.take().expect("piped"),
         );
-        let mut expected = normalize(&command.expected);
-        expected.push(ANY.to_string());
+        let expected = normalize(&command.expected);
         let mut seen: Vec<String> = Vec::new();
         let deadline = Instant::now() + SERVE_PATIENCE;
         loop {
-            if matches(&expected, &normalize(&seen)) {
-                return Ok(Server { child });
+            // Learn into a copy: a partial banner may pair values that a later line contradicts.
+            let mut learned = bindings.clone();
+            match compare(
+                &expected,
+                &normalize(&seen),
+                ns,
+                context,
+                &mut learned,
+                true,
+            ) {
+                Ok(true) => {
+                    *bindings = learned;
+                    return Ok(Server { child });
+                }
+                Ok(false) => {}
+                Err(e) => {
+                    Server { child }.stop();
+                    return Err(format!("    {e}"));
+                }
             }
             let left = deadline.saturating_duration_since(Instant::now());
             match lines.recv_timeout(left) {
@@ -472,7 +726,6 @@ impl Server {
                     // server failed to bind — one changed banner line read as a dozen pages
                     // broken (seen moving the pin to edb9a3d).
                     Server { child }.stop();
-                    expected.pop();
                     return Err(format!(
                         "    {}\n    the page says it starts with:\n      {}\n    it printed:\n      {}",
                         match exited {

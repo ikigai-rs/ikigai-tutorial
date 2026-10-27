@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-27**: The other books now lists Running ikigai, a fifth book for operators: the ikigai binary and what it takes to run kernels for real.
+
+  Pages: [The other books](other-books.md)
+
 - **2026-10-26**: In "A space that changes while it runs", "Compare with" is now one list, above Before and After, instead of a second row of a dozen buttons under the tabs that was hard to tell from them on a phone. It offers the stages before the open tab, a stage of your own among them, and starts at the stage just before; opening a tab puts it back there. When a tab's step has moved nothing yet, After now says so plainly: the stage your kernel is still at, and that the tab's step has moved nothing yet.
 
   Pages: [A space that changes while it runs](applied/live-space.md)
