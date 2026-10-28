@@ -57,8 +57,9 @@ ikigai --plain -c 'source urn:kernel:catalog'
 
 This prints the catalog: descriptions of the endpoints available in this host, assembled
 into one graph. An endpoint is code that handles requests for a resource. Each endpoint
-supplies its own description. Turtle is a text format for Resource Description Framework (RDF) graphs. Each
-statement links a subject to an object through a predicate that names their relationship. A full install prints several hundred lines.
+supplies its own description. Turtle is a text format for Resource Description Framework
+(RDF) graphs. Each statement links a subject to an object through a predicate that names
+their relationship. The catalog is long; you do not need to read every line now.
 
 ## 2. Everything *you* may do
 
@@ -69,7 +70,8 @@ ikigai --plain -c 'source urn:kernel:actions'
 This prints one resource name per line, limited to endpoints your current permissions
 allow you to invoke. The book calls this list the **manifold**. The session starts with
 root authority, which allows nearly everything. A **capability** specifies which requests
-a caller may make. Narrow the session's capability and the list gets shorter. An agent can use the same list to discover its available tools.
+a caller may make. Narrow the session's capability and the list gets shorter. An agent
+can use the same list to discover its available tools.
 
 The names are **IRIs**, Internationalized Resource Identifiers. A URL is one kind of
 identifier; the `urn:…` names here use the URN scheme. They identify resources without
@@ -204,6 +206,7 @@ cache
   urn:file:notes.txt  cut      text/plain                     17 B  1 thread    root
   urn:iki:fn:toUpper  live     application/json              318 B  1 thread    root
   urn:iki:fn:toUpper  cut      text/plain                      3 B  1 thread    root
+[uncacheable]
 ```
 
 The first two lines show the cache's limits: 4096 entries and 64 MiB by default. The
@@ -238,6 +241,7 @@ threads (cut generations)
 …
   urn:file:notes.txt  gen 2
   urn:iki:fn:toUpper  gen 1
+[uncacheable]
 ```
 
 This lists the threads cut during this kernel's lifetime and their generation counters.
@@ -270,8 +274,8 @@ urn:iki:fn:toUpper   toUpper · computed · main · 0ms   → 3b  A B
 its permissions, and the connection used. Here, `embedded` means the kernel runs in the
 CLI's own process.
 
-The result was `computed` because [Cut a thread](#6-cut-a-thread) invalidated the cached answer. `main` is the
-execution thread, not a golden thread. `0ms` is the duration displayed in whole
+The result was `computed` because [Cut a thread](#6-cut-a-thread) invalidated the cached
+answer. `main` is the execution thread, not a golden thread. `0ms` is the duration displayed in whole
 milliseconds, and `3b` is the size of `A B` in bytes. When an endpoint requests other
 resources, the trace shows those requests underneath it.
 
