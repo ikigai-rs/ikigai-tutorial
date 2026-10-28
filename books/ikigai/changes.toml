@@ -21,6 +21,11 @@ summary = "The two front-door chapters now distinguish shell commands, REPL inpu
 pages = ["front-door/cli.md", "front-door/grammar.md"]
 
 [[change]]
+date = "2026-10-28"
+summary = "Four pages now say what the streams releases changed. \"The REPL grammar\" says when a pipe hands the next stage a body instead of a value (ikigai-engine 0.2.2), and that a stored plan still pipes by value. \"Golden threads in practice\" and \"Twenty minutes, nothing compiled\" say what the cache bound counts now: a one-shot body is never stored, a spilled one counts its full length, and a hit shares its bytes. \"The file workspace\" ends with files as bodies (ikigai-fs 0.2.3): seekable reads, a validator for ETag and ranges, sinks that stream, and the 64 MiB write ceiling per root."
+pages = ["front-door/grammar.md", "getting-started/golden-threads.md", "front-door/cli.md", "getting-started/file-workspace.md"]
+
+[[change]]
 date = "2026-10-27"
 summary = "The book now builds against ikigai-core 0.2, the streams release, and every module it links moved with it. In \"Tic-tac-toe, V\", a game over a store in another process now caches nothing in the host: each read asks the store again, so a mark another client writes there is on the next board, and the store contract is run against the store's own answers. Status names core 0.2.2 and ikigai-module 0.5.1 and says what 0.2.0 changed. A plain `trace` no longer prints `defaulted=`; \"A space that changes while it runs\" asks for it with `trace --defaults`. The `list` in \"The REPL grammar\" shows the toolbox's new `urn:toolbox:path:{rest}`, and the grounding in \"A sentence becomes a draft\" counts 252 vocabulary terms."
 pages = ["applied/tic-tac-toe-5.md", "modules/status.md", "applied/live-space.md", "front-door/grammar.md", "code/sentence.md"]

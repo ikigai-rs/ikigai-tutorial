@@ -11,6 +11,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
 
+- **2026-10-28**: Four pages now say what the streams releases changed. "The REPL grammar" says when a pipe hands the next stage a body instead of a value (ikigai-engine 0.2.2), and that a stored plan still pipes by value. "Golden threads in practice" and "Twenty minutes, nothing compiled" say what the cache bound counts now: a one-shot body is never stored, a spilled one counts its full length, and a hit shares its bytes. "The file workspace" ends with files as bodies (ikigai-fs 0.2.3): seekable reads, a validator for ETag and ranges, sinks that stream, and the 64 MiB write ceiling per root.
+
+  Pages: [The REPL grammar](front-door/grammar.md), [Golden threads in practice](getting-started/golden-threads.md), [Twenty minutes, nothing compiled](front-door/cli.md), [The file workspace](getting-started/file-workspace.md)
+
 - **2026-10-27**: The book now builds against ikigai-core 0.2, the streams release, and every module it links moved with it. In "Tic-tac-toe, V", a game over a store in another process now caches nothing in the host: each read asks the store again, so a mark another client writes there is on the next board, and the store contract is run against the store's own answers. Status names core 0.2.2 and ikigai-module 0.5.1 and says what 0.2.0 changed. A plain `trace` no longer prints `defaulted=`; "A space that changes while it runs" asks for it with `trace --defaults`. The `list` in "The REPL grammar" shows the toolbox's new `urn:toolbox:path:{rest}`, and the grounding in "A sentence becomes a draft" counts 252 vocabulary terms.
 
   Pages: [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md), [Where this actually stands](modules/status.md), [A space that changes while it runs](applied/live-space.md), [The REPL grammar](front-door/grammar.md), [A sentence becomes a draft](code/sentence.md)

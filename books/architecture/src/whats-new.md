@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-28**: "One module, a boundary and a surface" has a new section, "Bodies larger than memory": how the HTTP door of ikigai-cli 0.2.2 frames a streamed answer (Content-Length or chunked), serves byte ranges (206, 416, If-Range), spills uploads to disk under its 408 and 413 bounds, and why every ETag changed once.
+
+  Pages: [One module, a boundary and a surface](door/door.md)
+
 - **2026-10-27**: The book now builds against ikigai-core 0.2, the streams release. In "Spaces that wrap spaces", the trace of the state board no longer ends with `defaulted=as`: the REPL's plain `trace` leaves the kernel's defaulted inputs out now, and `trace --defaults` shows them. In "The manifold, and the UI that falls out of it", the ledger's `doctor` action is listed in the place the kernel now lists it, under both capabilities.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md), [The manifold, and the UI that falls out of it](spine/manifold.md)

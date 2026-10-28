@@ -144,3 +144,28 @@ body.
 
 Then look in `~/.ikigai/workspace`: it is an ordinary directory. Nothing about the model
 requires the storage to be exotic; it requires the *access* to be named.
+
+## Files as bodies
+
+The transcripts above are replayed against the book's pinned `ikigai-cli` 0.1.64, where a
+file read answers one buffer. From `ikigai-fs` 0.2.3 (`ikigai-cli` 0.2.3) a file is a
+**body** ([Streams, I](../streams/bytes.md)) on the native backend:
+
+- A `source` answers a **seekable** body backed by the file, read 64 KiB at a time. A
+  reader that streams it (a pipe into a stage that reads a body, an HTTP download) holds a
+  chunk, not the file, and is not held to the 16 MiB a buffered file read is; one that
+  collects it is bound by its run's byte budget instead. A file that changes while it is
+  read ends in a conflict, never a short or mixed body.
+- The body states a **strong validator**: the content id of its bytes, computed on the
+  first read that asks for it and remembered against the file's version, so an HTTP door
+  can send an `ETag`, answer `304` and serve byte ranges (`206`) for a file. A file changed
+  in the last two seconds states none yet, and until it does the door serves no ranges
+  for it.
+- A `sink` **streams** its content into the file, a chunk at a time and never collected
+  first, so `source urn:file:big.log | sink urn:file:copy.log` copies a file without
+  holding it. A sink that fails part-way leaves the target as it was.
+- Each root has a **write ceiling**, 64 MiB unless the host sets another
+  (`FileEndpoint::max_write`). A `sink` past it is refused, never truncated, and the file
+  keeps what it held.
+
+The browser's `localStorage` backend still answers and stores buffers.

@@ -205,8 +205,12 @@ cache
 
 The first two lines show the cache's limits: 4096 entries and 64 MiB by default. The
 default policy removes the least recently used entry when either limit is exceeded.
-[Golden threads in
-practice](../getting-started/golden-threads.md) shows how a host configures the cache.
+[Golden threads in practice](../getting-started/golden-threads.md) shows how a host
+configures the cache and how streamed answers count toward its size limit. Since core
+0.2.0, a stream that can only be read once, a *one-shot body*, is never cached. An answer
+stored on disk counts its full length toward the limit. A cache hit shares the stored
+bytes rather than copying them.
+
 Each row lists an entry's resource name, state, format, size, dependency count, and
 resolution chain. `root` means the host's own space.
 

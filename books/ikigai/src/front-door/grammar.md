@@ -90,6 +90,21 @@ The tally counts every resolution the line performed. Cacheability flows down th
 a stage over an uncacheable input is no more cacheable than that input, and cutting the
 input's thread invalidates the transformed result too.
 
+A pipe can also pass an output as it arrives, starting with `ikigai-engine` 0.2.2 and
+`ikigai-cli` 0.2.3. The receiving argument must declare that it reads a *body*, using
+`ik:readsBody true` in its contract or `ArgSpec::reads_body` in Rust. For example,
+`source urn:file:big.log | sink urn:file:copy.log` copies the file a chunk at a time.
+
+For other arguments, the kernel collects the whole output into a value, within the
+run's byte budget. The trace marks that step `collected`. An output that is already one
+buffer passes by value either way. Stored plans, run with `execute` or `urn:plan:eval`,
+still pipe by value regardless of what the receiving argument declares.
+[Streams, I: bytes are a representation](../streams/bytes.md) introduces bodies.
+
+<!-- urn-gate: unbound urn:plan:eval — the plan runner ikigai-engine serves; ikigai-cli 0.2.3 lists
+it, but the book's pinned 0.1.64 does not mount it, so the CLI vocabulary (probed against that pin)
+cannot claim it. -->
+
 ## The map: `..`
 
 ```text
