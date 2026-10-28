@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-28**: The introduction defines the kernel's basic terms before using them, points to the companion books without a stale count, and distinguishes runnable Rust examples from ignored fragments. The front door names Cargo as an installation prerequisite and defines REPL, RDF, and capability; the grammar explains its syntax markers and acknowledges a REPL still open from the CLI chapter. The CLI chapter also includes the uncacheable status printed after cache and thread listings in CLI 0.2.4 and no longer understates the catalog's length.
+
+  Pages: [Introduction](introduction.md), [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-28**: The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and passes a caller-supplied greeting to `compose` by name, and a misspelled argument name is shown as the error it is since CLI 0.2.4.
 
   Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
