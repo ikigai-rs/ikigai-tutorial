@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-28**: A new part, "Exploring without Rust", after the front door: no endpoints to write, only the `ikigai` command, the Run buttons and files, over a week of USGS earthquakes. "A week of earthquakes" introduces it; "A lab with names in it" asks the recorded week questions with a pipe, a map and a fork, and traces, caches and cuts them; "Somebody else's resource" reads the live feed through `urn:http:get`, keeps it for USGS's sixty seconds, cuts the URL's thread and narrows the session to one host; "Reshaping JSON with jq" asks sharper questions with `urn:json:query` and fills a headline template with `$j`. The page's kernel now also holds that headline template, which the `list` in "The REPL grammar" shows.
+
+  Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md), [Somebody else's resource](explore/http.md), [Reshaping JSON with jq](explore/jq.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-28**: The page's kernel now holds one recorded file: a week of USGS earthquakes (178 events of M4.5 and up, 2024-01-01 to 2024-01-08) at `urn:file:quakes-2024-01-01.geojson`, the same name the CLI's file workspace gives a copy you save there. "The kernel in the browser" shows it in a new section, "One recorded file", where jq counts its events, and the `list` in "The REPL grammar" ends with it.
 
   Pages: [Appendix: the kernel in the browser](browser.md), [The REPL grammar](front-door/grammar.md)

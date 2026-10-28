@@ -1,0 +1,1 @@
+The week of 2024-01-01: $j{urn:file:quakes-2024-01-01.geojson .features|length} earthquakes of M4.5 and up; the largest, $j{urn:file:quakes-2024-01-01.geojson .features | max_by(.properties.mag) | .properties.title}.

@@ -1,7 +1,7 @@
 [package]
 name = "quakes"
 version = "0.1.0"
-description = "The recorded window \"Exploring without Rust\" runs on: one week of USGS earthquakes (2024-01-01 to 2024-01-08, M4.5 and up, 178 events) as GeoJSON, bound at urn:file:quakes-2024-01-01.geojson so the page's kernel reads the same name the CLI's file workspace does."
+description = "The recorded window \"Exploring without Rust\" runs on: one week of USGS earthquakes (2024-01-01 to 2024-01-08, M4.5 and up, 178 events) as GeoJSON, bound at urn:file:quakes-2024-01-01.geojson so the page's kernel reads the same name the CLI's file workspace does; and urn:quakes:template:headline, a template its $j markers fill."
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
