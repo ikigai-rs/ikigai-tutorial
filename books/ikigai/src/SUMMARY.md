@@ -9,6 +9,13 @@
 - [Twenty minutes with the CLI](front-door/cli.md)
 - [The REPL grammar](front-door/grammar.md)
 
+# Exploring without Rust
+
+- [A week of earthquakes](explore/index.md)
+- [A lab with names in it](explore/lab.md)
+- [Somebody else's resource](explore/http.md)
+- [Reshaping JSON with jq](explore/jq.md)
+
 # Getting started
 
 - [Resolution](getting-started/resolution.md)

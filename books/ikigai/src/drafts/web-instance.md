@@ -1,7 +1,7 @@
 # The Web as an instance
 
 <!-- Draft: cites Peter Rodgers' paper, which is not yet public. Intended home once it is:
-     the front door — a sidebar after "Twenty minutes, nothing compiled", or the
+     the front door — a sidebar after "Twenty minutes with the CLI", or the
      introduction's "Why bother". Prose and one table; no code, so nothing can rot. -->
 
 If [the shape of resolution](../getting-started/shape-of-resolution.md) felt abstract,

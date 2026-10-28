@@ -15,6 +15,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-10-28"
+summary = "Links to the ikigai Book's CLI tour use its new title, Twenty minutes with the CLI."
+pages = ["introduction.md", "model/live.md"]
+
+[[change]]
 date = "2026-10-27"
 summary = "The inspector's htmx host builds against ikigai-core 0.2 and ikigai-web 0.2: its route helper sets the new `redirect` field to none, so every route answers as before. The routes the page quotes are unchanged."
 pages = ["delivery/htmx.md"]

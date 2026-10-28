@@ -4,7 +4,12 @@ The same command syntax works in the `ikigai` REPL, in a shell with `ikigai -c`,
 book's runnable cells, and in the [browser demo](../getting-started/running-it.md#the-browser-demo).
 Each uses its own host, which determines the available resource names. A command with a
 **Run** button works in this page. The CLI examples below run inside `ikigai --plain`
-unless they start with `ikigai`, in which case run them in your shell.
+unless they start with `ikigai`, in which case run them in your shell. If your REPL from
+[Twenty minutes with the CLI](cli.md) is still open, you can keep using it.
+
+The syntax blocks use `<…>` for a value you supply, `[…]` for an optional part, and `…`
+for repetition. Do not type those markers. In the pipe, map, and fork syntax blocks,
+`a`, `b`, and `c` stand for resource names.
 
 ## A resolution
 
@@ -13,9 +18,10 @@ source <iri> [input]
 source <iri> key=value …
 ```
 
-`source` is the verb, meaning "read." The IRI identifies the resource to read. Everything
-after it supplies arguments to that request. These are command parts, not RDF's
-subject, predicate, and object.
+`source` is the verb, meaning "read." An IRI (Internationalized Resource Identifier)
+names the resource to read. Everything after it supplies arguments to that request.
+These are command parts, not the subject,
+predicate, and object of a Resource Description Framework (RDF) statement.
 
 `key=value` names an argument. An unnamed, or *positional*, value fills a declared
 argument that you have not supplied by name. The engine reads the endpoint's description
@@ -282,8 +288,8 @@ line, a `sink` under `-c` reads stdin, waits at most two seconds for its first b
 silence sends no `content` at all rather than an empty one (it says so on stderr). A `sink` the
 kernel dispatched cuts the golden thread named after the target, whether it succeeded or
 (since core 0.1.95) failed, which is how a write invalidates every cached read that declared that
-thread, and cached `source` results for that name: since core 0.1.73 every cacheable
-`source` result hangs from the thread named after its own target, declared or not, as the [previous
+thread, and cached `source` and `exists` answers for that name: since core 0.1.73 every cacheable
+`source` or `exists` answer hangs from the thread named after its own target, declared or not, as the [previous
 chapter](cli.md#6-cut-a-thread) showed on a pure function.
 
 The `urn:iki:tutorial:*` names in the cell below are this book's own, bound by the page's
@@ -305,8 +311,10 @@ aTitleFromTheGrammarChapter
 describe <iri> [type]
 ```
 
-The `Meta` verb. The type defaults to `text/turtle`; `text/plain` is the human face, and
-any other type the host can reach through a transreptor works too.
+`describe` uses the `Meta` verb to ask for a resource's description. The media type
+defaults to `text/turtle`, an RDF graph in Turtle format; `text/plain` requests a
+human-readable summary. A transreptor converts representations between formats, so
+other media types work when the host has a conversion path to them.
 
 <div class="ikigai-run" data-cmd='describe urn:iki:fn:reverseList text/plain'>
 <pre class="ikigai-run-expected">reverseList — Reverse list
@@ -494,7 +502,9 @@ urn:json:to-csv                           → json-to-csv
 urn:compress:gzip                         → compress-gzip
 urn:decompress:gzip                       → decompress-gzip
 urn:compress:zlib                         → compress-zlib
-urn:decompress:zlib                       → decompress-zlib</pre>
+urn:decompress:zlib                       → decompress-zlib
+urn:file:quakes-2024-01-01.geojson        → quakes-window
+urn:quakes:template:headline              → quakes-headline</pre>
 </div>
 
 That is everything the kernel in this page binds. The kernel's own `urn:kernel:*` rows come
@@ -502,8 +512,10 @@ first; then Part I's twelve names, in the order they were bound: `ikigai-fn`'s n
 this book's three chained on top, exactly as [Binding](../getting-started/binding.md) wrote
 them. After those come the Applied parts' tic-tac-toe, time and spreadsheet names, the
 names "Checking a resource" uses, and the shop and `ikigai-json` names that "Transreption" and
-"Short names in a space" use, and last the gzip and zlib names of
-[Streams, I](../streams/bytes.md). A host built from Part I alone lists only Part I's share of
+"Short names in a space" use, the gzip and zlib names of
+[Streams, I](../streams/bytes.md), and last the recorded week and the headline template of
+[Exploring without Rust](../explore/index.md) ([the kernel in the browser](../browser.md#one-recorded-file)
+says why the page binds one file). A host built from Part I alone lists only Part I's share of
 it. A full CLI lists a few hundred, many served over a socket from another
 process — which is [Part III](../beyond/socket.md).
 

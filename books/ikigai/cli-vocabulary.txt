@@ -125,6 +125,11 @@ urn:host:posture
 urn:http:head
 urn:http:delete
 
+# "Somebody else's resource" (Exploring without Rust) reads the live USGS feed through
+# `urn:http:get`, in REPL steps a reader types (not replayed: the page and CI do not reach
+# USGS). Run against 0.2.4 on 2026-10-28; `describe` answers against the pinned 0.1.64 too.
+urn:http:get
+
 # The LLM face: one front grammar over pluggable backends. `urn:llm:{provider}:ask`
 # is deliberately NOT listed — which providers exist is the reader's own llm.json,
 # so the book declares that name an illustration rather than claiming it.

@@ -119,6 +119,9 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // "Streams, I: bytes are a representation": gzip and zlib, both ways, as resources and
         // as transreptors (`urn:compress:*`, `urn:decompress:*`).
         Arc::new(ikigai_compress::space()),
+        // "Exploring without Rust": the recorded week of earthquakes, one atom at
+        // `urn:file:quakes-2024-01-01.geojson`. The only `urn:file:` name the page binds.
+        Arc::new(quakes::space()),
     ])
 }
 
@@ -2006,15 +2009,65 @@ mod tests {
         );
     }
 
+    /// "A lab with names in it", the first chapter of "Exploring without Rust": the recorded
+    /// week described, asked, piped, mapped and forked; a trace that shows the file read; what
+    /// hangs from the file's thread, and a cut of it.
+    #[test]
+    fn the_explore_lab_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("explore/lab.md", 8);
+        assert!(t[0].starts_with("quakes-window — "), "{}", t[0]);
+        assert!(t[1].starts_with("178\n[computed]\n"), "{}", t[1]);
+        // The map asks `toUpper` the same question twice; the second answer is cached.
+        assert!(t[3].contains("cached"), "{}", t[3]);
+        // The question read the file through the kernel, and found it cached.
+        assert!(
+            t[5].contains("urn:file:quakes-2024-01-01.geojson   quakes-window · cached"),
+            "{}",
+            t[5]
+        );
+        // A cut makes the count stale, and it recomputes to the same 178.
+        assert!(t[7].starts_with("cached\n"), "{}", t[7]);
+        assert!(t[7].ends_with("not cached\n178\n[computed]\n"), "{}", t[7]);
+    }
+
+    /// "Reshaping JSON with jq": jq over the recorded week, the three answer forms (the plain
+    /// one refusing a stream), a cached second ask, and the headline template filled by `$j`.
+    #[test]
+    fn the_explore_jq_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("explore/jq.md", 6);
+        assert!(
+            t[1].starts_with("M 7.5 - 2024 Noto Peninsula, Japan Earthquake\n"),
+            "{}",
+            t[1]
+        );
+        assert!(
+            t[3].contains("error: invalid argument `as`: as=text/plain answers exactly one"),
+            "{}",
+            t[3]
+        );
+        assert!(
+            t[5].contains("178 earthquakes of M4.5 and up; the largest, M 7.5 - 2024 Noto"),
+            "{}",
+            t[5]
+        );
+    }
+
     #[test]
     fn the_browser_appendix_cells_answer_as_it_says() {
         // `./` makes it a path under `src/`: the appendix is not an Applied chapter.
-        let t = run_chapter_in_page_order("./browser.md", 2);
+        let t = run_chapter_in_page_order("./browser.md", 3);
+        // The recorded week of earthquakes: jq counts its events, reading the file through the
+        // kernel, so the file's own answer is cached after it.
+        assert!(
+            t[0].starts_with(&format!("{}\n[computed]\ncached\n", quakes::EVENTS)),
+            "{}",
+            t[0]
+        );
         // The appendix's page asks for no clock, so the time endpoint refuses and says why.
-        assert!(t[0].contains("this kernel has no clock"), "{}", t[0]);
+        assert!(t[1].contains("this kernel has no clock"), "{}", t[1]);
         // And a trace has no durations to print.
-        assert!(t[1].contains("urn:iki:tutorial:title"), "{}", t[1]);
-        assert!(t[1].contains(" · —"), "{}", t[1]);
+        assert!(t[2].contains("urn:iki:tutorial:title"), "{}", t[2]);
+        assert!(t[2].contains(" · —"), "{}", t[2]);
     }
 
     #[test]

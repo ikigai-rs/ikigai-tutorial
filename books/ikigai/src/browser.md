@@ -69,7 +69,36 @@ a kernel or its endpoints might need:
 None of the right-hand column is something the kernel asks the platform for. A browser
 host and a native host fill the same seams, each from what it has. Where the browser has
 nothing (files, processes, the keychain), the page binds no space for it, and a name in
-those families is simply not found there.
+those families is simply not found there. One name under `urn:file:` is the exception,
+and it is not a file system.
+
+## One recorded file
+
+The part "Exploring without Rust" runs on one recorded week of earthquakes, as USGS
+published it: 178 events of magnitude 4.5 and up, from 2024-01-01 to 2024-01-08, in
+GeoJSON. At a shell it is a file you save in the CLI's file workspace, where it is
+`urn:file:quakes-2024-01-01.geojson`. The page binds that same name to the same bytes,
+compiled into the module by the `quakes` crate, so a cell and a command name one resource.
+It answers only reads, and it never changes.
+
+The first line below asks `urn:json:query`, a jq program run as a resource, how many events
+the file holds. The query reads the file through the kernel, so the second line finds the
+file's own answer already cached. The third asks the file to describe itself:
+
+<div class="ikigai-run" data-cmd='source urn:json:query src=urn:file:quakes-2024-01-01.geojson q=".features|length"
+cache urn:file:quakes-2024-01-01.geojson
+describe urn:file:quakes-2024-01-01.geojson text/plain'>
+<pre class="ikigai-run-expected">178
+[computed]
+cached
+quakes-window — A recorded week of earthquakes
+USGS earthquakes of M4.5 and up from 2024-01-01 to 2024-01-08, 178 events, as GeoJSON, recorded once and never changed: the window &quot;Exploring without Rust&quot; runs on.
+verbs: Source, Meta
+[computed]</pre>
+</div>
+
+Every other name under `urn:file:` is not found in this page: a `sink` to one has nowhere
+to go. The CLI binds the whole family to a directory on your disk.
 
 ## Rust's standard library cannot see the browser
 

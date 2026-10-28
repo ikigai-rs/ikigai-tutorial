@@ -11,6 +11,18 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
 
+- **2026-10-28**: The introduction defines the kernel's basic terms before using them, points to the companion books without a stale count, and distinguishes runnable Rust examples from ignored fragments. The front door names Cargo as an installation prerequisite and defines REPL, RDF, and capability; the grammar explains its syntax markers and acknowledges a REPL still open from the CLI chapter. The CLI chapter also includes the uncacheable status printed after cache and thread listings in CLI 0.2.4 and no longer understates the catalog's length.
+
+  Pages: [Introduction](introduction.md), [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
+
+- **2026-10-28**: A new part, "Exploring without Rust", after the front door: no endpoints to write, only the `ikigai` command, the Run buttons and files, over a week of USGS earthquakes. "A week of earthquakes" introduces it; "A lab with names in it" asks the recorded week questions with a pipe, a map and a fork, and traces, caches and cuts them; "Somebody else's resource" reads the live feed through `urn:http:get`, keeps it for USGS's sixty seconds, cuts the URL's thread and narrows the session to one host; "Reshaping JSON with jq" asks sharper questions with `urn:json:query` and fills a headline template with `$j`. The page's kernel now also holds that headline template, which the `list` in "The REPL grammar" shows.
+
+  Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md), [Somebody else's resource](explore/http.md), [Reshaping JSON with jq](explore/jq.md), [The REPL grammar](front-door/grammar.md)
+
+- **2026-10-28**: The page's kernel now holds one recorded file: a week of USGS earthquakes (178 events of M4.5 and up, 2024-01-01 to 2024-01-08) at `urn:file:quakes-2024-01-01.geojson`, the same name the CLI's file workspace gives a copy you save there. "The kernel in the browser" shows it in a new section, "One recorded file", where jq counts its events, and the `list` in "The REPL grammar" ends with it.
+
+  Pages: [Appendix: the kernel in the browser](browser.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-28**: The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and passes a caller-supplied greeting to `compose` by name, and a misspelled argument name is shown as the error it is since CLI 0.2.4.
 
   Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
