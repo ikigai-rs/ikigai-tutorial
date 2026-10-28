@@ -3,6 +3,7 @@
 //! | name | kind | what it is |
 //! |---|---|---|
 //! | `urn:file:quakes-2024-01-01.geojson` | atom | one week of USGS earthquakes, M4.5 and up, as GeoJSON |
+//! | `urn:quakes:template:headline` | atom | a one-line template whose `$j{…}` markers ask the week two questions |
 //!
 //! The part works at a shell, where the CLI's file workspace (`ikigai --files <dir>`) serves a
 //! copy of the same file under the same name, and in the page, where this crate serves it. So a
@@ -37,10 +38,20 @@ pub const WINDOW_BYTES: &[u8] = include_bytes!("../quakes-2024-01-01.geojson");
 /// How many events the window holds: what `.features|length` answers.
 pub const EVENTS: usize = 178;
 
+/// The headline template "Reshaping JSON with jq" fills with `urn:iki:fn:compose`. A name of our
+/// own, under `urn:quakes:`: at a shell, the reader writes the same text to a file of their own.
+pub const HEADLINE: &str = "urn:quakes:template:headline";
+
+/// The headline's text, as `templates/headline.txt` holds it.
+pub const HEADLINE_TEXT: &str = include_str!("../templates/headline.txt");
+
 // ANCHOR: space
-/// The window, bound at [`WINDOW`]: an atom that answers its bytes, cacheably.
+/// The window, bound at [`WINDOW`]: an atom that answers its bytes, cacheably; and the headline
+/// template, at [`HEADLINE`].
 pub fn space() -> EndpointSpace {
-    EndpointSpace::new().bind(Exact::new(WINDOW), window())
+    EndpointSpace::new()
+        .bind(Exact::new(WINDOW), window())
+        .bind(Exact::new(HEADLINE), headline())
 }
 // ANCHOR_END: space
 
@@ -58,6 +69,27 @@ pub fn window() -> FnEndpoint {
                  Rust\" runs on.",
             )
             .action(ActionSpec::new(Verb::Source).output(GEOJSON))
+            .verb(Verb::Meta),
+    )
+}
+
+/// The atom behind [`HEADLINE`]: the template as it is written, markers and all.
+pub fn headline() -> FnEndpoint {
+    FnEndpoint::new("quakes-headline", |_: &Invocation<'_>| {
+        Ok(Representation::new(
+            ReprType::new("text/plain"),
+            HEADLINE_TEXT.as_bytes().to_vec(),
+        )
+        .cacheable())
+    })
+    .with_description(
+        Description::new("quakes-headline")
+            .title("The week's headline, as a template")
+            .summary(
+                "One line with two `$j{…}` markers over the recorded week: how many \
+                 earthquakes, and the largest. Fill it with urn:iki:fn:compose.",
+            )
+            .action(ActionSpec::new(Verb::Source).output("text/plain"))
             .verb(Verb::Meta),
     )
 }
