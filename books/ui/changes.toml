@@ -16,6 +16,12 @@
 
 [[change]]
 date = "2026-10-27"
+summary = "The inspector's htmx host builds against ikigai-core 0.2 and ikigai-web 0.2: its route helper sets the new `redirect` field to none, so every route answers as before. The routes the page quotes are unchanged."
+pages = ["delivery/htmx.md"]
+maintenance = true
+
+[[change]]
+date = "2026-10-27"
 summary = "The other books now links Running ikigai, the operator's book, and says the library lists all five books."
 pages = ["other-books.md"]
 
