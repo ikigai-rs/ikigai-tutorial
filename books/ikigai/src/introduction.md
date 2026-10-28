@@ -90,12 +90,13 @@ on every merge.
 The book changes often. [What's new](whats-new.md) lists each change, most recent first, with
 the pages to read for it.
 
-It is one of three. [The library](library/index.html) lists them all, with who each is for and
+[The library](library/index.html) lists the companion books, with who each is for and
 where to start.
 
-Every Rust block in these pages is compiled and run by `mdbook test`, and the longer code
-listings are **included from the crates that compile them** rather than copied. A book
-that paraphrases its own examples is a book that will eventually be wrong about them.
+`mdbook test` compiles and runs the runnable Rust examples. It skips fragments marked
+`ignore`; the longer code listings are **included from the crates that compile them**
+rather than copied. A book that paraphrases its own examples is a book that will eventually
+be wrong about them.
 
 ```bash
 # read it (mdbook serve never builds the in-page kernel, so Run is disabled there)
@@ -110,7 +111,7 @@ mdbook serve books/ikigai --open
 
 The code lives in
 [`crates/`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates) — one crate per
-part, plus the two that gate the book itself.
+part, plus crates that build and check the books.
 
 ## Conventions
 
