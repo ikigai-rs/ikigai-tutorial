@@ -57,6 +57,10 @@ value either way. A stored plan (`execute`, `urn:plan:eval`) still pipes by valu
 whatever the receiving argument declares. [Streams, I: bytes are a
 representation](../streams/bytes.md) is where a body begins.
 
+<!-- urn-gate: unbound urn:plan:eval — the plan runner ikigai-engine serves; ikigai-cli 0.2.3 lists
+it, but the book's pinned 0.1.64 does not mount it, so the CLI vocabulary (probed against that pin)
+cannot claim it. -->
+
 <div class="ikigai-run" data-cmd='source urn:iki:fn:toUpper in="a b" | urn:iki:fn:reverseList'>
 <pre class="ikigai-run-expected">A B
 [2 computed]</pre>
