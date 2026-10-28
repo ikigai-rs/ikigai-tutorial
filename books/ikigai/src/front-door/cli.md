@@ -286,4 +286,6 @@ that vocabulary against a real CLI. It also replays the REPL transcripts against
 `ikigai-cli` {{#include ../../ikigai-cli.version}}, pinned in
 `books/ikigai/ikigai-cli.version`. Contributors can run these checks with
 `./scripts/test-transcripts.sh`. That pin identifies the replayed version; a newer CLI
-may print different output.
+may print different output. The replay exists because, for a while, it did not run in CI,
+and section 6 went on saying a cut left a pure function's answer `cached` long after core
+0.1.73 changed it. If a command here fails on a newer CLI, the replay is where to look first.

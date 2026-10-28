@@ -17,7 +17,7 @@
 
 [[change]]
 date = "2026-10-28"
-summary = "The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and includes a caller-supplied greeting, with the CLI's current argument-routing limitation explained."
+summary = "The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and passes a caller-supplied greeting to `compose` by name, and a misspelled argument name is shown as the error it is since CLI 0.2.4."
 pages = ["front-door/cli.md", "front-door/grammar.md"]
 
 [[change]]

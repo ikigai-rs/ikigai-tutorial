@@ -43,8 +43,23 @@ source urn:demo:greet Hello name=Joe
 ```
 
 Use `describe urn:demo:greet text/plain` to see the declared names, `greeting` and `name`.
-Check their spelling: in CLI 0.2.0 an unknown `key=value` can be treated as positional
-text when an argument is still available. A typo does not always produce an error.
+The engine checks every name against that description, so a typo is an error, not a wrong
+answer. This line:
+
+```text
+source urn:iki:fn:toUpper inn=abc
+```
+
+is refused with:
+
+```text
+error: `urn:iki:fn:toUpper` declares no argument `inn` (its arguments: `in`). To send `inn=abc` as text, name the argument it fills: in="inn=abc"
+```
+
+As the error says, text that contains `=` goes to an argument by name: `in="a=b"`. Text whose
+part before the `=` is not a name, such as `2+2=4`, is still ordinary positional text. (CLI
+0.2.4 and later. Earlier releases sent a misspelled `key=value` on as positional text, so
+`inn=abc` came back as `INN=ABC`.)
 
 `demo` is a namespace used for the bundled examples. The host binds the full name
 `urn:demo:greet` to an endpoint. Replacing `demo` with another word does not create a new
@@ -63,8 +78,15 @@ quoting can insert an actual newline before passing the command to ikigai:
 ikigai --plain -c $'source urn:iki:fn:toUpper in="a\nb" | urn:iki:fn:reverseList'
 ```
 
-This prints `B` then `A`, on separate lines. `$'…'` belongs to the shell; do not type it
-inside the ikigai REPL. The `split` endpoint in the next example makes a newline list
+Fish has no `$'…'` quoting. There, end the single quotes, write `\n` unquoted, and reopen
+them:
+
+```bash
+ikigai --plain -c 'source urn:iki:fn:toUpper in="a'\n'b" | urn:iki:fn:reverseList'
+```
+
+Either line prints `B` then `A`, on separate lines. The quoting belongs to the shell; do
+not type it inside the ikigai REPL. The `split` endpoint in the next example makes a newline list
 without needing a literal newline in your command.
 
 ## The pipe: `|`
@@ -220,19 +242,19 @@ sink urn:file:greeting.txt Hello, $h{{name}}!
 This creates `greeting.txt` in the workspace. `$h{{name}}` inserts a caller-supplied
 argument named `name`, escaping it for HTML. The template is separate from the data.
 
-CLI 0.2.0's `source` command recognizes only `src` in `compose`'s declared arguments.
-Adding `name=Joe` to that command is rejected. The CLI's general `invoke` form can pass
-the extra argument. Enter these lines in the same REPL:
+`compose` declares `src` and accepts any other name as a template argument, because the
+template decides which names it uses. Pass `name` beside `src`, in the same REPL:
 
 ```text
-(invoke 'source "urn:iki:fn:compose" "src" "urn:file:greeting.txt" "name" "Joe")
-(invoke 'source "urn:iki:fn:compose" "src" "urn:file:greeting.txt" "name" "Alice")
+source urn:iki:fn:compose src=urn:file:greeting.txt name=Joe
+source urn:iki:fn:compose src=urn:file:greeting.txt name=Alice
 ```
 
 The results are `Hello, Joe!` and `Hello, Alice!`. Both use the same template file;
-only the argument changes. Lines starting with `(` use the
-[Lisp syntax described below](#and-one-more-). This example runs in the CLI, which has
-the file workspace and Lisp endpoint; the kernel in this page does not provide them.
+only the argument changes. This example runs in the CLI, which has the file workspace;
+the kernel in this page does not provide one. (CLI 0.2.4 and later. Earlier releases
+refused `name=Joe` here; the [Lisp form described below](#and-one-more-) could pass it:
+`(invoke 'source "urn:iki:fn:compose" "src" "urn:file:greeting.txt" "name" "Joe")`.)
 
 ## Writing: `sink`
 
