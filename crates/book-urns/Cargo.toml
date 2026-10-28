@@ -39,6 +39,9 @@ sentence-draft = { path = "../sentence-draft" }
 # "Streams, I: bytes are a representation": its listings build a kernel over ikigai-compress's
 # space alone.
 ikigai-compress.workspace = true
+# "Exploring without Rust": the recorded week and its headline template (`urn:quakes:*`), which
+# the part's prose names as well as its cells.
+quakes = { path = "../quakes" }
 # The one parser for `<!-- transcript: … -->` (ledger #1075): the REPL replay reads a block's
 # declaration exactly as the console runner and the `cargo run` check do.
 book-transcripts = { path = "../book-transcripts" }

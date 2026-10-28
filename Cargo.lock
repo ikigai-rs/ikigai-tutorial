@@ -258,6 +258,7 @@ dependencies = [
  "live-space",
  "loadable-module",
  "push",
+ "quakes",
  "script-host",
  "sentence-draft",
  "shop",
