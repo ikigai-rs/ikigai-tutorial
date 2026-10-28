@@ -504,10 +504,13 @@ again, and the Python store still has the game.
 
 Two things to know. The mount is an override and not an alias: an alias mount at
 `urn:iki:tutorial:ttt:stored:` would strip that prefix and forward names the Python and
-TypeScript servers do not bind. And every write has to go through the host. The host cuts a
-stored cell's thread when *its* kernel issues the write. A mark written to the Python process
-by some other client is invisible to the host's cache, which goes on serving the old board
-until something else cuts it, because there is no golden thread over the wire yet.
+TypeScript servers do not bind. And the host caches nothing over the mount. A cut on the
+Python process never crosses the wire, so a mark written there by some other client would
+leave a cached board stale; the host holds every answer the mount gives as uncacheable
+instead, and so the cells, lines and board above it too. Each read asks the store again, a
+mark written by another client is on the next board the host draws, and the store's own cache
+is still where its marks are held. That is why the contract asks the store, not the mount,
+whether a mark is cacheable.
 
 ## What the board does for a reader who cannot see it
 

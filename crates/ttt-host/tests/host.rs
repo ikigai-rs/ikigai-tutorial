@@ -583,8 +583,11 @@ fn the_startup_line_names_the_port_it_bound() {
 
 // ANCHOR: run_lines
 /// `-c`: the reader's own commands, run on the game's kernel in this process with the store
-/// in ANOTHER process — the verdicts are that kernel's, `[computed]` then `[cached]`, and a
-/// trace shows the peer's own span under the stored cell.
+/// in ANOTHER process — the verdicts are that kernel's, and a trace shows the peer's own span
+/// under the stored cell. A mounted answer is held as uncacheable here (`ikigai-resolve`'s
+/// rule: a cut on the peer never crosses back), so the board over it is `[uncacheable]` every
+/// time, and the trace says why: the mount's node is `uncached=declared`, the cell over it
+/// `uncached=dependency` on the stored cell.
 #[test]
 fn run_lines_answer_with_the_game_kernels_verdicts_over_a_peer_store() {
     let peer = serve_peer(Kernel::new(Arc::new(stored_space(Arc::default()))));
@@ -606,12 +609,22 @@ fn run_lines_answer_with_the_game_kernels_verdicts_over_a_peer_store() {
         "{out}"
     );
     assert!(
-        out.contains("---\n-X-\n---\n[computed]\n---\n-X-\n---\n[cached]\n"),
+        out.contains("---\n-X-\n---\n[uncacheable]\n---\n-X-\n---\n[uncacheable]\n"),
+        "{out}"
+    );
+    assert!(
+        out.contains("uncached=dependency urn:iki:tutorial:ttt:stored:1:1"),
+        "{out}"
+    );
+    assert!(
+        out.lines()
+            .any(|line| line.contains("─ urn:iki:tutorial:ttt:stored:1:1 ")
+                && line.ends_with("uncached=declared")),
         "{out}"
     );
     // The stored cell twice: the mount's node in this kernel, and the peer's own under it.
     assert_eq!(
-        out.matches("urn:iki:tutorial:ttt:stored:1:1 ").count(),
+        out.matches("─ urn:iki:tutorial:ttt:stored:1:1 ").count(),
         2,
         "{out}"
     );

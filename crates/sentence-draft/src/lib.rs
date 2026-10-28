@@ -248,7 +248,7 @@ impl HttpTransport for Ureq {
         Ok(HttpResponse {
             status,
             headers: vec![],
-            body,
+            body: body.into(),
         })
     }
 }

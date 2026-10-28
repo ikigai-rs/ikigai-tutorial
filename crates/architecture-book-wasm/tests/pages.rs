@@ -125,6 +125,21 @@ fn golden_threads_answers_as_the_page_says_in_page_order() {
     run_page_in_order("economics/economics.md", 6);
 }
 
+#[test]
+fn the_manifold_answers_as_the_page_says_in_page_order() {
+    run_page_in_order("spine/manifold.md", 5);
+}
+
+#[test]
+fn the_spine_answers_as_the_page_says_in_page_order() {
+    run_page_in_order("spine/spine.md", 4);
+}
+
+#[test]
+fn two_faces_answers_as_the_page_says_in_page_order() {
+    run_page_in_order("substrate/two-faces.md", 2);
+}
+
 /// Each control, pressed first on a fresh page, runs every one of its lines in its harness:
 /// nothing it sends is a name the harness does not bind or a line the engine cannot read.
 #[test]

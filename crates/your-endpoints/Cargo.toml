@@ -26,8 +26,11 @@ futures.workspace = true
 hello-camel = { path = "../hello-camel" }
 
 [dev-dependencies]
-# 0.9 adds RECOMPUTE; 0.10 adds opt-in FAILURES. This caret stays below 0.11.
-ikigai-conformance = "0.10.0"
+# 0.9 adds RECOMPUTE; 0.10 adds opt-in FAILURES.
+# 0.11.0 is the pin (set 2026-10-27, ledger #2365): the release on core 0.2. It turns on DATATYPES
+# and FAILURES by default (the suite already asked for FAILURES), and `word_count_conforms` is
+# clean under both. A 0.x caret: also a ceiling (<0.12.0).
+ikigai-conformance = "0.11.0"
 # Part III's code, for the exercises in `tests/beyond.rs`: a kernel behind a socket, and
 # the three kinds of mount. Read-only from here — the book includes its listings from
 # `crates/two-hosts`, and that is the file you do NOT edit.
@@ -36,9 +39,15 @@ two-hosts = { path = "../two-hosts" }
 # are declared with — both needed to hand-write a peer that is always down. 0.1.63 here and for
 # `ikigai-ipc` below, with `crates/two-hosts` (set 2026-10-14; the wire v9 crates, 0.1.66 on, wait
 # for the book's version-move pass, ledger #2060).
-ikigai-resolve = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-resolve = "0.2.1"
 # The concrete resolver `two_hosts::socket::connect` returns, so a helper can name it.
-ikigai-ipc = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-ipc = "0.2.1"
 async-trait = "0.1"
 # The section "Code and language as resources", for the exercises in `tests/code.rs`: the script
 # host, its ceilings, and the drafting host with its stub model. Read-only from here, like

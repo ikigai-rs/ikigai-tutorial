@@ -35,19 +35,38 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 # 0.1.63 is the pin for this crate and the three below (set 2026-10-14), one release for all
 # four, as 0.1.30 was. Newer cli crates exist (0.1.66 brought wire v9) and are not taken here:
 # moving them moves the wire the book's transcripts replay, which is its own pass (ledger #2060).
-ikigai-web = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2 adds `Route::redirect` (a page to redirect to after a non-htmx POST); the routes here set
+# it to `None`, keeping the endpoint's answer, as before.
+ikigai-web = "0.2.1"
 # The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
 # peer store). 0.1.30 speaks wire v8 (a typed Conflict), backward compatible with the v7
 # the Python and Deno faces were built against; both speak v8 at their main.
-ikigai-ipc = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2 speaks wire v10.
+ikigai-ipc = "0.2.1"
 # `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
 # `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds. 0.1.30 is the release
 # the two crates above belong to.
-ikigai-resolve = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# Since 0.1.64 a mount holds every answer as uncacheable here (a cut on the peer never crosses
+# back), so a game over a peer store caches nothing in this host, and the store contract is run
+# against the peer's own answers (`peer_answers` in src/lib.rs), not the mount's.
+ikigai-resolve = "0.2.1"
 # `-c <line>`: the REPL grammar (`source`, `sink`, `cache`, `trace`) run against the game's
 # own kernel in this process, so a line's verdict is that kernel's. 0.1.18 is the floor
 # book-wasm states for the same `Engine::new` / `eval` / `Action` surface.
-ikigai-engine = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2's plain `trace` leaves out the kernel's `defaulted` notes; `trace --defaults` prints them.
+ikigai-engine = "0.2.1"
 async-trait = "0.1"
 futures.workspace = true
 # The runtime ikigai-web's server runs on.

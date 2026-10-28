@@ -332,6 +332,7 @@ urn:iki:tutorial:check:to-turtle          → to-turtle
 urn:toolbox:page                          → toolbox-page
 urn:toolbox:none                          → toolbox-none
 urn:toolbox:text:{message}                → echo
+urn:toolbox:path:{rest}                   → toolbox-path
 urn:toolbox:input:{iri}                   → toolbox-input
 urn:toolbox:check:{iri}                   → toolbox-check
 urn:toolbox:{name}                        → toolbox-file
