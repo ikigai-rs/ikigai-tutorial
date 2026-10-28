@@ -4,14 +4,15 @@ A resource-oriented computing kernel in Rust, taught from the outside in.
 
 ## What ikigai is, in one paragraph
 
-Everything is a **resource** named by a URI. You never call a function; you **resolve** a
-name against a **kernel**, which routes it to a bound **endpoint** and hands back a
-**representation** — bytes plus a media type. There are five verbs, not a vocabulary of
-methods: `Source` (read), `Sink` (write), `Exists`, `Delete`, and `Meta` (describe
-yourself). **Transreptors** convert one representation into another, so the same resource
-can arrive as text, as Turtle, or as HTML. **Golden threads** track what a result was
-derived from, so a write invalidates exactly what it should. **Capabilities** gate
-authority and attenuate as they pass down a call chain.
+In ikigai, data and computations are **resources**, each named by an IRI
+(Internationalized Resource Identifier). To **resolve** a name is to ask the **kernel**
+to route a request to an **endpoint**, code that handles it. The answer is a
+**representation**: bytes plus a media type, such as `text/plain`. Requests use five verbs: `Source` (read), `Sink`
+(write), `Exists`, `Delete`, and `Meta` (describe the resource). **Transreptors** convert
+one representation into another, such as text into HTML. **Golden threads** record a
+result's dependencies so a change can invalidate cached answers that depend on it.
+**Capabilities** specify which requests a caller may make; a caller can pass narrower
+permissions to the resources it calls.
 
 That is the whole model. The rest is consequences — and the first four of them, run
 rather than described, are [What resolution buys you](getting-started/payoff.md).
@@ -21,7 +22,7 @@ rather than described, are [What resolution buys you](getting-started/payoff.md)
 Because naming a thing and *resolving* a thing are different acts, and separating them
 buys you a lot at once. If a computation has a name, it can be cached, traced,
 substituted, authorized, converted, and moved to another machine without its caller
-knowing. A function call gives you none of that; it is a jump with arguments.
+knowing. An ordinary function call does not provide those services on its own.
 
 The wager of this project is that a system where every step is a resolvable name is
 *cheaper to reason about at scale* than one where the steps are opaque calls — and that
@@ -32,9 +33,11 @@ boundary on what may be done, and provenance for what was done.
 ## What is in here
 
 **[The front door](front-door/cli.md)** needs no Rust: twenty minutes with the `ikigai` CLI that show the
-whole model — a catalog, a manifold, a pipe, a format change, a cache hit, a cut thread,
-a trace — and then the REPL grammar those commands are written in, with a Run button
-wherever this page's own kernel can answer.
+model in use: list available resources, pass results between them, change formats, reuse
+and invalidate cached answers, and trace a request. [The REPL grammar](front-door/grammar.md)
+then explains the command syntax. A REPL is an interactive prompt that reads a command,
+runs it, prints its result, and waits for another. Run buttons let you try commands
+where the page's own kernel can answer.
 
 **Part I — Getting started** builds an endpoint and links it into a kernel you compose
 yourself. It is the 95% case, and everything else assumes it.
