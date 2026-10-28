@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-28**: The page's kernel now holds one recorded file: a week of USGS earthquakes (178 events of M4.5 and up, 2024-01-01 to 2024-01-08) at `urn:file:quakes-2024-01-01.geojson`, the same name the CLI's file workspace gives a copy you save there. "The kernel in the browser" shows it in a new section, "One recorded file", where jq counts its events, and the `list` in "The REPL grammar" ends with it.
+
+  Pages: [Appendix: the kernel in the browser](browser.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-28**: The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and passes a caller-supplied greeting to `compose` by name, and a misspelled argument name is shown as the error it is since CLI 0.2.4.
 
   Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
