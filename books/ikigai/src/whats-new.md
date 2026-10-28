@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-28**: The introduction defines the kernel's basic terms before using them, points to the companion books without a stale count, and distinguishes runnable Rust examples from ignored fragments. The front door names Cargo as an installation prerequisite and defines REPL, RDF, and capability; the grammar explains its syntax markers and acknowledges a REPL still open from the CLI chapter. The CLI chapter also includes the uncacheable status printed after cache and thread listings in CLI 0.2.4 and no longer understates the catalog's length.
+
+  Pages: [Introduction](introduction.md), [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-28**: A new part, "Exploring without Rust", after the front door: no endpoints to write, only the `ikigai` command, the Run buttons and files, over a week of USGS earthquakes. "A week of earthquakes" introduces it; "A lab with names in it" asks the recorded week questions with a pipe, a map and a fork, and traces, caches and cuts them; "Somebody else's resource" reads the live feed through `urn:http:get`, keeps it for USGS's sixty seconds, cuts the URL's thread and narrows the session to one host; "Reshaping JSON with jq" asks sharper questions with `urn:json:query` and fills a headline template with `$j`. The page's kernel now also holds that headline template, which the `list` in "The REPL grammar" shows.
 
   Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md), [Somebody else's resource](explore/http.md), [Reshaping JSON with jq](explore/jq.md), [The REPL grammar](front-door/grammar.md)
