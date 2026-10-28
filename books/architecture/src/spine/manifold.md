@@ -45,10 +45,10 @@ urn:iki:store:graph-info
 urn:iki:store:graph-update
 urn:iki:store:update
 urn:iki:ledger:{ledger}:defer
-urn:iki:ledger:{ledger}:doctor
 urn:iki:ledger:{ledger}:item:{id}:state
 urn:iki:store:load
 urn:iki:ledger:{ledger}:claim
+urn:iki:ledger:{ledger}:doctor
 urn:iki:ledger:{ledger}:link
 urn:iki:ledger:{ledger}:purge
 urn:iki:ledger:{ledger}:reopen
@@ -89,8 +89,8 @@ urn:iki:ledger:{ledger}:item:{id}:closed
 urn:iki:ledger:{ledger}:item:{id}:holder:{holder}
 urn:iki:ledger:{ledger}:item:{id}:state:{value}
 urn:iki:store:graph-info
-urn:iki:ledger:{ledger}:doctor
 urn:iki:ledger:{ledger}:item:{id}:state
+urn:iki:ledger:{ledger}:doctor
 urn:iki:store:graph-ask
 urn:iki:store:graph-construct
 urn:iki:store:graph-describe

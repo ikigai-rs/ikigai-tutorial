@@ -14,8 +14,8 @@
 
 [[change]]
 date = "2026-10-27"
-summary = "The book now builds against ikigai-core 0.2, the streams release. In \"Spaces that wrap spaces\", the trace of the state board no longer ends with `defaulted=as`: the REPL's plain `trace` leaves the kernel's defaulted inputs out now, and `trace --defaults` shows them."
-pages = ["overlays/overlays.md"]
+summary = "The book now builds against ikigai-core 0.2, the streams release. In \"Spaces that wrap spaces\", the trace of the state board no longer ends with `defaulted=as`: the REPL's plain `trace` leaves the kernel's defaulted inputs out now, and `trace --defaults` shows them. In \"The manifold, and the UI that falls out of it\", the ledger's `doctor` action is listed in the place the kernel now lists it, under both capabilities."
+pages = ["overlays/overlays.md", "spine/manifold.md"]
 
 [[change]]
 date = "2026-10-27"
