@@ -286,6 +286,7 @@ dependencies = [
  "js-sys",
  "live-space",
  "push",
+ "quakes",
  "serde_json",
  "shop",
  "spreadsheet",
@@ -2622,6 +2623,15 @@ dependencies = [
  "ikigai-vocab",
  "spreadsheet",
  "time-resource",
+]
+
+[[package]]
+name = "quakes"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "serde_json",
 ]
 
 [[package]]

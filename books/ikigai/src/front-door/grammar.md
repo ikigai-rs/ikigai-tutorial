@@ -494,7 +494,8 @@ urn:json:to-csv                           → json-to-csv
 urn:compress:gzip                         → compress-gzip
 urn:decompress:gzip                       → decompress-gzip
 urn:compress:zlib                         → compress-zlib
-urn:decompress:zlib                       → decompress-zlib</pre>
+urn:decompress:zlib                       → decompress-zlib
+urn:file:quakes-2024-01-01.geojson        → quakes-window</pre>
 </div>
 
 That is everything the kernel in this page binds. The kernel's own `urn:kernel:*` rows come
@@ -502,8 +503,9 @@ first; then Part I's twelve names, in the order they were bound: `ikigai-fn`'s n
 this book's three chained on top, exactly as [Binding](../getting-started/binding.md) wrote
 them. After those come the Applied parts' tic-tac-toe, time and spreadsheet names, the
 names "Checking a resource" uses, and the shop and `ikigai-json` names that "Transreption" and
-"Short names in a space" use, and last the gzip and zlib names of
-[Streams, I](../streams/bytes.md). A host built from Part I alone lists only Part I's share of
+"Short names in a space" use, the gzip and zlib names of
+[Streams, I](../streams/bytes.md), and last the one recorded file the page binds
+([the kernel in the browser](../browser.md#one-recorded-file) says why). A host built from Part I alone lists only Part I's share of
 it. A full CLI lists a few hundred, many served over a socket from another
 process — which is [Part III](../beyond/socket.md).
 

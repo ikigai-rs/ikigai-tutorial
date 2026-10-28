@@ -119,6 +119,9 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // "Streams, I: bytes are a representation": gzip and zlib, both ways, as resources and
         // as transreptors (`urn:compress:*`, `urn:decompress:*`).
         Arc::new(ikigai_compress::space()),
+        // "Exploring without Rust": the recorded week of earthquakes, one atom at
+        // `urn:file:quakes-2024-01-01.geojson`. The only `urn:file:` name the page binds.
+        Arc::new(quakes::space()),
     ])
 }
 
@@ -2009,12 +2012,19 @@ mod tests {
     #[test]
     fn the_browser_appendix_cells_answer_as_it_says() {
         // `./` makes it a path under `src/`: the appendix is not an Applied chapter.
-        let t = run_chapter_in_page_order("./browser.md", 2);
+        let t = run_chapter_in_page_order("./browser.md", 3);
+        // The recorded week of earthquakes: jq counts its events, reading the file through the
+        // kernel, so the file's own answer is cached after it.
+        assert!(
+            t[0].starts_with(&format!("{}\n[computed]\ncached\n", quakes::EVENTS)),
+            "{}",
+            t[0]
+        );
         // The appendix's page asks for no clock, so the time endpoint refuses and says why.
-        assert!(t[0].contains("this kernel has no clock"), "{}", t[0]);
+        assert!(t[1].contains("this kernel has no clock"), "{}", t[1]);
         // And a trace has no durations to print.
-        assert!(t[1].contains("urn:iki:tutorial:title"), "{}", t[1]);
-        assert!(t[1].contains(" · —"), "{}", t[1]);
+        assert!(t[2].contains("urn:iki:tutorial:title"), "{}", t[2]);
+        assert!(t[2].contains(" · —"), "{}", t[2]);
     }
 
     #[test]
