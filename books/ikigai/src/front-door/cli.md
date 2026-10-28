@@ -213,12 +213,10 @@ cache
 
 The first two lines show the cache's limits: 4096 entries and 64 MiB by default. The
 default policy removes the least recently used entry when either limit is exceeded.
-[Golden threads in practice](../getting-started/golden-threads.md) shows how a host
-configures the cache and how streamed answers count toward its size limit. Since core
-0.2.0, a stream that can only be read once, a *one-shot body*, is never cached. An answer
-stored on disk counts its full length toward the limit. A cache hit shares the stored
-bytes rather than copying them.
-
+[Golden threads in
+practice](../getting-started/golden-threads.md) shows how a host configures the cache,
+and what the size counts now that an answer can be a stream (core 0.2.0: a one-shot body
+is never stored, a spilled one counts its full length, a hit shares its bytes).
 Each row lists an entry's resource name, state, format, size, dependency count, and
 resolution chain. `root` means the host's own space.
 
@@ -296,7 +294,9 @@ that vocabulary against a real CLI. It also replays the REPL transcripts against
 `ikigai-cli` {{#include ../../ikigai-cli.version}}, pinned in
 `books/ikigai/ikigai-cli.version`. Contributors can run these checks with
 `./scripts/test-transcripts.sh`. That pin identifies the replayed version; a newer CLI
-may print different output.
+may print different output. The replay exists because, for a while, it did not run in CI,
+and section 6 went on saying a cut left a pure function's answer `cached` long after core
+0.1.73 changed it. If a command here fails on a newer CLI, the replay is where to look first.
 
 This replay covers the blocks with `ikigai>` prompts. It does not execute shell command
 blocks or prompt-free REPL examples.

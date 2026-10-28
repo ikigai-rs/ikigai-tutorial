@@ -7,7 +7,11 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
-- **2026-10-28**: The front-door chapters explain the Rust/Cargo setup, separate commands from output, and use a pipe whose reversal is visible. The grammar shows the composition templates and caller-supplied data, and clarifies cache probes, request tallies, fan-out width, and which examples CI replays.
+- **2026-10-28**: The CLI tour now explains the Rust/Cargo prerequisite and separates installation time from the walkthrough. The grammar clarifies which requests its tally counts, why a cache probe can cache a description, and what fan-out width reports.
+
+  Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
+
+- **2026-10-28**: The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and passes a caller-supplied greeting to `compose` by name, and a misspelled argument name is shown as the error it is since CLI 0.2.4.
 
   Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
 
