@@ -4,7 +4,12 @@ The same command syntax works in the `ikigai` REPL, in a shell with `ikigai -c`,
 book's runnable cells, and in the [browser demo](../getting-started/running-it.md#the-browser-demo).
 Each uses its own host, which determines the available resource names. A command with a
 **Run** button works in this page. The CLI examples below run inside `ikigai --plain`
-unless they start with `ikigai`, in which case run them in your shell.
+unless they start with `ikigai`, in which case run them in your shell. If your REPL from
+[Twenty minutes, nothing compiled](cli.md) is still open, you can keep using it.
+
+The syntax blocks use `<…>` for a value you supply, `[…]` for an optional part, and `…`
+for repetition. Do not type those markers. In the pipe, map, and fork syntax blocks,
+`a`, `b`, and `c` stand for resource names.
 
 ## A resolution
 
@@ -13,9 +18,10 @@ source <iri> [input]
 source <iri> key=value …
 ```
 
-`source` is the verb, meaning "read." The IRI identifies the resource to read. Everything
-after it supplies arguments to that request. These are command parts, not RDF's
-subject, predicate, and object.
+`source` is the verb, meaning "read." An IRI (Internationalized Resource Identifier)
+names the resource to read. Everything after it supplies arguments to that request.
+These are command parts, not the subject,
+predicate, and object of a Resource Description Framework (RDF) statement.
 
 `key=value` names an argument. An unnamed, or *positional*, value fills a declared
 argument that you have not supplied by name. The engine reads the endpoint's description
@@ -297,8 +303,10 @@ aTitleFromTheGrammarChapter
 describe <iri> [type]
 ```
 
-The `Meta` verb. The type defaults to `text/turtle`; `text/plain` is the human face, and
-any other type the host can reach through a transreptor works too.
+`describe` uses the `Meta` verb to ask for a resource's description. The media type
+defaults to `text/turtle`, an RDF graph in Turtle format; `text/plain` requests a
+human-readable summary. A transreptor converts representations between formats, so
+other media types work when the host has a conversion path to them.
 
 <div class="ikigai-run" data-cmd='describe urn:iki:fn:reverseList text/plain'>
 <pre class="ikigai-run-expected">reverseList — Reverse list
