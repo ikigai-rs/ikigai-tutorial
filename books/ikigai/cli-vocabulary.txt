@@ -46,7 +46,10 @@ urn:iki:fn:conditional
 # The same library's demo endpoints, which the grammar chapter's map and fork lines use,
 # and the compose shape the CLI's host binds for its own demo.
 urn:demo:split
+urn:demo:wrap
+urn:demo:greet
 urn:data:page
+urn:data:about
 
 # The Lisp engine the grammar chapter names in passing: a line starting with `(`.
 urn:lisp:eval
