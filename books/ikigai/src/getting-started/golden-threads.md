@@ -163,6 +163,17 @@ growing. `Fifo` and `CostAware` (keep what was expensive) ship beside it, and a 
 that wants an unbounded cache says so by declining to name a victim — visibly, not by
 omission.
 
+Since core 0.2.0 an entry holds a body, which need not be one buffer in memory ([Streams,
+I](../streams/bytes.md)), and the bound counts bodies as follows. A **one-shot** body, a
+stream that can be read only once, is never stored: there is nothing to read again, and the
+step's `uncached=` trace note names the cause, `one-shot body`. A body **spilled** to a
+file is counted at its full length against the byte bound, although it holds no memory,
+and one that does not know its length counts as unbounded, so no bounded policy admits it.
+And a stored body is **shared, not copied**: the entry takes a second handle on the answer
+only once the policy has admitted it, and a hit read as a body is another handle on the
+same bytes. (A caller that asks for a plain buffer still gets its own copy, as every hit
+cost before 0.2.0.)
+
 ```rust
 # extern crate hello_camel;
 # extern crate ikigai_core;

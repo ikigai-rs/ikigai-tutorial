@@ -70,6 +70,43 @@ did not declare, and above all **no bearer token and no personal data in a query
 logged, shared, and cached; the addressing convention and the leak-prevention rule are the same rule
 seen from two sides.
 
+## Bodies larger than memory
+
+A door also frames what it sends and bounds what it takes, and since the streams release it
+does both without holding a whole body. What follows is `ikigai serve --http` from
+`ikigai-cli` 0.2.2 (ikigai-web 0.2.2, built with the cli's `web` feature), with the file
+answers of 0.2.3; *The ikigai Book*'s part on streams says what a body is.
+
+- **Framing.** An answer that is one buffer goes whole, with `Content-Length`, as every
+  answer did before. An answer that streams is framed by `Content-Length` when its length is
+  known and chunked when it is not. A stream that fails part-way fails *visibly*: a chunked
+  answer ends without its last chunk, a measured one ends short, and the connection closes;
+  never a well-formed shorter body.
+- **Ranges.** A `GET` over a body that can seek, knows its length and has a strong validator
+  says `Accept-Ranges: bytes` and honors a `Range` of one byte range: `206 Partial Content`,
+  or `416 Range Not Satisfiable` when the range lies past the end. `If-Range` is compared
+  strongly against the `ETag`, and anything else (a mismatch, a date, several ranges, a
+  `Range` that does not parse) is answered with the whole body and `200`. A file is such a
+  body from 0.2.3, so a file download resumes.
+- **Uploads.** A route named an upload route (`http.upload` in the config home) does not
+  read its body into memory: the door writes it to a spill under
+  `<config home>/spill/http-<port>` as it arrives, then hands the sink the content's id. Each
+  bound is a refusal, never a truncation: `413` past the route's largest body (checked against
+  `Content-Length` before a byte is read) or past the caller's spill grant, `408` for a body
+  that falls behind the minimum rate after its grace (`http.upload_min_rate`,
+  `http.upload_grace`), and `503` when the uploads in flight hold the most the disk may
+  (`http.spill_total`; `http.spill_ceiling` bounds one request). A caller granted no spill is
+  served as before, its body in memory under the door's ordinary bound.
+- **Validators.** Every `ETag` is now one rule over the type and the content id, whatever
+  the body's shape, so a buffer and a stream of the same bytes carry the same tag. Before
+  0.2.2 the hash ran over the bytes themselves, so every tag changed **once**: a client's
+  cache revalidates each stored answer once, a `200` where it had a `304`, and is right from
+  then on.
+
+The bounds are the security half and the framing is the UX half, and they are, once more,
+the same decisions: a download that cannot pretend to have finished and an upload that
+cannot fill the disk are one rule seen from two sides.
+
 ## Where this runs, and where it is drawn
 
 A browser's content-security policy and its Origin checks are enforced by the *real* browser, which
