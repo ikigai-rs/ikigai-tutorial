@@ -26,11 +26,20 @@ ikigai-core.workspace = true
 # transport crate's source and 0.1.62 changed no wire, and 0.1.57 to 0.1.61 changed only HTTP
 # doors (a DELETE answers with its body, an `Expect: 100-continue` is invited, a dead listener
 # ends the accept loop on Windows).
-ikigai-ipc = "0.1.63"
-ikigai-quic = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-ipc = "0.2.1"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-quic = "0.2.1"
 # `MountedRemote` (the alias/override composition) and the `Resolver` surface a
 # connected peer presents.
-ikigai-resolve = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-resolve = "0.2.1"
 # `Failover` — what `--prefer` is made of. 0.2.0 is the floor (set 2026-10-21) because "Preference"
 # teaches what it changed: `Failover` decides by core 0.1.108's `Error::class()`, advancing on a
 # transient OR a retry-after failure of an idempotent verb (`Verb::is_idempotent`), and returns
@@ -42,8 +51,11 @@ ikigai-resolve = "0.1.63"
 # the architecture book's resilience harness (ledger #2174) builds on. Nothing here changed
 # behavior. 0.2.2 (2026-10-25) writes the state face's strings with core's `turtle_literal`
 # (ledger #2184, #2222), so it takes ikigai-core 0.1.112 and no RDF library on wasm32; kept in
-# step with the resilience harness's pin. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-throttle = "0.2.2"
+# step with the resilience harness's pin. A 0.x caret: also a ceiling (<0.3.0, until 2026-10-27).
+# 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.2" was a ceiling
+# below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-throttle = "0.3.0"
 async-trait = "0.1"
 futures.workspace = true
 

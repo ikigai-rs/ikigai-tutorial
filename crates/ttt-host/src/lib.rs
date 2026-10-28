@@ -39,8 +39,9 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use ikigai_core::{
-    Bindings, Description, Endpoint, Error, Expiry, Fallback, Invocation, Iri, Kernel, ReprType,
-    Representation, Request, Resolution, Resolved, Result, Scope, Space, SpaceEntry, Verb,
+    Bindings, Description, Endpoint, EndpointSpace, Error, Expiry, Fallback, FnEndpoint,
+    Invocation, Iri, Kernel, ReprType, Representation, Request, Resolution, Resolved, Result,
+    Scope, Space, SpaceEntry, UriTemplate, Verb,
 };
 use ikigai_resolve::MountedRemote;
 use ikigai_vocab::TurtleRenderer;
@@ -168,15 +169,22 @@ pub fn parse_args<I: IntoIterator<Item = String>>(args: I) -> std::result::Resul
 /// The mount is an OVERRIDE (`MountedRemote::overriding`): names are forwarded unchanged,
 /// so the peer answers `urn:iki:tutorial:ttt:stored:1:1` as that name — what the Python and
 /// Deno stores bind. The check WRITES a square off the board (`7,-3`) and clears it again.
+///
+/// The check reads the PEER's answers, not the mount's: a mount holds every answer as
+/// uncacheable here, whatever the peer said (`ikigai-resolve`, since 0.1.64), because a cut on
+/// the peer never crosses back. The peer's own cache still holds its marks, so whether a mark
+/// is cacheable is a question about the peer, and the contract asks the peer.
 pub fn peer_store(socket: &Path) -> std::result::Result<Arc<dyn Space>, String> {
-    let resolver = ikigai_ipc::connect(socket)
-        .map_err(|e| format!("the store at {}: {e}", socket.display()))?;
+    let resolver: Arc<dyn ikigai_resolve::Resolver> = Arc::new(
+        ikigai_ipc::connect(socket)
+            .map_err(|e| format!("the store at {}: {e}", socket.display()))?,
+    );
     let mount: Arc<dyn Space> = Arc::new(MountedRemote::overriding(
-        Arc::new(resolver),
+        Arc::clone(&resolver),
         STORED_PREFIX,
         format!("ipc:{}", socket.display()),
     ));
-    futures::executor::block_on(tic_tac_toe::check_store(Arc::clone(&mount))).map_err(
+    futures::executor::block_on(tic_tac_toe::check_store(peer_answers(resolver))).map_err(
         |clause| {
             format!(
                 "the store at {} breaks the store contract: {clause}",
@@ -187,6 +195,19 @@ pub fn peer_store(socket: &Path) -> std::result::Result<Arc<dyn Space>, String> 
     Ok(mount)
 }
 // ANCHOR_END: peer
+
+/// The stored cell's names answered by the peer itself: every request forwarded over
+/// `resolver`, and the answer kept as the peer gave it, expiry included.
+fn peer_answers(resolver: Arc<dyn ikigai_resolve::Resolver>) -> Arc<dyn Space> {
+    Arc::new(EndpointSpace::new().bind(
+        UriTemplate::parse(tic_tac_toe::STORED).expect("the stored cell's template parses"),
+        FnEndpoint::new("peer-store", move |inv: &Invocation<'_>| {
+            resolver
+                .issue(inv.request.clone())
+                .map(|(answer, _status)| answer)
+        }),
+    ))
+}
 
 /// The game, built: one kernel, and a corridor per game.
 pub struct Host {
@@ -313,6 +334,7 @@ pub fn edge_config() -> EdgeConfig {
         cap: None,
         cors: None,
         csp: None,
+        redirect: None,
     };
     let page = |pattern: &str, iri: &str| Route {
         csp: Some(PAGE_CSP.to_string()),

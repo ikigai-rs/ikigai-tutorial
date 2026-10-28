@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-27**: The book now builds against ikigai-core 0.2, the streams release. In "Spaces that wrap spaces", the trace of the state board no longer ends with `defaulted=as`: the REPL's plain `trace` leaves the kernel's defaulted inputs out now, and `trace --defaults` shows them.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-10-27**: The other books now links Running ikigai, the operator's side of the door and capabilities this book describes, and says the library lists all five books.
 
   Pages: [The other books](other-books.md)

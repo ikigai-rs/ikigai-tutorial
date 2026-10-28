@@ -25,12 +25,19 @@ inspector = { path = "../inspector" }
 # The HTTP door. 0.1.64 is the floor: it added `EdgeConfig::html_door`, the HTML door default
 # of the UI conventions (D6): the strict page CSP, an Origin check on every unsafe method, and
 # the security headers (ledger #1813). ttt-host stays on 0.1.63; the two never meet. A 0.x
-# caret, so also a ceiling (<0.2.0).
-ikigai-web = "0.1.64"
+# caret, so also a ceiling (<0.2.0, until 2026-10-27).
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.64" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2 adds `Route::redirect`; the routes here set it to `None`, keeping the endpoint's answer.
+ikigai-web = "0.2.1"
 # The directory delivery (D17): `--artifacts DIR` binds `urn:iki:tutorial:inspect:dir:{path}`
 # to a jailed FileEndpoint over DIR. 0.1.9 is the release ikigai-ui's own tests use. A 0.x
-# caret: also a ceiling (<0.2.0).
-ikigai-fs = "0.1.9"
+# caret: also a ceiling (<0.2.0, until 2026-10-27).
+# 0.2.2 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.9" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-fs = "0.2.2"
 tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "io-util", "time"] }
 
 [dev-dependencies]

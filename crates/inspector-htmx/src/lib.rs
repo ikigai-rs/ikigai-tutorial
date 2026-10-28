@@ -73,6 +73,7 @@ fn route(pattern: &str, iri: &str) -> Route {
         cap: None,
         cors: None,
         csp: None,
+        redirect: None,
     }
 }
 

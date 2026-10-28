@@ -95,7 +95,7 @@ lto = true
 # the match by `ik:contract`. The old per-id `urn:ikigai:endpoint:{id}:action:{verb}` is gone, so
 # every `Meta` and catalog graph a chapter shows moved with it, and a book below 0.1.91 would
 # print IRIs its own pages no longer quote. 0.1.90 changed nothing here (vocab's space names
-# itself). A 0.x caret: also a ceiling (<0.2.0). Before that the floor was 0.1.87, because three
+# itself). A 0.x caret: also a ceiling (<0.2.0, until 2026-10-27). Before that the floor was 0.1.87, because three
 # chapters run what it added: `urn:kernel:explain`, the dry run
 # of a resolution ("Tracing a resolution"), `urn:kernel:dependents`, what cutting a golden thread
 # would recompute ("Golden threads"), and `Description::unsatisfied_scopes`, the floor's own
@@ -117,7 +117,12 @@ lto = true
 # `lossy=allow` consent (0.1.77), and `urn:kernel:topology` (0.1.78); before that 0.1.72,
 # where the resolution chain arrived; before that 0.1.66, which `ikigai-vocab` 0.1.66
 # requires.)
-ikigai-core = "0.1.110"
+# 0.2.0 is the pin (set 2026-10-27, ledger #2365): 0.2.0 is the streams release (ledger #2261), a
+# representation's bytes as a body read as it arrives, and the old pin "0.1.110" meant <0.2.0 under
+# 0.x rules, so it could not admit it. It is a caret floor: the lock takes 0.2.2, as the modules
+# below require (ikigai-vocab 0.2.2 takes core ^0.2.2), and the status chapter names that. A
+# 0.x caret: also a ceiling (<0.3.0).
+ikigai-core = "0.2.0"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
 # kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.109 is the pin, paired
 # with core 0.1.109 (set 2026-10-21): since 0.1.105 it renders the ArgSpec shape (input groups,
@@ -138,8 +143,12 @@ ikigai-core = "0.1.110"
 # action at its content-addressed contract IRI (above), with the action's inputs under that
 # contract, and its vocabulary defines `ik:contract` and documents `ik:ActionMatch`'s new subject;
 # it requires core 0.1.91. Before that the pin was 0.1.66, the release core 0.1.66 paired with,
-# while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-vocab = "0.1.109"
+# while the lock resolved 0.1.78. A 0.x caret: also a ceiling (<0.2.0, until 2026-10-27).
+# 0.2.0 is the pin (set 2026-10-27, ledger #2365), paired with core 0.2.0, the streams release
+# (ledger #2261); the old pin "0.1.109" meant <0.2.0 under 0.x rules. The lock takes 0.2.2, whose
+# vocabulary has one more term than 0.1.112's ("A sentence becomes a draft" counts 252). A 0.x
+# caret: also a ceiling (<0.3.0).
+ikigai-vocab = "0.2.0"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
@@ -160,22 +169,31 @@ ikigai-vocab = "0.1.109"
 # #987), and the book binds compose behind doors of its own, and binding a door drops a space's
 # name (core 0.1.89), so no answered-by or topology a page prints moved; 0.4.1 exports
 # `MARKER_LETTERS` and `escape_markers`, which nothing here uses. The old pin "0.5.0" was a
-# ceiling below 0.6. A 0.x caret: also a ceiling (<0.7.0).
-ikigai-fn = "0.6.0"
+# ceiling below 0.6. A 0.x caret: also a ceiling (<0.7.0, until 2026-10-27).
+# 0.7.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.6.0" was a ceiling
+# below 0.7.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.8.0).
+ikigai-fn = "0.7.0"
 # JSON and CSV as resources, for "Transreption" and "Short names in a space": `urn:json:query` (a
 # sandboxed jq selection of any resource, read under the caller's capability, a non-JSON source
 # through the kernel's transreptors), `urn:json:from-csv` (also the registered text/csv to
 # application/json transreptor) and `urn:json:to-csv`. 0.1.0 is the first release and the floor; it
 # builds for wasm32-unknown-unknown, where a sandbox bound reached is an abort that traps the page's
 # kernel (wasm cannot unwind), so the book's in-page programs stay far inside the bounds. A 0.x
-# caret: also a ceiling (<0.2.0).
-ikigai-json = "0.1.0"
+# caret: also a ceiling (<0.2.0, until 2026-10-27).
+# 0.3.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-json = "0.3.1"
 # Bytes transrepted, for "Streams, I: bytes are a representation" (ledger #2253): `urn:compress:gzip`
 # and `urn:decompress:gzip` (and zlib), each also a registered transreptor, with a decompression
 # bound (`max-bytes`) that refuses rather than truncates. 0.2.0 is the published head and the floor;
 # it needs core ^0.1.89, below the pin here, and links only `flate2`'s pure-Rust backend, so it
-# builds for wasm32-unknown-unknown as it is. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-compress = "0.2.0"
+# builds for wasm32-unknown-unknown as it is. A 0.x caret: also a ceiling (<0.3.0, until 2026-10-27).
+# 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.0" was a ceiling
+# below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-compress = "0.3.0"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
 # transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the floor
 # because it added `arrangement_space()`, which mounts the arrangement surface alone, and the `full`
@@ -190,8 +208,11 @@ ikigai-compress = "0.2.0"
 # 0.2.0, the published head past the old pin's 0.x ceiling (<0.2.0): its one change is that both its
 # spaces name themselves (`urn:iki:space:sexpr`, `…:sexpr:arrangement`, ledger #987), and the book
 # calls its functions rather than mounting its spaces, so nothing a page prints moved. A 0.x caret:
-# also a ceiling (<0.3.0).
-ikigai-sexpr = { version = "0.2.4", default-features = false }
+# also a ceiling (<0.3.0, until 2026-10-27).
+# 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.4" was a ceiling
+# below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-sexpr = { version = "0.3.0", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Part VII's
 # picture test uses it (a dev-dependency), and `crates/live-space` mounts its space for
 # `urn:diagram:kernel`; neither is in the page, so the page pays nothing for it. 0.2.4 is the pin,
@@ -209,13 +230,16 @@ ikigai-sexpr = { version = "0.2.4", default-features = false }
 # classes, so the committed tic-tac-toe picture was redrawn at the move: those two lines changed,
 # and nothing it draws did. Before that 0.2.0 was the pin, past the first release's 0.x ceiling (<0.2.0): `space()` names itself
 # `urn:iki:space:diagram` (ledger #987), and `render` is unchanged, so the picture is the same
-# bytes. A 0.x caret, so also a ceiling (<0.3.0).
-ikigai-diagram = "0.2.4"
+# bytes. A 0.x caret, so also a ceiling (<0.3.0, until 2026-10-27).
+# 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.4" was a ceiling
+# below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-diagram = "0.3.0"
 # 0.4.0 is the pin (set 2026-10-14): an out-of-band host call is held to its
 # session's capability (ledger #83), an unwired module channel fails at once with a typed error
 # (ledger #746), and `ModuleSessionTransport::invoke_session` returns `ikigai_core::Result`, the
 # minor bump; no crate here implements that trait (`loadable-module` builds a `ModuleSpace` over
-# the in-process transport). A 0.x caret, so also a ceiling (<0.5.0); the old pin "0.3.2" was a
+# the in-process transport). A 0.x caret, so also a ceiling (<0.5.0, until 2026-10-27); the old pin "0.3.2" was a
 # ceiling below 0.4. Before that the pin was 0.3.2: a failed out-of-band host call is recorded
 # as a dependency, which no chapter shows. The status chapter stamps its claims at a version of its
 # own (`book_claims` fetches that exact version from crates.io, whatever this pin says); it was
@@ -230,7 +254,10 @@ ikigai-diagram = "0.2.4"
 # (Older history: 0.2.0 enforced a module endpoint's declared `requires` across the
 # boundary, growing `ModuleSpace::new` its `ModuleFloor` argument; 0.1.9 was the floor
 # because `Resolved` grew a public `canonical` field in ikigai-core 0.1.64.)
-ikigai-module = "0.4.0"
+# 0.5.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.4.0" was a ceiling
+# below 0.5.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.6.0).
+ikigai-module = "0.5.1"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
 # 0.2.5 is the pin (set 2026-10-14; 0.2.6 is newer and inside the caret): a call without its
@@ -247,8 +274,11 @@ ikigai-module = "0.4.0"
 # SPARQL thread for the build, so debug and release agree (ledger #1025). "The graph face" printed
 # the same rows at it. Before that the floor was 0.1.11, for a security fix, not for an API: the
 # release cli 0.1.43 adopted (ledger #962), since a book should not teach a face below the floor its
-# own host ships; before it, 0.1.7, the API the chapter uses. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-sparql = "0.2.5"
+# own host ships; before it, 0.1.7, the API the chapter uses. A 0.x caret: also a ceiling (<0.3.0, until 2026-10-27).
+# 0.3.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.5" was a ceiling
+# below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-sparql = "0.3.1"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"
@@ -304,9 +334,12 @@ oxrdf = "0.3"
 # then 0.4.2, where a malformed timestamp stopped dropping an item from `items`/`next` (ledger
 # #866). Before 0.4.0 the floor was 0.3.0, which fixed the unled audit's findings on 0.2.1 that
 # the first chapter walks straight through: two appends in one millisecond minting the same id,
-# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.13.0): read it as a RANGE.
+# and `next` cached across the clock. A 0.x caret, so also a ceiling (<0.13.0, until 2026-10-27): read it as a RANGE.
 # The old pin, "0.9.0", was a ceiling below 0.10 and held the book at 0.9.
-ikigai-ledger = "0.12.0"
+# 0.13.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.12.0" was a ceiling
+# below 0.13.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.14.0).
+ikigai-ledger = "0.13.1"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.25 is the pin (set 2026-10-23), because it changes what a page prints: since
@@ -346,8 +379,11 @@ ikigai-ledger = "0.12.0"
 # than truncating (ledger #970), and 0.2.10 sizes the SPARQL thread for the build (ledger #1003).
 # No query a page runs comes near either bound. Before that the pin was 0.2.8, what gonk edb9a3d
 # links (gonk PR 104), and 0.2.7 is a security floor below which no book crate should sit (ledger
-# #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0).
-ikigai-store = { version = "0.2.25", default-features = false }
+# #915; cli 0.1.43 adopted it). A 0.x caret: also a ceiling (<0.3.0, until 2026-10-27).
+# 0.3.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.25" was a ceiling
+# below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-store = { version = "0.3.1", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
 # Book's "Explain, with a mounted model" and "One-off review". 0.19.0 is the pin (set 2026-10-20;
 # later 0.19.x releases are inside the caret): the review pass and the judge loop stop at the first `Refused` or `RetryAfter`
@@ -357,7 +393,7 @@ ikigai-store = { version = "0.2.25", default-features = false }
 # adopts in the same wave, so the book tracks it; the book's stub model never refuses or
 # rate-limits, so no page's output moves. It also carries the never-published 0.18.11 (a
 # dev-dependency bump). Its floors lift the lock's ikigai-core to 0.1.108, and it takes ikigai-a11y
-# 0.3 (with `themes`), so the lock no longer holds a11y 0.2. A 0.x caret: also a ceiling (<0.20.0);
+# 0.3 (with `themes`), so the lock no longer holds a11y 0.2. A 0.x caret: also a ceiling (<0.20.0, until 2026-10-27);
 # read it as a RANGE.
 # Before that the pin was 0.18.9, the published head: one writer per store handle, narrowed to the
 # mount graph (ledger #1324), and a PR explanation cut at the output budget is refused rather than
@@ -380,7 +416,10 @@ ikigai-store = { version = "0.2.25", default-features = false }
 # #818), and the chapter's stub answer printed the same findings at it. The 0.18 floor was 0.18.0, the
 # release that added the explain-status cost line the chapter shows ("opens instantly from the
 # archive"), and what gonk edb9a3d linked.
-ikigai-browse = "0.19.0"
+# 0.20.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.19.0" was a ceiling
+# below 0.20.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.21.0).
+ikigai-browse = "0.20.0"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
@@ -400,8 +439,11 @@ oxigraph = { version = "0.5.11", default-features = false }
 # mapping in every build (ledger #1085). The OpenSpec mapping uses neither `SERVICE` nor deep
 # frontmatter, so it lifts the same graph. 0.1.0 is the first release on crates.io (2026-10-06);
 # before it, this line was a pin to one full git revision of the public repository, the way
-# DESIGN.md pins gonk. A 0.x caret, so also a ceiling (<0.2.0).
-ikigai-markdown = "0.1.4"
+# DESIGN.md pins gonk. A 0.x caret, so also a ceiling (<0.2.0, until 2026-10-27).
+# 0.2.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.4" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-markdown = "0.2.0"
 # Scripts as resources, for the section "Code and language as resources": `urn:script:{name}`
 # with content-addressed versions, `…:result` (run as a read) and `…:runs` (run for effects),
 # under the least of what a script declares, what its publisher held and the host's ceiling.
@@ -417,9 +459,12 @@ ikigai-markdown = "0.1.4"
 # #1278). The API floor is 0.3.0: "Who a script runs as" teaches NAMESPACE grants
 # (`urn:cap:script:write:team-*`) and exclusions, and `authority::holds`, which arrived there
 # (ledger #1173, #1174); 0.3.1 and 0.3.2 fix plans (ledger #1220, #1222), which no chapter
-# publishes. It requires core 0.1.95, the line above. A 0.x caret: also a ceiling (<0.4.0);
+# publishes. It requires core 0.1.95, the line above. A 0.x caret: also a ceiling (<0.4.0, until 2026-10-27);
 # read it as a RANGE.
-ikigai-script = "0.3.6"
+# 0.4.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.3.6" was a ceiling
+# below 0.4.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.5.0).
+ikigai-script = "0.4.0"
 # Natural language to a DRAFT script, for "A sentence becomes a draft": `urn:nl:grounding` (what
 # the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.4.0 is the
 # pin and the floor: the release whose drafter, when the model gives
@@ -431,8 +476,11 @@ ikigai-script = "0.3.6"
 # deprecated alias; ledger #1242, #1243). 0.2.1 asked the script host's own rule whether the caller
 # may read a named example (ledger #1196); 0.2.0 bounded each draft with `max_tokens` (ledger
 # #1203), which the stub model records. It requires ikigai-script 0.3.0 itself. A 0.x caret: also a
-# ceiling (<0.5.0); the old pin "0.3.0" was a ceiling below 0.4 and held the book at 0.3.
-ikigai-nl = "0.4.0"
+# ceiling (<0.5.0, until 2026-10-27); the old pin "0.3.0" was a ceiling below 0.4 and held the book at 0.3.
+# 0.5.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.4.0" was a ceiling
+# below 0.5.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.6.0).
+ikigai-nl = "0.5.0"
 # A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
 # every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
 # `ikigai-llm`'s `urn:llm:ask` over a local Ollama. llm 0.16.0 and the HTTP seam it is built on,
@@ -449,8 +497,16 @@ ikigai-nl = "0.4.0"
 # `Endpoint`, and refuses an `as=` its faces do not declare (ledger #88, #179); the drafter reports
 # whatever the model's failure says, and asks for no face. 0.x carets: ceilings too (<0.17.0,
 # <0.4.0); the old pins "0.15.0" and "0.2.1" were ceilings below 0.16 and 0.3.
-ikigai-llm = "0.16.0"
-ikigai-http = "0.3.0"
+# 0.17.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.16.0" was a ceiling
+# below 0.17.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.18.0).
+ikigai-llm = "0.17.1"
+# 0.4.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.3.0" was a ceiling
+# below 0.4.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.5.0).
+# http 0.4's `HttpResponse::body` is an `HttpBody` (a buffer or a stream); `Ureq` hands it its
+# bytes with `.into()`. llm 0.17 takes http ^0.4, so they still move together.
+ikigai-http = "0.4.0"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
 # localhost. "2" is that example's line; a caret, so <3.0.0.
@@ -459,8 +515,12 @@ ureq = { version = "2", default-features = false }
 # `urn:toolbox:input:{iri}`, the Turtle face it reads under the caller's capability. 0.1.0 is the
 # first release, and the floor; it needs core ^0.1.89 and fn ^0.5, both below the pins here. The
 # crate holds no build: the page and its WebAssembly engine are a directory a host binds (its
-# `build.sh`), and nothing here builds or binds one. A 0.x caret: also a ceiling (<0.2.0).
-ikigai-toolbox = "0.1.0"
+# `build.sh`), and nothing here builds or binds one. A 0.x caret: also a ceiling (<0.2.0, until 2026-10-27).
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2 binds one more door, `urn:toolbox:path:{rest}`, which the `list` in "The REPL grammar" shows.
+ikigai-toolbox = "0.2.1"
 # The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: from
 # 0.4.0 that is the CORE-only subset validator (`core_shacl`) on oxrdf and oxttl alone, which covers
 # closed shapes (`sh:closed`, `sh:ignoredProperties`) and every constraint the chapter's shapes use,
@@ -470,8 +530,11 @@ ikigai-toolbox = "0.1.0"
 # would bring the store back (`cargo tree -e features -i ikigai-shacl` shows none). Through 0.3.x
 # the same line linked the SPARQL engine: the ikigai Book's `book_wasm_bg.wasm` measured 8.74 MB
 # raw, 1.77 MB gzip -9 at 0.3.7 and 4.89 MB, 1.09 MB at 0.4.0 (2026-10-22, ledger #2115). A 0.x
-# caret: also a ceiling (<0.5.0).
-ikigai-shacl = { version = "0.4.0", default-features = false }
+# caret: also a ceiling (<0.5.0, until 2026-10-27).
+# 0.5.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.4.0" was a ceiling
+# below 0.5.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.6.0).
+ikigai-shacl = { version = "0.5.0", default-features = false }
 # The JSON faces the drafting chapter reads back (a draft's attempts, a check's findings).
 serde_json = "1"
 # The config file "Configuration" reads through `layered_paths`.

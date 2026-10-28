@@ -19,7 +19,12 @@ ledger-host = { path = "../ledger-host" }
 resilience-harness = { path = "../resilience-harness" }
 # The CLI's engine, as `crates/book-wasm` and `crates/gonk-book-wasm` take it: the same REPL
 # grammar a reader types at `ikigai`, so a cell's line means what it means at a shell.
-ikigai-engine = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2's plain `trace` leaves out the kernel's `defaulted` notes, so the overlays chapter's trace
+# of the board no longer prints `defaulted=as`.
+ikigai-engine = "0.2.1"
 futures.workspace = true
 serde_json = "1"
 # ⚠ Pinned EXACTLY, to the version the other kernels pin and pages.yml installs the

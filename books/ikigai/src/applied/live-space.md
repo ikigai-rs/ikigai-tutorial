@@ -367,7 +367,7 @@ the same words, and `cap reset` widens the session back to root:
 
 <div class="ikigai-run" data-live='workshop' data-cmd='sink urn:iki:tutorial:live:declaration (alias (exact "urn:iki:tutorial:live:picture" "urn:diagram:kernel" :resolve-at root) (endpoints))
 source urn:iki:space:dynamic:workshop:status
-trace urn:iki:tutorial:live:picture
+trace --defaults urn:iki:tutorial:live:picture
 cap urn:cap:kernel:listen
 source urn:diagram:kernel
 source urn:iki:tutorial:live:picture

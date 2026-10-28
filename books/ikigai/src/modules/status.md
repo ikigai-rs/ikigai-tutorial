@@ -5,9 +5,10 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.1.112**, stamped on
-2026-10-25, and `ikigai-module` **0.4.0**, stamped on 2026-10-14 (each its crate's newest
-release on crates.io at its stamp), and its shell examples are replayed against
+them is a claim, not a fact. This book builds against `ikigai-core` **0.2.2** and
+`ikigai-module` **0.5.1**, both stamped on 2026-10-27 (each its crate's newest release on
+crates.io at its stamp; the module claims below were written at 0.4.0, carry that stamp, and
+each still holds at 0.5.1), and its shell examples are replayed against
 `ikigai-cli` **0.1.64**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
 newest on 2026-10-14). A
 test (`crates/book-urns/tests/book_claims.rs`)
@@ -127,7 +128,7 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.1.112. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.2.2. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
 chapters they touch. Of the nine since, 0.1.104 (the principal vocabulary), 0.1.106 and
@@ -162,9 +163,17 @@ an endpoint you write can rely on, or what a page shows:
 - **0.1.112 — a face that is not offered is refused, and Turtle literals are shared.** The
   kernel's own operations declare the faces they serve, and refuse any other `as=` rather
   than answering text under another name; a trace therefore shows a face the caller left out
-  as `defaulted=as`, as [A space that changes while it runs](../applied/live-space.md) shows
-  under its view. `turtle_literal` and `escape_literal` are exported, so a module writes a
-  Turtle string the way core does instead of carrying an RDF library for it.
+  as `defaulted=as`. Since `ikigai-engine` 0.2 the REPL's `trace` prints those notes only
+  when asked, as `trace --defaults`, which [A space that changes while it
+  runs](../applied/live-space.md) asks under its view. `turtle_literal` and `escape_literal`
+  are exported, so a module writes a Turtle string the way core does instead of carrying an
+  RDF library for it.
+- **0.2.0 — streams.** A representation's bytes may be a body read as it arrives
+  (`Representation<Body>`, `Endpoint::invoke_body`, `Kernel::issue_body`) rather than one
+  whole buffer. A body that can be read only once is never stored in the cache, and one still
+  being read past the run's deadline ends with `OverBudget`. [Streams, I: bytes are a
+  representation](../streams/bytes.md) starts the part about them. Every module this book
+  links moved to 0.2 with it, since under 0.x rules a 0.1 pin could not admit it.
 
 The seventeen from 0.1.79 to 0.1.95 are one line each here, and taught where a chapter
 teaches them:

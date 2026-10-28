@@ -425,7 +425,7 @@ trace  urn:throttle:state
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 &#32;
-urn:throttle:state   throttle-state · cached · … · 0ms · answered-by=urn:iki:space:tutorial:harness:board defaulted=as   → …</pre>
+urn:throttle:state   throttle-state · cached · … · 0ms · answered-by=urn:iki:space:tutorial:harness:board   → …</pre>
 </div>
 
 The clock moved the two seconds the retry waited. The breaker's key is the same answer as

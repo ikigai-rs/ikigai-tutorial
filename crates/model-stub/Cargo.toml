@@ -25,6 +25,11 @@ ikigai-vocab.workspace = true
 # 0.1.63 changed a Unix-socket wire (0.1.62's changes are engine, MCP, tz and key-file fixes; 0.1.63
 # touched only the engine, the embedded host, tz and the intray, and no transport crate's source),
 # so the stub and gonk speak one protocol.
-ikigai-ipc = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0). It speaks wire v10
+# and still serves v7 to v9 at the version a peer's hello names (`ikigai_wire::MIN_PROTOCOL_VERSION`),
+# so the pinned gonk's older client and this stub still agree on one protocol.
+ikigai-ipc = "0.2.1"
 async-trait = "0.1"
 serde_json.workspace = true

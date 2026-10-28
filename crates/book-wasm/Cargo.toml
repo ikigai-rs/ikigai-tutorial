@@ -88,13 +88,21 @@ ikigai-vocab.workspace = true
 # value goes: a content-less `delete` takes one into a declared `content`, a `source` value is
 # routed among the Source action's own arguments, and a stdin known to be empty is no value. No
 # cell pipes into a `delete` or a per-verb source.)
-ikigai-engine = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+# 0.2's plain `trace` leaves out the kernel's `defaulted` notes; `trace --defaults` prints them,
+# which "A space that changes while it runs" asks for under its view.
+ikigai-engine = "0.2.1"
 # The `Resolver` seam the engine drives, implemented here by `InChain` so a cell can run in
 # one chain (a game's, a person's scenario) on the page's kernel. 0.1.29 matches the engine:
 # it is where `issue_as_async_in` and `is_cached_in` arrived, which `InChain` overrides to
 # stack the line's chain inside its own (`Scope::stack`, core 0.1.82). 0.1.63 is the pin, with
 # the engine.
-ikigai-resolve = "0.1.63"
+# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
+# below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
+ikigai-resolve = "0.2.1"
 # The trait is an `#[async_trait]`, so its implementor needs the macro.
 async-trait = "0.1"
 # `block_on` for the trait's one synchronous method, as the kernel's own impl does.
