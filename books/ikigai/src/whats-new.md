@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-28**: The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and includes a caller-supplied greeting, with the CLI's current argument-routing limitation explained.
+
+  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
+
 - **2026-10-28**: Four pages now say what the streams releases changed. "The REPL grammar" says when a pipe hands the next stage a body instead of a value (ikigai-engine 0.2.2), and that a stored plan still pipes by value. "Golden threads in practice" and "Twenty minutes, nothing compiled" say what the cache bound counts now: a one-shot body is never stored, a spilled one counts its full length, and a hit shares its bytes. "The file workspace" ends with files as bodies (ikigai-fs 0.2.3): seekable reads, a validator for ETag and ranges, sinks that stream, and the 64 MiB write ceiling per root.
 
   Pages: [The REPL grammar](front-door/grammar.md), [Golden threads in practice](getting-started/golden-threads.md), [Twenty minutes, nothing compiled](front-door/cli.md), [The file workspace](getting-started/file-workspace.md)

@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-28"
+summary = "The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and includes a caller-supplied greeting, with the CLI's current argument-routing limitation explained."
+pages = ["front-door/cli.md", "front-door/grammar.md"]
+
+[[change]]
+date = "2026-10-28"
 summary = "Four pages now say what the streams releases changed. \"The REPL grammar\" says when a pipe hands the next stage a body instead of a value (ikigai-engine 0.2.2), and that a stored plan still pipes by value. \"Golden threads in practice\" and \"Twenty minutes, nothing compiled\" say what the cache bound counts now: a one-shot body is never stored, a spilled one counts its full length, and a hit shares its bytes. \"The file workspace\" ends with files as bodies (ikigai-fs 0.2.3): seekable reads, a validator for ETag and ranges, sinks that stream, and the 64 MiB write ceiling per root."
 pages = ["front-door/grammar.md", "getting-started/golden-threads.md", "front-door/cli.md", "getting-started/file-workspace.md"]
 
