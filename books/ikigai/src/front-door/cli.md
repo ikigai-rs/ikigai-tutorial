@@ -1,4 +1,4 @@
-# Twenty minutes, nothing compiled
+# Twenty minutes with the CLI
 
 You can try ikigai in two places. The book's **Run** buttons use a kernel running in
 your browser, compiled from Rust to WebAssembly. Here, a *kernel* is the part of ikigai
@@ -11,6 +11,13 @@ different format, reuse a cached answer, invalidate it, and inspect a request's 
 You do not need to write Rust.
 
 ## 0. Install
+
+You need Rust and Cargo, Rust's package manager. If `cargo --version` reports
+`command not found`, install the toolchain with [rustup](https://rustup.rs/), then open
+a new terminal. You do not need to know Rust to follow this walkthrough.
+
+Cargo compiles the CLI from source, which can take several minutes on the first
+installation. Allow about twenty minutes for the walkthrough after installation.
 
 ```bash
 cargo install ikigai-cli --locked
@@ -27,7 +34,8 @@ ikigai --version
 > (RUSTSEC-2026-0382), using 0.103.16 instead of 0.103.15. Install 0.1.68 or later.
 
 The default build supports the commands below. Remote QUIC connections need the optional
-`quic` feature; the HTTP/HTTPS server features also need `web`. To include both, install with:
+`quic` feature. The HTTP server, `serve --http`, needs `web`. The layers HTTPS server,
+`--layers-https`, needs both. To include both features, install with:
 
 ```bash
 cargo install ikigai-cli --locked --features quic,web
@@ -37,8 +45,8 @@ Feature flags select code at build time. Reinstalling with these flags rebuilds 
 it does not add a plug-in to the existing executable. Current releases list which features
 were compiled in at the bottom of `ikigai --help`.
 
-The shell examples use `-c` to run a command and exit. `--plain` requests plain terminal
-output. Run `ikigai` for the full-screen REPL, or `ikigai --plain` for a line-by-line REPL.
+The shell examples use `-c` to run a command and exit. For interactive use, `ikigai`
+opens the full-screen REPL. `ikigai --plain` selects the line-by-line REPL.
 A REPL keeps the process running between commands, so it keeps the cache too.
 [5. A cache hit](#5-a-cache-hit) needs that shared session.
 
@@ -55,7 +63,7 @@ ikigai --plain -c 'source urn:kernel:catalog'
 This prints the catalog: descriptions of the endpoints available in this host, assembled
 into one graph. An endpoint is code that handles requests for a resource. Each endpoint
 supplies its own description. Turtle is a text format for RDF graphs, whose statements
-have a subject, a predicate, and an object. A full install prints several hundred lines.
+have a subject, a predicate, and an object.
 
 ## 2. Everything *you* may do
 
@@ -89,7 +97,7 @@ producing `A` and `B` on separate lines. The next pipe passes those lines to `re
 which reverses their order. It reverses newline-separated items, so a single line such as
 `a b` would stay in the same order.
 
-`[3 computed]` counts three requests whose answers were computed. The `source` verb means
+`[3 computed]` reports three pipeline stages whose answers were computed. The `source` verb means
 "read this resource"; after each pipe it is implied. `demo` is part of the name of a
 bundled example endpoint. It is not a special word in the command grammar.
 
@@ -289,3 +297,6 @@ that vocabulary against a real CLI. It also replays the REPL transcripts against
 `books/ikigai/ikigai-cli.version`. Contributors can run these checks with
 `./scripts/test-transcripts.sh`. That pin identifies the replayed version; a newer CLI
 may print different output.
+
+This replay covers the blocks with `ikigai>` prompts. It does not execute shell command
+blocks or prompt-free REPL examples.

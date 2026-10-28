@@ -17,7 +17,7 @@
 
 [[change]]
 date = "2026-10-28"
-summary = "The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and includes a caller-supplied greeting, with the CLI's current argument-routing limitation explained."
+summary = "The front-door chapters explain the Rust/Cargo setup, separate commands from output, and use a pipe whose reversal is visible. The grammar shows the composition templates and caller-supplied data, and clarifies cache probes, request tallies, fan-out width, and which examples CI replays."
 pages = ["front-door/cli.md", "front-door/grammar.md"]
 
 [[change]]

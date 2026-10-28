@@ -7,13 +7,13 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
-- **2026-10-28**: The two front-door chapters now distinguish shell commands, REPL input, and expected output. Pipe examples visibly reverse a list, and the grammar explains named arguments, newlines, example namespaces, and fan-out reporting. Composition now shows the template before its result and includes a caller-supplied greeting, with the CLI's current argument-routing limitation explained.
+- **2026-10-28**: The front-door chapters explain the Rust/Cargo setup, separate commands from output, and use a pipe whose reversal is visible. The grammar shows the composition templates and caller-supplied data, and clarifies cache probes, request tallies, fan-out width, and which examples CI replays.
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)
 
 - **2026-10-28**: Four pages now say what the streams releases changed. "The REPL grammar" says when a pipe hands the next stage a body instead of a value (ikigai-engine 0.2.2), and that a stored plan still pipes by value. "Golden threads in practice" and "Twenty minutes, nothing compiled" say what the cache bound counts now: a one-shot body is never stored, a spilled one counts its full length, and a hit shares its bytes. "The file workspace" ends with files as bodies (ikigai-fs 0.2.3): seekable reads, a validator for ETag and ranges, sinks that stream, and the 64 MiB write ceiling per root.
 
-  Pages: [The REPL grammar](front-door/grammar.md), [Golden threads in practice](getting-started/golden-threads.md), [Twenty minutes, nothing compiled](front-door/cli.md), [The file workspace](getting-started/file-workspace.md)
+  Pages: [The REPL grammar](front-door/grammar.md), [Golden threads in practice](getting-started/golden-threads.md), [Twenty minutes with the CLI](front-door/cli.md), [The file workspace](getting-started/file-workspace.md)
 
 - **2026-10-27**: The book now builds against ikigai-core 0.2, the streams release, and every module it links moved with it. In "Tic-tac-toe, V", a game over a store in another process now caches nothing in the host: each read asks the store again, so a mark another client writes there is on the next board, and the store contract is run against the store's own answers. Status names core 0.2.2 and ikigai-module 0.5.1 and says what 0.2.0 changed. A plain `trace` no longer prints `defaulted=`; "A space that changes while it runs" asks for it with `trace --defaults`. The `list` in "The REPL grammar" shows the toolbox's new `urn:toolbox:path:{rest}`, and the grounding in "A sentence becomes a draft" counts 252 vocabulary terms.
 
@@ -113,7 +113,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-21**: The install notes now name ikigai-cli 0.1.68 as the first release fixing the TLS advisory. The second getting-started exercise also checks that an explicitly empty argument overrides its declared default.
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)
 
 - **2026-10-21**: A correction: since ikigai-core 0.1.105 the kernel fills a declared default in before your endpoint runs, and a description that marks a defaulted input required is refused. The second getting-started exercise and Contribute a module said the opposite; the exercise now shows it in a block that runs on every build.
 
@@ -121,7 +121,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-21**: The book now builds against ikigai-core 0.1.109. Where this actually stands names what 0.1.105, 0.1.108 and 0.1.109 changed (defaults filled in, failure classes, a run's deadline, dynamic spaces), Preferential resolution says a prefer-mount now also falls through when the peer says to retry later (ikigai-throttle 0.2.0), Who is asking says the handshake offers a range of wire versions, and the install steps say a release fixing a TLS advisory is coming. A sentence becomes a draft now counts 229 vocabulary terms in the grounding, where it counted 199.
 
-  Pages: [Where this actually stands](modules/status.md), [Preferential resolution](beyond/preference.md), [Who is asking](beyond/identity.md), [Twenty minutes, nothing compiled](front-door/cli.md), [Running it](getting-started/running-it.md), [A sentence becomes a draft](code/sentence.md)
+  Pages: [Where this actually stands](modules/status.md), [Preferential resolution](beyond/preference.md), [Who is asking](beyond/identity.md), [Twenty minutes with the CLI](front-door/cli.md), [Running it](getting-started/running-it.md), [A sentence becomes a draft](code/sentence.md)
 
 - **2026-10-19**: The book now builds against ikigai-core 0.1.108, which a newer ikigai-browse requires; Where this actually stands says so, and that every listing and cell runs unchanged on the five kernel releases since 0.1.103.
 
@@ -129,7 +129,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-18**: Notes from a first run on WSL2: Twenty minutes, nothing compiled says the default CLI build has no QUIC and when to add --features quic, the REPL grammar says which cells only this page's kernel can run and why its list prints more than the expected eleven names, the introduction links the front door, and the getting-started exercises name three things their hints left out (ArgSpec's .default field, ArgRef::Content behind the catch-all arm, and the clock your-endpoints' kernel does not have).
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md), [Introduction](introduction.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md), [Introduction](introduction.md), [Running it](getting-started/running-it.md), [Exercises: getting started](getting-started/exercises.md)
 
 - **2026-10-17**: The shell examples are now replayed against ikigai-cli 0.1.64. The aliases page says its two HTTP rows are the pre-0.2 spelling recorded on 0.1.41, and names the current urn:http:head and urn:http:delete.
 
@@ -213,11 +213,11 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-10**: The front door's section on cut threads now explains why a file's cut count varies: the CLI watches its workspace and cuts a file's thread for every change event the operating system reports, so a Mac and a Linux machine print different numbers for the same lines.
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md)
 
 - **2026-10-09**: Twenty minutes, nothing compiled corrects its cut section: cutting a pure function's name now invalidates its cached answer, because every cacheable read hangs from a thread named after its own target. The cache readout shown has gained state and chain columns, and the trace that follows is now computed rather than served.
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md)
 
 - **2026-10-09**: Tracing a resolution gains a dry run that shows where a request would go and whether it would be let in without sending it, and Golden threads in practice shows how to ask what a cut would recompute before making it. Who is asking now explains that a mount carries your narrowed capability to the peer and shows a test that checks a module's published grant list against its declarations; the REPL grammar describes the sandboxed Lisp, and Configuration gives the passkey flags that replaced an environment variable.
 
@@ -315,7 +315,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-09-26**: A new chapter, Golden threads in practice, shows the whole mechanism (declare, derive, cut), the cache's default bound and eviction policy, and the two rules worth stating as rules. Transreption now says plainly that a transreptor's claim to be lossless is not checked.
 
-  Pages: [Golden threads in practice](getting-started/golden-threads.md), [Transreption](building/transreption.md), [Twenty minutes, nothing compiled](front-door/cli.md), [What resolution buys you](getting-started/payoff.md)
+  Pages: [Golden threads in practice](getting-started/golden-threads.md), [Transreption](building/transreption.md), [Twenty minutes with the CLI](front-door/cli.md), [What resolution buys you](getting-started/payoff.md)
 
 - **2026-09-26**: A new chapter, Tracing a resolution, makes the trace the subject: what each event records, and what a denial, an alias hop and a miss inside a confinement look like, including events for things that never ran.
 
@@ -347,7 +347,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-09-08**: A corrected explanation of cutting a golden thread: Twenty minutes, nothing compiled now caches and cuts a file, and shows that a cut invalidates only the entries that declared that thread, so a pure function's answer stays cached.
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [What resolution buys you](getting-started/payoff.md), [The REPL grammar](front-door/grammar.md), [Resolution](getting-started/resolution.md), [Glossary](glossary.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md), [What resolution buys you](getting-started/payoff.md), [The REPL grammar](front-door/grammar.md), [Resolution](getting-started/resolution.md), [Glossary](glossary.md)
 
 - **2026-09-08**: Where this actually stands is corrected: a module endpoint's own declared capability is now enforced by the host, and the matching exercise says so. Every claim the modules part makes about another project now carries the version it was true at.
 
@@ -363,7 +363,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-09-08**: A new front door: Twenty minutes, nothing compiled shows the whole model in eight CLI commands, and The REPL grammar covers one construct per section with runnable cells. A Glossary, a map of the repositories and a guide to contributing a module join the end of the book.
 
-  Pages: [Twenty minutes, nothing compiled](front-door/cli.md), [The REPL grammar](front-door/grammar.md), [Glossary](glossary.md), [The repositories](repositories.md), [Contribute a module](contribute.md), [Introduction](introduction.md), [Where to go next](next.md)
+  Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md), [Glossary](glossary.md), [The repositories](repositories.md), [Contribute a module](contribute.md), [Introduction](introduction.md), [Where to go next](next.md)
 
 - **2026-09-08**: The published book now carries a working kernel: press Run beside a command in What resolution buys you, Running it or Hello, resource and it resolves for real in your browser, with nothing installed.
 

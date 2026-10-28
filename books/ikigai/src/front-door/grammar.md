@@ -86,7 +86,10 @@ A
 `reverseList` reverses the lines, so `B` comes first. A space does not separate list
 items: `reverseList` would leave the single line `A B` unchanged.
 
-The tally counts every resolution the line performed. Cacheability flows down the pipe:
+The tally reports the cache status of each requested stage or mapped item. It excludes
+argument-description fetches and requests made inside an endpoint.
+
+Cacheability flows down the pipe:
 a stage over an uncacheable input is no more cacheable than that input, and cutting the
 input's thread invalidates the transformed result too.
 
@@ -122,10 +125,12 @@ C
 [4 computed]</pre>
 </div>
 
-Four resolutions: one split and three calls to `toUpper`, one per item. The CLI's
-`--plain` REPL and `-c` mode also report the fan-out width. `[fan-out 3 → 1 wide]` means
-three items processed one at a time; `3 → 3 wide` means three ran concurrently on a
-scheduled host. The full-screen REPL and this page's cells omit that extra line.
+Four reported results: one split and three calls to `toUpper`, one per item. The CLI's
+`--plain` REPL and `-c` mode also report the fan-out width supported by the scheduler.
+`[fan-out 3 → 1 wide]` means three items with capacity for one at a time; `3 → 3 wide`
+allows up to three at a time. The width is calculated before dispatch, rather than
+measuring how much the work overlapped. The full-screen REPL and this page's cells omit
+that extra line.
 
 ## The fork: `( a ; b )`
 
@@ -220,8 +225,8 @@ sink urn:file:greeting.txt Hello, $h{{name}}!
 This creates `greeting.txt` in the workspace. `$h{{name}}` inserts a caller-supplied
 argument named `name`, escaping it for HTML. The template is separate from the data.
 
-CLI 0.2.0's `source` command recognizes only `src` in `compose`'s declared arguments.
-Adding `name=Joe` to that command is rejected. The CLI's general `invoke` form can pass
+In CLI 0.2.0, `compose`'s description declares only `src`, so the command router rejects
+an extra `name=Joe` argument. The CLI's general `invoke` form can pass
 the extra argument. Enter these lines in the same REPL:
 
 ```text
@@ -229,8 +234,18 @@ the extra argument. Enter these lines in the same REPL:
 (invoke 'source "urn:iki:fn:compose" "src" "urn:file:greeting.txt" "name" "Alice")
 ```
 
-The results are `Hello, Joe!` and `Hello, Alice!`. Both use the same template file;
-only the argument changes. Lines starting with `(` use the
+The output is:
+
+```text
+Hello, Joe!
+[uncacheable]
+Hello, Alice!
+[uncacheable]
+```
+
+Both calls use the same template file; only the argument changes. `[uncacheable]`
+describes the outer Lisp evaluation, which is uncacheable by default. The inner
+composition results are cached. Lines starting with `(` use the
 [Lisp syntax described below](#and-one-more-). This example runs in the CLI, which has
 the file workspace and Lisp endpoint; the kernel in this page does not provide them.
 
@@ -252,8 +267,8 @@ line, a `sink` under `-c` reads stdin, waits at most two seconds for its first b
 silence sends no `content` at all rather than an empty one (it says so on stderr). A `sink` the
 kernel dispatched cuts the golden thread named after the target, whether it succeeded or
 (since core 0.1.95) failed, which is how a write invalidates every cached read that declared that
-thread, and every cached read of that name: since core 0.1.73 every cacheable read hangs from
-the thread named after its own target, declared or not, as the [previous
+thread, and cached `source` results for that name: since core 0.1.73 every cacheable
+`source` result hangs from the thread named after its own target, declared or not, as the [previous
 chapter](cli.md#6-cut-a-thread) showed on a pure function.
 
 The `urn:iki:tutorial:*` names in the cell below are this book's own, bound by the page's
@@ -305,8 +320,8 @@ of one that is not there.
 cache <iri> [args]
 ```
 
-Would this be served from the cache right now? Answered without resolving, so asking
-does not change the answer.
+Checks whether the requested `source` result is currently cached, without running that
+operation. To route arguments, it may first resolve and cache the endpoint's description.
 
 <div class="ikigai-run" data-cmd='cache urn:iki:fn:reverseList in="x"
 source urn:iki:fn:reverseList in="x"
@@ -487,8 +502,8 @@ port the program is handed; `with-handler`; and the verbs with their general for
 `invoke`. Every other global is rebound to a refusal, so `display`, the environment and
 the host's own stdin are out of reach, and the forms that would leave the evaluation,
 `require`, `defmacro`, are refused before compiling. A refusal is an error the program can
-catch, and a typed `Denied` if it does not. Out of scope for this book, and worth knowing
-exists.
+catch, and a typed `Denied` if it does not. The template example above uses `invoke`;
+the rest of the Lisp language is beyond this grammar reference.
 
 <!-- urn-gate: illustration urn:demo:echo/{message} — a URI template printed in the
      in-page `list` output above; the family is bound (ikigai-fn's echo), the braces are

@@ -6,7 +6,7 @@
 
 # The front door
 
-- [Twenty minutes, nothing compiled](front-door/cli.md)
+- [Twenty minutes with the CLI](front-door/cli.md)
 - [The REPL grammar](front-door/grammar.md)
 
 # Getting started
