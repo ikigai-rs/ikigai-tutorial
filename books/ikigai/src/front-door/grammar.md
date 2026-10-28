@@ -1,10 +1,10 @@
 # The REPL grammar
 
-One grammar drives the `ikigai` REPL, its `-c` one-shot, the cells in this book, and the
-[browser demo](../getting-started/running-it.md#the-browser-demo)'s terminal — the same engine,
-with a different host behind it. This chapter
-is that grammar, one runnable line per construct. Where the in-page kernel binds the
-names, the line has a **Run** button; the rest run at a shell.
+The same command syntax works in the `ikigai` REPL, in a shell with `ikigai -c`, in this
+book's runnable cells, and in the [browser demo](../getting-started/running-it.md#the-browser-demo).
+Each uses its own host, which determines the available resource names. A command with a
+**Run** button works in this page. The CLI examples below run inside `ikigai --plain`
+unless they start with `ikigai`, in which case run them in your shell.
 
 ## A resolution
 
@@ -13,10 +13,13 @@ source <iri> [input]
 source <iri> key=value …
 ```
 
-`source` is the verb. A bare word after the IRI is *positional* and fills whichever
-declared argument is left unnamed; `key=value` names one, and `key` has to be an argument
-the endpoint declared — the engine routes by the description, which is why a typo in a
-name is an error rather than a silently ignored argument.
+`source` is the verb, meaning "read." The IRI identifies the resource to read. Everything
+after it supplies arguments to that request. These are command parts, not RDF's
+subject, predicate, and object.
+
+`key=value` names an argument. An unnamed, or *positional*, value fills a declared
+argument that you have not supplied by name. The engine reads the endpoint's description
+to find its argument names. For example, `toUpper` declares one argument called `in`:
 
 <div class="ikigai-run" data-cmd='source urn:iki:fn:toUpper in="resource oriented computing"
 source urn:iki:fn:toUpper resource oriented computing'>
@@ -30,11 +33,61 @@ Two spellings of the same request — and the second answers `[cached]`, because
 kernel keys the cache on the request, not the text you typed. Edit the input and run
 again: a different request, computed afresh.
 
+For an endpoint with two arguments, name one and supply the other positionally. These
+three commands all ask the bundled `greet` endpoint for `Hello, Joe`:
+
+```text
+source urn:demo:greet greeting=Hello name=Joe
+source urn:demo:greet greeting=Hello Joe
+source urn:demo:greet Hello name=Joe
+```
+
+Use `describe urn:demo:greet text/plain` to see the declared names, `greeting` and `name`.
+The engine checks every name against that description, so a typo is an error, not a wrong
+answer. This line:
+
+```text
+source urn:iki:fn:toUpper inn=abc
+```
+
+is refused with:
+
+```text
+error: `urn:iki:fn:toUpper` declares no argument `inn` (its arguments: `in`). To send `inn=abc` as text, name the argument it fills: in="inn=abc"
+```
+
+As the error says, text that contains `=` goes to an argument by name: `in="a=b"`. Text whose
+part before the `=` is not a name, such as `2+2=4`, is still ordinary positional text. (CLI
+0.2.4 and later. Earlier releases sent a misspelled `key=value` on as positional text, so
+`inn=abc` came back as `INN=ABC`.)
+
+`demo` is a namespace used for the bundled examples. The host binds the full name
+`urn:demo:greet` to an endpoint. Replacing `demo` with another word does not create a new
+binding. Later chapters show how to bind your own names.
+
 ## Quoting
 
 Wrap a word in `"…"` to keep `|`, `..`, `(`, `)`, `;` or a space literal inside an IRI or
 an input; `\"` is a literal quote and `\\` a literal backslash. `in="a b"` is one
 argument; `in=a b` is one argument and one stray positional.
+
+Ikigai's quotes do not turn `\n` into a newline. In Bash or Zsh, the shell's `$'…'`
+quoting can insert an actual newline before passing the command to ikigai:
+
+```bash
+ikigai --plain -c $'source urn:iki:fn:toUpper in="a\nb" | urn:iki:fn:reverseList'
+```
+
+Fish has no `$'…'` quoting. There, end the single quotes, write `\n` unquoted, and reopen
+them:
+
+```bash
+ikigai --plain -c 'source urn:iki:fn:toUpper in="a'\n'b" | urn:iki:fn:reverseList'
+```
+
+Either line prints `B` then `A`, on separate lines. The quoting belongs to the shell; do
+not type it inside the ikigai REPL. The `split` endpoint in the next example makes a newline list
+without needing a literal newline in your command.
 
 ## The pipe: `|`
 
@@ -42,9 +95,8 @@ argument; `in=a b` is one argument and one stray positional.
 source a [input] | b | c
 ```
 
-The whole output of one stage becomes the next stage's unnamed argument. Each
-stage after the first is written as its IRI alone — it is a `source`, so the verb is
-implied.
+The whole output of one stage becomes the next stage's unnamed argument. Each stage
+after the first is written as its IRI alone. The `source` verb is implied.
 
 How the output gets there depends on the stage that receives it (`ikigai-engine` 0.2.2,
 `ikigai-cli` 0.2.3 and later). An argument whose contract declares it reads a body
@@ -61,10 +113,15 @@ representation](../streams/bytes.md) is where a body begins.
 it, but the book's pinned 0.1.64 does not mount it, so the CLI vocabulary (probed against that pin)
 cannot claim it. -->
 
-<div class="ikigai-run" data-cmd='source urn:iki:fn:toUpper in="a b" | urn:iki:fn:reverseList'>
-<pre class="ikigai-run-expected">A B
-[2 computed]</pre>
+<div class="ikigai-run" data-cmd='source urn:demo:split "a,b" | urn:iki:fn:toUpper | urn:iki:fn:reverseList'>
+<pre class="ikigai-run-expected">B
+A
+[3 computed]</pre>
 </div>
+
+`split` produces two lines, `a` and `b`. `toUpper` changes them to `A` and `B`.
+`reverseList` reverses the lines, so `B` comes first. A space does not separate list
+items: `reverseList` would leave the single line `A B` unchanged.
 
 The tally counts every resolution the line performed. Cacheability flows down the pipe:
 a stage over an uncacheable input is no more cacheable than that input, and cutting the
@@ -87,9 +144,10 @@ C
 [4 computed]</pre>
 </div>
 
-Four resolutions — one split, three upper-cases. At a shell the CLI adds a line saying
-how wide the fan-out ran (`[fan-out 3 → 1 wide]` on a single thread, `3 → 3 wide` on a
-scheduled host); the engine itself only counts.
+Four resolutions: one split and three calls to `toUpper`, one per item. The CLI's
+`--plain` REPL and `-c` mode also report the fan-out width. `[fan-out 3 → 1 wide]` means
+three items processed one at a time; `3 → 3 wide` means three ran concurrently on a
+scheduled host. The full-screen REPL and this page's cells omit that extra line.
 
 ## The fork: `( a ; b )`
 
@@ -97,7 +155,9 @@ scheduled host); the engine itself only counts.
 source a [input] | ( b ; c )
 ```
 
-Fan the same input to each branch and join their outputs.
+Send the whole input to each branch, then join the branches' outputs in order. Here,
+`toUpper` receives all three lines and returns `A`, `B`, `C`. `reverseList` receives the
+original lower-case lines and returns `c`, `b`, `a`.
 
 <div class="ikigai-run" data-cmd='source urn:demo:split "a,b,c" | ( urn:iki:fn:toUpper ; urn:iki:fn:reverseList )'>
 <pre class="ikigai-run-expected">A
@@ -115,9 +175,36 @@ cell, on a fresh page, and it reads `3 computed`.
 
 ## Composition: `urn:iki:fn:compose`
 
-Not a grammar construct — an endpoint — but the one the grammar exists to serve.
-`compose` takes a *shape*, a text resource with `$a{<iri>}` transclusion markers, resolves
-every marker through the kernel, and splices the answers in, recursively:
+`compose` is an endpoint that fills in a text template. The book calls that template a
+*shape*. A marker such as `$a{urn:data:about}` means "read this resource and insert its
+contents here." This inclusion is called *transclusion*. If the included text contains
+more `$a{…}` markers, `compose` expands those too.
+
+The CLI comes with a template named `urn:data:page`. Read the template before composing it:
+
+```bash
+ikigai --plain -c 'source urn:data:page'
+```
+
+Its contents are:
+
+```text
+ikigai compose demo — one pull, recursively assembled
+
+  toUpper : $a{urn:iki:fn:toUpper?in="resource oriented computing"}
+  wrap    : $a{urn:demo:wrap?text=hello}
+  greet   : $a{urn:demo:greet?greeting=Hi&name=World}
+  nested  : $a{urn:data:about}
+
+literal marker (escaped, not expanded): $$a{urn:iki:fn:toUpper?in=x}
+```
+
+The text after `?` supplies arguments to the resource named inside the marker. `&`
+separates arguments. So the greeting uses `greeting=Hi` and `name=World`, both written
+directly into this template. They are fixed inputs, not defaults that a caller can
+override. `$$a{…}` escapes a marker so it appears literally in the result.
+
+Now ask `compose` to read that template and fill it in. `src` identifies the template:
 
 ```bash
 ikigai --plain -c 'source urn:iki:fn:compose src=urn:data:page'
@@ -130,11 +217,44 @@ ikigai compose demo — one pull, recursively assembled
   wrap    : [hello]
   greet   : Hi, World
   nested  : a shape within a shape: COMPOSED WITHIN A COMPOSED SHAPE
+
+literal marker (escaped, not expanded): $a{urn:iki:fn:toUpper?in=x}
 ```
 
-The page is one resource that pulled the others in. That is how the browser demo builds
-its whole page, and how every part of a composed answer stays under its own golden
-thread: the composite is cacheable only while every part is.
+For the nested line, `urn:data:about` contains:
+
+```text
+a shape within a shape: $a{urn:iki:fn:toUpper?in="composed within a composed shape"}
+```
+
+That second marker explains the uppercase text at the end. The composed result depends
+on every resource read along the way. Their golden threads carry through to the result,
+so changing one dependency invalidates the cached composition too.
+
+### Make a template and pass it data
+
+In the CLI's REPL, write your own template as a file resource:
+
+```text
+sink urn:file:greeting.txt Hello, $h{{name}}!
+```
+
+This creates `greeting.txt` in the workspace. `$h{{name}}` inserts a caller-supplied
+argument named `name`, escaping it for HTML. The template is separate from the data.
+
+`compose` declares `src` and accepts any other name as a template argument, because the
+template decides which names it uses. Pass `name` beside `src`, in the same REPL:
+
+```text
+source urn:iki:fn:compose src=urn:file:greeting.txt name=Joe
+source urn:iki:fn:compose src=urn:file:greeting.txt name=Alice
+```
+
+The results are `Hello, Joe!` and `Hello, Alice!`. Both use the same template file;
+only the argument changes. This example runs in the CLI, which has the file workspace;
+the kernel in this page does not provide one. (CLI 0.2.4 and later. Earlier releases
+refused `name=Joe` here; the [Lisp form described below](#and-one-more-) could pass it:
+`(invoke 'source "urn:iki:fn:compose" "src" "urn:file:greeting.txt" "name" "Joe")`.)
 
 ## Writing: `sink`
 
