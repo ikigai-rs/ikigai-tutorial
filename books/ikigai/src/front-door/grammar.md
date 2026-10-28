@@ -42,9 +42,20 @@ argument; `in=a b` is one argument and one stray positional.
 source a [input] | b | c
 ```
 
-The whole output of one stage becomes the next stage's unnamed argument, by value. Each
+The whole output of one stage becomes the next stage's unnamed argument. Each
 stage after the first is written as its IRI alone — it is a `source`, so the verb is
 implied.
+
+How the output gets there depends on the stage that receives it (`ikigai-engine` 0.2.2,
+`ikigai-cli` 0.2.3 and later). An argument whose contract declares it reads a body
+(`ik:readsBody true`, `ArgSpec::reads_body` in Rust) is handed the upstream *as a body*
+and reads it as it arrives, so `source urn:file:big.log | sink urn:file:copy.log` copies
+the file a chunk at a time rather than holding it. Any other argument gets the output by
+value, as before: the kernel collects it whole, under the run's byte budget, and notes
+it in that step's trace (`collected`). An output that is already one buffer goes by
+value either way. A stored plan (`execute`, `urn:plan:eval`) still pipes by value,
+whatever the receiving argument declares. [Streams, I: bytes are a
+representation](../streams/bytes.md) is where a body begins.
 
 <div class="ikigai-run" data-cmd='source urn:iki:fn:toUpper in="a b" | urn:iki:fn:reverseList'>
 <pre class="ikigai-run-expected">A B

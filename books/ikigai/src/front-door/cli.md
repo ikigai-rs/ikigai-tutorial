@@ -161,7 +161,9 @@ cache
 
 The first two lines are the cache's bound — 4096 entries and 64 MiB by default, the
 least-recently-used entry going when either is exceeded; [Golden threads in
-practice](../getting-started/golden-threads.md) is where a host picks a different one. Then
+practice](../getting-started/golden-threads.md) is where a host picks a different one, and
+says what the size counts now that an answer can be a stream (core 0.2.0: a one-shot body
+is never stored, a spilled one counts its full length, a hit shares its bytes). Then
 one row per entry: the name it was resolved from, its **state**, its type and size, how
 many threads it hangs from, and the resolution chain it was computed in (`root` here, the
 host's own space).
