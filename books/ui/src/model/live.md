@@ -8,7 +8,7 @@ views follow the kernel as it changes, and makes every view a URL that Back retu
 ## What a write does to the cache
 
 In this page's kernel, read the card, then look at the cache's text face, the one
-[Twenty minutes, nothing compiled](../../front-door/cli.html) printed:
+[Twenty minutes with the CLI](../../front-door/cli.html) printed:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:inspect:demo:card'>
 <pre class="ikigai-run-expected">&lt;div id="note-card" class="inspect-card" hx-get="/inspect/card" hx-trigger="ikigai:cut from:body" hx-swap="outerHTML" data-ui-quiet=""&gt;

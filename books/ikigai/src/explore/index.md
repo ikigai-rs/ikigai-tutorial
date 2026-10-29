@@ -37,7 +37,7 @@ built from them is served over HTTP.
 ## What you need
 
 For the Run buttons, nothing. For the shell steps, the `ikigai` command at 0.2.4 or later
-(`cargo install ikigai-cli --locked`; [Twenty minutes, nothing compiled](../front-door/cli.md)
+(`cargo install ikigai-cli --locked`; [Twenty minutes with the CLI](../front-door/cli.md)
 has the details), because 0.2.4 is the first release whose command can run jq. Every
 shell step in this part was run against `ikigai-cli` 0.2.4.
 

@@ -43,8 +43,8 @@ urn:iki:fn:toUpper
 urn:iki:fn:reverseList
 urn:iki:fn:compose
 urn:iki:fn:conditional
-# The same library's demo endpoints, which the grammar chapter's map and fork lines use,
-# and the compose shape the CLI's host binds for its own demo.
+# The same library's bundled example endpoints used in both front-door chapters,
+# and the composition templates the CLI's host binds for its demo.
 urn:demo:split
 urn:demo:wrap
 urn:demo:greet

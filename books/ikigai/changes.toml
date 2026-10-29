@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-28"
+summary = "The CLI tour now explains the Rust/Cargo prerequisite and separates installation time from the walkthrough. The grammar clarifies which requests its tally counts, why a cache probe can cache a description, and what fan-out width reports."
+pages = ["front-door/cli.md", "front-door/grammar.md"]
+
+[[change]]
+date = "2026-10-28"
 summary = "The introduction defines the kernel's basic terms before using them, points to the companion books without a stale count, and distinguishes runnable Rust examples from ignored fragments. The front door names Cargo as an installation prerequisite and defines REPL, RDF, and capability; the grammar explains its syntax markers and acknowledges a REPL still open from the CLI chapter. The CLI chapter also includes the uncacheable status printed after cache and thread listings in CLI 0.2.4 and no longer understates the catalog's length."
 pages = ["introduction.md", "front-door/cli.md", "front-door/grammar.md"]
 

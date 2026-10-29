@@ -2,6 +2,11 @@
 # The same format as every book's (see books/ui/changes.toml for the fields).
 
 [[change]]
+date = "2026-10-28"
+summary = "The link to the ikigai Book's CLI tour uses its new title, Twenty minutes with the CLI."
+pages = ["index.md"]
+
+[[change]]
 date = "2026-10-27"
 summary = "The library lists a fifth book, Running ikigai: the operator's book for the ikigai binary, with every command in it run against a pinned release."
 pages = ["index.md"]
