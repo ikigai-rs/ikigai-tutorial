@@ -88,8 +88,8 @@ From the file above:
 
 The two HTTP rows are the spelling that run printed, recorded on 0.1.41 and not re-recorded.
 Since `ikigai-http` 0.2.0 those resources are `urn:http:head` and `urn:http:delete` (the
-`ikigai-cli` the book now replays against, 0.1.64, links it); the old names stay as deprecated
-aliases until 0.3.0.
+`ikigai-cli` the book now replays against, 0.2.5, links `ikigai-http` 0.4.3); the old names
+still resolve there, as deprecated aliases.
 
 The first row is also why `urn:fn:toUpper` and `urn:iki:fn:toUpper` give one function and
 not two. The catalog lists only the canonical name, and dropping `urn:iki:` means the

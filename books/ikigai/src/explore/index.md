@@ -38,8 +38,11 @@ built from them is served over HTTP.
 
 For the Run buttons, nothing. For the shell steps, the `ikigai` command at 0.2.4 or later
 (`cargo install ikigai-cli --locked`; [Twenty minutes with the CLI](../front-door/cli.md)
-has the details), because 0.2.4 is the first release whose command can run jq. Every
-shell step in this part was run against `ikigai-cli` 0.2.4.
+has the details), because 0.2.4 is the first release whose command can run jq, and 0.2.5
+the first that reads a `.geojson` file as JSON. The shell steps over the recorded week are
+replayed against `ikigai-cli` {{#include ../../ikigai-cli.version}}, the release the book
+is checked against, every time the book changes. The steps over the live feed cannot be,
+because the feed moves; they are what 0.2.4 printed on 2026-10-28.
 
 Work in a directory of your own, so nothing here touches the CLI's default workspace:
 

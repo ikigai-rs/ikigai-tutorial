@@ -78,9 +78,9 @@ ikigai-vocab.workspace = true
 # built from doors the host supplies (`Engine::with_as_of_doors`), and hands the resolver that
 # line's chain (`Resolver::issue_as_async_in`). 0.1.63 is the pin (set 2026-10-14); the workspace
 # locks every cli crate at one version, so this one follows. The ikigai Book's REPL transcripts
-# replay `ikigai` 0.1.64 (`books/ikigai/ikigai-cli.version`), which links core 0.1.103 while the
-# cells link 0.1.109; every transcript and cell replayed unchanged across that gap, and closing it
-# means wire v9 (cli 0.1.66), which is ledger #2060's pass. 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
+# replay `ikigai` 0.2.5 (`books/ikigai/ikigai-cli.version`, moved from 0.1.64 on 2026-10-29,
+# ledger #2554), which links core 0.2.6 and engine 0.2.5 while the cells link core 0.2.2 and
+# engine 0.2.1, so the replay cli is now AHEAD of the cells rather than behind them. 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
 # keeps its first line and gains the argument's contract beneath it, read from the target's JSON
 # `Meta`, with "pipe a value in or pass name=…" when a pipe or positional value would fill it
 # (ledger #1499). (The gonk Book's pinned gonk links 0.1.61. 0.1.62 changed

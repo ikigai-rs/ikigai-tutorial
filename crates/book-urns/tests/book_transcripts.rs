@@ -46,6 +46,20 @@
 //! <!-- transcript: manual — the capability line prints this machine's home directory -->
 //! ```
 //!
+//! A page whose REPL steps read files the reader was told to fetch first (the recorded week of
+//! "Exploring without Rust", which the part's first page downloads into `~/quakes` and starts
+//! the REPL over with `--files ~/quakes`) names them ONCE, anywhere on the page, as paths from
+//! the repository's root:
+//!
+//! ```text
+//! <!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson -->
+//! ```
+//!
+//! Every transcript on that page then starts its REPL with `--files` over a fresh directory
+//! in its scratch home holding a copy of each, under its own file name: the workspace the
+//! page set up, from the same bytes the reader's `curl` fetches. Nothing else on the page
+//! changes; a file a block writes there is still written by the block.
+//!
 //! Every transcript runs in a SCRATCH home: a fresh directory that is the working
 //! directory, `HOME` and (under `.config`) the config home of its one `ikigai` process. The
 //! front door writes `urn:file:notes.txt`, which lands in `~/.ikigai/workspace/`, and a
@@ -85,6 +99,36 @@ struct Transcript {
     expected: Vec<String>,
     /// `Some(reason)` when the prose declared the block manual.
     manual: Option<String>,
+    /// The repository files the page's file workspace starts with (`transcripts: workspace`).
+    workspace: Vec<String>,
+}
+
+/// The files a page's REPL workspace starts with: every path its
+/// `<!-- transcripts: workspace a, b -->` lines name (commas or spaces between them), relative
+/// to the repository's root. (`transcripts:`, plural, is a page's declaration; `transcript:` is
+/// a block's.)
+fn page_workspace(text: &str) -> Vec<String> {
+    text.lines()
+        .filter_map(|line| {
+            let (_, rest) = line.split_once("transcripts:")?;
+            let rest = rest.trim().strip_prefix("workspace")?;
+            Some(rest.split("-->").next().unwrap_or(rest).to_string())
+        })
+        .flat_map(|names| {
+            names
+                .split([',', ' '])
+                .filter(|n| !n.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .collect()
+}
+
+fn repo_root() -> PathBuf {
+    book_src()
+        .join("../../..")
+        .canonicalize()
+        .expect("the repository root")
 }
 
 fn collect_markdown(dir: &Path, out: &mut Vec<PathBuf>) {
@@ -126,6 +170,7 @@ fn transcripts() -> Vec<Transcript> {
 /// REPL block exempted the REPL block too, and that block passed without being replayed. And a
 /// reason wrapped over two lines lost its second.
 fn scan_page(file: &str, text: &str, out: &mut Vec<Transcript>) {
+    let workspace = page_workspace(text);
     let lines: Vec<&str> = text.lines().collect();
     let mut i = 0;
     while i < lines.len() {
@@ -177,6 +222,7 @@ fn scan_page(file: &str, text: &str, out: &mut Vec<Transcript>) {
                 commands,
                 expected,
                 manual,
+                workspace: workspace.clone(),
             }),
         }
         i = end + 1;
@@ -187,18 +233,31 @@ fn scan_page(file: &str, text: &str, out: &mut Vec<Transcript>) {
 /// that the REPL's screen is written to.
 struct ScratchHome {
     dir: PathBuf,
+    /// The file workspace the REPL starts over (`--files`), when the page declared one.
+    files: Option<PathBuf>,
     /// Outside the home, so no command a page runs there can list or read it.
     screen: PathBuf,
 }
 
 impl ScratchHome {
-    fn new(n: usize) -> ScratchHome {
+    fn new(n: usize, workspace: &[String]) -> ScratchHome {
         let base = format!("book-transcripts-{}-{n}", std::process::id());
         let dir = std::env::temp_dir().join(&base);
         let screen = std::env::temp_dir().join(format!("{base}.screen"));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join(".config")).expect("a scratch home");
-        ScratchHome { dir, screen }
+        let files = (!workspace.is_empty()).then(|| {
+            let files = dir.join("files");
+            std::fs::create_dir_all(&files).expect("a scratch workspace");
+            for path in workspace {
+                let from = repo_root().join(path);
+                let name = from.file_name().expect("a workspace file has a name");
+                std::fs::copy(&from, files.join(name))
+                    .unwrap_or_else(|e| panic!("copying the page's workspace file {path}: {e}"));
+            }
+            files
+        });
+        ScratchHome { dir, files, screen }
     }
 }
 
@@ -217,20 +276,41 @@ impl Drop for ScratchHome {
 ///
 /// The two streams share one file rather than two pipes: two pipes read separately lose the
 /// order between them, and one descriptor behind both keeps it (the REPL flushes each answer
-/// as it writes it, and stderr is unbuffered). The whole session is written
-/// to stdin before the REPL is waited for, which is what a paste does; the commands are a few
-/// hundred bytes, far under a pipe's buffer, and the REPL's output goes to the file, so neither
-/// side can block the other.
+/// as it writes it, and stderr is unbuffered).
+///
+/// The lines are typed at a READER's pace, not pasted: each is written once the answer to the
+/// one before has landed and the screen has been still for [`SETTLED`]. ⚠ A paste raced the
+/// CLI's file watcher. From `ikigai-cli` 0.2 a `sink urn:file:…` stages its bytes in a
+/// `.ikigai-fs-<hex>.tmp` and renames it into place, and the watcher cuts the file's thread
+/// when that event arrives, on its own thread; pasted, the `source` on the next line could be
+/// served before the cut and then made stale by it, so "The same four things from a shell"
+/// printed `not cached` for a read it had just made, about one replay in twelve (ledger
+/// #2554). A reader at the prompt takes far longer than the watcher between two lines, so the
+/// pause is what they see. Nothing is waited for longer than [`ANSWER_WAIT`]: a command that
+/// prints nothing is typed past once that has passed.
+///
+/// The pace is also why a `cache` readout lists `urn:time:now`: the CLI's host reads its clock
+/// every second (a job it registers for the full-screen REPL's tab bar) and that answer is
+/// cached until the next minute, so a session older than a second, which every reader's is,
+/// holds it. In the second after a minute turns, before the job reads it again, that row says
+/// `expired` (2 readouts in 330, measured on 0.2.5), so no session is started in the last
+/// [`MINUTE_MARGIN`] of a minute: no session here lasts that long, so none spans the turn.
 fn type_into_repl(home: &ScratchHome, commands: &[String]) -> std::io::Result<String> {
     use std::io::Write;
     use std::process::Stdio;
 
+    clear_of_the_minute();
     let screen = std::fs::File::create(&home.screen)?;
-    let mut child = Command::new("ikigai")
+    let mut ikigai = Command::new("ikigai");
+    ikigai
         .current_dir(&home.dir)
         .env("HOME", &home.dir)
         .env("XDG_CONFIG_HOME", home.dir.join(".config"))
-        .arg("--quiet")
+        .arg("--quiet");
+    if let Some(files) = &home.files {
+        ikigai.arg("--files").arg(files);
+    }
+    let mut child = ikigai
         .stdin(Stdio::piped())
         .stdout(Stdio::from(screen.try_clone()?))
         .stderr(Stdio::from(screen))
@@ -238,12 +318,57 @@ fn type_into_repl(home: &ScratchHome, commands: &[String]) -> std::io::Result<St
     {
         let mut stdin = child.stdin.take().expect("stdin was piped");
         for c in commands {
+            let before = screen_len(home);
             writeln!(stdin, "{c}")?;
+            stdin.flush()?;
+            wait_for_answer(home, before);
         }
         // Dropping stdin is the reader's Ctrl-D: the REPL ends at EOF.
     }
     child.wait()?;
     std::fs::read_to_string(&home.screen)
+}
+
+/// How long the screen must be still after an answer before the next line is typed.
+const SETTLED: std::time::Duration = std::time::Duration::from_millis(200);
+/// How close to the turn of a minute a session may not start.
+const MINUTE_MARGIN: u64 = 10;
+
+/// Wait, when the minute is about to turn, until it has (and a second more).
+fn clear_of_the_minute() {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("after 1970");
+    let into = now.as_secs() % 60;
+    if into >= 60 - MINUTE_MARGIN {
+        std::thread::sleep(std::time::Duration::from_secs(61 - into));
+    }
+}
+/// How long a line's answer is waited for before the next line is typed anyway.
+const ANSWER_WAIT: std::time::Duration = std::time::Duration::from_secs(10);
+
+fn screen_len(home: &ScratchHome) -> u64 {
+    std::fs::metadata(&home.screen)
+        .map(|m| m.len())
+        .unwrap_or(0)
+}
+
+/// Wait until the screen has grown past `before` and then been still for [`SETTLED`], or
+/// [`ANSWER_WAIT`] has passed.
+fn wait_for_answer(home: &ScratchHome, before: u64) {
+    let start = std::time::Instant::now();
+    let mut last = before;
+    let mut still_since = std::time::Instant::now();
+    while start.elapsed() < ANSWER_WAIT {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        let now = screen_len(home);
+        if now != last {
+            last = now;
+            still_since = std::time::Instant::now();
+        } else if now > before && still_since.elapsed() >= SETTLED {
+            return;
+        }
+    }
 }
 
 /// Drop the lines that legitimately differ between the book and a replay: cache verdicts
@@ -405,7 +530,7 @@ fn every_transcript_in_the_book_replays_against_the_installed_cli() {
             println!("skip {}:{} — manual: {reason}", t.file, t.line);
             continue;
         }
-        let home = ScratchHome::new(n);
+        let home = ScratchHome::new(n, &t.workspace);
         let screen = match type_into_repl(&home, &t.commands) {
             Ok(screen) => screen,
             Err(e) => panic!(
@@ -602,6 +727,39 @@ mod unit {
             s(&["c"]),
             "the marker above `b` is not `c`'s"
         );
+    }
+
+    #[test]
+    fn a_pages_workspace_declaration_reaches_every_transcript_on_it() {
+        let found = scan(
+            "<!-- transcripts: workspace crates/quakes/a.geojson, b.jq -->\n\
+             ```text\n\
+             ikigai> a\n\
+             ```\n\
+             \n\
+             ```text\n\
+             ikigai> b\n\
+             ```\n",
+        );
+        assert_eq!(found.len(), 2, "{found:?}");
+        for t in &found {
+            assert_eq!(t.workspace, s(&["crates/quakes/a.geojson", "b.jq"]));
+        }
+        assert!(scan("```text\nikigai> a\n```\n")[0].workspace.is_empty());
+    }
+
+    #[test]
+    fn every_declared_workspace_file_is_in_the_repository() {
+        for t in transcripts() {
+            for path in &t.workspace {
+                assert!(
+                    repo_root().join(path).is_file(),
+                    "{}: `transcripts: workspace` names {path}, which is not a file in the \
+                     repository",
+                    t.file
+                );
+            }
+        }
     }
 
     #[test]

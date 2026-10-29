@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-29"
+summary = "The book's REPL transcripts are now replayed against ikigai-cli 0.2.5, and the Exploring part's shell steps over the recorded week are replayed transcripts too, as are the grammar's named-argument, refusal and composition examples. \"Reshaping JSON with jq\" queries the `.geojson` file directly (0.2.5 reads it as JSON, so the `.json` copy is gone) and writes its jq program with `sink`; \"A lab with names in it\" shows the text tools' 0.2.5 tallies and why their answers are not cached; the CLI tour's `cache` readout includes the CLI's own clock; and \"What resolution buys you\" says why the thread list can name a temporary file."
+pages = ["explore/index.md", "explore/lab.md", "explore/jq.md", "front-door/grammar.md", "front-door/cli.md", "getting-started/payoff.md", "getting-started/file-workspace.md", "modules/status.md", "beyond/emacs-aliases.md"]
+
+[[change]]
 date = "2026-10-28"
 summary = "\"Somebody else's resource\" now says why its live steps run in your REPL rather than in the page: the page could fetch the feed, but every Run cell is checked against a fixed answer, and a feed that changes every minute never matches."
 pages = ["explore/http.md"]

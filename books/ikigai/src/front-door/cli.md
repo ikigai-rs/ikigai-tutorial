@@ -207,11 +207,12 @@ explains this rule's history. To see the entries the cuts left behind, read the 
 ```text
 ikigai> source urn:kernel:cache
 cache
-  entries  3 / 4096 (2 stale)
-  size     338 B / 64.0 MB
+  entries  4 / 4096 (2 stale)
+  size     343 B / 64.0 MB
   urn:file:notes.txt  cut      text/plain                     17 B  1 thread    root
   urn:iki:fn:toUpper  live     application/json              318 B  1 thread    root
   urn:iki:fn:toUpper  cut      text/plain                      3 B  1 thread    root
+  urn:time:now        live     text/plain                      5 B  1 thread    root
 [uncacheable]
 ```
 
@@ -233,6 +234,12 @@ probe only reports that state.
 The `live` row is `toUpper`'s description, which the engine read to route its arguments.
 It depends on the host's bindings, because changing a binding can change the endpoint's
 description. Cutting the thread for `toUpper`'s results leaves this description valid.
+
+The last row is one you did not ask for. The CLI reads its own clock, `urn:time:now`, once a
+second (the full-screen REPL shows it in its tab bar), and the answer, the time as `HH:MM`,
+is cached until the minute changes. So it is in every session that has been open longer than
+a second (CLI 0.2 and later). Read the cache just as a minute turns and the row may say
+`expired` instead, with one entry stale, until the next second's read replaces it.
 
 ## 7. Which threads have been cut
 
