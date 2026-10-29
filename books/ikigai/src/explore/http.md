@@ -5,8 +5,12 @@ it. The live feed is USGS's. They decide what it says, they change it every minu
 they say how long a copy of it stays good. This chapter reads it through the kernel and
 shows what the kernel does with each of those facts.
 
-This page cannot reach the network, so every step here is for the `ikigai` REPL you
-started in [A week of earthquakes](index.md#what-you-need). The answers below are what
+This page's kernel does not reach the network, so every step here is for the `ikigai` REPL
+you started in [A week of earthquakes](index.md#what-you-need). That is a choice, not a
+limit of the browser: USGS lets any page read this feed, and ikigai-http runs in a browser
+over its `fetch`. But every Run cell in this book is checked against the answer printed
+beside it, and a feed that changes every minute would never match, so the live steps stay
+in your REPL. The answers below are what
 `ikigai-cli` 0.2.4 printed on 2026-10-28. Yours will have different numbers, because the
 feed has moved on since.
 
