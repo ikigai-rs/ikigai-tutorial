@@ -1,0 +1,1 @@
+PREFIX qk: <https://ikigai-rs.dev/ns/quakes#> CONSTRUCT { ?quake a qk:Earthquake ; qk:mag ?mag ; qk:magType ?magType ; qk:place ?place ; qk:time ?time } WHERE { ?quake a qk:Earthquake ; qk:mag ?mag ; qk:magType ?magType ; qk:place ?place ; qk:time ?time FILTER(?mag >= 5.5) }

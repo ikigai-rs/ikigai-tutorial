@@ -512,9 +512,16 @@ urn:quakes:template:headline              → quakes-headline
 urn:file:quakes.context.jsonld            → quakes-context
 urn:quakes:template:graph                 → quakes-graph-template
 urn:quakes:graph                          → quakes-graph
+urn:file:quakes-2024-01-08.geojson        → quakes-window-2024-01-08
+urn:quakes:template:graph:2024-01-08      → quakes-graph-template-2024-01-08
+urn:quakes:graph:2024-01-08               → quakes-graph-2024-01-08
+urn:quakes:strong                         → quakes-strong
 urn:quakes:question:count                 → quakes-question-count
 urn:quakes:question:biggest               → quakes-question-biggest
 urn:quakes:question:by-magtype            → quakes-question-by-magtype
+urn:quakes:question:strong                → quakes-question-strong
+urn:quakes:question:strongest-first       → quakes-question-strongest-first
+urn:quakes:question:week-after            → quakes-question-week-after
 urn:rdf:union                             → rdf-union
 urn:rdf:diff                              → rdf-diff
 urn:rdf:transrept                         → rdf-transrept
@@ -530,9 +537,9 @@ this book's three chained on top, exactly as [Binding](../getting-started/bindin
 them. After those come the Applied parts' tic-tac-toe, time and spreadsheet names, the
 names "Checking a resource" uses, and the shop and `ikigai-json` names that "Transreption" and
 "Short names in a space" use, the gzip and zlib names of
-[Streams, I](../streams/bytes.md), then the recorded week, the headline template and the
-quakes context, graph and questions of [Exploring without Rust](../explore/index.md)
-([the kernel in the browser](../browser.md#one-recorded-file) says why the page binds two
+[Streams, I](../streams/bytes.md), then the recorded weeks, the headline template and the
+quakes context, graphs, questions and layer of [Exploring without Rust](../explore/index.md)
+([the kernel in the browser](../browser.md#one-recorded-file) says why the page binds three
 files), and last the RDF and SPARQL names [Giving the data names](../explore/names.md) asks
 with. A host built from Part I alone lists only Part I's share of
 it. A full CLI lists a few hundred, many served over a socket from another

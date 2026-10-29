@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-29**: New in "Exploring without Rust": "Composites, one layer at a time". Answers built from answers: a SPARQL filter whose answer is a graph at a name, then a sort, a grouping and a join with a second recorded week that read it by that name, all as Run cells. The page asks what hangs from the context and from a question, and cuts one to see what recomputes. At a shell, your own notes, a file per earthquake, join the two weeks through a row template; and joining the live feed into a cached composite shows its lifetime fall to the feed's minute, and where to put volatile data instead.
+
+  Pages: [Composites, one layer at a time](explore/composites.md), [A week of earthquakes](explore/index.md), [Giving the data names](explore/names.md), [The REPL grammar](front-door/grammar.md), [Appendix: the kernel in the browser](browser.md)
+
 - **2026-10-29**: A new page in the Exploring part, "A river of feeds": a directory of RSS feeds becomes a list of names, XSLT lifts each feed to RDF, and the feeds become one river you query with SPARQL kept in files, with only the feed you changed recomputed. It reads feeds politely (`max_age=` and a User-Agent, shown against a stand-in origin on your own machine, never a real person's site, with what 0.2.6's revalidation adds), binds a search term with `bindings=` so a quote in it stays text, and writes one answer as a page, a digest, a feed and an OPML. Its REPL steps run over the repository's `examples/rss` and are replayed against the book's pinned cli.
 
   Pages: [A river of feeds](explore/rss.md), [A week of earthquakes](explore/index.md)
