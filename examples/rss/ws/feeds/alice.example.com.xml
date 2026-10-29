@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Alice Writes Things</title>
+    <link>https://alice.example.com/</link>
+    <description>Notes on static sites, feeds and the small web.</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <ttl>60</ttl>
+    <lastBuildDate>Mon, 26 Oct 2026 09:30:00 +0000</lastBuildDate>
+    <atom:link href="https://alice.example.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Why my feed sends an ETag</title>
+      <link>https://alice.example.com/posts/ETag/</link>
+      <pubDate>Mon, 26 Oct 2026 09:30:00 +0000</pubDate>
+      <guid>https://alice.example.com/posts/ETag/</guid>
+      <description>&lt;p&gt;Readers that send &lt;code&gt;If-None-Match&lt;/code&gt; get a &lt;strong&gt;304&lt;/strong&gt; and no body. Caching is politeness.&lt;/p&gt;</description>
+      <category>rss</category>
+      <category>caching</category>
+    </item>
+    <item>
+      <title>A static site in one afternoon</title>
+      <link>https://alice.example.com/posts/static-site/</link>
+      <pubDate>Thu, 15 Oct 2026 18:05:00 +0000</pubDate>
+      <guid>https://alice.example.com/posts/static-site/</guid>
+      <description>&lt;p&gt;Markdown in, HTML out, and a feed for free.&lt;/p&gt;</description>
+      <category>static-sites</category>
+    </item>
+    <item>
+      <title>Tomatoes, finally</title>
+      <link>https://alice.example.com/posts/tomatoes/</link>
+      <pubDate>Fri, 02 Oct 2026 07:00:00 +0000</pubDate>
+      <guid>https://alice.example.com/posts/tomatoes/</guid>
+      <description>&lt;p&gt;The garden did its job. &lt;img src="https://alice.example.com/img/tomato.jpg" alt="a red tomato"&gt;&lt;/p&gt;</description>
+      <category>garden</category>
+    </item>
+  </channel>
+</rss>

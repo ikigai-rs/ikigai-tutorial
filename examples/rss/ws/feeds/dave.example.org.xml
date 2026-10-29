@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Dave Talks</title>
+    <link>https://dave.example.org/</link>
+    <description>A podcast about the web, with show notes.</description>
+    <language>en</language>
+    <item>
+      <title>Episode 12: The small web</title>
+      <link>https://dave.example.org/episodes/12</link>
+      <pubDate>Wed, 7 Oct 2026 10:00:00 -0700</pubDate>
+      <author>dave@example.org (Dave)</author>
+      <description>Personal sites, webrings and RSS.</description>
+      <enclosure url="https://dave.example.org/audio/12.mp3" length="31457280" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 11: Caching for people who hate caching</title>
+      <link>https://dave.example.org/episodes/11</link>
+      <pubDate>Wed, 23 Sep 2026 10:00:00 -0700</pubDate>
+      <author>dave@example.org (Dave)</author>
+      <description>Max-age, ETags, and why a 304 is the nicest answer a server can give.</description>
+      <enclosure url="https://dave.example.org/audio/11.mp3" length="29360128" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 10: Live from the garage</title>
+      <link>https://dave.example.org/episodes/10</link>
+      <pubDate>Wed, 9 Sep 2026 10:00:00 -0700</pubDate>
+      <enclosure url="https://dave.example.org/audio/10.mp3" length="27262976" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>

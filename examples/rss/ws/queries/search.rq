@@ -1,0 +1,20 @@
+PREFIX rss: <http://purl.org/rss/1.0/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX content: <http://purl.org/rss/1.0/modules/content/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# Search: a literal, case-insensitive substring of the title, the summary, the full text or a category.
+# Fill with compose, q=TERMS. The summary and full text are HTML, so a term also matches markup.
+SELECT ?item ?title ?link ?date ?feed ?feedTitle ?summary
+WHERE {
+  ?item a rss:item ; rss:link ?link ; dcterms:isPartOf ?feed .
+  ?feed rss:title ?feedTitle .
+  OPTIONAL { ?item rss:title ?t }
+  OPTIONAL { ?item dc:date ?date }
+  OPTIONAL { ?item rss:description ?summary }
+  BIND(COALESCE(?t, "(untitled)") AS ?title)
+  OPTIONAL { ?item content:encoded ?full }
+  OPTIONAL { SELECT ?item (GROUP_CONCAT(?c; separator=" ") AS ?cats) WHERE { ?item dc:subject ?c } GROUP BY ?item }
+  FILTER(CONTAINS(LCASE(CONCAT(?title, " ", COALESCE(?summary, ""), " ", COALESCE(?full, ""), " ", COALESCE(?cats, ""))), LCASE("$r{{q}}")))
+}
+ORDER BY DESC(?date)

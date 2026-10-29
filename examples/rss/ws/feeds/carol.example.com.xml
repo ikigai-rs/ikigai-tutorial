@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>carol.example.com</title>
+    <link>https://carol.example.com/</link>
+    <description>Short posts.</description>
+    <atom:link href="https://carol.example.com/index.xml" rel="self" type="application/rss+xml"/>
+    <cloud domain="rpc.example.net" port="443" path="/pleaseNotify" registerProcedure="" protocol="http-post"/>
+    <item>
+      <link>https://carol.example.com/2026/10/24/rss-cloud/</link>
+      <guid isPermaLink="false">tag:carol.example.com,2026-10-24:/rss-cloud</guid>
+      <pubDate>Sat, 24 Oct 2026 16:45:00 GMT</pubDate>
+      <description><![CDATA[<p>Tried <a href="https://rpc.example.net/">rssCloud</a> today: the feed tells readers when it changes, so nobody has to poll.</p>]]></description>
+    </item>
+    <item>
+      <link>https://carol.example.com/2026/10/12/coffee/</link>
+      <guid isPermaLink="false">tag:carol.example.com,2026-10-12:/coffee</guid>
+      <pubDate>Mon, 12 Oct 2026 06:30:00 GMT</pubDate>
+      <description><![CDATA[<p>Coffee, then code.</p>]]></description>
+    </item>
+    <item>
+      <title>A longer one about feed readers</title>
+      <link>https://carol.example.com/2026/10/05/readers/</link>
+      <guid isPermaLink="false">tag:carol.example.com,2026-10-05:/readers</guid>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 GMT</pubDate>
+      <description><![CDATA[<p>Three feed readers compared. The best one sends conditional requests; the worst refetches every five minutes.</p>]]></description>
+    </item>
+  </channel>
+</rss>

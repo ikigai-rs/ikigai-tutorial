@@ -1,0 +1,122 @@
+<https://alice.example.com/feed.xml> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/channel> .
+<https://alice.example.com/feed.xml> <http://purl.org/rss/1.0/title> "Alice Writes Things" .
+<https://alice.example.com/feed.xml> <http://purl.org/rss/1.0/link> "https://alice.example.com/" .
+<https://alice.example.com/feed.xml> <http://purl.org/dc/terms/valid> "60" .
+<https://alice.example.com/posts/ETag/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://alice.example.com/posts/ETag/> <http://purl.org/dc/terms/isPartOf> <https://alice.example.com/feed.xml> .
+<https://alice.example.com/posts/ETag/> <http://purl.org/rss/1.0/title> "Why my feed sends an ETag" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/rss/1.0/link> "https://alice.example.com/posts/ETag/" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/dc/elements/1.1/identifier> "https://alice.example.com/posts/ETag/" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/rss/1.0/description> "<p>Readers that send <code>If-None-Match</code> get a <strong>304</strong> and no body. Caching is politeness.</p>" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/dc/elements/1.1/subject> "rss" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/dc/elements/1.1/subject> "caching" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/dc/terms/issued> "Mon, 26 Oct 2026 09:30:00 +0000" .
+<https://alice.example.com/posts/ETag/> <http://purl.org/dc/elements/1.1/date> "2026-10-26T09:30:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://alice.example.com/posts/static-site/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://alice.example.com/posts/static-site/> <http://purl.org/dc/terms/isPartOf> <https://alice.example.com/feed.xml> .
+<https://alice.example.com/posts/static-site/> <http://purl.org/rss/1.0/title> "A static site in one afternoon" .
+<https://alice.example.com/posts/static-site/> <http://purl.org/rss/1.0/link> "https://alice.example.com/posts/static-site/" .
+<https://alice.example.com/posts/static-site/> <http://purl.org/dc/elements/1.1/identifier> "https://alice.example.com/posts/static-site/" .
+<https://alice.example.com/posts/static-site/> <http://purl.org/rss/1.0/description> "<p>Markdown in, HTML out, and a feed for free.</p>" .
+<https://alice.example.com/posts/static-site/> <http://purl.org/dc/elements/1.1/subject> "static-sites" .
+<https://alice.example.com/posts/static-site/> <http://purl.org/dc/terms/issued> "Thu, 15 Oct 2026 18:05:00 +0000" .
+<https://alice.example.com/posts/static-site/> <http://purl.org/dc/elements/1.1/date> "2026-10-15T18:05:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://alice.example.com/posts/tomatoes/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/dc/terms/isPartOf> <https://alice.example.com/feed.xml> .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/rss/1.0/title> "Tomatoes, finally" .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/rss/1.0/link> "https://alice.example.com/posts/tomatoes/" .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/dc/elements/1.1/identifier> "https://alice.example.com/posts/tomatoes/" .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/rss/1.0/description> "<p>The garden did its job. <img src=\"https://alice.example.com/img/tomato.jpg\" alt=\"a red tomato\"></p>" .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/dc/elements/1.1/subject> "garden" .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/dc/terms/issued> "Fri, 02 Oct 2026 07:00:00 +0000" .
+<https://alice.example.com/posts/tomatoes/> <http://purl.org/dc/elements/1.1/date> "2026-10-02T07:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://bob.example.org> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/channel> .
+<https://bob.example.org> <http://purl.org/rss/1.0/title> "Bob's Workbench" .
+<https://bob.example.org> <http://purl.org/rss/1.0/link> "https://bob.example.org" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/terms/isPartOf> <https://bob.example.org> .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/rss/1.0/title> "My home server caches everything now" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/rss/1.0/link> "https://bob.example.org/2026/10/home-server-cache/" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/elements/1.1/identifier> "https://bob.example.org/?p=412" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/rss/1.0/description> "A reverse proxy, a cache, and a lot of patience. [&#8230;]" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/rss/1.0/modules/content/encoded> "<p>I put a reverse proxy in front of everything. The cache hit rate is the only number I check now.</p>\n<p>The trick was honoring <code>Cache-Control</code> instead of guessing.</p>" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/elements/1.1/subject> "Home Server" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/elements/1.1/subject> "caching" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/elements/1.1/creator> "Bob" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/terms/issued> "Tue, 27 Oct 2026 21:14:09 -0500" .
+<https://bob.example.org/2026/10/home-server-cache/> <http://purl.org/dc/elements/1.1/date> "2026-10-27T21:14:09-05:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://bob.example.org/2026/10/dovetails/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/dc/terms/isPartOf> <https://bob.example.org> .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/rss/1.0/title> "Dovetails by hand" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/rss/1.0/link> "https://bob.example.org/2026/10/dovetails/" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/dc/elements/1.1/identifier> "https://bob.example.org/?p=398" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/rss/1.0/description> "Saw, chisel, mallet, repeat. [&#8230;]" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/rss/1.0/modules/content/encoded> "<p>Saw, chisel, mallet, repeat. The tenth one fit.</p>" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/dc/elements/1.1/subject> "Woodworking" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/dc/elements/1.1/creator> "Bob" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/dc/terms/issued> "Sat, 10 Oct 2026 14:02:44 -0500" .
+<https://bob.example.org/2026/10/dovetails/> <http://purl.org/dc/elements/1.1/date> "2026-10-10T14:02:44-05:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://bob.example.org/2026/09/still-rss/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/dc/terms/isPartOf> <https://bob.example.org> .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/rss/1.0/title> "Why I still read RSS" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/rss/1.0/link> "https://bob.example.org/2026/09/still-rss/" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/dc/elements/1.1/identifier> "https://bob.example.org/?p=371" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/rss/1.0/description> "No algorithm decides what I see. [&#8230;]" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/rss/1.0/modules/content/encoded> "<p>No algorithm decides what I see. A feed reader is a list of names I chose.</p>" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/dc/elements/1.1/subject> "rss" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/dc/elements/1.1/creator> "Bob" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/dc/terms/issued> "Mon, 28 Sep 2026 08:00:00 -0500" .
+<https://bob.example.org/2026/09/still-rss/> <http://purl.org/dc/elements/1.1/date> "2026-09-28T08:00:00-05:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://carol.example.com/index.xml> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/channel> .
+<https://carol.example.com/index.xml> <http://purl.org/rss/1.0/title> "carol.example.com" .
+<https://carol.example.com/index.xml> <http://purl.org/rss/1.0/link> "https://carol.example.com/" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/terms/isPartOf> <https://carol.example.com/index.xml> .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/rss/1.0/link> "https://carol.example.com/2026/10/24/rss-cloud/" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/elements/1.1/identifier> "tag:carol.example.com,2026-10-24:/rss-cloud" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/rss/1.0/description> "<p>Tried <a href=\"https://rpc.example.net/\">rssCloud</a> today: the feed tells readers when it changes, so nobody has to poll.</p>" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/terms/issued> "Sat, 24 Oct 2026 16:45:00 GMT" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/elements/1.1/date> "2026-10-24T16:45:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://carol.example.com/2026/10/12/coffee/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://carol.example.com/2026/10/12/coffee/> <http://purl.org/dc/terms/isPartOf> <https://carol.example.com/index.xml> .
+<https://carol.example.com/2026/10/12/coffee/> <http://purl.org/rss/1.0/link> "https://carol.example.com/2026/10/12/coffee/" .
+<https://carol.example.com/2026/10/12/coffee/> <http://purl.org/dc/elements/1.1/identifier> "tag:carol.example.com,2026-10-12:/coffee" .
+<https://carol.example.com/2026/10/12/coffee/> <http://purl.org/rss/1.0/description> "<p>Coffee, then code.</p>" .
+<https://carol.example.com/2026/10/12/coffee/> <http://purl.org/dc/terms/issued> "Mon, 12 Oct 2026 06:30:00 GMT" .
+<https://carol.example.com/2026/10/12/coffee/> <http://purl.org/dc/elements/1.1/date> "2026-10-12T06:30:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://carol.example.com/2026/10/05/readers/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/dc/terms/isPartOf> <https://carol.example.com/index.xml> .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/rss/1.0/title> "A longer one about feed readers" .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/rss/1.0/link> "https://carol.example.com/2026/10/05/readers/" .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/dc/elements/1.1/identifier> "tag:carol.example.com,2026-10-05:/readers" .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/rss/1.0/description> "<p>Three feed readers compared. The best one sends conditional requests; the worst refetches every five minutes.</p>" .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/dc/terms/issued> "Mon, 05 Oct 2026 12:00:00 GMT" .
+<https://carol.example.com/2026/10/05/readers/> <http://purl.org/dc/elements/1.1/date> "2026-10-05T12:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<https://dave.example.org/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/channel> .
+<https://dave.example.org/> <http://purl.org/rss/1.0/title> "Dave Talks" .
+<https://dave.example.org/> <http://purl.org/rss/1.0/link> "https://dave.example.org/" .
+<https://dave.example.org/episodes/12> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://dave.example.org/episodes/12> <http://purl.org/dc/terms/isPartOf> <https://dave.example.org/> .
+<https://dave.example.org/episodes/12> <http://purl.org/rss/1.0/title> "Episode 12: The small web" .
+<https://dave.example.org/episodes/12> <http://purl.org/rss/1.0/link> "https://dave.example.org/episodes/12" .
+<https://dave.example.org/episodes/12> <http://purl.org/rss/1.0/description> "Personal sites, webrings and RSS." .
+<https://dave.example.org/episodes/12> <http://purl.org/dc/elements/1.1/creator> "dave@example.org (Dave)" .
+<https://dave.example.org/episodes/12> <http://purl.org/dc/terms/issued> "Wed, 7 Oct 2026 10:00:00 -0700" .
+<https://dave.example.org/episodes/12> <http://purl.org/dc/elements/1.1/date> "2026-10-07T10:00:00-07:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://dave.example.org/episodes/11> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://dave.example.org/episodes/11> <http://purl.org/dc/terms/isPartOf> <https://dave.example.org/> .
+<https://dave.example.org/episodes/11> <http://purl.org/rss/1.0/title> "Episode 11: Caching for people who hate caching" .
+<https://dave.example.org/episodes/11> <http://purl.org/rss/1.0/link> "https://dave.example.org/episodes/11" .
+<https://dave.example.org/episodes/11> <http://purl.org/rss/1.0/description> "Max-age, ETags, and why a 304 is the nicest answer a server can give." .
+<https://dave.example.org/episodes/11> <http://purl.org/dc/elements/1.1/creator> "dave@example.org (Dave)" .
+<https://dave.example.org/episodes/11> <http://purl.org/dc/terms/issued> "Wed, 23 Sep 2026 10:00:00 -0700" .
+<https://dave.example.org/episodes/11> <http://purl.org/dc/elements/1.1/date> "2026-09-23T10:00:00-07:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://dave.example.org/episodes/10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://dave.example.org/episodes/10> <http://purl.org/dc/terms/isPartOf> <https://dave.example.org/> .
+<https://dave.example.org/episodes/10> <http://purl.org/rss/1.0/title> "Episode 10: Live from the garage" .
+<https://dave.example.org/episodes/10> <http://purl.org/rss/1.0/link> "https://dave.example.org/episodes/10" .
+<https://dave.example.org/episodes/10> <http://purl.org/dc/terms/issued> "Wed, 9 Sep 2026 10:00:00 -0700" .
+<https://dave.example.org/episodes/10> <http://purl.org/dc/elements/1.1/date> "2026-09-09T10:00:00-07:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .

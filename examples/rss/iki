@@ -1,0 +1,6 @@
+#!/bin/sh
+# Run ikigai over this example, hermetically: a config home of its own (.home/), ws/ as the
+# file root, and none of the machine's mounts. IKIGAI names the binary (default: ikigai on PATH).
+H=$(cd "$(dirname "$0")" && pwd)
+mkdir -p "$H/.home"
+exec "${IKIGAI:-ikigai}" --config-home "$H/.home" --files "$H/ws" --no-config-mounts "$@"

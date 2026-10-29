@@ -1,0 +1,8 @@
+PREFIX rss: <http://purl.org/rss/1.0/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+# A LINES view of the river for urn:text:*: one tab-separated line per item, date first.
+SELECT ?date ?feedTitle ?title ?link
+WHERE { ?item a rss:item ; rss:link ?link ; dcterms:isPartOf ?feed . ?feed rss:title ?feedTitle .
+  OPTIONAL { ?item rss:title ?t } OPTIONAL { ?item dc:date ?date } BIND(COALESCE(?t, "(untitled)") AS ?title) }
+ORDER BY DESC(?date)

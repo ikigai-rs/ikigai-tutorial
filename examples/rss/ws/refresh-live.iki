@@ -1,0 +1,3 @@
+source urn:http:get url=https://iheartrss.com/subscriptions.opml max_age=86400 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:xslt:transform stylesheet=urn:file:feeds.xsl | urn:text:head n=3 | sink urn:file:live-feeds.txt
+source urn:file:live-feeds.txt .. ( urn:http:get max_age=21600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:xslt:transform stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples ) | sink urn:file:river-live.nt
+source urn:file:queries/per-feed.rq | urn:sparql:select graph=urn:file:river-live.nt as=text/csv

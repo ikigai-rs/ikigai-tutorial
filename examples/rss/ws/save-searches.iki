@@ -1,0 +1,2 @@
+source urn:iki:fn:compose src=urn:file:queries/search.rq q=cach | sink urn:file:searches/caching.rq
+source urn:iki:fn:compose src=urn:file:queries/search.rq q=rss | sink urn:file:searches/rss.rq
