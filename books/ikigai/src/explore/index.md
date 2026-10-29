@@ -44,6 +44,9 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
 - [A river of feeds](rss.md): turn a directory of RSS feeds into one graph with XSLT, read
   feeds by their publishers' rules, and keep questions about it, and the pages they make, as
   files.
+- [Naming a composition](naming.md): bind a request with its arguments to a name, so the
+  composites and the river's questions are asked by name, and see what a name fixes, what it
+  follows, who may change it and when a name is somebody else's.
 
 Later in this part, a page built from them is served over HTTP.
 

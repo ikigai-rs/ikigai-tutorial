@@ -398,8 +398,8 @@ could do that: binding a plan to a name comes with engine 0.2.6 (ledger #2509), 
 book's pinned cli, {{#include ../../ikigai-cli.version}}, links, and its REPL's `bind` names a
 request with its arguments (named requests, ledger #2447). This part has not taken them up
 yet, so here a different threshold is still a different question file and a different plan;
-[A river of feeds](rss.md#8-what-the-river-is-waiting-for) waits on the same chapter, and
-this book does not work around it.
+[A river of feeds](rss.md#8-what-the-river-is-waiting-for) waits on the same thing, and
+[Naming a composition](naming.md) is where this part takes names up.
 
 ## 6. What a script does not have yet
 

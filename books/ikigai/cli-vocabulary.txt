@@ -103,6 +103,10 @@ urn:rdf:diff
 # The XSLT engine the CLI links natively: "A river of feeds" turns a directory (OPML) into a
 # list of names, each RSS feed into RDF/XML, and a SPARQL answer into a page, with it.
 urn:xslt:transform
+# jq as a resource, which the CLI links natively (`ikigai-json`): "Naming a composition" asks it
+# of a bound name from a shell (`ikigai -c 'source urn:json:query src=…'`). Probed with
+# `describe` against the pinned 0.2.6 on 2026-10-29, scratch home.
+urn:json:query
 
 # ── Part III — Beyond one host ────────────────────────────────────────────────
 #

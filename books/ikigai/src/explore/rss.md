@@ -497,5 +497,6 @@ the same reason: in this chapter, a request with arguments is not a name.
 Named requests (ledger #2447) remove all three, and `ikigai-cli` 0.2.6, the release this
 book is checked against, has them: the REPL's `bind` names a request with its arguments. This
 chapter was written before that release and does not use them yet (nor does [Reshaping JSON
-with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) for its headline). The chapter
-that introduces them will come back to this river and give each of these a name.
+with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) for its headline). The next
+chapter introduces them and comes back to this river: [Naming a composition](naming.md)
+names the live feed and the saved searches, and says why the build line is not a name yet.
