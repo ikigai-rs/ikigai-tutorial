@@ -7,7 +7,8 @@ a Rust host can mount it; `--mount urn:py:=<socket>` in the chapter is the bindi
 
 Modeled on ikigai-python's ``examples/endpoints.py`` (read-only for this book); kept
 here so the book builds from a clone of this repository alone. Needs ``ikigai-python``
-installed (``pip install <path to ikigai-python>``); it has no dependencies of its own.
+installed (``pip install <path to ikigai-python>``), which brings its one dependency,
+``blake3``, with it.
 """
 
 from __future__ import annotations
@@ -21,17 +22,19 @@ from ikigai import endpoint, serve
 # The decorator is the description, and the signature is the contract. `who: str`
 # becomes a required input of class xsd:string; the `Annotated` text becomes its
 # summary; `cacheable=True` is the same claim `.cacheable()` makes in Rust — a pure
-# function of its declared inputs — and it is the mounting kernel, not this process,
-# that will honor it.
+# function of its declared inputs. Whether a kernel that mounts this peer caches the
+# answers is the kernel's call, not this process's, and the chapter shows what
+# ikigai-cli does with it.
 @endpoint("urn:py:hello", summary="Greet someone", cacheable=True)
 def hello(who: Annotated[str, "the name to greet"]) -> str:
     return f"Hello, {who}!"
 
 
-# A second one, so `list` has something to show and a pipe has something to feed.
-@endpoint("urn:py:shout", summary="Uppercase a string, loudly", cacheable=True)
-def shout(text: Annotated[str, "the text to shout"]) -> str:
-    return text.upper() + "!"
+# A second one, so `list` has something to show and a pipe has something to feed: a list in,
+# one item per line, and each line shouted (the TypeScript track's `shout` does the same).
+@endpoint("urn:py:shout", summary="Shout each line of a list", cacheable=True)
+def shout(text: Annotated[str, "the lines to shout, one per line"]) -> str:
+    return "\n".join(line.upper() + "!" for line in text.split("\n"))
 # ANCHOR_END: endpoint
 
 

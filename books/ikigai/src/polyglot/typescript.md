@@ -4,18 +4,30 @@
      the reader's own `--mount urn:ts:=`; not a name the CLI or this workspace binds. -->
 <!-- urn-gate: illustration urn:ts:shout — likewise. -->
 
-The same mirror of Part I, in Deno. Every listing is in `examples/deno/` and was run
-against a served `ikigai-cli` 0.1.18 as it was written. `ikigai-deno` is not on JSR yet, so
-the listings import it by path — a sibling checkout at `../../../ikigai-deno`; edit the
-import if yours is elsewhere.
+The same mirror of Part I, in Deno. Every listing is in `examples/deno/`. `ikigai-deno` is
+not on JSR yet, so the listings import it by path, from a sibling checkout of it beside this
+repository's; edit the import if yours is elsewhere. ikigai-deno's own code imports
+`@std/crypto` (for the BLAKE3 digests in its contract IRIs) by that bare name, which its own
+`deno.json` maps for it and a script importing it by path never sees. So every `deno run`
+here passes `--config examples/deno/deno.json`, a three-line import map beside the listings
+that maps `@std/crypto` to JSR. A first run fetches it from JSR before it starts.
+
+The blocks that start a peer and mount it ([Binding](#binding) and the family below) are
+replayed against the book's pinned `ikigai-cli` on every change to this repository, with
+ikigai-deno at its `main`, by `scripts/polyglot-tracks.sh`: the peers are started from these
+very lines, and what each `ikigai` command prints, cache verdicts included, is compared with
+the page. The client listings were run against a served `ikigai-cli` 0.1.18 as they were
+written and are not replayed.
 
 If the kernel from the [Python track](python.md) is still serving `/tmp/ikbook-kernel.sock`,
-skip the first line.
+skip the first two lines. The second one waits for the kernel's socket, because a client
+started at once can find none yet.
 
 <!-- transcript: serve -->
 ```bash
 ikigai serve /tmp/ikbook-kernel.sock &
-deno run -A examples/deno/client.ts /tmp/ikbook-kernel.sock
+until [ -S /tmp/ikbook-kernel.sock ]; do sleep 0.2; done
+deno run -A --config examples/deno/deno.json examples/deno/client.ts /tmp/ikbook-kernel.sock
 ```
 
 ## Resolution
@@ -58,22 +70,58 @@ Turtle.
 
 ## Binding
 
+Start the peer, and wait for its socket before you mount it:
+
+<!-- demo: start -->
 ```bash
-deno run -A examples/deno/hello.ts /tmp/ts-hello.sock &
-ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:ts:hello who=Ada'
-ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:ts:shout text="resource oriented computing" | urn:iki:fn:reverseList'
+rm -f /tmp/ts-hello.sock
+deno run -A --config examples/deno/deno.json examples/deno/hello.ts /tmp/ts-hello.sock &
+until [ -S /tmp/ts-hello.sock ]; do sleep 0.2; done
 ```
 
+The wait is not decoration. Deno fetches `@std/crypto` from JSR on a first run before the
+peer binds its socket, and an `ikigai --mount` started at once fails with
+`No such file or directory`. The `rm -f` clears a socket an earlier run left behind, which
+would otherwise end the wait before this peer is listening.
+
+<!-- demo: run -->
 ```text
+$ ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:ts:hello who=Ada'
 Hello, Ada!
-[computed]
-RESOURCE ORIENTED COMPUTING!
-[2 computed]
+[uncacheable]
+$ ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:demo:split "resource,oriented,computing" | urn:ts:shout | urn:iki:fn:reverseList' -c 'source urn:kernel:uncached'
+COMPUTING!
+ORIENTED!
+RESOURCE!
+[1 computed · 2 uncacheable]
+uncached (why a computed read was not cached; the last 64, most recent first)
+  urn:iki:fn:reverseList      ×1  upstream  [root]
+  urn:ts:shout                ×1  declared  [root]
+
+[uncacheable]
+— batch: 2 commands · 1 computed · 3 uncacheable
 ```
 
-The second line is the part to notice: a pipe from a TypeScript endpoint into a Rust one,
-in the host's grammar, with neither knowing the other's language. The host owns the
-topology; the peers own their answers.
+The pipe is the part to notice: Rust into TypeScript into Rust, in the host's grammar, with
+none of the three knowing the others' language. `urn:demo:split` (Rust) turns the commas
+into a list of three lines. `urn:ts:shout` (TypeScript) takes that list and shouts each
+line. `urn:iki:fn:reverseList` (Rust) reverses the order of the lines, so `computing` comes
+first. Each stage leaves a mark you can see: the list's three items, the capitals and `!` on
+every line, and the reversed order. So the answer shows that both crossings happened, and in
+that order. The host owns the topology; the peers own their
+answers.
+
+Now read the verdicts. Both endpoints declare `cacheable: true`, and the peer marks its
+answers that way on the wire. `ikigai-cli` 0.2.5, the version this page is replayed against,
+caches neither: every read through `--mount` is `[uncacheable]`, and `urn:kernel:uncached`
+gives `declared` as the reason. Only `split`, a Rust endpoint in the host, was computed and
+kept. `reverseList` is uncacheable too, for a different reason, `upstream`: it read an answer
+that could not be cached. That is the mount's rule, on purpose: a kernel that mounts a peer stores no copy of
+what the peer answers, because a change on the peer's side (a file it watches, a write
+that reaches it by another route) never crosses back to the mounting kernel, so a stored
+copy could be served stale for as long as the host runs. The `declared` reason is the
+mount's own declaration, not the peer's. So `cacheable: true` on a served peer describes its
+answers; through `--mount`, the host does not keep them.
 
 ## What resolution buys you
 
@@ -130,38 +178,44 @@ is cacheable and answers `NotFound` for a missing note, a Sink whose body arrive
 `content`, and a Delete. Exists is not written at all. It defaults to "would Source
 succeed", so a `NotFound` answers `false`.
 
+<!-- demo: start -->
 ```bash
-deno run -A examples/deno/notes.ts /tmp/ts-notes.sock &
-ikigai --plain --mount urn:ts:=/tmp/ts-notes.sock -c 'sink urn:ts:note:milk two liters' \
+rm -f /tmp/ts-notes.sock
+deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ts-notes.sock &
+until [ -S /tmp/ts-notes.sock ]; do sleep 0.2; done
+```
+
+<!-- demo: run -->
+```text
+$ ikigai --plain --mount urn:ts:=/tmp/ts-notes.sock -c 'sink urn:ts:note:milk two liters' \
   -c 'source urn:ts:note:milk' -c 'source urn:ts:note:milk' \
   -c 'sink urn:ts:note:milk three liters' -c 'source urn:ts:note:milk' \
   -c 'source urn:ts:note:index' -c 'delete urn:ts:note:milk' -c 'source urn:ts:note:milk'
-```
-
-```text
 wrote milk
 [uncacheable]
 two liters
-[computed]
+[uncacheable]
 two liters
-[cached]
+[uncacheable]
 wrote milk
 [uncacheable]
 three liters
-[computed]
+[uncacheable]
 milk
 [uncacheable]
 forgot milk
 [uncacheable]
 error: not found: no note called milk
+— batch: 8 commands · 7 uncacheable
 ```
 
-Read the verdicts. The second read of `milk` was served from the host's cache. The peer
-keeps no cache. The write that followed cut the note's golden thread in the host, so the
-next read computed again and saw the new text. The peer wrote no invalidation code. The
-host cuts a name's thread after every Sink or Delete it forwards to that name. The index is
-uncacheable on purpose, because it reads every note and a write cuts only the note it
-wrote. Exists, from a client:
+Read the verdicts. The note's Source declares itself cacheable, and, as in
+[Binding](#binding), `ikigai-cli` 0.2.5 caches nothing a mounted peer answers, so every read
+here reached the peer. The peer keeps no cache of its own either, and that is why the read
+after the second write saw the new text. The writes and the delete are uncacheable whatever
+the host does, because a Sink or Delete answer always is, and the index is uncacheable on
+purpose: it reads every note, and a write is about only the note it wrote. Exists, from a
+client:
 
 ```ts
 const k = await connect("/tmp/ts-notes.sock"); // the peer itself; Exists is a read

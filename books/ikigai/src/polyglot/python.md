@@ -5,8 +5,14 @@
 <!-- urn-gate: illustration urn:py:shout — likewise. -->
 
 Part I, chapter for chapter, from a language with no kernel in it. Every listing is in
-`examples/python/` and was run against a served `ikigai-cli` 0.1.18 as it was written (the refusal text shown in the
-capabilities section is a later kernel's: see the note there).
+`examples/python/`. The blocks that start a peer and mount it
+([Binding](#binding-a-mount-is-a-binding) and the family below) are replayed against the
+book's pinned `ikigai-cli` on every change to this repository, with ikigai-python at its
+`main`, by `scripts/polyglot-tracks.sh`: the peers are started from these very lines, and what
+each `ikigai` command prints, cache verdicts included, is compared with the page. The client
+listings and the `describe` card were run against a served `ikigai-cli` 0.1.18 as they were
+written and are not replayed (the refusal text shown in the capabilities section is a later
+kernel's: see the note there).
 
 If the `ttt-host` from [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md) or its apps are still
 running, they can stay: this kernel is on a socket of its own.
@@ -15,7 +21,11 @@ running, they can stay: this kernel is on a socket of its own.
 ```bash
 pip install rdflib /path/to/ikigai-python     # a checkout; not on PyPI yet
 ikigai serve /tmp/ikbook-kernel.sock &         # a kernel to talk to
+until [ -S /tmp/ikbook-kernel.sock ]; do sleep 0.2; done   # wait for its socket
 ```
+
+The `pip install` brings ikigai-python's one dependency with it: `blake3`, for the digests in
+the contract IRIs a served door publishes.
 
 ## Resolution: a name, over the wire
 
@@ -59,6 +69,8 @@ Greet someone
 verbs: Source, Meta
   input who [argument]: the name to greet
 outputs: text/plain;charset=utf-8
+
+[computed]
 ```
 
 And from the client side, the same card as data — the JSON face of `Meta`, parsed:
@@ -69,25 +81,61 @@ And from the client side, the same card as data — the JSON face of `Meta`, par
 
 ## Binding: a mount is a binding
 
+Start the peer, and wait for its socket before you mount it (the `rm -f` clears a socket an
+earlier run left behind, which would end the wait before this peer is listening):
+
+<!-- demo: start -->
 ```bash
+rm -f /tmp/py-hello.sock
 python3 examples/python/hello.py /tmp/py-hello.sock &
-ikigai --plain --mount urn:py:=/tmp/py-hello.sock -c 'source urn:py:hello who=Ada'
+until [ -S /tmp/py-hello.sock ]; do sleep 0.2; done
 ```
 
+<!-- demo: run -->
 ```text
+$ ikigai --plain --mount urn:py:=/tmp/py-hello.sock -c 'source urn:py:hello who=Ada'
 Hello, Ada!
-[computed]
+[uncacheable]
 ```
 
 The Python process bound nothing under `urn:py:`; the **host** did, with `--mount`,
 exactly as [Binding, and a host of your own](../getting-started/binding.md) said a host
-decides the name. `list` shows where the name is served from:
+decides the name. `list` shows where the name is served from, after every name the host
+binds itself:
 
+<!-- demo: run -->
 ```text
 $ ikigai --plain --mount urn:py:=/tmp/py-hello.sock -c list
+…
 urn:py:hello                        → hello   [/tmp/py-hello.sock]
 urn:py:shout                        → shout   [/tmp/py-hello.sock]
 ```
+
+`hello` declares `cacheable=True`, and the answer above still says `[uncacheable]`. Read it
+twice and ask the host why:
+
+<!-- demo: run -->
+```text
+$ ikigai --plain --mount urn:py:=/tmp/py-hello.sock -c 'source urn:py:hello who=Ada' -c 'source urn:py:hello who=Ada' -c 'source urn:kernel:uncached'
+Hello, Ada!
+[uncacheable]
+Hello, Ada!
+[uncacheable]
+uncached (why a computed read was not cached; the last 64, most recent first)
+  urn:py:hello      ×2  declared  [root]
+
+[uncacheable]
+— batch: 3 commands · 3 uncacheable
+```
+
+`ikigai-cli` 0.2.5, the version this page is replayed against, caches nothing a mounted peer
+answers: both reads reached the Python process, and `urn:kernel:uncached` gives `declared` as
+the reason. That is the mount's rule, on purpose: a kernel that mounts a peer stores no copy of
+what the peer answers, because a change on the peer's side (a file it watches, a write
+that reaches it by another route) never crosses back to the mounting kernel, so a stored
+copy could be served stale for as long as the host runs. The `declared` reason is the
+mount's own declaration, not the peer's. So `cacheable=True` on a served peer describes its answers;
+through `--mount`, the host does not keep them.
 
 ## What resolution buys you: the kernel's cache and trace, from outside
 
@@ -99,10 +147,11 @@ urn:py:shout                        → shout   [/tmp/py-hello.sock]
 {{#include ../../../../examples/python/client.py:traced}}
 ```
 
-The cache is the **kernel's**. `cacheable=True` on the decorated function only marks the
-representation; served straight from Python nothing is cached, and mounted through a Rust
-kernel the same function's answers are — the cache verdict flips to `HIT` on the second
-call. The trace events come back over the wire and are the same `TraceEvent`s a Rust
+The cache is the **kernel's**: what these two listings probe is a name the served kernel
+binds itself, and its answer is cached there, for every client of that kernel. `cacheable=True`
+on a decorated function only marks the representation. Served straight from Python nothing is
+cached, and mounted through `ikigai-cli` 0.2.5 nothing is either, as
+[Binding](#binding-a-mount-is-a-binding) showed. The trace events come back over the wire and are the same `TraceEvent`s a Rust
 tracer receives.
 
 ## Capabilities: a scoped connect
@@ -159,38 +208,44 @@ is cacheable and answers `NotFound` for a missing note, a Sink whose body arrive
 `content`, and a Delete. Exists is not written at all. It defaults to "would Source
 succeed", so a `NotFound` answers `false`.
 
+<!-- demo: start -->
 ```bash
+rm -f /tmp/py-notes.sock
 python3 examples/python/notes.py /tmp/py-notes.sock &
-ikigai --plain --mount urn:py:=/tmp/py-notes.sock -c 'sink urn:py:note:milk two liters' \
+until [ -S /tmp/py-notes.sock ]; do sleep 0.2; done
+```
+
+<!-- demo: run -->
+```text
+$ ikigai --plain --mount urn:py:=/tmp/py-notes.sock -c 'sink urn:py:note:milk two liters' \
   -c 'source urn:py:note:milk' -c 'source urn:py:note:milk' \
   -c 'sink urn:py:note:milk three liters' -c 'source urn:py:note:milk' \
   -c 'source urn:py:note:index' -c 'delete urn:py:note:milk' -c 'source urn:py:note:milk'
-```
-
-```text
 wrote milk
 [uncacheable]
 two liters
-[computed]
+[uncacheable]
 two liters
-[cached]
+[uncacheable]
 wrote milk
 [uncacheable]
 three liters
-[computed]
+[uncacheable]
 milk
 [uncacheable]
 forgot milk
 [uncacheable]
 error: not found: no note called milk
+— batch: 8 commands · 7 uncacheable
 ```
 
-Read the verdicts. The second read of `milk` was served from the host's cache. The peer
-keeps no cache. The write that followed cut the note's golden thread in the host, so the
-next read computed again and saw the new text. The peer wrote no invalidation code. The
-host cuts a name's thread after every Sink or Delete it forwards to that name. The index is
-uncacheable on purpose, because it reads every note and a write cuts only the note it
-wrote. Exists, from a client (the block above ended by deleting `milk`, so sink it again
+Read the verdicts. The note's Source declares itself cacheable, and, as in
+[Binding](#binding-a-mount-is-a-binding), `ikigai-cli` 0.2.5 caches nothing a mounted peer
+answers, so every read here reached the peer. The peer keeps no cache of its own either, and
+that is why the read after the second write saw the new text. The writes and the delete are
+uncacheable whatever the host does, because a Sink or Delete answer always is, and the index
+is uncacheable on purpose: it reads every note, and a write is about only the note it wrote.
+Exists, from a client (the block above ended by deleting `milk`, so sink it again
 first):
 
 ```python

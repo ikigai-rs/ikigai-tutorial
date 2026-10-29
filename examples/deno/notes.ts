@@ -5,7 +5,7 @@
  * matches — and answers more than one verb on it: read a note, write it, delete it, ask
  * whether it is there. Run it and mount it the way the chapter mounts `hello.ts`:
  *
- *     deno run -A examples/deno/notes.ts /tmp/ts-notes.sock
+ *     deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ts-notes.sock
  *     ikigai --plain --mount urn:ts:=/tmp/ts-notes.sock -c 'sink urn:ts:note:milk "2 liters"'
  *
  * Modeled on ikigai-deno's `examples/tictactoe_store.ts` (read-only for this book); kept

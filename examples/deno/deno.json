@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@std/crypto": "jsr:@std/crypto@^1.0.0"
+  },
+  "lock": false
+}
