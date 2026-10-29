@@ -38,6 +38,9 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
 - [Composites, one layer at a time](composites.md): build answers from answers, a filter,
   a sort, a grouping and a join of two weeks with notes of your own, each a name the next
   reads; see what a cut recomputes, and what joining the live feed costs.
+- [A river of feeds](rss.md): turn a directory of RSS feeds into one graph with XSLT, read
+  feeds by their publishers' rules, and keep questions about it, and the pages they make, as
+  files.
 
 Later in this part, a page built from them is served over HTTP.
 

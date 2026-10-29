@@ -1,0 +1,506 @@
+# A river of feeds
+
+The earthquakes came from one publisher, in one format, on one schedule. A feed reader has
+the opposite problem: many small publishers, each with a feed of their own, each deciding
+how often it changes and how long a copy stays good. This chapter builds a reader of that
+kind out of the same parts as the rest of this part, SPARQL among them, as [Giving the data
+names](names.md) asked it of the earthquakes, plus one more: XSLT, which reads XML.
+
+The feeds are a directory of personal blogs, and a directory is a list of names. Each feed
+becomes RDF, the feeds together become one graph called the **river**, questions about the
+river are files, and one answer is written out four ways: a web page, a digest, a feed of
+its own and a directory of the feeds that matched. Every step is a REPL line. The only code
+is XSLT, SPARQL and three files of REPL lines.
+
+## What you need
+
+The `ikigai` command, 0.2.5 or later, and a copy of this book's repository, which holds the
+example in `examples/rss/`:
+
+```bash
+git clone https://github.com/ikigai-rs/ikigai-tutorial
+cd ikigai-tutorial/examples/rss
+./iki --plain
+```
+
+`./iki` starts the REPL over the example's own workspace, `ws/`, with a configuration
+directory of its own (`.home/`) and none of your machine's mounts, so nothing here touches
+the CLI's default workspace. It runs `ikigai` from your PATH; name another binary with
+`IKIGAI=`.
+
+The feeds are a fixture: four invented blogs under `example.com` and `example.org`, domains
+reserved for examples, shaped like the real feeds in a directory of personal sites (their
+dates, their `guid` forms, HTML in descriptions, missing fields, a podcast with no `guid`).
+Nothing in `ws/` came from a real person's feed, and nothing in this chapter reads one. The
+example's README ends with a live run, which is your choice to make, rarely.
+
+<!-- transcripts: workspace examples/rss/ws -->
+
+The book's checks replay every `ikigai>` block on this page against `ikigai-cli`
+{{#include ../../ikigai-cli.version}}, over a copy of `ws/` as git has it, so those answers are
+the ones you get. Each block is a fresh REPL unless the text says it goes on from the one
+before. The steps against the stand-in origin in section 2 are not replayed, and the section
+says why.
+
+## 1. A directory is a list of names
+
+`ws/directory.opml` is the directory. OPML is a small XML format for lists of feeds; each
+`<outline>` names one, with its address in `xmlUrl`. A directory of four looks like this,
+one line per feed:
+
+```xml
+<outline type="rss" version="RSS" text="Alice Writes Things" title="Alice Writes Things" description="Notes on static sites, feeds and the small web." xmlUrl="https://alice.example.com/feed.xml" htmlUrl="https://alice.example.com/"/>
+```
+
+`urn:xslt:transform` runs an XSLT stylesheet over a resource: `src` is what to read and
+`stylesheet` the stylesheet, and both are names, read through the kernel. `ws/feeds.xsl`
+writes each feed's address on a line of its own. `ws/feeds-local.xsl` writes, for each feed,
+the name of the fixture's copy of it, `urn:file:feeds/{host}.xml`:
+
+```text
+ikigai> source urn:xslt:transform src=urn:file:directory.opml stylesheet=urn:file:feeds.xsl
+https://alice.example.com/feed.xml
+https://bob.example.org/feed/
+https://carol.example.com/index.xml
+https://dave.example.org/feed
+[computed]
+ikigai> source urn:xslt:transform src=urn:file:directory.opml stylesheet=urn:file:feeds-local.xsl
+urn:file:feeds/alice.example.com.xml
+urn:file:feeds/bob.example.org.xml
+urn:file:feeds/carol.example.com.xml
+urn:file:feeds/dave.example.org.xml
+[computed]
+```
+
+A list with one name per line is the shape `..` maps over ([A lab with names in
+it](lab.md#4-a-map) mapped `toUpper` over places). Both lists are answers like any other:
+cached, and hanging from the directory's thread and the stylesheet's. Add a feed to the
+OPML and the list changes; the rest of this chapter uses the second one, so nothing leaves
+your machine.
+
+## 2. Somebody else's rules
+
+[Somebody else's resource](http.md#2-how-long-a-copy-stays-good) read a feed whose
+publisher said how long a copy stayed good: sixty seconds. Personal feeds mostly say less.
+In one polite pass over a real directory of 115 personal feeds, on 2026-10-28, one request
+each, the headers said this (counts only; which site said what is not recorded here):
+
+| What the feed's answer said | Feeds |
+|---|---|
+| No `Cache-Control` at all | 39 |
+| `max-age=0` | 28 |
+| A copy may be kept more than ten seconds | 30 of 112 |
+| Sends an `ETag` | 95 |
+| Answers a conditional request with 304 Not Modified | 90 |
+
+So a copy of most of these feeds may barely be kept, but nearly all of them can say "not
+changed" in a few bytes when asked properly. A reader that honors the first and uses the
+second downloads almost nothing on a feed that has not changed.
+
+None of that can be shown against a real person's site, and this book never tries. The
+example has a stand-in origin instead, `tools/origin.py`: a small web server on your own
+machine that serves the fixture feeds with whatever cache headers the path asks for
+(`/cc/max60/…`, `/cc/etag/…`, `/cc/none/…`, and a few more listed in the file) and logs
+every request it is sent. Start it in a second terminal:
+
+```bash
+python3 -I tools/origin.py ws/feeds /tmp/origin.log
+```
+
+It prints the port it chose, `port 37959` here. The port is different every run, which is
+why the blocks in this section are not replayed: each one prints the port. Yours will show
+your port; everything else is what `ikigai-cli` 0.2.5 printed on 2026-10-29.
+
+A feed that says `max-age=60` is kept for sixty seconds, as USGS's was. The second read is
+served from the cache, and the origin's log shows one request:
+
+```text
+source urn:http:get url=http://127.0.0.1:37959/cc/max60/alice.example.com.xml | urn:text:wc
+source urn:http:get url=http://127.0.0.1:37959/cc/max60/alice.example.com.xml | urn:text:wc
+cache urn:http:get url=http://127.0.0.1:37959/cc/max60/alice.example.com.xml
+```
+
+```text
+38
+[2 computed]
+38
+[2 cached]
+cached
+```
+
+A feed that says nothing is not kept at all: every read is a download. You may decide for
+yourself how stale a copy you will accept, with `max_age=` in seconds, and say who you are,
+with a `User-Agent` header. A publisher reading their logs then sees a tutorial asking once
+an hour, not an anonymous client asking every time:
+
+```text
+source urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:text:wc
+cache urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)"
+source urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml max_age=3600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:text:wc
+cache urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml max_age=3600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)"
+```
+
+```text
+29
+[2 uncacheable]
+not cached
+29
+[2 computed]
+cached
+```
+
+The same feed, kept for an hour because you asked for an hour. `max_age=` does not
+override a publisher who forbids a copy: the same line against `/cc/nostore/` (which sends
+`Cache-Control: no-store`) stays `[2 uncacheable]`. And a feed that sends an `ETag` and
+nothing else:
+
+```text
+source urn:http:get url=http://127.0.0.1:37959/cc/etag/bob.example.org.xml | urn:text:wc
+source urn:http:get url=http://127.0.0.1:37959/cc/etag/bob.example.org.xml | urn:text:wc
+source urn:kernel:uncached
+```
+
+```text
+49
+[2 uncacheable]
+49
+[2 uncacheable]
+uncached (why a computed read was not cached; the last 64, most recent first)
+  urn:text:wc       ×2  upstream  [root]
+  urn:http:get      ×2  declared  [root]
+  urn:text:wc       ×1  upstream  [root]
+  urn:http:get      ×1  declared  [root]
+
+[uncacheable]
+```
+
+`urn:kernel:uncached` says why: `urn:http:get` declared its answers uncacheable (nothing in
+the headers allowed a copy), and each `wc` was computed from one (`upstream`). The origin's
+log shows two full downloads, and neither request asked "has it changed?":
+
+```text
+{"t": 1793267742.929, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
+{"t": 1793267743.93, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
+```
+
+That is `ikigai-cli` 0.2.5, the release this book is checked against. From `ikigai-cli`
+0.2.6 (with ikigai-http 0.5.0), an answer that carries a validator is kept for
+revalidation: the second read sends `If-None-Match` with the stored `ETag`, the origin
+answers **304 Not Modified** with no body, and the stored body is served. The example's
+README records the log of that, from a cli built before 0.2.6 was published (so its
+User-Agent still says 0.2.5):
+
+```text
+{"t": 1793265062.737, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
+{"t": 1793265062.738, "path": "/cc/etag/bob.example.org.xml", "if-none-match": "\"985b241130e43cac\"", "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 304}
+```
+
+This step stays plain text, and unchecked, until the book is checked against 0.2.6. Stop the
+origin when you are done (Ctrl-C in its terminal). The rest of the chapter reads the fixture's
+files.
+
+## 3. XSLT reads RSS directly
+
+RSS 1.0 was RDF; RSS 2.0, the format nearly every feed uses now, is plain XML. So turning a
+feed into RDF needs no new vocabulary, only a stylesheet. `ws/items.xsl` reads an RSS 2.0
+feed and writes RDF/XML in RSS 1.0's own terms (`rss:item`, `rss:title`, `rss:link`,
+`rss:description`) plus Dublin Core for the rest (`dc:subject` for a category, `dc:creator`,
+`dcterms:isPartOf` for the feed an item belongs to). `urn:rdf:transrept` then rewrites the
+RDF/XML as N-Triples, one statement per line.
+
+An item in RDF needs a name, an IRI, and an RSS item has two candidates. Its `guid` is the
+publisher's own identifier, but it is only a web address when the feed says
+`isPermaLink` (the default) and it starts with `http`. Its `link` is always an address. The
+stylesheet takes the `guid` when it is a permalink and the `link` otherwise, and keeps the
+`guid` as `dc:identifier` either way. Carol's feed uses `tag:` identifiers, which are not
+web addresses, so her items are named by their links:
+
+```text
+ikigai> source urn:xslt:transform src=urn:file:feeds/carol.example.com.xml stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples | urn:text:grep pattern=rss-cloud
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/rss/1.0/item> .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/terms/isPartOf> <https://carol.example.com/index.xml> .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/rss/1.0/link> "https://carol.example.com/2026/10/24/rss-cloud/" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/elements/1.1/identifier> "tag:carol.example.com,2026-10-24:/rss-cloud" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/rss/1.0/description> "<p>Tried <a href=\"https://rpc.example.net/\">rssCloud</a> today: the feed tells readers when it changes, so nobody has to poll.</p>" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/terms/issued> "Sat, 24 Oct 2026 16:45:00 GMT" .
+<https://carol.example.com/2026/10/24/rss-cloud/> <http://purl.org/dc/elements/1.1/date> "2026-10-24T16:45:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+[3 computed]
+```
+
+That item has no title, which RSS 2.0 allows; the river's queries call it `(untitled)`. Its
+description is HTML, kept as text. And its date is there twice. RSS dates are written the
+way email dates are, `Sat, 24 Oct 2026 16:45:00 GMT`, which nothing can sort or compare.
+The stylesheet keeps that as `dcterms:issued`, and when it can read it, adds a `dc:date` in
+the form SPARQL compares, `2026-10-24T16:45:00Z`, typed `xsd:dateTime`. A date it cannot
+read gets no `dc:date` rather than a wrong one.
+
+Dave's podcast has no `guid` at all, so its episodes are named by their links too. Its dates
+use a one-digit day and an offset, `Wed, 7 Oct 2026 10:00:00 -0700`, and come out keeping
+the offset:
+
+```text
+ikigai> source urn:xslt:transform src=urn:file:feeds/dave.example.org.xml stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples | urn:text:grep pattern=date
+<https://dave.example.org/episodes/12> <http://purl.org/dc/elements/1.1/date> "2026-10-07T10:00:00-07:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://dave.example.org/episodes/11> <http://purl.org/dc/elements/1.1/date> "2026-09-23T10:00:00-07:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://dave.example.org/episodes/10> <http://purl.org/dc/elements/1.1/date> "2026-09-09T10:00:00-07:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+[2 cached · 1 computed]
+```
+
+The stylesheet's comments name the places it works around the XSLT engine's gaps (how it
+gets a newline into the text output, why one IRI lives in a variable), so it reads as a
+record of what that engine does today, not only as a recipe.
+
+## 4. The river
+
+Now the whole directory at once. Section 1's list of names, mapped (`..`) over the two
+stages in parentheses, so each feed is lifted to RDF on its own; the four answers joined,
+and the result written to `ws/river.nt`:
+
+```text
+ikigai> source urn:xslt:transform src=urn:file:directory.opml stylesheet=urn:file:feeds-local.xsl .. ( urn:xslt:transform stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples ) | sink urn:file:river.nt
+wrote 14886 bytes to river.nt
+[9 computed · 1 uncacheable]
+ikigai> source urn:xslt:transform src=urn:file:directory.opml stylesheet=urn:file:feeds-local.xsl .. ( urn:xslt:transform stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples ) | sink urn:file:river.nt
+wrote 14886 bytes to river.nt
+[9 cached · 1 uncacheable]
+```
+
+Each name on the list reaches `urn:xslt:transform` as its `src`, the one argument the stage
+leaves out. The first build computed nine answers: the list, and two stages for each of four
+feeds. The write is the one uncacheable step, because a write has to happen each time it is
+asked for. The second build, the same line again, found all nine in the cache, so only the
+write ran. (The `--plain` REPL also prints `[fan-out 4 → 1 wide]` under each build; [the
+grammar](../front-door/grammar.md#the-map-) explains it.)
+
+Ask what hangs from one feed, then say that another one changed and build again:
+
+<!-- transcript: continues -->
+
+```text
+ikigai> dependents urn:file:feeds/dave.example.org.xml
+dependents of urn:file:feeds/dave.example.org.xml  (cut 0 times)
+  3 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
+  urn:file:feeds/dave.example.org.xml  text/xml                     1.4 KB  1 thread    root
+  urn:rdf:transrept                    application/n-triples        2.8 KB  6 threads   root
+  urn:xslt:transform                   application/xml              2.3 KB  5 threads   root
+[uncacheable]
+ikigai> sink urn:kernel:cut urn:file:feeds/alice.example.com.xml
+cut urn:file:feeds/alice.example.com.xml
+[uncacheable]
+ikigai> source urn:xslt:transform src=urn:file:directory.opml stylesheet=urn:file:feeds-local.xsl .. ( urn:xslt:transform stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples ) | sink urn:file:river.nt
+wrote 14886 bytes to river.nt
+[7 cached · 2 computed · 1 uncacheable]
+```
+
+Three things hang from Dave's feed: the file, and the two stages that lifted it. Nothing else
+in the river does, so a change to Dave's feed can make only those stale. The cut says
+Alice's feed changed, and the rebuild computes exactly two answers, the two stages of
+Alice's lift. The other three feeds' lifts, and the list, come from the cache.
+
+Editing the file does the same, with no cut by hand: the CLI watches its workspace and cuts a
+file's thread when the file changes. Change a title in `ws/feeds/dave.example.org.xml` with
+your editor and build again, and the tally is the same, `[7 cached · 2 computed · 1
+uncacheable]`, with the new title in `river.nt` (and 7 more bytes, if you add `, again` to
+it). Put the file back afterwards (`git checkout ws/feeds`), because the next sections expect
+the fixture as it was.
+
+## 5. Questions are files
+
+The questions are SPARQL, kept in `ws/queries/` as files, so each is a resource with a
+name. `urn:sparql:select` runs one over a graph: pipe the query in, name the graph with
+`graph=`, and choose the answer's form with `as=`. The river's census, how many items each
+feed holds and its newest:
+
+```text
+ikigai> source urn:file:queries/per-feed.rq | urn:sparql:select graph=urn:file:river.nt as=text/csv
+feedTitle,items,newest
+Bob's Workbench,3,2026-10-27T21:14:09-05:00
+Alice Writes Things,3,2026-10-26T09:30:00Z
+carol.example.com,3,2026-10-24T16:45:00Z
+Dave Talks,3,2026-10-07T10:00:00-07:00
+[2 computed]
+```
+
+The other queries have a blank to fill: `since.rq` a day, `in.rq` a category, `from.rq` a
+feed and `search.rq` some text. Each blank is a `$r{{name}}` marker, and
+`urn:iki:fn:compose`, which filled a template in [Reshaping JSON with
+jq](jq.md#4-a-template-that-asks-questions), fills it from an argument of the same name. Their
+answers have more columns than fit on a line, so here each goes through
+`views/digest.xsl`, which writes a SPARQL answer as a short Markdown list (section 6 is
+about views):
+
+```text
+ikigai> source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
+# Digest
+- 2026-10-27 [My home server caches everything now](https://bob.example.org/2026/10/home-server-cache/) from Bob's Workbench
+- 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
+- 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
+- 2026-10-15 [A static site in one afternoon](https://alice.example.com/posts/static-site/) from Alice Writes Things
+[3 computed]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/in.rq category=caching | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
+# Digest
+- 2026-10-27 [My home server caches everything now](https://bob.example.org/2026/10/home-server-cache/) from Bob's Workbench
+- 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
+[3 computed]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/from.rq feed=https://carol.example.com/index.xml | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
+# Digest
+- 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
+- 2026-10-12 [(untitled)](https://carol.example.com/2026/10/12/coffee/) from carol.example.com
+- 2026-10-05 [A longer one about feed readers](https://carol.example.com/2026/10/05/readers/) from carol.example.com
+[3 computed]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/search.rq q=cach | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
+# Digest
+- 2026-10-27 [My home server caches everything now](https://bob.example.org/2026/10/home-server-cache/) from Bob's Workbench
+- 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
+- 2026-09-23 [Episode 11: Caching for people who hate caching](https://dave.example.org/episodes/11) from Dave Talks
+[3 computed]
+```
+
+A feed is named by its own address (`from.rq` compares it with each item's
+`dcterms:isPartOf`). The search is a case-insensitive substring of an item's title, summary,
+full text and categories, so `cach` finds "caches", "caching" and "Caching". The summaries are
+HTML, so a search also matches markup.
+
+### A term with a quote in it
+
+`compose` splices the term into the query as text. A term with a `"` in it ends the
+query's string early, and what follows is read as SPARQL:
+
+```text
+ikigai> source urn:iki:fn:compose src=urn:file:queries/search.rq q="href=\"https" | urn:sparql:select graph=urn:file:river.nt as=text/csv
+error: endpoint error: SPARQL syntax error: error at 18:139: expected NOT
+```
+
+Here it is only a syntax error. With a term chosen to be valid SPARQL, the same splice would
+change the question, which is why a term somebody else typed must never be spliced.
+`urn:sparql:select` has a way that cannot go wrong: `bindings=`, a JSON object of variable
+names and values, binds each value into the query *after* it is parsed, so a value is always
+a term and never syntax. `queries/search-bound.rq` is the search written for it, with `?q`
+where `search.rq` has its marker (a bound variable must be one the query projects, so it
+selects `?q` too):
+
+```text
+ikigai> source urn:file:queries/search-bound.rq | urn:sparql:select graph=urn:file:river.nt bindings="{\"q\": \"href=\\\"https\"}" as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
+# Digest
+- 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
+[3 computed]
+```
+
+The term is the text `href="https`, quote and all, and it matched the one summary with a
+link in it, Carol's. The backslashes are the REPL's quoting, not the query's: inside a
+quoted value `\"` is a quotation mark and `\\` a backslash ([the
+grammar](../front-door/grammar.md#quoting)), so the value the REPL passes is the JSON
+`{"q": "href=\"https"}`.
+
+## 6. One answer, four faces
+
+A SPARQL answer has a standard XML form, `application/sparql-results+xml`, and XSLT reads
+XML. So one answer can be written out many ways, a stylesheet for each, and none of them
+knows anything about feeds. `ws/views/` holds four:
+
+- `page.xsl`, an HTML page, a list of links with each item's feed and day; everything it
+  takes from a feed is written as text, never as markup, so a feed cannot put a script in
+  your page;
+- `digest.xsl`, a Markdown list, as above;
+- `feed.xsl`, an RSS feed of the answer, so a search is something you can subscribe to;
+- `opml.xsl`, an OPML directory of the feeds that matched, so the answer to "who writes
+  about caching?" can be loaded into a feed reader.
+
+```text
+ikigai> source urn:file:queries/river.rq | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl | sink urn:file:out/river.html
+wrote 1581 bytes to out/river.html
+[3 computed · 1 uncacheable]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl | sink urn:file:out/digest.md
+wrote 455 bytes to out/digest.md
+[3 computed · 1 uncacheable]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/search.rq q=cach | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/feed.xsl | sink urn:file:out/caching.xml
+wrote 1542 bytes to out/caching.xml
+[3 computed · 1 uncacheable]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/search-feeds.rq q=cach | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/opml.xsl | sink urn:file:out/caching.opml
+wrote 559 bytes to out/caching.opml
+[3 computed · 1 uncacheable]
+```
+
+Open `ws/out/river.html` in a browser, or read the others in an editor. The OPML is built
+from `search-feeds.rq`, the same search counted per feed, because a directory lists each feed
+once. Each written file is as fresh as the river: these four lines are the end of a
+pipeline that starts at the directory, and every answer in it hangs from every file it read.
+
+## 7. Saved searches and the refresh script
+
+A search worth keeping is a file. Fill `search.rq` once and keep what `compose` wrote: the
+result is a complete query, no blank left, under `ws/searches/`:
+
+```text
+ikigai> source urn:iki:fn:compose src=urn:file:queries/search.rq q=cach | sink urn:file:searches/caching.rq
+wrote 1077 bytes to searches/caching.rq
+[1 computed · 1 uncacheable]
+ikigai> source urn:iki:fn:compose src=urn:file:queries/search.rq q=rss | sink urn:file:searches/rss.rq
+wrote 1076 bytes to searches/rss.rq
+[1 computed · 1 uncacheable]
+ikigai> source urn:file:searches
+caching.rq
+rss.rq
+[uncacheable]
+ikigai> source urn:file:searches | urn:text:wc
+2
+[1 computed · 1 uncacheable]
+```
+
+`ws/save-searches.iki` is those two lines in a file: a script that writes scripts, because each
+query it writes is a program `urn:sparql:select` runs. A REPL reads a file of lines as
+readily as it reads you, so at a shell, in `examples/rss`:
+
+```bash
+./iki --quiet < ws/save-searches.iki
+```
+
+Reading a directory, `source urn:file:searches`, answers its listing, one name per line,
+and that listing is never cached: it is read fresh every time. So the folder is a set. Save
+another search and it is in the set; delete a file and it is gone, with nothing else to
+update.
+
+What a map cannot do with that set yet is run it. The listing names the files as the folder
+knows them, `caching.rq`, not as the kernel does, `urn:file:searches/caching.rq`, and a stage
+mapped over it is handed the short name. In the same REPL as the saves above:
+
+<!-- transcript: continues -->
+
+```text
+ikigai> source urn:file:searches .. urn:iki:fn:compose
+error: invalid argument `src`: not an IRI: invalid IRI: No scheme found in an absolute IRI
+       `src`: the IRI of the template to fill
+```
+
+So `ws/refresh.iki`, which rebuilds the river and all four faces, names its searches one by
+one. It is section 4's build line and section 6's four lines, with the feed reading the saved
+search, `urn:file:searches/caching.rq`, instead of composing it again. After a change to a
+feed, the directory or a stylesheet:
+
+```bash
+./iki --quiet < ws/refresh.iki
+```
+
+Only what the change reached is computed again; the rest comes from the cache of that one
+REPL. `examples/rss/check.sh` runs both scripts and fails if `river.nt` or anything in
+`ws/out/` differs from the committed copy, which is how the example knows it still works.
+
+## 8. What the river is waiting for
+
+<!-- urn-gate: illustration urn:river:all — a name this chapter imagines for the river's
+     build line, which named requests (ledger #2447) would make possible; nothing binds it. -->
+
+Everything above works, and three things in it are clumsier than they should be, all for
+the same reason: a request with arguments is not a name.
+
+- The build line is the same long line in section 4 and in `refresh.iki`, and anything that
+  wants the river has to repeat it, or read the file it wrote and lose the thread back to the
+  feeds. A name for that composition, say `urn:river:all`, would be read like any resource,
+  cached like one, and stale when any feed changed.
+- A live feed is `urn:http:get` with a `url`, a `max_age` and a `User-Agent`, written out at
+  every use. Named once, with the politeness in the name, no line could forget it.
+- The saved searches are a set of files, but not yet a set of names a map can walk.
+
+Named requests are designed and not yet built (ledger #2447, the same gap [Reshaping JSON
+with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) ran into with its headline). The
+chapter that introduces them will come back to this river and give each of these a name.

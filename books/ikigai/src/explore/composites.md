@@ -410,3 +410,6 @@ What each layer costs is what it reads. A layer that reads only recorded data an
 lasts until one of them is written; one that reads the feed lasts a minute; and a layer that
 reads another by name pays only for its own work when it is recomputed. Later in this part,
 a page built from them is served over HTTP.
+
+Next, the same parts over many publishers at once, each with its own rules for how long a copy
+stays good: [A river of feeds](rss.md).

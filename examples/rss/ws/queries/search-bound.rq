@@ -1,0 +1,19 @@
+PREFIX rss: <http://purl.org/rss/1.0/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX content: <http://purl.org/rss/1.0/modules/content/>
+# Search with the term BOUND, not spliced: pass bindings={"q": "TERMS"}. The term is always a
+# literal, whatever it holds (a quote mark included), so it can never become query syntax.
+SELECT ?q ?item ?title ?link ?date ?feed ?feedTitle ?summary
+WHERE {
+  ?item a rss:item ; rss:link ?link ; dcterms:isPartOf ?feed .
+  ?feed rss:title ?feedTitle .
+  OPTIONAL { ?item rss:title ?t }
+  OPTIONAL { ?item dc:date ?date }
+  OPTIONAL { ?item rss:description ?summary }
+  BIND(COALESCE(?t, "(untitled)") AS ?title)
+  OPTIONAL { ?item content:encoded ?full }
+  OPTIONAL { SELECT ?item (GROUP_CONCAT(?c; separator=" ") AS ?cats) WHERE { ?item dc:subject ?c } GROUP BY ?item }
+  FILTER(CONTAINS(LCASE(CONCAT(?title, " ", COALESCE(?summary, ""), " ", COALESCE(?full, ""), " ", COALESCE(?cats, ""))), LCASE(?q)))
+}
+ORDER BY DESC(?date)

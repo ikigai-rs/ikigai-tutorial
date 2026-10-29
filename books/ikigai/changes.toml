@@ -22,6 +22,11 @@ pages = ["explore/composites.md", "explore/index.md", "explore/names.md", "front
 
 [[change]]
 date = "2026-10-29"
+summary = "A new page in the Exploring part, \"A river of feeds\": a directory of RSS feeds becomes a list of names, XSLT lifts each feed to RDF, and the feeds become one river you query with SPARQL kept in files, with only the feed you changed recomputed. It reads feeds politely (`max_age=` and a User-Agent, shown against a stand-in origin on your own machine, never a real person's site, with what 0.2.6's revalidation adds), binds a search term with `bindings=` so a quote in it stays text, and writes one answer as a page, a digest, a feed and an OPML. Its REPL steps run over the repository's `examples/rss` and are replayed against the book's pinned cli."
+pages = ["explore/rss.md", "explore/index.md"]
+
+[[change]]
+date = "2026-10-29"
 summary = "New in \"Exploring without Rust\": \"Giving the data names\". A JSON-LD context gives the earthquake feed's keys published meanings, in a small vocabulary of the book's own at ikigai-rs.dev/ns/quakes, while each earthquake keeps USGS's own event page as its name. The page's kernel now runs SPARQL, so the Run cells ask the recorded week as a graph how many earthquakes it holds, which was largest and how each magnitude type counts, with each question a resource; the shell steps edit the context and watch an answer change."
 pages = ["explore/names.md", "explore/index.md", "explore/jq.md", "front-door/grammar.md", "browser.md"]
 

@@ -71,7 +71,11 @@ source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:s
 
 `compose` splices the term as text, so a term with a `"` in it would break the query. `urn:sparql:select` also takes
 `bindings=` (a JSON object), which binds a value into the *parsed* query so it is always a term, never syntax; the
-query must project the variable it binds.
+query must project the variable it binds. `queries/search-bound.rq` is the search written that way:
+
+```text
+source urn:file:queries/search-bound.rq | urn:sparql:select graph=urn:file:river.nt bindings="{\"q\": \"href=\\\"https\"}" as=text/csv
+```
 
 **4. One answer, four faces.** The same SPARQL answer, as results XML, through four stylesheets in `ws/views/`: an HTML
 page, a Markdown digest, an RSS feed of the matches (a search you can subscribe to), and an OPML of the feeds that
@@ -147,7 +151,7 @@ pick others if you like), and builds a live river. It names the tutorial in its 
 | `ws/feeds/*.xml` | four synthetic RSS 2.0 feeds covering the census's shapes |
 | `ws/feeds.xsl`, `ws/feeds-local.xsl` | OPML → a list of feed URLs, or of the fixture's files |
 | `ws/items.xsl` | RSS 2.0 → RDF/XML (RSS 1.0 + Dublin Core); its comments name the XSLT engine workarounds it carries |
-| `ws/queries/*.rq` | river, since, in (category), from (feed), search, search-feeds, per-feed, lines |
+| `ws/queries/*.rq` | river, since, in (category), from (feed), search, search-bound (`bindings=`), search-feeds, per-feed, lines |
 | `ws/views/*.xsl` | one SPARQL answer as an HTML page, a Markdown digest, an RSS feed, an OPML |
 | `ws/*.iki` | `save-searches`, `refresh`, `refresh-live`: replay files of REPL lines |
 | `ws/river.nt`, `ws/out/*` | what `refresh.iki` writes, committed so `check.sh` can tell a change |
