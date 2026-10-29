@@ -11,7 +11,7 @@ limit of the browser: USGS lets any page read this feed, and ikigai-http runs in
 over its `fetch`. But every Run cell in this book is checked against the answer printed
 beside it, and a feed that changes every minute would never match, so the live steps stay
 in your REPL. The answers below are what
-`ikigai-cli` 0.2.4 printed on 2026-10-28. Yours will have different numbers, because the
+`ikigai-cli` 0.2.6 printed on 2026-10-29. Yours will have different numbers, because the
 feed has moved on since.
 
 ## 1. A URL is a name
@@ -26,12 +26,12 @@ source urn:http:get url=https://earthquake.usgs.gov/earthquakes/feed/v1.0/summar
 ```
 
 ```text
-189
+187
 [2 computed]
 ```
 
 The feed uses the same layout as the recorded week, one earthquake to a line, so this
-week had 189.
+week had 187.
 
 ## 2. How long a copy stays good
 
@@ -66,7 +66,7 @@ source urn:http:get url=https://earthquake.usgs.gov/earthquakes/feed/v1.0/summar
 
 ```text
 not cached
-189
+187
 [2 computed]
 ```
 
@@ -89,7 +89,7 @@ source urn:kernel:dependents thread=https://earthquake.usgs.gov/earthquakes/feed
 ```text
 dependents of https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson  (cut 0 times)
   2 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
-  urn:http:get  application/json           129.1 KB  2 threads   root
+  urn:http:get  application/json           128.1 KB  2 threads   root
   urn:text:wc   text/plain                      3 B  3 threads   root
 
 [uncacheable]
@@ -121,7 +121,7 @@ source urn:http:get url=https://earthquake.usgs.gov/earthquakes/feed/v1.0/summar
 ```
 
 ```text
-wrote 132235 bytes to week.json
+wrote 131126 bytes to week.json
 [1 computed · 1 uncacheable]
 ```
 
@@ -147,7 +147,7 @@ cap reset
 ```text
 narrowed — capability: urn:cap:net:earthquake.usgs.gov
 not cached
-189
+187
 [2 computed]
 error: denied: capability does not grant `GET` to `example.com/`
 reset to identity — capability: root (full authority)

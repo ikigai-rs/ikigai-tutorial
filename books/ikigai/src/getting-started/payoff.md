@@ -329,6 +329,8 @@ cargo run -p hello-camel -- --catalog
 
 ## The same four things from a shell
 
+<!-- urn-gate: illustration urn:iki:space:dynamic:names — a golden thread's name in a `urn:kernel:threads` readout, not a resource: in 0.2.6 nothing resolves it (its `:status` child does). -->
+
 None of this is a property of Rust. The `ikigai` CLI drives another host with the same
 kernel in it, and the REPL grammar reaches all four. Start a fresh `ikigai` with no arguments
 (quit a REPL still open from [the front door](../front-door/cli.md) first: its cache and its cut
@@ -373,6 +375,9 @@ ikigai> source urn:kernel:threads
 threads (cut generations)
 …
   urn:file:notes.txt  gen 2
+  urn:iki:host:names  gen 1
+  urn:iki:space:dynamic:names  gen 1
+  urn:kernel:bindings  gen 1
 ```
 
 Line by line: `|` pipes one resolution's output into the next one's unnamed argument, and
@@ -390,7 +395,8 @@ generation — the file's twice. The `…` stands for any other file threads the
 cut: since CLI 0.2 a write goes to a temporary file first (`.ikigai-fs-` and a random
 name), which is then renamed into place, and the watcher cuts that file's thread too, so a
 row like `urn:file:.ikigai-fs-5d04287e853c130ee4476af679bdaae6.tmp  gen 3` is likely, with
-a name that changes every time.
+a name that changes every time. The three rows after the file's are the names layer's: since
+CLI 0.2.6 the CLI starts that layer in every session, which cuts those threads once (the [front door](../front-door/cli.md#7-which-threads-have-been-cut) says more).
 
 > ⚠ The Turtle the CLI prints may differ in shape from the tutorial host's: which
 > `ikigai-vocab` renders it is the CLI's choice, made on the CLI's release schedule, and

@@ -14,8 +14,8 @@ is XSLT, SPARQL and three files of REPL lines.
 
 ## What you need
 
-The `ikigai` command, 0.2.5 or later, and a copy of this book's repository, which holds the
-example in `examples/rss/`:
+The `ikigai` command, 0.2.5 or later (section 2's revalidation needs 0.2.6), and a copy of
+this book's repository, which holds the example in `examples/rss/`:
 
 ```bash
 git clone https://github.com/ikigai-rs/ikigai-tutorial
@@ -107,17 +107,17 @@ every request it is sent. Start it in a second terminal:
 python3 -I tools/origin.py ws/feeds /tmp/origin.log
 ```
 
-It prints the port it chose, `port 37959` here. The port is different every run, which is
+It prints the port it chose, `port 46413` here. The port is different every run, which is
 why the blocks in this section are not replayed: each one prints the port. Yours will show
-your port; everything else is what `ikigai-cli` 0.2.5 printed on 2026-10-29.
+your port; everything else is what `ikigai-cli` 0.2.6 printed on 2026-10-29.
 
 A feed that says `max-age=60` is kept for sixty seconds, as USGS's was. The second read is
 served from the cache, and the origin's log shows one request:
 
 ```text
-source urn:http:get url=http://127.0.0.1:37959/cc/max60/alice.example.com.xml | urn:text:wc
-source urn:http:get url=http://127.0.0.1:37959/cc/max60/alice.example.com.xml | urn:text:wc
-cache urn:http:get url=http://127.0.0.1:37959/cc/max60/alice.example.com.xml
+source urn:http:get url=http://127.0.0.1:46413/cc/max60/alice.example.com.xml | urn:text:wc
+source urn:http:get url=http://127.0.0.1:46413/cc/max60/alice.example.com.xml | urn:text:wc
+cache urn:http:get url=http://127.0.0.1:46413/cc/max60/alice.example.com.xml
 ```
 
 ```text
@@ -134,10 +134,10 @@ with a `User-Agent` header. A publisher reading their logs then sees a tutorial 
 an hour, not an anonymous client asking every time:
 
 ```text
-source urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:text:wc
-cache urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)"
-source urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml max_age=3600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:text:wc
-cache urn:http:get url=http://127.0.0.1:37959/cc/none/carol.example.com.xml max_age=3600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)"
+source urn:http:get url=http://127.0.0.1:46413/cc/none/carol.example.com.xml headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:text:wc
+cache urn:http:get url=http://127.0.0.1:46413/cc/none/carol.example.com.xml headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)"
+source urn:http:get url=http://127.0.0.1:46413/cc/none/carol.example.com.xml max_age=3600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)" | urn:text:wc
+cache urn:http:get url=http://127.0.0.1:46413/cc/none/carol.example.com.xml max_age=3600 headers="User-Agent: ikigai-tutorial (+https://ikigai-rs.github.io/ikigai-tutorial/)"
 ```
 
 ```text
@@ -155,49 +155,42 @@ override a publisher who forbids a copy: the same line against `/cc/nostore/` (w
 nothing else:
 
 ```text
-source urn:http:get url=http://127.0.0.1:37959/cc/etag/bob.example.org.xml | urn:text:wc
-source urn:http:get url=http://127.0.0.1:37959/cc/etag/bob.example.org.xml | urn:text:wc
+source urn:http:get url=http://127.0.0.1:46413/cc/etag/bob.example.org.xml | urn:text:wc
+source urn:http:get url=http://127.0.0.1:46413/cc/etag/bob.example.org.xml | urn:text:wc
 source urn:kernel:uncached
 ```
 
 ```text
 49
-[2 uncacheable]
+[2 computed]
 49
-[2 uncacheable]
+[2 computed]
 uncached (why a computed read was not cached; the last 64, most recent first)
-  urn:text:wc       ×2  upstream  [root]
-  urn:http:get      ×2  declared  [root]
-  urn:text:wc       ×1  upstream  [root]
-  urn:http:get      ×1  declared  [root]
+  urn:text:wc      ×2  expired 1793296165726  [root]
 
 [uncacheable]
 ```
 
-`urn:kernel:uncached` says why: `urn:http:get` declared its answers uncacheable (nothing in
-the headers allowed a copy), and each `wc` was computed from one (`upstream`). The origin's
-log shows two full downloads, and neither request asked "has it changed?":
+Nothing in the headers allows a copy to be served as it is, but the `ETag` allows the next
+best thing, and `ikigai-cli` 0.2.6 (with ikigai-http 0.5.0) uses it.
+The answer is stored already expired, kept for **revalidation**: the second read sends
+`If-None-Match` with the stored `ETag`, the origin answers **304 Not Modified** with no body,
+and the stored body is served. The origin's log shows one download and one 304:
 
 ```text
-{"t": 1793267742.929, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
-{"t": 1793267743.93, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
+{"t": 1793296165.725, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.6", "accept-encoding": "gzip", "status": 200}
+{"t": 1793296165.726, "path": "/cc/etag/bob.example.org.xml", "if-none-match": "\"985b241130e43cac\"", "if-modified-since": null, "user-agent": "ikigai/0.2.6", "accept-encoding": "gzip", "status": 304}
 ```
 
-That is `ikigai-cli` 0.2.5, the release this book is checked against. From `ikigai-cli`
-0.2.6 (with ikigai-http 0.5.0), an answer that carries a validator is kept for
-revalidation: the second read sends `If-None-Match` with the stored `ETag`, the origin
-answers **304 Not Modified** with no body, and the stored body is served. The example's
-README records the log of that, from a cli built before 0.2.6 was published (so its
-User-Agent still says 0.2.5):
+Both reads still say `computed`: the stored body stays expired, so every read asks the
+origin again, `cache` on the URL says `not cached` (`source urn:kernel:cache` lists the body
+as `expired`), and the `wc` computed from it is not kept either. `urn:kernel:uncached` says
+so, with the moment its upstream expired (in milliseconds since 1970). What the 304 saves is
+the download, not the computation. On 0.2.5, which kept nothing for revalidation, the same
+two reads were `[2 uncacheable]` and the log showed two full 200s with no `If-None-Match`.
 
-```text
-{"t": 1793265062.737, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
-{"t": 1793265062.738, "path": "/cc/etag/bob.example.org.xml", "if-none-match": "\"985b241130e43cac\"", "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 304}
-```
-
-This step stays plain text, and unchecked, until the book is checked against 0.2.6. Stop the
-origin when you are done (Ctrl-C in its terminal). The rest of the chapter reads the fixture's
-files.
+Stop the origin when you are done (Ctrl-C in its terminal). The rest of the chapter reads
+the fixture's files.
 
 ## 3. XSLT reads RSS directly
 
@@ -488,10 +481,10 @@ REPL. `examples/rss/check.sh` runs both scripts and fails if `river.nt` or anyth
 ## 8. What the river is waiting for
 
 <!-- urn-gate: illustration urn:river:all — a name this chapter imagines for the river's
-     build line, which named requests (ledger #2447) would make possible; nothing binds it. -->
+     build line, which named requests (ledger #2447) make possible; nothing binds it here. -->
 
 Everything above works, and three things in it are clumsier than they should be, all for
-the same reason: a request with arguments is not a name.
+the same reason: in this chapter, a request with arguments is not a name.
 
 - The build line is the same long line in section 4 and in `refresh.iki`, and anything that
   wants the river has to repeat it, or read the file it wrote and lose the thread back to the
@@ -501,6 +494,8 @@ the same reason: a request with arguments is not a name.
   every use. Named once, with the politeness in the name, no line could forget it.
 - The saved searches are a set of files, but not yet a set of names a map can walk.
 
-Named requests are designed and not yet built (ledger #2447, the same gap [Reshaping JSON
-with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) ran into with its headline). The
-chapter that introduces them will come back to this river and give each of these a name.
+Named requests (ledger #2447) remove all three, and `ikigai-cli` 0.2.6, the release this
+book is checked against, has them: the REPL's `bind` names a request with its arguments. This
+chapter was written before that release and does not use them yet (nor does [Reshaping JSON
+with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) for its headline). The chapter
+that introduces them will come back to this river and give each of these a name.

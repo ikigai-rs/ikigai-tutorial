@@ -227,8 +227,9 @@ wrote 11 bytes to notes/none.txt
 ```
 
 Now the earthquakes the notes are about: the ones of magnitude 6 and up in either week, with
-each one's id. A question with both graphs reads both weeks; its answer goes to a file, because
-at a shell an answer with arguments has no name of its own yet (named requests, ledger #2447),
+each one's id. A question with both graphs reads both weeks; its answer goes to a file,
+because this page gives an answer with arguments no name of its own (the REPL's `bind` can,
+from `ikigai-cli` 0.2.6: named requests, ledger #2447, which this part has not taken up yet),
 and `urn:json:query` turns the CSV into the JSON list the next step reads:
 
 <!-- transcript: continues -->

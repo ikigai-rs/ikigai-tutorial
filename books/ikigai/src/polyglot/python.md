@@ -101,7 +101,7 @@ Hello, Ada!
 The Python process bound nothing under `urn:py:`; the **host** did, with `--mount`,
 exactly as [Binding, and a host of your own](../getting-started/binding.md) said a host
 decides the name. `list` shows where the name is served from, after every name the host
-binds itself:
+binds itself and before its names layer, which `ikigai-cli` 0.2.6 binds last:
 
 <!-- demo: run -->
 ```text
@@ -109,6 +109,8 @@ $ ikigai --plain --mount urn:py:=/tmp/py-hello.sock -c list
 …
 urn:py:hello                        → hello   [/tmp/py-hello.sock]
 urn:py:shout                        → shout   [/tmp/py-hello.sock]
+urn:iki:host:names                  → host-names
+urn:iki:space:dynamic:names:status  → dynamic-space-status
 ```
 
 `hello` declares `cacheable=True`, and the answer above still says `[uncacheable]`. Read it
@@ -128,7 +130,7 @@ uncached (why a computed read was not cached; the last 64, most recent first)
 — batch: 3 commands · 3 uncacheable
 ```
 
-`ikigai-cli` 0.2.5, the version this page is replayed against, caches nothing a mounted peer
+`ikigai-cli` 0.2.6, the version this page is replayed against, caches nothing a mounted peer
 answers: both reads reached the Python process, and `urn:kernel:uncached` gives `declared` as
 the reason. That is the mount's rule, on purpose: a kernel that mounts a peer stores no copy of
 what the peer answers, because a change on the peer's side (a file it watches, a write
@@ -150,7 +152,7 @@ through `--mount`, the host does not keep them.
 The cache is the **kernel's**: what these two listings probe is a name the served kernel
 binds itself, and its answer is cached there, for every client of that kernel. `cacheable=True`
 on a decorated function only marks the representation. Served straight from Python nothing is
-cached, and mounted through `ikigai-cli` 0.2.5 nothing is either, as
+cached, and mounted through `ikigai-cli` 0.2.6 nothing is either, as
 [Binding](#binding-a-mount-is-a-binding) showed. The trace events come back over the wire and are the same `TraceEvent`s a Rust
 tracer receives.
 
@@ -240,7 +242,7 @@ error: not found: no note called milk
 ```
 
 Read the verdicts. The note's Source declares itself cacheable, and, as in
-[Binding](#binding-a-mount-is-a-binding), `ikigai-cli` 0.2.5 caches nothing a mounted peer
+[Binding](#binding-a-mount-is-a-binding), `ikigai-cli` 0.2.6 caches nothing a mounted peer
 answers, so every read here reached the peer. The peer keeps no cache of its own either, and
 that is why the read after the second write saw the new text. The writes and the delete are
 uncacheable whatever the host does, because a Sink or Delete answer always is, and the index

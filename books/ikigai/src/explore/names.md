@@ -257,9 +257,10 @@ curl -sO https://raw.githubusercontent.com/ikigai-rs/ikigai-tutorial/main/books/
 
 The steps below are replayed against `ikigai-cli` {{#include ../../ikigai-cli.version}} by
 the book's checks, over the same two files. Write the template from the page as a file of
-your own, fill it, and keep the filled copy as `quakes.jsonld`. There is no name like
-`urn:quakes:graph` at a shell: a request with arguments cannot be named as one resource
-yet (named requests, ledger #2447), and `graph` takes a name. So the copy is a file:
+your own, fill it, and keep the filled copy as `quakes.jsonld`. This page uses no name like
+`urn:quakes:graph` at a shell: it was written before a request with arguments could be named
+as one resource, which the REPL's `bind` does from `ikigai-cli` 0.2.6 (named requests, ledger
+#2447), and `graph` takes a name. So the copy is a file:
 
 <!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson books/ikigai/ns/quakes.context.jsonld -->
 
