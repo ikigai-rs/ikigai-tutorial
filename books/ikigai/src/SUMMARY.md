@@ -16,6 +16,7 @@
 - [Somebody else's resource](explore/http.md)
 - [Reshaping JSON with jq](explore/jq.md)
 - [Giving the data names](explore/names.md)
+- [Composites, one layer at a time](explore/composites.md)
 
 # Getting started
 

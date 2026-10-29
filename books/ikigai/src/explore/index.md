@@ -13,7 +13,9 @@ call it **Quakes**. Two copies of it run through the part:
   2024-01-08, the largest the M7.5 Noto Peninsula earthquake in Japan on New Year's Day.
   It never changes, so every answer the book prints from it is the answer you get. The
   kernel in this page holds a copy, at `urn:file:quakes-2024-01-01.geojson`, so its Run
-  buttons work with nothing installed.
+  buttons work with nothing installed. [Composites, one layer at a
+  time](composites.md) adds the week after it, recorded the same way, at
+  `urn:file:quakes-2024-01-08.geojson`.
 - **The live feed**: the same kind of document for the past seven days, which USGS updates
   every minute. Only the `ikigai` command can reach it, because this page cannot reach the
   network.
@@ -33,6 +35,9 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
 - [Giving the data names](names.md): give the feed's keys published meanings with a JSON-LD
   context, keep USGS's own address for each earthquake as its name, and ask the result
   questions in SPARQL, each question a resource.
+- [Composites, one layer at a time](composites.md): build answers from answers, a filter,
+  a sort, a grouping and a join of two weeks with notes of your own, each a name the next
+  reads; see what a cut recomputes, and what joining the live feed costs.
 
 Later in this part, a page built from them is served over HTTP.
 

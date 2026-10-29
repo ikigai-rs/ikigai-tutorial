@@ -315,5 +315,5 @@ computed again, because writing `quakes.jsonld` cut its thread. (jq wrote the co
 on one line; an editor would have kept your layout.) Download the context again to put the
 line back.
 
-The questions now have names, and the earthquakes keep USGS's. Later in this part, a page
-built from them is served over HTTP.
+The questions now have names, and the earthquakes keep USGS's. Next, answers built from
+answers, one layer at a time: [Composites, one layer at a time](composites.md).

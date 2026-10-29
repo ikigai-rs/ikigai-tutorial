@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-29**: New in "Exploring without Rust": "Composites, one layer at a time". Answers built from answers: a SPARQL filter whose answer is a graph at a name, then a sort, a grouping and a join with a second recorded week that read it by that name, all as Run cells. The page asks what hangs from the context and from a question, and cuts one to see what recomputes. At a shell, your own notes, a file per earthquake, join the two weeks through a row template; and joining the live feed into a cached composite shows its lifetime fall to the feed's minute, and where to put volatile data instead.
+
+  Pages: [Composites, one layer at a time](explore/composites.md), [A week of earthquakes](explore/index.md), [Giving the data names](explore/names.md), [The REPL grammar](front-door/grammar.md), [Appendix: the kernel in the browser](browser.md)
+
 - **2026-10-29**: New in "Exploring without Rust": "Giving the data names". A JSON-LD context gives the earthquake feed's keys published meanings, in a small vocabulary of the book's own at ikigai-rs.dev/ns/quakes, while each earthquake keeps USGS's own event page as its name. The page's kernel now runs SPARQL, so the Run cells ask the recorded week as a graph how many earthquakes it holds, which was largest and how each magnitude type counts, with each question a resource; the shell steps edit the context and watch an answer change.
 
   Pages: [Giving the data names](explore/names.md), [A week of earthquakes](explore/index.md), [Reshaping JSON with jq](explore/jq.md), [The REPL grammar](front-door/grammar.md), [Appendix: the kernel in the browser](browser.md)

@@ -69,8 +69,8 @@ a kernel or its endpoints might need:
 None of the right-hand column is something the kernel asks the platform for. A browser
 host and a native host fill the same seams, each from what it has. Where the browser has
 nothing (files, processes, the keychain), the page binds no space for it, and a name in
-those families is simply not found there. One name under `urn:file:` is the exception,
-and it is not a file system.
+those families is simply not found there. Three names under `urn:file:` are the exception,
+and they are not a file system.
 
 ## One recorded file
 
@@ -81,7 +81,9 @@ GeoJSON. At a shell it is a file you save in the CLI's file workspace, where it 
 compiled into the module by the `quakes` crate, so a cell and a command name one resource.
 It answers only reads, and it never changes. The JSON-LD context that
 [Giving the data names](explore/names.md) reads beside it is bound the same way, at
-`urn:file:quakes.context.jsonld`, the name the copy you download there has.
+`urn:file:quakes.context.jsonld`, the name the copy you download there has, and so is the
+week after that [Composites, one layer at a time](explore/composites.md) joins, at
+`urn:file:quakes-2024-01-08.geojson`.
 
 The first line below asks `urn:json:query`, a jq program run as a resource, how many events
 the file holds. The query reads the file through the kernel, so the second line finds the

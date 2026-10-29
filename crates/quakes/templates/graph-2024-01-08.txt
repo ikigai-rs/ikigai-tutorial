@@ -1,0 +1,1 @@
+{"@context": $r{urn:json:query?src=urn:file:quakes.context.jsonld&q=.[]}, "@graph": [$r{urn:file:quakes-2024-01-08.geojson}]}

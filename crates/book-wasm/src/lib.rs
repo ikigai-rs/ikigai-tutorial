@@ -119,10 +119,11 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // "Streams, I: bytes are a representation": gzip and zlib, both ways, as resources and
         // as transreptors (`urn:compress:*`, `urn:decompress:*`).
         Arc::new(ikigai_compress::space()),
-        // "Exploring without Rust": the recorded week of earthquakes at
-        // `urn:file:quakes-2024-01-01.geojson`, and the quakes context at
-        // `urn:file:quakes.context.jsonld`, the only `urn:file:` names the page binds; the
-        // graph template, the graph and the questions under `urn:quakes:`.
+        // "Exploring without Rust": the recorded weeks of earthquakes at
+        // `urn:file:quakes-2024-01-01.geojson` and `urn:file:quakes-2024-01-08.geojson`, and
+        // the quakes context at `urn:file:quakes.context.jsonld`, the only `urn:file:` names
+        // the page binds; the graph templates, the graphs, the questions and the strong layer
+        // under `urn:quakes:`.
         Arc::new(quakes::space()),
         // "Giving the data names": RDF in the page. The RDF transreptor (`urn:rdf:transrept`,
         // which reads JSON-LD) and SPARQL over any graph the kernel resolves (`urn:sparql:*`,
@@ -2103,6 +2104,29 @@ mod tests {
         assert!(t[4].lines().any(|l| l.trim_end() == events), "{}", t[4]);
         // A cut of the context makes the graph stale.
         assert!(t[8].contains("not cached"), "{}", t[8]);
+    }
+
+    /// "Composites, one layer at a time": a filter at a name, a sort and a grouping that read
+    /// it, a join of it with the week after, and what a cut of the filter's question recomputes.
+    #[test]
+    fn the_explore_composites_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("explore/composites.md", 8);
+        // The filter's answer is a graph at a name: the count question counts it, and it is
+        // cached under that name (SPARQL's CSV ends its lines with CRLF).
+        assert!(t[1].lines().any(|l| l.trim_end() == "12"), "{}", t[1]);
+        assert!(t[1].ends_with("cached\n"), "{}", t[1]);
+        // The join reads the strong layer and the week after.
+        assert!(
+            t[4].lines().any(|l| l.trim_end() == "Japan,7.5,6"),
+            "{}",
+            t[4]
+        );
+        // The layer hangs from the context, and from its question.
+        assert!(t[5].contains("urn:quakes:strong "), "{}", t[5]);
+        assert!(t[5].contains("urn:quakes:graph:2024-01-08 "), "{}", t[5]);
+        assert!(t[6].contains("urn:quakes:strong "), "{}", t[6]);
+        // A cut of the question makes the layer stale and leaves the graph under it cached.
+        assert!(t[7].contains("not cached\ncached\n"), "{}", t[7]);
     }
 
     #[test]
