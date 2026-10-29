@@ -393,12 +393,13 @@ it to this directory's files.
 
 The notable plan has its threshold, `6`, written into the question it reads. A plan that took
 the threshold as a parameter, bound to a name and read with a value, would be one plan for
-every threshold. The `ikigai-cli` this book is checked against does not have that: binding a
-plan to a name comes with engine 0.2.6 (ledger #2509), and the book's pinned cli,
-{{#include ../../ikigai-cli.version}}, has engine 0.2.5. Until then, a different threshold is
-a different question file and a different plan. Parameters arrive in this part with named
-requests (ledger #2447), the same gap [A river of feeds](rss.md#8-what-the-river-is-waiting-for)
-ran into, and this book does not work around them.
+every threshold. This page was written before the `ikigai-cli` this book is checked against
+could do that: binding a plan to a name comes with engine 0.2.6 (ledger #2509), which the
+book's pinned cli, {{#include ../../ikigai-cli.version}}, links, and its REPL's `bind` names a
+request with its arguments (named requests, ledger #2447). This part has not taken them up
+yet, so here a different threshold is still a different question file and a different plan;
+[A river of feeds](rss.md#8-what-the-river-is-waiting-for) waits on the same chapter, and
+this book does not work around it.
 
 ## 6. What a script does not have yet
 

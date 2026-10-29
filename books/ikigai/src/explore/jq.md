@@ -216,11 +216,10 @@ This week: 189 earthquakes of M4.5 and up; the largest, M 7.0 - 191 km ENE of Na
 ```
 
 The headline is as fresh as the copy it reads: save the feed to `week.json` again and the
-next compose recomputes it. What you cannot do yet is point the template straight at
-`urn:http:get` with its `url`, because a request with arguments cannot be named as one
-resource. That waits on named requests, designed and not yet built
-(ledger #2447), and the page this part
-builds later is where it matters.
+next compose recomputes it. Pointing the template straight at `urn:http:get` with its `url`
+needs a request with arguments to be named as one resource. Named requests (ledger #2447) do
+that, with the REPL's `bind`, from `ikigai-cli` 0.2.6; this page was written before that
+release and does not use them yet, and the page this part builds later is where it matters.
 
 Next, the questions get names of their own under `urn:quakes:`, and the data becomes a
 graph that keeps USGS's names for each earthquake: [Giving the data names](names.md). Later

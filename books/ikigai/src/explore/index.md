@@ -55,7 +55,7 @@ has the details), because 0.2.4 is the first release whose command can run jq, a
 the first that reads a `.geojson` file as JSON. The shell steps over the recorded week are
 replayed against `ikigai-cli` {{#include ../../ikigai-cli.version}}, the release the book
 is checked against, every time the book changes. The steps over the live feed cannot be,
-because the feed moves; they are what 0.2.4 printed on 2026-10-28.
+because the feed moves; each page says which release printed them, and when.
 
 Work in a directory of your own, so nothing here touches the CLI's default workspace:
 

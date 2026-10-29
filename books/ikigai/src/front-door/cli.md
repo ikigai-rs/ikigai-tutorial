@@ -243,6 +243,8 @@ a second (CLI 0.2 and later). Read the cache just as a minute turns and the row 
 
 ## 7. Which threads have been cut
 
+<!-- urn-gate: illustration urn:iki:space:dynamic:names — a golden thread's name in a `urn:kernel:threads` readout, not a resource: in 0.2.6 nothing resolves it (its `:status` child does). -->
+
 The relevant rows from this session are shown below. Other file threads may appear,
 including temporary files the CLI used while writing. `…` marks omitted rows.
 
@@ -254,12 +256,18 @@ threads (cut generations)
 …
   urn:file:notes.txt  gen 2
   urn:iki:fn:toUpper  gen 1
+  urn:iki:host:names  gen 1
+  urn:iki:space:dynamic:names  gen 1
+  urn:kernel:bindings  gen 1
 [uncacheable]
 ```
 
 This lists the threads cut during this kernel's lifetime and their generation counters.
 We cut `toUpper`'s once by hand. The file's thread was cut at least twice, once by the
-write and once by hand.
+write and once by hand. The last three rows were there before you typed anything: since
+CLI 0.2.6 the CLI starts its names layer (it binds the names in `urn:iki:host:names`, which
+the REPL's `bind` writes), and starting it cuts each of these threads once, even when there
+are no names to bind.
 
 The CLI's filesystem watcher can add more cuts, including for the CLI's own writes.
 One edit can produce several operating-system events, with different timing on different

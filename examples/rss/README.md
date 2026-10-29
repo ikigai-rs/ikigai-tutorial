@@ -121,17 +121,18 @@ source urn:http:get url=http://127.0.0.1:PORT/cc/etag/bob.example.org.xml | urn:
 ```
 
 - `max-age=60`: the second read is `[2 cached]`, and the origin saw one request.
-- An ETag and nothing else: on ikigai-cli 0.2.5 every read downloads the whole feed again (`[2 uncacheable]`, two
-  200s, no `If-None-Match`). From 0.2.6 (ikigai-http 0.5.0, ikigai-core 0.2.7) the answer is kept for
+- An ETag and nothing else: from ikigai-cli 0.2.6 (ikigai-http 0.5.0, ikigai-core 0.2.7) the answer is kept for
   revalidation: the second read sends `If-None-Match`, the origin answers **304**, and the stored body is served.
-  The origin's log shows it:
+  Both reads still say `[2 computed]`: the stored body stays expired, so every read asks the origin again, it is
+  not `cached`, and the `wc` over it is not kept (`source urn:kernel:uncached` lists it as `expired`). The 304 saves the download, not
+  the computation. The origin's log, from `ikigai-cli` 0.2.6 on 2026-10-29:
 
 ```text
-{"t": 1793265062.737, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 200}
-{"t": 1793265062.738, "path": "/cc/etag/bob.example.org.xml", "if-none-match": "\"985b241130e43cac\"", "if-modified-since": null, "user-agent": "ikigai/0.2.5", "accept-encoding": "gzip", "status": 304}
+{"t": 1793296165.725, "path": "/cc/etag/bob.example.org.xml", "if-none-match": null, "if-modified-since": null, "user-agent": "ikigai/0.2.6", "accept-encoding": "gzip", "status": 200}
+{"t": 1793296165.726, "path": "/cc/etag/bob.example.org.xml", "if-none-match": "\"985b241130e43cac\"", "if-modified-since": null, "user-agent": "ikigai/0.2.6", "accept-encoding": "gzip", "status": 304}
 ```
 
-(Recorded on a cli built from main before 0.2.6 was published, so its User-Agent still says 0.2.5.)
+  On 0.2.5 every read downloaded the whole feed again (`[2 uncacheable]`, two 200s, no `If-None-Match`).
 
 ## The live run (your choice, and polite)
 
