@@ -44,8 +44,8 @@ use std::time::{Duration, Instant};
 
 use book_transcripts::normalizers::{self, Bindings, Context, Normalizer};
 use book_transcripts::{
-    alignment, expand_includes, home_declared, normalize, page_normalizers, pages, refused,
-    safe_file_name, scan_page, stray_writes, Block, Command as Step, Kind, ANY,
+    alignment, expand_includes, home_declared, normalize, page_normalizers, page_workspace, pages,
+    refused, safe_file_name, scan_page, stray_writes, Block, Command as Step, Kind, ANY,
 };
 
 /// How long one `run` command may take before it is a failure.
@@ -144,6 +144,7 @@ fn main() -> ExitCode {
             &blocks,
             home_declared(&text),
             &page_normalizers(&text),
+            &page_workspace(&text),
             &mut tally,
         );
         failures.append(&mut failed);
@@ -267,12 +268,14 @@ fn compare(
 
 /// One page, one session: its blocks in order, in one scratch directory. `home` is the
 /// page's `transcripts: home` reason, if it declared one; `page_ns` the normalizers it names for
-/// every block. Counts what it does in `tally`, and returns the failures.
+/// every block; `workspace` the repository files its directory starts with. Counts what it does
+/// in `tally`, and returns the failures.
 fn run_page(
     options: &Options,
     blocks: &[Block],
     home: Option<String>,
     page_ns: &[String],
+    workspace: &[String],
     tally: &mut Tally,
 ) -> Vec<String> {
     let mut failures = Vec::new();
@@ -287,6 +290,14 @@ fn run_page(
     let scratch = Scratch::new(home.is_some());
     if let Err(e) = scratch.fits_a_socket() {
         failures.push(format!("{page}: {e}"));
+        return failures;
+    }
+    for path in workspace {
+        if let Err(e) = scratch.seed(&options.book, path) {
+            failures.push(format!("{page}: `transcripts: workspace` {path}: {e}"));
+        }
+    }
+    if !failures.is_empty() {
         return failures;
     }
     let context = scratch.context();
@@ -587,6 +598,45 @@ impl Scratch {
         let mut text = lines.join("\n");
         text.push('\n');
         std::fs::write(&path, text).map_err(|e| e.to_string())
+    }
+
+    /// Copy a `transcripts: workspace` path, relative to the repository's root (two levels above
+    /// the book), into the page's directory: a file under its own name, a directory as every file
+    /// git tracks under it, at its path below that directory. The same bytes the reader fetched a
+    /// chapter ago, from the same commit, never a local run's leftovers.
+    fn seed(&self, book: &std::path::Path, path: &str) -> Result<(), String> {
+        let root = book
+            .join("../..")
+            .canonicalize()
+            .map_err(|e| format!("the repository root: {e}"))?;
+        let from = root.join(path);
+        if !from.is_dir() {
+            let name = from.file_name().ok_or("names no file")?;
+            std::fs::copy(&from, self.dir.join(name)).map_err(|e| e.to_string())?;
+            return Ok(());
+        }
+        let listed = Command::new("git")
+            .arg("-C")
+            .arg(&from)
+            .args(["ls-files", "-z", "--", "."])
+            .output()
+            .map_err(|e| format!("git ls-files: {e}"))?;
+        if !listed.status.success() {
+            return Err(String::from_utf8_lossy(&listed.stderr).into_owned());
+        }
+        let names = String::from_utf8(listed.stdout).map_err(|e| e.to_string())?;
+        let names: Vec<&str> = names.split('\0').filter(|n| !n.is_empty()).collect();
+        if names.is_empty() {
+            return Err("a directory with no file git tracks".to_string());
+        }
+        for name in names {
+            let target = self.dir.join(name);
+            if let Some(parent) = target.parent() {
+                std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+            }
+            std::fs::copy(from.join(name), &target).map_err(|e| format!("{name}: {e}"))?;
+        }
+        Ok(())
     }
 
     fn command(&self, paths: &[PathBuf], text: &str) -> Command {

@@ -17,6 +17,7 @@
 - [Reshaping JSON with jq](explore/jq.md)
 - [Giving the data names](explore/names.md)
 - [Composites, one layer at a time](explore/composites.md)
+- [Process scripts are files](explore/scripts.md)
 - [A river of feeds](explore/rss.md)
 
 # Getting started

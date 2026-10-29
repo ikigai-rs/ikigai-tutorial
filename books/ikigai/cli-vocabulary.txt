@@ -143,6 +143,12 @@ urn:time:now
 # 0.2.5 on 2026-10-29, scratch home.
 urn:plan:eval
 
+# "Process scripts are files" validates a stored plan and asks what authority it needs before it
+# runs (`urn:plan:validate`, `urn:plan:requires`, served by ikigai-engine beside `urn:plan:eval`),
+# in shell steps the book's console runner replays against the pinned 0.2.5 (2026-10-29).
+urn:plan:validate
+urn:plan:requires
+
 # "Somebody else's resource" (Exploring without Rust) reads the live USGS feed through
 # `urn:http:get`, in REPL steps a reader types (not replayed: the page and CI do not reach
 # USGS). Run against 0.2.4 on 2026-10-28; `describe` answers against the pinned 0.2.5 too.
