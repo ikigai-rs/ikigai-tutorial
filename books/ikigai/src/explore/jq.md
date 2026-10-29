@@ -131,41 +131,31 @@ template's.
 
 ## 5. At a shell: the type comes from the name
 
-The REPL runs the same questions, with one surprise. Every answer below is what
-`ikigai-cli` 0.2.4 printed; the ones over the live week are what the feed held on
-2026-10-28, and yours will differ. Over the copy of the recorded week you
-downloaded in [A week of earthquakes](index.md#what-you-need):
+The REPL runs the same questions. Over the copy of the recorded week you downloaded in
+[A week of earthquakes](index.md#what-you-need), type the line after `ikigai>`:
+
+<!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson -->
 
 ```text
-source urn:json:query src=urn:file:quakes-2024-01-01.geojson q=".features|length"
-```
-
-```text
-error: invalid argument `src`: `urn:file:quakes-2024-01-01.geojson` is `text/plain`, and nothing this kernel mounts converts it to application/json
-       `src`: the JSON resource to query (any IRI the caller may read)
-```
-
-A file has no type of its own. The CLI's file workspace guesses one from the name's
-extension: `.json` is JSON, and `.geojson` is not on its list, so the file is served as
-plain text and the query will not read it. That is a gap in the workspace, not in your
-file (GeoJSON has a registered type, `application/geo+json`, which the page's copy
-declares); it is recorded as ledger #2529. Until
-it is fixed, a copy whose name ends in `.json` is read as JSON. Make one with the kernel:
-
-```text
-source urn:file:quakes-2024-01-01.geojson | sink urn:file:quakes-2024-01-01.json
-source urn:json:query src=urn:file:quakes-2024-01-01.json q=".features|length"
-```
-
-```text
-wrote 125765 bytes to quakes-2024-01-01.json
-[1 cached · 1 uncacheable]
+ikigai> source urn:json:query src=urn:file:quakes-2024-01-01.geojson q=".features|length"
 178
 [computed]
 ```
 
-And the live week you saved in [Somebody else's resource](http.md#4-keeping-a-copy) is
-already `week.json`, so it needs nothing:
+A file has no type of its own. The CLI's file workspace takes one from the name's
+extension: `.json` is JSON, and `.geojson` is GeoJSON's registered type,
+`application/geo+json`, which is JSON too, so the query reads it as the page's copy is
+read. (`ikigai-cli` 0.2.5 and later. On 0.2.4 the workspace did not know `.geojson` and
+served the file as plain text, which the query refused, `is text/plain, and nothing this
+kernel mounts converts it to application/json`; ledger #2529. There, copy it to a name
+ending in `.json` first: `source urn:file:quakes-2024-01-01.geojson | sink
+urn:file:quakes-2024-01-01.json`.)
+
+The answers in sections 5 and 6 over the recorded week are replayed against
+`ikigai-cli` {{#include ../../ikigai-cli.version}} by the book's checks, over the same file
+the download fetches. The ones over the live week cannot be: they are what `ikigai-cli` 0.2.4
+printed over the feed as it was on 2026-10-28, and yours will differ. The live week you saved
+in [Somebody else's resource](http.md#4-keeping-a-copy) is `week.json`:
 
 ```text
 source urn:json:query src=urn:file:week.json q=".features | max_by(.properties.mag) | .properties.title" as=text/plain
@@ -178,22 +168,31 @@ M 7.0 - 191 km ENE of Nagqu, China
 
 ## 6. At a shell: programs and templates are files
 
-A jq program you will use again belongs in a file, and a file is a resource. Pipe it into
-the query: a piped value fills the one argument you did not name, here `q`.
+A jq program you will use again belongs in a file, and a file is a resource. Write one with
+`sink`; the quotation marks make the program one value, so its `|` is part of the program
+and not a pipe, and the marks themselves are not stored. Then pipe the file into the query:
+a piped value fills the one argument you did not name, here `q`.
 
-```bash
-mkdir -p ~/quakes/queries
-printf '%s\n' '.features | max_by(.properties.mag) | .properties.title' > ~/quakes/queries/biggest.jq
-```
+<!-- transcript: continues -->
 
 ```text
-source urn:file:queries/biggest.jq | urn:json:query src=urn:file:quakes-2024-01-01.json as=text/plain
+ikigai> sink urn:file:queries/biggest.jq ".features | max_by(.properties.mag) | .properties.title"
+wrote 55 bytes to queries/biggest.jq
+[uncacheable]
+ikigai> source urn:file:queries/biggest.jq | urn:json:query src=urn:file:quakes-2024-01-01.geojson as=text/plain
+M 7.5 - 2024 Noto Peninsula, Japan Earthquake
+[2 computed]
+```
+
+The `sink` made the `queries` directory too. The file is an ordinary one,
+`~/quakes/queries/biggest.jq`, so an editor or `jq -f` reads it as well. The same program
+over the live week:
+
+```text
 source urn:file:queries/biggest.jq | urn:json:query src=urn:file:week.json as=text/plain
 ```
 
 ```text
-M 7.5 - 2024 Noto Peninsula, Japan Earthquake
-[2 computed]
 M 7.0 - 191 km ENE of Nagqu, China
 [1 cached · 1 computed]
 ```

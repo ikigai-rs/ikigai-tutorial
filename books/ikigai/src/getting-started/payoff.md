@@ -371,6 +371,7 @@ ikigai> cache urn:file:notes.txt
 not cached
 ikigai> source urn:kernel:threads
 threads (cut generations)
+…
   urn:file:notes.txt  gen 2
 ```
 
@@ -385,7 +386,11 @@ what reaches a pure function: `urn:iki:fn:toUpper` declared no thread, but since
 every cacheable read also hangs from the thread named after its own target (above), so a cut
 of `urn:iki:fn:toUpper` would invalidate it too, as the [front
 door](../front-door/cli.md#6-cut-a-thread) showed. `urn:kernel:threads` shows every thread that has ever been cut, with its
-generation — the file's twice.
+generation — the file's twice. The `…` stands for any other file threads the CLI's watcher
+cut: since CLI 0.2 a write goes to a temporary file first (`.ikigai-fs-` and a random
+name), which is then renamed into place, and the watcher cuts that file's thread too, so a
+row like `urn:file:.ikigai-fs-5d04287e853c130ee4476af679bdaae6.tmp  gen 3` is likely, with
+a name that changes every time.
 
 > ⚠ The Turtle the CLI prints may differ in shape from the tutorial host's: which
 > `ikigai-vocab` renders it is the CLI's choice, made on the CLI's release schedule, and

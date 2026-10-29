@@ -40,25 +40,29 @@ kernel keys the cache on the request, not the text you typed. Edit the input and
 again: a different request, computed afresh.
 
 For an endpoint with two arguments, name one and supply the other positionally. These
-three commands all ask the bundled `greet` endpoint for `Hello, Joe`:
+three commands all ask the bundled `greet` endpoint for `Hello, Joe` (type what follows
+`ikigai>`, the REPL's prompt, here and below):
 
 ```text
-source urn:demo:greet greeting=Hello name=Joe
-source urn:demo:greet greeting=Hello Joe
-source urn:demo:greet Hello name=Joe
+ikigai> source urn:demo:greet greeting=Hello name=Joe
+Hello, Joe
+[computed]
+ikigai> source urn:demo:greet greeting=Hello Joe
+Hello, Joe
+[cached]
+ikigai> source urn:demo:greet Hello name=Joe
+Hello, Joe
+[cached]
 ```
+
+They are one request, so the second and third are answered from the cache.
 
 Use `describe urn:demo:greet text/plain` to see the declared names, `greeting` and `name`.
 The engine checks every name against that description, so a typo is an error, not a wrong
-answer. This line:
+answer. This line is refused:
 
 ```text
-source urn:iki:fn:toUpper inn=abc
-```
-
-is refused with:
-
-```text
+ikigai> source urn:iki:fn:toUpper inn=abc
 error: `urn:iki:fn:toUpper` declares no argument `inn` (its arguments: `in`). To send `inn=abc` as text, name the argument it fills: in="inn=abc"
 ```
 
@@ -114,10 +118,6 @@ it in that step's trace (`collected`). An output that is already one buffer goes
 value either way. A stored plan (`execute`, `urn:plan:eval`) still pipes by value,
 whatever the receiving argument declares. [Streams, I: bytes are a
 representation](../streams/bytes.md) is where a body begins.
-
-<!-- urn-gate: unbound urn:plan:eval — the plan runner ikigai-engine serves; ikigai-cli 0.2.3 lists
-it, but the book's pinned 0.1.64 does not mount it, so the CLI vocabulary (probed against that pin)
-cannot claim it. -->
 
 <div class="ikigai-run" data-cmd='source urn:demo:split "a,b" | urn:iki:fn:toUpper | urn:iki:fn:reverseList'>
 <pre class="ikigai-run-expected">B
@@ -193,13 +193,8 @@ more `$a{…}` markers, `compose` expands those too.
 
 The CLI comes with a template named `urn:data:page`. Read the template before composing it:
 
-```bash
-ikigai --plain -c 'source urn:data:page'
-```
-
-Its contents are:
-
 ```text
+ikigai> source urn:data:page
 ikigai compose demo — one pull, recursively assembled
 
   toUpper : $a{urn:iki:fn:toUpper?in="resource oriented computing"}
@@ -208,6 +203,7 @@ ikigai compose demo — one pull, recursively assembled
   nested  : $a{urn:data:about}
 
 literal marker (escaped, not expanded): $$a{urn:iki:fn:toUpper?in=x}
+[computed]
 ```
 
 The text after `?` supplies arguments to the resource named inside the marker. `&`
@@ -217,11 +213,8 @@ override. `$$a{…}` escapes a marker so it appears literally in the result.
 
 Now ask `compose` to read that template and fill it in. `src` identifies the template:
 
-```bash
-ikigai --plain -c 'source urn:iki:fn:compose src=urn:data:page'
-```
-
 ```text
+ikigai> source urn:iki:fn:compose src=urn:data:page
 ikigai compose demo — one pull, recursively assembled
 
   toUpper : RESOURCE ORIENTED COMPUTING
@@ -230,12 +223,15 @@ ikigai compose demo — one pull, recursively assembled
   nested  : a shape within a shape: COMPOSED WITHIN A COMPOSED SHAPE
 
 literal marker (escaped, not expanded): $a{urn:iki:fn:toUpper?in=x}
+[computed]
 ```
 
 For the nested line, `urn:data:about` contains:
 
 ```text
+ikigai> source urn:data:about
 a shape within a shape: $a{urn:iki:fn:toUpper?in="composed within a composed shape"}
+[computed]
 ```
 
 That second marker explains the uppercase text at the end. The composed result depends
@@ -247,7 +243,9 @@ so changing one dependency invalidates the cached composition too.
 In the CLI's REPL, write your own template as a file resource:
 
 ```text
-sink urn:file:greeting.txt Hello, $h{{name}}!
+ikigai> sink urn:file:greeting.txt Hello, $h{{name}}!
+wrote 18 bytes to greeting.txt
+[uncacheable]
 ```
 
 This creates `greeting.txt` in the workspace. `$h{{name}}` inserts a caller-supplied
@@ -256,12 +254,18 @@ argument named `name`, escaping it for HTML. The template is separate from the d
 `compose` declares `src` and accepts any other name as a template argument, because the
 template decides which names it uses. Pass `name` beside `src`, in the same REPL:
 
+<!-- transcript: continues -->
+
 ```text
-source urn:iki:fn:compose src=urn:file:greeting.txt name=Joe
-source urn:iki:fn:compose src=urn:file:greeting.txt name=Alice
+ikigai> source urn:iki:fn:compose src=urn:file:greeting.txt name=Joe
+Hello, Joe!
+[computed]
+ikigai> source urn:iki:fn:compose src=urn:file:greeting.txt name=Alice
+Hello, Alice!
+[computed]
 ```
 
-The results are `Hello, Joe!` and `Hello, Alice!`. Both use the same template file;
+Both use the same template file;
 only the argument changes. This example runs in the CLI, which has the file workspace;
 the kernel in this page does not provide one. (CLI 0.2.4 and later. Earlier releases
 refused `name=Joe` here; the [Lisp form described below](#and-one-more-) could pass it:
