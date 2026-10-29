@@ -279,6 +279,10 @@ ikigai-module = "0.5.1"
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.5" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
 ikigai-sparql = "0.3.1"
+# The RDF transreptor under ikigai-sparql (both from ikigai-linkeddata), named by the book's kernel
+# for "Giving the data names", which transrepts the quakes graph. The version ikigai-sparql's lock
+# already takes. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-rdf = "0.3.1"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"

@@ -1,0 +1,1 @@
+PREFIX qk: <https://ikigai-rs.dev/ns/quakes#> SELECT (COUNT(?quake) AS ?quakes) WHERE { ?quake a qk:Earthquake }

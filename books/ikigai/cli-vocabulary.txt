@@ -96,6 +96,10 @@ urn:file:*
 # the two the graph-face and transreption chapters drive from a shell.
 urn:rdf:transrept
 urn:sparql:select
+# ikigai-rdf's set operations, which the page's kernel binds beside its transreptor, so the
+# grammar's `list` of that kernel prints them ("Giving the data names" put RDF in the page).
+urn:rdf:union
+urn:rdf:diff
 
 # ── Part III — Beyond one host ────────────────────────────────────────────────
 #

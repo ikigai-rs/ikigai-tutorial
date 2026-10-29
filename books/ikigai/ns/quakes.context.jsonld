@@ -1,0 +1,27 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@base": "https://earthquake.usgs.gov/earthquakes/eventpage/",
+    "qk": "https://ikigai-rs.dev/ns/quakes#",
+    "geojson": "https://purl.org/geojson/vocab#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "id": "@id",
+    "type": "@type",
+    "FeatureCollection": "geojson:FeatureCollection",
+    "Feature": "geojson:Feature",
+    "Point": "geojson:Point",
+    "earthquake": "qk:Earthquake",
+    "features": {"@id": "geojson:features", "@container": "@set"},
+    "geometry": "geojson:geometry",
+    "coordinates": {"@id": "geojson:coordinates", "@container": "@list"},
+    "properties": "@nest",
+    "mag": {"@id": "qk:mag", "@type": "xsd:double"},
+    "magType": "qk:magType",
+    "place": "qk:place",
+    "time": "qk:time",
+    "felt": "qk:felt",
+    "title": "schema:name",
+    "url": {"@id": "schema:url", "@type": "@id"}
+  }
+}

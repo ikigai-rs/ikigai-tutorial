@@ -222,6 +222,6 @@ resource. That waits on named requests, designed and not yet built
 (ledger #2447), and the page this part
 builds later is where it matters.
 
-Later in this part, the questions get names of their own under `urn:quakes:`, the data
-becomes a graph that keeps USGS's names for each earthquake, and the headline grows into a
-page.
+Next, the questions get names of their own under `urn:quakes:`, and the data becomes a
+graph that keeps USGS's names for each earthquake: [Giving the data names](names.md). Later
+in this part, the headline grows into a page.

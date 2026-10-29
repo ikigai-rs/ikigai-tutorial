@@ -119,9 +119,16 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // "Streams, I: bytes are a representation": gzip and zlib, both ways, as resources and
         // as transreptors (`urn:compress:*`, `urn:decompress:*`).
         Arc::new(ikigai_compress::space()),
-        // "Exploring without Rust": the recorded week of earthquakes, one atom at
-        // `urn:file:quakes-2024-01-01.geojson`. The only `urn:file:` name the page binds.
+        // "Exploring without Rust": the recorded week of earthquakes at
+        // `urn:file:quakes-2024-01-01.geojson`, and the quakes context at
+        // `urn:file:quakes.context.jsonld`, the only `urn:file:` names the page binds; the
+        // graph template, the graph and the questions under `urn:quakes:`.
         Arc::new(quakes::space()),
+        // "Giving the data names": RDF in the page. The RDF transreptor (`urn:rdf:transrept`,
+        // which reads JSON-LD) and SPARQL over any graph the kernel resolves (`urn:sparql:*`,
+        // which loads JSON-LD as it is). Neither overlaps anything above.
+        Arc::new(ikigai_rdf::space()),
+        Arc::new(ikigai_sparql::space()),
     ])
 }
 
@@ -2078,6 +2085,24 @@ mod tests {
             "{}",
             t[5]
         );
+    }
+
+    /// "Giving the data names": the quakes context, the week as a graph under it, the three
+    /// SPARQL questions as resources, and what a cut of the context's thread recomputes.
+    #[test]
+    fn the_explore_names_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("explore/names.md", 9);
+        // The earthquake is named by USGS's page for it, and carries our terms.
+        assert!(
+            t[2].contains("<https://earthquake.usgs.gov/earthquakes/eventpage/us6000m0xl> <https://ikigai-rs.dev/ns/quakes#mag>"),
+            "{}",
+            t[2]
+        );
+        // The count is the week's (SPARQL's CSV ends its lines with CRLF).
+        let events = quakes::EVENTS.to_string();
+        assert!(t[4].lines().any(|l| l.trim_end() == events), "{}", t[4]);
+        // A cut of the context makes the graph stale.
+        assert!(t[8].contains("not cached"), "{}", t[8]);
     }
 
     #[test]

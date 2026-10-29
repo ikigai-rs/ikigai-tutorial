@@ -79,7 +79,9 @@ published it: 178 events of magnitude 4.5 and up, from 2024-01-01 to 2024-01-08,
 GeoJSON. At a shell it is a file you save in the CLI's file workspace, where it is
 `urn:file:quakes-2024-01-01.geojson`. The page binds that same name to the same bytes,
 compiled into the module by the `quakes` crate, so a cell and a command name one resource.
-It answers only reads, and it never changes.
+It answers only reads, and it never changes. The JSON-LD context that
+[Giving the data names](explore/names.md) reads beside it is bound the same way, at
+`urn:file:quakes.context.jsonld`, the name the copy you download there has.
 
 The first line below asks `urn:json:query`, a jq program run as a resource, how many events
 the file holds. The query reads the file through the kernel, so the second line finds the
