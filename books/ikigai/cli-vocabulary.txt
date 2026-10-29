@@ -100,6 +100,9 @@ urn:sparql:select
 # grammar's `list` of that kernel prints them ("Giving the data names" put RDF in the page).
 urn:rdf:union
 urn:rdf:diff
+# The XSLT engine the CLI links natively: "A river of feeds" turns a directory (OPML) into a
+# list of names, each RSS feed into RDF/XML, and a SPARQL answer into a page, with it.
+urn:xslt:transform
 
 # ── Part III — Beyond one host ────────────────────────────────────────────────
 #
