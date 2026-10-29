@@ -11,7 +11,7 @@ The book teaches by building one small, real app: a **kernel inspector**. It sho
 kernel to the person running it: what its cache holds, which golden threads have been cut, how
 its spaces are arranged, what its endpoints say about themselves, and its scheduler. If you have
 read The ikigai Book you have met every one of those as text. `source urn:kernel:cache` printed
-the cache in [Twenty minutes, nothing compiled](../front-door/cli.html), and the threads and their
+the cache in [Twenty minutes with the CLI](../front-door/cli.html), and the threads and their
 cuts were the subject of [Golden threads in practice](../getting-started/golden-threads.html).
 Here they become pages that update while you watch.
 
