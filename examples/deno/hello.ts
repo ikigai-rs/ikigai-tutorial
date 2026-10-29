@@ -37,16 +37,19 @@ export const hello = endpoint("urn:ts:hello", {
   cacheable: true,
 }, ({ who }) => `Hello, ${who}!`);
 
+// A list in, a list out: one item per line, each shouted, so a pipe that feeds it a list
+// and reverses what comes back shows every stage's mark on every line.
 export const shout = endpoint("urn:ts:shout", {
-  summary: "Uppercase a string, loudly",
+  summary: "Shout each line of a list",
   args: [{
     name: "text",
     required: true,
-    summary: "the text to shout",
+    summary: "the lines to shout, one per line",
     class: XSD_STRING,
   }],
   cacheable: true,
-}, ({ text }) => `${String(text).toUpperCase()}!`);
+}, ({ text }) =>
+  String(text).split("\n").map((line) => `${line.toUpperCase()}!`).join("\n"));
 // ANCHOR_END: endpoint
 
 // ANCHOR: serve

@@ -17,7 +17,7 @@
 
 [[change]]
 date = "2026-10-29"
-summary = "The polyglot tracks' binding steps run again, and are now replayed against the book's pinned cli with their Python and Deno peers started from the pages' own lines. The TypeScript track's peer starts (an import map beside the listings, `examples/deno/deno.json`, supplies the `@std/crypto` ikigai-deno now needs), each listing waits for its peer's socket before mounting it, and the binding pipe goes Rust into TypeScript into Rust with a visible effect at each stage. Both tracks now show the verdicts ikigai-cli 0.2.5 prints: it caches nothing a mounted peer answers, and the pages say so, with `urn:kernel:uncached`'s reason, rather than claiming the host honors the peer's `cacheable`."
+summary = "The polyglot tracks' binding steps run again, and are now replayed against the book's pinned cli with their Python and Deno peers started from the pages' own lines. The TypeScript track's peer starts (an import map beside the listings, `examples/deno/deno.json`, supplies the `@std/crypto` ikigai-deno now needs), each listing waits for its peer's socket before mounting it, and the binding pipe goes Rust into TypeScript into Rust with a visible effect at each stage: `shout`, in both tracks, now takes a list and shouts each line, and the list comes back reversed. Both tracks now show the verdicts ikigai-cli 0.2.5 prints: it caches nothing a mounted peer answers, and the pages say so, with `urn:kernel:uncached`'s reason, rather than claiming the host honors the peer's `cacheable`."
 pages = ["polyglot/typescript.md", "polyglot/python.md", "polyglot/index.md"]
 
 [[change]]

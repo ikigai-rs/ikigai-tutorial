@@ -30,10 +30,11 @@ def hello(who: Annotated[str, "the name to greet"]) -> str:
     return f"Hello, {who}!"
 
 
-# A second one, so `list` has something to show and a pipe has something to feed.
-@endpoint("urn:py:shout", summary="Uppercase a string, loudly", cacheable=True)
-def shout(text: Annotated[str, "the text to shout"]) -> str:
-    return text.upper() + "!"
+# A second one, so `list` has something to show and a pipe has something to feed: a list in,
+# one item per line, and each line shouted (the TypeScript track's `shout` does the same).
+@endpoint("urn:py:shout", summary="Shout each line of a list", cacheable=True)
+def shout(text: Annotated[str, "the lines to shout, one per line"]) -> str:
+    return "\n".join(line.upper() + "!" for line in text.split("\n"))
 # ANCHOR_END: endpoint
 
 

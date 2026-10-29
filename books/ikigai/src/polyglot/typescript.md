@@ -91,8 +91,8 @@ Hello, Ada!
 [uncacheable]
 $ ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:demo:split "resource,oriented,computing" | urn:ts:shout | urn:iki:fn:reverseList' -c 'source urn:kernel:uncached'
 COMPUTING!
-ORIENTED
-RESOURCE
+ORIENTED!
+RESOURCE!
 [1 computed · 2 uncacheable]
 uncached (why a computed read was not cached; the last 64, most recent first)
   urn:iki:fn:reverseList      ×1  upstream  [root]
@@ -104,10 +104,11 @@ uncached (why a computed read was not cached; the last 64, most recent first)
 
 The pipe is the part to notice: Rust into TypeScript into Rust, in the host's grammar, with
 none of the three knowing the others' language. `urn:demo:split` (Rust) turns the commas
-into three lines. `urn:ts:shout` (TypeScript) uppercases the whole value and puts one `!` at
-its end, after `computing`. `urn:iki:fn:reverseList` (Rust) reverses the order of the lines,
-which carries that `!` to the top. Each stage left a mark you can see, so the answer shows
-both crossings happened, and in that order. The host owns the topology; the peers own their
+into a list of three lines. `urn:ts:shout` (TypeScript) takes that list and shouts each
+line. `urn:iki:fn:reverseList` (Rust) reverses the order of the lines, so `computing` comes
+first. Each stage leaves a mark you can see: the list's three items, the capitals and `!` on
+every line, and the reversed order. So the answer shows that both crossings happened, and in
+that order. The host owns the topology; the peers own their
 answers.
 
 Now read the verdicts. Both endpoints declare `cacheable: true`, and the peer marks its
