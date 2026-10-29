@@ -140,9 +140,12 @@ urn:time:now
 
 # "Twenty minutes with the CLI" and "The payoff" show the names layer's threads in a
 # `urn:kernel:threads` readout, and name the host's names file it binds (`urn:iki:host:names`,
-# Source and Sink, which the REPL's `bind` writes). New in 0.2.6; probed with `describe`
-# against the pinned 0.2.6 on 2026-10-29, scratch home.
+# Source and Sink, which the REPL's `bind` writes). "The Python track" shows it in `list`
+# beside `urn:iki:space:dynamic:names:status`, which says what the names layer has in force.
+# Both new in 0.2.6; probed with `describe` and `source` against the pinned 0.2.6 on
+# 2026-10-29, scratch home.
 urn:iki:host:names
+urn:iki:space:dynamic:names:status
 
 # "The REPL grammar" names the plan runner a stored plan pipes through (`urn:plan:eval`, served
 # by ikigai-engine). The CLI mounts it from 0.2.3; probed with `describe` against the pinned
