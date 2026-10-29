@@ -185,5 +185,6 @@ two fields cannot say:
   still being written, never finishes being one.
 
 That is where this part goes next: a representation whose bytes arrive in pieces, so an answer
-can start before it ends and a large one never has to be held whole (ledger #2228). It is not in
-the kernel yet, and the pages that follow will say what it adds as it arrives.
+can start before it ends and a large one never has to be held whole (ledger #2228). The kernel
+now has its first half, and [the next page](replay.md) reads it: a body that can be read again,
+a file as one, and a range of a resource that reads only the range.

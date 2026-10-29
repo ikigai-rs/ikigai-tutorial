@@ -1965,6 +1965,34 @@ mod tests {
         assert!(answered.contains("lentils,B,7\n"), "{}", t[2]);
     }
 
+    #[test]
+    fn the_second_streams_chapters_ranges_answer_as_it_says_in_page_order() {
+        let t = run_chapter_in_page_order("streams/replay.md", 3);
+        // The stock's first row by its offsets, computed and then cached.
+        assert_eq!(t[0], "flour,A,12\n[computed]\nflour,A,12\n[cached]\n");
+        // A write to the stock cuts the cached range; the same offsets then read the rewritten
+        // table's CRLF bytes, not a row.
+        let (before, after) = t[1].split_once("ok\n").expect("the write answers ok");
+        assert_eq!(before, "rice,B,30\n[computed]\n");
+        assert!(after.ends_with("\n0\r\nlentils\n[computed]\n"), "{}", t[1]);
+        // Past the end is refused, an end beyond it reads to the end, and a backward range is
+        // refused before anything is read.
+        assert!(
+            t[2].starts_with(
+                "error: invalid argument `start`: the range starts at 54, past the end"
+            ),
+            "{}",
+            t[2]
+        );
+        // The rewritten table's last row, with its CRLF.
+        assert!(t[2].contains("\nlentils,B,7\r\n[computed]\n"), "{}", t[2]);
+        assert!(
+            t[2].contains("the range ends before it starts (20..10)"),
+            "{}",
+            t[2]
+        );
+    }
+
     /// "The REPL grammar" shows `list` in the page's kernel: every name it binds. A space added
     /// to `page_space()` changes that answer, so the cell is held to it here, where `cargo test`
     /// sees it, and not only by the browser run.

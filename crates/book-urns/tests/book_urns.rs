@@ -120,6 +120,10 @@ fn book_hosts() -> Vec<(&'static str, Arc<dyn Space>)> {
             Arc::new(ikigai_compress::space()) as Arc<dyn Space>,
         ),
         (
+            "ikigai_fs::cacheable_space(…), the file mount \"Streams, II\" builds in its listings",
+            Arc::new(ikigai_fs::cacheable_space(std::env::temp_dir())) as Arc<dyn Space>,
+        ),
+        (
             "quakes::space(), the recorded week \"Exploring without Rust\" runs on",
             Arc::new(quakes::space()) as Arc<dyn Space>,
         ),
@@ -150,17 +154,19 @@ fn a_book_host_binds(iri: &str) -> Option<&'static str> {
         .or_else(|| the_kernel_answers(iri).then_some("hello_camel::kernel()"))
 }
 
-/// The third authority: names the **kernel** answers itself. `urn:kernel:*` is intercepted
-/// before any space is consulted, so no `Space` binds it and [`binds`] cannot see it — a
-/// Rust example naming `urn:kernel:catalog` would fail the gate while working perfectly.
-/// So ask a real kernel: the tutorial host, which carries the renderer the catalog needs.
+/// The third authority: names the **kernel** answers itself. `urn:kernel:*` and the stream
+/// builtins `urn:stream:*` are intercepted before any space is consulted, so no `Space` binds
+/// them and [`binds`] cannot see them — a Rust example naming `urn:kernel:catalog` would fail
+/// the gate while working perfectly. So ask a real kernel: the tutorial host, which carries
+/// the renderer the catalog needs.
 ///
-/// "Answers" means the kernel recognized the operation. An unknown `urn:kernel:` suffix
-/// comes back `Unresolved`; anything else — a representation, a missing argument, a
-/// denial — is the kernel saying the name is one of its own. `Source` is tried first, then
-/// `Sink` for the write-only ones (`urn:kernel:cut`), which need a thread to name.
+/// "Answers" means the kernel recognized the operation. An unknown `urn:kernel:` or
+/// `urn:stream:` suffix comes back `Unresolved`; anything else — a representation, a missing
+/// argument, a denial, a facility the host did not install — is the kernel saying the name is
+/// one of its own. `Source` is tried first, then `Sink` for the write-only ones
+/// (`urn:kernel:cut`), which need a thread to name.
 fn the_kernel_answers(iri: &str) -> bool {
-    if !iri.starts_with("urn:kernel:") {
+    if !iri.starts_with("urn:kernel:") && !iri.starts_with("urn:stream:") {
         return false;
     }
     let Ok(parsed) = Iri::parse(iri) else {
@@ -179,6 +185,23 @@ fn the_kernel_answers(iri: &str) -> bool {
             Request::new(Verb::Sink, parsed)
                 .with_arg("thread", ArgRef::Inline(b"urn-gate-probe".to_vec())),
         )
+}
+
+/// The kernel's own names are recognized by asking the kernel, so a misspelled one still fails:
+/// the stream builtins answer (a missing argument, a facility not installed), an unknown
+/// suffix under either prefix does not.
+#[test]
+fn the_kernel_answers_its_stream_builtins_and_nothing_else_under_the_prefix() {
+    for name in [
+        "urn:stream:collect",
+        "urn:stream:text",
+        "urn:stream:range",
+        "urn:stream:spill",
+    ] {
+        assert!(the_kernel_answers(name), "{name}");
+    }
+    assert!(!the_kernel_answers("urn:stream:ranges"));
+    assert!(!the_kernel_answers("urn:kernel:urn-gate-probe"));
 }
 
 /// A family is reachable if the book, the manifest, or a prefix-routed space can show
@@ -309,7 +332,7 @@ fn an_elided_digest_matches_sixty_four_hex_digits_and_nothing_else() {
 
 /// The kernel the page runs: `book_wasm::page_kernel()` compiled to wasm. A cell may name
 /// only what it binds — Part I's space and the applied chapter's game
-/// (`book_wasm::page_space()`), plus the kernel's own `urn:kernel:*`.
+/// (`book_wasm::page_space()`), plus the kernel's own `urn:kernel:*` and `urn:stream:*`.
 fn the_in_page_kernel_answers(iri: &str) -> bool {
     binds(&book_wasm::page_space(), iri) || the_kernel_answers(iri)
 }

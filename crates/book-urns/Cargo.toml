@@ -39,6 +39,8 @@ sentence-draft = { path = "../sentence-draft" }
 # "Streams, I: bytes are a representation": its listings build a kernel over ikigai-compress's
 # space alone.
 ikigai-compress.workspace = true
+# "Streams, II": its listings mount a directory with ikigai-fs and read `urn:file:stock.csv`.
+ikigai-fs = "0.2.2"
 # "Exploring without Rust": the recorded week and its headline template (`urn:quakes:*`), which
 # the part's prose names as well as its cells.
 quakes = { path = "../quakes" }
