@@ -60,6 +60,13 @@
 //! page set up, from the same bytes the reader's `curl` fetches. Nothing else on the page
 //! changes; a file a block writes there is still written by the block.
 //!
+//! A path that names a DIRECTORY is a workspace the reader already has whole (an example's
+//! `ws/`, which its own `./iki` serves with `--files`): what it holds, subdirectories and all,
+//! is copied to the workspace's root, so `urn:file:feeds/alice.example.com.xml` names the
+//! same file in the replay as at the reader's prompt. Only what git tracks is copied, so a
+//! file a local run of the example wrote there (and `.gitignore` leaves out) is not in the
+//! replay, as it is not in CI's checkout.
+//!
 //! Every transcript runs in a SCRATCH home: a fresh directory that is the working
 //! directory, `HOME` and (under `.config`) the config home of its one `ikigai` process. The
 //! front door writes `urn:file:notes.txt`, which lands in `~/.ikigai/workspace/`, and a
@@ -251,6 +258,10 @@ impl ScratchHome {
             std::fs::create_dir_all(&files).expect("a scratch workspace");
             for path in workspace {
                 let from = repo_root().join(path);
+                if from.is_dir() {
+                    copy_tracked(path, &files);
+                    continue;
+                }
                 let name = from.file_name().expect("a workspace file has a name");
                 std::fs::copy(&from, files.join(name))
                     .unwrap_or_else(|e| panic!("copying the page's workspace file {path}: {e}"));
@@ -258,6 +269,36 @@ impl ScratchHome {
             files
         });
         ScratchHome { dir, files, screen }
+    }
+}
+
+/// Copy every file git tracks under the repository directory `dir` into `to`, keeping its
+/// path below `dir`.
+fn copy_tracked(dir: &str, to: &Path) {
+    let root = repo_root().join(dir);
+    let listed = Command::new("git")
+        .arg("-C")
+        .arg(&root)
+        .args(["ls-files", "-z", "--", "."])
+        .output()
+        .unwrap_or_else(|e| panic!("listing the files git tracks in {dir}: {e}"));
+    assert!(
+        listed.status.success(),
+        "git ls-files in {dir}: {}",
+        String::from_utf8_lossy(&listed.stderr)
+    );
+    let names = String::from_utf8(listed.stdout).expect("file names are UTF-8");
+    let names: Vec<&str> = names.split('\0').filter(|n| !n.is_empty()).collect();
+    assert!(
+        !names.is_empty(),
+        "`transcripts: workspace` names {dir}, which holds no tracked file"
+    );
+    for name in names {
+        let target = to.join(name);
+        std::fs::create_dir_all(target.parent().expect("under the workspace"))
+            .expect("a workspace subdirectory");
+        std::fs::copy(root.join(name), &target)
+            .unwrap_or_else(|e| panic!("copying the page's workspace file {dir}/{name}: {e}"));
     }
 }
 
@@ -752,14 +793,33 @@ mod unit {
     fn every_declared_workspace_file_is_in_the_repository() {
         for t in transcripts() {
             for path in &t.workspace {
+                let at = repo_root().join(path);
                 assert!(
-                    repo_root().join(path).is_file(),
-                    "{}: `transcripts: workspace` names {path}, which is not a file in the \
-                     repository",
+                    at.is_file() || at.is_dir(),
+                    "{}: `transcripts: workspace` names {path}, which is not a file or a \
+                     directory in the repository",
                     t.file
                 );
             }
         }
+    }
+
+    #[test]
+    fn a_workspace_directory_is_copied_whole_and_only_what_git_tracks() {
+        let to = std::env::temp_dir().join(format!("book-transcripts-copy-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&to);
+        std::fs::create_dir_all(&to).unwrap();
+        copy_tracked("examples/rss/ws", &to);
+        assert!(to.join("directory.opml").is_file());
+        assert!(
+            to.join("feeds/alice.example.com.xml").is_file(),
+            "subdirectories keep their path"
+        );
+        assert!(
+            !to.join("searches").exists(),
+            "ws/searches/ is what save-searches.iki writes, ignored by git, never copied"
+        );
+        let _ = std::fs::remove_dir_all(&to);
     }
 
     #[test]

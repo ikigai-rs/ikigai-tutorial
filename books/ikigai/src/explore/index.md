@@ -33,6 +33,9 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
 - [Giving the data names](names.md): give the feed's keys published meanings with a JSON-LD
   context, keep USGS's own address for each earthquake as its name, and ask the result
   questions in SPARQL, each question a resource.
+- [A river of feeds](rss.md): turn a directory of RSS feeds into one graph with XSLT, read
+  feeds by their publishers' rules, and keep questions about it, and the pages they make, as
+  files.
 
 Later in this part, a page built from them is served over HTTP.
 
