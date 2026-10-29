@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-28**: "Somebody else's resource" now says why its live steps run in your REPL rather than in the page: the page could fetch the feed, but every Run cell is checked against a fixed answer, and a feed that changes every minute never matches.
+
+  Pages: [Somebody else's resource](explore/http.md)
+
 - **2026-10-28**: The CLI tour now explains the Rust/Cargo prerequisite and separates installation time from the walkthrough. The grammar clarifies which requests its tally counts, why a cache probe can cache a description, and what fan-out width reports.
 
   Pages: [Twenty minutes with the CLI](front-door/cli.md), [The REPL grammar](front-door/grammar.md)

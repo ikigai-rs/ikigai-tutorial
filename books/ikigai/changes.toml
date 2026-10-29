@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-28"
+summary = "\"Somebody else's resource\" now says why its live steps run in your REPL rather than in the page: the page could fetch the feed, but every Run cell is checked against a fixed answer, and a feed that changes every minute never matches."
+pages = ["explore/http.md"]
+
+[[change]]
+date = "2026-10-28"
 summary = "The CLI tour now explains the Rust/Cargo prerequisite and separates installation time from the walkthrough. The grammar clarifies which requests its tally counts, why a cache probe can cache a description, and what fan-out width reports."
 pages = ["front-door/cli.md", "front-door/grammar.md"]
 
