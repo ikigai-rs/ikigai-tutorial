@@ -5,11 +5,14 @@
  * it and a Rust host can mount it; `--mount urn:ts:=<socket>` in the chapter is the
  * binding.
  *
- *     deno run -A examples/deno/hello.ts /tmp/ts-hello.sock
+ *     deno run -A --config examples/deno/deno.json examples/deno/hello.ts /tmp/ts-hello.sock
  *
  * Modeled on ikigai-deno's `examples/demo.ts` (read-only for this book); kept here so
  * the book builds from a clone of this repository alone. Imports ikigai-deno by path
- * until it is on JSR — set `IKIGAI_DENO` to your checkout, or edit the import.
+ * until it is on JSR, from a sibling checkout at `../ikigai-deno`; edit the import if
+ * yours is elsewhere. ikigai-deno's own code imports `@std/crypto` by its bare name
+ * (BLAKE3, for its contract IRIs), which its own `deno.json` maps and a script importing
+ * it by path never sees, so `examples/deno/deno.json` beside this file maps it here.
  */
 
 import { endpoint, Server } from "../../../ikigai-deno/src/serve.ts";
@@ -21,7 +24,8 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 // Rust chapter stated it — and the handler receives the named arguments. (ikigai-deno's
 // `./zod` entry point derives the same list from a schema; this file stays
 // zero-dependency on purpose.) `cacheable: true` is the same claim `.cacheable()` makes
-// in Rust, and the mounting kernel is what honors it.
+// in Rust; whether a kernel that mounts this peer caches the answers is the kernel's
+// call, and the chapter shows what ikigai-cli does with it.
 export const hello = endpoint("urn:ts:hello", {
   summary: "Greet someone",
   args: [{

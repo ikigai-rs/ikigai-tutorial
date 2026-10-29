@@ -209,4 +209,29 @@ cargo run --quiet -p book-transcripts -- books/ikigai --strict --path "$book_cli
 echo "── ikigai CLI vocabulary (ikigai-cli $book_cli) ──────────────────"
 cargo test -p book-urns --test book_urns -- --ignored --nocapture || status=1
 
+# The polyglot tracks' mounted peers, with the same binary first on PATH: each track's binding
+# and family steps start a Python or Deno peer and mount it with `ikigai --mount`, which no REPL
+# replay can do, so `scripts/polyglot-tracks.sh` starts them from the pages' own lines (with
+# ikigai-python and ikigai-deno cloned at `main`) and compares what every command prints,
+# verdicts included (ledger #2612). It needs python3 and deno; under CI a missing one fails it.
+#
+#   deno, when none is on PATH, is Deno at the version below, the release's own Linux x86_64
+#         build, unzipped into `target/deno/<version>/` (ignored by git) once: the runner has a
+#         python3 and no deno. Elsewhere, install Deno yourself; the script says it is missing.
+deno_version=2.9.7
+if ! command -v deno > /dev/null 2>&1 && [ "$(uname -s)-$(uname -m)" = Linux-x86_64 ]; then
+    deno_root="target/deno/$deno_version"
+    if [ ! -x "$deno_root/deno" ]; then
+        echo "fetching deno $deno_version into $deno_root (once per version)"
+        mkdir -p "$deno_root"
+        curl -fsSL -o "$deno_root/deno.zip" \
+            "https://github.com/denoland/deno/releases/download/v$deno_version/deno-x86_64-unknown-linux-gnu.zip"
+        unzip -q -o "$deno_root/deno.zip" -d "$deno_root"
+        rm "$deno_root/deno.zip"
+    fi
+    PATH="$PWD/$deno_root:$PATH"
+fi
+echo "── the polyglot tracks' peers (ikigai-cli $book_cli) ──────────────────"
+./scripts/polyglot-tracks.sh || status=1
+
 exit "$status"

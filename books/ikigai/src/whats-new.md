@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-29**: The polyglot tracks' binding steps run again, and are now replayed against the book's pinned cli with their Python and Deno peers started from the pages' own lines. The TypeScript track's peer starts (an import map beside the listings, `examples/deno/deno.json`, supplies the `@std/crypto` ikigai-deno now needs), each listing waits for its peer's socket before mounting it, and the binding pipe goes Rust into TypeScript into Rust with a visible effect at each stage. Both tracks now show the verdicts ikigai-cli 0.2.5 prints: it caches nothing a mounted peer answers, and the pages say so, with `urn:kernel:uncached`'s reason, rather than claiming the host honors the peer's `cacheable`.
+
+  Pages: [The TypeScript track](polyglot/typescript.md), [The Python track](polyglot/python.md), [One wire, three languages](polyglot/index.md)
+
 - **2026-10-29**: New in "Exploring without Rust", after the composites: "Process scripts are files". The composites' copies are refreshed by a file of REPL lines replayed with `ikigai --quiet <`, and a replay with a failing line shows what ikigai-cli 0.2.5 does: it goes on to the next line and exits 1 at the end. A pipeline is stored as a plan, executed and executed again from the cache; `urn:plan:validate` and `urn:plan:requires` check a plan and name the authority it needs before it runs, and a session narrowed to another host is refused at the step, naming USGS's. Then a jq query writes a script that the reader replays, and the page says what plans and `.iki` files do not have yet. Every shell step on the page is run against the book's pinned cli.
 
   Pages: [Process scripts are files](explore/scripts.md), [Composites, one layer at a time](explore/composites.md), [A week of earthquakes](explore/index.md)

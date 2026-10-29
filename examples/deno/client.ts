@@ -6,7 +6,7 @@
  * in it at all.
  *
  *     ikigai serve /tmp/ikbook-kernel.sock &
- *     deno run -A examples/deno/client.ts /tmp/ikbook-kernel.sock
+ *     deno run -A --config examples/deno/deno.json examples/deno/client.ts /tmp/ikbook-kernel.sock
  *
  * Imports ikigai-deno by path until it is on JSR.
  */

@@ -5,8 +5,8 @@ borrowed these faces ahead of time), and the model never depended on it. A resol
 a request and a representation crossing a boundary, and the boundary is a wire protocol
 with a version number: `ikigai-ipc` speaks it over a Unix socket in Rust, and so do two
 other implementations of the same codec — [`ikigai-python`](https://github.com/ikigai-rs/ikigai-python)
-(pure standard library, no dependencies) and [`ikigai-deno`](https://github.com/ikigai-rs/ikigai-deno)
-(zero-dependency TypeScript). Each is both halves at once: a **client** that drives a
+(standard library, and one dependency: `blake3`, for the digests in a served door's contract IRIs) and [`ikigai-deno`](https://github.com/ikigai-rs/ikigai-deno)
+(TypeScript, with one dependency, `@std/crypto`, for the same digests, and `zod` only for its optional `./zod` entry point). Each is both halves at once: a **client** that drives a
 running kernel, and a **servable peer** that a Rust host mounts as a space.
 
 That pairing is called **L0** of the polyglot ladder, and the name is honest about what it
@@ -44,8 +44,11 @@ published to PyPI or JSR yet; both install from a checkout (`pip install <path>`
 import by path), and the listings in this part say so where it matters. The listings
 themselves live in this repository under `examples/`, modeled on the sibling repositories'
 own examples (read-only for this book) so that the book builds from a clone of this
-repository alone; every one of them was run against `ikigai-cli` 0.1.18 as it was written (one refusal line shown
-in the Python track carries a later kernel's wording, and says so).
+repository alone. The client listings were run against `ikigai-cli` 0.1.18 as they were written
+(one refusal line shown in the Python track carries a later kernel's wording, and says so).
+The steps that start a peer and mount it are replayed against the book's pinned `ikigai-cli`
+on every change to this repository, by `scripts/polyglot-tracks.sh`, and each track says which
+those are.
 
 > ⚠ Names under `urn:py:` and `urn:ts:` in this part are served by *your* peer process and
 > resolve only while it runs and is mounted. They are not in the CLI, and the book's URN
