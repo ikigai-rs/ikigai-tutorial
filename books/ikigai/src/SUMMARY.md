@@ -19,6 +19,7 @@
 - [Composites, one layer at a time](explore/composites.md)
 - [Process scripts are files](explore/scripts.md)
 - [A river of feeds](explore/rss.md)
+- [Naming a composition](explore/naming.md)
 
 # Getting started
 
