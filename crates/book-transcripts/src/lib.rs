@@ -66,6 +66,15 @@
 //! own `sh -c`, so a `cd` or a shell variable does not carry; the files do. That is a constraint
 //! on how a chapter is written, and it is stated here rather than discovered.
 //!
+//! A page whose reader already has files from an earlier chapter (a download, a recorded week)
+//! names them once, as paths from the repository's root, and they are copied into the page's
+//! directory before its first block ([`page_workspace`]; the ikigai book's REPL replay reads the
+//! same declaration):
+//!
+//! ```text
+//! <!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson -->
+//! ```
+//!
 //! ## The home a page did not ask for
 //!
 //! A page names its homes itself (`--config-home`, `--data-home`), because a reader who copies
@@ -234,6 +243,30 @@ pub fn page_normalizers(text: &str) -> Vec<String> {
             let (_, rest) = line.split_once("transcripts:")?;
             let rest = rest.trim().trim_end_matches("-->").trim();
             Some(names(rest.strip_prefix("normalize")?))
+        })
+        .flatten()
+        .collect()
+}
+
+/// The files a page's session starts with: every path its `<!-- transcripts: workspace a, b -->`
+/// lines name (commas or spaces between them), relative to the repository's root. The ikigai
+/// book's REPL replay starts each transcript's `--files` workspace with them; the console runner
+/// copies them into the page's scratch directory before its first block, so a page whose reader
+/// downloaded a file a chapter ago finds it there. A path that names a directory stands for every
+/// file git tracks under it, kept at its path below the directory.
+///
+/// ```
+/// use book_transcripts::page_workspace;
+///
+/// let page = "<!-- transcripts: workspace crates/q/a.geojson, books/x/ns/c.jsonld -->\n";
+/// assert_eq!(page_workspace(page), ["crates/q/a.geojson", "books/x/ns/c.jsonld"]);
+/// ```
+pub fn page_workspace(text: &str) -> Vec<String> {
+    text.lines()
+        .filter_map(|line| {
+            let (_, rest) = line.split_once("transcripts:")?;
+            let rest = rest.trim().strip_prefix("workspace")?;
+            Some(names(rest.split("-->").next().unwrap_or(rest)))
         })
         .flatten()
         .collect()

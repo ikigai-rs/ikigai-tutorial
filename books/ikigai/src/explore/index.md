@@ -38,6 +38,9 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
 - [Composites, one layer at a time](composites.md): build answers from answers, a filter,
   a sort, a grouping and a join of two weeks with notes of your own, each a name the next
   reads; see what a cut recomputes, and what joining the live feed costs.
+- [Process scripts are files](scripts.md): keep REPL lines in a file and replay them, store
+  a pipeline as a plan, ask what authority it needs before it runs, and write a script with a
+  script.
 - [A river of feeds](rss.md): turn a directory of RSS feeds into one graph with XSLT, read
   feeds by their publishers' rules, and keep questions about it, and the pages they make, as
   files.

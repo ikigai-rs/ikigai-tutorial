@@ -69,6 +69,9 @@
 #         own. Its pages normalize what legitimately varies, block by block, and a server a page
 #         starts on port 0 is reached at the port it printed (`book_transcripts::normalizers`).
 #
+# The same binary runs the ikigai Book's `console` blocks through `book-transcripts --strict`,
+# like the gonk Book's (the "Exploring without Rust" part's script chapter is shell steps).
+#
 # The same binary then runs `crates/book-urns/tests/book_urns.rs`'s CLI-vocabulary probe
 # (ledger #1031), `#[ignore]`d for the same reason: it asks that `ikigai` for every exact name in
 # `books/ikigai/cli-vocabulary.txt`, the book's written-down claim about the CLI, so the claim is
@@ -194,6 +197,14 @@ echo "── ikigai (ikigai-cli $book_cli) ────────────�
 PATH="$PWD/$book_cli_root/bin:$PATH"
 ikigai --version
 cargo test -p book-urns --test book_transcripts -- --ignored --nocapture || status=1
+
+# The ikigai Book's shell steps (`console` blocks: a script replayed with `ikigai --quiet <`, a
+# plan written with `-c` and `>`, an exit status) are run by the same runner as the gonk Book's,
+# against the same pinned cli, one page one session, starting from the files its
+# `transcripts: workspace` names. Its REPL blocks are the replay's above, not this.
+echo "── ikigai shell steps (ikigai-cli $book_cli) ──────────────────"
+cargo run --quiet -p book-transcripts -- books/ikigai --strict --path "$book_cli_root/bin" \
+    || status=1
 
 echo "── ikigai CLI vocabulary (ikigai-cli $book_cli) ──────────────────"
 cargo test -p book-urns --test book_urns -- --ignored --nocapture || status=1

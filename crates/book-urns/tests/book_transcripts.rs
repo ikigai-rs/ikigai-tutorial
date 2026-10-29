@@ -85,7 +85,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use book_transcripts::{declared, Kind};
+use book_transcripts::{declared, page_workspace, Kind};
 
 fn book_src() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -108,27 +108,6 @@ struct Transcript {
     manual: Option<String>,
     /// The repository files the page's file workspace starts with (`transcripts: workspace`).
     workspace: Vec<String>,
-}
-
-/// The files a page's REPL workspace starts with: every path its
-/// `<!-- transcripts: workspace a, b -->` lines name (commas or spaces between them), relative
-/// to the repository's root. (`transcripts:`, plural, is a page's declaration; `transcript:` is
-/// a block's.)
-fn page_workspace(text: &str) -> Vec<String> {
-    text.lines()
-        .filter_map(|line| {
-            let (_, rest) = line.split_once("transcripts:")?;
-            let rest = rest.trim().strip_prefix("workspace")?;
-            Some(rest.split("-->").next().unwrap_or(rest).to_string())
-        })
-        .flat_map(|names| {
-            names
-                .split([',', ' '])
-                .filter(|n| !n.is_empty())
-                .map(str::to_string)
-                .collect::<Vec<_>>()
-        })
-        .collect()
 }
 
 fn repo_root() -> PathBuf {
