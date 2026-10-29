@@ -1,0 +1,100 @@
+# The quakes vocabulary: the terms The ikigai Book's "Giving the data names" (Exploring without
+# Rust) gives the fields of USGS's earthquake GeoJSON that no published vocabulary already names.
+#
+# THIS FILE IS THE NAMESPACE'S PUBLIC DEFINITION. Every term of https://ikigai-rs.dev/ns/quakes#
+# is defined here, and this file is the one to serve at https://ikigai-rs.dev/ns/quakes, as
+# text/turtle. Its JSON-LD context, quakes.context.jsonld beside it, maps the feed onto these
+# terms, and crates/quakes/tests/vocabulary.rs holds the two to each other: every term the
+# context maps into this namespace is defined here, and every term defined here is one the
+# context maps. owl:versionInfo below changes whenever a term is added or changed, so one
+# deployed definition can be told from the next.
+#
+# The data is USGS's, and so are the names of the earthquakes: the context makes each one the
+# IRI of its own event page, https://earthquake.usgs.gov/earthquakes/eventpage/{id}, which USGS
+# publishes. This file mints no name for an earthquake, and no term under USGS's domain: USGS
+# publishes no RDF vocabulary, so a term there would be one nobody could look up.
+#
+# Reused, not minted, because each is exact:
+#
+#   - The GeoJSON-LD vocabulary, https://purl.org/geojson/vocab# (geojson.org/geojson-ld), for
+#     GeoJSON's own structure: geojson:Feature, geojson:FeatureCollection, geojson:features,
+#     geojson:geometry, geojson:Point and geojson:coordinates (an ordered list: longitude,
+#     latitude and, in USGS's feeds, depth in kilometers). The context's mappings for these are
+#     the GeoJSON-LD context's own.
+#   - schema:url, for `url`: "URL of the item", here USGS's page for the event, as an IRI.
+#   - schema:name, for `title`: the event's name as USGS titles it ("M 7.5 - 2024 Noto
+#     Peninsula, Japan Earthquake").
+#
+# Not reused, and why:
+#
+#   - geo:lat and geo:long (W3C WGS84) would need the coordinates as two properties of the
+#     event; GeoJSON gives them as one list in a fixed order, and a JSON-LD context cannot pick
+#     an item out of a list. geojson:coordinates says what the document says.
+#   - Depth is the third coordinate, carried by geojson:coordinates, so no term here names it.
+#   - schema:Event, schema:startDate and schema:location are close and not exact: USGS's `time`
+#     is a number of milliseconds, not a date, and its `place` is a phrase ("77 km ESE of
+#     Fangale'ounga, Tonga"), not a schema:Place.
+#   - Magnitude and magnitude type have no term in a vocabulary we could find that says what
+#     USGS's fields say; QuakeML (quakeml.org) models them, in XML, with no RDF terms to reuse.
+
+@prefix qk:      <https://ikigai-rs.dev/ns/quakes#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix geojson: <https://purl.org/geojson/vocab#> .
+
+<https://ikigai-rs.dev/ns/quakes>
+    a owl:Ontology ;
+    owl:versionInfo "0.1.0" ;
+    rdfs:label "Quakes" ;
+    rdfs:comment "Terms for the fields of the U.S. Geological Survey's earthquake GeoJSON (the FDSN event service and the summary feeds) that no published vocabulary names exactly. GeoJSON's structure is the GeoJSON-LD vocabulary's; each earthquake is named by the IRI of its USGS event page." ;
+    dcterms:source <https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php> ;
+    rdfs:seeAlso <https://purl.org/geojson/vocab>, <https://schema.org/> .
+
+qk:Earthquake
+    a owl:Class ;
+    rdfs:isDefinedBy <https://ikigai-rs.dev/ns/quakes> ;
+    rdfs:label "earthquake" ;
+    rdfs:comment "An event USGS's `properties.type` calls \"earthquake\" (the context maps that word to this class). Every event in a feed of M4.5 and up is one; a smaller feed also lists quarry blasts and explosions, which the context does not map." .
+
+qk:mag
+    a owl:DatatypeProperty ;
+    rdfs:isDefinedBy <https://ikigai-rs.dev/ns/quakes> ;
+    rdfs:label "magnitude" ;
+    rdfs:comment "USGS's `properties.mag`: the event's magnitude, a number with no unit, on the scale qk:magType names. The context types it xsd:double, so 5 and 5.1 are values of one type." ;
+    rdfs:domain qk:Earthquake ;
+    rdfs:range xsd:double .
+
+qk:magType
+    a owl:DatatypeProperty ;
+    rdfs:isDefinedBy <https://ikigai-rs.dev/ns/quakes> ;
+    rdfs:label "magnitude type" ;
+    rdfs:comment "USGS's `properties.magType`: the method or scale qk:mag was computed with, as USGS spells it (\"mb\", body-wave; \"mww\", \"mwr\", \"mwb\", moment magnitudes; and others)." ;
+    rdfs:domain qk:Earthquake ;
+    rdfs:range xsd:string .
+
+qk:place
+    a owl:DatatypeProperty ;
+    rdfs:isDefinedBy <https://ikigai-rs.dev/ns/quakes> ;
+    rdfs:label "place" ;
+    rdfs:comment "USGS's `properties.place`: where the event was, in words, as USGS describes it (a distance and direction from a named place, or a region's name). Text, not a place: for the location, read geojson:geometry." ;
+    rdfs:domain qk:Earthquake ;
+    rdfs:range xsd:string .
+
+qk:time
+    a owl:DatatypeProperty ;
+    rdfs:isDefinedBy <https://ikigai-rs.dev/ns/quakes> ;
+    rdfs:label "origin time" ;
+    rdfs:comment "USGS's `properties.time`: when the event began, in milliseconds since 1970-01-01T00:00:00Z (UTC), the integer USGS gives. Kept as that integer: a JSON-LD context cannot turn it into an xsd:dateTime." ;
+    rdfs:domain qk:Earthquake ;
+    rdfs:range xsd:integer .
+
+qk:felt
+    a owl:DatatypeProperty ;
+    rdfs:isDefinedBy <https://ikigai-rs.dev/ns/quakes> ;
+    rdfs:label "felt reports" ;
+    rdfs:comment "USGS's `properties.felt`: how many people reported feeling the event to USGS's \"Did You Feel It?\", a count. USGS writes null when nobody did; JSON-LD drops a null, so an event with no reports has no qk:felt at all." ;
+    rdfs:domain qk:Earthquake ;
+    rdfs:range xsd:integer .

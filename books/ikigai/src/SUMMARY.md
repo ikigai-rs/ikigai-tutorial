@@ -15,6 +15,7 @@
 - [A lab with names in it](explore/lab.md)
 - [Somebody else's resource](explore/http.md)
 - [Reshaping JSON with jq](explore/jq.md)
+- [Giving the data names](explore/names.md)
 
 # Getting started
 

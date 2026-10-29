@@ -30,9 +30,11 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
   long USGS says an answer stays fresh, and narrow what the session may reach to one host.
 - [Reshaping JSON with jq](jq.md): ask sharper questions with `urn:json:query`, jq as a
   resource, and fill a template with the answers.
+- [Giving the data names](names.md): give the feed's keys published meanings with a JSON-LD
+  context, keep USGS's own address for each earthquake as its name, and ask the result
+  questions in SPARQL, each question a resource.
 
-Later in this part, the data gets names of its own, questions become files, and a page
-built from them is served over HTTP.
+Later in this part, a page built from them is served over HTTP.
 
 ## What you need
 

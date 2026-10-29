@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-29**: New in "Exploring without Rust": "Giving the data names". A JSON-LD context gives the earthquake feed's keys published meanings, in a small vocabulary of the book's own at ikigai-rs.dev/ns/quakes, while each earthquake keeps USGS's own event page as its name. The page's kernel now runs SPARQL, so the Run cells ask the recorded week as a graph how many earthquakes it holds, which was largest and how each magnitude type counts, with each question a resource; the shell steps edit the context and watch an answer change.
+
+  Pages: [Giving the data names](explore/names.md), [A week of earthquakes](explore/index.md), [Reshaping JSON with jq](explore/jq.md), [The REPL grammar](front-door/grammar.md), [Appendix: the kernel in the browser](browser.md)
+
 - **2026-10-29**: A second streams page, "Streams, II: a body you can read again": a body is a buffer, something that opens a fresh reader every time (`Replay`), or a one-shot stream, and the kernel caches the first two and never the third. Its cells read byte ranges of the shop's stock through `urn:stream:range` in the page, and see a write cut them; its listings write a `Replay` of their own and read a file through ikigai-fs as a seekable body, which refuses rather than tear when the file changes under a reader. "Streams, I" now ends by pointing to it.
 
   Pages: [Streams, II: a body you can read again](streams/replay.md), [Streams, I: bytes are a representation](streams/bytes.md)

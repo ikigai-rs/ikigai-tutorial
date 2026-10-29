@@ -16,7 +16,13 @@ path = "src/lib.rs"
 # `include_bytes!`, never read from a file system at run time.
 [dependencies]
 ikigai-core.workspace = true
+# `compose_over`, for `urn:quakes:graph`: the graph template bound at a name of its own.
+ikigai-fn.workspace = true
 
 [dev-dependencies]
 futures.workspace = true
 serde_json = "1"
+# The term-agreement test (`tests/vocabulary.rs`) reads the vocabulary with the Turtle parser
+# the workspace already pins.
+oxttl.workspace = true
+oxrdf.workspace = true

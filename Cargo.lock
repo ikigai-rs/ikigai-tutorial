@@ -282,8 +282,10 @@ dependencies = [
  "ikigai-compress",
  "ikigai-core",
  "ikigai-engine",
+ "ikigai-rdf",
  "ikigai-resolve",
  "ikigai-sexpr",
+ "ikigai-sparql",
  "ikigai-vocab",
  "js-sys",
  "live-space",
@@ -2633,6 +2635,9 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
+ "ikigai-fn",
+ "oxrdf",
+ "oxttl",
  "serde_json",
 ]
 

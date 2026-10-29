@@ -64,9 +64,21 @@ shop = { path = "../shop" }
 ikigai-compress.workspace = true
 # "Exploring without Rust": the recorded week of USGS earthquakes, at
 # `urn:file:quakes-2024-01-01.geojson`, the name the CLI's file workspace gives the same file.
-# The page has no file system, so this one name is an atom with the bytes compiled in; nothing
-# else under `urn:file:` is bound here. Its chapters read it with `urn:json:query` (bound above).
+# The page has no file system, so this name is an atom with the bytes compiled in, and so is
+# `urn:file:quakes.context.jsonld` ("Giving the data names"); nothing else under `urn:file:` is
+# bound here. Its chapters read them with `urn:json:query` (bound above) and `urn:sparql:select`.
 quakes = { path = "../quakes" }
+# "Giving the data names": the quakes context makes the recorded week a graph, and the chapter
+# asks it SPARQL: ikigai-rdf (`urn:rdf:transrept`) and ikigai-sparql (`urn:sparql:*`, oxigraph's
+# in-memory store), both from ikigai-linkeddata. Each reads JSON-LD itself (oxjsonld, with no
+# network loader, which is why the chapter's template puts the context inline). They build for
+# wasm32-unknown-unknown as they are, and they are the page's largest addition: the release
+# kernel grew from 9,603,302 to 13,808,431 bytes (gzip -9: 1,968,325 to 2,738,628), measured
+# 2026-10-29 with the workspace's release profile. ikigai-jsonld (`urn:jsonld:expand`,
+# `:compact`, …) is NOT linked: no cell uses it, and it would add 1,428,313 bytes more (gzip -9:
+# 304,631), on every page that has a cell. Add it with the first cell that does.
+ikigai-rdf.workspace = true
+ikigai-sparql.workspace = true
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

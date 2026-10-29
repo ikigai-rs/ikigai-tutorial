@@ -1,0 +1,1 @@
+PREFIX qk: <https://ikigai-rs.dev/ns/quakes#> SELECT ?magType (COUNT(?quake) AS ?quakes) WHERE { ?quake qk:magType ?magType } GROUP BY ?magType ORDER BY ?magType

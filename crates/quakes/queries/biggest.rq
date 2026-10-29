@@ -1,0 +1,1 @@
+PREFIX qk: <https://ikigai-rs.dev/ns/quakes#> SELECT ?quake ?mag ?place WHERE { ?quake qk:mag ?mag ; qk:place ?place } ORDER BY DESC(?mag) LIMIT 1
