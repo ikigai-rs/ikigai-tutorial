@@ -130,11 +130,12 @@ uncached (why a computed read was not cached; the last 64, most recent first)
 
 `ikigai-cli` 0.2.5, the version this page is replayed against, caches nothing a mounted peer
 answers: both reads reached the Python process, and `urn:kernel:uncached` gives `declared` as
-the reason, which is the reason it gives for an endpoint that declared no caching. Whether a
-host should cache a mounted peer's answers when the peer declares them cacheable is an open
-question, open in the project's ledger as this page was last replayed. Until it is settled,
-take `cacheable=True` on a served peer as the peer's description of its answers, not as a
-cache you have.
+the reason. That is the mount's rule, on purpose: a kernel that mounts a peer stores no copy of
+what the peer answers, because a change on the peer's side (a file it watches, a write
+that reaches it by another route) never crosses back to the mounting kernel, so a stored
+copy could be served stale for as long as the host runs. The `declared` reason is the
+mount's own declaration, not the peer's. So `cacheable=True` on a served peer describes its answers;
+through `--mount`, the host does not keep them.
 
 ## What resolution buys you: the kernel's cache and trace, from outside
 

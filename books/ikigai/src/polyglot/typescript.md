@@ -114,12 +114,14 @@ answers.
 Now read the verdicts. Both endpoints declare `cacheable: true`, and the peer marks its
 answers that way on the wire. `ikigai-cli` 0.2.5, the version this page is replayed against,
 caches neither: every read through `--mount` is `[uncacheable]`, and `urn:kernel:uncached`
-gives `declared` as the reason, which is the reason it gives for an endpoint that declared no
-caching. Only `split`, a Rust endpoint in the host, was computed and kept. `reverseList` is uncacheable
-too, for a different reason, `upstream`: it read an answer that could not be cached. Whether a
-host should cache a mounted peer's answers when the peer declares them cacheable is an open
-question, open in the project's ledger as this page was last replayed. Until it is settled, take `cacheable: true` on a
-served peer as the peer's description of its answers, not as a cache you have.
+gives `declared` as the reason. Only `split`, a Rust endpoint in the host, was computed and
+kept. `reverseList` is uncacheable too, for a different reason, `upstream`: it read an answer
+that could not be cached. That is the mount's rule, on purpose: a kernel that mounts a peer stores no copy of
+what the peer answers, because a change on the peer's side (a file it watches, a write
+that reaches it by another route) never crosses back to the mounting kernel, so a stored
+copy could be served stale for as long as the host runs. The `declared` reason is the
+mount's own declaration, not the peer's. So `cacheable: true` on a served peer describes its
+answers; through `--mount`, the host does not keep them.
 
 ## What resolution buys you
 
