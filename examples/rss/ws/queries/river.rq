@@ -1,0 +1,16 @@
+PREFIX rss: <http://purl.org/rss/1.0/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX content: <http://purl.org/rss/1.0/modules/content/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# The river: every item of every feed, newest first.
+SELECT ?item ?title ?link ?date ?feed ?feedTitle ?summary
+WHERE {
+  ?item a rss:item ; rss:link ?link ; dcterms:isPartOf ?feed .
+  ?feed rss:title ?feedTitle .
+  OPTIONAL { ?item rss:title ?t }
+  OPTIONAL { ?item dc:date ?date }
+  OPTIONAL { ?item rss:description ?summary }
+  BIND(COALESCE(?t, "(untitled)") AS ?title)
+}
+ORDER BY DESC(?date)

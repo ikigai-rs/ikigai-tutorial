@@ -1,0 +1,9 @@
+PREFIX rss: <http://purl.org/rss/1.0/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX content: <http://purl.org/rss/1.0/modules/content/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# How many items each feed holds, and its newest date: the census of the river.
+SELECT ?feedTitle (COUNT(?item) AS ?items) (MAX(?date) AS ?newest)
+WHERE { ?item a rss:item ; dcterms:isPartOf ?feed . ?feed rss:title ?feedTitle . OPTIONAL { ?item dc:date ?date } }
+GROUP BY ?feedTitle ORDER BY DESC(?newest)

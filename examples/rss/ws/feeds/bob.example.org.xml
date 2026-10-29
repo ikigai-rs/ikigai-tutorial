@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/">
+  <channel>
+    <title>Bob's Workbench</title>
+    <link>https://bob.example.org</link>
+    <description>Woodworking, home servers and the occasional rant.</description>
+    <lastBuildDate>Tue, 27 Oct 2026 21:14:09 -0500</lastBuildDate>
+    <language>en-US</language>
+    <sy:updatePeriod>hourly</sy:updatePeriod>
+    <sy:updateFrequency>1</sy:updateFrequency>
+    <generator>https://wordpress.org/?v=6.8</generator>
+    <item>
+      <title>My home server caches everything now</title>
+      <link>https://bob.example.org/2026/10/home-server-cache/</link>
+      <comments>https://bob.example.org/2026/10/home-server-cache/#respond</comments>
+      <dc:creator><![CDATA[Bob]]></dc:creator>
+      <pubDate>Tue, 27 Oct 2026 21:14:09 -0500</pubDate>
+      <category><![CDATA[Home Server]]></category>
+      <category><![CDATA[caching]]></category>
+      <guid isPermaLink="false">https://bob.example.org/?p=412</guid>
+      <description><![CDATA[A reverse proxy, a cache, and a lot of patience. [&#8230;]]]></description>
+      <content:encoded><![CDATA[<p>I put a reverse proxy in front of everything. The cache hit rate is the only number I check now.</p>
+<p>The trick was honoring <code>Cache-Control</code> instead of guessing.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Dovetails by hand</title>
+      <link>https://bob.example.org/2026/10/dovetails/</link>
+      <dc:creator><![CDATA[Bob]]></dc:creator>
+      <pubDate>Sat, 10 Oct 2026 14:02:44 -0500</pubDate>
+      <category><![CDATA[Woodworking]]></category>
+      <guid isPermaLink="false">https://bob.example.org/?p=398</guid>
+      <description><![CDATA[Saw, chisel, mallet, repeat. [&#8230;]]]></description>
+      <content:encoded><![CDATA[<p>Saw, chisel, mallet, repeat. The tenth one fit.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Why I still read RSS</title>
+      <link>https://bob.example.org/2026/09/still-rss/</link>
+      <dc:creator><![CDATA[Bob]]></dc:creator>
+      <pubDate>Mon, 28 Sep 2026 08:00:00 -0500</pubDate>
+      <category><![CDATA[rss]]></category>
+      <guid isPermaLink="false">https://bob.example.org/?p=371</guid>
+      <description><![CDATA[No algorithm decides what I see. [&#8230;]]]></description>
+      <content:encoded><![CDATA[<p>No algorithm decides what I see. A feed reader is a list of names I chose.</p>]]></content:encoded>
+    </item>
+  </channel>
+</rss>

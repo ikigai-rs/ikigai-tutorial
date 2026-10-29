@@ -1,0 +1,5 @@
+source urn:xslt:transform src=urn:file:directory.opml stylesheet=urn:file:feeds-local.xsl .. ( urn:xslt:transform stylesheet=urn:file:items.xsl | urn:rdf:transrept as=application/n-triples ) | sink urn:file:river.nt
+source urn:file:queries/river.rq | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl | sink urn:file:out/river.html
+source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl | sink urn:file:out/digest.md
+source urn:file:searches/caching.rq | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/feed.xsl | sink urn:file:out/caching.xml
+source urn:iki:fn:compose src=urn:file:queries/search-feeds.rq q=cach | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/opml.xsl | sink urn:file:out/caching.opml

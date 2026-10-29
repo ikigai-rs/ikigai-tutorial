@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>A small directory of example feeds</title>
+    <dateModified>Wed, 28 Oct 2026 12:00:00 GMT</dateModified>
+    <ownerName>The ikigai Book</ownerName>
+  </head>
+  <body>
+    <outline type="rss" version="RSS" text="Alice Writes Things" title="Alice Writes Things" description="Notes on static sites, feeds and the small web." xmlUrl="https://alice.example.com/feed.xml" htmlUrl="https://alice.example.com/"/>
+    <outline type="rss" version="RSS" text="Bob's Workbench" title="Bob's Workbench" description="Woodworking, home servers and the occasional rant." xmlUrl="https://bob.example.org/feed/" htmlUrl="https://bob.example.org/"/>
+    <outline type="rss" version="RSS" text="carol.example.com" title="carol.example.com" description="Short posts." xmlUrl="https://carol.example.com/index.xml" htmlUrl="https://carol.example.com/"/>
+    <outline type="rss" version="RSS" text="Dave Talks" title="Dave Talks" description="A podcast about the web, with show notes." xmlUrl="https://dave.example.org/feed" htmlUrl="https://dave.example.org/"/>
+  </body>
+</opml>
