@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-29**: A second streams page, "Streams, II: a body you can read again": a body is a buffer, something that opens a fresh reader every time (`Replay`), or a one-shot stream, and the kernel caches the first two and never the third. Its cells read byte ranges of the shop's stock through `urn:stream:range` in the page, and see a write cut them; its listings write a `Replay` of their own and read a file through ikigai-fs as a seekable body, which refuses rather than tear when the file changes under a reader. "Streams, I" now ends by pointing to it.
+
+  Pages: [Streams, II: a body you can read again](streams/replay.md), [Streams, I: bytes are a representation](streams/bytes.md)
+
 - **2026-10-29**: The book's REPL transcripts are now replayed against ikigai-cli 0.2.5, and the Exploring part's shell steps over the recorded week are replayed transcripts too, as are the grammar's named-argument, refusal and composition examples. "Reshaping JSON with jq" queries the `.geojson` file directly (0.2.5 reads it as JSON, so the `.json` copy is gone) and writes its jq program with `sink`; "A lab with names in it" shows the text tools' 0.2.5 tallies and why their answers are not cached; the CLI tour's `cache` readout includes the CLI's own clock; and "What resolution buys you" says why the thread list can name a temporary file.
 
   Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md), [Reshaping JSON with jq](explore/jq.md), [The REPL grammar](front-door/grammar.md), [Twenty minutes with the CLI](front-door/cli.md), [What resolution buys you](getting-started/payoff.md), [The file workspace](getting-started/file-workspace.md), [Where this actually stands](modules/status.md), [The aliases, day to day](beyond/emacs-aliases.md)

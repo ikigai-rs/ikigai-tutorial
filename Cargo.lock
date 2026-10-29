@@ -255,6 +255,7 @@ dependencies = [
  "hello-camel",
  "ikigai-compress",
  "ikigai-core",
+ "ikigai-fs",
  "live-space",
  "loadable-module",
  "push",

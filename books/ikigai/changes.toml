@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-29"
+summary = "A second streams page, \"Streams, II: a body you can read again\": a body is a buffer, something that opens a fresh reader every time (`Replay`), or a one-shot stream, and the kernel caches the first two and never the third. Its cells read byte ranges of the shop's stock through `urn:stream:range` in the page, and see a write cut them; its listings write a `Replay` of their own and read a file through ikigai-fs as a seekable body, which refuses rather than tear when the file changes under a reader. \"Streams, I\" now ends by pointing to it."
+pages = ["streams/replay.md", "streams/bytes.md"]
+
+[[change]]
+date = "2026-10-29"
 summary = "The book's REPL transcripts are now replayed against ikigai-cli 0.2.5, and the Exploring part's shell steps over the recorded week are replayed transcripts too, as are the grammar's named-argument, refusal and composition examples. \"Reshaping JSON with jq\" queries the `.geojson` file directly (0.2.5 reads it as JSON, so the `.json` copy is gone) and writes its jq program with `sink`; \"A lab with names in it\" shows the text tools' 0.2.5 tallies and why their answers are not cached; the CLI tour's `cache` readout includes the CLI's own clock; and \"What resolution buys you\" says why the thread list can name a temporary file."
 pages = ["explore/index.md", "explore/lab.md", "explore/jq.md", "front-door/grammar.md", "front-door/cli.md", "getting-started/payoff.md", "getting-started/file-workspace.md", "modules/status.md", "beyond/emacs-aliases.md"]
 
