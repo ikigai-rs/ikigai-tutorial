@@ -111,8 +111,8 @@ southern East Pacific Rise,5.5,0
 </div>
 
 Six more in Japan, after the aftershocks of the first week; nine in Tonga; none on the ridges
-and the Balleny Islands. The `GROUP BY ?region` is the join: the first week's strong earthquakes
-and the second week's earthquakes meet on the region they share. The question is
+and the Balleny Islands. The `OPTIONAL` is the join: the second week's earthquakes are matched
+to the first week's strong ones on the region they share, and `GROUP BY ?region` counts them. The question is
 `urn:quakes:question:week-after`, a file like the others, in
 [`crates/quakes/queries/`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates/quakes/queries).
 
