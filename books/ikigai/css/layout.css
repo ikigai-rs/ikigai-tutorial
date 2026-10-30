@@ -8,6 +8,28 @@
     --content-max-width: 1280px;
 }
 
+/* mdbook's wide chapter arrows are fixed, full-height links 90px wide at the page's edges, shown
+ * from 1080px up (1380px with the sidebar open): breakpoints sized for its 750px column. The wider
+ * column reaches under them between those widths and about 1500px, where the arrow's hover strip
+ * covers the right end of a Run cell and takes its clicks. So while the arrows show, the column
+ * keeps clear of them: the arrow's width, the resize indicator the previous arrow sits past, and a
+ * gap. Where they hide, the column fills the page as before. */
+:root {
+    --nav-gutter: calc(90px + var(--sidebar-resize-indicator-width) + 1rem);
+}
+
+@media only screen and (min-width: 1081px) {
+    .content main {
+        max-width: min(var(--content-max-width), calc(100% - 2 * var(--nav-gutter)));
+    }
+}
+
+@media only screen and (max-width: 1380px) {
+    #mdbook-sidebar-toggle-anchor:checked ~ .page-wrapper .content main {
+        max-width: var(--content-max-width);
+    }
+}
+
 main > p,
 main > ul,
 main > ol,
