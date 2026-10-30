@@ -212,12 +212,9 @@ fn check_diff(args: &[String]) -> Result<(), String> {
             }
         }
         let prose = prose_files(files, &published);
-        if prose.is_empty() {
-            println!("{book_dir}: no page changed");
-            continue;
-        }
         let entries_path = format!("{book_dir}/{ENTRIES_FILE}");
         let head_entries: Vec<Change> = match show(&root, &head, &entries_path)? {
+            None if prose.is_empty() => continue,
             None => {
                 problems.push(format!(
                     "{book_dir}: its pages changed and it has no {ENTRIES_FILE}\n\n{}",
@@ -231,6 +228,30 @@ fn check_diff(args: &[String]) -> Result<(), String> {
         let base_entries: Vec<Change> = show(&root, &base, &entries_path)?
             .and_then(|t| parse_changes(&t).ok())
             .unwrap_or_default();
+        let mut recorded: Vec<&Change> = base_entries.iter().collect();
+        for (index, entry) in head_entries.iter().enumerate() {
+            // A summary already in the record stays exempt, including when its page paths or
+            // other metadata are updated. Only newly introduced summary text gets this gate.
+            if let Some(position) = recorded
+                .iter()
+                .position(|old| old.date == entry.date && old.summary == entry.summary)
+            {
+                recorded.remove(position);
+                continue;
+            }
+            let (words, sentences) = summary_counts(&entry.summary);
+            if words > MAX_SUMMARY_WORDS || sentences > MAX_SUMMARY_SENTENCES {
+                problems.push(format!(
+                    "{entries_path}: entry {} ({}): summary has {words} words and {sentences} sentences; \
+                     new summaries allow at most {MAX_SUMMARY_WORDS} words and {MAX_SUMMARY_SENTENCES} sentences",
+                    index + 1, entry.date
+                ));
+            }
+        }
+        if prose.is_empty() {
+            println!("{book_dir}: no page changed");
+            continue;
+        }
         let fresh = new_or_updated(&base_entries, &head_entries);
         if fresh.is_empty() {
             let mut message = missing_entry_message(&book_dir, &prose, &head_summary);
@@ -255,6 +276,31 @@ fn check_diff(args: &[String]) -> Result<(), String> {
     } else {
         Err(problems.join("\n\n"))
     }
+}
+
+/// Limits for summary text introduced by a diff, never the historical record.
+const MAX_SUMMARY_WORDS: usize = 60;
+const MAX_SUMMARY_SENTENCES: usize = 2;
+
+/// Words are whitespace-separated. A sentence ends at a whitespace-separated token ending in
+/// `.`, `!`, or `?` (possibly followed by closing quotes, parentheses, or Markdown delimiters).
+/// Punctuation runs count once; internal dots in versions, paths, and URLs do not end sentences.
+/// A final unpunctuated fragment counts too. This is a deterministic prose gate, not a language
+/// parser: abbreviations ending in a period also count as sentence endings.
+fn summary_counts(summary: &str) -> (usize, usize) {
+    let mut words = 0;
+    let mut sentences = 0;
+    let mut fragment = false;
+    for word in summary.split_whitespace() {
+        words += 1;
+        fragment = true;
+        let end = word.trim_end_matches(['\"', '\'', '”', '’', ')', ']', '*', '_', '`']);
+        if end.ends_with(['.', '!', '?']) {
+            sentences += 1;
+            fragment = false;
+        }
+    }
+    (words, sentences + usize::from(fragment))
 }
 
 /// The repository-relative files a page pulls in with `{{#include}}` (also `rustdoc_include` and
@@ -291,4 +337,21 @@ fn included_files(page_path: &str, text: &str) -> BTreeSet<String> {
         out.insert(parts.join("/"));
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::summary_counts;
+
+    #[test]
+    fn summary_counting_handles_prose_punctuation_and_technical_names() {
+        assert_eq!(summary_counts("One?! Two..."), (2, 2));
+        assert_eq!(summary_counts("One. An unfinished second"), (4, 2));
+        assert_eq!(
+            summary_counts("Read `src/main.rs` with 0.2.6 at https://example.org."),
+            (6, 1)
+        );
+        assert_eq!(summary_counts("“First!” (Second?)"), (2, 2));
+        assert_eq!(summary_counts("One.\n\nTwo."), (2, 2));
+    }
 }

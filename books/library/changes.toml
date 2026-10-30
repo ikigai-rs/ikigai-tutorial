@@ -1,4 +1,7 @@
 # What's new in the ikigai library: one entry per change a reader would notice, NEWEST FIRST.
+# New entries: one or two sentences, at most 60 whitespace-separated words.
+# Sentence endings are . ! ? before whitespace/end, after closing quotes/delimiters;
+# a final unpunctuated fragment counts too. Past entries are left as recorded.
 # The same format as every book's (see books/ui/changes.toml for the fields).
 
 [[change]]
