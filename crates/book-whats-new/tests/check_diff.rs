@@ -280,3 +280,80 @@ fn worktree_mode_sees_an_uncommitted_included_file() {
     write(&s.0, "crates/demo/src/lib.rs", "fn z() {}\n");
     assert!(!check_worktree(&s.0).status.success());
 }
+
+#[test]
+fn added_summaries_obey_word_and_sentence_limits_even_without_page_changes() {
+    for (summary, expected) in [
+        (format!("{}end.", "word ".repeat(60)), Some("61 words")),
+        ("One. Two! Three?".to_string(), Some("3 sentences")),
+        (format!("{}end. Second sentence!", "word ".repeat(57)), None),
+    ] {
+        let s = scratch();
+        write(
+            &s.0,
+            "books/demo/changes.toml",
+            &format!("[[change]]\ndate = \"2026-10-02\"\nsummary = \"{summary}\"\npages = [\"hello.md\"]\n\n{ONE_ENTRY}"),
+        );
+        commit(&s.0);
+        let out = check(&s.0);
+        if let Some(count) = expected {
+            assert!(!out.status.success(), "accepted {count}");
+            let e = stderr(&out);
+            assert!(
+                e.contains("books/demo/changes.toml: entry 1 (2026-10-02)"),
+                "{e}"
+            );
+            assert!(e.contains(count), "{e}");
+        } else {
+            assert!(out.status.success(), "{}", stderr(&out));
+        }
+    }
+}
+
+#[test]
+fn an_unchanged_old_long_summary_is_not_checked() {
+    let s = scratch();
+    let old = ONE_ENTRY.replace("The book begins.", &"Old sentence. ".repeat(40));
+    write(&s.0, "books/demo/changes.toml", &old);
+    commit(&s.0);
+    write(&s.0, "books/demo/src/hello.md", "# Hello\n\nMore.\n");
+    write(
+        &s.0,
+        "books/demo/changes.toml",
+        &format!("[[change]]\ndate = \"2026-10-02\"\nsummary = \"More.\"\npages = [\"hello.md\"]\n\n{old}"),
+    );
+    commit(&s.0);
+    let out = check(&s.0);
+    assert!(out.status.success(), "{}", stderr(&out));
+}
+
+#[test]
+fn an_old_long_summary_can_have_its_page_paths_updated() {
+    let s = scratch();
+    let old = ONE_ENTRY.replace("The book begins.", &"Old sentence. ".repeat(40));
+    write(&s.0, "books/demo/changes.toml", &old);
+    commit(&s.0);
+    write(&s.0, "books/demo/src/hello.md", "# Hello\n\nCorrected.\n");
+    write(
+        &s.0,
+        "books/demo/changes.toml",
+        &old.replace("[\"hello.md\"]", "[\"hello.md\", \"introduction.md\"]"),
+    );
+    commit(&s.0);
+    let out = check(&s.0);
+    assert!(out.status.success(), "{}", stderr(&out));
+}
+
+#[test]
+fn worktree_mode_refuses_a_long_new_entry_with_a_page_change() {
+    let s = scratch();
+    write(&s.0, "books/demo/src/hello.md", "# Hello\n\nMore.\n");
+    write(
+        &s.0,
+        "books/demo/changes.toml",
+        &format!("[[change]]\ndate = \"2026-10-02\"\nsummary = \"{}\"\npages = [\"hello.md\"]\n\n{ONE_ENTRY}", "word ".repeat(61)),
+    );
+    let out = check_worktree(&s.0);
+    assert!(!out.status.success());
+    assert!(stderr(&out).contains("61 words"), "{}", stderr(&out));
+}

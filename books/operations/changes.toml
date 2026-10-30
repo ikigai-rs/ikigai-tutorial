@@ -5,7 +5,10 @@
 # that adds or updates no entry here is refused in CI, with the entry to add.
 #
 #   date        "YYYY-MM-DD"
-#   summary     one or two sentences for a READER: what they will now find (not the commit subject)
+#   summary     one or two sentences, at most 60 words, for a READER: what they will now find
+#               (not the commit subject); check-diff checks new summary text, not past entries
+#               Words split on whitespace; sentence endings are . ! ? before whitespace/end
+#               (after closing quotes/delimiters); a final unpunctuated fragment counts too
 #   pages       the pages to read for it, as SUMMARY.md links them; titles come from SUMMARY.md
 #   removed     titles of pages that no longer exist, listed without a link (optional)
 #   maintenance true for upkeep with no news in it (a version move, a link or typo fix): kept
