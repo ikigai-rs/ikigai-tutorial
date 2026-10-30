@@ -530,7 +530,38 @@ urn:rdf:transrept                         → rdf-transrept
 urn:sparql:select                         → sparql-select
 urn:sparql:ask                            → sparql-ask
 urn:sparql:describe                       → sparql-describe
-urn:sparql:construct                      → sparql-construct</pre>
+urn:sparql:construct                      → sparql-construct
+urn:file:directory.opml                   → rss-directory.opml
+urn:file:feeds.xsl                        → rss-feeds.xsl
+urn:file:feeds-local.xsl                  → rss-feeds-local.xsl
+urn:file:items.xsl                        → rss-items.xsl
+urn:file:feeds/alice.example.com.xml      → rss-feeds-alice.example.com.xml
+urn:file:feeds/bob.example.org.xml        → rss-feeds-bob.example.org.xml
+urn:file:feeds/carol.example.com.xml      → rss-feeds-carol.example.com.xml
+urn:file:feeds/dave.example.org.xml       → rss-feeds-dave.example.org.xml
+urn:file:queries/from.rq                  → rss-queries-from.rq
+urn:file:queries/in.rq                    → rss-queries-in.rq
+urn:file:queries/lines.rq                 → rss-queries-lines.rq
+urn:file:queries/per-feed.rq              → rss-queries-per-feed.rq
+urn:file:queries/river.rq                 → rss-queries-river.rq
+urn:file:queries/search.rq                → rss-queries-search.rq
+urn:file:queries/search-bound.rq          → rss-queries-search-bound.rq
+urn:file:queries/search-feeds.rq          → rss-queries-search-feeds.rq
+urn:file:queries/since.rq                 → rss-queries-since.rq
+urn:file:views/digest.xsl                 → rss-views-digest.xsl
+urn:file:views/feed.xsl                   → rss-views-feed.xsl
+urn:file:views/opml.xsl                   → rss-views-opml.xsl
+urn:file:views/page.xsl                   → rss-views-page.xsl
+urn:file:river.nt                         → rss-river.nt
+urn:xslt:transform                        → xslt-transform
+urn:text:wc                               → wc
+urn:text:head                             → head
+urn:text:tail                             → tail
+urn:text:grep                             → grep
+urn:text:sort                             → sort
+urn:text:uniq                             → uniq
+urn:text:nl                               → nl
+urn:text:rev                              → rev</pre>
 </div>
 
 That is everything the kernel in this page binds. The kernel's own `urn:kernel:*` rows come
@@ -541,9 +572,10 @@ names "Checking a resource" uses, and the shop and `ikigai-json` names that "Tra
 "Short names in a space" use, the gzip and zlib names of
 [Streams, I](../streams/bytes.md), then the recorded weeks, the headline template and the
 quakes context, graphs, questions and layer of [Exploring without Rust](../explore/index.md)
-([the kernel in the browser](../browser.md#one-recorded-file) says why the page binds three
-files), and last the RDF and SPARQL names [Giving the data names](../explore/names.md) asks
-with. A host built from Part I alone lists only Part I's share of
+([the kernel in the browser](../browser.md#one-recorded-file) says why the page binds those
+files), the RDF and SPARQL names [Giving the data names](../explore/names.md) asks
+with, and last the example's files, XSLT and the text tools that [A river of
+feeds](../explore/rss.md) runs on. A host built from Part I alone lists only Part I's share of
 it. A full CLI lists a few hundred, many served over a socket from another
 process — which is [Part III](../beyond/socket.md).
 

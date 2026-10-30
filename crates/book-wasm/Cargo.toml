@@ -66,7 +66,7 @@ ikigai-compress.workspace = true
 # `urn:file:quakes-2024-01-01.geojson`, the name the CLI's file workspace gives the same file.
 # The page has no file system, so this name is an atom with the bytes compiled in, and so is
 # `urn:file:quakes.context.jsonld` ("Giving the data names"); nothing else under `urn:file:` is
-# bound here. Its chapters read them with `urn:json:query` (bound above) and `urn:sparql:select`.
+# bound here but "A river of feeds"'s fixture (`rss-river`, below). Its chapters read them with `urn:json:query` (bound above) and `urn:sparql:select`.
 quakes = { path = "../quakes" }
 # "Giving the data names": the quakes context makes the recorded week a graph, and the chapter
 # asks it SPARQL: ikigai-rdf (`urn:rdf:transrept`) and ikigai-sparql (`urn:sparql:*`, oxigraph's
@@ -79,6 +79,21 @@ quakes = { path = "../quakes" }
 # 304,631), on every page that has a cell. Add it with the first cell that does.
 ikigai-rdf.workspace = true
 ikigai-sparql.workspace = true
+# "A river of feeds": the example's fixture (`examples/rss/ws/`) at the `urn:file:` names the
+# CLI's file workspace gives it, XSLT (`urn:xslt:transform`, ikigai-xslt, pure-Rust xrust) to read
+# the directory, lift each feed to RDF/XML and write an answer's four faces, and ikigai-text
+# (`urn:text:*`), whose `grep` the chapter's lift lines end in. ikigai-xslt is 0.4.0, the version the
+# workspace already locks (crates/inspector): 0.4.1, which the replay cli links, adds only `xsl:param`
+# arguments, which no line of the chapter passes, and needs ikigai-core 0.2.5 where the cells lock
+# 0.2.2. All three build for wasm32-unknown-unknown as they are. With them (and ikigai-fn 0.7.1,
+# ikigai-sparql 0.3.2) the release kernel, as wasm-bindgen writes it for the page, grew from
+# 13,893,565 to 23,338,487 bytes (gzip -9: 2,749,132 to 3,425,876), measured 2026-10-30 with the
+# workspace's release profile (ledger #2639). Most of that is the `name` section, the functions'
+# demangled names, 7,411,720 to 15,183,229 bytes (xrust's generic types make long ones); code
+# grew 4,930,228 to 6,333,162 and data 1,508,000 to 1,769,748.
+rss-river = { path = "../rss-river" }
+ikigai-xslt = "0.4.0"
+ikigai-text = "0.4.0"
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true
