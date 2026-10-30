@@ -216,7 +216,7 @@ confused in one sentence. The ledger called `default` is the one whose name may 
 [Two teams, one gonk](../teams/two-teams.md) gives two teams a named ledger each, in one gonk,
 and shows what each team's grant does and does not reach.
 
-## Served
+## Served by gonk
 
 gonk is that same composition in a process that keeps it: a durable store on disk instead of
 an in-memory one, and doors for other processes to reach it by. Install it at the revision

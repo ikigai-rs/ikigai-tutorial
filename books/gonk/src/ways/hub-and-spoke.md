@@ -137,7 +137,7 @@ One arc is ready. The goal is the hub's, and the docs arc waits on the library a
 in words. The hub does not have to remember the order: it is in the links, and any spoke that asks
 `next` gets the same answer.
 
-### 3. Dispatch: one spoke, one arc, one tree
+### 3. The hub dispatches: one spoke, one arc, one tree
 
 The hub starts a spoke on the ready arc, in a working tree of its own (`git worktree add`), so that
 two agents never share files. The spoke's first act is the claim, on a lease long enough for the
@@ -218,7 +218,7 @@ closed #3 (done)
 [uncacheable]
 ```
 
-### 6. The hub's own work: ask first
+### 6. The hub asks before merging its own work
 
 Some of the goal is the hub's to do itself: here, a line in the changelog saying what the arcs
 changed. The hub files and claims it like any arc, and does it. But when its own pull request is

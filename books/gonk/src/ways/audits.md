@@ -93,7 +93,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:cla
 [uncacheable]
 ```
 
-### 2. Two auditors, two trees, blind
+### 2. Audit twice, blind, in two trees
 
 Each auditor gets a detached worktree at the pinned commit, so neither can change what the other
 reads, and neither is shown the other's report, the repository's earlier findings, or any review's:

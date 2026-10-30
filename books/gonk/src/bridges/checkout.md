@@ -1,4 +1,4 @@
-# Checkout
+# Checking out repositories
 
 A browse root has to be on disk before gonk starts: gonk refuses to start on a root that names
 a missing directory, because that is the shape of a typo. On a new machine that means cloning

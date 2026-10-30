@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-29**: The numbered steps in the Ways of working chapters follow one pattern: a step opens with what you do (Open a pull request, and wait for CI; Write the hook; Make a rule fire) or, in the chapters where the actor changes from step to step, with who does it (The hub dispatches; The worker hands back, with evidence). Checkout is now Checking out repositories, beside Filing roborev findings and Importing a kata ledger, and A ledger of your own's Served section is Served by gonk.
+
+  Pages: [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md), [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md), [Checking out repositories](bridges/checkout.md), [A ledger of your own](ledger/your-own.md)
+
 - **2026-10-27**: The other books now links Running ikigai, the operator's book for the ikigai binary this book's QUIC client chapters use, and says the library lists all five books.
 
   Pages: [The other books](ikigai-book.md)
@@ -111,9 +115,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Introduction](introduction.md), [Browse roots: a repository as resources](browse/roots.md), [The ledger in a browser](ledger/browser.md), [The three doors, and who is asking](machines/doors.md), [Over MCP](agent/mcp.md)
 
-- **2026-10-09**: The ledger in a browser now explains how gonk answers another page that links to it but refuses one that loads it as an image or script, and the anonymous SPARQL time budget; Over MCP lists the ledger's new state, assertion and doctor tools, and Checkout takes the server's home flags.
+- **2026-10-09**: The ledger in a browser now explains how gonk answers another page that links to it but refuses one that loads it as an image or script, and the anonymous SPARQL time budget; Over MCP lists the ledger's new state, assertion and doctor tools, and Checking out repositories takes the server's home flags.
 
-  Pages: [The ledger in a browser](ledger/browser.md), [Over MCP](agent/mcp.md), [Checkout](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
+  Pages: [The ledger in a browser](ledger/browser.md), [Over MCP](agent/mcp.md), [Checking out repositories](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
 
 - **2026-10-09**: A new chapter, Over MCP, gives an agent the ledger through its own QUIC identity: the tool list, a keyed append answering that the item already exists on a retry, what the server logged, and three refusals.
 
@@ -153,7 +157,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 - **2026-10-06**: Browse roots shows a repository served as resources, and a new Bridges part covers filing roborev findings as ledger items, importing a kata ledger, keeping checkouts current, and all of it in order on a fresh machine.
 
-  Pages: [Browse roots: a repository as resources](browse/roots.md), [Filing roborev findings](bridges/roborev.md), [Importing a kata ledger](bridges/kata.md), [Checkout](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
+  Pages: [Browse roots: a repository as resources](browse/roots.md), [Filing roborev findings](bridges/roborev.md), [Importing a kata ledger](bridges/kata.md), [Checking out repositories](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
 
 - **2026-10-06**: Two new chapters: The ledger in a browser walks gonk's pages, forms, passkey invitations and access log, and Over the socket reaches the same ledger from another process with the `ikigai` command line, the way an agent does.
 

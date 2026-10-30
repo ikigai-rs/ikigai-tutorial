@@ -129,7 +129,7 @@ harness.py
 a repository describes the controls of the process it was generated for and no others. Another
 profile, or several, gives a different graph.
 
-### 2. The harness as a graph
+### 2. Read the harness as a graph
 
 Each rule of `AGENTS.md` is a **guide**, and each place the tools enforce one is a **sensor**, both
 with a stable IRI whose last segment never changes, so that every firing recorded under it stays
@@ -177,7 +177,7 @@ $ cd library && python3 tools/harness.py check
 harness check: 18 guide(s) and 14 other control(s) agree with the code
 ```
 
-### 3. A rule fires
+### 3. Make a rule fire
 
 The repository is wired to this page's gonk as in [Solo](solo.md#with-the-starter). Two rows of
 `init` matter here: `harness`, which says the coverage questions are asked rather than published

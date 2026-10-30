@@ -152,7 +152,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:c
 [uncacheable]
 ```
 
-### 3. One task, one pull request, one checked box
+### 3. Implement one task, and check its box in the same commit
 
 A worker takes the next task as in [Solo on one machine](solo.md): claim, branch, implement. The
 box is checked **in the same commit as the code**, so the tree and the code never disagree about
