@@ -31,7 +31,7 @@ standard error; gonk's README uses `/tmp/ikigai-gonk.log`.)
 
 File something, so the pages have an item to show. An anonymous caller at the HTTP door only
 reads (the banner's `anonymous read: default`), so file it over the owner's socket, as in [the
-last chapter](your-own.md#served):
+last chapter](your-own.md#served-by-gonk):
 
 <!-- transcript: run -->
 ```console

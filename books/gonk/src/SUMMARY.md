@@ -33,7 +33,7 @@
 
 - [Filing roborev findings](bridges/roborev.md)
 - [Importing a kata ledger](bridges/kata.md)
-- [Checkout](bridges/checkout.md)
+- [Checking out repositories](bridges/checkout.md)
 - [A fresh machine, end to end](bridges/fresh-machine.md)
 
 # Several machines

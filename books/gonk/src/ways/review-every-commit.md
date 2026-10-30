@@ -43,7 +43,7 @@ over QUIC.
 
 ## The loop, step by step
 
-### 1. A model, a repository, and the queue
+### 1. Set up a model, a repository and the queue
 
 The model is this book's stub, the one [Scripts and sentences in gonk](../scripts/in-gonk.md)
 mounts. It also answers what a browse root asks a model: a fixed review of the file below, a
@@ -106,7 +106,7 @@ live; and run `gh`, which a review of a pull request uses. What is missing is th
 is the only way into the annotations everyone reads, so a reviewer without that token *cannot*
 publish. gonk refuses to start rather than arm a reviewer whose grant holds it.
 
-### 2. The hook
+### 2. Write the hook
 
 <!-- transcript: file demo/.git/hooks/post-commit -->
 ```sh
@@ -132,7 +132,7 @@ $ printf 'gonk.browse.root = "demo=%s/demo"\ngonk.mount = "prefer urn:llm:=%s/mo
 The root and the mount are written with `printf` and `$PWD` because a `~` in `config.toml` means
 the home of whoever runs gonk ([Browse roots](../browse/roots.md)).
 
-### 3. gonk, armed
+### 3. Start gonk with review armed
 
 <!-- transcript: serve -->
 ```console

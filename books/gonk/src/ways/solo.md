@@ -165,7 +165,7 @@ $ git -C demo log --oneline
 … initials
 ```
 
-### 5. A pull request, and CI
+### 5. Open a pull request, and wait for CI
 
 <!-- transcript: manual — it needs a forge (GitHub here) and its CI, which this book's checks do not reach -->
 ```console

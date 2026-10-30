@@ -166,7 +166,7 @@ says by whom. The release is `denied`: a claim taken over QUIC records the claim
 **principal**, so worker-2 cannot drop worker-1's claim by spelling its name. Over the socket in
 the previous chapter there was no principal, and a holder was only a name.
 
-### 3. The work, on the worker
+### 3. The worker does the work
 
 <!-- transcript: manual — a worker machine running an agent, and a forge; this book's checks have neither -->
 ```console
@@ -199,7 +199,7 @@ The loop here uses none of it, so that every step stays visible; [With the
 starter](#with-the-starter), at the end, shows what it generates, and [Routing work to
 agents](routing.md) runs it: the dispatch it waits for, and one loop per agent.
 
-### 4. Hand back with evidence
+### 4. The worker hands back, with evidence
 
 <!-- transcript: run -->
 ```console
