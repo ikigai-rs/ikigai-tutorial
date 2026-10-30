@@ -15,7 +15,7 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md), [The manifold, and the UI that falls out of it](spine/manifold.md)
 
-- **2026-10-27**: The other books now links Running ikigai, the operator's side of the door and capabilities this book describes, and says the library lists all five books.
+- **2026-10-27**: "The other books" now links Running ikigai, the operator's side of the door and capabilities this book describes, and says the library lists all five books.
 
   Pages: [The other books](other-books.md)
 

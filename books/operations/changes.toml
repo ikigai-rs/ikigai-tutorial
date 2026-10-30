@@ -13,6 +13,12 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-10-29"
+summary = "In \"The REPL and its modes\", the section on `--connect` is headed like the other flags' sections, flag first, and the last refusal under \"When it does not work\" quotes its message as the others do."
+pages = ["binary/repl.md"]
+maintenance = true
+
+[[change]]
 date = "2026-10-27"
-summary = "A new book, for operators: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. Every command in it is run against a pinned release whenever the book is built, so its output cannot go stale. The first chapter is The REPL and its modes: the full-screen and line REPLs, a quiet session that replays from a file, -c batches and how they read stdin, pipes, maps and forks, Lisp with -e and --load, describe and help, and the same REPL attached to a served kernel with --connect. The rest of the outline is in the table of contents."
+summary = "A new book, for operators: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. Every command in it is run against a pinned release whenever the book is built, so its output cannot go stale. The first chapter is \"The REPL and its modes\": the full-screen and line REPLs, a quiet session that replays from a file, -c batches and how they read stdin, pipes, maps and forks, Lisp with -e and --load, describe and help, and the same REPL attached to a served kernel with --connect. The rest of the outline is in the table of contents."
 pages = ["introduction.md", "binary/repl.md"]

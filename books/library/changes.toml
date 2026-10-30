@@ -3,7 +3,7 @@
 
 [[change]]
 date = "2026-10-28"
-summary = "The link to the ikigai Book's CLI tour uses its new title, Twenty minutes with the CLI."
+summary = "The link to the ikigai Book's CLI tour uses its new title, \"Twenty minutes with the CLI\"."
 pages = ["index.md"]
 
 [[change]]
