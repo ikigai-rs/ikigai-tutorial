@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-30**: The spreadsheet chapters are now "Spreadsheet, I" to "Spreadsheet, VII", like "Tic-tac-toe, I", and the TypeScript track's headings now say what each section shows, as the Python track's do. The REPL grammar's cache heading is now "Probing: `cache`", and the live host's second "Stage 3" now reads "Stage 3, unchanged".
+
+  Pages: [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [The TypeScript track](polyglot/typescript.md), [The REPL grammar](front-door/grammar.md), [A space that changes while it runs](applied/live-space.md), [A river of feeds](explore/rss.md)
+
 - **2026-10-29**: Every exercise title now starts with what you do: "Write a strict lowerCamelCase", "Add a second argument", "Publish a query, and find the thread it hangs from", "Script a model whose draft never validates" and "Add the style note ledger item 1242 left out, as a composition", as the exercises in the other parts already did. "Tic-tac-toe, I" and the code exercises now carry the same title on the page as in the contents.
 
   Pages: [Exercises: getting started](getting-started/exercises.md), [Exercises: code and language](code/exercises.md), [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md)
@@ -165,7 +169,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-22**: A new chapter in Applied, A space that changes while it runs, follows Tic-tac-toe VII. It names an empty dynamic space, adds four endpoints the book already has by writing a declaration, and watches the space's picture redraw. A removed door takes its cached answers with it, a refused change keeps the old doors, and a view gives another name to something the host serves without granting anything. A spreadsheet, VII adds the session space beside it, and Where this actually stands now names ikigai-core 0.1.110.
 
-  Pages: [A space that changes while it runs](applied/live-space.md), [A spreadsheet, VII: push](applied/spreadsheet-7.md), [Where this actually stands](modules/status.md)
+  Pages: [A space that changes while it runs](applied/live-space.md), [Spreadsheet, VII: push](applied/spreadsheet-7.md), [Where this actually stands](modules/status.md)
 
 - **2026-10-21**: Contribute a module now explains declared failure classes, the RECOMPUTE check added in conformance 0.9 and the opt-in FAILURES check in 0.10. The your-endpoints crate runs the suite for word-count, and the page explains why a 0.10.0 pin does not receive 0.11's new default.
 
@@ -217,7 +221,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-14**: A refused argument is now followed by that argument's own description from the endpoint's contract, so the fix sits next to the complaint; Tic-tac-toe, II explains where that line comes from, and the spreadsheet and tic-tac-toe pages show it.
 
-  Pages: [Tic-tac-toe, II: lines, aliases and the board](applied/tic-tac-toe-2.md), [A spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md), [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+  Pages: [Tic-tac-toe, II: lines, aliases and the board](applied/tic-tac-toe-2.md), [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md), [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
 
 - **2026-10-13**: The aliases, day to day drops its warning that a mount removes local functions: a mount only adds, so a peer's function sits beside the local one of the same name.
 
@@ -269,7 +273,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-10-10**: Every self-description in the book now shows its per-verb contract named by a digest of its content, and What resolution buys you explains that shape, why the book writes the digest as an ellipsis, and the stable per-door name the tool list uses instead.
 
-  Pages: [What resolution buys you](getting-started/payoff.md), [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md), [A spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md)
+  Pages: [What resolution buys you](getting-started/payoff.md), [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md), [Spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md)
 
 - **2026-10-10**: The front door's section on cut threads now explains why a file's cut count varies: the CLI watches its workspace and cuts a file's thread for every change event the operating system reports, so a Mac and a Linux machine print different numbers for the same lines.
 
@@ -319,15 +323,15 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 - **2026-09-29**: A spreadsheet, VII is now part of the book: push, where the page is told when a value changes instead of asking every few seconds, with listening as an authority and a comparison of polling and push.
 
-  Pages: [A spreadsheet, VII: push](applied/spreadsheet-7.md), [A spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md), [Introduction](introduction.md)
+  Pages: [Spreadsheet, VII: push](applied/spreadsheet-7.md), [Spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md), [Introduction](introduction.md)
 
 - **2026-09-29**: A spreadsheet, VI is now part of the book: a sheet is a space, so a person's what-if scenario and the sheet as it was a week ago are each a corridor, and corridors stack.
 
-  Pages: [A spreadsheet, VI: a sheet is a space, and spaces stack](applied/spreadsheet-6.md), [Time is a resource](applied/time.md), [Introduction](introduction.md)
+  Pages: [Spreadsheet, VI: a sheet is a space, and spaces stack](applied/spreadsheet-6.md), [Time is a resource](applied/time.md), [Introduction](introduction.md)
 
 - **2026-09-29**: A spreadsheet, I to V are now part of the book: cells as atoms, a formula as code that is itself a resource, recalculation that is nothing but golden threads, cells that read the clock, and a feed that something outside the sheet writes.
 
-  Pages: [A spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [A spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [A spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md), [A spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md), [A spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md), [Time is a resource](applied/time.md), [Introduction](introduction.md)
+  Pages: [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [Spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [Spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md), [Spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md), [Spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md), [Time is a resource](applied/time.md), [Introduction](introduction.md)
 
 - **2026-09-29**: In Time is a resource the clock view is now a template bound at a name, with no view code at all, and its marker escapes what it splices, the default to reach for whenever a value is text somebody else chose.
 

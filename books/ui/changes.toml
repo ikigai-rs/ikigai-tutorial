@@ -15,6 +15,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-10-30"
+summary = "The delivery targets now lead with their technology: \"htmx\", \"GPUI\", \"WebAssembly\", \"WebTransport\" and \"Text: in the terminal\". Two headings in the views chapters now name their subject: \"Other forms of data\" and \"When a graph helps\"."
+pages = ["delivery/htmx.md", "delivery/gpui.md", "delivery/wasm.md", "delivery/webtransport.md", "delivery/terminal.md", "model/views-from-csv.md", "model/views-from-json.md"]
+
+[[change]]
 date = "2026-10-28"
 summary = "Links to the ikigai Book's CLI tour use its new title, \"Twenty minutes with the CLI\"."
 pages = ["introduction.md", "model/live.md"]

@@ -18,11 +18,11 @@
 
 # Part II: delivery targets
 
-- [Server-rendered HTML, with htmx and push](delivery/htmx.md)
-- [Native, with GPUI](delivery/gpui.md)
-- [In the browser, as WebAssembly](delivery/wasm.md)
-- [Server-rendered, over WebTransport](delivery/webtransport.md)
-- [The terminal](delivery/terminal.md)
+- [htmx: server-rendered HTML with push](delivery/htmx.md)
+- [GPUI: native](delivery/gpui.md)
+- [WebAssembly: in the browser](delivery/wasm.md)
+- [WebTransport: server-rendered](delivery/webtransport.md)
+- [Text: in the terminal](delivery/terminal.md)
 
 # Part III: components
 

@@ -90,8 +90,8 @@ each, the headers said this (counts only; which site said what is not recorded h
 | No `Cache-Control` at all | 39 |
 | `max-age=0` | 28 |
 | A copy may be kept more than ten seconds | 30 of 112 |
-| Sends an `ETag` | 95 |
-| Answers a conditional request with 304 Not Modified | 90 |
+| An `ETag` | 95 |
+| 304 Not Modified, to a conditional request | 90 |
 
 So a copy of most of these feeds may barely be kept, but nearly all of them can say "not
 changed" in a few bytes when asked properly. A reader that honors the first and uses the

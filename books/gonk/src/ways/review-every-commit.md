@@ -211,7 +211,7 @@ $ open http://localhost:1070/queue
 Over the socket the owner holds `urn:cap:annotate` too, so the same two decisions are Sinks to
 the findings. The minor one is declined with a reason from the closed set; the major one is
 published, marked reproduced, with the reproduction as its note. The reproduction is the
-three-line test in [One-off review](../review/one-off.md#deciding), and making it is the one step
+three-line test in [One-off review](../review/one-off.md#deciding-on-a-finding), and making it is the one step
 of this loop no machine does for you.
 
 <!-- transcript: run -->
@@ -235,7 +235,9 @@ Nothing is pending on the file now. The declined finding is summarized by its re
 marks the same claim when a later pass makes it again; the published one is an annotation that
 everyone who reads the file sees, one hop from the model's claim it came from.
 
-### 6. File it
+<a id="6-file-it"></a>
+
+### 6. File the published findings
 
 A published finding is a fact about the code, and fixing it is work, so it goes on the ledger.
 `ikigai-gonk findings file <root>` files a root's **published** findings as ledger items, never

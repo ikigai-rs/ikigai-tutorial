@@ -10,7 +10,9 @@ If you have read The ikigai Book you have met capabilities and `clamp`. Here we 
 end to end — capability, clamp, principal, grant, corridor — on the worked item, and watch an
 attenuation take effect for real.
 
-## A capability is a resource, and it only narrows
+<a id="a-capability-is-a-resource-and-it-only-narrows"></a>
+
+## Capabilities: a resource that only narrows
 
 A capability is named like everything else (`urn:cap:…`) and carries a set of scopes. The one
 operation that matters is **clamp** (attenuation): intersect a capability with a set of scopes to

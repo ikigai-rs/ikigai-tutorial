@@ -1,4 +1,4 @@
-# A spreadsheet, IV: cells that read the clock
+# Spreadsheet, IV: cells that read the clock
 
 [Part III](spreadsheet-3.md) showed one way for a cached value to go: something writes, the
 kernel cuts a golden thread, and every value that read what was written is computed again the

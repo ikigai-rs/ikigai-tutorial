@@ -349,7 +349,9 @@ $ open http://localhost:1070/
 opens the same ledger as a page: the three items and `next`, and, once you sign in under a grant
 that writes it, a form to file another. That page, and signing in, is the next chapter.
 
-## What you built
+<a id="what-you-built"></a>
+
+## What you have now
 
 | concern | the page | your kernel | gonk |
 | --- | --- | --- | --- |

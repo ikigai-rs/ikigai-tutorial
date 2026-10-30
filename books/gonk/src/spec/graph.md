@@ -191,7 +191,9 @@ document, so counting without `DISTINCT` over-counts. And task 1.1, which cites 
 the answer, because the query asked for tasks that cite; nothing about it is lost, it is simply
 about its change and no requirement.
 
-## What you built
+<a id="what-you-built"></a>
+
+## What you have now
 
 The **atoms** are the Markdown files and the mapping file; the **graph** is derived from them,
 one named graph per document, and rebuilt from them whenever the host asks (`lift_tree` holds

@@ -270,7 +270,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 The worker's comment is attributed to its certificate's principal, filled in by the QUIC door;
 the dispatcher's `author=ada` is the owner's own word, because the socket proves nothing more.
 
-### 6. What the server saw
+<a id="6-what-the-server-saw"></a>
+
+### What the server saw
 
 <!-- transcript: run -->
 ```console

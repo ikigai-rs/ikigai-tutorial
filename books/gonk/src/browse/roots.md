@@ -57,7 +57,9 @@ The `browse` line names each root and whether its watcher started, and says wher
 family keeps what it writes (annotations, archived explanations): one graph of the same store
 the ledger lives in, so a SPARQL query can join a ledger item to the file it is about.
 
-## Reading it
+<a id="reading-it"></a>
+
+## Reading the root
 
 The repository is reached the way the ledger was in [Over the socket](../agent/socket.md):
 another ikigai process mounts gonk's socket. With the alias at `urn:gk:`, the root's listing
@@ -122,7 +124,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:notes:t
 [uncacheable]
 ```
 
-## Changing it while gonk runs
+<a id="changing-it-while-gonk-runs"></a>
+
+## Changing the repository while gonk runs
 
 Commit a change, without touching gonk:
 
@@ -201,7 +205,9 @@ mount = "prefer urn:repo:=~/.ikigai/gonk.sock"
 which then run in gonk's process. A prefix mount cannot say "the roots remote and the facades
 local".
 
-## What is next for the browser
+<a id="what-is-next-for-the-browser"></a>
+
+## Where to go next
 
 A root is also the place an explanation is about: browse can derive one per file or
 directory from a model gonk mounts, archived once per content version, so the hash above is

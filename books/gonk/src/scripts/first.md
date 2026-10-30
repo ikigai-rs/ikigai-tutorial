@@ -140,7 +140,9 @@ count
 1
 ```
 
-## Next
+<a id="next"></a>
+
+## Where to go next
 
 [Scripts and sentences in gonk](in-gonk.md) does the same things in depth: who may draft, run and
 publish through each of gonk's three doors, why a machine drafts and only a person publishes, and

@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-30"
+summary = "The spreadsheet chapters are now \"Spreadsheet, I\" to \"Spreadsheet, VII\", like \"Tic-tac-toe, I\", and the TypeScript track's headings now say what each section shows, as the Python track's do. The REPL grammar's cache heading is now \"Probing: `cache`\", and the live host's second \"Stage 3\" now reads \"Stage 3, unchanged\"."
+pages = ["applied/spreadsheet-1.md", "polyglot/typescript.md", "front-door/grammar.md", "applied/live-space.md", "explore/rss.md"]
+
+[[change]]
 date = "2026-10-29"
 summary = "Every exercise title now starts with what you do: \"Write a strict lowerCamelCase\", \"Add a second argument\", \"Publish a query, and find the thread it hangs from\", \"Script a model whose draft never validates\" and \"Add the style note ledger item 1242 left out, as a composition\", as the exercises in the other parts already did. \"Tic-tac-toe, I\" and the code exercises now carry the same title on the page as in the contents."
 pages = ["getting-started/exercises.md", "code/exercises.md", "applied/tic-tac-toe-1.md"]

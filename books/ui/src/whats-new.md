@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-10
 
+- **2026-10-30**: The delivery targets now lead with their technology: "htmx", "GPUI", "WebAssembly", "WebTransport" and "Text: in the terminal". Two headings in the views chapters now name their subject: "Other forms of data" and "When a graph helps".
+
+  Pages: [htmx: server-rendered HTML with push](delivery/htmx.md), [GPUI: native](delivery/gpui.md), [WebAssembly: in the browser](delivery/wasm.md), [WebTransport: server-rendered](delivery/webtransport.md), [Text: in the terminal](delivery/terminal.md), [Views from CSV: one model, two sources](model/views-from-csv.md), [Views from JSON](model/views-from-json.md)
+
 - **2026-10-28**: Links to the ikigai Book's CLI tour use its new title, "Twenty minutes with the CLI".
 
   Pages: [Introduction](introduction.md), [Live data and history](model/live.md)
@@ -25,4 +29,4 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 - **2026-10-22**: A new book. It builds a kernel inspector, a small real app that shows a running kernel's cache, golden threads, topology, catalog and scheduler as pages. "A page is a composed resource" builds a page from a template and the resources it is filled with, "Graph to page with XSLT" turns the kernel's own graphs into views, "Live data and history" makes the views follow the kernel's cuts and gives every view a URL, and "Server-rendered HTML, with htmx and push" serves it all over HTTP. The chapters of Part I run in the page.
 
-  Pages: [Introduction](introduction.md), [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md), [Live data and history](model/live.md), [Server-rendered HTML, with htmx and push](delivery/htmx.md)
+  Pages: [Introduction](introduction.md), [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md), [Live data and history](model/live.md), [htmx: server-rendered HTML with push](delivery/htmx.md)

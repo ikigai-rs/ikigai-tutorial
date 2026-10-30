@@ -1,4 +1,4 @@
-# A spreadsheet, III: recalculation is golden threads
+# Spreadsheet, III: recalculation is golden threads
 
 Change one number in a spreadsheet, and every cell that reads it has to be computed again, and
 every cell that reads those, and nothing else. Getting that right, and fast, is most of what a

@@ -177,7 +177,9 @@ for wasm (there is no config home in a browser), and the tree itself would have 
 the page. A page that ran a different mapping lookup over a frozen copy of the tree would be
 showing something this chapter does not teach, so the Rust above is the runnable form.
 
-## What you built
+<a id="what-you-built"></a>
+
+## What you have now
 
 The **atoms** are the tree's files and the ledger's graph. The spec graphs are derived from the
 files and the items are derived from the spec graphs, each by a composition the host did not write;

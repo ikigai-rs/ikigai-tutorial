@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-10
 
+- **2026-10-30**: The first section of "Resolve the viewer's authority once" is now "Capabilities: a resource that only narrows", in the same form as the sections after it.
+
+  Pages: [Resolve the viewer's authority once](spine/spine.md)
+
 - **2026-10-28**: "One module, a boundary and a surface" has a new section, "Bodies larger than memory": how the HTTP door of ikigai-cli 0.2.2 frames a streamed answer (Content-Length or chunked), serves byte ranges (206, 416, If-Range), spills uploads to disk under its 408 and 413 bounds, and why every ETag changed once.
 
   Pages: [One module, a boundary and a surface](door/door.md)

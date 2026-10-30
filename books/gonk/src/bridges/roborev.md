@@ -101,7 +101,9 @@ another user, in a sandbox or on another machine, that directory is what you mov
 read it. The grant is narrow (one ledger's writes, as [Over MCP](../agent/mcp.md) reads the same
 four scopes) and revocable (`ikigai-gonk client remove roborev`).
 
-## Filing it
+<a id="filing-it"></a>
+
+## Filing a review
 
 Start a scratch gonk in the same directory. The last chapter to start one was [Explain, with a
 mounted model](../browse/explain.md) (the review and spec chapters run none); if that gonk is still
@@ -208,7 +210,9 @@ client's principal, `urn:iki:host:gonk:client:` and its certificate's fingerprin
 owner. The item is an ordinary ledger item from here on: `next` ranks it, a person claims it, and
 closing it is a decision with a reason rather than a report scrolling away.
 
-## The hook
+<a id="the-hook"></a>
+
+## The completion hook
 
 What ran that by hand is one `[[hooks]]` entry in roborev's config (`~/.roborev/config.toml`,
 or a repository's `.roborev.toml`):

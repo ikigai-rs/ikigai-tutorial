@@ -556,7 +556,9 @@ Everything above, in one table:
 | draft from a sentence | **no**, before any model call | with `--nl draft` | with `--nl draft` | yes |
 | what a run may read | the least of: the runner's grant, what the publisher held at publish, and gonk's ceiling (the ledgers' reads) | | | |
 
-## What you built
+<a id="what-you-built"></a>
+
+## What you have now
 
 Nothing new, and that is the point. The **atoms** are the scripts (plain files, each version
 content-addressed, each recording what its publisher held) and the ledger's graph. Every

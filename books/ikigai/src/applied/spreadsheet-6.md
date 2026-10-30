@@ -1,4 +1,4 @@
-# A spreadsheet, VI: a sheet is a space, and spaces stack
+# Spreadsheet, VI: a sheet is a space, and spaces stack
 
 Five parts have composed *resources*: a value is a function of other values, a view is a template
 over names, and the kernel keeps the dependencies. This part composes the *context* the names are

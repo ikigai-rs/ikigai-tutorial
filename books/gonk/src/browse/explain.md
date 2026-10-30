@@ -232,7 +232,9 @@ except that the first explain of each version takes seconds instead of microseco
 names a real model. The archive is why that is affordable: the model is paid once per version of
 each file, however many people read it.
 
-## What you built
+<a id="what-you-built"></a>
+
+## What you have now
 
 In resource terms: the **atoms** are the files and browse's store (the archive); the **model** is
 an input nothing here can derive, bound at two names; `explain` is a **composition** of a file and

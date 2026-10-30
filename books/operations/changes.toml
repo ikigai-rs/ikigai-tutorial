@@ -13,6 +13,12 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-10-30"
+summary = "The planned chapter \"Unattended\" is now \"Running unattended\" in the outline, like the chapters beside it."
+pages = []
+maintenance = true
+
+[[change]]
 date = "2026-10-29"
 summary = "In \"The REPL and its modes\", the section on `--connect` is headed like the other flags' sections, flag first, and the last refusal under \"When it does not work\" quotes its message as the others do."
 pages = ["binary/repl.md"]
