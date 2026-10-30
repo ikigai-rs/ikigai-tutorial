@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-29**: Every exercise title now starts with what you do: "Write a strict lowerCamelCase", "Add a second argument", "Publish a query, and find the thread it hangs from", "Script a model whose draft never validates" and "Add the style note ledger item 1242 left out, as a composition", as the exercises in the other parts already did. "Tic-tac-toe, I" and the code exercises now carry the same title on the page as in the contents.
+
+  Pages: [Exercises: getting started](getting-started/exercises.md), [Exercises: code and language](code/exercises.md), [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md)
+
 - **2026-10-29**: New in "Exploring without Rust", after the river: "Naming a composition". The REPL's `bind` gives a request with its arguments a name, kept in a names file beside the data (`--names`): the filled graph, the count, the strong layer and the notable earthquakes of both weeks are asked by name, with no copies in between. The page shows a fixed argument refused, `as` refused as a fixed argument, a name described by its target's contract, a reference that recomputes when its question file changes, a `cap read-only` session that reads the names and may not change them, and a binding of a name the CLI already serves reported as shadowed. The river gets a named saved search, a name for every search term, and a polite live feed named by a template that captures a whole web address. It ends by saying what names now make plain in the chapters before it, and what is still not a name: the river's build line. "A river of feeds" and "Process scripts are files" now point to it.
 
   Pages: [Naming a composition](explore/naming.md), [A river of feeds](explore/rss.md), [Process scripts are files](explore/scripts.md), [A week of earthquakes](explore/index.md)

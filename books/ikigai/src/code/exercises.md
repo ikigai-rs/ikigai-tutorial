@@ -1,4 +1,4 @@
-# Exercises: code and language as resources
+# Exercises: code and language
 
 Four, and all four are written in **your** crate — `crates/your-endpoints/tests/code.rs` —
 against the code this section quotes, `crates/script-host`, `crates/script-authority` and
@@ -13,7 +13,7 @@ cargo test -p your-endpoints --test code
 
 ---
 
-## 1. A query of your own, and the thread it hangs from
+## 1. Publish a query, and find the thread it hangs from
 
 Publish a query called `closed-items` that lists the CLOSED items, by number and title. Read its
 result twice. Then run `close-item` from [Scripts are resources](scripts.md) for item 4, and read it again.
@@ -76,7 +76,7 @@ the payroll in it. Narrowing can only keep what is already there.
 
 ---
 
-## 3. A draft that never validates
+## 3. Script a model whose draft never validates
 
 Script a stub whose only draft, for the ask "delete everything", is an UPDATE:
 `DELETE WHERE { GRAPH <urn:iki:tutorial:items> { ?s ?p ?o } }`. Draft with it, as a person who may
@@ -107,7 +107,7 @@ has produced, at the end, an answer saying so.
 
 ---
 
-## 4. The style note ledger item 1242 left out, as a composition
+## 4. Add the style note ledger item 1242 left out, as a composition
 
 The live demo's draft pairs `FROM <g>` with `GRAPH <g> { … }`. On this host that is harmless (the
 script host runs a query over one set of graphs that serves as both its default and its named
