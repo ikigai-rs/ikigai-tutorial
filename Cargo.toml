@@ -173,7 +173,10 @@ ikigai-vocab = "0.2.0"
 # 0.7.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.6.0" was a ceiling
 # below 0.7.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.8.0).
-ikigai-fn = "0.7.0"
+# 0.7.1 is the pin (set 2026-10-30, ledger #2639): compose declares its template arguments as an
+# open set, so the engine passes `since=…` to it rather than refusing it as a value with nowhere
+# to go; "A river of feeds" fills its queries that way in the page. Nothing else moved.
+ikigai-fn = "0.7.1"
 # JSON and CSV as resources, for "Transreption" and "Short names in a space": `urn:json:query` (a
 # sandboxed jq selection of any resource, read under the caller's capability, a non-JSON source
 # through the kernel's transreptors), `urn:json:from-csv` (also the registered text/csv to
@@ -278,11 +281,15 @@ ikigai-module = "0.5.1"
 # 0.3.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.5" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-sparql = "0.3.1"
+# 0.3.2 is the pin (set 2026-10-30, ledger #2639): "A river of feeds" runs its SPARQL in the page,
+# and its search binds a term with `bindings=` (ledger #2517), which 0.3.2 added. It is also what
+# the replay cli 0.2.6 links. Before that the pin was 0.3.1 (above).
+ikigai-sparql = "0.3.2"
 # The RDF transreptor under ikigai-sparql (both from ikigai-linkeddata), named by the book's kernel
 # for "Giving the data names", which transrepts the quakes graph. The version ikigai-sparql's lock
-# already takes. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-rdf = "0.3.1"
+# already takes: 0.3.2 since ikigai-sparql 0.3.2 (2026-10-30, ledger #2639), which requires it, and
+# which the replay cli 0.2.6 links too. Before that, 0.3.1. A 0.x caret: also a ceiling (<0.4.0).
+ikigai-rdf = "0.3.2"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"

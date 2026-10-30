@@ -286,11 +286,14 @@ dependencies = [
  "ikigai-resolve",
  "ikigai-sexpr",
  "ikigai-sparql",
+ "ikigai-text",
  "ikigai-vocab",
+ "ikigai-xslt",
  "js-sys",
  "live-space",
  "push",
  "quakes",
+ "rss-river",
  "serde_json",
  "shop",
  "spreadsheet",
@@ -1411,9 +1414,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-fn"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c5ac322b75473e7833ff1c529514bc6ff4a048deb5f53a06660609dba87d1d1"
+checksum = "6892edb569d679ec37d68eab6e3336a1435bf0def9a5143501376b076c871e48"
 dependencies = [
  "async-trait",
  "futures-util",
@@ -1600,9 +1603,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-rdf"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d36c8123e1c48ca9b95d6c597b686a4e31b802d8917e58e8a5e42cabe8a9f47"
+checksum = "2368189afbfb91bac8fa50c773427bcb1400de435a4042254b723d676d2eb747"
 dependencies = [
  "async-trait",
  "futures-util",
@@ -1674,9 +1677,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-sparql"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc6f284b15f286f4b2b7a9c3007691b3347d66d073c330cd4a2ed45140575f2c"
+checksum = "1682cfcf9634f5b0b8cf038788d288c98f34d9d2fcb3dbdf883d57bae8a19623"
 dependencies = [
  "async-trait",
  "ikigai-core",
@@ -1684,6 +1687,7 @@ dependencies = [
  "ikigai-vocab",
  "oxigraph",
  "oxiri",
+ "serde_json",
  "spargebra",
 ]
 
@@ -1703,6 +1707,17 @@ dependencies = [
  "serde_json",
  "spargebra",
  "toml",
+]
+
+[[package]]
+name = "ikigai-text"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81f802c8b71bd598b28f036ae2cc6dacc8d85dbd96eaa78e6bfa082abdf537b5"
+dependencies = [
+ "async-trait",
+ "futures-util",
+ "ikigai-core",
 ]
 
 [[package]]
@@ -2908,6 +2923,14 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rss-river"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
 ]
 
 [[package]]

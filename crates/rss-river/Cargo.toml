@@ -1,0 +1,21 @@
+[package]
+name = "rss-river"
+version = "0.1.0"
+description = "The fixture \"A river of feeds\" runs on, in the page: examples/rss/ws's directory, feeds, stylesheets, queries, views and committed river, each bound at the urn:file: name the CLI's file workspace gives it."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "rss_river"
+path = "src/lib.rs"
+
+# Compiled into the page (`crates/book-wasm`), so it stays wasm-clean: every file is
+# `include_bytes!`, never read from a file system at run time.
+[dependencies]
+ikigai-core.workspace = true
+
+[dev-dependencies]
+futures.workspace = true

@@ -122,7 +122,7 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // "Exploring without Rust": the recorded weeks of earthquakes at
         // `urn:file:quakes-2024-01-01.geojson` and `urn:file:quakes-2024-01-08.geojson`, and
         // the quakes context at `urn:file:quakes.context.jsonld`, the only `urn:file:` names
-        // the page binds; the graph templates, the graphs, the questions and the strong layer
+        // the page binds besides "A river of feeds"'s (below); the graph templates, the graphs, the questions and the strong layer
         // under `urn:quakes:`.
         Arc::new(quakes::space()),
         // "Giving the data names": RDF in the page. The RDF transreptor (`urn:rdf:transrept`,
@@ -130,6 +130,12 @@ pub fn page_space_over(inputs: Arc<InputStore>, listening: Arc<Listening>) -> Fa
         // which loads JSON-LD as it is). Neither overlaps anything above.
         Arc::new(ikigai_rdf::space()),
         Arc::new(ikigai_sparql::space()),
+        // "A river of feeds": the example's directory, feeds, stylesheets, queries, views and
+        // committed river at their `urn:file:` names (none of them a quakes name), XSLT
+        // (`urn:xslt:transform`) and the text tools (`urn:text:*`). None overlaps anything above.
+        Arc::new(rss_river::space()),
+        Arc::new(ikigai_xslt::space()),
+        Arc::new(ikigai_text::space()),
     ])
 }
 
@@ -2127,6 +2133,38 @@ mod tests {
         assert!(t[6].contains("urn:quakes:strong "), "{}", t[6]);
         // A cut of the question makes the layer stale and leaves the graph under it cached.
         assert!(t[7].contains("not cached\ncached\n"), "{}", t[7]);
+    }
+
+    /// "A river of feeds": XSLT reads the directory, lifts two feeds to RDF/XML that
+    /// `urn:rdf:transrept` writes as N-Triples, SPARQL asks the committed river its questions
+    /// (one with a term bound after parsing, beside one spliced in that breaks the query), and
+    /// one answer is written four ways.
+    #[test]
+    fn the_explore_rss_cells_answer_as_the_chapter_says_in_page_order() {
+        let t = run_chapter_in_page_order("explore/rss.md", 11);
+        // The directory is a list of names, in the fixture's own copies.
+        assert!(
+            t[0].contains("\nurn:file:feeds/carol.example.com.xml\n"),
+            "{}",
+            t[0]
+        );
+        // Carol's `tag:` guid is kept as an identifier, and her item is named by its link.
+        assert!(
+            t[1].contains("<http://purl.org/dc/elements/1.1/identifier> \"tag:carol.example.com,2026-10-24:/rss-cloud\""),
+            "{}",
+            t[1]
+        );
+        // A spliced quote breaks the query; the bound term matches Carol's one link.
+        assert!(t[5].starts_with("error: "), "{}", t[5]);
+        assert!(t[6].contains("rss-cloud"), "{}", t[6]);
+        // The digest face is section 5's first question again: all three answers cached.
+        assert!(t[8].ends_with("[3 cached]\n"), "{}", t[8]);
+        // The page face writes a feed's text as text: Bob's apostrophe is escaped.
+        assert!(
+            t[7].contains("(Bob&apos;s Workbench, 2026-10-27)"),
+            "{}",
+            t[7]
+        );
     }
 
     #[test]

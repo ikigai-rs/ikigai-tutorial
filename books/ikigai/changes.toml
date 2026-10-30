@@ -17,6 +17,11 @@
 
 [[change]]
 date = "2026-10-30"
+summary = "\"A river of feeds\" now runs in the page. Its directory, its two feed lifts, its SPARQL questions (the spliced term that breaks a query and the bound one that cannot) and the four faces of one answer are Run cells, over the example's own files bound at the names its REPL gives them, with the committed river at `urn:file:river.nt`. The stand-in origin, the river's build, the watcher and the saved searches stay REPL transcripts, and the page says why. The REPL grammar's `list` and the browser appendix list the new names."
+pages = ["explore/rss.md", "front-door/grammar.md", "browser.md"]
+
+[[change]]
+date = "2026-10-30"
 summary = "The spreadsheet chapters are now \"Spreadsheet, I\" to \"Spreadsheet, VII\", like \"Tic-tac-toe, I\", and the TypeScript track's headings now say what each section shows, as the Python track's do. The REPL grammar's cache heading is now \"Probing: `cache`\", and the live host's second \"Stage 3\" now reads \"Stage 3, unchanged\"."
 pages = ["applied/spreadsheet-1.md", "polyglot/typescript.md", "front-door/grammar.md", "applied/live-space.md", "explore/rss.md"]
 
