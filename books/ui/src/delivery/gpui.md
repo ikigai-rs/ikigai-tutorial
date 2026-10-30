@@ -1,4 +1,4 @@
-# Native, with GPUI
+# GPUI: native
 
 *This chapter is not written yet.*
 

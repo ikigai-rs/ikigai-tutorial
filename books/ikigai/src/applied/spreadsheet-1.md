@@ -1,4 +1,4 @@
-# A spreadsheet, I: cells are atoms
+# Spreadsheet, I: cells are atoms
 
 Tic-tac-toe built an application out of names, and every answer in it changed for one
 reason: somebody played a move. This arc builds something a little bigger, a spreadsheet,

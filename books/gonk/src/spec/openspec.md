@@ -82,7 +82,9 @@ folder **moves** to `changes/archive/<date>-<id>/`, intact, as the record of why
 what they say. So at any moment, `changes/` is exactly the work in flight, and `changes/archive/`
 the work done. The ledger in two chapters' time keys off that move.
 
-## Where this goes next
+<a id="where-this-goes-next"></a>
+
+## Where to go next
 
 Everything above is text, and a person reads it well. What a person cannot do is ask the tree a
 question across files: *which requirements does this change touch, which of its tasks are still

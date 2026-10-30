@@ -30,7 +30,9 @@ until [ -S /tmp/ikbook-kernel.sock ]; do sleep 0.2; done
 deno run -A --config examples/deno/deno.json examples/deno/client.ts /tmp/ikbook-kernel.sock
 ```
 
-## Resolution
+<a id="resolution"></a>
+
+## Resolution: a name, over the wire
 
 ```ts
 {{#include ../../../../examples/deno/client.ts:resolve}}
@@ -42,7 +44,9 @@ your first run: if another client already resolved that request against the same
 it says `Hit` before you have done anything. The cache belongs to the kernel, not to the
 connection.
 
-## Hello, resource
+<a id="hello-resource"></a>
+
+## Hello, resource: an endpoint with explicit args
 
 ```ts
 {{#include ../../../../examples/deno/hello.ts:endpoint}}
@@ -58,7 +62,9 @@ instead (`z.object({ who: z.string().describe(…) })`), and that is the closer 
 "the signature is the contract"; the sibling repository's `examples/endpoints.ts` shows
 it. Either way, a Rust host sees one description.
 
-## Why an endpoint describes itself
+<a id="why-an-endpoint-describes-itself"></a>
+
+## Why an endpoint describes itself: its description, as JSON or Turtle
 
 ```ts
 {{#include ../../../../examples/deno/client.ts:describe}}
@@ -68,7 +74,9 @@ it. Either way, a Rust host sees one description.
 The same two faces the Rust chapters used, reached from a runtime that has never parsed
 Turtle.
 
-## Binding
+<a id="binding"></a>
+
+## Binding: a mount is a binding
 
 Start the peer, and wait for its socket before you mount it:
 
@@ -123,7 +131,9 @@ copy could be served stale for as long as the host runs. The `declared` reason i
 mount's own declaration, not the peer's. So `cacheable: true` on a served peer describes its
 answers; through `--mount`, the host does not keep them.
 
-## What resolution buys you
+<a id="what-resolution-buys-you"></a>
+
+## What resolution buys you: the kernel's cache and trace, from outside
 
 ```ts
 {{#include ../../../../examples/deno/client.ts:cached}}
@@ -133,7 +143,9 @@ answers; through `--mount`, the host does not keep them.
 {{#include ../../../../examples/deno/client.ts:traced}}
 ```
 
-## Capabilities
+<a id="capabilities"></a>
+
+## Capabilities: a scoped connect
 
 ```ts
 {{#include ../../../../examples/deno/client.ts:scoped}}

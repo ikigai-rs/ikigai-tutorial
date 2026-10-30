@@ -1,4 +1,4 @@
-# In the browser, as WebAssembly
+# WebAssembly: in the browser
 
 *This chapter is not written yet.*
 

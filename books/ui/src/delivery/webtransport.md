@@ -1,4 +1,4 @@
-# Server-rendered, over WebTransport
+# WebTransport: server-rendered
 
 *This chapter is not written yet.*
 

@@ -50,8 +50,8 @@ still, and a replay answer it with the instant being replayed.
 
 Almost every page of this book runs a kernel with no clock. That is why a trace
 in [What resolution buys you](../getting-started/payoff.md) prints `—` where a duration
-would go. This page asks for one, and so do [A spreadsheet, IV](spreadsheet-4.md), whose
-cells read the time, and [A spreadsheet, VI](spreadsheet-6.md), which keeps a story clock so its
+would go. This page asks for one, and so do [Spreadsheet, IV](spreadsheet-4.md), whose
+cells read the time, and [Spreadsheet, VI](spreadsheet-6.md), which keeps a story clock so its
 week of history reads the same for every reader. This page's markup carries a `data-clock` attribute, and when the
 page sees it, it builds its kernel with the browser's clock before anything resolves:
 
@@ -226,7 +226,7 @@ cached until the next minute, which it inherits from `now`:
 {{#include ../../../../crates/time-resource/src/lib.rs:instant}}
 ```
 
-The spreadsheet's `NOW()` reads it, in [A spreadsheet, IV](spreadsheet-4.md).
+The spreadsheet's `NOW()` reads it, in [Spreadsheet, IV](spreadsheet-4.md).
 
 ## A page that polls
 

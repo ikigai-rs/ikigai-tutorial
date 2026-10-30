@@ -181,7 +181,9 @@ same arguments: `urn:iki:fn:each` in ikigai-fn 0.6.0 and `urn:json:query` with i
 in ikigai-json 0.1.0. Replacing them changed two template lines and no output. The only code the
 inspector has for these views is its two atoms.
 
-## And the rest
+<a id="and-the-rest"></a>
+
+## Other forms of data
 
 JSON and CSV are two forms of many. The same pattern covers the others: find the model the view
 needs, and the smallest step from the form the data has to that model.

@@ -184,7 +184,9 @@ The finding is about `urn:repo:notes:file:README.md`, a file gonk now serves, so
 for that file and the ledger item find each other. It is authored by the `roborev` client, not by
 you.
 
-## Where that leaves you
+<a id="where-that-leaves-you"></a>
+
+## What you have now
 
 <!-- transcript: run -->
 ```console

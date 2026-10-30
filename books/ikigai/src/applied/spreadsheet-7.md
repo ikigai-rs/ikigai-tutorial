@@ -1,4 +1,4 @@
-# A spreadsheet, VII: push
+# Spreadsheet, VII: push
 
 [Part V](spreadsheet-5.md) ended with a page that found out about a write it did not make the
 only way a reader of a name can: it asked again, every two seconds, whether anything had changed

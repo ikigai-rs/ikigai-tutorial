@@ -1,6 +1,6 @@
 # Scripts are resources
 
-[A spreadsheet, II](../applied/spreadsheet-2.md) made a formula code as a resource: compiled by
+[Spreadsheet, II](../applied/spreadsheet-2.md) made a formula code as a resource: compiled by
 a transreptor, cached like any other answer, and compiled again exactly when its text changed,
 because the compiled form hung from the input's golden thread and nothing else. That code still
 lived inside the sheet. Somebody wrote the formula language in Rust, and a cell could only say

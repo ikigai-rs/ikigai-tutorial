@@ -247,7 +247,7 @@ is the only thing that makes the picture stale: nothing polls, and nothing redra
 nobody asks for. The words hang from the same thread, for the same reason, and the page's next
 read of each draws the stage below the tabs.
 
-A page that listens for that thread (see [A spreadsheet, VII](spreadsheet-7.md), later in the
+A page that listens for that thread (see [Spreadsheet, VII](spreadsheet-7.md), later in the
 book) would redraw the picture the moment a change binds, with nobody running anything. That is
 push, and the bindings thread is what it would listen to.
 
@@ -566,7 +566,9 @@ The cut is also what lets the space keep one name across versions. A space's nam
 promise to the cache: same name, same doors. A dynamic space breaks that on every change,
 and keeps the name anyway, because nothing cached under the old doors survives the change.
 
-### Stage 3: a change refused
+<a id="stage-3-a-change-refused"></a>
+
+### Stage 3, unchanged: a change refused
 
 The same refusal in Rust:
 
@@ -718,7 +720,7 @@ thread, so the next change to the declaration cuts it, like everything else the 
   picture cannot find it.
 
 The same mechanism, one thread per space, also gives a server a cheap way to forget a
-session. [A spreadsheet, VII](spreadsheet-7.md#what-a-server-needs), later in the book,
+session. [Spreadsheet, VII](spreadsheet-7.md#what-a-server-needs), later in the book,
 shows it.
 
 ## What was built

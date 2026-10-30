@@ -1,4 +1,4 @@
-# A spreadsheet, II: a formula is code as a resource
+# Spreadsheet, II: a formula is code as a resource
 
 [Part I](spreadsheet-1.md) stored what a person typed and passed it through as the cell's
 value. That is enough for `42` and for `Rent`. It is not enough for `=A1*2`, which is not a

@@ -16,6 +16,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-30"
+summary = "Every chapter now ends with the same heading, \"What you have now\", and points onward with \"Where to go next\". Headings that began with \"it\" now name what they are about, such as \"Filing a review\" and \"Reading the root\", and every old link still lands."
+pages = ["ledger/your-own.md", "browse/roots.md", "bridges/roborev.md", "review/one-off.md", "ways/review-every-commit.md", "ways/workers.md", "scripts/first.md", "spec/openspec.md"]
+
+[[change]]
 date = "2026-10-29"
 summary = "The numbered steps in the Ways of working chapters follow one pattern: a step opens with what you do (Open a pull request, and wait for CI; Write the hook; Make a rule fire) or, in the chapters where the actor changes from step to step, with who does it (The hub dispatches; The worker hands back, with evidence). Checkout is now Checking out repositories, beside Filing roborev findings and Importing a kata ledger, and A ledger of your own's Served section is Served by gonk."
 pages = ["ways/solo.md", "ways/workers.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md", "ways/spec-first.md", "ways/audits.md", "ways/harness.md", "bridges/checkout.md", "ledger/your-own.md"]
@@ -98,7 +103,7 @@ pages = ["introduction.md"]
 
 [[change]]
 date = "2026-10-15"
-summary = "A new part, Two teams, one gonk, runs two named ledgers in one gonk with an agent per team and a manager over both: each team's next, one query giving four answers to four identities, a cross-team join, a report one team publishes, and what a signed-out caller sees."
+summary = "A new part, Several teams. Its chapter, Two teams, one gonk, runs two named ledgers in one gonk with an agent per team and a manager over both: each team's next, one query giving four answers to four identities, a cross-team join, a report one team publishes, and what a signed-out caller sees."
 pages = ["teams/two-teams.md", "introduction.md"]
 commit = "e4baf01"
 
@@ -197,7 +202,7 @@ commit = "196a5a1"
 
 [[change]]
 date = "2026-10-11"
-summary = "A new part, Scripts and sentences in gonk: grants for scripts and drafting, a saved query run by a person and by a worker, the anonymous run budget, drafting a query from a sentence, and how a draft becomes a published script."
+summary = "A new part, Scripts and sentences. Its chapter, Scripts and sentences in gonk, covers grants for scripts and drafting, a saved query run by a person and by a worker, the anonymous run budget, drafting a query from a sentence, and how a draft becomes a published script."
 pages = ["scripts/in-gonk.md", "introduction.md"]
 commit = "677dfba"
 

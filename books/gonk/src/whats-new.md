@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-10
 
+- **2026-10-30**: Every chapter now ends with the same heading, "What you have now", and points onward with "Where to go next". Headings that began with "it" now name what they are about, such as "Filing a review" and "Reading the root", and every old link still lands.
+
+  Pages: [A ledger of your own](ledger/your-own.md), [Browse roots: a repository as resources](browse/roots.md), [Filing roborev findings](bridges/roborev.md), [One-off review, and what a finding is](review/one-off.md), [Review every commit](ways/review-every-commit.md), [Remote workers](ways/workers.md), [Your first saved query](scripts/first.md), [OpenSpec in one chapter](spec/openspec.md)
+
 - **2026-10-29**: The numbered steps in the Ways of working chapters follow one pattern: a step opens with what you do (Open a pull request, and wait for CI; Write the hook; Make a rule fire) or, in the chapters where the actor changes from step to step, with who does it (The hub dispatches; The worker hands back, with evidence). Checkout is now Checking out repositories, beside Filing roborev findings and Importing a kata ledger, and A ledger of your own's Served section is Served by gonk.
 
   Pages: [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md), [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md), [Checking out repositories](bridges/checkout.md), [A ledger of your own](ledger/your-own.md)
@@ -43,7 +47,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Introduction](introduction.md)
 
-- **2026-10-15**: A new part, Two teams, one gonk, runs two named ledgers in one gonk with an agent per team and a manager over both: each team's next, one query giving four answers to four identities, a cross-team join, a report one team publishes, and what a signed-out caller sees.
+- **2026-10-15**: A new part, Several teams. Its chapter, Two teams, one gonk, runs two named ledgers in one gonk with an agent per team and a manager over both: each team's next, one query giving four answers to four identities, a cross-team join, a report one team publishes, and what a signed-out caller sees.
 
   Pages: [Two teams, one gonk](teams/two-teams.md), [Introduction](introduction.md)
 
@@ -95,7 +99,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Your first saved query](scripts/first.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
 
-- **2026-10-11**: A new part, Scripts and sentences in gonk: grants for scripts and drafting, a saved query run by a person and by a worker, the anonymous run budget, drafting a query from a sentence, and how a draft becomes a published script.
+- **2026-10-11**: A new part, Scripts and sentences. Its chapter, Scripts and sentences in gonk, covers grants for scripts and drafting, a saved query run by a person and by a worker, the anonymous run budget, drafting a query from a sentence, and how a draft becomes a published script.
 
   Pages: [Scripts and sentences in gonk](scripts/in-gonk.md), [Introduction](introduction.md)
 

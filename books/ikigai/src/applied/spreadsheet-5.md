@@ -1,4 +1,4 @@
-# A spreadsheet, V: data that changes outside the sheet
+# Spreadsheet, V: data that changes outside the sheet
 
 Everything the sheet has shown so far changes for one of two reasons: somebody typed into it,
 or the clock moved. Real sheets read a third kind of thing, data that belongs to somebody else:

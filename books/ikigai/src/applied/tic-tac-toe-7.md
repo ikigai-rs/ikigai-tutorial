@@ -380,7 +380,7 @@ printed, it does not yet start unchanged, because a few of the host's endpoints 
 
 This part declared one space, the game's root. A *game* is still a corridor built in Rust
 (Part IV's `game`), and so are the temporal and personal corridors the spreadsheet arc builds
-later ([A spreadsheet, VI](spreadsheet-6.md)).
+later ([Spreadsheet, VI](spreadsheet-6.md)).
 Declaring corridors as templates, filled in per request from a game id, an instant or a
 person, is the next step (ledger item 632).
 

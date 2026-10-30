@@ -208,7 +208,9 @@ a jq program as escaped text, so a template can show one field of a document
 a native kernel a program past a bound is refused with a reason; in this page's WebAssembly kernel
 the refusal stops the kernel instead, and the page has to be reloaded.
 
-## And when a graph helps
+<a id="and-when-a-graph-helps"></a>
+
+## When a graph helps
 
 JSON can become a graph. ikigai-jsonld reads JSON-LD, and a JSON-LD context maps plain JSON's
 keys to vocabulary terms, after which everything in the XSLT chapter applies, and SPARQL too. That

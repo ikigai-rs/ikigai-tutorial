@@ -341,7 +341,9 @@ they do for `source`, and a pipe is refused: the question is about one resource.
 workspace](../getting-started/file-workspace.md#try-it) asks it of a file it just wrote and
 of one that is not there.
 
-## Probing the cache: `cache`
+<a id="probing-the-cache-cache"></a>
+
+## Probing: `cache`
 
 ```text
 cache <iri> [args]

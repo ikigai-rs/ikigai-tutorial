@@ -1,4 +1,4 @@
-# Server-rendered HTML, with htmx and push
+# htmx: server-rendered HTML with push
 
 Part I built the inspector as resources and never said where they would be shown. This chapter
 puts them in a browser: a host that serves the inspector's pages over HTTP, with htmx swapping

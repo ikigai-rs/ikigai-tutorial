@@ -169,7 +169,7 @@ A browser timer uses the same bridge: a task waits on the `setTimeout` promise, 
 completes the channel the endpoint is waiting on.
 
 The other direction never happens: the kernel does not call into the page. In
-[A spreadsheet, VII: push](applied/spreadsheet-7.md) the page awaits a future that a cut
+[Spreadsheet, VII: push](applied/spreadsheet-7.md) the page awaits a future that a cut
 completes, and then decides on its own turn of the event loop what to redraw. In
 [A space that changes while it runs](applied/live-space.md) the live host's rebuild loop
 is itself a `spawn_local` task.

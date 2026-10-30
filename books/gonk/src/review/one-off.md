@@ -83,7 +83,9 @@ can also be sent to a second model, a *judge*, for a verdict that orders the que
 orders; it does not decide. This chapter's host turns it off, since a judge of a stub would judge
 nothing.)
 
-## Deciding
+<a id="deciding"></a>
+
+## Deciding on a finding
 
 A decision is a Sink to the finding. Declining takes a **reason** from a closed set, because
 "why not" is the data that makes the next review better:
@@ -224,7 +226,9 @@ with a stub model mounted.
 What gonk can also do — review every file a commit touches, from a `post-commit` hook — is off,
 and the next chapter is why.
 
-## What you built
+<a id="what-you-built"></a>
+
+## What you have now
 
 The **atoms** are the file and browse's store, now holding pass records, findings and decisions
 beside the explain archive. A **finding** is a resource a composition (the review pass) mints and

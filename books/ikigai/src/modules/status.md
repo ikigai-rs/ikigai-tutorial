@@ -183,16 +183,16 @@ teaches them:
 - **0.1.80 — `Conflict`.** A typed refusal for a request the resource's *current state* says
   no to, the 409 of the taxonomy, found by this book's game: a move to a taken square
   ([Tic-tac-toe, VI](../applied/tic-tac-toe-6.md)). The spreadsheet's market and its
-  read-only past refuse with it ([A spreadsheet, V](../applied/spreadsheet-5.md),
+  read-only past refuse with it ([Spreadsheet, V](../applied/spreadsheet-5.md),
   [VI](../applied/spreadsheet-6.md)).
 - **0.1.81 — levels and sealed names.** `Level`, the resolved scope a hit reports, and a
   host's seals on names, checked when a space is built ([Tic-tac-toe,
   VII](../applied/tic-tac-toe-7.md), "What a declaration may and may not do").
 - **0.1.82 — corridors stack, and a read says why it was not cached.** `Scope::stack`
-  ([A spreadsheet, VI](../applied/spreadsheet-6.md)); every uncacheable read names its
+  ([Spreadsheet, VI](../applied/spreadsheet-6.md)); every uncacheable read names its
   reason ([Tracing a resolution](../beyond/tracing.md)); a fallback over a composite's
   `NotFound` is cut when the atom changes, and the cache readout marks each row live, cut or
-  expired ([A spreadsheet, III](../applied/spreadsheet-3.md)); and cut listeners.
+  expired ([Spreadsheet, III](../applied/spreadsheet-3.md)); and cut listeners.
 - **0.1.83 — a space built from its declaration.** `Registry`, `build` and
   `Topology::from_turtle` (the `declare` feature), the inverse of `urn:kernel:topology`, with
   every door naming the endpoint that answers it ([Tic-tac-toe,
@@ -232,7 +232,7 @@ teaches them:
   `NotFound` and cached a fallback is cut when that name changes; it rides only a `NotFound`
   or `Unresolved`, and any other failure stays uncached. No chapter teaches `depends_on` yet:
   the spreadsheet falls back only on an atom's own `NotFound`, which the atom's own thread
-  already covers ([A spreadsheet, V](../applied/spreadsheet-5.md), "fall back on an atom's own
+  already covers ([Spreadsheet, V](../applied/spreadsheet-5.md), "fall back on an atom's own
   `NotFound`").
 - **0.1.94 — a percent escape is two hex digits.** A match or contract IRI whose escape
   carries a sign (`%+1`) is refused where it used to name a door; nothing else about the

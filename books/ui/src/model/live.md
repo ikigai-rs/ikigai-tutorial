@@ -51,7 +51,7 @@ them does not need to guess when to look again; it needs to be **told**.
 
 ## Being told: the push stream
 
-The cli's HTTP door already tells. [A spreadsheet, VII: push](../../applied/spreadsheet-7.html)
+The cli's HTTP door already tells. [Spreadsheet, VII: push](../../applied/spreadsheet-7.html)
 built on it: one `GET` of the door's push path answers `text/event-stream`, and every cut that
 invalidated something the page's own reads rest on arrives as one `cut` event. It is heard under
 the same capability the page's reads were made with, so a viewer hears only cuts of what that
@@ -169,8 +169,8 @@ event that names the card.
 The cells above run in this page's own kernel, so they show the cache changing as text. This
 page does not yet show the cache *view* rendered and changing in place. Nothing in the kernel
 stops it: a kernel compiled to WebAssembly can listen for its own cuts, and
-[A spreadsheet, VII: push](../../applied/spreadsheet-7.html) does exactly that in its page. What
+[Spreadsheet, VII: push](../../applied/spreadsheet-7.html) does exactly that in its page. What
 is missing is this book's half: its kernel does not export a listener to the page yet, and no
 script here renders a view's HTML in place of a cell's text. That is the next step for this
-book's kernel; until then, [Server-rendered HTML, with htmx and push](../delivery/htmx.md) runs
+book's kernel; until then, [htmx: server-rendered HTML with push](../delivery/htmx.md) runs
 the real thing.

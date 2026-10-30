@@ -1,4 +1,4 @@
-# The terminal
+# Text: in the terminal
 
 *This chapter is not written yet.*
 
