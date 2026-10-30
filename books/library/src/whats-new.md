@@ -7,7 +7,7 @@ What has changed in The ikigai library, most recent first: the date, what was ad
 
 ## 2026-10
 
-- **2026-10-28**: The link to the ikigai Book's CLI tour uses its new title, Twenty minutes with the CLI.
+- **2026-10-28**: The link to the ikigai Book's CLI tour uses its new title, "Twenty minutes with the CLI".
 
   Pages: [The ikigai library](index.md)
 

@@ -375,7 +375,7 @@ commands:
 `ikigai --help` is the other one: the binary's flags and subcommands, as opposed to the REPL's
 grammar.
 
-## The same REPL, another kernel: `--connect`
+## `--connect`: the same REPL, another kernel
 
 Every mode above builds a kernel inside the `ikigai` process. `--connect` attaches the same REPL,
 or the same `-c` batch, to a kernel another process serves. Start one on a Unix socket in the
@@ -428,7 +428,8 @@ The refusals on this page, and what each means:
 - ``error: `;` outside a `( … )` fork``: two statements in one `-c`. Use one `-c` each.
 - `error: denied: capability does not grant …`: the capability the line ran under (here narrowed by
   `--cap`) holds no grant for what the resource declares it needs.
-- A server that is not there:
+- `ikigai: connect …: No such file or directory`: `--connect` names a socket that is not
+  there:
 
 <!-- transcript: run -->
 ```console

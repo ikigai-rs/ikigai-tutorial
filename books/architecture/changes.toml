@@ -24,7 +24,7 @@ pages = ["overlays/overlays.md", "spine/manifold.md"]
 
 [[change]]
 date = "2026-10-27"
-summary = "The other books now links Running ikigai, the operator's side of the door and capabilities this book describes, and says the library lists all five books."
+summary = "\"The other books\" now links Running ikigai, the operator's side of the door and capabilities this book describes, and says the library lists all five books."
 pages = ["other-books.md"]
 
 [[change]]

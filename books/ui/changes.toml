@@ -16,7 +16,7 @@
 
 [[change]]
 date = "2026-10-28"
-summary = "Links to the ikigai Book's CLI tour use its new title, Twenty minutes with the CLI."
+summary = "Links to the ikigai Book's CLI tour use its new title, \"Twenty minutes with the CLI\"."
 pages = ["introduction.md", "model/live.md"]
 
 [[change]]
@@ -27,20 +27,20 @@ maintenance = true
 
 [[change]]
 date = "2026-10-27"
-summary = "The other books now links Running ikigai, the operator's book, and says the library lists all five books."
+summary = "\"The other books\" now links Running ikigai, the operator's book, and says the library lists all five books."
 pages = ["other-books.md"]
 
 [[change]]
 date = "2026-10-25"
-summary = "The other books now links The ikigai Architecture too, and says the library lists all four books."
+summary = "\"The other books\" now links The ikigai Architecture too, and says the library lists all four books."
 pages = ["other-books.md"]
 
 [[change]]
 date = "2026-10-23"
-summary = "Two new chapters build views over data that is not a graph: Views from JSON makes a table of the planets from a JSON document with compose templates and ikigai-fn's each, and reaches into a document with ikigai-json's jq query; Views from CSV: one model, two sources shows the same view over a CSV table, read as JSON through ikigai-json, each source with its own golden thread. Graph to page with XSLT now says why the inspector uses RDF and XSLT (the kernel already publishes its introspection as graphs) and that a view composes whatever form its data has. The inspector's navigation gains the two planet pages, and the introduction and The other books link the new library of every book."
+summary = "Two new chapters build views over data that is not a graph: \"Views from JSON\" makes a table of the planets from a JSON document with compose templates and ikigai-fn's each, and reaches into a document with ikigai-json's jq query; \"Views from CSV: one model, two sources\" shows the same view over a CSV table, read as JSON through ikigai-json, each source with its own golden thread. \"Graph to page with XSLT\" now says why the inspector uses RDF and XSLT (the kernel already publishes its introspection as graphs) and that a view composes whatever form its data has. The inspector's navigation gains the two planet pages, and the introduction and \"The other books\" link the new library of every book."
 pages = ["model/views-from-json.md", "model/views-from-csv.md", "model/xslt.md", "introduction.md", "other-books.md", "model/composed.md"]
 
 [[change]]
 date = "2026-10-22"
-summary = "A new book. It builds a kernel inspector, a small real app that shows a running kernel's cache, golden threads, topology, catalog and scheduler as pages. A page is a composed resource builds a page from a template and the resources it is filled with, Graph to page with XSLT turns the kernel's own graphs into views, Live data and history makes the views follow the kernel's cuts and gives every view a URL, and Server-rendered HTML, with htmx and push serves it all over HTTP. The chapters of Part I run in the page."
+summary = "A new book. It builds a kernel inspector, a small real app that shows a running kernel's cache, golden threads, topology, catalog and scheduler as pages. \"A page is a composed resource\" builds a page from a template and the resources it is filled with, \"Graph to page with XSLT\" turns the kernel's own graphs into views, \"Live data and history\" makes the views follow the kernel's cuts and gives every view a URL, and \"Server-rendered HTML, with htmx and push\" serves it all over HTTP. The chapters of Part I run in the page."
 pages = ["introduction.md", "model/composed.md", "model/xslt.md", "model/live.md", "delivery/htmx.md"]

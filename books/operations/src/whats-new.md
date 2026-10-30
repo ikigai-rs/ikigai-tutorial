@@ -7,6 +7,6 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-10
 
-- **2026-10-27**: A new book, for operators: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. Every command in it is run against a pinned release whenever the book is built, so its output cannot go stale. The first chapter is The REPL and its modes: the full-screen and line REPLs, a quiet session that replays from a file, -c batches and how they read stdin, pipes, maps and forks, Lisp with -e and --load, describe and help, and the same REPL attached to a served kernel with --connect. The rest of the outline is in the table of contents.
+- **2026-10-27**: A new book, for operators: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. Every command in it is run against a pinned release whenever the book is built, so its output cannot go stale. The first chapter is "The REPL and its modes": the full-screen and line REPLs, a quiet session that replays from a file, -c batches and how they read stdin, pipes, maps and forks, Lisp with -e and --load, describe and help, and the same REPL attached to a served kernel with --connect. The rest of the outline is in the table of contents.
 
   Pages: [Introduction](introduction.md), [The REPL and its modes](binary/repl.md)
