@@ -1,4 +1,4 @@
-# Tic-tac-toe, I: the resource model and the atoms
+# Tic-tac-toe, I: the model and the atoms
 
 Everything so far has been one idea at a time. This part builds one small application
 end to end, in the order resource-oriented design says to: name the resources first, write

@@ -78,7 +78,7 @@ own](binding.md) shows the one line that makes the difference.
 
 ---
 
-## 1. Strict lowerCamelCase
+## 1. Write a strict lowerCamelCase
 
 `camel-case` never lower-cases anything: `"Hello WORLD"` becomes `"HelloWORLD"`, because it
 treats the input's own casing as meaningful. Write `lower-camel-case`, which does not — and
@@ -124,7 +124,7 @@ whatever your rule says, and `"   "` → `""` rather than an error.
 
 ---
 
-## 2. A second argument
+## 2. Add a second argument
 
 Add an optional `separator`, so a caller can split on something other than whitespace.
 Declare it in the description with `optional()` and a `default_value`.
