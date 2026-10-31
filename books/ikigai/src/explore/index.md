@@ -47,6 +47,10 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
 - [Naming a composition](naming.md): bind a request with its arguments to a name, so the
   composites and the river's questions are asked by name, and see what a name fixes, what it
   follows, who may change it and when a name is somebody else's.
+- [When a rule is not enough](beyond-rules.md): write a Lisp program, as a file, that decides
+  which weeks to read, see it cached and recomputed when a file it read changes, and see what
+  its sandbox can reach; then mount a few lines of Python as a peer for what the sandbox cannot
+  do, and see what changes when the answer comes from another process.
 
 Later in this part, a page built from them is served over HTTP.
 
