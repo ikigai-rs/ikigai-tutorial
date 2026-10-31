@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-31**: The first REPL instructions now recommend `ikigai --plain` for screen-reader users and link to the CLI's accessibility notes.
+
+  Pages: [Twenty minutes with the CLI](front-door/cli.md)
+
 - **2026-10-30**: New in "Exploring without Rust": "When a rule is not enough". A Lisp program, kept as a file, counts earthquakes by region over the weeks a file lists, is cached and recomputes when the list changes; then a small Python peer, mounted into the CLI, measures distances from Tokyo, and the page says what a second process changes.
 
   Pages: [When a rule is not enough](explore/beyond-rules.md), [A week of earthquakes](explore/index.md)

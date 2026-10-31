@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-31"
+summary = "The first REPL instructions now recommend `ikigai --plain` for screen-reader users and link to the CLI's accessibility notes."
+pages = ["front-door/cli.md"]
+
+[[change]]
 date = "2026-10-30"
 summary = "New in \"Exploring without Rust\": \"When a rule is not enough\". A Lisp program, kept as a file, counts earthquakes by region over the weeks a file lists, is cached and recomputes when the list changes; then a small Python peer, mounted into the CLI, measures distances from Tokyo, and the page says what a second process changes."
 pages = ["explore/beyond-rules.md", "explore/index.md"]
