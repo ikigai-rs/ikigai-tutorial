@@ -20,6 +20,7 @@
 - [Process scripts are files](explore/scripts.md)
 - [A river of feeds](explore/rss.md)
 - [Naming a composition](explore/naming.md)
+- [When a rule is not enough](explore/beyond-rules.md)
 
 # Getting started
 

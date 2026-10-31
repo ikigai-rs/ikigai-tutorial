@@ -48,6 +48,8 @@ were compiled in at the bottom of `ikigai --help`.
 The shell examples use `-c` to run a command and exit. For interactive use, `ikigai`
 opens the full-screen REPL (read-evaluate-print loop): an interactive prompt that runs each
 command you enter. `ikigai --plain` selects the line-by-line REPL.
+If you use a screen reader, start `ikigai --plain` to avoid full-screen redraws, as
+recommended in the [CLI accessibility notes](https://github.com/ikigai-rs/ikigai-cli/blob/main/ACCESSIBILITY.md#known-limitations).
 A REPL keeps the process running between commands, so it keeps the cache too.
 [5. A cache hit](#5-a-cache-hit) needs that shared session.
 
