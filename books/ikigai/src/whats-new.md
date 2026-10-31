@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-31**: The first REPL instructions now recommend `ikigai --plain` for screen-reader users and link to the CLI's accessibility notes.
+
+  Pages: [Twenty minutes with the CLI](front-door/cli.md)
+
 - **2026-10-30**: "A river of feeds" now runs in the page. Its directory, its two feed lifts, its SPARQL questions (the spliced term that breaks a query and the bound one that cannot) and the four faces of one answer are Run cells, over the example's own files bound at the names its REPL gives them, with the committed river at `urn:file:river.nt`. The stand-in origin, the river's build, the watcher and the saved searches stay REPL transcripts, and the page says why. The REPL grammar's `list` and the browser appendix list the new names.
 
   Pages: [A river of feeds](explore/rss.md), [The REPL grammar](front-door/grammar.md), [Appendix: the kernel in the browser](browser.md)
