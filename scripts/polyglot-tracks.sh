@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run the polyglot tracks' mounted peers for real, and check the pages against what happens
-# (ledger #2612): books/ikigai/src/polyglot/python.md and typescript.md.
+# (ledger #2612): books/ikigai/src/polyglot/python.md and typescript.md, and the Python peer
+# of books/ikigai/src/explore/beyond-rules.md (ledger #2693).
 #
 # Their binding and family steps cannot be REPL transcripts: each starts a Python or Deno peer
 # on a socket and mounts it with `ikigai --mount`. Until this ran, nothing replayed them, and
@@ -52,7 +53,8 @@ from pathlib import Path
 
 REPO = Path(sys.argv[1])
 PAGES = [REPO / "books/ikigai/src/polyglot/python.md",
-         REPO / "books/ikigai/src/polyglot/typescript.md"]
+         REPO / "books/ikigai/src/polyglot/typescript.md",
+         REPO / "books/ikigai/src/explore/beyond-rules.md"]
 DEMO = Path("/tmp/ikbook-polyglot")
 WORK = DEMO / "work"
 TUTORIAL = WORK / "ikigai-tutorial"
@@ -140,12 +142,31 @@ def matches(got, want):
         at = found + len(segment)
     return True
 
+# A page that declares `<!-- transcripts: workspace … -->` (as "When a rule is not enough"
+# does: its reader works in `~/quakes`, not in a clone) runs in a directory of its own, seeded
+# with those repository files under their own names, as `book-transcripts` seeds it; every
+# other page runs in the copy of the repository.
+WORKSPACE = re.compile(r"<!-- transcripts: workspace ([^>]*?) -->")
+
+def page_dir(page):
+    paths = [p for decl in WORKSPACE.findall(texts[page]) for p in decl.split()]
+    if not paths:
+        return TUTORIAL
+    where = DEMO / "pages" / page.stem
+    where.mkdir(parents=True)
+    for rel in paths:
+        (where / Path(rel).name).write_bytes((REPO / rel).read_bytes())
+    return where
+
+cwd = TUTORIAL
+
 def shell(command, **kw):
-    return subprocess.run(["bash", "-c", command], cwd=TUTORIAL, env=env, **kw)
+    return subprocess.run(["bash", "-c", command], cwd=cwd, env=env, **kw)
 
 try:
     for page in PAGES:
         print(f"── {page.relative_to(REPO)}")
+        cwd = page_dir(page)
         for kind, block in DIRECTIVE.findall(texts[page]):
             if kind == "start":
                 for line in block.splitlines():
@@ -155,12 +176,12 @@ try:
                     if line.endswith("&"):
                         log = open(DEMO / "logs" / f"{len(started)}.log", "w")
                         started.append(subprocess.Popen(
-                            ["bash", "-c", line[:-1]], cwd=TUTORIAL, env=env,
+                            ["bash", "-c", line[:-1]], cwd=cwd, env=env,
                             stdout=log, stderr=subprocess.STDOUT, start_new_session=True))
                     else:
                         # The page's own wait, given two minutes; a peer that exits meanwhile
                         # will never answer, so that ends it at once, with the peer's log.
-                        step = subprocess.Popen(["bash", "-c", line], cwd=TUTORIAL, env=env,
+                        step = subprocess.Popen(["bash", "-c", line], cwd=cwd, env=env,
                                                 start_new_session=True)
                         deadline = time.time() + 120
                         while step.poll() is None and time.time() < deadline:
