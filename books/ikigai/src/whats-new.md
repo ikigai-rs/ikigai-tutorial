@@ -11,6 +11,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [Twenty minutes with the CLI](front-door/cli.md)
 
+- **2026-10-30**: New in "Exploring without Rust": "When a rule is not enough". A Lisp program, kept as a file, counts earthquakes by region over the weeks a file lists, is cached and recomputes when the list changes; then a small Python peer, mounted into the CLI, measures distances from Tokyo, and the page says what a second process changes.
+
+  Pages: [When a rule is not enough](explore/beyond-rules.md), [A week of earthquakes](explore/index.md)
+
 - **2026-10-30**: "A river of feeds" now runs in the page. Its directory, its two feed lifts, its SPARQL questions (the spliced term that breaks a query and the bound one that cannot) and the four faces of one answer are Run cells, over the example's own files bound at the names its REPL gives them, with the committed river at `urn:file:river.nt`. The stand-in origin, the river's build, the watcher and the saved searches stay REPL transcripts, and the page says why. The REPL grammar's `list` and the browser appendix list the new names.
 
   Pages: [A river of feeds](explore/rss.md), [The REPL grammar](front-door/grammar.md), [Appendix: the kernel in the browser](browser.md)
