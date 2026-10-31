@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-10
 
+- **2026-10-31**: A third streams page, "Streams, III: a body read once, and its bound": a one-shot stream is never cached, is collected under the run's byte budget and refused with `OverBudget` past it, never truncated. Its cell decodes the shop's stock with `urn:stream:text` and sees gzip's bytes refused; its listings decode a stream chunk by chunk.
+
+  Pages: [Streams, III: a body read once, and its bound](streams/once.md), [Streams, II: a body you can read again](streams/replay.md)
+
 - **2026-10-31**: The first REPL instructions now recommend `ikigai --plain` for screen-reader users and link to the CLI's accessibility notes.
 
   Pages: [Twenty minutes with the CLI](front-door/cli.md)

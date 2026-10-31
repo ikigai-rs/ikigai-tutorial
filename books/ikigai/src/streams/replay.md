@@ -320,6 +320,5 @@ new one.
 Everything on this page could be read again. A buffer can, a file can, and a range of either is a
 buffer. What is left is the third shape, the body that can be read once: a response still
 arriving, a generator, an upload. The kernel already refuses to cache one, and
-`urn:stream:range` already refuses to slice one. Holding one as something that can be read again,
-by writing it through to the disk as it arrives (`urn:stream:spill`), and serving a range of a
-resource over HTTP, are what the next page in this part takes up (ledger #2228).
+`urn:stream:range` already refuses to slice one. [The next page](once.md) reads one: collected
+under the run's byte budget, decoded as text as it streams, and refused past the bound.

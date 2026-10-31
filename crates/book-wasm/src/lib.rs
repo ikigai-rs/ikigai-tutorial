@@ -2007,6 +2007,33 @@ mod tests {
         );
     }
 
+    #[test]
+    fn the_third_streams_chapters_text_cell_answers_as_it_says() {
+        let t = run_chapter_in_page_order("streams/once.md", 1);
+        // The stock decoded as text, computed and then cached.
+        let (first, rest) = t[0]
+            .split_once("[computed]\n")
+            .expect("the first line computes");
+        assert!(first.starts_with("item,shelf,count\n"), "{}", t[0]);
+        assert!(rest.starts_with(&format!("{first}[cached]\n")), "{}", t[0]);
+        // Gzip's bytes are refused at the first one that is not UTF-8, and a charset the
+        // decoder does not have is refused by name.
+        assert!(
+            rest.contains(
+                "error: invalid argument `content`: the body is not valid UTF-8 (at byte 1)\n"
+            ),
+            "{}",
+            t[0]
+        );
+        assert!(
+            rest.ends_with(
+                "error: unsupported: urn:stream:text decodes UTF-8 only; the body's charset is `iso-8859-1`\n"
+            ),
+            "{}",
+            t[0]
+        );
+    }
+
     /// "The REPL grammar" shows `list` in the page's kernel: every name it binds. A space added
     /// to `page_space()` changes that answer, so the cell is held to it here, where `cargo test`
     /// sees it, and not only by the browser run.
