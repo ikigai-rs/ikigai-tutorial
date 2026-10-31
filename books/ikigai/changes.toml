@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-10-31"
+summary = "A third streams page, \"Streams, III: a body read once, and its bound\": a one-shot stream is never cached, is collected under the run's byte budget and refused with `OverBudget` past it, never truncated. Its cell decodes the shop's stock with `urn:stream:text` and sees gzip's bytes refused; its listings decode a stream chunk by chunk."
+pages = ["streams/once.md", "streams/replay.md"]
+
+[[change]]
 date = "2026-10-30"
 summary = "\"A river of feeds\" now runs in the page. Its directory, its two feed lifts, its SPARQL questions (the spliced term that breaks a query and the bound one that cannot) and the four faces of one answer are Run cells, over the example's own files bound at the names its REPL gives them, with the committed river at `urn:file:river.nt`. The stand-in origin, the river's build, the watcher and the saved searches stay REPL transcripts, and the page says why. The REPL grammar's `list` and the browser appendix list the new names."
 pages = ["explore/rss.md", "front-door/grammar.md", "browser.md"]

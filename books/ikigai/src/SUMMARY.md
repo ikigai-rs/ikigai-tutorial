@@ -97,6 +97,7 @@
 
 - [Streams, I: bytes are a representation](streams/bytes.md)
 - [Streams, II: a body you can read again](streams/replay.md)
+- [Streams, III: a body read once, and its bound](streams/once.md)
 
 # Polyglot tracks
 
