@@ -7,7 +7,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
-- **2026-11-02**: The book now builds against ikigai-core 0.2.12, and Status says so. "Tic-tac-toe, IV" finds game b's top row cached again, because its next move recomputed what game a's moves cut, and a trace in "A space that changes while it runs" names the alias view that answers. The kernel's lists now show ikigai-fn's html-to-text.
+- **2026-11-02**: The book now builds against ikigai-core 0.2.12, and the kernel's lists show ikigai-fn's html-to-text. "Tic-tac-toe, IV" finds game b's top row cached again, and a trace in "A space that changes while it runs" names the alias view that answers.
 
   Pages: [Where this actually stands](modules/status.md), [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md), [A space that changes while it runs](applied/live-space.md), [The REPL grammar](front-door/grammar.md), [The graph face](building/graph-face.md)
 
