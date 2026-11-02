@@ -32,6 +32,7 @@
 // by the kernel's `viewStyles`, its text out of the status region and its HTML under "HTML
 // source"); axe finds no WCAG A/AA violation in the cell at a 320 px viewport (UI conventions D12,
 // reflow); and a view the kernel refuses shows the refusal as text, with nothing rendered (D14).
+// On each such page, views written to get past the sanitizer (`HOSTILE`) must come out inert.
 //
 // The site is served the way `axe-browser.mjs` serves it: every request answered from the
 // directory by Playwright's router, on the made-up origin `book-dom.mjs` uses; nothing leaves the
@@ -303,6 +304,105 @@ async function refused(page, i) {
     }, { i, line: REFUSED });
 }
 
+// Views written to get past the region's sanitizer (ledger #2823's review): each must come out
+// inert. `keep` names what a harmless part of a case must still have after it.
+const PWN = "window.__ikigaiPwned=1";
+const HOSTILE = [
+    { name: "an SVG link whose href is animated to javascript:",
+      html: `<svg><a><animate attributeName="href" values="javascript:${PWN}" fill="freeze"/><text>click</text></a></svg>` },
+    { name: "an SVG link whose href is set to javascript:",
+      html: `<svg><a><set attributeName="href" to="javascript:${PWN}"/><text>click</text></a></svg>` },
+    { name: "an image from data:image/svg+xml",
+      html: `<img alt="x" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22/%3E">` },
+    { name: "an SVG use of an outside document",
+      html: `<svg><use href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20id%3D%22x%22/%3E#x"/></svg>` },
+    { name: "a javascript: link inside an SVG foreignObject",
+      html: `<svg><foreignObject><a href="javascript:${PWN}">x</a></foreignObject></svg>` },
+    { name: "a MathML namespace confusion",
+      html: `<math><mtext><table><mglyph><style><img src=x onerror="${PWN}">` },
+    { name: "a javascript: link with mixed case and a leading space",
+      html: `<a href=" JaVaScRiPt:${PWN}">x</a>` },
+    { name: "an event handler on an image",
+      html: `<img alt="x" src="x" onerror="${PWN}">` },
+    { name: "a form and a button's formaction",
+      html: `<form action="javascript:${PWN}"><button formaction="javascript:${PWN}">go</button></form>` },
+    { name: "a style that covers the page",
+      html: `<div style="position:fixed;inset:0">over</div><style>*{display:none}</style>` },
+    { name: "a status region, a main and its skip link (D13)",
+      html: `<a class="ui-skip" href="#m">Skip</a><main id="m"><p role="status" aria-live="assertive">x</p></main>` },
+    { name: "an http(s) link and a PNG image, which are kept",
+      html: `<a href="https://example.org/">example</a><img alt="dot" src="data:image/png;base64,iVBORw0KGgo=">`,
+      keep: ["a[href='https://example.org/'][target='_blank'][rel='noopener noreferrer']",
+          "img[src^='data:image/png']"] },
+];
+
+// In the page: every hostile view through the sanitizer the cells use (`run.js` exposes it as
+// `ikigaiRunViewSanitized`), into a shadow root as a cell's view is, given time to animate and
+// to load. Returns problems.
+export async function hostile(page) {
+    return page.evaluate(async ({ cases }) => {
+        const problems = [];
+        const DROPPED = "svg, math, animate, set, animateMotion, animateTransform, use, foreignObject, " +
+            "script, iframe, frame, object, embed, form, style, link, meta, base, main, a.ui-skip";
+        for (const c of cases) {
+            let body;
+            try {
+                body = await window.ikigaiRunViewSanitized(c.html);
+            } catch (err) {
+                problems.push(`${c.name}: the sanitizer failed (${err && err.message ? err.message : err})`);
+                continue;
+            }
+            const host = document.createElement("div");
+            const root = host.attachShadow({ mode: "open" });
+            document.body.appendChild(host);
+            root.appendChild(body);
+            await new Promise((r) => setTimeout(r, 300));
+            const all = [...root.querySelectorAll("*")];
+            const kept = all.filter((n) => n.matches(DROPPED)).map((n) => n.localName);
+            if (kept.length) {
+                problems.push(`${c.name}: kept ${[...new Set(kept)].join(", ")}`);
+            }
+            for (const n of all) {
+                for (const a of n.attributes) {
+                    if (/^on/i.test(a.name) || a.name === "style" || a.name === "aria-live" ||
+                        /^(hx|data-hx)-/.test(a.name) ||
+                        (a.name === "role" && /^(status|alert|log|main)$/.test(a.value.trim()))) {
+                        problems.push(`${c.name}: kept the attribute ${a.name} on <${n.localName}>`);
+                    }
+                }
+                // What a link goes to as the browser now reads it: for SVG, after animation.
+                const href = n.href && typeof n.href === "object" ? n.href.animVal
+                    : n.hasAttribute("href") || n.hasAttribute("xlink:href")
+                        ? n.getAttribute("href") || n.getAttribute("xlink:href") : null;
+                if (href !== null && href !== "" &&
+                    (n.localName !== "a" || !/^https?:\/\//i.test(href.trim()))) {
+                    problems.push(`${c.name}: <${n.localName}> goes to ${JSON.stringify(href)}`);
+                }
+                if (n.localName === "a" && href && (n.getAttribute("target") !== "_blank" ||
+                    !/\bnoopener\b/.test(n.getAttribute("rel") || "") ||
+                    !/\bnoreferrer\b/.test(n.getAttribute("rel") || ""))) {
+                    problems.push(`${c.name}: a link does not open in a new tab with rel="noopener noreferrer"`);
+                }
+                const src = n.getAttribute("src");
+                if (src !== null && (n.localName !== "img" || !/^data:image\//i.test(src.trim()) ||
+                    /^data:image\/svg\+xml/i.test(src.trim()))) {
+                    problems.push(`${c.name}: <${n.localName}> loads ${JSON.stringify(src.slice(0, 40))}`);
+                }
+            }
+            for (const sel of c.keep || []) {
+                if (!root.querySelector(sel)) {
+                    problems.push(`${c.name}: lost what it should keep (${sel})`);
+                }
+            }
+            host.remove();
+        }
+        if (window.__ikigaiPwned) {
+            problems.push("a hostile view ran script in the page");
+        }
+        return problems;
+    }, { cases: HOSTILE });
+}
+
 function difference(got, want) {
     const g = got.split("\n").filter((l) => l.trim());
     const w = want.split("\n").filter((l) => l.trim());
@@ -366,6 +466,9 @@ export async function checkCells(browser, siteArg) {
         if (renders.length > 0) {
             for (const problem of await renderedAxe(page)) {
                 failures.push(`${rel}, its rendered views at 320 px: ${problem}`);
+            }
+            for (const problem of await hostile(page)) {
+                failures.push(`${rel}, a hostile view: ${problem}`);
             }
             for (const i of renders) {
                 const problem = await refused(page, i);

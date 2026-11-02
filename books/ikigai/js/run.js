@@ -341,6 +341,11 @@
         return body;
     }
 
+    // The sanitizer as a cell's view goes through it, for `a11y/cells.mjs`'s hostile cases.
+    window.ikigaiRunViewSanitized = function (html) {
+        return Promise.resolve(sanitized(html));
+    };
+
     // The palette the book's theme reads as, on the shadow root's host, kept in step with the
     // theme menu.
     function themed(host) {
