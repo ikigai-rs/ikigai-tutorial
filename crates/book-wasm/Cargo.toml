@@ -94,6 +94,14 @@ ikigai-sparql.workspace = true
 rss-river = { path = "../rss-river" }
 ikigai-xslt = "0.4.0"
 ikigai-text = "0.4.0"
+# A cell that renders its view (`data-render='html'`, js/run.js): ikigai-ui's token stylesheet,
+# rewritten for the shadow root the view is shown in (`viewStyles`). It links ikigai-ui 0.3.0, the
+# UI book's version, whose space (htmx, the shell, the palettes) is compiled in but NOT bound in
+# `page_space()`: the stylesheet is composed by a kernel of its own (crates/book-view).
+# The release kernel, as wasm-bindgen writes it for the page, grew from 23,338,487 to 23,480,481
+# bytes (gzip -9: 3,425,876 to 3,462,579), measured 2026-11-01 with the workspace's release
+# profile (ledger #2823).
+book-view = { path = "../book-view" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
 ikigai-vocab.workspace = true

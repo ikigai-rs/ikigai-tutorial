@@ -27,14 +27,26 @@
 // have not run, when it differs; and "Run all above" followed by Run must give "as the chapter
 // shows".
 //
+// A cell that renders its view (`data-render='html'`, ledger #2823) is held to three more things,
+// on the same load once its page's cells have run: its view is rendered (in a shadow root, styled
+// by the kernel's `viewStyles`, its text out of the status region and its HTML under "HTML
+// source"); axe finds no WCAG A/AA violation in the cell at a 320 px viewport (UI conventions D12,
+// reflow); and a view the kernel refuses shows the refusal as text, with nothing rendered (D14).
+//
 // The site is served the way `axe-browser.mjs` serves it: every request answered from the
 // directory by Playwright's router, on the made-up origin `book-dom.mjs` uses; nothing leaves the
 // process. Run on its own, the browser is the machine's Google Chrome (or `--chrome`), as there.
 import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, relative, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { chromium } from "playwright-core";
 import { ORIGIN, pages } from "./book-dom.mjs";
+
+const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
+const GATING = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+// A name no kernel binds: what a refused view looks like.
+const REFUSED = "source urn:iki:tutorial:no-such-view";
 
 function siteUrlOf(dir) {
     const m = readFileSync(join(dir, "404.html"), "utf8").match(/<base href="([^"]+)"/);
@@ -219,6 +231,78 @@ async function open(context, siteUrl, rel) {
     return { page, loaded };
 }
 
+// In the page, after cell `i` ran: is its view rendered? Returns a problem, or null.
+async function rendered(page, i) {
+    return page.evaluate((i) => {
+        const cell = document.querySelectorAll("div.ikigai-run")[i];
+        const view = cell.querySelector("figure.ikigai-run-view");
+        const host = view && view.querySelector(".ikigai-run-view-frame");
+        const root = host && host.shadowRoot;
+        const body = root && root.querySelector(".ikigai-run-view-body");
+        const source = cell.querySelector("details.ikigai-run-source");
+        const caption = cell.querySelector(".ikigai-run-caption").textContent;
+        if (!view || view.hidden || !body || body.children.length === 0) {
+            return `its view was not rendered (the caption says ${JSON.stringify(caption)})`;
+        }
+        if (!root.querySelector("style") || !/--bg:/.test(root.querySelector("style").textContent)) {
+            return "its view is not styled by the kernel's token stylesheet";
+        }
+        if (!["light", "dark"].includes(host.getAttribute("data-theme"))) {
+            return `its view has no palette (data-theme ${JSON.stringify(host.getAttribute("data-theme"))})`;
+        }
+        if (!cell.querySelector(".ikigai-run-out").hidden) {
+            return "its HTML is still shown as text in the status region";
+        }
+        if (!source || source.hidden || !/^\s*</.test(source.querySelector("pre").textContent)) {
+            return "its HTML is not under \"HTML source\"";
+        }
+        if (root.querySelector("script, iframe, object, embed, form, link, main, [style], [role=status], [aria-live], [hx-get], a.ui-skip")) {
+            return "its view kept markup the region drops (a script, frame, form, stylesheet, style, main, skip link, status region or htmx attribute)";
+        }
+        if (cell.querySelectorAll('[role="status"]').length !== 1) {
+            return "the cell does not have exactly one status region";
+        }
+        return null;
+    }, i);
+}
+
+// In the page, at a 320 px viewport: axe over the rendered cells. Returns problems.
+async function renderedAxe(page) {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.waitForTimeout(200);
+    await page.evaluate(axeSource);
+    const found = await page.evaluate((gating) => window.axe.run(
+        { include: [["div.ikigai-run[data-render]"]] }, { runOnly: { type: "tag", values: gating } })
+        .then((r) => r.violations.map((v) => `${v.id} — ${v.help}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(", ")}`)),
+    GATING);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    return found;
+}
+
+// In the page: run a name no kernel binds in rendered cell `i`. The refusal is text, nothing is
+// rendered, and Reset puts the chapter's command back. Returns a problem, or null.
+async function refused(page, i) {
+    return page.evaluate(async ({ i, line }) => {
+        const cell = document.querySelectorAll("div.ikigai-run")[i];
+        const caption = cell.querySelector(".ikigai-run-caption");
+        cell.querySelector("textarea").value = line;
+        cell.querySelector("button.ikigai-run-button").click();
+        const deadline = Date.now() + 30000;
+        while (caption.textContent === "running…" && Date.now() < deadline) {
+            await new Promise((r) => setTimeout(r, 20));
+        }
+        const pane = cell.querySelector(".ikigai-run-out");
+        const view = cell.querySelector("figure.ikigai-run-view");
+        const problem = pane.hidden || !/^error: /.test(pane.textContent)
+            ? `the refusal is not shown as text (the pane says ${JSON.stringify(pane.textContent)})`
+            : view && !view.hidden ? "a view is still rendered beside the refusal"
+            : !/refused/.test(caption.textContent) ? `the caption does not say the view was refused: ${JSON.stringify(caption.textContent)}`
+            : null;
+        [...cell.querySelectorAll("button")].find((b) => b.textContent === "Reset").click();
+        return problem;
+    }, { i, line: REFUSED });
+}
+
 function difference(got, want) {
     const g = got.split("\n").filter((l) => l.trim());
     const w = want.split("\n").filter((l) => l.trim());
@@ -238,6 +322,7 @@ export async function checkCells(browser, siteArg) {
     const failures = [];
     let checked = 0;
     let shortcuts = 0;
+    let views = 0;
     for (const path of pages(siteArg)) {
         if (!readFileSync(path, "utf8").includes('class="ikigai-run"')) {
             continue;
@@ -251,6 +336,7 @@ export async function checkCells(browser, siteArg) {
         }
         const count = await page.locator("div.ikigai-run").count();
         const withAbove = [];
+        const renders = [];
         for (let i = 0; i < count; i++) {
             const r = await press(page, i, "run");
             checked += 1;
@@ -263,12 +349,31 @@ export async function checkCells(browser, siteArg) {
             if (picture !== null) {
                 failures.push(`${rel} cell ${i + 1}, run in page order: ${picture}`);
             }
+            if (await page.locator("div.ikigai-run").nth(i).getAttribute("data-render") === "html") {
+                renders.push(i);
+                const problem = await rendered(page, i);
+                if (problem !== null) {
+                    failures.push(`${rel} cell ${i + 1}, rendered: ${problem}`);
+                }
+            }
             if (await page.locator("div.ikigai-run").nth(i).getByRole("button", { name: "Run all above" }).count()) {
                 withAbove.push(i);
             }
         }
         for (const problem of await compareWith(page)) {
             failures.push(`${rel}, after its cells ran in page order: ${problem}`);
+        }
+        if (renders.length > 0) {
+            for (const problem of await renderedAxe(page)) {
+                failures.push(`${rel}, its rendered views at 320 px: ${problem}`);
+            }
+            for (const i of renders) {
+                const problem = await refused(page, i);
+                views += 1;
+                if (problem !== null) {
+                    failures.push(`${rel} cell ${i + 1}, refused: ${problem}`);
+                }
+            }
         }
         await page.close();
 
@@ -292,7 +397,7 @@ export async function checkCells(browser, siteArg) {
         }
     }
     await context.close();
-    return { failures, summary: `cells against the chapter: ${checked} cell(s) run in page order, ${shortcuts} run after "Run all above", ${failures.length} failure(s)` };
+    return { failures, summary: `cells against the chapter: ${checked} cell(s) run in page order, ${shortcuts} run after "Run all above", ${views} rendered view(s) checked, ${failures.length} failure(s)` };
 }
 
 // On its own, from the command line.

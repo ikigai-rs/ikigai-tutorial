@@ -16,7 +16,7 @@
 //! the only one asking, and it is their kernel. The inspector's HTTP host is where a viewer's
 //! capability narrows what a view shows.
 //!
-//! Exports, by the names `js/run.js` calls: `evalLineAsync` and `boundNames`.
+//! Exports, by the names `js/run.js` calls: `evalLineAsync`, `boundNames` and `viewStyles`.
 
 use std::rc::Rc;
 
@@ -70,6 +70,14 @@ pub fn eval_line_async(line: String) -> js_sys::Promise {
             engine.eval_async(&line).await,
         )))
     })
+}
+
+/// The stylesheet a rendered cell's view is shown under (`data-render='html'`, `js/run.js`):
+/// ikigai-ui's token stylesheet, the one the inspector's pages link, for the shadow root the
+/// view is put in ([`book_view::styles`]).
+#[wasm_bindgen(js_name = viewStyles)]
+pub fn view_styles() -> String {
+    book_view::styles()
 }
 
 /// The names the inspector binds, one per line.

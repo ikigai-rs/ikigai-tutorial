@@ -115,6 +115,21 @@
 // requires "as the chapter shows" of each, so the expected outputs stay what a reader who reads in
 // order gets.
 //
+// A cell may RENDER its view (`data-render='html'`; ledger #2823, the same cell kind in every
+// book): its command composes a page or a fragment, and Run shows that HTML as a page, below the
+// cell's status region, with the source it was rendered from one click away ("HTML source"). The
+// view is put in a shadow root of its own, so the book's styles do not reach in and its markup does
+// not reach out, styled by ikigai-ui's token stylesheet (the kernel's `viewStyles`, UI conventions
+// D12) in the palette the book's theme reads as (light and rust light; coal, navy and ayu dark).
+// The region is SANDBOXED by what is kept: no script, frame, object, form, stylesheet, style
+// attribute, event handler or htmx attribute survives, a link goes only to an absolute http(s)
+// address (in a new tab), and an image only from a `data:` URL. The cell's caption is still the one
+// status region (D13): a view's own `role="status"`, `role="alert"` or `aria-live` is dropped, and
+// so are its `<main>` (the chapter has one) and its skip link. A view that FAILS is not rendered:
+// the refusal is the cell's text, as on any cell (D14), and the region is emptied. The comparison
+// with the chapter is the text's, as everywhere. `a11y/cells.mjs` runs each such cell, requires the
+// view rendered and axe-clean at 320 px, and requires a refused one to stay text.
+//
 // A page may keep a STORY CLOCK: `data-clock='2026-09-22T12:00Z'` (an instant, where a plain
 // `data-clock` asks for the browser's clock) builds the page's kernel with a clock stopped
 // there, and a cell carrying `data-at='…'` moves it before it runs. Every reader's page then
@@ -258,6 +273,107 @@
         return n + " " + (n === 1 ? one : many);
     }
 
+    // ── rendered views (`data-render='html'`) ────────────────────────────────
+    // ikigai-ui's token stylesheet, for a shadow root: asked of the kernel once per page.
+    var stylesFor = null;
+    function viewStyles() {
+        if (!stylesFor) {
+            stylesFor = load().then(function (mod) {
+                if (typeof mod.viewStyles !== "function") {
+                    throw new Error("this page's kernel has no viewStyles");
+                }
+                return mod.viewStyles();
+            });
+        }
+        return stylesFor;
+    }
+
+    // What is kept of a view (see the comment at the top). Parsed inertly (DOMParser runs no
+    // script and loads nothing), then cleaned, then moved into the page.
+    var DROPPED = "script, noscript, template, iframe, frame, frameset, object, embed, applet, " +
+        "link, meta, base, style, form, title";
+    function sanitized(html) {
+        var doc = new DOMParser().parseFromString(html, "text/html");
+        doc.querySelectorAll(DROPPED).forEach(function (n) { n.remove(); });
+        // A view's skip link points at its own <main>, which is not in the chapter's page.
+        doc.querySelectorAll("a.ui-skip").forEach(function (n) { n.remove(); });
+        doc.body.querySelectorAll("*").forEach(function (n) {
+            for (var i = n.attributes.length - 1; i >= 0; i--) {
+                var name = n.attributes[i].name.toLowerCase();
+                var value = n.attributes[i].value;
+                if (/^on/.test(name) || name === "style" || name === "srcset" ||
+                    name === "formaction" || name === "action" || name === "ping" ||
+                    name === "aria-live" || /^(hx|data-hx)-/.test(name) ||
+                    (name === "role" && /^(status|alert|log|main)$/.test(value.trim()))) {
+                    n.removeAttribute(n.attributes[i].name);
+                } else if (name === "href" || name === "xlink:href" || name === "src") {
+                    var keep = name === "src" ? /^data:image\//i.test(value)
+                        : n.localName === "a" && /^https?:\/\//i.test(value.trim());
+                    if (!keep) {
+                        n.removeAttribute(n.attributes[i].name);
+                    }
+                }
+            }
+            if (n.localName === "a" && n.hasAttribute("href")) {
+                n.setAttribute("target", "_blank");
+                n.setAttribute("rel", "noopener noreferrer");
+            }
+        });
+        // The chapter's page has its <main>; a view's becomes a plain block.
+        doc.body.querySelectorAll("main").forEach(function (m) {
+            var div = doc.createElement("div");
+            while (m.firstChild) {
+                div.appendChild(m.firstChild);
+            }
+            for (var i = 0; i < m.attributes.length; i++) {
+                div.setAttribute(m.attributes[i].name, m.attributes[i].value);
+            }
+            m.replaceWith(div);
+        });
+        var body = el("div", "ikigai-run-view-body");
+        var lang = doc.documentElement.getAttribute("lang");
+        if (lang) {
+            body.setAttribute("lang", lang);
+        }
+        while (doc.body.firstChild) {
+            body.appendChild(document.adoptNode(doc.body.firstChild));
+        }
+        return body;
+    }
+
+    // The palette the book's theme reads as, on the shadow root's host, kept in step with the
+    // theme menu.
+    function themed(host) {
+        function apply() {
+            var dark = /(^|\s)(coal|navy|ayu)(\s|$)/.test(document.documentElement.className);
+            host.setAttribute("data-theme", dark ? "dark" : "light");
+        }
+        apply();
+        new MutationObserver(apply).observe(document.documentElement,
+            { attributes: true, attributeFilter: ["class"] });
+    }
+
+    // A view wider than the column scrolls sideways, and then takes a tab stop and a name, so a
+    // keyboard can scroll it too (SC 2.1.1); one that fits takes neither.
+    function scrollable(host) {
+        function check() {
+            if (host.scrollWidth > host.clientWidth + 1) {
+                host.tabIndex = 0;
+                host.setAttribute("role", "region");
+                host.setAttribute("aria-label", "The rendered view, scrolls sideways");
+            } else {
+                host.removeAttribute("tabindex");
+                host.removeAttribute("role");
+                host.removeAttribute("aria-label");
+            }
+        }
+        check();
+        if (!host.ikigaiWatched && typeof ResizeObserver === "function") {
+            host.ikigaiWatched = true;
+            new ResizeObserver(check).observe(host);
+        }
+    }
+
     function install(cell) {
         var original = cell.getAttribute("data-cmd") || "";
         var game = cell.getAttribute("data-game");
@@ -268,6 +384,7 @@
         var harness = cell.getAttribute("data-harness");
         var asOf = cell.getAttribute("data-as-of");
         var at = cell.getAttribute("data-at");
+        var renders = cell.getAttribute("data-render") === "html";
         // The chain the cell runs in, spelled as the page's kernel reads it. (Not `chain`: the
         // runner's `reduce` below names its promise that, and would shadow it.)
         var chainSpec = game ||
@@ -360,6 +477,53 @@
         cell.appendChild(result);
 
         caption.id = id + "-caption";
+
+        // A rendered cell's view and its source, below the status region and outside it: the
+        // caption says what happened, once. Built on the first view that renders.
+        var view = null;
+        var viewRoot = null;
+        var viewCaption = null;
+        var source = null;
+        var sourceOut = null;
+        function shown(html, n) {
+            return viewStyles().then(function (css) {
+                if (!view) {
+                    view = el("figure", "ikigai-run-view");
+                    viewCaption = el("figcaption", "ikigai-run-view-caption");
+                    var host = el("div", "ikigai-run-view-frame");
+                    viewRoot = host.attachShadow({ mode: "open" });
+                    view.appendChild(viewCaption);
+                    view.appendChild(host);
+                    source = el("details", "ikigai-run-source");
+                    source.appendChild(el("summary", "ikigai-run-source-summary",
+                        "HTML source (what the kernel answered)"));
+                    sourceOut = el("pre", "ikigai-run-source-out", "");
+                    source.appendChild(sourceOut);
+                    cell.insertBefore(view, expectedWrap);
+                    cell.insertBefore(source, expectedWrap);
+                    themed(host);
+                }
+                viewCaption.textContent = "The view, rendered from run " + n + "'s HTML";
+                viewRoot.textContent = "";
+                var style = document.createElement("style");
+                style.textContent = css;
+                viewRoot.appendChild(style);
+                viewRoot.appendChild(sanitized(html));
+                sourceOut.textContent = html;
+                view.hidden = false;
+                source.hidden = false;
+                scrollable(view.lastChild);
+            });
+        }
+        function unshown() {
+            if (view) {
+                viewRoot.textContent = "";
+                view.hidden = true;
+                source.hidden = true;
+                sourceOut.textContent = "";
+            }
+            pane.hidden = false;
+        }
 
         // The listing's own output stays available — behind a disclosure, so the
         // answer is not on the page before the reader has asked the question. With or
@@ -478,6 +642,8 @@
                 }
                 var acc = "";
                 var verdicts = [];
+                var last = null;
+                var refused = false;
                 // Sequential on purpose: a later line may depend on an earlier one's
                 // side effect (a Sink, a cut), so they run in order, one at a time.
                 return lines.reduce(function (chain, line) {
@@ -487,6 +653,8 @@
                         return reply.then(function (json) {
                             var reply = JSON.parse(json);
                             acc += render(reply);
+                            last = reply;
+                            refused = refused || reply.kind === "error";
                             if (reply.cache) {
                                 verdicts.push(reply.cache);
                             } else if (reply.kind === "error") {
@@ -500,27 +668,43 @@
                     self.ran = true;
                     var against = compare(lines, acc);
                     record(lines.join("\n"), acc, verdicts.join(" · "), elapsed, against.mark);
-                    caption.textContent = "run " + runs + " — from the kernel in this page" +
-                        against.says + (runs > 1 ? "; compare it with the runs below" : "");
-                    run.disabled = false;
-                    // A cell may have changed a game a board on this page shows; the board
-                    // is a copy the kernel cannot cut, so say that something ran (ttt.js).
-                    // What a listener holds, the chain's next run waits for (`held`).
-                    var holds = [];
-                    document.dispatchEvent(new CustomEvent("ikigai:cell-ran", {
-                        detail: {
-                            game: game,
-                            chain: chainSpec,
-                            cell: cell,
-                            lines: lines,
-                            hold: function (work) {
-                                holds.push(Promise.resolve(work).catch(function () {}));
+                    var html = renders && !refused && last && last.kind === "output" && last.text;
+                    var drawn = !renders ? Promise.resolve("") : !html
+                        ? Promise.resolve(unshown()).then(function () {
+                            return refused ? "; the view was refused, so nothing is rendered: the refusal is above"
+                                : "; the view answered no HTML, so nothing is rendered";
+                        })
+                        : shown(last.text, runs).then(function () {
+                            pane.hidden = true;
+                            return "; the view is rendered below, its HTML under “HTML source”";
+                        }, function (err) {
+                            unshown();
+                            return "; the view could not be rendered (" +
+                                (err && err.message ? err.message : err) + "), so its HTML is shown as text";
+                        });
+                    return drawn.then(function (rendered) {
+                        caption.textContent = "run " + runs + " — from the kernel in this page" +
+                            rendered + against.says + (runs > 1 ? "; compare it with the runs below" : "");
+                        run.disabled = false;
+                        // A cell may have changed a game a board on this page shows; the board
+                        // is a copy the kernel cannot cut, so say that something ran (ttt.js).
+                        // What a listener holds, the chain's next run waits for (`held`).
+                        var holds = [];
+                        document.dispatchEvent(new CustomEvent("ikigai:cell-ran", {
+                            detail: {
+                                game: game,
+                                chain: chainSpec,
+                                cell: cell,
+                                lines: lines,
+                                hold: function (work) {
+                                    holds.push(Promise.resolve(work).catch(function () {}));
+                                }
                             }
+                        }));
+                        if (chainSpec && holds.length > 0) {
+                            held[chainSpec] = Promise.all([held[chainSpec]].concat(holds));
                         }
-                    }));
-                    if (chainSpec && holds.length > 0) {
-                        held[chainSpec] = Promise.all([held[chainSpec]].concat(holds));
-                    }
+                    });
                 });
             }, markUnavailable).catch(function (err) {
                 // The kernel loaded, and something in the page's own path failed while
@@ -593,6 +777,7 @@
             clear.hidden = true;
             runs = 0;
             pane.textContent = "";
+            unshown();
             if (!unavailable) {
                 caption.textContent = "reset — the chapter's command is back; press Run to resolve it in this page";
             }
@@ -604,6 +789,7 @@
             clear.hidden = true;
             runs = 0;
             pane.textContent = "";
+            unshown();
             if (!unavailable) {
                 caption.textContent = "history cleared — press Run to resolve it in this page";
             }

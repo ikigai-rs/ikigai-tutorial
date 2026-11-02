@@ -16,6 +16,9 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 ikigai-core.workspace = true
 inspector = { path = "../inspector" }
+# A cell that renders its view (`data-render='html'`, js/run.js): ikigai-ui's token stylesheet,
+# rewritten for the shadow root the view is shown in (`viewStyles`).
+book-view = { path = "../book-view" }
 # The CLI's engine, as crates/book-wasm and crates/gonk-book-wasm take it: the same REPL grammar
 # a reader types at `ikigai`. 0.1.63, with them.
 # 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and

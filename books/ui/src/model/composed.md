@@ -98,9 +98,13 @@ a resource too:
 [computed]</pre>
 </div>
 
-and the page is the shell over the note's fragment, which in turn includes the card:
+and the page is the shell over the note's fragment, which in turn includes the card. Run shows
+it rendered, styled by ikigai-ui's tokens in the palette your theme reads as, with its HTML under
+"HTML source". The page keeps no script, stylesheet link or status region of its own, and its
+links to the inspector's other views are not followed: they belong to the inspector's host, not
+this book:
 
-<div class="ikigai-run" data-cmd='source urn:iki:tutorial:inspect:page:note'>
+<div class="ikigai-run" data-render='html' data-cmd='source urn:iki:tutorial:inspect:page:note'>
 <pre class="ikigai-run-expected">&lt;!doctype html&gt;
 &lt;html lang="en" data-theme="auto"&gt;
 &lt;head&gt;

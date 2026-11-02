@@ -1,0 +1,22 @@
+[package]
+name = "book-view"
+version = "0.1.0"
+description = "What a rendered cell (`data-render='html'`, js/run.js) is styled by: ikigai-ui's token stylesheet, as the books' page kernels hand it to the shadow root a view is rendered into."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "book_view"
+path = "src/lib.rs"
+
+# Linked into two page kernels (crates/book-wasm and crates/ui-book-wasm), so it stays wasm-clean.
+[dependencies]
+ikigai-core.workspace = true
+# The token stylesheet (`urn:iki:ui:tokens.css`), the palettes behind it (UI conventions D12) and
+# their contrast floor. 0.3.0, the version crates/inspector links, so the UI book's views and the
+# region they are rendered into are styled by one token set.
+ikigai-ui = "0.3.0"
+futures.workspace = true

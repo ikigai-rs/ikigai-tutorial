@@ -111,9 +111,10 @@ link to the whole page. A reload, a bookmark and a history miss all fetch the pa
 composes the same fragment, so there is no state a reload can lose (UI conventions D10).
 
 A detail is a view with a URL like any other. Each thread's link carries its name,
-percent-encoded, as one path segment:
+percent-encoded, as one path segment. Run renders the fragment, with its HTML under "HTML source".
+In the page it does not refresh itself: the book has no push stream, so its `hx-get` is dropped:
 
-<div class="ikigai-run" data-cmd='source urn:iki:tutorial:inspect:fragment:thread:urn:iki:tutorial:inspect:demo:note'>
+<div class="ikigai-run" data-render='html' data-cmd='source urn:iki:tutorial:inspect:fragment:thread:urn:iki:tutorial:inspect:demo:note'>
 <pre class="ikigai-run-expected">&lt;section class='inspect' id='view'&gt;&lt;span data-ui-quiet='' hidden='' hx-get='/inspect/fragment/thread/urn%3Aiki…
 [uncacheable]</pre>
 </div>
