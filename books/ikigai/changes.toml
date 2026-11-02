@@ -20,8 +20,8 @@
 
 [[change]]
 date = "2026-11-02"
-summary = "The book now builds against ikigai-core 0.2.8, and Status says so. \"Tic-tac-toe, IV\" finds game b's top row cached again, because its next move recomputed what game a's moves cut, and a trace in \"A space that changes while it runs\" names the alias view that answers."
-pages = ["modules/status.md", "applied/tic-tac-toe-4.md", "applied/live-space.md"]
+summary = "The book now builds against ikigai-core 0.2.12, and Status says so. \"Tic-tac-toe, IV\" finds game b's top row cached again, because its next move recomputed what game a's moves cut, and a trace in \"A space that changes while it runs\" names the alias view that answers. The kernel's lists now show ikigai-fn's html-to-text."
+pages = ["modules/status.md", "applied/tic-tac-toe-4.md", "applied/live-space.md", "front-door/grammar.md", "building/graph-face.md"]
 
 [[change]]
 date = "2026-11-01"

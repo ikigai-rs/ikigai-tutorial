@@ -16,7 +16,7 @@ path = "src/lib.rs"
 [dependencies]
 ikigai-core.workspace = true
 # The token stylesheet (`urn:iki:ui:tokens.css`), the palettes behind it (UI conventions D12) and
-# their contrast floor. 0.4.0, the version crates/inspector links, so the UI book's views and the
+# their contrast floor. 0.4.1, the version crates/inspector links, so the UI book's views and the
 # region they are rendered into are styled by one token set.
-ikigai-ui = "0.4.0"
+ikigai-ui = "0.4.1"
 futures.workspace = true

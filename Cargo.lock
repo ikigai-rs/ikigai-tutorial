@@ -1086,7 +1086,7 @@ dependencies = [
  "book-transcripts",
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-vocab",
 ]
 
@@ -1353,14 +1353,15 @@ dependencies = [
 
 [[package]]
 name = "ikigai-browse"
-version = "0.20.0"
+version = "0.20.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7e92ebed316bdc54d4f8b1e86e12eb91380bb60b613649b75f3350d47b7e58c"
+checksum = "65fa40d222b5724659901bb446698c66dc73df5f1c312d3d3f4d8f684e59a189"
 dependencies = [
  "async-trait",
+ "futures-core",
  "ikigai-a11y",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-store",
  "notify",
  "oxigraph",
@@ -1396,9 +1397,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-core"
-version = "0.2.8"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b9c5bb6f78ece4d365ca1ac5a48f49670cc4451bc7b2d585199cbea7ccfb38"
+checksum = "b43db487798ba70c0c717347cedd4c7bc72c665d30e9e7f75db59e96ddc3ecf3"
 dependencies = [
  "async-trait",
  "blake3",
@@ -1415,12 +1416,12 @@ dependencies = [
 
 [[package]]
 name = "ikigai-diagram"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0c8ee38dda32a37326f1209252edaf4ffb7833b49ac0ad80c510534c782f68e"
+checksum = "75e80854ff0b8f3674aa6f5a0ee3ceb0a31493336d0bf5cc39b98d3730fc19af"
 dependencies = [
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "oxrdf",
  "oxttl",
 ]
@@ -1441,12 +1442,13 @@ dependencies = [
 
 [[package]]
 name = "ikigai-fn"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6892edb569d679ec37d68eab6e3336a1435bf0def9a5143501376b076c871e48"
+checksum = "de8d2e81d55b68fd3c3c6267ae9c7462c981c7b6bd03d6405784618f75a4ffd9"
 dependencies = [
  "async-trait",
  "futures-util",
+ "html5ever",
  "ikigai-core",
  "serde",
  "serde_json",
@@ -1486,6 +1488,21 @@ name = "ikigai-http"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7bbb711c9498d685cefd0fa1400abbece1f5b64d6fed4c0b1e2df12db6515e5b"
+dependencies = [
+ "async-trait",
+ "base64 0.22.1",
+ "futures-io",
+ "futures-util",
+ "httpdate",
+ "ikigai-core",
+ "url",
+]
+
+[[package]]
+name = "ikigai-http"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9e66329277afd83e8eae5ad930be6ec4a31d7220ea8e58705d9c3c9adf2ebcb"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -1553,7 +1570,7 @@ dependencies = [
  "eventsource-stream",
  "futures-util",
  "ikigai-core",
- "ikigai-http",
+ "ikigai-http 0.4.0",
  "serde",
  "serde_json",
  "url",
@@ -1782,14 +1799,14 @@ checksum = "de028b6b735eb20e85eead4970c1f8f481a30e96077c92fa3be3dbcebb481869"
 dependencies = [
  "async-trait",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.7.2",
 ]
 
 [[package]]
 name = "ikigai-ui"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d6851b3d4dc6317b5a8d51471e8297067b17dd92943bee572fb502d107ed2d7"
+checksum = "4a5afcb08a6a728568b771018eb76f4643de459507808a59ca8d2a219f3913b4"
 dependencies = [
  "futures-executor",
  "ikigai-a11y",
@@ -1810,20 +1827,22 @@ dependencies = [
 
 [[package]]
 name = "ikigai-web"
-version = "0.2.1"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c035dfd4d4cd5a34e76e90ff7d40cc7acfc2b9fef105f91304a8f0151e77e80"
+checksum = "78f1a8c3077c941c471a38a217672d96fdabb7123f1c325c8c7df4fb3d9e68f9"
 dependencies = [
  "blake3",
  "bytes",
  "chrono",
+ "futures-core",
  "http",
  "http-body",
  "http-body-util",
  "hyper",
  "hyper-util",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
+ "ikigai-http 0.5.1",
  "libc",
  "serde_json",
  "tokio",
@@ -1890,7 +1909,7 @@ dependencies = [
  "form_urlencoded",
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-fs",
  "ikigai-json",
  "ikigai-rdf",
@@ -2127,7 +2146,7 @@ dependencies = [
  "hello-camel",
  "ikigai-core",
  "ikigai-diagram",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-sexpr",
  "ikigai-vocab",
 ]
@@ -2392,6 +2411,7 @@ dependencies = [
  "oxrdf",
  "oxrdfio",
  "oxsdatatypes",
+ "rand 0.8.8",
  "rand 0.9.5",
  "rustc-hash",
  "siphasher",
@@ -2439,7 +2459,7 @@ dependencies = [
  "oxilangtag",
  "oxiri",
  "oxsdatatypes",
- "rand 0.9.5",
+ "rand 0.8.8",
  "sha2 0.11.0",
  "thiserror",
 ]
@@ -2751,7 +2771,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-vocab",
  "spreadsheet",
  "time-resource",
@@ -2763,7 +2783,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "oxrdf",
  "oxttl",
  "serde_json",
@@ -3230,7 +3250,7 @@ dependencies = [
  "book-transcripts",
  "futures",
  "ikigai-core",
- "ikigai-http",
+ "ikigai-http 0.4.0",
  "ikigai-llm",
  "ikigai-nl",
  "ikigai-script",
@@ -3349,7 +3369,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-json",
  "ikigai-vocab",
  "live-space",
@@ -3414,7 +3434,7 @@ dependencies = [
  "oxiri",
  "oxrdf",
  "oxsdatatypes",
- "rand 0.9.5",
+ "rand 0.8.8",
  "regex",
  "rustc-hash",
  "sha1 0.11.0",
@@ -3435,7 +3455,7 @@ dependencies = [
  "oxiri",
  "oxrdf",
  "peg",
- "rand 0.9.5",
+ "rand 0.8.8",
  "thiserror",
 ]
 
@@ -3446,7 +3466,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "973ee503ab3d6c3de66b4b459233cd5b22b44dad0fb7b8d0931daf73d2ede935"
 dependencies = [
  "oxrdf",
- "rand 0.9.5",
+ "rand 0.8.8",
  "spargebra",
 ]
 
@@ -3465,7 +3485,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-vocab",
  "time-resource",
 ]
@@ -3641,7 +3661,7 @@ dependencies = [
  "futures",
  "ikigai-core",
  "ikigai-diagram",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-sexpr",
  "ikigai-vocab",
 ]
@@ -3682,7 +3702,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fn 0.7.1",
+ "ikigai-fn 0.9.0",
  "ikigai-vocab",
 ]
 
@@ -4098,7 +4118,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

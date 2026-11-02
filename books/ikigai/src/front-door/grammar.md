@@ -429,6 +429,7 @@ urn:iki:fn:reverseList                    → reverseList
 urn:iki:fn:compose                        → compose
 urn:iki:fn:conditional                    → conditional
 urn:iki:fn:each                           → each
+urn:iki:fn:html-to-text                   → html-to-text
 urn:demo:wrap                             → wrap
 urn:demo:split                            → split
 urn:demo:greet                            → greet

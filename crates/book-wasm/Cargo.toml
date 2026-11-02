@@ -85,7 +85,7 @@ ikigai-sparql.workspace = true
 # (`urn:text:*`), whose `grep` the chapter's lift lines end in. ikigai-xslt is 0.4.0, the version the
 # workspace already locks (crates/inspector): 0.4.1, which the replay cli links, adds only `xsl:param`
 # arguments, which no line of the chapter passes, and needed ikigai-core 0.2.5 where the cells locked
-# 0.2.2 (0.2.8 since ledger #2853). All three build for wasm32-unknown-unknown as they are. With them (and ikigai-fn 0.7.1,
+# 0.2.2 (0.2.12 since ledger #2853). All three build for wasm32-unknown-unknown as they are. With them (and ikigai-fn 0.7.1,
 # ikigai-sparql 0.3.2) the release kernel, as wasm-bindgen writes it for the page, grew from
 # 13,893,565 to 23,338,487 bytes (gzip -9: 2,749,132 to 3,425,876), measured 2026-10-30 with the
 # workspace's release profile (ledger #2639). Most of that is the `name` section, the functions'
@@ -95,7 +95,7 @@ rss-river = { path = "../rss-river" }
 ikigai-xslt = "0.4.0"
 ikigai-text = "0.4.0"
 # A cell that renders its view (`data-render='html'`, js/run.js): ikigai-ui's token stylesheet,
-# rewritten for the shadow root the view is shown in (`viewStyles`). It links ikigai-ui 0.4.0, the
+# rewritten for the shadow root the view is shown in (`viewStyles`). It links ikigai-ui 0.4.1, the
 # UI book's version, whose space (htmx, the shell, the palettes) is compiled in but NOT bound in
 # `page_space()`: the stylesheet is composed by a kernel of its own (crates/book-view).
 # The release kernel, as wasm-bindgen writes it for the page, grew from 23,338,487 to 23,480,481
@@ -115,8 +115,8 @@ ikigai-vocab.workspace = true
 # locks every cli crate at one version, so this one follows. The ikigai Book's REPL transcripts
 # replay `ikigai` 0.2.6 (`books/ikigai/ikigai-cli.version`, moved from 0.1.64 to 0.2.5 on
 # 2026-10-29, ledger #2554, then to 0.2.6 the same day, ledger #2610), which locks core 0.2.8
-# and engine 0.2.6 while the cells link core 0.2.8 (ikigai-ui 0.4's ikigai-fn 0.9 needs it, ledger
-# #2853) and engine 0.2.1, so the replay cli is now AHEAD of the cells rather than behind them. 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
+# and engine 0.2.6 while the cells link core 0.2.12 (ledger #2853) and engine 0.2.1, so the replay
+# cli is ahead of the cells on the engine and behind them on core. 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
 # keeps its first line and gains the argument's contract beneath it, read from the target's JSON
 # `Meta`, with "pipe a value in or pass name=…" when a pipe or positional value would fill it
 # (ledger #1499). (The gonk Book's pinned gonk links 0.1.61. 0.1.62 changed

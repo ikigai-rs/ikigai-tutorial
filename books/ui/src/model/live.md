@@ -21,6 +21,8 @@ In this page's kernel, read the card, then look at the cache's text face, the on
 <pre class="ikigai-run-expected">cache
   entries  3 / 4096 (0 stale)
   size     402 B / 64.0 MB
+  policy   lru (4096 entries, 67108864 bytes)
+  evictions  0
   urn:iki:tutorial:inspect:demo:card      live     text/html; charset=utf-8      182 B  4 threads   root
   urn:iki:tutorial:inspect:demo:note      live     text/plain; charset=utf-8       31 B  1 thread    root
   urn:iki:tutorial:inspect:template:card  live     text/html; charset=utf-8      189 B  2 threads   root
@@ -39,6 +41,8 @@ note:
 <pre class="ikigai-run-expected">cache
   entries  3 / 4096 (2 stale)
   size     402 B / 64.0 MB
+  policy   lru (4096 entries, 67108864 bytes)
+  evictions  0
   urn:iki:tutorial:inspect:demo:card      cut      text/html; charset=utf-8      182 B  4 threads   root
   urn:iki:tutorial:inspect:demo:note      cut      text/plain; charset=utf-8       31 B  1 thread    root
   urn:iki:tutorial:inspect:template:card  live     text/html; charset=utf-8      189 B  2 threads   root

@@ -19,8 +19,8 @@
 
 [[change]]
 date = "2026-11-02"
-summary = "\"A page is a composed resource\" now shows the theme chooser ikigai-ui 0.4 puts in every page's header."
-pages = ["model/composed.md"]
+summary = "\"A page is a composed resource\" now shows the theme chooser ikigai-ui 0.4 puts in every page's header, and \"Live data and history\" shows the cache's policy and evictions."
+pages = ["model/composed.md", "model/live.md"]
 
 [[change]]
 date = "2026-11-01"

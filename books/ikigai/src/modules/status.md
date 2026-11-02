@@ -5,8 +5,8 @@ feature by hitting its edges has wasted your afternoon.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.2.8**, stamped on
-2026-11-02 (the oldest release ikigai-ui 0.4 can link, not the newest), and
+them is a claim, not a fact. This book builds against `ikigai-core` **0.2.12**, stamped on
+2026-11-02 (its newest release on crates.io at its stamp), and
 `ikigai-module` **0.5.1**, stamped on 2026-10-27 (its newest release on crates.io at its stamp;
 the module claims below were written at 0.4.0, carry that stamp, and each still holds at
 0.5.1), and its shell examples are replayed against
@@ -129,7 +129,7 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.2.8. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.2.12. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
 chapters they touch. Of the nine since, 0.1.104 (the principal vocabulary), 0.1.106 and
