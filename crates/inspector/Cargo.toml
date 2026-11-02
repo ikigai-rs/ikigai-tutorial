@@ -21,13 +21,20 @@ ikigai-vocab.workspace = true
 # 0.7.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.6.0" was a ceiling
 # below 0.7.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.8.0).
-ikigai-fn = "0.7.0"
+# 0.9.0 is the pin (set 2026-11-02, ledger #2853), the version ikigai-ui 0.4 links, so the two
+# share one copy. A 0.x caret: also a ceiling (<0.10.0).
+ikigai-fn = "0.9.0"
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
 # 0.3's page shell splices a family's head additions from `urn:iki:ui:head:{family}`, one more
 # door and one more cache entry, which the committed snapshots show.
-ikigai-ui = "0.3.0"
+# 0.4.0 is the pin (set 2026-11-02, ledger #2853): one announcing status region (D13), the
+# --line/--rule token split and a theme chooser in every page's header, which the committed
+# snapshots show. A 0.x caret: also a ceiling (<0.5.0).
+# 0.4.1 is the pin (set 2026-11-02, ledger #2853): the focus fix (ledger #2899), a background swap
+# no longer takes focus from <body>.
+ikigai-ui = "0.4.1"
 # 0.4.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.3.1" was a ceiling
 # below 0.4.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.5.0).
@@ -59,7 +66,9 @@ ikigai-json = "0.3.1"
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-ui = { version = "0.3.0", features = ["testkit"] }
+# 0.4.1 is the pin (set 2026-11-02, ledger #2853), with the dependency above. A 0.x caret: also a
+# ceiling (<0.5.0).
+ikigai-ui = { version = "0.4.1", features = ["testkit"] }
 # The directory delivery, for real, in the two-deliveries test (never in the page: ikigai-fs
 # reads a disk). The release ikigai-ui's own tests use; a 0.x caret (<0.2.0).
 # 0.2.2 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and

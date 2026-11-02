@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-02**: "A page is a composed resource" now shows the theme chooser ikigai-ui 0.4 puts in every page's header, and "Live data and history" shows the cache's policy and evictions.
+
+  Pages: [A page is a composed resource](model/composed.md), [Live data and history](model/live.md)
+
 - **2026-11-01**: Two cells now show their view rendered, not as text: the note's page in "A page is a composed resource" and a thread's detail in "Live data and history". Each is styled by ikigai-ui's tokens, with its HTML one click away.
 
   Pages: [A page is a composed resource](model/composed.md), [Live data and history](model/live.md)

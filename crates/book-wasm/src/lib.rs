@@ -1905,8 +1905,9 @@ mod tests {
         // A golden thread is a name: the ROOT's move on 0,0 un-caches game b's top row, and
         // b's corner is recomputed from b's own store — still b's X.
         // …and it had already happened: game a's moves on the top row un-cached game b's
-        // row 0 before this section asked for it.
-        assert_eq!(t[9], "X--\n[computed]\ncached\n");
+        // row 0, and game b's next move and winner computed it again, so this section finds
+        // it served.
+        assert_eq!(t[9], "X--\n[cached]\ncached\n");
         assert!(t[11].starts_with("not cached\n"), "{}", t[11]);
         let stored = t[11]
             .lines()

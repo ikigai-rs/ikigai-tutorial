@@ -251,19 +251,19 @@ thread is not. A thread is a name, and a move cuts the thread named after the sq
 played, in every game at once.
 
 It has already happened on this page. Game `b` read its top row with its board, several
-cells back, and nothing in game `b` has touched that row since. Yet read it now and it is
-computed, not served:
+cells back, and then game `a` played three moves on the top row. Each one cut the thread of
+the square it played, in game `b` as well, so game `b`'s row went although nothing in game
+`b` had touched it. Game `b`'s next move and winner read the row again and computed it, which
+is the only reason it is served now:
 
 <div class="ikigai-run" data-game='b' data-cmd='source urn:iki:tutorial:ttt:row:0
 cache urn:iki:tutorial:ttt:cells:0.0,1.0,2.0'>
 <pre class="ikigai-run-expected">X--
-[computed]
+[cached]
 cached</pre>
 </div>
 
-Game `a` played three moves on the top row in between, and each one cut the thread of the
-square it played, in game `b` as well. Now the row is cached again, so watch it go on
-purpose.
+Now watch it go on purpose.
 
 The root's game plays two moves, the second of them on the top-left corner:
 

@@ -5,6 +5,12 @@
 
 What has changed in The ikigai Architecture, most recent first: the date, what was added or changed, and the pages to read for it. Smaller upkeep (moving to a newer release when nothing a reader does changes, a corrected link, a typo) is not listed.
 
+## 2026-11
+
+- **2026-11-02**: "Spaces that wrap spaces" now shows the governors' board still cached at stage 4 by asking the cache, not with a trace.
+
+  Pages: [Spaces that wrap spaces](overlays/overlays.md)
+
 ## 2026-10
 
 - **2026-10-30**: The first section of "Resolve the viewer's authority once" is now "Capabilities: a resource that only narrows", in the same form as the sections after it.

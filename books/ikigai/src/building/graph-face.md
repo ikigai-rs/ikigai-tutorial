@@ -41,6 +41,7 @@ conditional
 each
 echo
 greet
+html-to-text
 reverseList
 sparql-ask
 sparql-construct

@@ -384,7 +384,7 @@ trace  urn:iki:tutorial:live:picture
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 &#32;
-urn:iki:tutorial:live:picture   ? · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 9291b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
+urn:iki:tutorial:live:picture   alias-view · computed · ThreadId(1) · — · answered-by=urn:iki:space:dynamic:workshop   → 9291b  &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; …
 └─ urn:diagram:kernel   diagram-kernel · computed · ThreadId(1) · — · answered-by=urn:iki:space:diagram defaulted=scheme
    └─ urn:kernel:topology   kernel-topology · computed · ThreadId(1) · — · defaulted=as
 narrowed — capability: urn:cap:kernel:listen

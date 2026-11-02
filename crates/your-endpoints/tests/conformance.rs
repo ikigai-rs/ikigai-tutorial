@@ -30,6 +30,8 @@ fn word_count_conforms() {
             "conditional",
             // ikigai-fn 0.6.0's collection fill, inherited through Part I's space.
             "each",
+            // ikigai-fn 0.7.2's words of an HTML page, inherited the same way.
+            "html-to-text",
             "wrap",
             "split",
             "greet",
