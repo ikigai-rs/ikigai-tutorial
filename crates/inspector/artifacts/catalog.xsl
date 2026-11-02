@@ -9,6 +9,7 @@
 <xsl:output method="html"/>
 <xsl:template match="/">
 <section id="view" class="inspect">
+<xsl:comment> spelling: quote (each summary below is its endpoint's own words) </xsl:comment>
 <h1>Catalog</h1>
 <p>Every endpoint this kernel binds, as it describes itself: <xsl:value-of select="count(rdf:RDF/ik:Endpoint)"/> endpoints.</p>
 <table class="inspect-table">

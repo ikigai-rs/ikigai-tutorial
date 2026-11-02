@@ -196,7 +196,7 @@ closed). A cooldown running out cuts nothing; the board's answer is cached only 
 out, on the harness clock. So a picture stays true until the state moves. After every step the
 page asks for it as your own lines would: a step that moved a governor cut its thread, so the
 picture is drawn again, once; a step that changes nothing cuts nothing, so the page's read is a
-cache hit, and the page says so (stage 4 shows one in a trace). Switching tabs, or what you
+cache hit, and the page says so (stage 4 shows one). Switching tabs, or what you
 compare with, asks for nothing at all: each tab keeps the picture its step drew. The chapter's twelve pictures are files the same
 harness drew natively, held to it byte for byte by a test, so they show before the page's kernel
 loads, without it, and in print. Every picture is kept in both the light and the dark colors
@@ -415,23 +415,19 @@ nothing to, has not moved:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='source urn:iki:tutorial:harness:clock
 source urn:throttle:state:breaker
-trace urn:throttle:state'>
+cache urn:throttle:state'>
 <pre class="ikigai-run-expected">the harness clock reads 7s
 [uncacheable]
 breaker: circuit-breaker, governs urn:iki:space:tutorial:harness:governed, trips after 3, cooldown 5s
   circuit `urn:iki:tutorial:harness:call`: closed, 0 consecutive transient failures
 [cached]
-trace  urn:throttle:state
-  client      ikigai repl  ·  capability: root (full authority)
-  transport   embedded · in-process
-&#32;
-urn:throttle:state   throttle-state · cached · … · 0ms · answered-by=urn:iki:space:tutorial:harness:board   → …</pre>
+cached</pre>
 </div>
 
 The clock moved the two seconds the retry waited. The breaker's key is the same answer as
 before, served from the cache: nothing a governor shows changed, so nothing cut its thread.
-**No change**, then, and the trace of the whole board says the same thing from the other side:
-`urn:throttle:state` was served from the cache, because the page read it when the stage
+**No change**, then, and the whole board says the same thing from the other side:
+`urn:throttle:state` is still in the cache, because the page read it when the stage
 happened, and nothing since has cut a thread it hangs from. The picture is a pure function of
 the board and the topology, so the page's next read of it is a cache hit too.
 

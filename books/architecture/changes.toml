@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-02"
+summary = "\"Spaces that wrap spaces\" now shows the governors' board still cached at stage 4 by asking the cache, not with a trace."
+pages = ["overlays/overlays.md"]
+
+[[change]]
 date = "2026-10-30"
 summary = "The first section of \"Resolve the viewer's authority once\" is now \"Capabilities: a resource that only narrows\", in the same form as the sections after it."
 pages = ["spine/spine.md"]

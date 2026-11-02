@@ -102,7 +102,8 @@ and the page is the shell over the note's fragment, which in turn includes the c
 it rendered, styled by ikigai-ui's tokens in the palette your theme reads as, with its HTML under
 "HTML source". The page keeps no script, stylesheet link or status region of its own, and its
 links to the inspector's other views are not followed: they belong to the inspector's host, not
-this book:
+this book. The HTML's header ends with ikigai-ui's theme chooser, which the shell gives every page;
+like every form, it stays out of the rendered view:
 
 <div class="ikigai-run" data-render='html' data-cmd='source urn:iki:tutorial:inspect:page:note'>
 <pre class="ikigai-run-expected">&lt;!doctype html&gt;
@@ -131,6 +132,7 @@ this book:
 &lt;a href="/inspect/planets-csv" hx-get="/inspect/fragment/planets-csv" hx-target="#main" hx-push-url="/inspect/planets-csv"&gt;Planets (CSV)&lt;/a&gt;
 &lt;/nav&gt;
 &lt;script src="/inspect/live.js" defer&gt;&lt;/script&gt;
+&lt;form class="ui-theme" method="get"&gt;&lt;label for="ui-theme"&gt;Theme&lt;/label&gt; &lt;select id="ui-theme" name="theme" data-ui-theme autocomplete="off"&gt;&lt;option value="auto" selected&gt;Auto (system)&lt;/option&gt;&lt;option value="light"&gt;Light&lt;/option&gt;&lt;option value="dark"&gt;Dark&lt;/option&gt;&lt;option value="high-contrast"&gt;High contrast&lt;/option&gt;&lt;/select&gt; &lt;button type="submit" class="ui-theme-apply"&gt;Apply&lt;/button&gt;&lt;/form&gt;
 &#32;
 &lt;/header&gt;
 &lt;div id="status" role="status" aria-live="polite"&gt;&lt;/div&gt;

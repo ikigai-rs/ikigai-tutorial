@@ -18,6 +18,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-02"
+summary = "\"A page is a composed resource\" now shows the theme chooser ikigai-ui 0.4 puts in every page's header."
+pages = ["model/composed.md"]
+
+[[change]]
 date = "2026-11-01"
 summary = "Two cells now show their view rendered, not as text: the note's page in \"A page is a composed resource\" and a thread's detail in \"Live data and history\". Each is styled by ikigai-ui's tokens, with its HTML one click away."
 pages = ["model/composed.md", "model/live.md"]

@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-02**: The book now builds against ikigai-core 0.2.8, and Status says so. "Tic-tac-toe, IV" finds game b's top row cached again, because its next move recomputed what game a's moves cut, and a trace in "A space that changes while it runs" names the alias view that answers.
+
+  Pages: [Where this actually stands](modules/status.md), [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md), [A space that changes while it runs](applied/live-space.md)
+
 - **2026-11-01**: In "A river of feeds", the river's HTML page now runs as a rendered view: Run shows the page as a browser would, styled by ikigai-ui's tokens, with the HTML the stylesheet wrote under "HTML source".
 
   Pages: [A river of feeds](explore/rss.md)

@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-02"
+summary = "The book now builds against ikigai-core 0.2.8, and Status says so. \"Tic-tac-toe, IV\" finds game b's top row cached again, because its next move recomputed what game a's moves cut, and a trace in \"A space that changes while it runs\" names the alias view that answers."
+pages = ["modules/status.md", "applied/tic-tac-toe-4.md", "applied/live-space.md"]
+
+[[change]]
 date = "2026-11-01"
 summary = "In \"A river of feeds\", the river's HTML page now runs as a rendered view: Run shows the page as a browser would, styled by ikigai-ui's tokens, with the HTML the stylesheet wrote under \"HTML source\"."
 pages = ["explore/rss.md"]
