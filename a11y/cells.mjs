@@ -27,14 +27,27 @@
 // have not run, when it differs; and "Run all above" followed by Run must give "as the chapter
 // shows".
 //
+// A cell that renders its view (`data-render='html'`, ledger #2823) is held to three more things,
+// on the same load once its page's cells have run: its view is rendered (in a shadow root, styled
+// by the kernel's `viewStyles`, its text out of the status region and its HTML under "HTML
+// source"); axe finds no WCAG A/AA violation in the cell at a 320 px viewport (UI conventions D12,
+// reflow); and a view the kernel refuses shows the refusal as text, with nothing rendered (D14).
+// On each such page, views written to get past the sanitizer (`HOSTILE`) must come out inert.
+//
 // The site is served the way `axe-browser.mjs` serves it: every request answered from the
 // directory by Playwright's router, on the made-up origin `book-dom.mjs` uses; nothing leaves the
 // process. Run on its own, the browser is the machine's Google Chrome (or `--chrome`), as there.
 import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, relative, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { chromium } from "playwright-core";
 import { ORIGIN, pages } from "./book-dom.mjs";
+
+const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
+const GATING = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+// A name no kernel binds: what a refused view looks like.
+const REFUSED = "source urn:iki:tutorial:no-such-view";
 
 function siteUrlOf(dir) {
     const m = readFileSync(join(dir, "404.html"), "utf8").match(/<base href="([^"]+)"/);
@@ -219,6 +232,182 @@ async function open(context, siteUrl, rel) {
     return { page, loaded };
 }
 
+// In the page, after cell `i` ran: is its view rendered? Returns a problem, or null.
+async function rendered(page, i) {
+    return page.evaluate((i) => {
+        const cell = document.querySelectorAll("div.ikigai-run")[i];
+        const view = cell.querySelector("figure.ikigai-run-view");
+        const host = view && view.querySelector(".ikigai-run-view-frame");
+        const root = host && host.shadowRoot;
+        const body = root && root.querySelector(".ikigai-run-view-body");
+        const source = cell.querySelector("details.ikigai-run-source");
+        const caption = cell.querySelector(".ikigai-run-caption").textContent;
+        if (!view || view.hidden || !body || body.children.length === 0) {
+            return `its view was not rendered (the caption says ${JSON.stringify(caption)})`;
+        }
+        if (!root.querySelector("style") || !/--bg:/.test(root.querySelector("style").textContent)) {
+            return "its view is not styled by the kernel's token stylesheet";
+        }
+        if (!["light", "dark"].includes(host.getAttribute("data-theme"))) {
+            return `its view has no palette (data-theme ${JSON.stringify(host.getAttribute("data-theme"))})`;
+        }
+        if (!cell.querySelector(".ikigai-run-out").hidden) {
+            return "its HTML is still shown as text in the status region";
+        }
+        if (!source || source.hidden || !/^\s*</.test(source.querySelector("pre").textContent)) {
+            return "its HTML is not under \"HTML source\"";
+        }
+        if (root.querySelector("script, iframe, object, embed, form, link, main, [style], [role=status], [aria-live], [hx-get], a.ui-skip")) {
+            return "its view kept markup the region drops (a script, frame, form, stylesheet, style, main, skip link, status region or htmx attribute)";
+        }
+        if (cell.querySelectorAll('[role="status"]').length !== 1) {
+            return "the cell does not have exactly one status region";
+        }
+        return null;
+    }, i);
+}
+
+// In the page, at a 320 px viewport: axe over the rendered cells. Returns problems.
+async function renderedAxe(page) {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.waitForTimeout(200);
+    await page.evaluate(axeSource);
+    const found = await page.evaluate((gating) => window.axe.run(
+        { include: [["div.ikigai-run[data-render]"]] }, { runOnly: { type: "tag", values: gating } })
+        .then((r) => r.violations.map((v) => `${v.id} — ${v.help}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(", ")}`)),
+    GATING);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    return found;
+}
+
+// In the page: run a name no kernel binds in rendered cell `i`. The refusal is text, nothing is
+// rendered, and Reset puts the chapter's command back. Returns a problem, or null.
+async function refused(page, i) {
+    return page.evaluate(async ({ i, line }) => {
+        const cell = document.querySelectorAll("div.ikigai-run")[i];
+        const caption = cell.querySelector(".ikigai-run-caption");
+        cell.querySelector("textarea").value = line;
+        cell.querySelector("button.ikigai-run-button").click();
+        const deadline = Date.now() + 30000;
+        while (caption.textContent === "running…" && Date.now() < deadline) {
+            await new Promise((r) => setTimeout(r, 20));
+        }
+        const pane = cell.querySelector(".ikigai-run-out");
+        const view = cell.querySelector("figure.ikigai-run-view");
+        const problem = pane.hidden || !/^error: /.test(pane.textContent)
+            ? `the refusal is not shown as text (the pane says ${JSON.stringify(pane.textContent)})`
+            : view && !view.hidden ? "a view is still rendered beside the refusal"
+            : !/refused/.test(caption.textContent) ? `the caption does not say the view was refused: ${JSON.stringify(caption.textContent)}`
+            : null;
+        [...cell.querySelectorAll("button")].find((b) => b.textContent === "Reset").click();
+        return problem;
+    }, { i, line: REFUSED });
+}
+
+// Views written to get past the region's sanitizer (ledger #2823's review): each must come out
+// inert. `keep` names what a harmless part of a case must still have after it, `gone` what must
+// go with a dropped element.
+const PWN = "window.__ikigaiPwned=1";
+const HOSTILE = [
+    { name: "an SVG link whose href is animated to javascript:",
+      html: `<svg><a><animate attributeName="href" values="javascript:${PWN}" fill="freeze"/><text>click</text></a></svg>` },
+    { name: "an SVG link whose href is set to javascript:",
+      html: `<svg><a><set attributeName="href" to="javascript:${PWN}"/><text>click</text></a></svg>` },
+    { name: "an image from data:image/svg+xml",
+      html: `<img alt="x" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22/%3E">` },
+    { name: "an SVG use of an outside document",
+      html: `<svg><use href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20id%3D%22x%22/%3E#x"/></svg>` },
+    { name: "a javascript: link inside an SVG foreignObject",
+      html: `<svg><foreignObject><a href="javascript:${PWN}">x</a></foreignObject></svg>` },
+    { name: "a MathML namespace confusion",
+      html: `<math><mtext><table><mglyph><style><img src=x onerror="${PWN}">` },
+    { name: "a javascript: link with mixed case and a leading space",
+      html: `<a href=" JaVaScRiPt:${PWN}">x</a>` },
+    { name: "an event handler on an image",
+      html: `<img alt="x" src="x" onerror="${PWN}">` },
+    { name: "a form and a button's formaction",
+      html: `<form action="javascript:${PWN}"><button formaction="javascript:${PWN}">go</button></form>`,
+      gone: "button" },
+    { name: "a style that covers the page",
+      html: `<div style="position:fixed;inset:0">over</div><style>*{display:none}</style>` },
+    { name: "a status region, a main and its skip link (D13)",
+      html: `<a class="ui-skip" href="#m">Skip</a><main id="m"><p role="status" aria-live="assertive">x</p></main>` },
+    { name: "an http(s) link and a PNG image, which are kept",
+      html: `<a href="https://example.org/">example</a><img alt="dot" src="data:image/png;base64,iVBORw0KGgo=">`,
+      keep: ["a[href='https://example.org/'][target='_blank'][rel='noopener noreferrer']",
+          "img[src^='data:image/png']"] },
+];
+
+// In the page: every hostile view through the sanitizer the cells use (`run.js` exposes it as
+// `ikigaiRunViewSanitized`), into a shadow root as a cell's view is, given time to animate and
+// to load. Returns problems.
+export async function hostile(page) {
+    return page.evaluate(async ({ cases }) => {
+        const problems = [];
+        const DROPPED = "svg, math, animate, set, animateMotion, animateTransform, use, foreignObject, " +
+            "script, iframe, frame, object, embed, form, style, link, meta, base, main, a.ui-skip";
+        for (const c of cases) {
+            let body;
+            try {
+                body = await window.ikigaiRunViewSanitized(c.html);
+            } catch (err) {
+                problems.push(`${c.name}: the sanitizer failed (${err && err.message ? err.message : err})`);
+                continue;
+            }
+            const host = document.createElement("div");
+            const root = host.attachShadow({ mode: "open" });
+            document.body.appendChild(host);
+            root.appendChild(body);
+            await new Promise((r) => setTimeout(r, 300));
+            const all = [...root.querySelectorAll("*")];
+            const kept = all.filter((n) => n.matches(DROPPED)).map((n) => n.localName);
+            if (kept.length) {
+                problems.push(`${c.name}: kept ${[...new Set(kept)].join(", ")}`);
+            }
+            for (const n of all) {
+                for (const a of n.attributes) {
+                    if (/^on/i.test(a.name) || a.name === "style" || a.name === "aria-live" ||
+                        /^(hx|data-hx)-/.test(a.name) ||
+                        (a.name === "role" && /^(status|alert|log|main)$/.test(a.value.trim()))) {
+                        problems.push(`${c.name}: kept the attribute ${a.name} on <${n.localName}>`);
+                    }
+                }
+                // What a link goes to as the browser now reads it: for SVG, after animation.
+                const href = n.href && typeof n.href === "object" ? n.href.animVal
+                    : n.hasAttribute("href") || n.hasAttribute("xlink:href")
+                        ? n.getAttribute("href") || n.getAttribute("xlink:href") : null;
+                if (href !== null && href !== "" &&
+                    (n.localName !== "a" || !/^https?:\/\//i.test(href.trim()))) {
+                    problems.push(`${c.name}: <${n.localName}> goes to ${JSON.stringify(href)}`);
+                }
+                if (n.localName === "a" && href && (n.getAttribute("target") !== "_blank" ||
+                    !/\bnoopener\b/.test(n.getAttribute("rel") || "") ||
+                    !/\bnoreferrer\b/.test(n.getAttribute("rel") || ""))) {
+                    problems.push(`${c.name}: a link does not open in a new tab with rel="noopener noreferrer"`);
+                }
+                const src = n.getAttribute("src");
+                if (src !== null && (n.localName !== "img" || !/^data:image\//i.test(src.trim()) ||
+                    /^data:image\/svg\+xml/i.test(src.trim()))) {
+                    problems.push(`${c.name}: <${n.localName}> loads ${JSON.stringify(src.slice(0, 40))}`);
+                }
+            }
+            if (c.gone && root.querySelector(c.gone)) {
+                problems.push(`${c.name}: kept ${c.gone}, which goes with it`);
+            }
+            for (const sel of c.keep || []) {
+                if (!root.querySelector(sel)) {
+                    problems.push(`${c.name}: lost what it should keep (${sel})`);
+                }
+            }
+            host.remove();
+        }
+        if (window.__ikigaiPwned) {
+            problems.push("a hostile view ran script in the page");
+        }
+        return problems;
+    }, { cases: HOSTILE });
+}
+
 function difference(got, want) {
     const g = got.split("\n").filter((l) => l.trim());
     const w = want.split("\n").filter((l) => l.trim());
@@ -238,6 +427,7 @@ export async function checkCells(browser, siteArg) {
     const failures = [];
     let checked = 0;
     let shortcuts = 0;
+    let views = 0;
     for (const path of pages(siteArg)) {
         if (!readFileSync(path, "utf8").includes('class="ikigai-run"')) {
             continue;
@@ -251,6 +441,7 @@ export async function checkCells(browser, siteArg) {
         }
         const count = await page.locator("div.ikigai-run").count();
         const withAbove = [];
+        const renders = [];
         for (let i = 0; i < count; i++) {
             const r = await press(page, i, "run");
             checked += 1;
@@ -263,12 +454,34 @@ export async function checkCells(browser, siteArg) {
             if (picture !== null) {
                 failures.push(`${rel} cell ${i + 1}, run in page order: ${picture}`);
             }
+            if (await page.locator("div.ikigai-run").nth(i).getAttribute("data-render") === "html") {
+                renders.push(i);
+                const problem = await rendered(page, i);
+                if (problem !== null) {
+                    failures.push(`${rel} cell ${i + 1}, rendered: ${problem}`);
+                }
+            }
             if (await page.locator("div.ikigai-run").nth(i).getByRole("button", { name: "Run all above" }).count()) {
                 withAbove.push(i);
             }
         }
         for (const problem of await compareWith(page)) {
             failures.push(`${rel}, after its cells ran in page order: ${problem}`);
+        }
+        if (renders.length > 0) {
+            for (const problem of await renderedAxe(page)) {
+                failures.push(`${rel}, its rendered views at 320 px: ${problem}`);
+            }
+            for (const problem of await hostile(page)) {
+                failures.push(`${rel}, a hostile view: ${problem}`);
+            }
+            for (const i of renders) {
+                const problem = await refused(page, i);
+                views += 1;
+                if (problem !== null) {
+                    failures.push(`${rel} cell ${i + 1}, refused: ${problem}`);
+                }
+            }
         }
         await page.close();
 
@@ -292,7 +505,7 @@ export async function checkCells(browser, siteArg) {
         }
     }
     await context.close();
-    return { failures, summary: `cells against the chapter: ${checked} cell(s) run in page order, ${shortcuts} run after "Run all above", ${failures.length} failure(s)` };
+    return { failures, summary: `cells against the chapter: ${checked} cell(s) run in page order, ${shortcuts} run after "Run all above", ${views} rendered view(s) checked, ${failures.length} failure(s)` };
 }
 
 // On its own, from the command line.

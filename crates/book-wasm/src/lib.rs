@@ -1183,6 +1183,14 @@ pub fn reply_to_json(reply: Result<Representation, String>, was_cached: bool) ->
     .to_string()
 }
 
+/// The stylesheet a rendered cell's view is shown under (`data-render='html'`, `js/run.js`):
+/// ikigai-ui's token stylesheet, for the shadow root the view is put in ([`book_view::styles`]).
+/// Composed by a kernel of its own, so asking never touches the cache the cells share.
+#[wasm_bindgen(js_name = viewStyles)]
+pub fn view_styles() -> String {
+    book_view::styles()
+}
+
 /// The names the in-page kernel binds, one per line — what a cell may name. The URN gate
 /// asks the same space natively; this is the same answer, from inside the page.
 #[wasm_bindgen(js_name = boundNames)]

@@ -5,6 +5,12 @@
 
 What has changed in Building ikigai UIs, most recent first: the date, what was added or changed, and the pages to read for it. Smaller upkeep (moving to a newer release when nothing a reader does changes, a corrected link, a typo) is not listed.
 
+## 2026-11
+
+- **2026-11-01**: Two cells now show their view rendered, not as text: the note's page in "A page is a composed resource" and a thread's detail in "Live data and history". Each is styled by ikigai-ui's tokens, with its HTML one click away.
+
+  Pages: [A page is a composed resource](model/composed.md), [Live data and history](model/live.md)
+
 ## 2026-10
 
 - **2026-10-30**: The delivery targets now lead with their technology: "htmx", "GPUI", "WebAssembly", "WebTransport" and "Text: in the terminal". Two headings in the views chapters now name their subject: "Other forms of data" and "When a graph helps".

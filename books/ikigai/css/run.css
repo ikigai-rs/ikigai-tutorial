@@ -235,3 +235,32 @@
    so it stays visible. (After run.js, the `<pre>` sits inside the <details>, not directly
    in the cell, and this rule no longer matches it.) */
 .js .ikigai-run > .ikigai-run-expected { display: none; }
+
+/* A rendered view (`data-render='html'`, see run.js): a figure below the cell's status region.
+   What is inside the frame is styled by ikigai-ui's tokens, in a shadow root these rules do not
+   reach; the frame itself is the book's. It scrolls sideways rather than widen the column, and
+   run.js gives it a tab stop when it does. */
+.ikigai-run-view { margin: .5rem 0 0; padding: 0 .8rem; }
+.ikigai-run-view-caption { font-size: .85em; color: var(--fg); margin-bottom: .3rem; }
+.ikigai-run-view-frame {
+    /* Anything the view positions is placed inside the frame, not on the chapter. */
+    position: relative;
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--table-header-bg);
+    border-radius: 4px;
+    padding: .6rem .8rem;
+}
+.ikigai-run-view-frame:focus-visible { outline: 3px solid var(--links); outline-offset: 2px; }
+/* Its source, one click away. */
+.ikigai-run-source { margin: .5rem .8rem 0; font-size: .85em; }
+.ikigai-run-source-summary { cursor: pointer; color: var(--fg); }
+.ikigai-run-source-summary:focus-visible { outline: 2px solid var(--links); outline-offset: 2px; }
+.ikigai-run-source-out {
+    margin: .35rem 0 0;
+    padding: .3rem .5rem;
+    background: var(--bg);
+    color: var(--fg);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}

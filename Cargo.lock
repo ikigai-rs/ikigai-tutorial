@@ -270,11 +270,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "book-view"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+ "ikigai-ui",
+]
+
+[[package]]
 name = "book-wasm"
 version = "0.1.0"
 dependencies = [
  "async-trait",
  "book-transcripts",
+ "book-view",
  "check-resource",
  "console_error_panic_hook",
  "futures",
@@ -3740,6 +3750,7 @@ name = "ui-book-wasm"
 version = "0.1.0"
 dependencies = [
  "book-transcripts",
+ "book-view",
  "console_error_panic_hook",
  "futures",
  "ikigai-core",

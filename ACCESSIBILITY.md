@@ -39,7 +39,9 @@ a review comment.
   of its own so every gate below covers it): every page `pages.yml` uploads, in each of mdbook's
   five themes (light, rust, coal, navy, ayu), including the 404 page and each book's generated
   *What's new* page.
-- **The in-page kernels**: the runnable cells (`js/run.js`), the tic-tac-toe boards (`js/ttt.js`),
+- **The in-page kernels**: the runnable cells (`js/run.js`), including a cell that renders its
+  view (`data-render='html'`: the view in a shadow root styled by ikigai-ui's tokens, below the
+  cell's one status region, its HTML under a disclosure), the tic-tac-toe boards (`js/ttt.js`),
   the polling views (`js/view.js`), the spreadsheet (`js/sheet.js`), the stages viewer
   (`js/stages.js`) and the RDF Toolbox opened in place
   (`js/toolbox.js`: its control, its panel, and the new-tab link that replaces both without the
@@ -72,6 +74,10 @@ a review comment.
   record the repair below; the remedy that removes our repair is upstream's.
 - **The vendored htmx** (`books/ikigai/src/vendor/htmx-2.0.4.min.js`) that drives the boards.
   The boards it renders are checked; htmx itself is not reviewed.
+- **The vendored DOMPurify** (`books/ikigai/src/vendor/purify-3.4.17.min.js`, Apache-2.0, its
+  license beside it) that sanitizes a rendered cell's view. It is held to its digest by
+  `a11y/vendor.test.mjs` and by the `integrity=` it is loaded with; DOMPurify itself is not
+  reviewed here.
 - **The RDF Toolbox page itself** (turtle-lsp's page as `ikigai-toolbox` patches and builds it),
   published in `toolbox/` beside The ikigai Book and opened in a frame from "Checking a
   resource". The browser run audits it there, opened, in all five themes, and two failures it
@@ -109,7 +115,7 @@ check means the site is not updated.
 | `a11y/axe.mjs`: axe-core in jsdom (`pages.yml`) | axe-core 4.10.3, jsdom 26.1.0 | Every built page with the books' scripts run, so mdbook's copy buttons, the cells and the search repairs are seen. Gates on axe's WCAG 2.0/2.1/2.2 A and AA rules; best-practice rules are reported only | Color and target size (jsdom has no layout); the kernel path (the wasm import fails in jsdom, so cells are seen without a kernel) |
 | `a11y/no-kernel.mjs` (`pages.yml`) | jsdom 26.1.0 | With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message, a live host's picture left as committed with its alt text and a line saying it will not be redrawn. Published pages and drafts | Whether the message is understood; only the absence of answers is checked |
 | `a11y/axe-browser.mjs`: axe-core in a real browser (`pages.yml`) | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the log, not pinned) | The assembled site, both books, every page in all five themes, with the kernels loaded, every cell run once, every "Expected output" opened, every view started, every toolbox check opened in place with its frame audited. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size` | One viewport (1280×900). States it does not open: search results, the theme menu, the collapsed sidebar, the keyboard-help popup |
-| `a11y/cells.mjs` (run by `axe-browser.mjs`, `pages.yml`) | playwright-core 1.63.0, the same Chrome | Every cell of every page, run in page order on a fresh load, is marked "as the chapter shows" (pages on the browser's clock are not compared), and a cell in a stages viewer's chain leaves its tab open with After showing a picture the kernel drew, captioned so, and once a page's cells have run, each viewer's "Compare with" select is set to stage 1 and must change Before, "What changed" and the status region; for every cell with "Run all above", a lone run that differs points at it, and the button then Run matches the chapter | Whether the marks and the hint are understood; a reader's own edits, which are never compared; a reader's own stages in "Compare with", which only a person has tried |
+| `a11y/cells.mjs` (run by `axe-browser.mjs`, `pages.yml`) | playwright-core 1.63.0, the same Chrome | Every cell of every page, run in page order on a fresh load, is marked "as the chapter shows" (pages on the browser's clock are not compared), and a cell in a stages viewer's chain leaves its tab open with After showing a picture the kernel drew, captioned so, and once a page's cells have run, each viewer's "Compare with" select is set to stage 1 and must change Before, "What changed" and the status region; for every cell with "Run all above", a lone run that differs points at it, and the button then Run matches the chapter; every cell that renders its view shows it rendered (styled by the kernel's token stylesheet, its HTML under "HTML source", one status region, none of the markup the region drops), axe finds no WCAG A/AA violation in those cells at a 320 px viewport, and a refused view stays text; on each such page, views written to get past the sanitizer (an SVG link whose `href` is animated to `javascript:`, a `data:image/svg+xml` image, SVG and MathML, handlers, forms, styles, a view's own status region) come out inert | Whether the marks and the hint are understood; whether a rendered view's links, which open a new tab, are expected; a reader's own edits, which are never compared; a reader's own stages in "Compare with", which only a person has tried |
 | `a11y/links.mjs` (`pages.yml`) | none | Every relative link in the assembled site lands on a page in it, including links between the two books | Fragments (`#id`) and external links |
 | `crates/book-urns`, `book_cells.rs` and the chapter-number checks (`cargo test`) | none | A blank line inside a cell's markup (which breaks the page once built); a bare "chapter N" with no link | Everything else about the prose |
 
