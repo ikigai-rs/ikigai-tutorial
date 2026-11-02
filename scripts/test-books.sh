@@ -15,7 +15,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 # The browser and native matchers read the same cases. Also exercise the routing
 # chapter's config edits with the platform's sed (GNU on Linux, BSD on macOS).
-node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs
+# And the vendored DOMPurify is held to its digest (a11y/vendor.test.mjs).
+node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs a11y/vendor.test.mjs
 
 TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"

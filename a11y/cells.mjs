@@ -305,7 +305,8 @@ async function refused(page, i) {
 }
 
 // Views written to get past the region's sanitizer (ledger #2823's review): each must come out
-// inert. `keep` names what a harmless part of a case must still have after it.
+// inert. `keep` names what a harmless part of a case must still have after it, `gone` what must
+// go with a dropped element.
 const PWN = "window.__ikigaiPwned=1";
 const HOSTILE = [
     { name: "an SVG link whose href is animated to javascript:",
@@ -325,7 +326,8 @@ const HOSTILE = [
     { name: "an event handler on an image",
       html: `<img alt="x" src="x" onerror="${PWN}">` },
     { name: "a form and a button's formaction",
-      html: `<form action="javascript:${PWN}"><button formaction="javascript:${PWN}">go</button></form>` },
+      html: `<form action="javascript:${PWN}"><button formaction="javascript:${PWN}">go</button></form>`,
+      gone: "button" },
     { name: "a style that covers the page",
       html: `<div style="position:fixed;inset:0">over</div><style>*{display:none}</style>` },
     { name: "a status region, a main and its skip link (D13)",
@@ -388,6 +390,9 @@ export async function hostile(page) {
                     /^data:image\/svg\+xml/i.test(src.trim()))) {
                     problems.push(`${c.name}: <${n.localName}> loads ${JSON.stringify(src.slice(0, 40))}`);
                 }
+            }
+            if (c.gone && root.querySelector(c.gone)) {
+                problems.push(`${c.name}: kept ${c.gone}, which goes with it`);
             }
             for (const sel of c.keep || []) {
                 if (!root.querySelector(sel)) {

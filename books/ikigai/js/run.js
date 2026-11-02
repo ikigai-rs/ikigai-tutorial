@@ -121,9 +121,10 @@
 // view is put in a shadow root of its own, so the book's styles do not reach in and its markup does
 // not reach out, styled by ikigai-ui's token stylesheet (the kernel's `viewStyles`, UI conventions
 // D12) in the palette the book's theme reads as (light and rust light; coal, navy and ayu dark).
-// The region is SANDBOXED by what is kept: no script, frame, object, form, stylesheet, style
-// attribute, event handler or htmx attribute survives, a link goes only to an absolute http(s)
-// address (in a new tab), and an image only from a `data:` URL. The cell's caption is still the one
+// The region is SANDBOXED by what is kept, which the vendored DOMPurify decides (HTML only: no
+// script, SVG, MathML, frame, object, form, stylesheet, style attribute or event handler), with the
+// region's rules on top: no htmx attribute, a link goes only to an absolute http(s) address (in a
+// new tab), and an image only from a `data:image/` URL other than SVG. The cell's caption is still the one
 // status region (D13): a view's own `role="status"`, `role="alert"` or `aria-live` is dropped, and
 // so are its `<main>` (the chapter has one) and its skip link. A view that FAILS is not rendered:
 // the refusal is the cell's text, as on any cell (D14), and the region is emptied. The comparison
@@ -288,63 +289,106 @@
         return stylesFor;
     }
 
-    // What is kept of a view (see the comment at the top). Parsed inertly (DOMParser runs no
-    // script and loads nothing), then cleaned, then moved into the page.
-    var DROPPED = "script, noscript, template, iframe, frame, frameset, object, embed, applet, " +
-        "link, meta, base, style, form, title";
-    function sanitized(html) {
-        var doc = new DOMParser().parseFromString(html, "text/html");
-        doc.querySelectorAll(DROPPED).forEach(function (n) { n.remove(); });
-        // A view's skip link points at its own <main>, which is not in the chapter's page.
-        doc.querySelectorAll("a.ui-skip").forEach(function (n) { n.remove(); });
-        doc.body.querySelectorAll("*").forEach(function (n) {
-            for (var i = n.attributes.length - 1; i >= 0; i--) {
-                var name = n.attributes[i].name.toLowerCase();
-                var value = n.attributes[i].value;
-                if (/^on/.test(name) || name === "style" || name === "srcset" ||
-                    name === "formaction" || name === "action" || name === "ping" ||
-                    name === "aria-live" || /^(hx|data-hx)-/.test(name) ||
-                    (name === "role" && /^(status|alert|log|main)$/.test(value.trim()))) {
-                    n.removeAttribute(n.attributes[i].name);
-                } else if (name === "href" || name === "xlink:href" || name === "src") {
-                    var keep = name === "src" ? /^data:image\//i.test(value)
-                        : n.localName === "a" && /^https?:\/\//i.test(value.trim());
-                    if (!keep) {
-                        n.removeAttribute(n.attributes[i].name);
+    // What is kept of a view (see the comment at the top) is DOMPurify's to decide, not a list
+    // of ours: the vendored copy (`src/vendor/purify-3.4.17.min.js`, byte for byte upstream's
+    // `dist/purify.min.js`, sha256
+    // cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31, license Apache-2.0 beside
+    // it; `a11y/vendor.test.mjs` holds the bytes to this digest and to PURIFY_INTEGRITY). It is
+    // loaded only when a view is first rendered, and the browser refuses it if its bytes differ.
+    // HTML only (no SVG or MathML: an animated `href` is never seen by an attribute filter), no
+    // form or style; the hooks below add the region's own rules.
+    var PURIFY = "vendor/purify-3.4.17.min.js";
+    var PURIFY_INTEGRITY = "sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx";
+    var PURIFY_CONFIG = {
+        USE_PROFILES: { html: true },
+        FORBID_TAGS: ["form", "style"],
+        // A form goes with what it holds, as a style does: its fields mean nothing without it.
+        ADD_FORBID_CONTENTS: ["form"],
+        FORBID_ATTR: ["style", "srcset", "ping", "action", "formaction"],
+        RETURN_DOM_FRAGMENT: true
+    };
+    // The attributes that make the browser go somewhere or fetch something.
+    var URL_ATTRS = ["href", "xlink:href", "src", "poster", "background", "srcset", "action",
+        "formaction", "ping"];
+    var purifier = null;
+    function purify() {
+        if (!purifier) {
+            purifier = new Promise(function (resolve, reject) {
+                var script = document.createElement("script");
+                script.src = root + PURIFY;
+                script.integrity = PURIFY_INTEGRITY;
+                script.crossOrigin = "anonymous";
+                script.onload = function () {
+                    if (typeof window.DOMPurify !== "function" || !window.DOMPurify.isSupported) {
+                        reject(new Error("the sanitizer did not load"));
+                        return;
                     }
+                    // An instance of our own, so no other script's hooks or settings reach it.
+                    var p = window.DOMPurify(window);
+                    p.addHook("afterSanitizeAttributes", regionRules);
+                    resolve(p);
+                };
+                script.onerror = function () {
+                    reject(new Error("the sanitizer did not load, or did not match its digest"));
+                };
+                document.head.appendChild(script);
+            });
+        }
+        return purifier;
+    }
+    // The region's rules, on each element DOMPurify keeps. The caption is the one status region
+    // (D13); a link goes only to an absolute http(s) address, in a new tab; an image comes only
+    // from a `data:image/` URL other than SVG; htmx attributes do nothing here.
+    function regionRules(n) {
+        for (var i = n.attributes.length - 1; i >= 0; i--) {
+            var name = n.attributes[i].name.toLowerCase();
+            var value = n.attributes[i].value.trim();
+            if (name === "aria-live" || /^(hx|data-hx)-/.test(name) ||
+                (name === "role" && /^(status|alert|log|main)$/i.test(value))) {
+                n.removeAttribute(n.attributes[i].name);
+            } else if (URL_ATTRS.indexOf(name) !== -1) {
+                var keep = name === "href" ? n.localName === "a" && /^https?:\/\//i.test(value)
+                    : name === "src" && n.localName === "img" && /^data:image\//i.test(value) &&
+                        !/^data:image\/svg\+xml/i.test(value);
+                if (!keep) {
+                    n.removeAttribute(n.attributes[i].name);
                 }
             }
-            if (n.localName === "a" && n.hasAttribute("href")) {
-                n.setAttribute("target", "_blank");
-                n.setAttribute("rel", "noopener noreferrer");
-            }
-        });
-        // The chapter's page has its <main>; a view's becomes a plain block.
-        doc.body.querySelectorAll("main").forEach(function (m) {
-            var div = doc.createElement("div");
-            while (m.firstChild) {
-                div.appendChild(m.firstChild);
-            }
-            for (var i = 0; i < m.attributes.length; i++) {
-                div.setAttribute(m.attributes[i].name, m.attributes[i].value);
-            }
-            m.replaceWith(div);
-        });
-        var body = el("div", "ikigai-run-view-body");
-        var lang = doc.documentElement.getAttribute("lang");
-        if (lang) {
-            body.setAttribute("lang", lang);
         }
-        while (doc.body.firstChild) {
-            body.appendChild(document.adoptNode(doc.body.firstChild));
+        if (n.localName === "a" && n.hasAttribute("href")) {
+            n.setAttribute("target", "_blank");
+            n.setAttribute("rel", "noopener noreferrer");
         }
-        return body;
+    }
+    function sanitized(html) {
+        return purify().then(function (p) {
+            var fragment = p.sanitize(html, PURIFY_CONFIG);
+            // A view's skip link points at its own <main>, which is not in the chapter's page.
+            fragment.querySelectorAll("a.ui-skip").forEach(function (n) { n.remove(); });
+            // The chapter's page has its <main>; a view's becomes a plain block.
+            fragment.querySelectorAll("main").forEach(function (m) {
+                var div = document.createElement("div");
+                while (m.firstChild) {
+                    div.appendChild(m.firstChild);
+                }
+                for (var i = 0; i < m.attributes.length; i++) {
+                    div.setAttribute(m.attributes[i].name, m.attributes[i].value);
+                }
+                m.replaceWith(div);
+            });
+            var body = el("div", "ikigai-run-view-body");
+            // Read inertly (DOMParser runs no script and loads nothing), for the view's language.
+            var lang = new DOMParser().parseFromString(html, "text/html").documentElement.getAttribute("lang");
+            if (lang) {
+                body.setAttribute("lang", lang);
+            }
+            body.appendChild(fragment);
+            return body;
+        });
     }
 
     // The sanitizer as a cell's view goes through it, for `a11y/cells.mjs`'s hostile cases.
-    window.ikigaiRunViewSanitized = function (html) {
-        return Promise.resolve(sanitized(html));
-    };
+    window.ikigaiRunViewSanitized = sanitized;
 
     // The palette the book's theme reads as, on the shadow root's host, kept in step with the
     // theme menu.
@@ -491,7 +535,8 @@
         var source = null;
         var sourceOut = null;
         function shown(html, n) {
-            return viewStyles().then(function (css) {
+            return Promise.all([viewStyles(), sanitized(html)]).then(function (both) {
+                var css = both[0];
                 if (!view) {
                     view = el("figure", "ikigai-run-view");
                     viewCaption = el("figcaption", "ikigai-run-view-caption");
@@ -513,7 +558,7 @@
                 var style = document.createElement("style");
                 style.textContent = css;
                 viewRoot.appendChild(style);
-                viewRoot.appendChild(sanitized(html));
+                viewRoot.appendChild(both[1]);
                 sourceOut.textContent = html;
                 view.hidden = false;
                 source.hidden = false;
