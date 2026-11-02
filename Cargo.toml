@@ -178,8 +178,9 @@ ikigai-vocab = "0.2.0"
 # 0.7.1 is the pin (set 2026-10-30, ledger #2639): compose declares its template arguments as an
 # open set, so the engine passes `since=…` to it rather than refusing it as a value with nowhere
 # to go; "A river of feeds" fills its queries that way in the page. Nothing else moved.
-# 0.9.0 is the pin (set 2026-11-02, ledger #2853): the version ikigai-ui 0.4 links, so the lock holds
-# one ikigai-fn and html5ever ships once. A 0.x caret: also a ceiling (<0.10.0).
+# 0.9.0 is the pin (set 2026-11-02, ledger #2853): the version ikigai-ui 0.4 links, so this workspace's
+# crates share its copy. ikigai-toolbox 0.2.1, below, still takes ^0.7. A 0.x caret: also a ceiling
+# (<0.10.0).
 ikigai-fn = "0.9.0"
 # JSON and CSV as resources, for "Transreption" and "Short names in a space": `urn:json:query` (a
 # sandboxed jq selection of any resource, read under the caller's capability, a non-JSON source
@@ -241,8 +242,8 @@ ikigai-sexpr = { version = "0.3.0", default-features = false }
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.4" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-# 0.3.2 is the pin (set 2026-11-02, ledger #2853): the release on ikigai-fn 0.9, so it shares this
-# workspace's one copy.
+# 0.3.2 is the pin (set 2026-11-02, ledger #2853): the release on ikigai-fn 0.9, the copy this
+# workspace's crates share.
 ikigai-diagram = "0.3.2"
 # 0.4.0 is the pin (set 2026-10-14): an out-of-band host call is held to its
 # session's capability (ledger #83), an unwired module channel fails at once with a typed error
@@ -436,8 +437,8 @@ ikigai-store = { version = "0.3.1", default-features = false }
 # 0.20.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.19.0" was a ceiling
 # below 0.20.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.21.0).
-# 0.20.6 is the pin (set 2026-11-02, ledger #2853): the newest release, on ikigai-fn 0.9, so it
-# shares this workspace's one copy.
+# 0.20.6 is the pin (set 2026-11-02, ledger #2853): the newest release, on ikigai-fn 0.9, the copy
+# this workspace's crates share.
 ikigai-browse = "0.20.6"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
@@ -539,6 +540,8 @@ ureq = { version = "2", default-features = false }
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
 # 0.2 binds one more door, `urn:toolbox:path:{rest}`, which the `list` in "The REPL grammar" shows.
+# 0.2.1 takes ikigai-fn ^0.7 and no release takes 0.9 (checked 2026-11-02, ledger #2853), so it is
+# what keeps a second ikigai-fn, 0.7.2, in the lock and in book-wasm. Its next release can end that.
 ikigai-toolbox = "0.2.1"
 # The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: from
 # 0.4.0 that is the CORE-only subset validator (`core_shacl`) on oxrdf and oxttl alone, which covers

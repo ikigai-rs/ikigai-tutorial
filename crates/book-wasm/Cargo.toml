@@ -100,7 +100,9 @@ ikigai-text = "0.4.0"
 # `page_space()`: the stylesheet is composed by a kernel of its own (crates/book-view).
 # The release kernel, as wasm-bindgen writes it for the page, grew from 23,338,487 to 23,480,481
 # bytes (gzip -9: 3,425,876 to 3,462,579), measured 2026-11-01 with the workspace's release
-# profile (ledger #2823).
+# profile (ledger #2823). With ikigai-ui 0.4.1, ikigai-fn 0.9 (html5ever is new here; ikigai-toolbox
+# 0.2.1 keeps its own ikigai-fn 0.7.2 beside it) and core 0.2.12, it grew from 23,480,481 to
+# 24,337,391 bytes (gzip -9: 3,462,579 to 3,653,645), measured 2026-11-02 the same way (ledger #2853).
 book-view = { path = "../book-view" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.

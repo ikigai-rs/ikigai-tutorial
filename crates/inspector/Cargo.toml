@@ -21,8 +21,8 @@ ikigai-vocab.workspace = true
 # 0.7.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.6.0" was a ceiling
 # below 0.7.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.8.0).
-# 0.9.0 is the pin (set 2026-11-02, ledger #2853), the version ikigai-ui 0.4 links, so the lock
-# holds one ikigai-fn. A 0.x caret: also a ceiling (<0.10.0).
+# 0.9.0 is the pin (set 2026-11-02, ledger #2853), the version ikigai-ui 0.4 links, so the two
+# share one copy. A 0.x caret: also a ceiling (<0.10.0).
 ikigai-fn = "0.9.0"
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
