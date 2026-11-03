@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-11
 
+- **2026-11-03**: "The manifold, and the UI that falls out of it" now lists what a newer ledger offers: an item's history and daily counts, which a reader's narrowed list keeps, and two write actions, which it drops.
+
+  Pages: [The manifold, and the UI that falls out of it](spine/manifold.md)
+
 - **2026-11-02**: "Spaces that wrap spaces" now shows the governors' board still cached at stage 4 by asking the cache, not with a trace.
 
   Pages: [Spaces that wrap spaces](overlays/overlays.md)

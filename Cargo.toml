@@ -362,7 +362,12 @@ oxrdf = "0.3"
 # 0.13.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.12.0" was a ceiling
 # below 0.13.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.14.0).
-ikigai-ledger = "0.13.1"
+# 0.18.0 is the pin (set 2026-11-03, ledger #2956): what gonk's tag ledger-v0.18.0 links, ahead of
+# the 0.17.0 the pinned gonk (564146c) links until `books/gonk/gonk.rev` moves there. It requires
+# store ^0.3.3, so the lock takes store 0.3.3 under the store pin below. The old pin "0.13.1" was a
+# ceiling below 0.14.0. A 0.x caret: also a ceiling (<0.19.0). The Architecture Book's manifold
+# prints the new names (`history`, `counts`, `backfill-closed-at`); no gonk Book cell moved.
+ikigai-ledger = "0.18.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.25 is the pin (set 2026-10-23), because it changes what a page prints: since

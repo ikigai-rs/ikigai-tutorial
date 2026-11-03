@@ -23,8 +23,8 @@
 //!
 //! So the code this crate owns is [`space`] (a `Fallback` of two published spaces),
 //! [`kernel`] (that space, a Meta renderer and a clock) and [`ask`] (one request, issued).
-//! Resource ratio: zero endpoints written, fourteen ledger resources and thirteen store
-//! resources composed.
+//! Resource ratio: zero endpoints written, twenty-six ledger resources and fifteen store
+//! resources composed, as `urn:kernel:actions` lists them at ledger 0.18.0.
 //!
 //! Read the chapter: `mdbook serve books/gonk --open`.
 
