@@ -517,16 +517,19 @@ ikigai-nl = "0.5.0"
 # `Endpoint`, and refuses an `as=` its faces do not declare (ledger #88, #179); the drafter reports
 # whatever the model's failure says, and asks for no face. 0.x carets: ceilings too (<0.17.0,
 # <0.4.0); the old pins "0.15.0" and "0.2.1" were ceilings below 0.16 and 0.3.
-# 0.17.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# Previously 0.17.1 (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): then the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.16.0" was a ceiling
 # below 0.17.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.18.0).
-ikigai-llm = "0.17.1"
-# 0.4.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# 0.19.0 (ledger #2930) takes HTTP ^0.5; move the host transport with it so
+# the drafting example shares one HttpTransport trait with the rest of the workspace.
+ikigai-llm = "0.19.0"
+# Previously 0.4.0 (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): then the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.3.0" was a ceiling
 # below 0.4.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.5.0).
 # http 0.4's `HttpResponse::body` is an `HttpBody` (a buffer or a stream); `Ureq` hands it its
 # bytes with `.into()`. llm 0.17 takes http ^0.4, so they still move together.
-ikigai-http = "0.4.0"
+# 0.5.1 (ledger #2930) matches llm 0.19 and the existing HTTP 0.5 users.
+ikigai-http = "0.5.1"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
 # localhost. "2" is that example's line; a caret, so <3.0.0.
@@ -536,13 +539,14 @@ ureq = { version = "2", default-features = false }
 # first release, and the floor; it needs core ^0.1.89 and fn ^0.5, both below the pins here. The
 # crate holds no build: the page and its WebAssembly engine are a directory a host binds (its
 # `build.sh`), and nothing here builds or binds one. A 0.x caret: also a ceiling (<0.2.0, until 2026-10-27).
-# 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
+# Previously 0.2.1 (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): then the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
 # 0.2 binds one more door, `urn:toolbox:path:{rest}`, which the `list` in "The REPL grammar" shows.
-# 0.2.1 takes ikigai-fn ^0.7 and no release takes 0.9 (checked 2026-11-02, ledger #2853), so it is
-# what keeps a second ikigai-fn, 0.7.2, in the lock and in book-wasm. Its next release can end that.
-ikigai-toolbox = "0.2.1"
+# 0.3.0 (ledger #2930) takes fn ^0.9 and core ^0.2.8, removing the second compose
+# implementation from book-wasm. The published toolbox build follows the same release
+# in books/ikigai/toolbox.rev, including its templates for fn 0.9.
+ikigai-toolbox = "0.3.0"
 # The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: from
 # 0.4.0 that is the CORE-only subset validator (`core_shacl`) on oxrdf and oxttl alone, which covers
 # closed shapes (`sh:closed`, `sh:ignoredProperties`) and every constraint the chapter's shapes use,

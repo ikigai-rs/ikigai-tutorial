@@ -11,7 +11,7 @@
 # scripts and its 8.3 MB engine load from here, only when a reader opens a check.
 #
 # The pin is `books/ikigai/toolbox.rev`: an ikigai-toolbox COMMIT (a tag can move), the one
-# whose crate the book links (`ikigai-toolbox` 0.1.0 is tag v0.1.0). It is cloned once into
+# whose crate the book links (`ikigai-toolbox` 0.3.0 is tag v0.3.0). It is cloned once into
 # `~/.cache/ikigai-tutorial/toolbox/<rev>/` (see below) with its submodule (turtle-lsp, pinned
 # by ikigai-toolbox), and its `build.sh` runs there every time: it refuses a submodule that is not at its pin, builds the
 # engine with upstream's toolchain (Rust 1.99.0, from turtle-lsp's rust-toolchain.toml) into
