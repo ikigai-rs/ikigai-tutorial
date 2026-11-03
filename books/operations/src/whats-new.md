@@ -7,7 +7,7 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
-- **2026-11-02**: A new chapter, "Logging": a host that opens an ikigai-log log, per-request attribution, reading segments as text and Turtle, escaped values, rotation and drops, encrypted backups, restores proved with verify against a tampered copy, and grep, awk and SPARQL queries over the segments.
+- **2026-11-03**: A new chapter, "Logging": a host that opens an ikigai-log log, per-request attribution, reading segments as text and Turtle, escaped values, rotation and drops, encrypted backups, restores from a decrypted backup proved with verify against a tampered copy, and grep, awk and SPARQL queries over the segments.
 
   Pages: [Logging](running/logging.md)
 

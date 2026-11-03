@@ -31,7 +31,7 @@ it does is a few lines of library calls you would make in your own host, and the
 <!-- transcript: manual — it compiles the host from the repository, minutes of build and a
      network fetch; the check builds this same crate itself before it runs the page. -->
 ```console
-$ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial log-host
+$ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial --rev da5ad3d1036186f86721ee5d93e71d6ef8355d19 log-host
 ```
 
 ## What a log is here
@@ -220,7 +220,7 @@ $ log-host ask --door door.sock urn:agent:alice urn:iki:fn:toUpper in=three
 THREE
 $ log-host ask --door door.sock urn:agent:bob urn:iki:fn:toUpper in=four
 FOUR
-$ ls home/log | wc -l
+$ ls home/log | wc -l | tr -d ' '
 3
 $ grep -h -E 'log:Rotation|^#seal' home/log/shop-2026-11-02T09-00-00Z.log
 #seal 1-4 sha256:…
@@ -241,9 +241,10 @@ $ ls home/log/*.log | tail -1 | xargs grep -h log:ChainBroken | cut -d' ' -f2-3
 log:ChainBroken urn:log:shop:…
 ```
 
-**That second line is a false alarm you will see on every rotation.** In `ikigai-log` 0.9.2 the
-check a rotation runs reads the segment it just sealed and its predecessor, before the successor
-has any lines, so it finds the rotation marker's `next=` naming a segment "not here", and lands a
+**That second line is a false alarm you will see on every rotation (ledger #2951).** In
+`ikigai-log` 0.9.2 the check a rotation runs reads the segment it just sealed and its predecessor,
+before the successor has any lines, so it finds the rotation marker's `next=` naming a segment
+"not here", and lands a
 `log:ChainBroken` saying the chain was truncated. The chain is fine, and `urn:log:verify` says so
 below. Until that changes, do not alert on `log:ChainBroken` alone: ask verify.
 
@@ -368,17 +369,27 @@ identical
 
 ### Restoring, and proving it
 
-End the writer in order, so that the last segment ends on a marker and a final seal. The restore
-is then only file copies into a fresh config home, and the host runs `--read-only` over it, which
-opens no writer and installs no tracer, so reading appends nothing:
+End the writer in order, so that the last segment ends on a marker and a final seal. Finish the
+backup with all the segments and the configuration, then encrypt and fetch that final archive.
+The earlier archive held only the first sealed segment; its rotation marker names a successor
+that must be backed up too before the whole chain can verify cleanly.
+
+Restore into a fresh config home from the decrypted archive, and compare each restored segment
+with that copy. The host runs `--read-only` over it, which opens no writer and installs no tracer,
+so reading appends nothing:
 
 <!-- transcript: run -->
 ```console
 $ log-host stop --door door.sock
 log closed
+$ cp -p home/log/*.log backup/
+$ cp home/log.toml backup/
+$ tar czf - -C backup . | rage -R offsite.pub > offsite-final.tar.gz.age
+$ mkdir recovered && rage -d -i offsite.key offsite-final.tar.gz.age | tar xzf - -C recovered
 $ mkdir -p restored/log
-$ cp home/log.toml restored/
-$ cp -p home/log/*.log restored/log/
+$ cp recovered/log.toml restored/
+$ cp -p recovered/*.log restored/log/
+$ for segment in restored/log/*.log; do cmp "$segment" "recovered/$(basename "$segment")" || exit 1; done
 $ ls restored/log | wc -l | tr -d ' '
 3
 ```
@@ -406,7 +417,7 @@ verified 3 segment(s), 0 broken
 
 <!-- transcript: run -->
 ```console
-$ sed 's/seq=3 principal=urn:agent:bob/seq=3 principal=urn:agent:alice/' backup/shop-2026-11-02T09-00-00Z.log > restored/log/shop-2026-11-02T09-00-00Z.log
+$ sed 's/seq=3 principal=urn:agent:bob/seq=3 principal=urn:agent:alice/' recovered/shop-2026-11-02T09-00-00Z.log > restored/log/shop-2026-11-02T09-00-00Z.log
 $ ikigai --connect restored.sock -c 'source urn:log:verify' < /dev/null 2>/dev/null | sed -E 's/ (entries|seals|level|prev|signed|head)=[^ ]*//g; s/ states .* — / — /'
 segment urn:log:shop:2026-11-02T09-00-00Z BROKEN
   BROKEN seal 1-4 — the alteration is between sequence 1 and 4
@@ -429,7 +440,7 @@ chain cut at its newest end:
 
 <!-- transcript: run -->
 ```console
-$ cp -p backup/shop-2026-11-02T09-00-00Z.log restored/log/
+$ cp -p recovered/shop-2026-11-02T09-00-00Z.log restored/log/
 $ rm "$(ls restored/log/*.log | tail -1)"
 $ ikigai --connect restored.sock -c 'source urn:log:verify' < /dev/null 2>/dev/null | sed -E 's/ (entries|seals|level|prev|signed|head)=[^ ]*//g; s/ states .* — / — /'
 segment urn:log:shop:2026-11-02T09-00-00Z OK
@@ -452,7 +463,7 @@ the start of the chain, without checking the predecessor its `@prev` names:
 
 <!-- transcript: run -->
 ```console
-$ cp -p home/log/*.log restored/log/
+$ cp -p recovered/*.log restored/log/
 $ rm restored/log/shop-2026-11-02T09-00-00Z.log
 $ ikigai --connect restored.sock -c 'source urn:log:verify' < /dev/null 2>/dev/null | sed -E 's/ (entries|seals|level|prev|signed|head)=[^ ]*//g; s/ states .* — / — /'
 segment urn:log:shop:… OK
@@ -523,7 +534,7 @@ list:
 
 <!-- transcript: run -->
 ```console
-$ cp -p backup/shop-2026-11-02T09-00-00Z.log restored/log/
+$ cp -p recovered/shop-2026-11-02T09-00-00Z.log restored/log/
 $ ikigai --connect restored.sock -c 'source urn:log:segments' < /dev/null 2>/dev/null | grep '^urn:' | paste -sd, - > segments.txt
 $ tr , '\n' < segments.txt | wc -l | tr -d ' '
 3
@@ -668,5 +679,5 @@ $ cat home/log/shop-2026-11-02T10-00-00Z.log | ikigai --connect log.sock -c 'sou
 1
 ```
 
-- **A false `log:ChainBroken` on every rotation** in `ikigai-log` 0.9.2, as shown under
+- **A false `log:ChainBroken` on every rotation** in `ikigai-log` 0.9.2 (ledger #2951), as shown under
   [Rotation](#rotation-as-it-happens).
