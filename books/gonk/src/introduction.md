@@ -79,10 +79,12 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.1.110, `ikigai-ledger` 0.12.0,
-`ikigai-store` 0.2.23, `ikigai-browse` 0.19.0, `ikigai-script` 0.3.6 and `ikigai-nl` 0.4.0. The
-book's own crates (the ones its Rust listings and in-page cells run) take the same releases, so a
-`console` block and a listing or a cell are answered by the same modules. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
+The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.17.0,
+`ikigai-store` 0.3.1, `ikigai-browse` 0.20.3, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
+book's own crates (the ones its Rust listings and in-page cells run) are a step apart, at
+`ikigai-core` 0.2.12, `ikigai-ledger` 0.13.1 and `ikigai-browse` 0.20.6. So a cell or a listing
+shows an older ledger than a `console` block does: no committer, no verified or claimed author,
+no events. It serves scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
 This gonk's HTTP door lets a caller with no identity read the ledgers and write nothing (gonk
 PR 186). Every page writes as the owner over the socket, or as a client over QUIC; the two bridges
@@ -106,10 +108,9 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial mode
 From [A ledger of your own](ledger/your-own.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
-way. It is 0.1.67, the release whose transports the pinned gonk was built with, so the two speak the
-same wire (v9, which carries the newer failure classes typed and a run's time left across a mount).
-The book's own crates take 0.1.63 for the in-page kernel's grammar; that is a different program and
-no page runs it as `ikigai`. The QUIC keep-alive a client
+way. It is 0.2.3, the release whose transports the pinned gonk was built with, so the two speak the
+same wire. The book's own crates take the in-page kernel's grammar from `ikigai-engine`; that is a
+different program and no page runs it as `ikigai`. The QUIC keep-alive a client
 sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
 model drafting or explaining) is not lost over `quic://`.
 

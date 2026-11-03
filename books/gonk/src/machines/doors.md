@@ -33,7 +33,7 @@ $ ikigai-gonk client add laptop --ledger default=write --port 1070 --config-home
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `laptop` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `laptop` (5 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -150,8 +150,8 @@ sent, so it cannot be forged from the client side, and a client that narrows its
 (an agent's grant carried with the request) is named all the same. (`ikigai-quic` also still
 stamps the name on each request as an argument called `principal`, after removing any the client
 sent; until gonk PR 122 that argument was where gonk read it.) A write that names no `author`
-is filed with this name as its author, and a write that names a *different* principal as its
-author is refused:
+records this name as its committer and its verified author, and a write that names anyone else
+as its author is refused:
 
 <!-- transcript: run -->
 ```console
@@ -160,13 +160,50 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/cli
   iri:      urn:iki:ledger:default:item:…
   filed:    … by urn:iki:host:gonk:client:…
   updated:  …
+  author:   urn:iki:host:gonk:client:… (verified)
+  committer: urn:iki:host:gonk:client:… at …
 [uncacheable]
-error: denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:host:gonk:client:….
+error: denied: `author=urn:iki:gonk:passkey:ada` refused for committer urn:iki:host:gonk:client:…: it is not the committer, the participants graph <urn:collab:participants> does not enroll the committer to act for it (prov:actedOnBehalfOf), and the committer is not an import principal (ledger:Importer). To write anyway, send no author to be the author yourself, or have the host enroll you to act for that principal
 — batch: 2 commands · uncacheable
 ```
 
-A plain-text author (`author=agent-7`, as in [Over the socket](../agent/socket.md)) is still
-kept: it renders as text, and claims nothing a door could check.
+A plain-text author is refused the same way; only the socket, which names no principal, keeps
+one as free text ([Over the socket](../agent/socket.md)):
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'sink urn:iki:ledger:append author=agent-7 Signed by a name'
+error: denied: `author=agent-7` refused for committer urn:iki:host:gonk:client:…: an author is a principal's IRI (urn:collab:participant:{name}), not a name. To write anyway, send the IRI of the principal you write for, or no author to be the author yourself
+```
+
+### Who wrote it
+
+Since `ikigai-ledger` 0.15 an entry records two things: its **committer**, the principal the door
+named, and its **author**, either verified (the committer itself) or claimed. A claim takes an
+enrollment in the graph `urn:collab:participants`, which only the owner writes, over the socket.
+That is why every writing grant now reads that graph: one principal may run several workers, and
+each may sign as itself:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk ledger enroll laptop --acts-for urn:collab:participant:laptop-claude --socket "$PWD/.ikigai/gonk.sock" --config-home "$PWD/.config/ikigai"
+enrolled in <urn:collab:participants>: <urn:iki:host:gonk:client:…> <http://www.w3.org/ns/prov#actedOnBehalfOf> <urn:collab:participant:laptop-claude> .
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'sink urn:iki:ledger:append author=urn:collab:participant:laptop-claude For laptop-claude' -c 'source urn:iki:ledger:item:3'
+#3 urn:iki:ledger:default:item:…
+[uncacheable]
+   #3  open    p-  For laptop-claude
+  iri:      urn:iki:ledger:default:item:…
+  filed:    … by urn:collab:participant:laptop-claude
+  updated:  …
+  author:   urn:collab:participant:laptop-claude (claimed by a delegate)
+  committer: urn:iki:host:gonk:client:… at …
+[uncacheable]
+— batch: 2 commands · 2 uncacheable
+```
+
+`ikigai-gonk ledger enroll gh-sync --importer` lets a sync name any foreign actor, and `ledger
+unenroll` undoes either. A grant minted before this release does not hold the graph's read token;
+re-mint it with `client add <name> … --force`.
 
 **The client's name has a second, older spelling, and that is where it matters.** The name
 follows every host's convention, `urn:iki:host:{name}:client:<fingerprint>`, with this host's

@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.1.67
+ikigai 0.2.3
 ```
 
 ## Start a gonk, and find its socket
@@ -82,7 +82,10 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'describe urn:gk:iki:ledger
 <urn:ikigai:contract:ledger-append:sink:b3:…:input:labels> ik:inputName "labels" ;
 <urn:ikigai:contract:ledger-append:sink:b3:…:input:about> ik:inputName "about" ;
 <urn:ikigai:contract:ledger-append:sink:b3:…:input:revision> ik:inputName "revision" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:raised> ik:inputName "raised" ;
 <urn:ikigai:contract:ledger-append:sink:b3:…:input:author> ik:inputName "author" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:created> ik:inputName "created" ;
+<urn:ikigai:contract:ledger-append:sink:b3:…:input:modified> ik:inputName "modified" ;
 <urn:ikigai:contract:ledger-append:sink:b3:…:input:key> ik:inputName "key" ;
 <urn:ikigai:contract:ledger-append:sink:b3:…:input:as> ik:inputName "as" ;
 ```
@@ -146,7 +149,7 @@ The socket's caller is the owner, and the owner holds everything gonk serves. De
 ```console
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'delete urn:iki:ledger:item:2'
 deleted #2 urn:iki:ledger:default:item:…
-  6 quad(s) moved to <urn:iki:ledger:graph:default:deleted> and recoverable
+  7 quad(s) moved to <urn:iki:ledger:graph:default:deleted> and recoverable
   tombstone: urn:iki:ledger:default:tombstone:…
 [uncacheable]
 ```
@@ -164,7 +167,8 @@ $ ikigai-gonk grants default write
   "urn:cap:ledger:read:default",
   "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
   "urn:cap:ledger:write:default",
-  "urn:cap:store:write:graph:urn:iki:ledger:graph:default"
+  "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+  "urn:cap:store:read:graph:urn:collab:participants"
 ]
 ```
 
@@ -243,8 +247,8 @@ the sealed write above succeeded. The [QUIC chapter](../machines/quic-client.md#
 shows how an operator gives a raw grant by name, `--ledger-graph`.)
 
 What the seal does **not** bound is the `author` argument on the session's own new items. The
-network doors refuse a write whose `author` is shaped like a principal and is not the caller's
-own; but the socket names no principal (every request is `owner`), so it cannot run that rule,
+network doors refuse a write whose `author` is not the caller's own, unless the owner enrolled
+the caller to claim it; but the socket names no principal (every request is `owner`), so it cannot run that rule,
 and a sealed session may still file an item that claims to be from a passkey:
 
 <!-- transcript: run -->
@@ -256,7 +260,8 @@ sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default
 — batch: 2 commands · uncacheable
 ```
 
-It is the same kind of claim as `author=agent-7`, on an item the session filed itself, never a
+It is the same kind of claim as `author=agent-7`, which an item's page and its text face mark
+as `(claimed, free text)`, on an item the session filed itself, never a
 change to someone else's; but gonk's item page renders a passkey-shaped author as that
 passkey's label, so it would read as Ada's. gonk's README states this residual rather than
 hiding it. An agent that must not be able to claim a person needs an identity of its own on the
@@ -275,7 +280,7 @@ here the ledger's, and the one the delete above moved item 2's six quads into:
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:sparql:select as=text/csv query="SELECT ?g (COUNT(*) AS ?n) WHERE { GRAPH ?g { ?s ?p ?o } } GROUP BY ?g ORDER BY ?g"'
 g,n
 urn:iki:ledger:graph:default,…
-urn:iki:ledger:graph:default:deleted,6
+urn:iki:ledger:graph:default:deleted,7
 [uncacheable]
 ```
 

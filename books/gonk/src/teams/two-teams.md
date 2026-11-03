@@ -67,12 +67,12 @@ which matters later:
 $ ikigai-gonk client add alpha-agent --ledger alpha=write --script 'report-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `alpha-agent`  …/.config/ikigai/gonk/quic/clients/alpha-agent
 …
-  enrolled     grant `alpha-agent` (6 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `alpha-agent` (7 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add beta-agent --ledger beta=write --script 'report-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `beta-agent`  …/.config/ikigai/gonk/quic/clients/beta-agent
 …
-  enrolled     grant `beta-agent` (6 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `beta-agent` (7 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add manager --ledger alpha=read --ledger beta=read --browse read --script 'report-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `manager`  …/.config/ikigai/gonk/quic/clients/manager
@@ -85,6 +85,7 @@ alpha-agent
   urn:cap:store:read:graph:urn:iki:ledger:graph:alpha
   urn:cap:ledger:write:alpha
   urn:cap:store:write:graph:urn:iki:ledger:graph:alpha
+  urn:cap:store:read:graph:urn:collab:participants
   urn:cap:script:read:report-*
   urn:cap:script:run:report-*
 beta-agent
@@ -92,6 +93,7 @@ beta-agent
   urn:cap:store:read:graph:urn:iki:ledger:graph:beta
   urn:cap:ledger:write:beta
   urn:cap:store:write:graph:urn:iki:ledger:graph:beta
+  urn:cap:store:read:graph:urn:collab:participants
   urn:cap:script:read:report-*
   urn:cap:script:run:report-*
 manager
@@ -444,7 +446,7 @@ socket](../agent/socket.md#whose-authority)). The owner deletes alpha's second i
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'delete urn:gk:iki:ledger:alpha:item:2'
 deleted alpha#2 urn:iki:ledger:alpha:item:…
-  7 quad(s) moved to <urn:iki:ledger:graph:alpha:deleted> and recoverable
+  8 quad(s) moved to <urn:iki:ledger:graph:alpha:deleted> and recoverable
   tombstone: urn:iki:ledger:alpha:tombstone:…
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/alpha-agent -c 'source urn:iki:ledger:alpha:next'
@@ -472,7 +474,7 @@ $ cat graphs.rq | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn
 g,n
 urn:iki:browse:graph:default,…
 urn:iki:ledger:graph:alpha,…
-urn:iki:ledger:graph:alpha:deleted,7
+urn:iki:ledger:graph:alpha:deleted,8
 urn:iki:ledger:graph:beta,…
 urn:iki:ledger:graph:default,…
 [uncacheable]
@@ -516,6 +518,7 @@ urn:script:report-alpha-open:result
 urn:script:report-alpha-open:runs
 $ LC_ALL=C comm -23 alpha.tools manager.tools
 urn:iki:ledger:{ledger}:append
+urn:iki:ledger:{ledger}:backfill-closed-at
 urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
@@ -526,7 +529,7 @@ urn:iki:ledger:{ledger}:link
 urn:iki:ledger:{ledger}:reopen
 urn:iki:store:graph-update
 $ LC_ALL=C comm -13 alpha.tools manager.tools | grep -c '^urn:repo:shop:'
-19
+21
 ```
 
 Three things to read in that:
@@ -539,7 +542,7 @@ Three things to read in that:
   [Authority from the text](../../beyond/datasets.html#authority-from-the-text) in gonk.
 - **The manager's list has no writer's tools.** Reading two ledgers is not writing either, so
   `append`, `claim`, `close` and the store's update door are absent, not offered and refused.
-- **The manager's list has the repository's.** Nineteen of the browse root's resources, which
+- **The manager's list has the repository's.** Twenty-one of the browse root's resources, which
   neither agent holds a token for.
 
 So an MCP agent built on alpha's certificate is not told what beta's report is called, and an

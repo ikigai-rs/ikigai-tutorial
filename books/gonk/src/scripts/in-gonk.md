@@ -128,6 +128,7 @@ worker
   urn:cap:ledger:claim:default
   urn:cap:ledger:comment:default
   urn:cap:store:write:graph:urn:iki:ledger:graph:default
+  urn:cap:store:read:graph:urn:collab:participants
   urn:cap:script:read:public
   urn:cap:script:run:public
 ```
@@ -137,7 +138,8 @@ the namespace (`write` and `delete` are what `publish` means). `reviewer` holds 
 over the same names and nothing that drafts. `worker`'s `--worker default` is a ledger role
 (`--ledger default=worker` says the same): read, claim and comment, never close, for a
 remote worker whose dispatcher closes. It carries the ledger graph's store WRITE token, because
-the ledger writes a claim or a comment as a store update under the caller's own capability; the
+the ledger writes a claim or a comment as a store update under the caller's own capability, and
+the read of `urn:collab:participants`, which says who may claim which author; the
 socket and QUIC doors refuse a narrowed caller's raw write to a ledger graph all the same
 ([Over the socket](../agent/socket.md), [A QUIC client](../machines/quic-client.md)). `ann`'s grant is `bot`'s with the ledger's writer in
 place of its reader.
@@ -315,17 +317,17 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (106 offered)
-urn:ikigai:vocab: 224 of 224
+left out: parts= did not ask for it (116 offered)
+urn:ikigai:vocab: 253 of 253
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)"'
-urn:ikigai:vocab: 0 of 224
+urn:ikigai:vocab: 0 of 253
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 ```
 
-Unfocused, the model would be shown all 224 terms of the vocabulary; focused on the ledger graph,
+Unfocused, the model would be shown all 253 terms of the vocabulary; focused on the ledger graph,
 the graph's own shape and the example that reads it, and no term, since none mentions the graph.
 
 Every draft on this page passes `focus=` all the same: what the model is not shown, it cannot

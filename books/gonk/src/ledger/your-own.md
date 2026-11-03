@@ -326,6 +326,7 @@ $ ikigai-gonk grants default delete
   "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
   "urn:cap:ledger:write:default",
   "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+  "urn:cap:store:read:graph:urn:collab:participants",
   "urn:cap:ledger:delete:default",
   "urn:cap:store:write:graph:urn:iki:ledger:graph:default:deleted"
 ]
@@ -333,8 +334,9 @@ $ ikigai-gonk grants default delete
 
 `grants` prints the token list for one ledger at one authority, for writing a grant by hand;
 the next chapter gives one to a person, with a passkey. Read it as the four-token writer from
-the Rust half plus two: the ledger's delete grant, and a write grant for a SECOND graph,
-`…:default:deleted`. A delete is a move into that ledger's graveyard, recoverable by hand, so
+the Rust half plus three: the read of `urn:collab:participants`, which says who may claim which
+author ([The three doors](../machines/doors.md#who-wrote-it), later in the book), the ledger's
+delete grant, and a write grant for a SECOND graph, `…:default:deleted`. A delete is a move into that ledger's graveyard, recoverable by hand, so
 it is a write to two graphs, and the caller must be able to make both. The refusal names the token it wanted,
 because a capability that is declared is a capability that is enforced, and the other way
 round. It is gonk's refusal, from the `ikigai-core` the pinned revision links, and since core

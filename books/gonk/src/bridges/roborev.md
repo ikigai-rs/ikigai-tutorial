@@ -89,7 +89,7 @@ $ ikigai-gonk client add roborev --ledger default=write --port 1070 --config-hom
 client `roborev`  …/.config/ikigai/gonk/quic/clients/roborev
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `roborev` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `roborev` (5 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -168,7 +168,8 @@ Each line of that is a decision the command made, and each is worth reading once
   problem's words with their whitespace collapsed. It is filed as the append's `key` and again
   as an `about`, and it is how the ledger knows a finding is already filed.
 - **`author=roborev` is the socket's author.** Over the QUIC door the command sends no author,
-  and gonk fills in the client's own principal, as the item below shows. The dry run prints the
+  and the ledger records the client's own principal as the committer and the verified author,
+  as the item below shows. The dry run prints the
   plan the same way whichever door the real run would take.
 
 Now for real, and the item it filed first, read back through the HTTP door, whose anonymous
@@ -187,14 +188,14 @@ $ curl -s http://127.0.0.1:1070/iki/ledger/item/1
   key:      urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
   filed:    … by urn:iki:host:gonk:client:…
   updated:  …
+  author:   urn:iki:host:gonk:client:… (verified)
+  committer: urn:iki:host:gonk:client:… at …
   revision: 1a2b3c4
   about:    urn:repo:demo:file:src/retry.rs
   about:    urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
 
   `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer that holds the RocksDB lock for longer than the caller waits (a second `ikigai-gonk` on the same store) spins this loop forever at 100% CPU.
-  
   Fix: Bound the loop (five attempts with backoff) and return the last `Busy` to the caller.
-  
   - severity: critical
   - location: /work/demo/src/retry.rs:41-58
   - commit: 1a2b3c4

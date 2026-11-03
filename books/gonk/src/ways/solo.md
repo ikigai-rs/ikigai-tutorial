@@ -220,16 +220,16 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   filed:    …
   updated:  …
 3 comment(s):
-  … ada
+  … ada (claimed, free text)
     Done when initials("Ada  Lovelace") is "AL" and a test says so.
-  … agent
+  … agent (claimed, free text)
     https://github.com/you/demo/pull/7 adds the test, CI green
-  … ada
+  … ada (claimed, free text)
     Checked: PR 7 merged with CI green; the test covers two spaces.
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:doctor'
 doctor: default (lifecycle kata-flight): no problems
-checked: orphaned, abandoned, lease-expired, unknown-state, two-states, awaiting-closed at …
+checked: orphaned, abandoned, lease-expired, unknown-state, two-states, awaiting-closed, awaiting-stale at …
 [uncacheable]
 ```
 
@@ -278,7 +278,7 @@ machine.)
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 60 files
+generated the library-lending sample (python, process solo) in …/library: 64 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -302,6 +302,7 @@ hooks
 justfile
 openspec
 scripts
+skills
 tests
 tools
 $ grep '^## ' library/AGENTS.md
@@ -314,6 +315,8 @@ $ grep '^## ' library/AGENTS.md
 ## 6. Never a bare `#N`
 ## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
+## Building in the ikigai style (optional)
+## Writing text people skim (optional)
 ## Optional: a hook for Claude Code
 $ cat library/.gonk/process.toml
 # How this repository's team works: the process profiles it was generated with, and what
@@ -349,7 +352,7 @@ gonk init: …/library
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.67 at …/ikigai
+  ok       ikigai    ikigai 0.2.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `agent` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
@@ -360,8 +363,8 @@ gonk init: …/library
   ok       nl        gonk offers `urn:nl:sparql`: drafting a query from a sentence (ikigai-nl)
 
 agents over MCP (configure the agent with this command):
-  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
 
+  ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
 $ cd library && python3 tools/gonk.py status
 process: solo

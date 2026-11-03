@@ -39,7 +39,7 @@ $ ikigai-gonk client add agent --ledger default=write --port 1070 --config-home 
 client `agent`  …/.config/ikigai/gonk/quic/clients/agent
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `agent` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `agent` (5 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -74,7 +74,7 @@ and a **grant of its own**, in its own config home's `grants.json`. This is the 
 ceiling: `ikigai mcp --grant agent` serves the manifold under exactly these scopes, so the
 tools of everything else the agent's `ikigai` could reach (its files, its secrets, a model) are
 filtered out of the list by capability. `show` narrows what is listed further, to the ledger's
-tools; it changes what the agent sees, not what it may call. The scopes are the server's four,
+tools; it changes what the agent sees, not what it may call. The scopes are the server's five,
 which `ikigai-gonk grants default write` prints:
 
 <!-- transcript: file agent/.config/ikigai/grants.json -->
@@ -85,7 +85,8 @@ which `ikigai-gonk grants default write` prints:
       "urn:cap:ledger:read:default",
       "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
       "urn:cap:ledger:write:default",
-      "urn:cap:store:write:graph:urn:iki:ledger:graph:default"
+      "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+      "urn:cap:store:read:graph:urn:collab:participants"
     ],
     "show": ["ledger-*"]
   }
@@ -121,15 +122,16 @@ description:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/list.jsonl | grep -o '"name":"[^"]*__[^"]*"' | LC_ALL=C sort
-ikigai mcp: serving the manifold under 4 scope(s)
-ikigai mcp: tool visibility — 1 shown, 0 hidden pattern(s)
+ikigai mcp: serving the manifold under 5 scope(s)
 ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs agent/gonk]
 "name":"ledger-append__sink"
+"name":"ledger-backfill-closed-at__sink"
 "name":"ledger-claim__delete"
 "name":"ledger-claim__sink"
 "name":"ledger-close__sink"
 "name":"ledger-comment__sink"
 "name":"ledger-count__source"
+"name":"ledger-counts__source"
 "name":"ledger-defer__delete"
 "name":"ledger-defer__sink"
 "name":"ledger-doctor__source"
@@ -157,7 +159,7 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-reopen__sink"
 ```
 
-Thirty-one tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
+Thirty-three tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
 `urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. Eight of
 them arrived with `ikigai-ledger` 0.5.0 and are not used in this book yet: an item's lifecycle
 **state** (`ledger-item-state__*`, a compare-and-set, so of two agents moving one item out of the
@@ -168,6 +170,9 @@ Two more arrived with 0.6.2: `ledger-item-about__sink` and `__delete`, which add
 item is **about** (a file, a PR, the session that delivered it) without touching its title or body.
 And one with 0.9.0: `ledger-count__source`, the number of items a filter admits, without the
 listing (the figure part 5 [asks for](../spec/ledger.md#the-walk)).
+Two more arrived by 0.14: `ledger-counts__source`, a ledger's dated counts, and
+`ledger-backfill-closed-at__sink`, which gives items closed before close times were recorded a
+`closedAt` marked as backfilled.
 A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
 deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging
@@ -188,9 +193,9 @@ three things outside its grant: an `author` naming a person's passkey, the item'
 and another ledger.
 
 An MCP client matches each response to its request by `id`, not by position, and `ikigai mcp`
-relies on that: at the version this book pins, 0.1.67, it runs each `tools/call` on a thread of
-its own and writes its answer when it finishes (ledger #1695; 0.1.61, the book's previous pin,
-answered one call at a time), so the answers to calls sent together come back in the order
+relies on that: since `ikigai-cli` 0.1.67 it runs each `tools/call` on a thread of
+its own and writes its answer when it finishes (ledger #1695; 0.1.61 answered one call at a
+time), so the answers to calls sent together come back in the order
 they finished, not the order they were asked. (The handshake, `tools/list` and notifications are
 still answered one at a time, in order, before the next line is read.) That is what an agent
 wants, since a slow call no longer holds up a fast one behind it. It also means that calls sent
@@ -230,15 +235,15 @@ whatever order they finished:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/file.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.67"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/retry.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.67"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/check.jsonl 2>/dev/null | LC_ALL=C sort
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.1.67"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
 {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n"}],"isError":false}}
-{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author` names a principal (urn:iki:gonk:passkey:ada), and only the door names one: a write may name its own principal or a plain-text author, never another identity. This request is from urn:iki:host:gonk:client:….\nkind: denied; class: denied"}],"isError":true}}
+{"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author=urn:iki:gonk:passkey:ada` refused for committer urn:iki:host:gonk:client:…: it is not the committer, the participants graph <urn:collab:participants> does not enroll the committer to act for it (prov:actedOnBehalfOf), and the committer is not an import principal (ledger:Importer). To write anyway, send no author to be the author yourself, or have the host enroll you to act for that principal\nkind: denied; class: denied"}],"isError":true}}
 {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"tool `ledger-item__delete` is not available under this capability"}],"isError":true}}
 {"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them\nkind: denied; class: denied"}],"isError":true}}
 ```
@@ -254,11 +259,11 @@ Read the answers by `id`:
   with the item that holds it, marked `existing`. The check and the filing are one store update
   in the ledger, so this holds for concurrent retries as well as sequential ones. An agent that
   keys what it files can retry freely.
-- **4: the author is the agent.** The item was filed with no `author` argument, and gonk filled
-  it with the name of the identity that asked, `urn:iki:host:gonk:client:<fingerprint>`, from the
-  certificate the connection was made with.
-- **5: and only the agent.** On the QUIC door an `author` that names a principal must be the
-  caller's own, so the agent cannot file as Ada. This is the residual the socket chapter ended
+- **4: the author is the agent.** The item was filed with no `author` argument, so the ledger
+  recorded the name of the identity that asked, `urn:iki:host:gonk:client:<fingerprint>`, from
+  the certificate the connection was made with, as its committer and its verified author.
+- **5: and only the agent.** On the QUIC door an `author` must be the caller's own unless the
+  owner enrolled the caller to claim it ([The three doors](../machines/doors.md#who-wrote-it)), so the agent cannot file as Ada. This is the residual the socket chapter ended
   on, closed by giving the agent its own door. The refusal's text ends with a line for a program
   rather than a person, `kind: denied; class: denied`: the kind of failure and its class, the
   rule for who may repeat it (`denied`: nobody, since a different authority is a different

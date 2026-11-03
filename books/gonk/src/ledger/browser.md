@@ -226,7 +226,7 @@ browses, belongs to an **identity**, and an identity is given by invitation:
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk passkey invite ada --ledger book=write --browse read --port 1070 --config-home "$PWD/.config/ikigai"
-passkey invite for `ada` — grant `ada` (6 scopes) in …/.config/ikigai/gonk/grants.json
+passkey invite for `ada` — grant `ada` (7 scopes) in …/.config/ikigai/gonk/grants.json
   valid for 30 minutes, once
   open  http://localhost:1070/#invite=…
   in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json
@@ -245,14 +245,17 @@ $ cat .config/ikigai/gonk/grants.json
     "urn:cap:store:read:graph:urn:iki:ledger:graph:book",
     "urn:cap:ledger:write:book",
     "urn:cap:store:write:graph:urn:iki:ledger:graph:book",
+    "urn:cap:store:read:graph:urn:collab:participants",
     "urn:cap:browse:read:*",
     "urn:cap:store:read:graph:urn:iki:browse:graph:default"
   ]
 }
 ```
 
-`--ledger book=write` is the four-token writer of one ledger from
-[the last chapter](your-own.md#whose-ledger). `--browse read` is the repositories as a role:
+`--ledger book=write` is the writer of one ledger from
+[the last chapter](your-own.md#whose-ledger), plus the read of `urn:collab:participants`, the graph
+that says who may claim which author ([The three doors](../machines/doors.md#who-wrote-it)).
+`--browse read` is the repositories as a role:
 read every browse root (`--root <name>` names one instead), and the browse graph's quads. Its
 stronger sibling, `--browse derive`, adds minting annotations and spending a mounted model's
 inference; it is one word on purpose, and it is refused on a server with no model to spend.

@@ -264,14 +264,14 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   Repository: docs. One example, and one sentence on what an empty name returns.
   Self-merge on green CI; hand back with the pull request.
 2 comment(s):
-  … spoke-docs
+  … spoke-docs (claimed, free text)
     https://github.com/you/docs/pull/5 merged on green
-  … hub
+  … hub (claimed, free text)
     Checked: docs PR 5 merged, CI green.
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:doctor'
 doctor: default (lifecycle kata-flight): no problems
-checked: orphaned, abandoned, lease-expired, unknown-state, two-states, awaiting-closed at …
+checked: orphaned, abandoned, lease-expired, unknown-state, two-states, awaiting-closed, awaiting-stale at …
 [uncacheable]
 ```
 
@@ -334,7 +334,7 @@ says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process hub
-generated the library-lending sample (python, process hub) in …/library: 62 files
+generated the library-lending sample (python, process hub) in …/library: 66 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -353,6 +353,8 @@ $ grep '^## ' library/AGENTS.md
 ## 6. Never a bare `#N`
 ## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
+## Building in the ikigai style (optional)
+## Writing text people skim (optional)
 ## Hub and spoke
 ## Optional: a hook for Claude Code
 $ ls library/tools library/.gonk/templates
@@ -390,7 +392,7 @@ gonk init: …/library
   note     role      hub: writes briefs as items, links them, dispatches each arc, closes on the evidence, asks a person before merging its own work
   note     role      arc agent: works one arc from its brief in its own working tree, merges on green, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.67 at …/ikigai
+  ok       ikigai    ikigai 0.2.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `hub` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
@@ -401,8 +403,8 @@ gonk init: …/library
   absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
 agents over MCP (configure the agent with this command):
-  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
 
+  ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
 $ cd library && python3 tools/gonk.py status
 process: hub

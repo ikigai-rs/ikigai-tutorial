@@ -10,11 +10,12 @@ it splits one worker machine into one loop per agent, so a dispatcher can choose
 
 ## Why a label is not enough
 
-A label is a plain value on an item. The ledger records nobody who set it, and anyone who may
-write to the ledger may add `worker:lawnboy`. It also lets any writer replace an item's title and
-body, and records nobody who made the edit. What gonk does attribute is a **comment**: a comment
-is appended, never edited, and gonk's HTTP and QUIC doors refuse a comment whose `author` is shaped
-like a principal unless it is the writer's own ([The three doors](../machines/doors.md#what-gonk-knew)).
+A label is a plain value on an item. Anyone who may write to the ledger may add `worker:lawnboy`,
+and may replace an item's title and body. Since `ikigai-ledger` 0.15 an event records who committed
+each such edit, but a worker reading the label sees only the value, and nothing in it says a router
+meant it. What a worker can read as attributed is a **comment**: a comment is appended, never
+edited, and gonk's HTTP and QUIC doors refuse a comment whose `author` is not the writer's own
+unless the owner enrolled the writer to claim it ([The three doors](../machines/doors.md#what-gonk-knew)).
 
 So the route is a comment, the **dispatch**, written by `tools/gonk.py dispatch`:
 
@@ -61,12 +62,12 @@ $ ikigai-gonk client add hub --ledger default=write --port 1070 --config-home "$
 client `hub`  …/.config/ikigai/gonk/quic/clients/hub
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `hub` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `hub` (5 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add lawnboy --worker default --port 1070 --config-home "$PWD/.config/ikigai"
 client `lawnboy`  …/.config/ikigai/gonk/quic/clients/lawnboy
 …
-  enrolled     grant `lawnboy` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `lawnboy` (6 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client list --config-home "$PWD/.config/ikigai" | awk '$1 == "hub" { print "urn:iki:host:gonk:client:" $2 }' > hub.principal
 ```
@@ -113,7 +114,7 @@ that exists:
 $ cd lawnboy/gonk-worker && python3 tools/worker.py init-agents --name lawnboy --agents claude,codex
 wrote    .gonk/worker-claude.toml  labels worker:lawnboy,agent:claude
 wrote    .gonk/worker-codex.toml  labels worker:lawnboy,agent:codex
-next: `python3 tools/worker_repos.py --owner <owner>` adds the repositories to each, then `python3 tools/worker.py --config .gonk/worker-<agent>.toml plan` checks one
+next: review [repos_from] github (the allowed organization) in each configuration, then `python3 tools/worker.py --config .gonk/worker-<agent>.toml plan` checks one
 $ cd lawnboy/gonk-worker && grep -E '^(labels|holder|routers) ' .gonk/worker-claude.toml
 labels = ["worker:lawnboy", "agent:claude"]
 holder = "lawnboy-claude"
@@ -141,10 +142,13 @@ $ cd lawnboy/gonk-worker && for a in claude codex; do sed -i.bak "s|^routers = .
 $ cd lawnboy/gonk-worker && grep '^routers ' .gonk/worker-claude.toml
 routers = ["urn:iki:host:gonk:client:…"]
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
-nothing ready with labels worker:lawnboy,agent:claude
+nothing ready with labels worker:lawnboy,agent:claude or worker:mac,agent:claude or worker:pool,agent:claude
 ```
 
 `plan` asks gonk what each loop would take now and why it skips the rest, and changes nothing.
+Each loop also reads the shared `worker:pool` label, and on a Mac `worker:mac`, after its own, which
+is why the line names three selections. A dispatch with no `worker:` label in `--labels` targets
+the pool.
 
 ## The dispatcher routes
 
@@ -192,13 +196,17 @@ own bundle. Then it routes #2 to lawnboy's Claude loop and #3 to its Codex loop:
 <!-- transcript: run -->
 ```console
 $ python3 lawnboy/gonk-worker/tools/new.py hub/library --process workers | head -n 1
-generated the library-lending sample (python, process workers) in …/hub/library: 67 files
+generated the library-lending sample (python, process workers) in …/hub/library: 72 files
 $ cd hub/library && git init -q && python3 tools/gonk.py init --ledger default --quic quic://127.0.0.1:1070 --cert-dir ../gonk --holder hub | tail -n 1
 ready.
 $ cd hub/library && python3 tools/gonk.py dispatch 2 --labels worker:lawnboy,agent:claude
+warning: could not check that a worker lists repository `library`: no status item found with worker-status:<name> (or --status-item N for legacy workers)
 commented on #2 (urn:iki:ledger:default:comment:…)
+default#2: next (worker:lawnboy,agent:claude): rank 2 of 2
 $ cd hub/library && python3 tools/gonk.py dispatch 3 --labels worker:lawnboy,agent:codex
+warning: could not check that a worker lists repository `library`: no status item found with worker-status:<name> (or --status-item N for legacy workers)
 commented on #3 (urn:iki:ledger:default:comment:…)
+default#3: next (worker:lawnboy,agent:codex): rank 1 of 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:2'
    #2  open    p2  Document initials in the README  [agent:claude repo:library worker:lawnboy]
 …
@@ -249,13 +257,15 @@ without `--as`, the principal the dispatch is from:
 <!-- transcript: run -->
 ```console
 $ python3 lawnboy/gonk-worker/tools/new.py owner --process workers | head -n 1
-generated the library-lending sample (python, process workers) in …/owner: 67 files
+generated the library-lending sample (python, process workers) in …/owner: 72 files
 $ cd owner && git init -q && python3 tools/gonk.py init --ledger default --socket "$PWD/../.ikigai/gonk.sock" --holder ada | tail -n 1
 ready.
 $ cd owner && python3 tools/gonk.py dispatch 1 --labels worker:lawnboy,agent:claude
 gonk.py: over the socket gonk names no author, so a dispatch from here would be from nobody and no worker would take it: pass --as <your principal> (your passkey's or your machine's IRI, as the workers' `routers` list it)
 $ cd owner && python3 tools/gonk.py dispatch 1 --labels worker:lawnboy,agent:claude --as urn:iki:gonk:passkey:QWRh
+warning: could not check that a worker lists repository `library`: no status item found with worker-status:<name> (or --status-item N for legacy workers)
 commented on #1 (urn:iki:ledger:default:comment:…)
+default#1: next (worker:lawnboy,agent:claude): rank 1 of 3
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #2  repo:library  Document initials in the README
 skip  #1  no dispatch by a router (its labels say nothing about who set them; a router dispatches with `gonk.py dispatch`)
@@ -389,5 +399,5 @@ The **sensors**:
 A router is one more identity to keep, and every worker's `routers` must change when it does. A
 dispatcher who edits an item must dispatch it again, or the loop stops taking it. A comment that
 should steer the agent has to come from a router, so a person who reviews from a browser routes
-with their passkey. And the check proves who routed an item, not who added each label, which the
-ledger does not record.
+with their passkey. And the check proves who routed an item, not who added each label, which only
+the ledger's edit events record, and the loop does not read them.
