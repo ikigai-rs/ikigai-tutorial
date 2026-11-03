@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-03"
+summary = "A new chapter, The Dashboard, seeds three ledgers with weeks of invented history and goes through each tab in screenshots: charts and the backfill sentence, agents' numbers as SPARQL you can click, polling and its pause control, then the Cache and System tabs."
+pages = ["ledger/dashboard.md", "ledger/checking.md", "ledger/browser.md", "ledger/lifecycle.md", "introduction.md"]
+
+[[change]]
+date = "2026-11-03"
 summary = "A new chapter, Checking what you have, turns on the RDF Toolbox with gonk.toolbox.dist and checks a ledger's items, one item, and what it says against SHACL shapes, each read under your own capability."
 pages = ["ledger/checking.md", "ledger/browser.md", "ledger/lifecycle.md", "introduction.md"]
 
