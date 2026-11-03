@@ -280,8 +280,8 @@ ikigai> dependents urn:file:feeds/dave.example.org.xml
 dependents of urn:file:feeds/dave.example.org.xml  (cut 0 times)
   3 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
   urn:file:feeds/dave.example.org.xml  text/xml                     1.4 KB  1 thread    root
-  urn:rdf:transrept                    application/n-triples        2.8 KB  6 threads   root
-  urn:xslt:transform                   application/xml              2.3 KB  5 threads   root
+  urn:rdf:transrept                    application/n-triples        2.8 KB  4 threads   root
+  urn:xslt:transform                   application/xml              2.3 KB  3 threads   root
 [uncacheable]
 ikigai> sink urn:kernel:cut urn:file:feeds/alice.example.com.xml
 cut urn:file:feeds/alice.example.com.xml
