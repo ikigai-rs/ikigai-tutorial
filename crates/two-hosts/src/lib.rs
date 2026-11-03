@@ -12,6 +12,7 @@
 //! and the mount module asserts each of the three failure rules that make a degrading
 //! mount honest. Those are the claims a reader has no way to check by reading.
 
+pub mod failure;
 pub mod identity;
 pub mod mounts;
 #[cfg(unix)]

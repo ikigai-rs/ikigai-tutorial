@@ -4156,6 +4156,8 @@ dependencies = [
  "ikigai-quic",
  "ikigai-resolve",
  "ikigai-throttle",
+ "ikigai-vocab",
+ "ikigai-web",
 ]
 
 [[package]]

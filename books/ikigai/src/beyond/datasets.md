@@ -486,6 +486,8 @@ assert_eq!(effective_budget(Some("60000"), five).unwrap(), five);
 A caller cannot raise its own budget: attenuating a capability only removes grants, and removing
 a budget grant only lowers the budget towards the base. At the budget the caller is answered with
 a typed `Timeout`, never a partial answer, and an update that runs out of time writes nothing.
+[Failure has a class](failure.md), later in this part, gives another budget the same shape: the
+retries a run may spend, granted as `urn:cap:retry:<n>`.
 
 What a deadline cannot do is stop every evaluation. Some loops inside the SPARQL engine, an
 aggregate over rows already in memory among them, do not check for cancellation, so the caller is

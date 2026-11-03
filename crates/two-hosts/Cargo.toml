@@ -44,7 +44,7 @@ ikigai-resolve = "0.2.1"
 # teaches what it changed: `Failover` decides by core 0.1.108's `Error::class()`, advancing on a
 # transient OR a retry-after failure of an idempotent verb (`Verb::is_idempotent`), and returns
 # every other class unchanged; `src/mounts.rs` tests both. With a run's retry budget configured,
-# each advance spends from it; no host here configures one. The old pin "0.1.11" was a ceiling
+# each advance spends from it; "Failure has a class" configures one (`src/failure.rs`). The old pin "0.1.11" was a ceiling
 # below 0.2. 0.2.1 is the pin (set 2026-10-24), kept in step with the ecosystem's release: it adds
 # the observable state face (`urn:throttle:state`, ledger #198), the `thr:` vocabulary (ledger
 # #2175) and a `Timeout` that takes an injected timer and so runs in the page (ledger #2189), which
@@ -62,3 +62,9 @@ futures.workspace = true
 [dev-dependencies]
 # A local space to fail over TO, and the name Part I already taught.
 hello-camel = { path = "../hello-camel" }
+# `error_status`, the HTTP edge's table: "Failure has a class" prints it, and its test holds
+# that table to this crate rather than to a copy. The door itself stays out of this crate's
+# code. The same pin as `ttt-host`, so the workspace links one copy.
+ikigai-web = "0.2.9"
+# `TurtleRenderer`, to read a declared failure back out of the contract a `Meta` answers.
+ikigai-vocab.workspace = true

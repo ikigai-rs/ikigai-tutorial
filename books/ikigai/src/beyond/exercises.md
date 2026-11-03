@@ -65,7 +65,8 @@ make the peer *refuse* rather than fail.
   over `dead(Error::Denied)` fails with `Error::Denied` — local never answers for a
   refusal.
 - **Read again** — [Preferential resolution](preference.md), the three intentions and the
-  rules for the third.
+  rules for the third, and [Failure has a class](failure.md) for why `Denied` stops where
+  `Unavailable` does not.
 
 <details>
 <summary>Hint</summary>
