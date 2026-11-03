@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-03**: The book's own crates, which run its cells and listings, now take ikigai-ledger 0.18.0, one release ahead of the pinned gonk. The Which gonk section of the introduction says what that means for the pages you run.
+
+  Pages: [Introduction](introduction.md)
+
 - **2026-11-02**: Every page is replayed at a newer gonk, ikigai-cli and starter, and The three doors gains Who wrote it: committers, verified and claimed authors, and enrollment. A plain-text author over QUIC is now refused, a kata import keeps owners, and Remote workers shows the packaged claim's renewals, exit codes and disk floor.
 
   Pages: [The three doors, and who is asking](machines/doors.md), [Over the socket](agent/socket.md), [Over MCP](agent/mcp.md), [Importing a kata ledger](bridges/kata.md), [A fresh machine, end to end](bridges/fresh-machine.md), [Checking out repositories](bridges/checkout.md), [Remote workers](ways/workers.md), [Routing work to agents](ways/routing.md), [Harness engineering](ways/harness.md), [Introduction](introduction.md)

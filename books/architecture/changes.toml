@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-03"
+summary = "\"The manifold, and the UI that falls out of it\" now lists what a newer ledger offers: an item's history and daily counts, which a reader's narrowed list keeps, and two write actions, which it drops."
+pages = ["spine/manifold.md"]
+
+[[change]]
 date = "2026-11-02"
 summary = "\"Spaces that wrap spaces\" now shows the governors' board still cached at stage 4 by asking the cache, not with a trace."
 pages = ["overlays/overlays.md"]

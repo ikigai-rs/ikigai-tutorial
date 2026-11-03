@@ -257,10 +257,14 @@ the book needs it first.
 
 **A sixth version gap is OPEN** (ledger #2830, 2026-11-02): at 564146c gonk links `ikigai-core` 0.2.11,
 `ikigai-ledger` 0.17.0, `ikigai-store` 0.3.1, `ikigai-browse` 0.20.3, `ikigai-script` 0.4.0, `ikigai-nl` 0.5.0
-and the door crates at 0.2.3, while the workspace's crates lock core 0.2.12, ledger 0.13.1 and browse 0.20.6.
-The ledger's gap is the one a reader meets: a cell or a listing shows no committer, no verified or claimed
-author and no events, and the introduction says so. It closes when the workspace takes ledger 0.17 or later,
-which every book's crates share, so it is a change of its own.
+and the door crates at 0.2.3, while the workspace's crates lock core 0.2.12, ledger 0.18.0, store 0.3.3 and
+browse 0.20.6. From ledger #2830 until #2956 (2026-11-03) they locked ledger 0.13.1, behind gonk: a cell or a
+listing showed no committer, no verified or claimed author and no events. Ledger #2956 moved them first, in a
+change of its own because every book's crates share them, so they are now one ledger release AHEAD of the pin,
+and the introduction says so. Replayed against every cell and listing, no gonk Book page moved; The ikigai
+Architecture's manifold printed the new action names and was re-recorded. The ledger's gap closes when
+`gonk.rev` moves to `ledger-v0.18.0` (d02ac2b), which links ledger 0.18.0, store 0.3.3 and browse 0.20.7; the
+workspace's browse stays at 0.20.6 until then.
 
 **The earlier gap was CLOSED** (ledger #2078, 2026-10-22): at 930ed24 gonk links the releases the
 book's crates take, `ikigai-core` 0.1.110 among them. From ledger #2060 (2026-10-21) it was closed

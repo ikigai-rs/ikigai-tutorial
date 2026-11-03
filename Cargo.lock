@@ -1680,9 +1680,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-ledger"
-version = "0.13.1"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc4bcddc5800fa7420b9a2b8888625179a506274f953c698dc5b19e01396dddf"
+checksum = "76db178205fabc78574164fb37300a2e979e76661da78af4c24aacc9e72e02cd"
 dependencies = [
  "async-trait",
  "getrandom 0.3.4",
@@ -1924,9 +1924,9 @@ dependencies = [
 
 [[package]]
 name = "ikigai-store"
-version = "0.3.1"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25b067897073b951ff968bc92b4df81bc836e460256411650c5db09162e0b2bb"
+checksum = "2636c6593f2391f06194470db19157d77647ed31160903f0f7bb945bdf4bccd4"
 dependencies = [
  "async-trait",
  "futures",
