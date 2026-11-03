@@ -132,7 +132,9 @@ Its examples come in three kinds, and the third is new here: cells that run in t
 (`crates/ledger-host`), and **shell transcripts** of the gonk binary, which
 `./scripts/test-transcripts.sh` replays against a scratch gonk built from the revision the
 book pins (`books/gonk/gonk.rev`; gonk is not on crates.io yet), in a scratch home, comparing
-what each command prints with what the page says (`crates/book-transcripts`).
+what each command prints with what the page says (`crates/book-transcripts`). *Checking what you have* runs that gonk
+over the real RDF Toolbox, so the script also builds the toolbox at its pin
+(`scripts/build-toolbox.sh`, `books/ikigai/toolbox.rev`), which needs rustup and node.
 
 ```bash
 mdbook serve books/gonk --open                     # the prose; Run is disabled (no kernel)

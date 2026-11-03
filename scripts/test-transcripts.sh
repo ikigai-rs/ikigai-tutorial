@@ -37,6 +37,14 @@
 #         serves, because no released `ikigai` opens a log. Built here and copied alone into
 #         `target/log-host/bin/`, as model-stub is.
 #
+#   the toolbox is ikigai-toolbox's real build, at the commit `books/ikigai/toolbox.rev` pins, made by
+#         `scripts/build-toolbox.sh` into `target/toolbox-dist/<rev>/` and named to the pages by
+#         `TOOLBOX_DIST`, which "Checking what you have" tells a reader to set after building it.
+#         The build runs every time, as it does for the published book, so one that breaks fails
+#         here. It runs in this script, not the page, because a page's HOME is the trap above,
+#         which rustup would fill. The build needs rustup and node. gonk's lock takes the crate at
+#         0.2.1, and v0.2.1 and v0.3.0 hold the same build inputs (`build.sh`, `patches/`, `web/`).
+#
 #   rage  is pinned to ONE crates.io version in `books/operations/rage.version`: the age-format
 #         encryption that same chapter's offsite backup shows. Installed `--locked` into
 #         `target/rage/<version>/`.
@@ -167,6 +175,10 @@ if [ ! -x "$rage_root/bin/rage" ]; then
         --root "$rage_root" --target-dir "$rage_root/build"
 fi
 
+toolbox_rev="$(tr -d '[:space:]' < books/ikigai/toolbox.rev)"
+toolbox_dist="$PWD/target/toolbox-dist/$toolbox_rev"
+./scripts/build-toolbox.sh "$toolbox_dist"
+
 starter_rev="$(tr -d '[:space:]' < books/gonk/starter.rev)"
 case "$starter_rev" in
     *[!0-9a-f]*|'') echo "books/gonk/starter.rev is not a git revision: '$starter_rev'" >&2; exit 2 ;;
@@ -195,7 +207,7 @@ git -C "$starter" checkout --quiet -B main "$starter_rev"
 status=0
 
 echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli, starter $starter_rev) ──────────────────"
-GIT_CONFIG_COUNT=1 \
+TOOLBOX_DIST="$toolbox_dist" GIT_CONFIG_COUNT=1 \
     GIT_CONFIG_KEY_0="url.$PWD/$starter.insteadOf" GIT_CONFIG_VALUE_0="$starter_url" \
     cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
     --path "$stub_root" \

@@ -18,7 +18,8 @@ transports. gonk is the host that composes them, which is why this book can show
 Each part is one way gonk is used **standalone**, and each builds on the one before it.
 
 - **A ledger of your own.** File, comment, link, claim, close and ask `next` — in this page,
-  in a kernel of your own, and against a gonk you start. Then the same ledger in a browser, and a
+  in a kernel of your own, and against a gonk you start. Then the same ledger in a browser, a check of what
+  it says with the RDF Toolbox, and a
   lifecycle of your own: the states an item moves through and the moves it may make.
 - **An agent's ledger.** The ledger reached from another process over the socket, the way an
   agent's tool calls reach it; and over MCP, where `ikigai mcp` projects the ledger's actions as

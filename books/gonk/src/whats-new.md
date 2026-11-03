@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-03**: A new chapter, Checking what you have, turns on the RDF Toolbox with gonk.toolbox.dist and checks a ledger's items, one item, and what it says against SHACL shapes, each read under your own capability.
+
+  Pages: [Checking what you have](ledger/checking.md), [The ledger in a browser](ledger/browser.md), [A lifecycle for your ledger](ledger/lifecycle.md), [Introduction](introduction.md)
+
 - **2026-11-03**: A new chapter, A lifecycle for your ledger, teaches a lifecycle's required version, declared moves and their refusals, next drain= and state=, evidence on a close and an item's history. Every page is replayed at a newer gonk; Browse roots adds the keyboard quote field, and Review every commit the Queue badge's new name.
 
   Pages: [A lifecycle for your ledger](ledger/lifecycle.md), [A ledger of your own](ledger/your-own.md), [The ledger in a browser](ledger/browser.md), [Over MCP](agent/mcp.md), [Browse roots: a repository as resources](browse/roots.md), [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Review every commit](ways/review-every-commit.md), [Introduction](introduction.md)
