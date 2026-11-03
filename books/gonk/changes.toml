@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-03"
-summary = "The book's own crates, which run its cells and listings, now take ikigai-ledger 0.18.0, one release ahead of the pinned gonk. The introduction's "Which gonk" section says what that means for the pages you run."
+summary = "The book's own crates, which run its cells and listings, now take ikigai-ledger 0.18.0, one release ahead of the pinned gonk. The Which gonk section of the introduction says what that means for the pages you run."
 pages = ["introduction.md"]
 
 [[change]]

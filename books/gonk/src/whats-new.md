@@ -7,7 +7,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-03**: The book's own crates, which run its cells and listings, now take ikigai-ledger 0.18.0, one release ahead of the pinned gonk. Which gonk says what that means for the pages you run.
+- **2026-11-03**: The book's own crates, which run its cells and listings, now take ikigai-ledger 0.18.0, one release ahead of the pinned gonk. The Which gonk section of the introduction says what that means for the pages you run.
 
   Pages: [Introduction](introduction.md)
 
