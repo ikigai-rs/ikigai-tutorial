@@ -211,6 +211,8 @@ ikigai> source urn:kernel:cache
 cache
   entries  4 / 4096 (2 stale)
   size     343 B / 64.0 MB
+  policy   lru (4096 entries, 67108864 bytes)
+  evictions  0
   urn:file:notes.txt  cut      text/plain                     17 B  1 thread    root
   urn:iki:fn:toUpper  live     application/json              318 B  1 thread    root
   urn:iki:fn:toUpper  cut      text/plain                      3 B  1 thread    root
@@ -220,6 +222,7 @@ cache
 
 The first two lines show the cache's limits: 4096 entries and 64 MiB by default. The
 default policy removes the least recently used entry when either limit is exceeded.
+`policy` names that policy and its limits; `evictions` counts entries removed by the policy.
 [Golden threads in
 practice](../getting-started/golden-threads.md) shows how a host configures the cache,
 and what the size counts now that an answer can be a stream (core 0.2.0: a one-shot body

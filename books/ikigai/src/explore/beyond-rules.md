@@ -368,7 +368,7 @@ $ ikigai --quiet --files . --mount urn:quakes-py:=/tmp/quakes-near.sock -c 'sour
 …
 [1 cached · 1 uncacheable]
 uncached (why a computed read was not cached; the last 64, most recent first)
-  urn:quakes-py:near:35.68:139.69      ×2  declared  [root]
+  urn:quakes-py:near:35.68:139.69      ×2  mounted  [root]
 
 [uncacheable]
 — batch: 3 commands · 1 cached · 1 computed · 3 uncacheable
@@ -376,7 +376,8 @@ uncached (why a computed read was not cached; the last 64, most recent first)
 
 The week came from the CLI's cache the second time; the peer was asked again. `ikigai-cli`
 {{#include ../../ikigai-cli.version}} keeps no copy of what a mounted peer answers, whatever the
-peer declares (`declared` is the mount's own declaration). A peer can change its answer without
+peer declares (`mounted` identifies a peer's answer held here uncached; `declared` means an
+answer declared uncacheable). A peer can change its answer without
 the kernel hearing of it, because no thread crosses the socket, so a copy could be served stale
 for as long as the CLI runs. The Lisp program's answer hung from every file it read; the peer's
 answer hangs from nothing the kernel can cut.

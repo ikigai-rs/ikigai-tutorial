@@ -104,7 +104,7 @@ RESOURCE!
 [1 computed · 2 uncacheable]
 uncached (why a computed read was not cached; the last 64, most recent first)
   urn:iki:fn:reverseList      ×1  upstream  [root]
-  urn:ts:shout                ×1  declared  [root]
+  urn:ts:shout                ×1  mounted  [root]
 
 [uncacheable]
 — batch: 2 commands · 1 computed · 3 uncacheable
@@ -120,16 +120,17 @@ that order. The host owns the topology; the peers own their
 answers.
 
 Now read the verdicts. Both endpoints declare `cacheable: true`, and the peer marks its
-answers that way on the wire. `ikigai-cli` 0.2.6, the version this page is replayed against,
+answers that way on the wire. `ikigai-cli` 0.2.9, the version this page is replayed against,
 caches neither: every read through `--mount` is `[uncacheable]`, and `urn:kernel:uncached`
-gives `declared` as the reason. Only `split`, a Rust endpoint in the host, was computed and
+gives `mounted` as the reason. Only `split`, a Rust endpoint in the host, was computed and
 kept. `reverseList` is uncacheable too, for a different reason, `upstream`: it read an answer
 that could not be cached. That is the mount's rule, on purpose: a kernel that mounts a peer stores no copy of
 what the peer answers, because a change on the peer's side (a file it watches, a write
 that reaches it by another route) never crosses back to the mounting kernel, so a stored
-copy could be served stale for as long as the host runs. The `declared` reason is the
-mount's own declaration, not the peer's. So `cacheable: true` on a served peer describes its
-answers; through `--mount`, the host does not keep them.
+copy could be served stale for as long as the host runs. The `mounted` reason identifies
+an answer held here uncached because the peer's cuts do not reach this kernel; `declared`
+is reserved for an answer declared uncacheable. So `cacheable: true` on a served peer describes
+its answers; through `--mount`, the host does not keep them.
 
 <a id="what-resolution-buys-you"></a>
 
@@ -222,7 +223,7 @@ error: not found: no note called milk
 ```
 
 Read the verdicts. The note's Source declares itself cacheable, and, as in
-[Binding](#binding), `ikigai-cli` 0.2.6 caches nothing a mounted peer answers, so every read
+[Binding](#binding), `ikigai-cli` 0.2.9 caches nothing a mounted peer answers, so every read
 here reached the peer. The peer keeps no cache of its own either, and that is why the read
 after the second write saw the new text. The writes and the delete are uncacheable whatever
 the host does, because a Sink or Delete answer always is, and the index is uncacheable on
