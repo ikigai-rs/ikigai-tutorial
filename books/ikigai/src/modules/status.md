@@ -10,8 +10,8 @@ them is a claim, not a fact. This book builds against `ikigai-core` **0.2.12**, 
 `ikigai-module` **0.5.1**, stamped on 2026-10-27 (its newest release on crates.io at its stamp;
 the module claims below were written at 0.4.0, carry that stamp, and each still holds at
 0.5.1), and its shell examples are replayed against
-`ikigai-cli` **0.2.6**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
-newest on 2026-10-29). A
+`ikigai-cli` **0.2.9**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
+release used for the 2026-11-02 replay). A
 test (`crates/book-urns/tests/book_claims.rs`)
 holds those three numbers to the workspace's lock and that pin, and re-checks each stamped
 claim below against the published crate it names, so that when one of them stops being

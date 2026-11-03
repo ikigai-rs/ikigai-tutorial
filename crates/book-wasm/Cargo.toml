@@ -115,9 +115,9 @@ ikigai-vocab.workspace = true
 # built from doors the host supplies (`Engine::with_as_of_doors`), and hands the resolver that
 # line's chain (`Resolver::issue_as_async_in`). 0.1.63 is the pin (set 2026-10-14); the workspace
 # locks every cli crate at one version, so this one follows. The ikigai Book's REPL transcripts
-# replay `ikigai` 0.2.6 (`books/ikigai/ikigai-cli.version`, moved from 0.1.64 to 0.2.5 on
-# 2026-10-29, ledger #2554, then to 0.2.6 the same day, ledger #2610), which locks core 0.2.8
-# and engine 0.2.6 while the cells link core 0.2.12 (ledger #2853) and engine 0.2.1, so the replay
+# replay `ikigai` 0.2.9 (`books/ikigai/ikigai-cli.version`, moved from 0.2.6 on
+# 2026-11-02 for the mounted uncached reason, ledger #2660), which locks core 0.2.11
+# and engine 0.2.12 while the cells link core 0.2.12 (ledger #2853) and engine 0.2.1, so the replay
 # cli is ahead of the cells on the engine and behind them on core. 0.1.63 changed the engine in one place: a typed `MissingArgument` or `InvalidArgument`
 # keeps its first line and gains the argument's contract beneath it, read from the target's JSON
 # `Meta`, with "pipe a value in or pass name=…" when a pipe or positional value would fill it
