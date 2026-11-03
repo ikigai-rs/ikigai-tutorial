@@ -31,7 +31,7 @@ it does is a few lines of library calls you would make in your own host, and the
 <!-- transcript: manual — it compiles the host from the repository, minutes of build and a
      network fetch; the check builds this same crate itself before it runs the page. -->
 ```console
-$ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial --rev da5ad3d1036186f86721ee5d93e71d6ef8355d19 log-host
+$ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial --rev 6a3b2ccaf6f645cb33de9b802cde742d87a5e2e9 log-host
 ```
 
 ## What a log is here
