@@ -62,6 +62,18 @@
 - [Periodic unled audits](ways/audits.md)
 - [Harness engineering](ways/harness.md)
 
+# A project of your own
+
+- [Start a project](project/start.md)
+- [A spec change, and the items it becomes](project/change.md)
+- [Claiming: lease, expiry, takeover](project/claim.md)
+- [Work, evidence, review, close](project/work.md)
+- [Two agents in one repository](project/two-agents.md)
+- [Ask the project in SPARQL](project/query.md)
+- [A workflow of your own](project/script.md)
+- [A model of your own](project/model.md)
+- [A query from a sentence](project/sentence.md)
+
 # Embedding
 
 - [The ledger, the store and browse in your own kernel](embedding/own-kernel.md)

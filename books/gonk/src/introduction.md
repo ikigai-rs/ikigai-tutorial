@@ -49,6 +49,10 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
   is about the controls around any of them: the rules and checks as a graph, a log of every time
   a check fires, and the questions that say which rules nothing checks and which checks have
   never fired.
+- **A project of your own.** All of it over one generated project, the starter's library-lending
+  sample: start it against a local or remote gonk, change its spec, turn that into items, claim, work,
+  close with evidence, run two agents side by side, ask it questions in SPARQL, publish a workflow,
+  set up a model, and draft a query from a sentence.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
 ## Three kinds of example, and how each is checked
