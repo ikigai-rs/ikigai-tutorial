@@ -7,6 +7,7 @@
 
 - [A ledger of your own](ledger/your-own.md)
 - [The ledger in a browser](ledger/browser.md)
+- [Checking what you have](ledger/checking.md)
 - [A lifecycle for your ledger](ledger/lifecycle.md)
 
 # An agent's ledger

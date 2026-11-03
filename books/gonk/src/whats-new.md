@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-03**: A new chapter, Checking what you have, turns on the RDF Toolbox with gonk.toolbox.dist and checks a ledger's items, one item, and what it says against SHACL shapes, each read under your own capability.
+
+  Pages: [Checking what you have](ledger/checking.md), [The ledger in a browser](ledger/browser.md), [A lifecycle for your ledger](ledger/lifecycle.md), [Introduction](introduction.md)
+
 - **2026-11-03**: A new part, A project of your own, walks through one generated project: start it, change its spec, seed items, claim, work and close with evidence, run two agents, query and script it, set up a model, and draft a query from a sentence.
 
   Pages: [Start a project](project/start.md), [A spec change, and the items it becomes](project/change.md), [Claiming: lease, expiry, takeover](project/claim.md), [Work, evidence, review, close](project/work.md), [Two agents in one repository](project/two-agents.md), [Ask the project in SPARQL](project/query.md), [A workflow of your own](project/script.md), [A model of your own](project/model.md), [A query from a sentence](project/sentence.md), [Introduction](introduction.md)
