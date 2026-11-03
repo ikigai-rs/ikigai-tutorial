@@ -2177,7 +2177,7 @@ mod tests {
     /// one answer is written four ways.
     #[test]
     fn the_explore_rss_cells_answer_as_the_chapter_says_in_page_order() {
-        let t = run_chapter_in_page_order("explore/rss.md", 11);
+        let t = run_chapter_in_page_order("explore/rss.md", 14);
         // The directory is a list of names, in the fixture's own copies.
         assert!(
             t[0].contains("\nurn:file:feeds/carol.example.com.xml\n"),
@@ -2191,16 +2191,69 @@ mod tests {
             t[1]
         );
         // A spliced quote breaks the query; the bound term matches Carol's one link.
-        assert!(t[5].starts_with("error: "), "{}", t[5]);
-        assert!(t[6].contains("rss-cloud"), "{}", t[6]);
-        // The digest face is section 5's first question again: all three answers cached.
-        assert!(t[8].ends_with("[3 cached]\n"), "{}", t[8]);
+        assert!(t[8].starts_with("error: "), "{}", t[8]);
+        assert!(t[9].contains("rss-cloud"), "{}", t[9]);
         // The page face writes a feed's text as text: Bob's apostrophe is escaped.
         assert!(
-            t[7].contains("(Bob&apos;s Workbench, 2026-10-27)"),
+            t[10].contains("(Bob&apos;s Workbench, 2026-10-27)"),
             "{}",
-            t[7]
+            t[10]
         );
+        // The digest face is section 5's first question again: only its stylesheet runs.
+        assert!(t[11].ends_with("[2 cached · 1 computed]\n"), "{}", t[11]);
+    }
+
+    /// The river's page, as `views/page.xsl` writes it (ledger #2866, #2703): it reflows on a
+    /// narrow screen (SC 1.4.10), and an item with no title has a link text of its own, its feed
+    /// and date, never a repeated "(untitled)" (SC 2.4.4).
+    #[test]
+    fn the_river_page_reflows_and_tells_its_untitled_links_apart() {
+        let page = Page::with_clock(None);
+        let engine = page.engine(None).expect("the page's engine");
+        let html = render(&action_to_json(engine.eval(
+            "source urn:file:queries/river.rq | urn:sparql:select graph=urn:file:river.nt \
+             as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl",
+        )));
+        assert!(
+            html.contains("<meta content='width=device-width, initial-scale=1' name='viewport'/>"),
+            "{html}"
+        );
+        assert!(!html.contains(">(untitled)</a>"), "{html}");
+        for text in [
+            ">Untitled item from carol.example.com, 2026-10-24</a>",
+            ">Untitled item from carol.example.com, 2026-10-12</a>",
+        ] {
+            assert!(html.contains(text), "{text} is not in {html}");
+        }
+    }
+
+    /// A cell of "A river of feeds" renders exactly when its answer is an HTML page (ledger
+    /// #2866): the page and the item lists render; CSV, N-Triples, Markdown, RSS and OPML stay
+    /// text, and so does the refused query.
+    #[test]
+    fn the_river_chapter_renders_exactly_the_cells_that_answer_html() {
+        let chapter = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../books/ikigai/src/explore/rss.md"
+        ))
+        .expect("the chapter");
+        let open = "<div class=\"ikigai-run\"";
+        let mut rendered = 0;
+        for cell in chapter.split(open).skip(1) {
+            let tag = &cell[..cell.find('\n').expect("a line")];
+            let expected = cell
+                .split("<pre class=\"ikigai-run-expected\">")
+                .nth(1)
+                .expect("an expected output");
+            let html = expected.starts_with("&lt;html");
+            assert_eq!(
+                tag.contains("data-render='html'"),
+                html,
+                "a cell renders exactly when it answers HTML: {tag}"
+            );
+            rendered += usize::from(html);
+        }
+        assert_eq!(rendered, 6, "the river page and the five item lists");
     }
 
     #[test]
