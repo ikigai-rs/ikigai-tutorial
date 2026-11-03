@@ -1,0 +1,27 @@
+[package]
+name = "log-host"
+version = "0.1.0"
+description = "The host taught by Running ikigai's \"Logging\" chapter: no released ikigai binary opens a log, so this is the smallest kernel that does. ikigai-log, SPARQL and the function library composed, served on a Unix socket, with a second door that names a principal per request through a per-call tracer."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "log_host"
+path = "src/lib.rs"
+
+[[bin]]
+name = "log-host"
+path = "src/main.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+ikigai-log.workspace = true
+ikigai-sparql.workspace = true
+ikigai-fn.workspace = true
+ikigai-vocab.workspace = true
+# The socket `ikigai --connect` dials. The same release `crates/model-stub` takes.
+ikigai-ipc = "0.2.1"
+futures.workspace = true

@@ -22,7 +22,7 @@
 # Running it for real
 
 - [Running unattended]()
-- [Logging and observability]()
+- [Logging](running/logging.md)
 - [Budgets and governors]()
 - [Running other people's code]()
 - [Upgrades]()

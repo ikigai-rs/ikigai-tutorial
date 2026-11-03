@@ -288,6 +288,7 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-23 | The library page (`books/library`) is in scope, under the same gates as the books; the inspector's two planet tables (JSON and CSV) join its snapshots, axe run and browser checks | PR #160 |
 | 2026-10-26 | The stages viewer shows Before \| After below the tabs; Left and Right on its tabs no longer open another chapter; `cells.mjs` checks After is the kernel's picture | this change |
 | 2026-10-27 | Running ikigai (`books/operations`), a fifth book, is in scope under the same gates as the others; its Run cells are The ikigai Book's `js/run.js` over The ikigai Book's kernel | this change |
+| 2026-11-02 | Running ikigai's "Logging": a value holding a control or bidirectional character is shown as its `\u{hex}` text, and the commands that make one write it as `printf` octal, so no raw one is on the page; the chapter's transcripts are terminal output (not evaluated) in the book's pages (evaluated), and long lines scroll inside their box | this change |
 
 ## References
 
