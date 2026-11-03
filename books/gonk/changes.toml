@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-02"
-summary = "Every page is replayed at a newer gonk, ikigai-cli and starter. The Three doors gains Who wrote it: committers, verified and claimed authors, and enrollment. A plain-text author over QUIC is now refused, a kata import keeps owners, and Remote workers shows the packaged claim's renewals, exit codes and disk floor."
+summary = "Every page is replayed at a newer gonk, ikigai-cli and starter, and The three doors gains Who wrote it: committers, verified and claimed authors, and enrollment. A plain-text author over QUIC is now refused, a kata import keeps owners, and Remote workers shows the packaged claim's renewals, exit codes and disk floor."
 pages = ["machines/doors.md", "agent/socket.md", "agent/mcp.md", "bridges/kata.md", "bridges/fresh-machine.md", "bridges/checkout.md", "ways/workers.md", "ways/routing.md", "ways/harness.md", "introduction.md"]
 
 [[change]]
