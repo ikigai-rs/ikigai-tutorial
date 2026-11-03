@@ -226,7 +226,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   Read-only. A bug counts only with a reproduction that fails at this commit because of it.
   Report what was not read, and whether the budget or the work ran out.
 1 comment(s):
-  … coordinator
+  … coordinator (claimed, free text)
     A: 23 of 40 tool calls; the work ran out. Read both files. Suspicion, not reproduced as a defect: a name given as two arguments keeps only the first (the usage says one argument).
     B: 31 of 40 tool calls; the work ran out. Read both files.
     Not read by either: nothing in scope. Out of scope: how the tools are installed.
@@ -287,7 +287,7 @@ $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
 $ cd starter && python3 tools/new.py ../library --process audits
-generated the library-lending sample (python, process audits) in …/library: 62 files
+generated the library-lending sample (python, process audits) in …/library: 66 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -306,6 +306,8 @@ $ grep '^## ' library/AGENTS.md
 ## 6. Never a bare `#N`
 ## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
+## Building in the ikigai style (optional)
+## Writing text people skim (optional)
 ## Periodic audits
 ## Optional: a hook for Claude Code
 $ ls library/tools library/.gonk/templates
@@ -342,7 +344,7 @@ gonk init: …/library
   note     audits    periodic unled audits instead of per-commit review: one repository, a file list, a budget, a reproduction per bug, one item per finding
   note     role      auditor: claims an audit item, reads only what it lists, files one item per reproduced bug
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.67 at …/ikigai
+  ok       ikigai    ikigai 0.2.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `coordinator` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
@@ -353,8 +355,8 @@ gonk init: …/library
   absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
 agents over MCP (configure the agent with this command):
-  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
 
+  ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
 $ cd library && python3 tools/audit.py artifacts/service/lending/domain.py artifacts/cli/library.py --dry-run
 Audit library: 2 file(s), 60 tool calls

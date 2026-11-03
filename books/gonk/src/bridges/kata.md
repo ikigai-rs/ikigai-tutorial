@@ -61,7 +61,7 @@ $ ikigai-gonk client add kata --ledger kata=write --port 1070 --config-home "$PW
 client `kata`  …/.config/ikigai/gonk/quic/clients/kata
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `kata` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `kata` (5 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -111,6 +111,8 @@ would file  kata 0001  Stop the loop on an empty queue
     priority=1
     labels=bug,area:loop
     then 2 comment(s)
+would marked    kata 0001 kata:owner:chris
+would deferred  kata 0001: unmatched owner
 would file  kata 0002  Rename the flight binary
     key=urn:kata:issue:01K6Z000000000000000000002
     about=urn:kata:issue:01K6Z000000000000000000002
@@ -138,6 +140,8 @@ and without it, the import:
 $ ikigai-gonk kata import kata.jsonl --quic 127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/kata --ledger kata
 kata export version 27: 4 issue(s), 4 link(s)
 filed     kata#1   kata 0001  Stop the loop on an empty queue
+marked    kata 0001 kata:owner:chris
+deferred  kata 0001: unmatched owner
 commented kata#1   kata comment 01K6Z0000000000000000000C1
 commented kata#1   kata comment 01K6Z0000000000000000000C2
 filed     kata#2   kata 0002  Rename the flight binary
@@ -157,7 +161,9 @@ issue is not imported, and neither is anything that hangs from it: its comment, 
 to it, which is reported as skipped. The last line counts everything the importer did not read,
 by kind, so nothing in the export is silently dropped.
 
-The links came across as links, which means `next` already knows the order of the work:
+The links came across as links, and the owner as a marker: kata 0001 names `chris` as its owner,
+this client is not `chris`, so the import labels the item `kata:owner:chris` and defers it rather
+than claim it for someone else. `next` says why it leaves that item out:
 
 <!-- transcript: run -->
 ```console
@@ -167,7 +173,7 @@ $ curl -s http://127.0.0.1:1070/iki/ledger/kata/next
 
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
-  not kata#1: blocked by kata#3
+  not kata#1: deferred
 ```
 
 ## Again, and later
@@ -242,6 +248,7 @@ owner's write, with kata's authors as the ledger's `author`:
 $ ikigai-gonk kata import kata.jsonl --socket "$PWD/.ikigai/gonk.sock"
 kata export version 27: 4 issue(s), 4 link(s)
 filed     #1       kata 0001  Stop the loop on an empty queue
+claimed   kata 0001 by chris
 commented #1       kata comment 01K6Z0000000000000000000C1
 commented #1       kata comment 01K6Z0000000000000000000C2
 filed     #2       kata 0002  Rename the flight binary
@@ -291,7 +298,7 @@ Carried as text only, or not at all:
 | --- | --- |
 | `created_at`, `short_id`, `uid`, and the author over QUIC | the provenance line; the `uid` is also the item's key and an `about` |
 | a comment's time, and its author over QUIC | its closing note `(kata comment <uid>, <created_at> by <author>)` |
-| `owner` | the provenance line, not a claim |
+| `owner` | over the socket, a free-text claim; over QUIC, a claim only when the owner names the importing client, otherwise a `kata:owner:<owner>` label and a deferral. Also in the provenance line |
 | `updated_at`, `metadata`, who added a label or link and when | not carried |
 | the event history | not carried; counted on the last line (`event 1`) |
 | sync bindings, federation state, claims, purge logs | not carried; counted on the last line |

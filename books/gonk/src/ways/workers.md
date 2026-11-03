@@ -51,12 +51,12 @@ $ ikigai-gonk client add worker-1 --worker default --port 1070 --config-home "$P
 client `worker-1`  …/.config/ikigai/gonk/quic/clients/worker-1
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `worker-1` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `worker-1` (6 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add worker-2 --worker default --port 1070 --config-home "$PWD/.config/ikigai"
 client `worker-2`  …/.config/ikigai/gonk/quic/clients/worker-2
 …
-  enrolled     grant `worker-2` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `worker-2` (6 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ jq -r '.["worker-1"][]' .config/ikigai/gonk/grants.json
 urn:cap:ledger:read:default
@@ -64,6 +64,7 @@ urn:cap:store:read:graph:urn:iki:ledger:graph:default
 urn:cap:ledger:claim:default
 urn:cap:ledger:comment:default
 urn:cap:store:write:graph:urn:iki:ledger:graph:default
+urn:cap:store:read:graph:urn:collab:participants
 ```
 
 Read, claim and comment on one ledger; the store write token is the one the ledger makes its own
@@ -262,7 +263,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 2 comment(s):
   … urn:iki:host:gonk:client:…
     https://github.com/you/demo/pull/9 README example, CI green
-  … ada
+  … ada (claimed, free text)
     PR 9 is red on main: the README example does not compile.
 [uncacheable]
 ```
@@ -322,10 +323,11 @@ of the workers is [Hub and spoke](hub-and-spoke.md), three chapters on.
 The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `workers` profile is this
 chapter packaged: `tools/new.py --process workers` adds a "Worker machines" section to the
 repository's `AGENTS.md`, carries `tools/worker.py` (the claim, work, report loop above, run
-unattended) with its two helpers, `tools/worker_repos.py` (which enrolls an owner's repositories
-in the worker's configuration and checks the worker's token may push to them) and
+unattended) with its three helpers, `tools/worker_repos.py` (which enrolls an owner's repositories
+in the worker's configuration and checks the worker's token may push to them),
 `tools/worker_usage.py` (which reads an agent's usage against its plan's weekly limit between
-items), its configuration's template and its service units, and the `just worker` recipes that
+items) and `tools/worker_onboard.py` (which enrolls a new machine with a pairing code), its
+configuration's template and its service units, and the `just worker` recipes that
 run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 ([Solo](solo.md#with-the-starter) says more):
 
@@ -334,7 +336,7 @@ run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process workers
-generated the library-lending sample (python, process workers) in …/library: 67 files
+generated the library-lending sample (python, process workers) in …/library: 72 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -353,6 +355,8 @@ $ grep '^## ' library/AGENTS.md
 ## 6. Never a bare `#N`
 ## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
+## Building in the ikigai style (optional)
+## Writing text people skim (optional)
 ## Worker machines
 ## Optional: a hook for Claude Code
 $ ls library/tools library/worker
@@ -360,6 +364,7 @@ library/tools:
 gonk.py
 harness.py
 worker.py
+worker_onboard.py
 worker_repos.py
 worker_usage.py
 
@@ -397,7 +402,7 @@ gonk init: …/library
   note     role      worker: an unattended machine running tools/worker.py; claims, works, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
-  ok       ikigai    ikigai 0.1.67 at …/ikigai
+  ok       ikigai    ikigai 0.2.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `worker-1` (.gonk/local.toml, this working tree only)
   ok       identity  urn:iki:host:gonk:client:… (from …/worker-1/gonk/client.crt)
@@ -410,8 +415,8 @@ gonk init: …/library
   absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
 agents over MCP (configure the agent with this command):
-  ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir …/worker-1/gonk
 
+  ikigai mcp --grant agent --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir …/worker-1/gonk
 ready.
 $ cd library && python3 tools/gonk.py status
 process: workers
@@ -428,6 +433,46 @@ trying and being refused. The `absent nl` row is this page's gonk mounting no mo
 `urn:nl:sparql` (its banner says so), and `init` says there is nothing to do until it does. The
 `worker` row is what a worker machine still needs, its `.gonk/worker.toml`; setting that machine
 up (its accounts, the boundary its agent runs inside) is the starter's `worker/README.md`.
+
+The packaged claim is careful in ways the loop above leaves to you. `gonk.py claim --renew` renews
+and never takes, and a tree that holds an item renews by default, so a renewal after someone
+released the item is refused rather than quietly taking it back. A refused write from gonk, a
+`Conflict`, exits 3; 1 stays any other failure, and 2 the tool's own refusal:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append Try the packaged claim'
+#3 urn:iki:ledger:default:item:…
+[uncacheable]
+$ cd library && python3 tools/gonk.py claim 3
+#3 claimed by worker-1 until …
+$ cd library && python3 tools/gonk.py claim 3 --renew
+#3 renewed by worker-1 until …
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'delete urn:gk:iki:ledger:claim item=3'
+#3 released
+[uncacheable]
+$ cd library && python3 tools/gonk.py claim 3 --renew; echo "exit $?"
+error: conflict: #3 is not claimed, so worker-1 has nothing to renew: the claim was released or never taken. Claim it again (without `renew`) if the work is still yours to do
+gonk.py: this working tree no longer holds item 3: stop writing, put what you have on a branch, say where in a comment, and claim something else
+exit 3
+```
+
+`release`, `report` and `close` drop this tree's claim with `from=<holder>`, a compare-and-set that
+loses to a takeover instead of dropping the new holder's claim, and `report`'s hand-back comment
+carries a `key=`, so a retry after a timeout posts once.
+
+`worker.py` also minds the disk. Before each item it reads the free space on the volume holding its
+work root and posts a `Disk:` line on its status item; under a floor it takes no new item until
+space returns, and it prunes kept worktrees and logs by age. The defaults are in the sample
+configuration, commented out:
+
+<!-- transcript: run -->
+```console
+$ grep -E '^# (floor_gb|every = "6h"|prune_after)' library/worker/worker.sample.toml
+# floor_gb = 30
+# every = "6h"            # how often the Disk: line is posted between crossings of the floor
+# prune_after = "7d"      # "0s" keeps every worktree and log; under the floor a build still goes
+```
 
 Profiles combine (`--process workers,spec` adds [spec first](spec-first.md)'s rules, and no
 `--process` at all means `solo,workers,spec`); only [unled audits](audits.md) and [review every

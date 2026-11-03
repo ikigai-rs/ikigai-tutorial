@@ -45,7 +45,7 @@ browse roots:
   added      gonk.browse.root = "flight=…/.ikigai/checkouts/flight"
   added      gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
 
-gonk reads gonk.browse.root at startup only: restart gonk to serve the new root(s).
+a running gonk mounts the new root(s) with no restart (it watches config.toml; `ikigai-gonk browse list` says what is in force).
 ```
 
 ## 2. gonk, serving them
@@ -60,14 +60,15 @@ $ ikigai-gonk client add roborev --ledger default=write --port 1070 --config-hom
 client `roborev`  …/.config/ikigai/gonk/quic/clients/roborev
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `roborev` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `roborev` (5 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 ```
 
-gonk reads its roots, and the certificates it trusts, when it starts, which is what the last lines
-of both commands say. If it is already running as a service, restart it the way that service is
+gonk reads the certificates it trusts when it starts, which is what the last lines of the `client
+add` say; a running gonk would mount the new roots by itself. If it is already running as a service,
+restart it the way that service is
 run; under launchd, with the label your plist gives it (`dev.ikigai-rs.gonk` here; the checkout
 stopped printing one, because a label is one operator's choice):
 
@@ -117,13 +118,14 @@ A `kata export` from the old tracker, here two issues, one blocking the other:
 
 The import runs once, by you, on this machine, so it can take the owner's socket, the shortcut
 that needs no enrollment ([Importing a kata ledger](kata.md#the-owners-socket-a-shortcut)); kata's
-authors stay the items' authors:
+authors stay the items' authors, and an owner kata names becomes a claim:
 
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk kata import kata.jsonl --socket "$PWD/.ikigai/gonk.sock"
 kata export version 27: 2 issue(s), 1 link(s)
 filed     #1       kata 0001  Stop the loop on an empty queue
+claimed   kata 0001 by chris
 filed     #2       kata 0002  Write the empty-queue test
 linked    #2 blocks #1
 
@@ -198,16 +200,16 @@ $ curl -s http://127.0.0.1:1070/iki/ledger/next
 
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 1
-  not #1: blocked by #2
+  not #1: claimed by chris
 ```
 
-One ledger: the work imported from kata, with its order intact (`kata 0002` blocking `kata 0001`),
-and a review finding filed by a hook, about a file in a repository gonk checked out and watches.
+One ledger: the work imported from kata, with its links and its owner intact (`kata 0002` blocks
+`kata 0001`, and `next` names chris's claim as the reason it leaves `kata 0001` out), and a review finding filed by a hook, about a file in a repository gonk checked out and watches.
 What keeps it current:
 
 | what changes | what brings it in | restart? |
 | --- | --- | --- |
 | a repository upstream | `ikigai-gonk checkout --all`, by hand or [on a timer](checkout.md#on-a-timer) | no: the watcher sees the fast-forward |
-| a new repository | `ikigai-gonk checkout <url> --write-config` | yes: roots are read at startup |
+| a new repository | `ikigai-gonk checkout <url> --write-config` | no: a running gonk watches `config.toml` |
 | kata | `ikigai-gonk kata import <a new export>` | no |
 | a roborev review | the hook, by itself | no |

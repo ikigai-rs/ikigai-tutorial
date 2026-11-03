@@ -262,7 +262,7 @@ in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter) says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo,spec
-generated the library-lending sample (python, process solo, spec) in …/library: 60 files
+generated the library-lending sample (python, process solo, spec) in …/library: 64 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -281,6 +281,8 @@ $ grep '^## ' library/AGENTS.md
 ## 6. Never a bare `#N`
 ## 7. Read ACCESSIBILITY.md before changing what people see
 ## Specs, artifacts, queries and scripts
+## Building in the ikigai style (optional)
+## Writing text people skim (optional)
 ## Spec first
 ## Optional: a hook for Claude Code
 $ cat library/.gonk/process.toml
@@ -319,7 +321,7 @@ gonk init: …/library
   note     role      you: both the dispatcher and whoever does the work
   note     spec      spec first: every change in behavior starts as an openspec change, seed files its tasks, next orders them
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.67 at …/ikigai
+  ok       ikigai    ikigai 0.2.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `agent` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
@@ -330,8 +332,8 @@ gonk init: …/library
   absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
 agents over MCP (configure the agent with this command):
-  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
 
+  ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
 $ cd library && python3 tools/gonk.py seed --dry-run
 would file  add-holds 1.1: Accept a hold on a title whose copies are all out

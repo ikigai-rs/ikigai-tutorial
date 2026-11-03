@@ -69,7 +69,7 @@ browse roots:
   added      gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
   added      gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
 
-gonk reads gonk.browse.root at startup only: restart gonk to serve the new root(s).
+a running gonk mounts the new root(s) with no restart (it watches config.toml; `ikigai-gonk browse list` says what is in force).
 $ cat .config/ikigai/config.toml
 gonk.browse.root = "notes=…/.ikigai/checkouts/notes"
 gonk.browse.root = "specs=…/.ikigai/checkouts/specs"
@@ -109,7 +109,8 @@ not written: add the lines above to …/.config/ikigai/config.toml, or run again
 
 A root gonk already serves needs no restart after an update: gonk watches it, and a
 fast-forward is a change on disk like any other (the watcher is shown working in
-[Browse roots](../browse/roots.md)). Only a NEW root needs the restart the first run asked for.
+[Browse roots](../browse/roots.md)). A NEW root needs none either, as the first run's last line
+said: a running gonk watches `config.toml` and mounts it.
 
 ### Every checkout, without the URLs
 

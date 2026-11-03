@@ -96,7 +96,7 @@ carries the harness and the vocabulary's complete definition:
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 60 files
+generated the library-lending sample (python, process solo) in …/library: 64 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -174,7 +174,7 @@ the graph to its vocabulary, and each guide's section to a heading of `AGENTS.md
 <!-- transcript: run -->
 ```console
 $ cd library && python3 tools/harness.py check
-harness check: 18 guide(s) and 14 other control(s) agree with the code
+harness check: 20 guide(s) and 14 other control(s) agree with the code
 ```
 
 ### 3. Make a rule fire
@@ -195,7 +195,7 @@ gonk init: …/library
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
-  ok       ikigai    ikigai 0.1.67 at …/ikigai
+  ok       ikigai    ikigai 0.2.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `ada` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC
@@ -206,8 +206,8 @@ gonk init: …/library
   absent   nl        gonk does not offer `urn:nl:sparql` yet, so a query is written by hand rather than drafted from a sentence (ikigai-nl); nothing to do until it does
 
 agents over MCP (configure the agent with this command):
-  ikigai mcp --override urn:iki:ledger:=…/.ikigai/gonk.sock
 
+  ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
 ```
 
@@ -273,12 +273,12 @@ one that is not, and loads that beside the graph:
 <!-- transcript: run -->
 ```console
 $ cd library && python3 tools/gonk.py harness
-harness: 18 rule(s), 14 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
+harness: 20 rule(s), 14 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
   not wired: ctl:edit-hook-not-wired
   not wired: ctl:edit-hook-unreadable-input
   not wired: ctl:edit-without-live-claim
-loaded:  updated <urn:iki:harness:graph:default>: +341 -0 quads
 
+loaded:  updated <urn:iki:harness:graph:default>: +359 -0 quads
 harness-firings-by-control: How often has each control fired, refusing or warning, and when first and last?
   control                label                           outcome  firings  first                     last
   ctl:evidence-required  report and close need evidence  Refusal  1        …  …
@@ -292,6 +292,8 @@ harness-guides-without-sensor: Which rules does no computational control check?
   guide:no-bare-numbers           never a bare #N                                        6. Never a bare `#N`
   guide:read-accessibility-first  read ACCESSIBILITY.md before changing what people see  7. Read ACCESSIBILITY.md before changing what people see
 
+  guide:building-ikigai-style     building in the ikigai style (optional)                Building in the ikigai style (optional)
+  guide:skimmable-text            writing text people skim (optional)                    Writing text people skim (optional)
 harness-sensors-never-fired: Which sensors of this repository's tools have never fired, and has a test shown each one can?
   control                         label                                             wired  proof
   ctl:claim-held-by-another       claim: held by another holder                     -      fired by a test
@@ -313,7 +315,7 @@ Four answers:
   the millisecond, in UTC). Over a real month this is the
   list of rules that are not landing: a sensor that fires often is doing its job, and saying that
   agents keep making the move its rule warns against.
-- **Rules with no sensor.** Six of the eighteen rules are text an agent has to apply, with
+- **Rules with no sensor.** Eight of the twenty rules are text an agent has to apply, with
   nothing that notices when it does not. Each row is a candidate for a sensor, not a defect, and
   some can only ever be applied by a reader: the starter's `profiles/README.md` records why several
   stay prose on purpose (`reproduce-before-fix`, for one, is a judgment about how an agent worked,
@@ -441,5 +443,5 @@ controls, a firing log, and coverage questions asked of both.
 
 The terms are in the namespace `https://ikigai-rs.dev/ns/harness#` (`harness:`), whose definition
 is the starter's `.gonk/harness/vocabulary.ttl`: every term, including those a generated
-repository does not use. It is not served at that address yet, so the starter's file is the
-definition.
+repository does not use. That address serves the same file as Turtle, and
+`https://ikigai-rs.dev/ns/ledger` does the same for the ledger's terms.

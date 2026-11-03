@@ -41,7 +41,7 @@ $ ikigai-gonk client add laptop --ledger default=write --browse read --root note
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `laptop` (6 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `laptop` (7 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -56,13 +56,15 @@ $ cat .config/ikigai/gonk/grants.json
     "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
     "urn:cap:ledger:write:default",
     "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+    "urn:cap:store:read:graph:urn:collab:participants",
     "urn:cap:browse:read:notes",
     "urn:cap:store:read:graph:urn:iki:browse:graph:default"
   ]
 }
 ```
 
-Six tokens: the four-token ledger writer from [the first chapter](../ledger/your-own.md), reading
+Seven tokens: the four-token ledger writer from [the first chapter](../ledger/your-own.md), the
+read of `urn:collab:participants` that [The three doors](doors.md#who-wrote-it) explains, reading
 the `notes` root, and reading browse's graph through the store's narrow door (so the client can
 join its items to what browse knows, as [the embedding chapter](../embedding/own-kernel.md), at the
 end of the book, does in a kernel of its own).
@@ -201,7 +203,7 @@ $ ikigai-gonk client add laptop --ledger default=write --browse read --root note
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `laptop` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `laptop` (8 scopes) in …/.config/ikigai/gonk/grants.json
   REPLACED     grant `laptop` (--force) — every identity enrolled under it holds the new list from its next request or connection:
     adds     urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default
   restart ikigai-gonk: trusted certificates are read at startup

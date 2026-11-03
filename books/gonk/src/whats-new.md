@@ -5,6 +5,12 @@
 
 What has changed in The gonk Book, most recent first: the date, what was added or changed, and the pages to read for it. Smaller upkeep (moving to a newer release when nothing a reader does changes, a corrected link, a typo) is not listed.
 
+## 2026-11
+
+- **2026-11-02**: Every page is replayed at a newer gonk, ikigai-cli and starter, and The three doors gains Who wrote it: committers, verified and claimed authors, and enrollment. A plain-text author over QUIC is now refused, a kata import keeps owners, and Remote workers shows the packaged claim's renewals, exit codes and disk floor.
+
+  Pages: [The three doors, and who is asking](machines/doors.md), [Over the socket](agent/socket.md), [Over MCP](agent/mcp.md), [Importing a kata ledger](bridges/kata.md), [A fresh machine, end to end](bridges/fresh-machine.md), [Checking out repositories](bridges/checkout.md), [Remote workers](ways/workers.md), [Routing work to agents](ways/routing.md), [Harness engineering](ways/harness.md), [Introduction](introduction.md)
+
 ## 2026-10
 
 - **2026-10-30**: Every chapter now ends with the same heading, "What you have now", and points onward with "Where to go next". Headings that began with "it" now name what they are about, such as "Filing a review" and "Reading the root", and every old link still lands.
