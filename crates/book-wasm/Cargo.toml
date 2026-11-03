@@ -103,6 +103,13 @@ ikigai-text = "0.4.0"
 # profile (ledger #2823). With ikigai-ui 0.4.1, ikigai-fn 0.9 (html5ever is new here; ikigai-toolbox
 # 0.2.1 keeps its own ikigai-fn 0.7.2 beside it) and core 0.2.12, it grew from 23,480,481 to
 # 24,337,391 bytes (gzip -9: 3,462,579 to 3,653,645), measured 2026-11-02 the same way (ledger #2853).
+# Toolbox 0.3.0 shares fn 0.9, removing fn 0.7.2 (ledger #2930). A same-toolchain
+# before/after build on 2026-11-02 shrank from 24,335,256 to 24,175,358 bytes;
+# gzip -9 shrank from 3,636,048 to 3,619,622 bytes (16,426 bytes, 0.45%). Measured with
+# rustc 1.99.1 on macOS arm64: `cargo build --locked --release -p book-wasm --target
+# wasm32-unknown-unknown`, then wasm-bindgen 0.2.108 `--target web --out-name book_wasm`,
+# then `gzip -9 -c book_wasm_bg.wasm | wc -c`. These local baselines differ from the
+# earlier measurements above; the delta compares only the two builds made together.
 book-view = { path = "../book-view" }
 # `TurtleRenderer`, now that the page builds its own kernel rather than taking
 # `hello_camel::kernel()` whole: the same renderer that one injects.
