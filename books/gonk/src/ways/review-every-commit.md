@@ -137,7 +137,7 @@ the home of whoever runs gonk ([Browse roots](../browse/roots.md)).
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   review  urn:space:reviews — ARMED: a drop fires urn:iki:gonk:review:pass under grant `reviewer` (5 scopes, net localhost, no urn:cap:annotate — a pass CANNOT publish). 0 waiting now. …
 …
@@ -207,6 +207,24 @@ and draws the judge's order; it needs a signed-in person, so this page cannot dr
 ```console
 $ open http://localhost:1070/queue
 ```
+
+A person who can publish findings has a **Queue** link in the header of every gonk page, with a badge
+that polls `/queue/depth`. That poll takes a signed-in grant, so a shell is refused, and the socket
+does not serve the fragment:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/queue/depth
+denied: capability does not grant `urn:cap:browse:read:*` (declared by `urn:iki:gonk:fragment:queue-depth`; any grant under `urn:cap:browse:read:` satisfies it)
+```
+
+So what follows comes from gonk's change (PR 273) and has not been replayed here. On screen the
+badge is two numbers, such as `1+1`: serious findings, and the others after the plus. Words hidden
+from sight now sit beside them, so the link's accessible name says what they count, `Queue , 1 serious
+, +1 other`, where it used to be `Queue 1+1`. The queue's full sentence, the one the depth printed
+above, is now the link's description; it used to be only a tooltip, which no keyboard, touch screen
+or screen reader could reach. A stuck or failing queue also shows the word `stuck` or `error`, so its
+state is not told by color alone.
 
 Over the socket the owner holds `urn:cap:annotate` too, so the same two decisions are Sinks to
 the findings. The minor one is declined with a reason from the closed set; the major one is

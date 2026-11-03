@@ -75,7 +75,7 @@ connection: editing either changes what a client may do, or revokes it, without 
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
 …

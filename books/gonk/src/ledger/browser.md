@@ -17,7 +17,7 @@ chapter](../introduction.md#a-gonk-per-chapter)).
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
@@ -363,6 +363,6 @@ stylesheet.
 
 The pages added no authority and no state of their own. The ledger is the graph it was in the
 last chapter; a page is a view of it, a form is one of its actions, and an identity is a name
-for a list of tokens in `grants.json`. The next part reaches the same ledger from another
-process, the way an agent does. (What a signed-out caller sees of a gonk that two teams share is in
+for a list of tokens in `grants.json`. [The next chapter](lifecycle.md) gives a ledger states of its
+own, and the part after it reaches the ledger from another process, the way an agent does. (What a signed-out caller sees of a gonk that two teams share is in
 [Two teams, one gonk](../teams/two-teams.md#what-a-signed-out-caller-sees).)

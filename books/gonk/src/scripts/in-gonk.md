@@ -149,7 +149,7 @@ place of its reader.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   scripts urn:script:* in …/.ikigai/scripts — sparql and plan, read-only (the ledgers' reads); anonymous runs PUBLIC scripts and read-only plans, 3 a minute in all (draft checks too), each held to the anonymous budget; a QUIC client drafts, a person publishes; backed up with the store
   nl      urn:nl:grounding, urn:nl:sparql:check — under the caller's own grant; urn:nl:sparql drafts through urn:llm:ask for a caller holding urn:cap:net:localhost (--nl draft), saving DRAFT scripts a person publishes
@@ -317,7 +317,7 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (116 offered)
+left out: parts= did not ask for it (118 offered)
 urn:ikigai:vocab: 253 of 253
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1

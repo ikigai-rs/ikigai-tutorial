@@ -112,6 +112,18 @@ somebody has it. Nothing told `next` that anything changed; it was **derived aga
 what it was derived from was written. That is a golden thread, the kernel's dependency
 tracking — the [ikigai Book's chapter on it](../../getting-started/golden-threads.html) is where it is taught.
 
+The ledger also keeps what happened. An item's **history** lists each edit, claim and close it has
+had, oldest first, and says what each one changed:
+
+<div class="ikigai-run" data-cmd='source urn:iki:ledger:item:2:history'>
+<pre class="ikigai-run-expected">#2: 2 event(s)
+…  link blocks urn:iki:ledger:default:item:…
+…  closed done
+[computed]</pre>
+</div>
+
+[A lifecycle for your ledger](lifecycle.md), later in this part, shows what more it can hold.
+
 ## In a kernel of your own
 
 That page's kernel is a crate in this repository,
@@ -226,7 +238,7 @@ own** in an empty directory, with its two homes inside that directory:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   socket  …/.ikigai/gonk.sock — owner only

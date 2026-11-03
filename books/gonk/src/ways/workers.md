@@ -76,7 +76,7 @@ apart.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   quic    udp 0.0.0.0:1070 — 2 trusted certificate(s), 2 enrolled
 …
@@ -241,8 +241,8 @@ the reason, and the item is ready again for whichever worker asks next:
 
 <!-- transcript: run -->
 ```console
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:close item=1 reason=done author=ada Checked: PR 8 merged, CI green, the test is in the diff.'
-closed #1 (done)
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:close item=1 reason=done evidence=https://github.com/you/demo/pull/8 author=ada Checked: PR 8 merged, CI green, the test is in the diff.'
+closed #1 done (1 evidence)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:comment item=2 rejects=true author=ada PR 9 is red on main: the README example does not compile.'
 commented on #2 (urn:iki:ledger:default:comment:…) cleared-awaiting
@@ -270,6 +270,25 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 
 The worker's comment is attributed to its certificate's principal, filled in by the QUIC door;
 the dispatcher's `author=ada` is the owner's own word, because the socket proves nothing more.
+
+The close's `evidence=` keeps the pull request on the close itself, and it is not fetched, so the
+check is still the dispatcher's. An item's history shows who did what, in order, and it is the
+shortest way to review a worker's run:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:1:history'
+#1: 3 event(s)
+…  claim worker-1  by urn:iki:host:gonk:client:…
+…  release worker-1 (released)  by urn:iki:host:gonk:client:…
+…  closed done, evidence https://github.com/you/demo/pull/8
+[uncacheable]
+```
+
+The claim and the release were made over QUIC, so each ends with the principal the door verified. The
+close was made over the socket, which has no name to give.
+[A lifecycle for your ledger](../ledger/lifecycle.md#what-happened-to-an-item) covers the rest of
+what a history holds.
 
 <a id="6-what-the-server-saw"></a>
 
@@ -359,7 +378,7 @@ $ grep '^## ' library/AGENTS.md
 ## Writing text people skim (optional)
 ## Worker machines
 ## Optional: a hook for Claude Code
-$ ls library/tools library/worker
+$ LC_ALL=C ls library/tools library/worker
 library/tools:
 gonk.py
 harness.py

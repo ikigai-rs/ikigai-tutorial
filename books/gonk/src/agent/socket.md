@@ -20,13 +20,13 @@ ikigai 0.2.3
 ## Start a gonk, and find its socket
 
 In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
-from [The ledger in a browser](../ledger/browser.md) is still running, stop it first, since this one
+from [A lifecycle for your ledger](../ledger/lifecycle.md) is still running, stop it first, since this one
 takes the same port.
 
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   socket  …/.ikigai/gonk.sock — owner only
 …

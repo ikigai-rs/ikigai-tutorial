@@ -78,7 +78,7 @@ the hub's `python3 tools/gonk.py init` prints the same name on its `identity` ro
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   quic    udp 0.0.0.0:1070 — 2 trusted certificate(s), 2 enrolled
 …

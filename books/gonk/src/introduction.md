@@ -18,7 +18,8 @@ transports. gonk is the host that composes them, which is why this book can show
 Each part is one way gonk is used **standalone**, and each builds on the one before it.
 
 - **A ledger of your own.** File, comment, link, claim, close and ask `next` — in this page,
-  in a kernel of your own, and against a gonk you start. Then the same ledger in a browser.
+  in a kernel of your own, and against a gonk you start. Then the same ledger in a browser, and a
+  lifecycle of your own: the states an item moves through and the moves it may make.
 - **An agent's ledger.** The ledger reached from another process over the socket, the way an
   agent's tool calls reach it; and over MCP, where `ikigai mcp` projects the ledger's actions as
   an agent's tools, through a door that names the agent.
@@ -79,13 +80,12 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.17.0,
-`ikigai-store` 0.3.1, `ikigai-browse` 0.20.3, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
-book's own crates (the ones its Rust listings and in-page cells run) are a step apart, at
-`ikigai-core` 0.2.12, `ikigai-ledger` 0.18.0, `ikigai-store` 0.3.3 and `ikigai-browse` 0.20.6. So
-a cell or a listing runs one ledger release ahead of a `console` block, and 0.18.0's additions (an
-item's history resource among them) are not in the gonk these pages start. gonk serves scripts and
-drafting at `urn:script:*` and `urn:nl:*`.
+The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.18.0,
+`ikigai-store` 0.3.3, `ikigai-browse` 0.20.7, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
+book's own crates (the ones its Rust listings and in-page cells run) take the same ledger and store,
+so a cell, a listing and a `console` block all answer from one ledger. Two patch releases differ, and
+no page shows either: those crates lock `ikigai-core` 0.2.12 and `ikigai-browse` 0.20.6. gonk serves
+scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
 This gonk's HTTP door lets a caller with no identity read the ledgers and write nothing (gonk
 PR 186). Every page writes as the owner over the socket, or as a client over QUIC; the two bridges

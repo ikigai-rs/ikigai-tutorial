@@ -19,6 +19,7 @@ used stand alone."
 | --- | --- | --- | --- |
 | A ledger of your own | A ledger of your own | cells (wasm) · Rust (`crates/ledger-host`) · transcripts | **written** |
 | | The ledger in a browser | transcripts (curl of the pages, the form as `/act`, the SPARQL 1.1 Protocol face of `/sparql` over the union of the caller's graphs and its refusal of a ledger outside the grant, the cross-site write, the foreign `Host` and a read another page LOADS (an image) each a `403` at the edge while a read it NAVIGATES to is answered (gonk PR 100, ledger #880), the anonymous SPARQL budget in the banner, `passkey invite --ledger --browse read`, the access log read back from a `tee`d file) · manual (the passkey ceremony, a browser) | **written** |
+| | A lifecycle for your ledger | transcripts (ledger #2956, `ikigai-ledger` 0.18.0): `gated.ttl` and a `gonk.ledger.lifecycle` line as `file` blocks; the same document less its `owl:versionInfo` refused at startup, from a second config home; the lifecycle read back; a move the document does not declare refused naming the legal ones, and a state it does not have; `next` plain and with `drain=` and `state=`, a misspelled drain refused, a blocked item still excluded under a filter; `close` with `evidence=`, an item as evidence and one that does not exist; `item:{id}:history` plain and as JSON; the doctor. It sits in this part because it needs only the owner's socket, and every later chapter can assume it. Who wrote each event is shown in Remote workers, because the socket's lines name no one | **written** |
 | An agent's ledger | Over the socket | transcripts: `ikigai --mount "urn:gk:=…/gonk.sock" -c …` (alias), why a mounted read is `[uncacheable]` at the client, the config-home `prefer` line (`XDG_CONFIG_HOME`: the cli has no config-home flag), `cap seal` to a `grants` list, the socket's access lines, and what the seal does and does not bound — a sealed ledger grant's raw `urn:iki:store:graph-update` to its graph refused over the socket since 77ac767 (gonk PR 98, ledger #899; ed43af3 admitted it) while root still writes raw, and a sealed session still filing an item whose `author` names a passkey (the socket runs no author rule); `urn:sparql:select` under the alias (`urn:gk:sparql:select`), its default dataset the union of the graphs the caller may read (two at root, one under a sealed ledger read) and a `graph=` outside the seal refused, a deleted graph and a missing one in the same words (ledger #928); `ikigai-cli` pinned beside gonk | **written** |
 | | Over MCP | transcripts: `client add agent --ledger default=write`, gonk serving the QUIC door on 1070, the bundle and a client-side `grants.json` ceiling (`show: ["ledger-*"]`) in `agent/`, `ikigai mcp --override urn:iki:ledger:=quic://… --cert-dir agent/gonk --grant agent` fed JSON-RPC from `file` blocks (stdin is null for a `run` command): the 31 tool names (eight new with `ikigai-ledger` 0.5.0: item state, the assertions, lifecycles, the doctor; two with 0.6.2: an item's `about`; one with 0.9.0: `count`), sorted with `LC_ALL=C`; a keyed append twice (`existing`), the item read by `key:`, its `author` the client's principal; a passkey-shaped `author`, a hidden `ledger-item__delete` and another ledger refused; the access log naming the client, and a ledger-less call logged as `default` (ledger #927, from ledger #782's verified path) | **written** |
 | The repository browser | Browse roots | transcripts against a scratch git repository the page creates (`git init`, a commit, a `file`-block `config.toml` root); tree/file/hash/state over the socket, a commit picked up by the watcher without a restart, the signed-out `/browse` notice | **written** |
@@ -179,7 +180,7 @@ on testing the old gonk under the new pin's name.
 full revision of `ikigai-rs/ikigai-gonk-starter`, never a path into a checkout. It was 38f539e (PR 26,
 the process profiles) and moved to c7a501a (PR 30, after PR 29) for Harness engineering: PR 29 is
 the harness template (`.gonk/harness/`, `tools/harness.py`, the firing log, `gonk.py harness`) and
-PR 30 makes `vocabulary.ttl` the namespace's complete public definition, which the chapter names. It moved to 5342b1f (the starter's main on 2026-10-21, ledger #2060) for Routing work to agents: PR 36 (one loop per agent, `init-agents`, `worker_repos.py`, `gonk-worker@.service`) and PR 37 (a router's dispatch, the required `routers`, comments quoted as data), and the later PRs to 45; every "With the starter" section was re-recorded. It moved to 9dd92b3 (the starter's main on 2026-11-02, ledger #2830), with gonk at 564146c and the cli at 0.2.3, for the worker's renewals, keyed reports, exit 3 and disk floor, shown in "Remote workers"; every page was replayed.
+PR 30 makes `vocabulary.ttl` the namespace's complete public definition, which the chapter names. It moved to 5342b1f (the starter's main on 2026-10-21, ledger #2060) for Routing work to agents: PR 36 (one loop per agent, `init-agents`, `worker_repos.py`, `gonk-worker@.service`) and PR 37 (a router's dispatch, the required `routers`, comments quoted as data), and the later PRs to 45; every "With the starter" section was re-recorded. It moved to 9dd92b3 (the starter's main on 2026-11-02, ledger #2830), with gonk at 564146c and the cli at 0.2.3, for the worker's renewals, keyed reports, exit 3 and disk floor, shown in "Remote workers"; every page was replayed. It stayed at 9dd92b3 when gonk moved to 0de36f0 (ledger #2956): its later commits on 2026-11-03 are a design note and the hub's close recording evidence, which wait for the starter's next move.
 The move changed the other six pages' "With the starter" output in three ways and no other: seven
 more generated files, `harness.py` in `tools/`, and a `note harness` row after `layout` in `init`. Each "Ways of working" page clones it the way a reader does, `git clone
 https://github.com/ikigai-rs/ikigai-gonk-starter starter`, then checks out the pin through an
@@ -208,7 +209,7 @@ crates.io, so the pin is an exact version (`cargo install --locked ikigai-cli --
 the file is one line read by the introduction's install line, the script and CI's cache key. Choose
 the release whose transports gonk's lock takes (`ikigai-ipc`, `ikigai-wire` and `ikigai-web` share
 the cli's version: 0.1.38 at 9b182ff, 60cf306 and ad0653b; 0.1.41 at ed43af3, 77ac767 and edb9a3d;
-0.1.44 at d9c9bcf, 9704b54 and 9f2e89e; 0.1.52 at 2598192; 0.1.55 at 71ca542; 0.1.61 at 3edf830; 0.1.67 at ca0810b and 930ed24; 0.2.3 at 564146c), so
+0.1.44 at d9c9bcf, 9704b54 and 9f2e89e; 0.1.52 at 2598192; 0.1.55 at 71ca542; 0.1.61 at 3edf830; 0.1.67 at ca0810b and 930ed24; 0.2.3 at 564146c and 0de36f0), so
 the client speaks the server's wire; moving gonk is a reason to look at this file too. At 3edf830
 the pin is 0.1.61, gonk's own transports, and the exception below is closed (ledger #1472's arc,
 2026-10-14). 0.1.62 was already on crates.io and the rule took what gonk links; both link
@@ -255,16 +256,19 @@ directly because browse takes an `oxigraph::store::Store`. A newer release that 
 yet waits for the pin, so a transcript and a listing are always answered by the same module, unless
 the book needs it first.
 
-**A sixth version gap is OPEN** (ledger #2830, 2026-11-02): at 564146c gonk links `ikigai-core` 0.2.11,
-`ikigai-ledger` 0.17.0, `ikigai-store` 0.3.1, `ikigai-browse` 0.20.3, `ikigai-script` 0.4.0, `ikigai-nl` 0.5.0
-and the door crates at 0.2.3, while the workspace's crates lock core 0.2.12, ledger 0.18.0, store 0.3.3 and
-browse 0.20.6. From ledger #2830 until #2956 (2026-11-03) they locked ledger 0.13.1, behind gonk: a cell or a
-listing showed no committer, no verified or claimed author and no events. Ledger #2956 moved them first, in a
-change of its own because every book's crates share them, so they are now one ledger release AHEAD of the pin,
-and the introduction says so. Replayed against every cell and listing, no gonk Book page moved; The ikigai
-Architecture's manifold printed the new action names and was re-recorded. The ledger's gap closes when
-`gonk.rev` moves to `ledger-v0.18.0` (d02ac2b), which links ledger 0.18.0, store 0.3.3 and browse 0.20.7; the
-workspace's browse stays at 0.20.6 until then.
+**The sixth version gap is CLOSED** (ledger #2956, 2026-11-03): `gonk.rev` moved to 0de36f0, gonk's main that
+day and one commit past the tag `ledger-v0.18.0` (d02ac2b; the commit between them is gonk PR 273, the Queue
+badge and the other accessibility fixes). It links `ikigai-core` 0.2.11, `ikigai-ledger` 0.18.0, `ikigai-store`
+0.3.3, `ikigai-browse` 0.20.7, `ikigai-script` 0.4.0, `ikigai-nl` 0.5.0 and the door crates at 0.2.3, while the
+workspace's crates lock core 0.2.12, ledger 0.18.0, store 0.3.3 and browse 0.20.6. The two patch differences
+remain, and no page shows either. Browse stays at 0.20.6 because `cargo update -p ikigai-browse --precise 0.20.7`
+also re-resolved `oxrdf`, `spareval`, `spargebra` and `sparopt` from `rand` 0.9 to 0.8 and `windows-sys` from 0.61
+to 0.52, too much to carry for a patch no page shows. The gap opened at ledger #2830 (2026-11-02), when gonk
+linked ledger 0.17.0 and the crates locked 0.13.1, so a cell or a listing showed no committer, no verified or
+claimed author and no events. Ledger #2956 moved the crates first, in a change of its own because every book's
+crates share them (they were one release AHEAD of the pin for one commit), and then this pin. Replayed against
+every cell and listing, no gonk Book page moved on the crates' move; The ikigai Architecture's manifold printed
+the new action names and was re-recorded.
 
 **The earlier gap was CLOSED** (ledger #2078, 2026-10-22): at 930ed24 gonk links the releases the
 book's crates take, `ikigai-core` 0.1.110 among them. From ledger #2060 (2026-10-21) it was closed

@@ -78,7 +78,7 @@ $ git -C demo -c user.name=Ada -c user.email=ada@example.com commit -q -m 'initi
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   socket  …/.ikigai/gonk.sock — owner only
 …
@@ -206,13 +206,14 @@ anyone, now for the other reason: it is the dispatcher's.
 ### 7. Close, as your own dispatcher
 
 The dispatcher reads the evidence (the pull request merged, CI green, the test in the diff), and
-only then closes, with a reason and a note that says what was checked. (Had the worker kept its
-claim, the close would have released it in the same write and said so.)
+only then closes, with a reason, a note that says what was checked, and `evidence=`, which records
+the pull request on the close itself. (Had the worker kept its claim, the close would have released
+it in the same write and said so.)
 
 <!-- transcript: run -->
 ```console
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:close item=1 reason=done author=ada Checked: PR 7 merged with CI green; the test covers two spaces.'
-closed #1 (done)
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:close item=1 reason=done evidence=https://github.com/you/demo/pull/7 author=ada Checked: PR 7 merged with CI green; the test covers two spaces.'
+closed #1 done (1 evidence)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:1'
    #1  closed  p1  initials panics on an empty word  [bug]  (done)
