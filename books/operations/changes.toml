@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-02"
+summary = "A new chapter, \"Logging\": a host that opens an ikigai-log log, per-request attribution, reading segments as text and Turtle, escaped values, rotation and drops, encrypted backups, restores proved with verify against a tampered copy, and grep, awk and SPARQL queries over the segments."
+pages = ["running/logging.md"]
+
+[[change]]
 date = "2026-10-30"
 summary = "The planned chapter \"Unattended\" is now \"Running unattended\" in the outline, like the chapters beside it."
 pages = []
