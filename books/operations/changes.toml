@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-11-03"
+summary = "The log host's install line is pinned to its commit on main."
+pages = ["running/logging.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-03"
 summary = "A new chapter, \"Logging\": a host that opens an ikigai-log log, per-request attribution, reading segments as text and Turtle, escaped values, rotation and drops, encrypted backups, restores from a decrypted backup proved with verify against a tampered copy, and grep, awk and SPARQL queries over the segments."
 pages = ["running/logging.md"]
 
