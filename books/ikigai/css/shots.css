@@ -1,0 +1,32 @@
+/* A chapter's screenshots (ledger #2973; The ikigai Book's since #2980, and the gonk Book links to this
+   copy, so the class keeps the name of the book that had them first). A figure holds a light and a dark copy of one capture, and
+   the page's theme shows one: light and rust the light copy, coal, navy and ayu the dark. The other
+   is `display: none`, so a screen reader meets one image and one alt text. */
+.gonk-shot {
+    margin: 1.5rem 0;
+}
+
+.gonk-shot img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--table-border-color);
+}
+
+.gonk-shot figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.9em;
+}
+
+.gonk-shot .gonk-scheme-dark,
+html.coal .gonk-shot .gonk-scheme-light,
+html.navy .gonk-shot .gonk-scheme-light,
+html.ayu .gonk-shot .gonk-scheme-light {
+    display: none;
+}
+
+html.coal .gonk-shot .gonk-scheme-dark,
+html.navy .gonk-shot .gonk-scheme-dark,
+html.ayu .gonk-shot .gonk-scheme-dark {
+    display: block;
+}

@@ -238,7 +238,7 @@ let err = block_on(check_resource::kernel().issue(Request::new(Verb::Source, pag
 assert!(matches!(err, Error::Unresolved(ref name) if name.as_str() == "urn:iki:toolbox:dist:page.template.html"));
 ```
 
-This book does bind one. It publishes a build of `ikigai-toolbox` 0.1.0 beside its pages, in
+This book does bind one. It publishes a build of `ikigai-toolbox` 0.3.0 beside its pages, in
 `toolbox/`, and the page's kernel binds `urn:iki:toolbox:dist:{path}` to it: a door that asks the
 browser for `toolbox/{path}` when, and only when, a name needs one of its files.
 
@@ -263,7 +263,8 @@ Escape) puts focus back on the button.
 <p class="toolbox-check-fallback"><a href="../toolbox/toolbox.html?from=/ikigai-tutorial/building/check/player-x.ttl&amp;from=/ikigai-tutorial/building/check/shapes.ttl#shacl" target="_blank" rel="noopener">Check player X against the player shapes in the RDF Toolbox</a>, in a new tab, on copies of the two Turtle faces published with this page.</p>
 </div>
 
-The SHACL tab of O's check shows the same finding as the cell above, worded by turtle-lsp. In
+The SHACL tab of O's check shows the same finding as the cell above, worded by turtle-lsp
+([What the page shows](#what-the-page-shows) has a picture of it). In
 the page, you hold the root of your own kernel, so the panel reads both players. Without the
 kernel (it did not load, or scripts are off), each button is a link instead, and the toolbox
 opens in a new tab on copies of the Turtle faces published beside this chapter. A test holds
@@ -272,6 +273,53 @@ read: nothing checks your capability on a file anyone can download.
 
 gonk, the host *The gonk Book* is about, serves the page at `/toolbox` when its configuration
 names a build (`gonk.toolbox.dist`).
+
+### What the page shows
+
+These are captures of that page in a real browser, from a scratch host: this chapter's crate with a
+toolbox build bound and `/toolbox/…` routed as above, and one caller, who holds the scope.
+`./scripts/capture-toolbox.sh` takes them again. The page in them is
+[turtle-lsp](https://github.com/abhishekkundu25/turtle-lsp)'s RDF Toolbox, by Abhishek Kundu, under
+the [MIT license](../toolbox/LICENSE.turtle-lsp), as `ikigai-toolbox` patches and builds it.
+
+`urn:toolbox:check:{iri}` with no shapes names one input, player O's Turtle face, and opens on
+Validate, which says whether the RDF itself is sound. It has nothing against `ttt:wins`: no shape
+has been named yet, and a note says the SHACL tab waits for one.
+
+<figure class="gonk-shot">
+<a class="gonk-scheme-light" href="check/img/validate-light.webp"><img src="check/img/validate-light.webp" loading="lazy" alt="The RDF Toolbox page, headed RDF Toolbox, built on turtle-lsp, and urn:iki:tutorial:check:player:o. The tabs are Format, Validate, which is open, and SPARQL, and a note under them says the SHACL tab appears when the input has shapes. The input is one file, named urn:iki:tutorial:check:player:o. The editor holds player O's Turtle: its type ttt:Player, ttt:name Grace, ttt:mark O and ttt:wins 3. The Validate pane says 0 problems in 0 of 1 files, and No problems."></a><a class="gonk-scheme-dark" href="check/img/validate-dark.webp"><img src="check/img/validate-dark.webp" loading="lazy" alt="The RDF Toolbox page, headed RDF Toolbox, built on turtle-lsp, and urn:iki:tutorial:check:player:o. The tabs are Format, Validate, which is open, and SPARQL, and a note under them says the SHACL tab appears when the input has shapes. The input is one file, named urn:iki:tutorial:check:player:o. The editor holds player O's Turtle: its type ttt:Player, ttt:name Grace, ttt:mark O and ttt:wins 3. The Validate pane says 0 problems in 0 of 1 files, and No problems."></a>
+</figure>
+
+Format lays the same file out again, and says it is the same graph before it shows you the
+difference. Nothing in the input changes unless you press Apply formatting.
+
+<figure class="gonk-shot">
+<a class="gonk-scheme-light" href="check/img/format-light.webp"><img src="check/img/format-light.webp" loading="lazy" alt="The same page with the Format tab open. The pane shows a mark reading Same graph, the count plus 4, minus 3 lines, and the buttons Apply formatting and Copy. Its line-by-line difference adds a blank line after the prefix and takes out the three property lines to put them back with a four-space indent."></a><a class="gonk-scheme-dark" href="check/img/format-dark.webp"><img src="check/img/format-dark.webp" loading="lazy" alt="The same page with the Format tab open. The pane shows a mark reading Same graph, the count plus 4, minus 3 lines, and the buttons Apply formatting and Copy. Its line-by-line difference adds a blank line after the prefix and takes out the three property lines to put them back with a four-space indent."></a>
+</figure>
+
+`shapes=` adds the second input and the SHACL tab. This is the check of O from the address above,
+and it finds what the cell above found. The cell's report says `sh:resultPath ttt:wins`, from
+`sh:ClosedConstraintComponent`. The page uses neither term: it says `ttt:wins` is not allowed by the
+closed shape, gives the line, and underlines the value in the editor.
+
+<figure class="gonk-shot">
+<a class="gonk-scheme-light" href="check/img/shacl-o-light.webp"><img src="check/img/shacl-o-light.webp" loading="lazy" alt="The RDF Toolbox page, headed RDF Toolbox, built on turtle-lsp, and urn:iki:tutorial:check:player:o. The SHACL tab is open and shows a count of 1 beside it. The input is two files, urn:iki:tutorial:check:player:o with 1 beside it and urn:iki:tutorial:check:shapes. The editor holds player O's Turtle: its type ttt:Player, ttt:name Grace, ttt:mark O and ttt:wins 3. The value of ttt:wins is underlined in red. The SHACL pane says 1 violation of 1 constraint, under it the sentence ttt:wins is not allowed on urn:iki:tutorial:check:player:o by the closed shape ttt:PlayerShape, and then one Error marked shacl-violation at line 5 of the player, quoting ttt:wins 3."></a><a class="gonk-scheme-dark" href="check/img/shacl-o-dark.webp"><img src="check/img/shacl-o-dark.webp" loading="lazy" alt="The RDF Toolbox page, headed RDF Toolbox, built on turtle-lsp, and urn:iki:tutorial:check:player:o. The SHACL tab is open and shows a count of 1 beside it. The input is two files, urn:iki:tutorial:check:player:o with 1 beside it and urn:iki:tutorial:check:shapes. The editor holds player O's Turtle: its type ttt:Player, ttt:name Grace, ttt:mark O and ttt:wins 3. The value of ttt:wins is underlined in red. The SHACL pane says 1 violation of 1 constraint, under it the sentence ttt:wins is not allowed on urn:iki:tutorial:check:player:o by the closed shape ttt:PlayerShape, and then one Error marked shacl-violation at line 5 of the player, quoting ttt:wins 3."></a>
+</figure>
+
+X has nothing the shape does not name, so there is nothing to list. The count is of the constraints
+that found something, so "of 0 constraints" does not say that no shapes were read.
+
+<figure class="gonk-shot">
+<a class="gonk-scheme-light" href="check/img/shacl-x-light.webp"><img src="check/img/shacl-x-light.webp" loading="lazy" alt="The SHACL pane alone, for player X: 0 violations of 0 constraints, and the sentence The data conforms to the shapes."></a><a class="gonk-scheme-dark" href="check/img/shacl-x-dark.webp"><img src="check/img/shacl-x-dark.webp" loading="lazy" alt="The SHACL pane alone, for player X: 0 violations of 0 constraints, and the sentence The data conforms to the shapes."></a>
+</figure>
+
+The SPARQL tab works on queries, not on the data. Over the player alone it says there are no queries
+in the input. Paste one about the player and it checks that query and lays it out, without running
+it: the page gives no rows, so this tab cannot tell you what `?wins` is.
+
+<figure class="gonk-shot">
+<a class="gonk-scheme-light" href="check/img/sparql-light.webp"><img src="check/img/sparql-light.webp" loading="lazy" alt="The same page with the SPARQL tab open and a second input file, pasted.rq, in the editor: a PREFIX line and a one-line SELECT of ?player and ?wins for a ttt:Player with ttt:wins. The pane says 0 problems in pasted.rq, and under Formatted a mark reading Same SPARQL algebra, the count plus 6, minus 1 lines, and a difference laying the SELECT out over several lines. No rows of results appear anywhere."></a><a class="gonk-scheme-dark" href="check/img/sparql-dark.webp"><img src="check/img/sparql-dark.webp" loading="lazy" alt="The same page with the SPARQL tab open and a second input file, pasted.rq, in the editor: a PREFIX line and a one-line SELECT of ?player and ?wins for a ttt:Player with ttt:wins. The pane says 0 problems in pasted.rq, and under Formatted a mark reading Same SPARQL algebra, the count plus 6, minus 1 lines, and a difference laying the SELECT out over several lines. No rows of results appear anywhere."></a>
+</figure>
 
 ## A CHECK is not `urn:kernel:validate`
 
@@ -332,3 +380,20 @@ cap reset'>
 error: denied: capability does not grant `urn:cap:tutorial:players:read` (declared by `urn:iki:tutorial:check:player:o`)
 reset to identity — capability: root (full authority)</pre>
 </div>
+
+The toolbox page is refused the same way. In this page you hold the root of your own kernel, so
+this one comes from a second scratch host, whose caller holds that other scope. The page asked for
+`/toolbox/input/{iri}` and got a `403`, which its red note reports by number. The shapes, which
+anyone may read, did load, so they are the whole input:
+
+<figure class="gonk-shot">
+<a class="gonk-scheme-light" href="check/img/refused-light.webp"><img src="check/img/refused-light.webp" loading="lazy" alt="The RDF Toolbox page, headed RDF Toolbox, built on turtle-lsp, and urn:iki:tutorial:check:player:o. The SHACL tab is open. The input is one file, urn:iki:tutorial:check:shapes, and the editor holds the shapes, not the player. A red note over the page says Could not open /toolbox/input/ and the percent-encoded name of player O, then HTTP 403. The SHACL pane says 0 violations of 0 constraints, and The data conforms to the shapes."></a><a class="gonk-scheme-dark" href="check/img/refused-dark.webp"><img src="check/img/refused-dark.webp" loading="lazy" alt="The RDF Toolbox page, headed RDF Toolbox, built on turtle-lsp, and urn:iki:tutorial:check:player:o. The SHACL tab is open. The input is one file, urn:iki:tutorial:check:shapes, and the editor holds the shapes, not the player. A red note over the page says Could not open /toolbox/input/ and the percent-encoded name of player O, then HTTP 403. The SHACL pane says 0 violations of 0 constraints, and The data conforms to the shapes."></a>
+</figure>
+
+The note lasts six seconds. What stays is easy to misread: "The data conforms to the shapes", with
+no data in the input. Read the list of files above the editor as well as the verdict. The refusal's
+own words are at the address the page asked for, and they are the words the cell above printed:
+
+<figure class="gonk-shot">
+<a href="check/img/refused-input.webp"><img src="check/img/refused-input.webp" loading="lazy" alt="A browser showing plain text and nothing else: denied: capability does not grant urn:cap:tutorial:players:read (declared by urn:iki:tutorial:check:player:o)."></a>
+</figure>

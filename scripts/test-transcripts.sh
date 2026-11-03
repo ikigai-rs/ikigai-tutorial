@@ -224,6 +224,15 @@ else
     echo "not run: no google-chrome on PATH; ./scripts/capture-dashboard.sh --chrome <path> runs it with another"
 fi
 
+# The same for The ikigai Book's "Checking a resource": the one command still runs at the toolbox's
+# pin, and the page still says what the chapter pictures, or the capture script stops and says so.
+echo "── the Checking a resource chapter's capture (ikigai-toolbox $toolbox_rev) ──────────────────"
+if [ -n "${CI:-}" ] || command -v google-chrome > /dev/null 2>&1; then
+    ./scripts/capture-toolbox.sh --out target/toolbox-capture || status=1
+else
+    echo "not run: no google-chrome on PATH; ./scripts/capture-toolbox.sh --chrome <path> runs it with another"
+fi
+
 echo "── Running ikigai (ikigai-cli $ops_cli, features quic and web) ──────────────────"
 "$ops_cli_root/bin/ikigai" --version
 cargo run --quiet -p book-transcripts -- books/operations --strict --path "$ops_cli_root/bin" \
