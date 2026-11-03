@@ -226,6 +226,7 @@ own small example.
 | the page with samples | `/toolbox/page` |
 
 The toolbox added no authority and no state: gonk serves a page, the page reads Turtle faces as you,
-and the checking runs in your tab. [The next chapter](lifecycle.md) gives a ledger states of its
+and the checking runs in your tab. [The next chapter](dashboard.md) reads every ledger at once, on a page of charts and tables, and
+[the one after it](lifecycle.md) gives a ledger states of its
 own, and the rules a lifecycle holds are enforced on every write, where a check only tells you what
 it finds.

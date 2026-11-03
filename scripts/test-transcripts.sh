@@ -213,6 +213,17 @@ TOOLBOX_DIST="$toolbox_dist" GIT_CONFIG_COUNT=1 \
     --path "$stub_root" \
     || status=1
 
+# The gonk Book's "The Dashboard" commits its images, so nothing here compares them. This proves the
+# one command that regenerates them still runs at the pin, and that the page still has what the
+# chapter pictures (a stale entry, the backfill sentence, no tooltip), writing under target/ only.
+# It needs Google Chrome and node: under CI a missing one fails it, elsewhere it says so and moves on.
+echo "── the Dashboard chapter's capture (ikigai-gonk $rev) ──────────────────"
+if [ -n "${CI:-}" ] || command -v google-chrome > /dev/null 2>&1; then
+    ./scripts/capture-dashboard.sh --out target/dashboard-capture || status=1
+else
+    echo "not run: no google-chrome on PATH; ./scripts/capture-dashboard.sh --chrome <path> runs it with another"
+fi
+
 echo "── Running ikigai (ikigai-cli $ops_cli, features quic and web) ──────────────────"
 "$ops_cli_root/bin/ikigai" --version
 cargo run --quiet -p book-transcripts -- books/operations --strict --path "$ops_cli_root/bin" \

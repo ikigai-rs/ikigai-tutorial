@@ -19,7 +19,8 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
 
 - **A ledger of your own.** File, comment, link, claim, close and ask `next` — in this page,
   in a kernel of your own, and against a gonk you start. Then the same ledger in a browser, a check of what
-  it says with the RDF Toolbox, and a
+  it says with the RDF Toolbox, the Dashboard over several ledgers and their agents, shown in
+  screenshots over a seeded history, and a
   lifecycle of your own: the states an item moves through and the moves it may make.
 - **An agent's ledger.** The ledger reached from another process over the socket, the way an
   agent's tool calls reach it; and over MCP, where `ikigai mcp` projects the ledger's actions as
@@ -85,11 +86,12 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.18.0,
+The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.18.1,
 `ikigai-store` 0.3.3, `ikigai-browse` 0.20.7, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
 book's own crates (the ones its Rust listings and in-page cells run) take the same ledger and store,
-so a cell, a listing and a `console` block all answer from one ledger. Two patch releases differ, and
-no page shows either: those crates lock `ikigai-core` 0.2.12 and `ikigai-browse` 0.20.6. gonk serves
+so a cell, a listing and a `console` block all answer from one ledger. Three patch releases differ, and
+no page shows any of them: those crates lock `ikigai-core` 0.2.12, `ikigai-ledger` 0.18.0 and
+`ikigai-browse` 0.20.6. gonk serves
 scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
 This gonk's HTTP door lets a caller with no identity read the ledgers and write nothing (gonk

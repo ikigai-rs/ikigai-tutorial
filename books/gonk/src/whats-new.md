@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-03**: A new chapter, The Dashboard, seeds three ledgers with weeks of invented history and goes through each tab in screenshots: charts and the backfill sentence, agents' numbers as SPARQL you can click, polling and its pause control, then the Cache and System tabs.
+
+  Pages: [The Dashboard](ledger/dashboard.md), [Checking what you have](ledger/checking.md), [The ledger in a browser](ledger/browser.md), [A lifecycle for your ledger](ledger/lifecycle.md), [Introduction](introduction.md)
+
 - **2026-11-03**: A new chapter, Checking what you have, turns on the RDF Toolbox with gonk.toolbox.dist and checks a ledger's items, one item, and what it says against SHACL shapes, each read under your own capability.
 
   Pages: [Checking what you have](ledger/checking.md), [The ledger in a browser](ledger/browser.md), [A lifecycle for your ledger](ledger/lifecycle.md), [Introduction](introduction.md)
