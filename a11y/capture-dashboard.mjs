@@ -104,7 +104,11 @@ try {
   const number = page.locator("td a").nth(1);
   await number.focus();
   await shots.take(page.locator(".panel").filter({ has: number }).first(), "agents-number-focused");
-  const [opened] = await Promise.all([context.waitForEvent("page"), number.click()]);
+  // The link's own address in a tab of its own, as a click gives: on the runner's Chrome a click here
+  // opened no tab within 30 s, for a reason not found, though Chrome for Testing's does.
+  if ((await number.getAttribute("target")) !== "_blank") throw new Error("a number's link no longer opens a new tab");
+  const opened = await context.newPage();
+  await opened.goto(new URL(await number.getAttribute("href"), base).href);
   await opened.waitForLoadState("networkidle");
   await opened.setViewportSize({ width: 1280, height: 900 });
   await shots.take(opened, "agents-sparql-results");
