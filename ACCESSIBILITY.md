@@ -55,9 +55,10 @@ a review comment.
   harness's twelve stages in The ikigai Architecture's "Spaces that wrap spaces", each stage in a
   light and a dark copy), and the ones a page draws (a stage a reader makes, kept in its own tab).
 - **Screenshots** committed into a book (the gonk Book's "The Dashboard", `scripts/capture-dashboard.sh`,
-  WebP in `ledger/dashboard/img/`): each with alt text saying what it shows, beside the sentence it
+  WebP in `ledger/dashboard/img/`; The ikigai Book's "Checking a resource", `scripts/capture-toolbox.sh`,
+  WebP in `building/check/img/`): each with alt text saying what it shows, beside the sentence it
   illustrates; a light and a dark copy where a figure has both, the theme's copy shown by
-  `css/shots.css` and the other `display: none`. The pages they show are gonk's. The alt text is
+  `css/shots.css` and the other `display: none`. The pages they show are gonk's and the RDF Toolbox's. The alt text is
   written by hand and nothing checks that it still matches a regenerated image.
 - **The stages viewer** (`js/stages.js`, `css/stages.css`, one copy every book can load; today
   the live host in The ikigai Book and the resilience harness in The ikigai Architecture): numbered tabs on the ARIA tabs pattern

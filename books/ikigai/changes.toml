@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-03"
+summary = "\"Checking a resource\" now shows the RDF Toolbox page itself, in light and dark screenshots: Validate, Format, a SHACL finding, the SPARQL tab, and what a caller without the scope sees, including a verdict that can mislead when the data was refused."
+pages = ["building/checking.md"]
+
+[[change]]
+date = "2026-11-03"
 summary = "A new chapter, \"Failure has a class\", teaches the seven failure classes and their HTTP statuses, declaring how an action fails, a retry budget granted as a capability, and a run deadline crossing a mount over a real socket."
 pages = ["beyond/failure.md", "beyond/preference.md", "modules/status.md"]
 

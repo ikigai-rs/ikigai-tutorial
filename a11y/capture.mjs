@@ -1,5 +1,5 @@
 // Generated screenshots for a book: what any capture script needs, whatever page it shows (ledger
-// #2973, and the path ledger #2023 reuses). `capture-dashboard.mjs` is the first to use it.
+// #2973, and the path ledger #2023 reuses). `capture-dashboard.mjs` and `capture-toolbox.mjs` use it.
 //
 // The browser is the one axe-browser.mjs drives, for the same reason: `playwright-core` is pinned
 // exactly and downloads nothing, the browser is the machine's installed Google Chrome or the binary
