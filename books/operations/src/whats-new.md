@@ -5,6 +5,12 @@
 
 What has changed in Running ikigai, most recent first: the date, what was added or changed, and the pages to read for it. Smaller upkeep (moving to a newer release when nothing a reader does changes, a corrected link, a typo) is not listed.
 
+## 2026-11
+
+- **2026-11-03**: A new chapter, "Logging": a host that opens an ikigai-log log, per-request attribution, reading segments as text and Turtle, escaped values, rotation and drops, encrypted backups, restores from a decrypted backup proved with verify against a tampered copy, and grep, awk and SPARQL queries over the segments.
+
+  Pages: [Logging](running/logging.md)
+
 ## 2026-10
 
 - **2026-10-27**: A new book, for operators: the ikigai binary, its flags and subcommands, and what it takes to run kernels for real. Every command in it is run against a pinned release whenever the book is built, so its output cannot go stale. The first chapter is "The REPL and its modes": the full-screen and line REPLs, a quiet session that replays from a file, -c batches and how they read stdin, pipes, maps and forks, Lisp with -e and --load, describe and help, and the same REPL attached to a served kernel with --connect. The rest of the outline is in the table of contents.

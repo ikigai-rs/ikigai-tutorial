@@ -193,6 +193,11 @@ ikigai-fn = "0.9.0"
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
 ikigai-json = "0.3.1"
+# The log: its line grammar, vocabulary, writer, tracer and `urn:log:*`, for Running ikigai's
+# "Logging" and the host it runs, `crates/log-host`. No released `ikigai` binary links it, so the
+# chapter needs a host. 0.9.2 is the floor: its escaping of control and bidirectional characters
+# (ledger #2732, #2917) is what the chapter shows. A 0.x caret: also a ceiling (<0.10.0).
+ikigai-log = "0.9.2"
 # Bytes transrepted, for "Streams, I: bytes are a representation" (ledger #2253): `urn:compress:gzip`
 # and `urn:decompress:gzip` (and zlib), each also a registered transreptor, with a decompression
 # bound (`max-bytes`) that refuses rather than truncates. 0.2.0 is the published head and the floor;

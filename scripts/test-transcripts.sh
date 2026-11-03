@@ -33,6 +33,14 @@
 #         redirect (the runner run by hand) the same page clones from GitHub and checks out the
 #         same commit, so the redirect changes where the bytes come from, never which bytes.
 #
+#   log-host is this workspace's own `crates/log-host`: the kernel Running ikigai's "Logging"
+#         serves, because no released `ikigai` opens a log. Built here and copied alone into
+#         `target/log-host/bin/`, as model-stub is.
+#
+#   rage  is pinned to ONE crates.io version in `books/operations/rage.version`: the age-format
+#         encryption that same chapter's offsite backup shows. Installed `--locked` into
+#         `target/rage/<version>/`.
+#
 #   model-stub is this workspace's own `crates/model-stub`: a deterministic `urn:llm:` peer on a
 #         Unix socket, which "Scripts and sentences in gonk" and the "Ways of working" pages start
 #         and mount so a scratch gonk drafts, explains and reviews without a real model or the
@@ -142,6 +150,23 @@ stub_root="target/model-stub/bin"
 mkdir -p "$stub_root"
 cp target/debug/model-stub "$stub_root/"
 
+cargo build --quiet -p log-host
+log_host_root="target/log-host/bin"
+mkdir -p "$log_host_root"
+cp target/debug/log-host "$log_host_root/"
+
+rage_version="$(tr -d '[:space:]' < books/operations/rage.version)"
+case "$rage_version" in
+    [0-9]*.[0-9]*.[0-9]*) ;;
+    *) echo "books/operations/rage.version is not a version: '$rage_version'" >&2; exit 2 ;;
+esac
+rage_root="target/rage/$rage_version"
+if [ ! -x "$rage_root/bin/rage" ]; then
+    echo "installing rage $rage_version into $rage_root (once per version)"
+    cargo install --locked rage --version "=$rage_version" \
+        --root "$rage_root" --target-dir "$rage_root/build"
+fi
+
 starter_rev="$(tr -d '[:space:]' < books/gonk/starter.rev)"
 case "$starter_rev" in
     *[!0-9a-f]*|'') echo "books/gonk/starter.rev is not a git revision: '$starter_rev'" >&2; exit 2 ;;
@@ -179,6 +204,7 @@ GIT_CONFIG_COUNT=1 \
 echo "── Running ikigai (ikigai-cli $ops_cli, features quic and web) ──────────────────"
 "$ops_cli_root/bin/ikigai" --version
 cargo run --quiet -p book-transcripts -- books/operations --strict --path "$ops_cli_root/bin" \
+    --path "$log_host_root" --path "$rage_root/bin" \
     || status=1
 
 # The harness's own serving fixture, with the same binary: a QUIC server on port 0 with the
