@@ -47,8 +47,9 @@ it, under the CLI's own engine. Its `urn:file:` names are the same files with th
 compiled in, so a cell and a REPL line name one resource. The cells on the page share one
 kernel and one cache, so run them in order. A cell whose answer is an HTML page shows the page,
 with its HTML one click away; every other answer stays text. The page cannot do two things:
-write a file, and watch one. So `urn:file:river.nt` in a cell is the copy the example commits, the one section
-4's build line writes (`check.sh` holds the two to each other). Sections 2, 4 and 7 stay
+write a file, and watch one. So `urn:file:river.nt` in a cell is the copy the example commits,
+the one section 4's build line writes (`check.sh` holds the two to each other). Sections 2, 4
+and 7 stay
 REPL transcripts: section 2 needs a web server, section 4 writes the river and watches the
 workspace, and section 7 writes and lists files.
 
@@ -230,8 +231,8 @@ web addresses, so her items are named by their links:
 
 That item has no title, which RSS 2.0 allows; the river's queries call it `(untitled)`, and
 section 5's page links it by its feed and date instead, because a list of links that all say
-"(untitled)" does not say where any of them goes. Its description is HTML, kept as text. And its date is there twice. RSS dates are written the
-way email dates are, `Sat, 24 Oct 2026 16:45:00 GMT`, which nothing can sort or compare.
+"(untitled)" does not say where any of them goes. Its description is HTML, kept as text. And
+its date is there twice. RSS dates are written the way email dates are, `Sat, 24 Oct 2026 16:45:00 GMT`, which nothing can sort or compare.
 The stylesheet keeps that as `dcterms:issued`, and when it can read it, adds a `dc:date` in
 the form SPARQL compares, `2026-10-24T16:45:00Z`, typed `xsd:dateTime`. A date it cannot
 read gets no `dc:date` rather than a wrong one.
@@ -405,8 +406,9 @@ knows anything about feeds. `ws/views/` holds four:
   about caching?" can be loaded into a feed reader.
 
 Each face is the same three steps with a different stylesheet at the end. Only the first is
-HTML, so only its cell shows a page. Markdown, RSS and OPML are not pages, so those three cells
-print the face as the text it is, which is also what a program reading it gets.
+HTML, so only its cell shows a page. Markdown, RSS and OPML are not pages, so those three cells,
+like the census's CSV in section 5, print the answer as the text it is, which is also what a
+program reading it gets.
 
 The page, over `river.rq`, every item in the river, newest first:
 
