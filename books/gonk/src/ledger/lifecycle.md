@@ -98,8 +98,8 @@ the moves. gonk reads the document only when it starts, so a change also takes a
 
 ## Start it, and read the lifecycle back
 
-Now start gonk with the real config. If the gonk from [The ledger in a
-browser](browser.md) is still running, stop it first, since this one takes the same port
+Now start gonk with the real config. If the gonk from [Checking what you
+have](checking.md) is still running, stop it first, since this one takes the same port
 ([A gonk per chapter](../introduction.md#a-gonk-per-chapter)).
 
 <!-- transcript: serve -->
