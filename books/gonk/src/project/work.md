@@ -95,7 +95,7 @@ $ PYTHONDONTWRITEBYTECODE=1 python3 repro.py 2027-01-31
 ## Fix it, and check the box in the same commit
 
 <!-- transcript: file cap.patch -->
-```diff
+```text
 --- a/artifacts/service/lending/domain.py
 +++ b/artifacts/service/lending/domain.py
 @@ -18,6 +18,7 @@
