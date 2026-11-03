@@ -122,7 +122,8 @@ with an `IssueContext` gives it a `not_after`, every sub-request inherits it and
 shorten it, and an endpoint or an overlay reads what is left with `Invocation::time_left`
 (an overlay that would wait for a retry checks the wait fits first). Wire v9, from
 `ikigai-cli` 0.1.66, carries the time left across a mount, so a peer's work is held to the
-caller's deadline too. It is still a deadline on the answer: the run is told how long it
+caller's deadline too ([Failure has a class](../beyond/failure.md), later in the book, runs it
+over a socket). It is still a deadline on the answer: the run is told how long it
 has, and nothing stops a computation that ignores it, so abandoned-never-stopped holds. Treat this
 section as the direction and the table above as the state, and do not plan a deployment on
 the difference.
@@ -149,7 +150,8 @@ an endpoint you write can rely on, or what a page shows:
   verbs may be re-issued; an action may state the classes it fails with (`fails(..)`,
   `ik:mayFail` in its contract); a run may carry a shared retry budget, granted as
   `urn:cap:retry:<n>`, and a deadline, above. `ikigai-throttle` 0.2.0 decides by the class,
-  which [Preference](../beyond/preference.md) shows.
+  which [Preference](../beyond/preference.md) shows. [Failure has a
+  class](../beyond/failure.md), later in the book, teaches all of it.
 - **0.1.109 — dynamic spaces.** A running kernel's arrangement can gain and lose doors
   without replacing its root: a `DynamicSpace` is rebuilt from a declaration resource, and
   each successful bind cuts the one thread every answer it served hangs from. [A space that changes

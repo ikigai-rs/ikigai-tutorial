@@ -112,10 +112,10 @@ Re-issuing those somewhere else would only produce a second wrong answer.
 
 Notice that this is the payoff for the chapter about the socket: the taxonomy survives the
 wire, so the fallback rule can be about *what kind of failure it was* rather than about the
-fact that something failed. (The three newest variants, `RetryAfter`, `OverBudget` and
-`Refused`, cross the wire typed from wire v9, `ikigai-cli` 0.1.66; this book's transport
-crates are still 0.1.63, so the tests above hand `Failover` the error directly rather than
-through a socket.)
+fact that something failed. (`RetryAfter`, `OverBudget` and `Refused` cross the wire typed
+from wire v9, `ikigai-cli` 0.1.66. The tests above hand `Failover` the error directly, to keep
+each rule on one page; [Failure has a class](failure.md) serves those errors over a real socket,
+and teaches the classes themselves.)
 
 ### A denial still propagates
 

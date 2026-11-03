@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-03**: A new chapter, "Failure has a class", teaches the seven failure classes and their HTTP statuses, declaring how an action fails, a retry budget granted as a capability, and a run deadline crossing a mount over a real socket.
+
+  Pages: [Failure has a class](beyond/failure.md), [Preferential resolution](beyond/preference.md), [Where this actually stands](modules/status.md)
+
 - **2026-11-02**: In "A river of feeds", every step that answers HTML now shows the page it is, with its source one click away; the river page reflows on a phone, and an untitled item's link names its feed and date.
 
   Pages: [A river of feeds](explore/rss.md)

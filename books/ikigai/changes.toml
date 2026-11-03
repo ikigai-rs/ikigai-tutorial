@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-03"
+summary = "A new chapter, \"Failure has a class\", teaches the seven failure classes and their HTTP statuses, declaring how an action fails, a retry budget granted as a capability, and a run deadline crossing a mount over a real socket."
+pages = ["beyond/failure.md", "beyond/preference.md", "modules/status.md"]
+
+[[change]]
 date = "2026-11-02"
 summary = "In \"A river of feeds\", every step that answers HTML now shows the page it is, with its source one click away; the river page reflows on a phone, and an untitled item's link names its feed and date."
 pages = ["explore/rss.md"]

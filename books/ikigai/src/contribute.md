@@ -102,6 +102,7 @@ could not classify it. `Permanent` is always implied, and `Denied` is implied be
 nonempty `requires`. Leaving the declaration unstated makes no promise; it does not
 mean the action cannot fail. State what the implementation can return so a consumer
 can decide whether to retry, wait, reduce the input or ask for authority.
+[Failure has a class](beyond/failure.md) teaches what each class lets a caller do.
 
 ## The tests
 
