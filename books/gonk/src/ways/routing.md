@@ -142,12 +142,12 @@ $ cd lawnboy/gonk-worker && for a in claude codex; do sed -i.bak "s|^routers = .
 $ cd lawnboy/gonk-worker && grep '^routers ' .gonk/worker-claude.toml
 routers = ["urn:iki:host:gonk:client:…"]
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
-nothing ready with labels worker:lawnboy,agent:claude or worker:mac,agent:claude or worker:pool,agent:claude
+nothing ready with labels worker:lawnboy,agent:claude or worker:pool,agent:claude
 ```
 
 `plan` asks gonk what each loop would take now and why it skips the rest, and changes nothing.
-Each loop also reads the shared `worker:pool` label, and on a Mac `worker:mac`, after its own, which
-is why the line names three selections. A dispatch with no `worker:` label in `--labels` targets
+Each loop also reads the shared `worker:pool` label after its own, which is why the line names two
+selections; on a Mac it reads `worker:mac` before the pool as well, and names three. A dispatch with no `worker:` label in `--labels` targets
 the pool.
 
 ## The dispatcher routes
