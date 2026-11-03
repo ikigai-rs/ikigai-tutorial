@@ -184,7 +184,7 @@ mod tests {
 
     #[test]
     fn a_ledger_of_your_own_answers_as_the_page_says_in_page_order() {
-        run_page_in_order("ledger/your-own.md", 10);
+        run_page_in_order("ledger/your-own.md", 11);
     }
 
     #[test]

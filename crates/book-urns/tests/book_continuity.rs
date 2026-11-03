@@ -157,7 +157,12 @@ fn wrong_neighbors(file: &str, text: &str, order: &[String]) -> Vec<String> {
     let mut out = Vec::new();
     for (link_text, target, _) in links(&prose) {
         let pos = prose.find(&format!("[{link_text}]")).unwrap_or(0);
-        let before = &prose[pos.saturating_sub(40)..pos];
+        // Forty bytes back, then on to the start of the character it landed in (`…` is three bytes).
+        let mut start = pos.saturating_sub(40);
+        while !prose.is_char_boundary(start) {
+            start -= 1;
+        }
+        let before = &prose[start..pos];
         let Some(direction) = claimed(&link_text, before) else {
             continue;
         };

@@ -116,7 +116,7 @@ here is a team concept; a team is the set of tokens its ledger's name appears in
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{shop (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
@@ -523,6 +523,7 @@ urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
 urn:iki:ledger:{ledger}:defer
+urn:iki:ledger:{ledger}:history
 urn:iki:ledger:{ledger}:item:{id}:about
 urn:iki:ledger:{ledger}:label
 urn:iki:ledger:{ledger}:link

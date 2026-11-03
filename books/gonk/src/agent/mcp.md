@@ -53,7 +53,7 @@ asks for. Start the server, which reads the certificates it trusts at startup:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
 …
@@ -135,9 +135,11 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-defer__delete"
 "name":"ledger-defer__sink"
 "name":"ledger-doctor__source"
+"name":"ledger-history__sink"
 "name":"ledger-item-about__delete"
 "name":"ledger-item-about__sink"
 "name":"ledger-item-closed__exists"
+"name":"ledger-item-history__source"
 "name":"ledger-item-holder-is__exists"
 "name":"ledger-item-state-is__exists"
 "name":"ledger-item-state__sink"
@@ -159,9 +161,10 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-reopen__sink"
 ```
 
-Thirty-three tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
+Thirty-five tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
 `urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. Eight of
-them arrived with `ikigai-ledger` 0.5.0 and are not used in this book yet: an item's lifecycle
+them arrived with `ikigai-ledger` 0.5.0, and [A lifecycle for your
+ledger](../ledger/lifecycle.md) uses most of them over the socket: an item's lifecycle
 **state** (`ledger-item-state__*`, a compare-and-set, so of two agents moving one item out of the
 same state exactly one wins), the **assertions** an agent can check before it acts
 (`ledger-item-state-is__exists`, `-holder-is`, `-closed`), the **lifecycles** themselves as
@@ -173,6 +176,9 @@ listing (the figure part 5 [asks for](../spec/ledger.md#the-walk)).
 Two more arrived by 0.14: `ledger-counts__source`, a ledger's dated counts, and
 `ledger-backfill-closed-at__sink`, which gives items closed before close times were recorded a
 `closedAt` marked as backfilled.
+And two with 0.18.0: `ledger-item-history__source`, [what happened to an
+item](../ledger/lifecycle.md#what-happened-to-an-item), and `ledger-history__sink`, which only a
+principal enrolled as an importer may use, to bring an item's past events from another system.
 A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
 deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging

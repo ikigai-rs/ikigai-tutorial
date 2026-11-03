@@ -47,7 +47,7 @@ root is the shape of a typo, not something to serve as empty.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.0 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{notes (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
@@ -191,6 +191,26 @@ A passkey invited with `--browse read`, as in [the browser chapter](../ledger/br
 reads every root; `--browse read --root notes` reads only this one. The pages are browse's own
 HTML faces (crumbs, listings, a highlighted file view with `#L{n}` anchors and the annotation
 margin) inside gonk's header.
+
+A person signed in with `--browse derive` also gets an annotate form on a file view, and selecting a
+line by its number fills the form's quote with that line's text. Clicking the gutter does that with a
+pointer. From the keyboard the file is one tab stop and its line numbers are not in the tab order, so
+gonk's script adds a **line to quote** field and a **quote line** button to the form: type a number
+and press Enter, or Tab to the button, and the line is selected and quoted while focus stays where it
+was. The field shows the selected line, so after opening a `#L42` link the button alone quotes line
+42. A line the file does not have, or a quote you typed yourself, changes nothing, and the status
+region says why. Using the form takes a signed-in browser, which a check cannot be, but the script
+that adds the controls is served to anyone:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/static/gonk.js | grep -o -E '"(line to quote |quote line)"'
+"line to quote "
+"quote line"
+```
+
+gonk's own repository holds the keyboard walk, in `tests/browser/quote_keyboard_2905.mjs`. It is run by
+hand there and not by gonk's CI, and it has not been run for this book.
 
 For an ikigai host that should see the roots under their own names, as the ledger was in [Over the
 socket](../agent/socket.md#the-same-names-from-the-config-home), the mount line is the same shape

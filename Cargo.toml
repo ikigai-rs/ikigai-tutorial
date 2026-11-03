@@ -362,8 +362,8 @@ oxrdf = "0.3"
 # 0.13.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.12.0" was a ceiling
 # below 0.13.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.14.0).
-# 0.18.0 is the pin (set 2026-11-03, ledger #2956): what gonk's tag ledger-v0.18.0 links, ahead of
-# the 0.17.0 the pinned gonk (564146c) links until `books/gonk/gonk.rev` moves there. It requires
+# 0.18.0 is the pin (set 2026-11-03, ledger #2956): what the pinned gonk (`books/gonk/gonk.rev`,
+# 0de36f0, past its tag ledger-v0.18.0) links; set one commit ahead of that pin's move. It requires
 # store ^0.3.3, so the lock takes store 0.3.3 under the store pin below. The old pin "0.13.1" was a
 # ceiling below 0.14.0. A 0.x caret: also a ceiling (<0.19.0). The Architecture Book's manifold
 # prints the new names (`history`, `counts`, `backfill-closed-at`); no gonk Book cell moved.
@@ -448,7 +448,8 @@ ikigai-store = { version = "0.3.1", default-features = false }
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.19.0" was a ceiling
 # below 0.20.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.21.0).
 # 0.20.6 is the pin (set 2026-11-02, ledger #2853): the newest release, on ikigai-fn 0.9, the copy
-# this workspace's crates share.
+# this workspace's crates share. The pinned gonk (0de36f0) links 0.20.7, and no page shows the patch;
+# taking it re-resolves oxigraph's crates to rand 0.8 and windows-sys 0.52 (books/gonk/DESIGN.md).
 ikigai-browse = "0.20.6"
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
