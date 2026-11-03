@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-02**: In "A river of feeds", every step that answers HTML now shows the page it is, with its source one click away; the river page reflows on a phone, and an untitled item's link names its feed and date.
+
+  Pages: [A river of feeds](explore/rss.md)
+
 - **2026-11-02**: The Python and TypeScript tracks and "When a rule is not enough" now show mounted as the reason the host keeps no copy of a peer's answer, distinct from declared for an answer declared uncacheable. The shell examples now replay against ikigai-cli 0.2.9, with updated cache and river dependency snapshots.
 
   Pages: [The Python track](polyglot/python.md), [The TypeScript track](polyglot/typescript.md), [When a rule is not enough](explore/beyond-rules.md), [Where this actually stands](modules/status.md), [Twenty minutes with the CLI](front-door/cli.md), [A river of feeds](explore/rss.md)

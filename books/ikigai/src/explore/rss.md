@@ -45,8 +45,9 @@ says why.
 Sections 1, 3, 5 and 6 are also Run cells, which run in this page, on a kernel compiled into
 it, under the CLI's own engine. Its `urn:file:` names are the same files with the same bytes,
 compiled in, so a cell and a REPL line name one resource. The cells on the page share one
-kernel and one cache, so run them in order. The page cannot do two things: write a file, and
-watch one. So `urn:file:river.nt` in a cell is the copy the example commits, the one section
+kernel and one cache, so run them in order. A cell whose answer is an HTML page shows the page,
+with its HTML one click away; every other answer stays text. The page cannot do two things:
+write a file, and watch one. So `urn:file:river.nt` in a cell is the copy the example commits, the one section
 4's build line writes (`check.sh` holds the two to each other). Sections 2, 4 and 7 stay
 REPL transcripts: section 2 needs a web server, section 4 writes the river and watches the
 workspace, and section 7 writes and lists files.
@@ -227,8 +228,9 @@ web addresses, so her items are named by their links:
 [3 computed]</pre>
 </div>
 
-That item has no title, which RSS 2.0 allows; the river's queries call it `(untitled)`. Its
-description is HTML, kept as text. And its date is there twice. RSS dates are written the
+That item has no title, which RSS 2.0 allows; the river's queries call it `(untitled)`, and
+section 5's page links it by its feed and date instead, because a list of links that all say
+"(untitled)" does not say where any of them goes. Its description is HTML, kept as text. And its date is there twice. RSS dates are written the
 way email dates are, `Sat, 24 Oct 2026 16:45:00 GMT`, which nothing can sort or compare.
 The stylesheet keeps that as `dcterms:issued`, and when it can read it, adds a `dc:date` in
 the form SPARQL compares, `2026-10-24T16:45:00Z`, typed `xsd:dateTime`. A date it cannot
@@ -323,37 +325,35 @@ The other queries have a blank to fill: `since.rq` a day, `in.rq` a category, `f
 feed and `search.rq` some text. Each blank is a `$r{{name}}` marker, and
 `urn:iki:fn:compose`, which filled a template in [Reshaping JSON with
 jq](jq.md#4-a-template-that-asks-questions), fills it from an argument of the same name. Their
-answers have more columns than fit on a line, so here each goes through
-`views/digest.xsl`, which writes a SPARQL answer as a short Markdown list (section 6 is
-about views):
+answers have more columns than fit on a line, so here each goes through `views/page.xsl`, which
+writes a SPARQL answer as an HTML page (section 6 is about views). Each is a page, so Run shows
+it as one, the way a browser would, with the HTML the stylesheet wrote under "HTML source".
 
-<div class="ikigai-run" data-cmd='source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
-source urn:iki:fn:compose src=urn:file:queries/in.rq category=caching | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
-source urn:iki:fn:compose src=urn:file:queries/from.rq feed=https://carol.example.com/index.xml | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl
-source urn:iki:fn:compose src=urn:file:queries/search.rq q=cach | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl'>
-<pre class="ikigai-run-expected"># Digest
-&#32;
-- 2026-10-27 [My home server caches everything now](https://bob.example.org/2026/10/home-server-cache/) from Bob's Workbench
-- 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
-- 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
-- 2026-10-15 [A static site in one afternoon](https://alice.example.com/posts/static-site/) from Alice Writes Things
-[3 computed]
-# Digest
-&#32;
-- 2026-10-27 [My home server caches everything now](https://bob.example.org/2026/10/home-server-cache/) from Bob's Workbench
-- 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
-[3 computed]
-# Digest
-&#32;
-- 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
-- 2026-10-12 [(untitled)](https://carol.example.com/2026/10/12/coffee/) from carol.example.com
-- 2026-10-05 [A longer one about feed readers](https://carol.example.com/2026/10/05/readers/) from carol.example.com
-[3 computed]
-# Digest
-&#32;
-- 2026-10-27 [My home server caches everything now](https://bob.example.org/2026/10/home-server-cache/) from Bob's Workbench
-- 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
-- 2026-09-23 [Episode 11: Caching for people who hate caching](https://dave.example.org/episodes/11) from Dave Talks
+Every item since a day:
+
+<div class="ikigai-run" data-render='html' data-cmd='source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl'>
+<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;meta content='width=device-width, initial-scale=1' name='viewport'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/home-server-cache/'&gt;My home server caches everything now&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-27)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/ETag/'&gt;Why my feed sends an ETag&lt;/a&gt; (Alice Writes Things, 2026-10-26)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/24/rss-cloud/'&gt;Untitled item from carol.example.com, 2026-10-24&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/static-site/'&gt;A static site in one afternoon&lt;/a&gt; (Alice Writes Things, 2026-10-15)&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
+[3 computed]</pre>
+</div>
+
+Every item in a category:
+
+<div class="ikigai-run" data-render='html' data-cmd='source urn:iki:fn:compose src=urn:file:queries/in.rq category=caching | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl'>
+<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;meta content='width=device-width, initial-scale=1' name='viewport'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/home-server-cache/'&gt;My home server caches everything now&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-27)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/ETag/'&gt;Why my feed sends an ETag&lt;/a&gt; (Alice Writes Things, 2026-10-26)&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
+[3 computed]</pre>
+</div>
+
+Every item from one feed:
+
+<div class="ikigai-run" data-render='html' data-cmd='source urn:iki:fn:compose src=urn:file:queries/from.rq feed=https://carol.example.com/index.xml | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl'>
+<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;meta content='width=device-width, initial-scale=1' name='viewport'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/24/rss-cloud/'&gt;Untitled item from carol.example.com, 2026-10-24&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/12/coffee/'&gt;Untitled item from carol.example.com, 2026-10-12&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/05/readers/'&gt;A longer one about feed readers&lt;/a&gt; (carol.example.com, 2026-10-05)&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
+[3 computed]</pre>
+</div>
+
+And every item that mentions some text:
+
+<div class="ikigai-run" data-render='html' data-cmd='source urn:iki:fn:compose src=urn:file:queries/search.rq q=cach | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl'>
+<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;meta content='width=device-width, initial-scale=1' name='viewport'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/home-server-cache/'&gt;My home server caches everything now&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-27)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/ETag/'&gt;Why my feed sends an ETag&lt;/a&gt; (Alice Writes Things, 2026-10-26)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/11'&gt;Episode 11: Caching for people who hate caching&lt;/a&gt; (Dave Talks, 2026-09-23)&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
 [3 computed]</pre>
 </div>
 
@@ -379,10 +379,8 @@ a term and never syntax. `queries/search-bound.rq` is the search written for it,
 where `search.rq` has its marker (a bound variable must be one the query projects, so it
 selects `?q` too):
 
-<div class="ikigai-run" data-cmd='source urn:file:queries/search-bound.rq | urn:sparql:select graph=urn:file:river.nt bindings="{\"q\": \"href=\\\"https\"}" as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl'>
-<pre class="ikigai-run-expected"># Digest
-&#32;
-- 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
+<div class="ikigai-run" data-render='html' data-cmd='source urn:file:queries/search-bound.rq | urn:sparql:select graph=urn:file:river.nt bindings="{\"q\": \"href=\\\"https\"}" as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl'>
+<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;meta content='width=device-width, initial-scale=1' name='viewport'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/24/rss-cloud/'&gt;Untitled item from carol.example.com, 2026-10-24&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
 [3 computed]</pre>
 </div>
 
@@ -398,25 +396,26 @@ A SPARQL answer has a standard XML form, `application/sparql-results+xml`, and X
 XML. So one answer can be written out many ways, a stylesheet for each, and none of them
 knows anything about feeds. `ws/views/` holds four:
 
-- `page.xsl`, an HTML page, a list of links with each item's feed and day; everything it
-  takes from a feed is written as text, never as markup, so a feed cannot put a script in
-  your page;
-- `digest.xsl`, a Markdown list, as above;
+- `page.xsl`, an HTML page, as above, a list of links with each item's feed and day; everything
+  it takes from a feed is written as text, never as markup, so a feed cannot put a script in
+  your page, and its viewport line lets it reflow on a phone;
+- `digest.xsl`, a Markdown list;
 - `feed.xsl`, an RSS feed of the answer, so a search is something you can subscribe to;
 - `opml.xsl`, an OPML directory of the feeds that matched, so the answer to "who writes
   about caching?" can be loaded into a feed reader.
 
-Each face is the same three steps with a different stylesheet at the end. The page, over
-`river.rq`, every item in the river, newest first. Run shows it rendered, the way a browser would
-show it, with the HTML the stylesheet wrote under "HTML source":
+Each face is the same three steps with a different stylesheet at the end. Only the first is
+HTML, so only its cell shows a page. Markdown, RSS and OPML are not pages, so those three cells
+print the face as the text it is, which is also what a program reading it gets.
+
+The page, over `river.rq`, every item in the river, newest first:
 
 <div class="ikigai-run" data-render='html' data-cmd='source urn:file:queries/river.rq | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl'>
-<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/home-server-cache/'&gt;My home server caches everything now&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-27)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/ETag/'&gt;Why my feed sends an ETag&lt;/a&gt; (Alice Writes Things, 2026-10-26)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/24/rss-cloud/'&gt;(untitled)&lt;/a&gt; (carol.example.com, 2026-10-24)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/static-site/'&gt;A static site in one afternoon&lt;/a&gt; (Alice Writes Things, 2026-10-15)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/12/coffee/'&gt;(untitled)&lt;/a&gt; (carol.example.com, 2026-10-12)&lt;/li&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/dovetails/'&gt;Dovetails by hand&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-10)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/12'&gt;Episode 12: The small web&lt;/a&gt; (Dave Talks, 2026-10-07)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/05/readers/'&gt;A longer one about feed readers&lt;/a&gt; (carol.example.com, 2026-10-05)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/tomatoes/'&gt;Tomatoes, finally&lt;/a&gt; (Alice Writes Things, 2026-10-02)&lt;/li&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/09/still-rss/'&gt;Why I still read RSS&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-09-28)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/11'&gt;Episode 11: Caching for people who hate caching&lt;/a&gt; (Dave Talks, 2026-09-23)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/10'&gt;Episode 10: Live from the garage&lt;/a&gt; (Dave Talks, 2026-09-09)&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
+<pre class="ikigai-run-expected">&lt;html lang='en'&gt;&lt;head&gt;&lt;meta charset='utf-8'/&gt;&lt;meta content='width=device-width, initial-scale=1' name='viewport'/&gt;&lt;title&gt;River&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;River&lt;/h1&gt;&lt;ol&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/home-server-cache/'&gt;My home server caches everything now&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-27)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/ETag/'&gt;Why my feed sends an ETag&lt;/a&gt; (Alice Writes Things, 2026-10-26)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/24/rss-cloud/'&gt;Untitled item from carol.example.com, 2026-10-24&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/static-site/'&gt;A static site in one afternoon&lt;/a&gt; (Alice Writes Things, 2026-10-15)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/12/coffee/'&gt;Untitled item from carol.example.com, 2026-10-12&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/10/dovetails/'&gt;Dovetails by hand&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-10-10)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/12'&gt;Episode 12: The small web&lt;/a&gt; (Dave Talks, 2026-10-07)&lt;/li&gt;&lt;li&gt;&lt;a href='https://carol.example.com/2026/10/05/readers/'&gt;A longer one about feed readers&lt;/a&gt; (carol.example.com, 2026-10-05)&lt;/li&gt;&lt;li&gt;&lt;a href='https://alice.example.com/posts/tomatoes/'&gt;Tomatoes, finally&lt;/a&gt; (Alice Writes Things, 2026-10-02)&lt;/li&gt;&lt;li&gt;&lt;a href='https://bob.example.org/2026/09/still-rss/'&gt;Why I still read RSS&lt;/a&gt; (Bob&amp;apos;s Workbench, 2026-09-28)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/11'&gt;Episode 11: Caching for people who hate caching&lt;/a&gt; (Dave Talks, 2026-09-23)&lt;/li&gt;&lt;li&gt;&lt;a href='https://dave.example.org/episodes/10'&gt;Episode 10: Live from the garage&lt;/a&gt; (Dave Talks, 2026-09-09)&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;
 [3 computed]</pre>
 </div>
 
-The digest, section 5's first question again, so all three of its answers come from the
-cache:
+The digest, section 5's first question again, so only the stylesheet runs:
 
 <div class="ikigai-run" data-cmd='source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl'>
 <pre class="ikigai-run-expected"># Digest
@@ -425,7 +424,7 @@ cache:
 - 2026-10-26 [Why my feed sends an ETag](https://alice.example.com/posts/ETag/) from Alice Writes Things
 - 2026-10-24 [(untitled)](https://carol.example.com/2026/10/24/rss-cloud/) from carol.example.com
 - 2026-10-15 [A static site in one afternoon](https://alice.example.com/posts/static-site/) from Alice Writes Things
-[3 cached]</pre>
+[2 cached · 1 computed]</pre>
 </div>
 
 A feed of the search for `cach`. Section 5 asked the same question, so only the stylesheet
@@ -448,7 +447,7 @@ writes the face into `ws/out/`:
 
 ```text
 ikigai> source urn:file:queries/river.rq | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl | sink urn:file:out/river.html
-wrote 1581 bytes to out/river.html
+wrote 1662 bytes to out/river.html
 [3 computed · 1 uncacheable]
 ikigai> source urn:iki:fn:compose src=urn:file:queries/since.rq since=2026-10-15 | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/digest.xsl | sink urn:file:out/digest.md
 wrote 455 bytes to out/digest.md
