@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-03"
+summary = "A new part, A project of your own, walks through one generated project: start it, change its spec, seed items, claim, work and close with evidence, run two agents, query and script it, set up a model, and draft a query from a sentence."
+pages = ["project/start.md", "project/change.md", "project/claim.md", "project/work.md", "project/two-agents.md", "project/query.md", "project/script.md", "project/model.md", "project/sentence.md", "introduction.md"]
+
+[[change]]
+date = "2026-11-03"
 summary = "A new chapter, A lifecycle for your ledger, teaches a lifecycle's required version, declared moves and their refusals, next drain= and state=, evidence on a close and an item's history. Every page is replayed at a newer gonk; Browse roots adds the keyboard quote field, and Review every commit the Queue badge's new name."
 pages = ["ledger/lifecycle.md", "ledger/your-own.md", "ledger/browser.md", "agent/mcp.md", "browse/roots.md", "ways/solo.md", "ways/workers.md", "ways/review-every-commit.md", "introduction.md"]
 

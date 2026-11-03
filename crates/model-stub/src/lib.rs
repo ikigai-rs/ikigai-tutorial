@@ -93,6 +93,43 @@ SELECT ?number ?title WHERE {
   GRAPH <urn:iki:ledger:graph:default> { ?item ledger:number ?number ; dcterms:title ?title }
 } ORDER BY ?number";
 
+/// "A project of your own" asks about the starter's library sample, whose ledger is `library`, so
+/// its drafts name that graph. This ask's first draft the check refuses and its repair passes.
+pub const ASK_LIBRARY_TITLES: &str = "the titles of the open items in the library ledger";
+
+/// The first draft for [`ASK_LIBRARY_TITLES`]: `ledger:state` is no predicate the graph uses.
+pub const LIBRARY_TITLES_FIRST: &str = "PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT ?title WHERE {
+  GRAPH <urn:iki:ledger:graph:library> { ?item ledger:state ledger:open ; dcterms:title ?title }
+} ORDER BY ?title";
+
+/// Its repair, once the prompt carries what the check refused.
+pub const LIBRARY_TITLES_REPAIRED: &str = "PREFIX ledger: <https://ikigai-rs.dev/ns/ledger#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT ?title WHERE {
+  GRAPH <urn:iki:ledger:graph:library> { ?item ledger:status ledger:open ; dcterms:title ?title }
+} ORDER BY ?title";
+
+/// An ask a weak model gets wrong the same way twice, which the repair cannot save.
+pub const ASK_LIBRARY_FEES: &str =
+    "the number and title of every open item about late fees, ordered by number";
+
+/// The draft for [`ASK_LIBRARY_FEES`]: it parses and names only predicates the graph uses, and
+/// matches nothing, because the status is written as the string `"open"` where the ledger stores
+/// the IRI `ledger:open`. The mistake [`P2_DRAFT`] makes, on the sample's ledger.
+pub const LIBRARY_FEES_DRAFT: &str = "SELECT ?number ?title
+WHERE {
+  GRAPH <urn:iki:ledger:graph:library> {
+    ?item a <https://ikigai-rs.dev/ns/ledger#Item> ;
+      <https://ikigai-rs.dev/ns/ledger#status> \"open\" ;
+      <https://ikigai-rs.dev/ns/ledger#number> ?number ;
+      <http://purl.org/dc/terms/title> ?title .
+    FILTER (CONTAINS(LCASE(?title), \"fee\"))
+  }
+}
+ORDER BY ?number";
+
 /// The stub's explanation, whatever it is asked to explain (browse-host's, word for word).
 pub const EXPLANATION: &str = "Defines `initials`, which joins the first letter of each \
 space-separated word of a name into one string.";
@@ -106,6 +143,17 @@ NOTE: Slicing the first byte panics on an empty word, so a name with two spaces 
 QUOTE: pub fn initials(name: &str) -> String {
 SEVERITY: minor
 NOTE: Returning a String allocates on every call; return a &str instead.
+";
+
+/// The file of the starter's library sample "A project of your own" reviews, after its fix.
+pub const LIBRARY_DOMAIN: &str = "artifacts/service/lending/domain.py";
+
+/// The stub's review of [`LIBRARY_DOMAIN`]: one finding, on the line the chapter's fix changes,
+/// whose claim that fix's reproduction refutes, so the page has a finding to decline.
+pub const LIBRARY_REVIEW: &str = "\
+QUOTE: \"fee_cents\": min(late * FEE_CENTS_PER_DAY, MAX_FEE_CENTS),
+SEVERITY: major
+NOTE: The cap is applied per day rather than to the total, so a return 41 days late still owes more than 1000 cents.
 ";
 
 /// The stub judge's answer to any claim: browse's four questions and a verdict, in the format
@@ -177,6 +225,14 @@ pub fn draft_for(prompt: &str) -> &'static str {
         } else {
             TITLES_FIRST
         }
+    } else if ask == ASK_LIBRARY_TITLES {
+        if repairing {
+            LIBRARY_TITLES_REPAIRED
+        } else {
+            LIBRARY_TITLES_FIRST
+        }
+    } else if ask == ASK_LIBRARY_FEES {
+        LIBRARY_FEES_DRAFT
     } else {
         ANYTHING
     }
@@ -201,7 +257,11 @@ impl Endpoint for Ask {
         let text = match kind {
             Kind::Review => {
                 let _ = writeln!(out, "model-stub: ask {n}: review {}", path_of(&prompt));
-                REVIEW.to_string()
+                if path_of(&prompt) == LIBRARY_DOMAIN {
+                    LIBRARY_REVIEW.to_string()
+                } else {
+                    REVIEW.to_string()
+                }
             }
             Kind::Judge => {
                 let _ = writeln!(out, "model-stub: ask {n}: judge one finding");
@@ -360,6 +420,26 @@ mod tests {
         assert_eq!(draft_for(&prompt(ASK_OPEN_COUNT, false)), OPEN_COUNT);
         assert_eq!(draft_for(&prompt("something else", false)), ANYTHING);
         assert_eq!(draft_for("no ask at all"), ANYTHING);
+    }
+
+    #[test]
+    fn the_library_asks_get_their_own_drafts() {
+        assert_eq!(
+            draft_for(&prompt(ASK_LIBRARY_TITLES, false)),
+            LIBRARY_TITLES_FIRST
+        );
+        assert_eq!(
+            draft_for(&prompt(ASK_LIBRARY_TITLES, true)),
+            LIBRARY_TITLES_REPAIRED
+        );
+        assert_eq!(
+            draft_for(&prompt(ASK_LIBRARY_FEES, false)),
+            LIBRARY_FEES_DRAFT
+        );
+        assert_eq!(
+            draft_for(&prompt(ASK_LIBRARY_FEES, true)),
+            LIBRARY_FEES_DRAFT
+        );
     }
 
     #[test]
