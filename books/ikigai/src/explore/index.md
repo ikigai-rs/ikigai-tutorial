@@ -57,13 +57,22 @@ Later in this part, a page built from them is served over HTTP.
 
 ## What you need
 
-For the Run buttons, nothing. For the shell steps, the `ikigai` command at 0.2.4 or later
-(`cargo install ikigai-cli --locked`; [Twenty minutes with the CLI](../front-door/cli.md)
-has the details), because 0.2.4 is the first release whose command can run jq, and 0.2.5
-the first that reads a `.geojson` file as JSON. The shell steps over the recorded week are
-replayed against `ikigai-cli` {{#include ../../ikigai-cli.version}}, the release the book
-is checked against, every time the book changes. The steps over the live feed cannot be,
-because the feed moves; each page says which release printed them, and when.
+For the Run buttons, nothing. For the shell steps, use `ikigai-cli`
+{{#include ../../ikigai-cli.version}}, the release the book is checked against. If you
+installed it in [Twenty minutes with the CLI](../front-door/cli.md), check your version
+with `ikigai --version`; otherwise, that chapter has the installation steps. To install
+the version used here:
+
+```bash
+cargo install ikigai-cli --locked --version '={{#include ../../ikigai-cli.version}}'
+```
+
+The shell steps over the recorded week are replayed against that release every time the
+book changes. The steps over the live feed cannot be, because the feed moves; each page
+says which release printed them, and when.
+
+If you still have a REPL open from [Twenty minutes with the CLI](../front-door/cli.md),
+quit it first: it is using the default workspace, `~/.ikigai/workspace/`.
 
 Work in a directory of your own, so nothing here touches the CLI's default workspace:
 
@@ -75,6 +84,4 @@ ikigai --plain --files ~/quakes
 ```
 
 `--files` makes `~/quakes` the file workspace, so `urn:file:quakes-2024-01-01.geojson`
-names the file you just downloaded, as it does in this page. If you still have a REPL open
-from the front door, quit it first: it is using the default workspace,
-`~/.ikigai/workspace/`.
+names the file you just downloaded, as it does in this page.
