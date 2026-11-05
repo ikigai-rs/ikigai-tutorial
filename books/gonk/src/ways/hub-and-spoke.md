@@ -334,14 +334,13 @@ says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process hub
-generated the library-lending sample (python, process hub) in …/library: 66 files
+generated the library-lending sample (python, process hub) in …/library: 67 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
   python3 tools/gonk.py next                   what to do first, and why
-
 AGENTS.md holds this process's rules; README.md walks through the sample.
 $ grep '^## ' library/AGENTS.md
 ## The loop
@@ -360,11 +359,11 @@ $ grep '^## ' library/AGENTS.md
 $ ls library/tools library/.gonk/templates
 library/.gonk/templates:
 brief.md
-
 library/tools:
 gonk.py
 harness.py
 hub.py
+review_findings.py
 $ cat library/.gonk/process.toml
 # How this repository's team works: the process profiles it was generated with, and what
 # each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its

@@ -96,20 +96,18 @@ carries the harness and the vocabulary's complete definition:
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 64 files
+generated the library-lending sample (python, process solo) in …/library: 65 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
   python3 tools/gonk.py next                   what to do first, and why
-
 AGENTS.md holds this process's rules; README.md walks through the sample.
 $ LC_ALL=C ls library/.gonk/harness library/.gonk/queries library/tools
 library/.gonk/harness:
 harness.ttl
 vocabulary.ttl
-
 library/.gonk/queries:
 README.md
 harness-firings-by-control.rq
@@ -119,10 +117,10 @@ harness-sensors-without-guide.rq
 open-items-for-artifact.rq
 open-work-by-change.rq
 requirements-with-open-work.rq
-
 library/tools:
 gonk.py
 harness.py
+review_findings.py
 ```
 
 `harness.ttl` is assembled the way `AGENTS.md` is, from one fragment per section of the rules, so
@@ -222,7 +220,7 @@ $ cd library && python3 tools/gonk.py file 'Renew a loan before it is due'
 $ cd library && python3 tools/gonk.py claim 1
 #1 claimed by ada until …
 $ cd library && python3 tools/gonk.py report 1 --note 'renewal works'
-gonk.py: --evidence is a URL (the pull request, or the reproduction that shows it is not a defect): a report without evidence is a claim nobody can check
+gonk.py: --evidence is a URL (the pull request, or the reproduction that shows it is not a defect): evidence must be something a reader can check
 ```
 
 That refusal is the sensor working, and its message says what to do instead, which is the part

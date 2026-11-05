@@ -9,9 +9,19 @@ kinds. One is a **plan**, a fixed set of requests, and the other is a query used
 In a new empty directory, as in [Start a project](start.md). If the gonk from [that
 chapter](query.md) is still running, stop it first, since this one takes the same port.
 
+The close example uses a dispatcher identity, because an alias scheme belongs to a principal.
+Enroll a QUIC client with both ledger write and `gh` alias authority before starting gonk
+([The three doors](../machines/doors.md) explains enrollment). A worker keeps neither grant:
+
+<!-- transcript: run -->
+```console
+$ mkdir -p .config/ikigai
+$ ikigai-gonk client add dispatcher --ledger library=write --alias library=gh --port 1070 --config-home "$PWD/.config/ikigai" > /dev/null
+```
+
 <!-- transcript: serve -->
 ```console
-$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
 ```
@@ -111,7 +121,8 @@ keeps the log honest.
 `close` refuses a close without evidence, but that rule lives in `tools/gonk.py`. Anyone with a write
 grant can close through the ledger's own door, so check what happened rather than trusting the path.
 The evidence can be in two places. `evidence=` on a direct close puts it on the close's record;
-`gonk.py close`, at the starter revision this book pins, posts it as a comment that starts `Evidence:`.
+`gonk.py close` writes structured evidence on the close and also posts a comment that starts
+`Evidence:`.
 The check accepts either:
 
 <!-- transcript: file library/.gonk/queries/closed-without-evidence.rq -->
@@ -135,14 +146,18 @@ SELECT ?number ?title WHERE {
 ORDER BY ?number
 ```
 
-Publish it, then close three items, one each way:
+Publish it, switch the starter to the dispatcher's QUIC identity, then close three items, one
+each way. The direct ledger calls still use the owner's socket:
 
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py init | grep -c 'urn:script:library-closed-without-evidence')
 1
+$ (cd library && python3 tools/gonk.py init --quic quic://127.0.0.1:1070 --cert-dir ../.config/ikigai/gonk/quic/clients/dispatcher | tail -1)
+ready.
 $ (cd library && python3 tools/gonk.py close 7 --evidence https://github.com/you/library/pull/1 --note 'Merged, CI green')
-closed library#7 (done)
+closed library#7 done (1 evidence)
+Alias: gh:you/library#1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:library:close item=8 evidence=https://github.com/you/library/pull/2 Merged, CI green.'
 closed library#8 done (1 evidence)
 [uncacheable]
@@ -158,6 +173,23 @@ number,title
 Only the third is listed. This checks that evidence was *named*, not that it holds: a made-up URL
 passes, and judging it stays with the dispatcher. To use it as a gate, have a CI job or a person run
 it and treat any row as a failure.
+
+A GitHub pull request URL on `gonk.py close` also adds a `gh:` alias, under the dispatcher's
+identity. The starter accepts that alias wherever it takes an item number. The ledger can read it
+too (percent-encoded inside the resource name):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:item:gh:you%2Flibrary%231' 2>/dev/null | head -3
+library#7  closed  p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]  (done)
+  iri:      urn:iki:ledger:library:item:…
+  key:      urn:openspec:change:cap-late-fees:task:1.1
+```
+
+The alias names the ledger item that the pull request resolved. The worker's hand-back only
+proposes evidence; the dispatcher adds the alias when accepting it at close. Adding this alias
+takes the separate `--alias library=gh` authority as well as an authenticated principal; neither
+belongs to the worker's narrow grant. The socket alone has no principal to own the scheme.
 
 A script's versions are named by their content, so the question "which check said that?" has an answer:
 

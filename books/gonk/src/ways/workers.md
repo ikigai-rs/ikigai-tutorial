@@ -355,14 +355,13 @@ run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process workers
-generated the library-lending sample (python, process workers) in …/library: 72 files
+generated the library-lending sample (python, process workers) in …/library: 73 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
   python3 tools/gonk.py next                   what to do first, and why
-
 AGENTS.md holds this process's rules; README.md walks through the sample.
 $ grep '^## ' library/AGENTS.md
 ## The loop
@@ -382,11 +381,11 @@ $ LC_ALL=C ls library/tools library/worker
 library/tools:
 gonk.py
 harness.py
+review_findings.py
 worker.py
 worker_onboard.py
 worker_repos.py
 worker_usage.py
-
 library/worker:
 units
 worker.sample.toml
