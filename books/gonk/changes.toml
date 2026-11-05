@@ -20,6 +20,21 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Importing a kata ledger links directly to the owner's socket section instead of pointing to the wrong section."
+pages = ["bridges/kata.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook."
+pages = ["bridges/roborev.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door."
+pages = ["bridges/roborev.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
 

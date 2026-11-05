@@ -51,8 +51,8 @@ three comments, three labels, four links, and an event. Save it as `kata.jsonl`:
 
 The importer files with an identity, as [`roborev file`](roborev.md) does: a client certificate
 enrolled to write the ledger it imports into, at gonk's QUIC door, or, as a shortcut for the user
-who runs gonk, the owner's socket (at the end of the next section). The export goes into a ledger
-of its own, `kata`, so enroll a client for that one ledger:
+who runs gonk, [the owner's socket](#the-owners-socket-a-shortcut), shown later on this page.
+The export goes into a ledger of its own, `kata`, so enroll a client for that one ledger:
 
 <!-- transcript: run -->
 ```console
