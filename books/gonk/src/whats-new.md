@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
+
+  Pages: [One-off review, and what a finding is](review/one-off.md), [The audit protocol, and why per-commit review is off](review/audit.md)
+
 - **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
 
   Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The ledger in a browser](ledger/browser.md)
