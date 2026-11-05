@@ -5,9 +5,11 @@ about it, and know later which answer came from which sample. The REPL is that k
 lab. Every sample, and every question you ask about one, has a name, and the kernel keeps
 track of which answers came from what.
 
-This chapter's sample is the recorded week of earthquakes. Every cell below runs in this
-page's kernel, so there is nothing to install: press **Run**. The commands are the same
-ones the `ikigai` REPL takes, and the last section runs a few of them at a shell.
+[A week of earthquakes](index.md) introduced the recorded week used here. If you followed
+its shell setup, you already have a copy in `~/quakes` and a REPL open over that directory.
+Every cell below runs in this page's kernel, so you can also follow along with nothing
+installed: press **Run**. The commands are the same ones the `ikigai` REPL takes, and the
+last section runs a few of them in your REPL.
 
 ## 1. The sample has a name
 
