@@ -91,3 +91,7 @@ the menu wrong. It cannot make the kitchen cook.
 > fail. If it declares authority it never checks, the catalog under-protects, which is
 > worse. Parameterized authority (network hosts, filesystem paths) declares the wildcard
 > form: `urn:cap:net:*` means "holds some grant under this prefix".
+
+You now have `camel-case`'s description and the reasons to keep it complete.
+[Binding, and a host of your own](binding.md) connects that endpoint to a name and
+adds the renderer that turns its description into the graph you read.
