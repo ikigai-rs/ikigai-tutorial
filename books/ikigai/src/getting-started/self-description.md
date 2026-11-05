@@ -5,7 +5,9 @@ description as a graph. [Golden threads in practice](golden-threads.md) explaine
 cached answers stay valid. Now return to that description: it lets callers discover
 what an endpoint accepts and what it can do, without knowing the endpoint in advance.
 
-## The `Description` does four jobs
+<a id="the-description-does-four-jobs"></a>
+
+## Four jobs for a `Description`
 
 1. **The engine routes named arguments by it.** `in="hello"` finds the right slot because
    the endpoint declared a slot called `in`.
@@ -67,7 +69,9 @@ present. Set containment over the catalog. A SPARQL query.
 That is the same mechanism as finding a transreptor from one media type to another, one
 level up. It is why the description is not paperwork.
 
-## The invariant that keeps it safe
+<a id="the-invariant-that-keeps-it-safe"></a>
+
+## Capabilities gate execution
 
 An **affordance** is an action offered for the things available. Choosing actions by
 type sounds alarming: whoever asserts types influences what gets offered. A hostile
@@ -78,7 +82,9 @@ executing it still requires the actor's capability.** Affordance is type-driven,
 authorization is capability-driven, and they are separate gates. Adversarial data can make
 the menu wrong. It cannot make the kitchen cook.
 
-## The one that bites
+<a id="the-one-that-bites"></a>
+
+## Declare the authority you enforce
 
 > ⚠ **Declared capabilities must be enforced capabilities.** If your endpoint checks
 > authority it never declared, the catalog over-offers — it advertises something that will
