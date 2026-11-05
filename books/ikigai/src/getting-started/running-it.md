@@ -83,6 +83,11 @@ One-shot resolutions take `-c`, and `--plain` drops the decoration so output is 
 ikigai --plain -c 'source urn:iki:fn:toUpper in="hello"'
 ```
 
+```text
+HELLO
+[computed]
+```
+
 Run `ikigai` with no arguments for the full-screen REPL, or `ikigai --plain` for the
 line-by-line REPL. If you use a screen reader, choose `ikigai --plain`, as
 [Twenty minutes with the CLI](../front-door/cli.md#0-install) recommends. Both use the same grammar: pipes (`|`), map
