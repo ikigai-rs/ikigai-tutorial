@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: The ledger chapters clarify resource checks, the Dashboard's seed setup and polling, and lifecycle diagnostics. Links name the surrounding chapters, and lifecycle state properties lead with their names.
+
+  Pages: [Checking what you have](ledger/checking.md), [The Dashboard](ledger/dashboard.md), [A lifecycle for your ledger](ledger/lifecycle.md)
+
 - **2026-11-05**: The starter now records a pull request alias when the dispatcher closes an item. Periodic unled audits adds review jobs: a worker hands back a JSON block, and the dispatcher files keyed, parented findings from a trusted worker, keeping the worker's narrow grant.
 
   Pages: [A workflow of your own](project/script.md), [Periodic unled audits](ways/audits.md)
