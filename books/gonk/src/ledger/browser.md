@@ -1,8 +1,8 @@
 # The ledger in a browser
 
-The last chapter reached gonk with `curl`, through paths that are a mechanical mapping of the
-ledger's own resources. This one opens the same server the way a person does: pages, forms, a
-sign-in. Everything a browser does here is still a request to a resource, so every step but
+In [A ledger of your own](your-own.md), you started a scratch gonk, read its ledger with
+`curl`, and wrote to it with `ikigai` over the owner's socket. This chapter starts a fresh gonk
+and opens its ledger in a browser: pages, forms, and a sign-in. Everything a browser does here is still a request to a resource, so every step but
 one can be checked from a shell, and this chapter does check them. The one that cannot is the
 passkey ceremony, which needs a browser and an authenticator; it is marked, and described.
 
@@ -289,8 +289,8 @@ Open the link the invite printed, in a browser on the machine gonk runs on:
 2. **Create passkey** brings up the browser's own passkey sheet. Approve it. gonk enrolls the
    credential's public key under the grant `ada`, and the page says so and asks you to sign in.
 3. **Sign in with passkey**, in the header, and approve a second time. The page reloads
-   signed in, and that browser holds the grant until it signs out, its session's twelve hours
-   end, or the server restarts.
+   signed in. By default, the session ends when you sign out, after twelve hours, after
+   sixty minutes with no request using that session, or when the server restarts.
 
 The second click is deliberate: when the creation sheet closes it still holds the window's
 focus, and a browser refuses a sign-in prompt from a page without it. The invite is
