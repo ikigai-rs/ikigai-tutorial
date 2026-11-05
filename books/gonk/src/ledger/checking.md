@@ -1,8 +1,9 @@
 # Checking what you have
 
-The last chapter showed that every page gonk serves is a transform of a graph face. Now use that
-face directly. Does what the ledger says parse? Does it fit the rules you hold it to? The **RDF
-Toolbox** answers both in your browser tab, over a resource named in its address and read as you.
+[The ledger in a browser](browser.md) showed that every page gonk serves is a transform of a graph
+face. Now use that face directly. Does what the ledger says parse? Does it fit the rules you hold it
+to? The **RDF Toolbox** answers both in your browser tab, over a resource named in its address and
+read as you.
 This chapter calls that a **check**.
 
 Why a resource can be checked at all is the subject of [Checking a
@@ -138,8 +139,8 @@ $ curl -s http://localhost:1070/toolbox/input/urn%3Aiki%3Aledger%3Aitem%3A2 | gr
 	ledger:label "book" ;
 ```
 
-The page's own address carries the check, so you can keep it or send it to someone who holds the
-same read. Item pages do not link here yet, so you type this address yourself.
+The page's own address carries the check, so you can keep it or send it to someone with permission
+to read the same resource. Item pages do not link here yet, so you type this address yourself.
 
 ## It reads as you
 
@@ -177,8 +178,8 @@ error: no endpoint resolved for urn:toolbox:page
 ## Check it against shapes
 
 Parsing says the Turtle is well formed. **Shapes** say whether it is what you meant. Suppose your
-team's rule is that every item carries a label. In [SHACL](https://www.w3.org/TR/shacl/), a graph
-that describes other graphs, that rule is:
+team's rule is that every item carries a label. [SHACL](https://www.w3.org/TR/shacl/) (Shapes
+Constraint Language) expresses rules as a graph. Write this rule as:
 
 <!-- transcript: file item-shapes.ttl -->
 ```turtle
@@ -226,7 +227,6 @@ own small example.
 | the page with samples | `/toolbox/page` |
 
 The toolbox added no authority and no state: gonk serves a page, the page reads Turtle faces as you,
-and the checking runs in your tab. [The next chapter](dashboard.md) reads every ledger at once, on a page of charts and tables, and
-[the one after it](lifecycle.md) gives a ledger states of its
-own, and the rules a lifecycle holds are enforced on every write, where a check only tells you what
-it finds.
+and the checking runs in your tab. [The next chapter](dashboard.md) reads every ledger at once, on a
+page of charts and tables. [A lifecycle for your ledger](lifecycle.md), the chapter after that, gives
+a ledger states of its own and enforces its rules on every write. A check only tells you what it finds.
