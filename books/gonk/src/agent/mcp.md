@@ -2,18 +2,18 @@
 
 An agent framework that speaks the [Model Context Protocol](https://modelcontextprotocol.io/)
 rather than ikigai reaches the same ledger through `ikigai mcp`. It projects a kernel's
-**capability-scoped manifold** as MCP tools: one tool per action the session may invoke, with
-the arguments that action declares. Nothing is written for the agent. The tool list is the
-ledger's own `Description`s, filtered by a capability, so it cannot offer what the session
-may not do.
+**capability-scoped manifold**, the set of actions available under the session's capability,
+as MCP tools: one tool per action, with the arguments that action declares. Nothing is written
+for the agent. The tool list is the ledger's own `Description`s, filtered by a capability, so it
+cannot offer what the session may not do.
 
-The [previous chapter](socket.md) ended on what the socket cannot bound: every request on it is
+The [previous chapter](socket.md) showed what the socket cannot bound: every request on it is
 the owner's, so a sealed session can still file an item whose `author` claims a passkey. An
 agent that must not be able to claim a person needs an identity of its own, on the door where
-the author rule runs. That is the QUIC door from [A QUIC client](../machines/quic-client.md),
-and this chapter puts the two together: the agent gets a client certificate and a grant on the
-server, and `ikigai mcp` reaches gonk through that door. Three things to see at the end, each
-on a transcript below:
+the author rule runs. That is the QUIC door, covered in full later in
+[A QUIC client](../machines/quic-client.md). This chapter sets up the identity it needs: the
+agent gets a client certificate and a grant on the server, and `ikigai mcp` reaches gonk through
+that door. Three things to see at the end, each on a transcript below:
 
 - the agent's tool list is the ledger's writer actions for one ledger, and nothing else;
 - a retried filing files once, because the append is keyed;
@@ -29,8 +29,9 @@ from [Over the socket](socket.md) is still running, stop it first, since this on
 port. This chapter's gonk starts only after the agent's certificate is minted, because it reads
 the certificates it trusts at startup.
 
-As in [A QUIC client](../machines/quic-client.md), the server mints the agent a certificate and
-enrolls it under a grant built from a role. The agent may write the `default` ledger:
+The server mints the agent a certificate and its private key, and enrolls the certificate under
+a grant built from a role. It saves the key, the agent's certificate and the server's certificate
+as a **bundle** for the agent to use. The agent may write the `default` ledger:
 
 <!-- transcript: run -->
 ```console
@@ -61,6 +62,9 @@ ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 
 ## The agent's side: a bundle and a ceiling
 
+Leave gonk running in its terminal. Run the remaining commands in a second terminal, in the
+same directory.
+
 The agent runs on "another machine", the directory `agent/`, with its own config home. It gets
 the bundle (on a real second machine, moved there and deleted here):
 
@@ -75,7 +79,8 @@ ceiling: `ikigai mcp --grant agent` serves the manifold under exactly these scop
 tools of everything else the agent's `ikigai` could reach (its files, its secrets, a model) are
 filtered out of the list by capability. `show` narrows what is listed further, to the ledger's
 tools; it changes what the agent sees, not what it may call. The scopes are the server's five,
-which `ikigai-gonk grants default write` prints:
+which `ikigai-gonk grants default write` prints. Save the following as
+`agent/.config/ikigai/grants.json`:
 
 <!-- transcript: file agent/.config/ikigai/grants.json -->
 ```json
@@ -100,9 +105,9 @@ be refused.
 
 ## The tool list
 
-An MCP client starts the server as a child process and talks JSON-RPC to it, one message per
+An MCP client starts `ikigai mcp` as a child process and talks JSON-RPC to it, one message per
 line. Here the messages are a file, so the transcript is repeatable: the handshake, then the
-request for the tool list.
+request for the tool list. Save them as `agent/list.jsonl`:
 
 <!-- transcript: file agent/list.jsonl -->
 ```json
@@ -208,7 +213,7 @@ wants, since a slow call no longer holds up a fast one behind it. It also means 
 in one batch are not sequenced: a read by key sent with the append it depends on may run first
 and find nothing. An agent that needs one call to land before the next waits for its answer, and
 so does this page, which sends the three steps as three runs of `ikigai mcp`, each with its own
-handshake:
+handshake. Save the first append as `agent/file.jsonl`:
 
 <!-- transcript: file agent/file.jsonl -->
 ```json
@@ -217,12 +222,16 @@ handshake:
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ledger-append__sink","arguments":{"content":"Read the notes","key":"agent-task-1"}}}
 ```
 
+Save the retry as `agent/retry.jsonl`:
+
 <!-- transcript: file agent/retry.jsonl -->
 ```json
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"book","version":"1"}}}
 {"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"ledger-append__sink","arguments":{"content":"Read the notes","key":"agent-task-1"}}}
 ```
+
+Save the read and the three calls outside the grant as `agent/check.jsonl`:
 
 <!-- transcript: file agent/check.jsonl -->
 ```json
@@ -268,7 +277,7 @@ Read the answers by `id`:
 - **4: the author is the agent.** The item was filed with no `author` argument, so the ledger
   recorded the name of the identity that asked, `urn:iki:host:gonk:client:<fingerprint>`, from
   the certificate the connection was made with, as its committer and its verified author.
-- **5: and only the agent.** On the QUIC door an `author` must be the caller's own unless the
+- **5: another author refused.** On the QUIC door an `author` must be the caller's own unless the
   owner enrolled the caller to claim it ([The three doors](../machines/doors.md#who-wrote-it)), so the agent cannot file as Ada. This is the residual the socket chapter ended
   on, closed by giving the agent its own door. The refusal's text ends with a line for a program
   rather than a person, `kind: denied; class: denied`: the kind of failure and its class, the
@@ -340,3 +349,6 @@ The agent's tool calls were the ledger's resources by their own names, the same 
 and `next` that the page's kernel ran in [the first chapter](../ledger/your-own.md), with the same
 contracts. MCP added a way to list them; what made the list safe to hand an agent was the
 capability it was computed under, and what made the agent answerable was the door it came in by.
+
+In the next chapter, [Browse roots](../browse/roots.md), gonk serves a repository beside the
+ledger, so an item about a file can lead to the file itself.

@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: Over MCP defines the manifold and certificate bundle, marks the QUIC chapter as a later explanation, and names each JSON file to save. It also says where to run client commands, labels the author refusal directly, and points onward to Browse roots.
+
+  Pages: [Over MCP](agent/mcp.md)
+
 - **2026-11-05**: Over the socket links back to the browser chapter, says where to run commands while gonk is running, and introduces MCP by its full name.
 
   Pages: [Over the socket](agent/socket.md)
