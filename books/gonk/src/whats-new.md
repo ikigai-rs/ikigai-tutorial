@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: Over MCP counts all five grant scopes, including read access to the participants graph. It also counts the final check's five response lines, matching the transcript.
+
+  Pages: [Over MCP](agent/mcp.md)
+
 - **2026-11-05**: Over the socket now describes reuse of valid cached answers and recomputation after invalidation. Its SPARQL explanation counts the deleted item's seven quads, matching the transcript.
 
   Pages: [Over the socket](agent/socket.md)

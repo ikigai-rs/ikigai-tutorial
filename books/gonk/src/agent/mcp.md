@@ -46,10 +46,10 @@ client `agent`  …/.config/ikigai/gonk/quic/clients/agent
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 ```
 
-Four scopes: the ledger's writer, read and write on `default`, and the store's tokens for that
-ledger's graph, which the ledger uses for its own writes. Not delete, not purge, and no other
-ledger. gonk enforces this list on every request from that certificate, whatever the client
-asks for. Start the server, which reads the certificates it trusts at startup:
+Five scopes: read and write on `default`, read and write on that ledger's graph, and read
+access to the participants graph, which records who may act for whom. The ledger uses the
+store's tokens for its own writes. Not delete, not purge, and no other ledger. gonk enforces
+this list on every request from that certificate, whatever the client asks for. Start the server, which reads the certificates it trusts at startup:
 
 <!-- transcript: serve -->
 ```console
@@ -263,7 +263,7 @@ $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:
 {"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them\nkind: denied; class: denied"}],"isError":true}}
 ```
 
-Run without `sort`, the last command prints the same seven lines with `id` 1 first and the rest
+Run without `sort`, the last command prints the same five lines with `id` 1 first and the rest
 in any order; an MCP client does not care, because it reads the `id`. (Sent as one file with the
 appends, as this page did through `ikigai-cli` 0.1.61, the read by key could overtake the first
 append and answer `not found`, which is why the page now waits.)
