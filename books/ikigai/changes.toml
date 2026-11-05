@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-05"
+summary = "The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace."
+pages = ["explore/index.md", "explore/lab.md"]
+
+[[change]]
 date = "2026-11-03"
 summary = "\"Checking a resource\" now shows the RDF Toolbox page itself, in light and dark screenshots: Validate, Format, a SHACL finding, the SPARQL tab, and what a caller without the scope sees, including a verdict that can mislead when the data was refused."
 pages = ["building/checking.md"]
