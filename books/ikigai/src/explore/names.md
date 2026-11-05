@@ -1,6 +1,7 @@
 # Giving the data names
 
-The questions so far knew what `mag` means because you read USGS's documentation. Nothing
+In [Reshaping JSON with jq](jq.md), you queried the recorded week by its keys, including
+`mag`. You knew what `mag` means because you read USGS's documentation. Nothing
 in the file says so: to the file, `mag` is three letters, and another feed's `mag` could
 mean anything. This chapter gives the recorded week names that say what they mean, and then
 asks it questions in SPARQL, the query language for data named that way.
@@ -130,9 +131,11 @@ _:b684 &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#rest&gt; &lt;http://www.w3
 
 Each line is one statement: a subject, a property, a value. Every earthquake fact is about
 `<https://earthquake.usgs.gov/earthquakes/eventpage/us6000m0xl>`, and every property is a
-full IRI, ours or someone else's, that you can look up. The `_:` names are blank nodes,
-things the document did not name: the point, and the list of its coordinates, which RDF
-writes as a chain of `rdf:first` and `rdf:rest`. 422 people told USGS they felt this one.
+full IRI (Internationalized Resource Identifier), ours or someone else's, that you can
+look up. These statements form an RDF (Resource Description Framework) graph. The `_:`
+names are blank nodes, things the document did not name: the point, and the list of its
+coordinates, which RDF writes as a chain of `rdf:first` and `rdf:rest`. 422 people told
+USGS they felt this one.
 
 The statement's `schema:url` and its subject are the same IRI. USGS already gave every
 earthquake its name, in `url`; the context only had to say so.
@@ -247,8 +250,10 @@ context, so it was still cached. At a shell, the context is a file, and it can c
 
 ## 6. At a shell
 
-The REPL has the same resources. In the REPL you started over `~/quakes`, download the
-context beside the recorded week:
+The REPL has the same query and template resources, but none of this page's
+`urn:quakes:` names. Keep the REPL over `~/quakes` from
+[Reshaping JSON with jq](jq.md#5-at-a-shell-the-type-comes-from-the-name) open. In a
+separate shell, download the context beside the recorded week:
 
 ```bash
 cd ~/quakes
@@ -256,11 +261,11 @@ curl -sO https://raw.githubusercontent.com/ikigai-rs/ikigai-tutorial/main/books/
 ```
 
 The steps below are replayed against `ikigai-cli` {{#include ../../ikigai-cli.version}} by
-the book's checks, over the same two files. Write the template from the page as a file of
-your own, fill it, and keep the filled copy as `quakes.jsonld`. This page uses no name like
-`urn:quakes:graph` at a shell: it was written before a request with arguments could be named
-as one resource, which the REPL's `bind` does from `ikigai-cli` 0.2.6 (named requests, ledger
-#2447), and `graph` takes a name. So the copy is a file:
+the book's checks, over the same two files. Back in the REPL, write the template from the
+page as a file of your own, fill it, and keep the filled copy as `quakes.jsonld`. The
+`graph` argument takes a resource name, so these steps give it the file's name. Later in
+this part, [Naming a composition](naming.md) shows how to name the filled template
+itself with `bind`.
 
 <!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson books/ikigai/ns/quakes.context.jsonld -->
 

@@ -11,6 +11,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [Naming a composition](explore/naming.md), [When a rule is not enough](explore/beyond-rules.md)
 
+- **2026-11-05**: The jq, data-naming, and composites walkthroughs clarify which steps run in a shell or the REPL and connect the files and questions carried between chapters. The composites chapter corrects its count of strong earthquakes in Japan from seven to six.
+
+  Pages: [Reshaping JSON with jq](explore/jq.md), [Giving the data names](explore/names.md), [Composites, one layer at a time](explore/composites.md)
+
 - **2026-11-05**: The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace. The lab’s text pipelines show the cache tallies and uncached reasons from CLI 0.2.9.
 
   Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md)
