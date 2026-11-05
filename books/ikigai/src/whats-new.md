@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
+
+  Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)
+
 - **2026-11-05**: "Naming a composition" clarifies its earlier examples and the path to the RSS workspace. "When a rule is not enough" shows the complete Python peer to save and run, clarifies which files a program depends on and when it can be cached, and explains great-circle distance.
 
   Pages: [Naming a composition](explore/naming.md), [When a rule is not enough](explore/beyond-rules.md)

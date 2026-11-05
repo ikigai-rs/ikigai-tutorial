@@ -1,12 +1,13 @@
 # Running it
 
-Read a chapter, then have a kernel in front of you. Four ways, cheapest first.
+In [Resolution](resolution.md), you met the kernel and the requests it handles. Here
+are four ways to run those requests, starting with the one that needs no installation.
 
 ## In this page
 
-The published book carries its own kernel: Part I's space — `camel-case` and the endpoints
-[What resolution buys you](payoff.md) adds — compiled to WebAssembly, under the same engine
-the CLI uses. Where a chapter has a **Run** button, the lines beside it are real REPL lines
+The published book carries its own kernel, compiled to WebAssembly and using the same
+engine as the CLI. It includes `camel-case` and the endpoints that
+[What resolution buys you](payoff.md) adds. Where a chapter has a **Run** button, the lines beside it are real REPL lines
 and the answer is a real resolution, in your browser, with nothing installed:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:camel-case in="resource oriented computing"'>
@@ -17,11 +18,20 @@ and the answer is a real resolution, in your browser, with nothing installed:
 Nothing runs until you press Run, and nothing is answered in advance — the listing's
 expected output sits behind a disclosure under the cell. One kernel serves the whole page and keeps its cache
 between runs, so a second press answers `[cached]`, and every run is kept under the cell.
-The command is yours to edit — Reset puts the chapter's command back and empties the cell. The kernel binds Part I's
-names and nothing else — the other parts' hosts, and your own crate, are not in the page
-— and if it fails to load, the expected output stands in for the result and the cell says so.
+The command is yours to edit — Reset puts the chapter's command back and empties the cell. The kernel provides the book's built-in resources, including those used in later parts;
+it does not load your own crate. If it fails to load, the expected output stands in for
+the result and the cell says so.
 
 ## The tutorial binary (this repo, nothing else)
+
+With Rust and Cargo installed, clone this repository and open its root directory:
+
+```bash
+git clone https://github.com/ikigai-rs/ikigai-tutorial.git
+cd ikigai-tutorial
+```
+
+If you already have a clone, open its root directory instead. Then run:
 
 ```bash
 cargo run -p hello-camel -- "resource oriented computing"
@@ -48,8 +58,8 @@ for most — which [What resolution buys you](payoff.md) reads through the same 
 ## The CLI
 
 The full host is the [`ikigai-cli`](https://crates.io/crates/ikigai-cli) crate, which
-installs a binary called `ikigai`. If you installed it in [Twenty minutes, nothing
-compiled](../front-door/cli.md), it is already there; if not:
+installs a binary called `ikigai`. If you installed it in [Twenty minutes with the
+CLI](../front-door/cli.md), it is already there; if not:
 
 ```bash
 cargo install ikigai-cli --locked
@@ -73,7 +83,14 @@ One-shot resolutions take `-c`, and `--plain` drops the decoration so output is 
 ikigai --plain -c 'source urn:iki:fn:toUpper in="hello"'
 ```
 
-Run it with no arguments and you get a REPL with the same grammar: pipes (`|`), map
+```text
+HELLO
+[computed]
+```
+
+Run `ikigai` with no arguments for the full-screen REPL, or `ikigai --plain` for the
+line-by-line REPL. If you use a screen reader, choose `ikigai --plain`, as
+[Twenty minutes with the CLI](../front-door/cli.md#0-install) recommends. Both use the same grammar: pipes (`|`), map
 (`..`), named arguments, `compose`, `cache`, `cap`, `trace`, and `list`. The REPL, the
 one-shot flag and the page-assembling browser demo all drive *the same engine* — worth
 knowing early, because anything you learn in one place transfers. One difference that
