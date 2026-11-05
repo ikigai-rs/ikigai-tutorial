@@ -86,11 +86,12 @@ the menu wrong. It cannot make the kitchen cook.
 
 ## Declare the authority you enforce
 
-> ⚠ **Declared capabilities must be enforced capabilities.** If your endpoint checks
-> authority it never declared, the catalog over-offers — it advertises something that will
-> fail. If it declares authority it never checks, the catalog under-protects, which is
-> worse. Parameterized authority (network hosts, filesystem paths) declares the wildcard
-> form: `urn:cap:net:*` means "holds some grant under this prefix".
+> ⚠ **Declare the authority your endpoint needs.** The kernel checks declared
+> requirements before dispatch, even if the endpoint does not repeat the check. If your
+> endpoint checks additional authority it never declared, the catalog over-offers — it
+> advertises something that will fail. Parameterized authority (network hosts, filesystem
+> paths) declares the wildcard form: `urn:cap:net:*` means "holds some grant under this
+> prefix". The endpoint must still check the grant for the specific host or path it uses.
 
 You now have `camel-case`'s description and the reasons to keep it complete.
 [Binding, and a host of your own](binding.md) connects that endpoint to a name and
