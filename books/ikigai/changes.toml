@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "\"Naming a composition\" clarifies its earlier examples and the path to the RSS workspace. \"When a rule is not enough\" shows the complete Python peer to save and run, clarifies which files a program depends on and when it can be cached, and explains great-circle distance."
+pages = ["explore/naming.md", "explore/beyond-rules.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace. The lab’s text pipelines show the cache tallies and uncached reasons from CLI 0.2.9."
 pages = ["explore/index.md", "explore/lab.md"]
 
