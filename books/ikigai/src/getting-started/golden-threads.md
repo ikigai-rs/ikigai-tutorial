@@ -1,8 +1,8 @@
 # Golden threads in practice
 
 [What resolution buys you](payoff.md) cut one thread and watched one derived answer
-recompute. This chapter explains the mechanism — declare, derive, cut, recompute — then shows
-what bounds the cache and what makes an answer safe to keep.
+recompute. This chapter explains the mechanism — declare, derive, cut, recompute — then
+shows what bounds the cache and what makes an answer safe to keep.
 
 ## Declare, derive, cut
 
@@ -228,9 +228,10 @@ cover: the state of what the answer read, and time.
 **2. Cacheability is only as good as the least cacheable dependency.** A representation
 has one of three expiries — `Always` (the default: never cached; an endpoint opts *in*),
 `At(deadline)` (until an instant, judged against the kernel's clock; a kernel with no
-clock declines to store it), `Never` (`.cacheable()`: a pure function of its inputs) —
-and a composite's is the *meet* of its own and every dependency's, with `Always` at the
-bottom. Adding one uncacheable source to a cached resource makes it uncacheable. That is
+clock declines to store it), `Never` (`.cacheable()`: no time-based expiry; a cut thread
+still invalidates it) — and a composite's is the *meet* of its own and every dependency's,
+with `Always` at the bottom. Adding one uncacheable source to a cached resource makes it
+uncacheable. That is
 a correctness no-op, and it is a performance change with no type signal. The cautionary
 tale is three sentences long: one uncacheable overlay was joined into a cached graph on a
 live server (2026-08-13, in `ikigai-cms-web`, the reading-room CMS); every read went from
