@@ -388,9 +388,9 @@ fifth card; nobody edits a script.
 
 Read a generated script before you replay it. It holds whatever the data put in it: a `place`
 with a line break in it would be a second REPL line, and that line would run with your
-authority. USGS's places have none, and `cat` is how you know. A replay of a generated script
-is also a good place for the narrowing in section 3: `cap write` as its first line would keep
-it to this directory's files.
+authority. USGS's places have none, and `cat` is how you know. To keep a generated script
+within this directory's files, put `cap seal write` on its first line. Unlike the reversible narrowing in section 3, the seal prevents later lines from
+widening the capability with `cap reset`, `logout` or `login`.
 
 ## 5. Plans with parameters
 
@@ -404,15 +404,26 @@ yet, so here a different threshold is still a different question file and a diff
 [A river of feeds](rss.md#8-what-the-river-is-waiting-for) waits on the same thing, and
 [Naming a composition](naming.md) is where this part takes names up.
 
-## 6. What a script does not have yet
+<a id="6-what-a-script-does-not-have-yet"></a>
 
-The `.iki` format is the REPL's lines and nothing more. It has no comments: a line starting `#` is
-an unknown command, an error, and the replay exits 1; it declares no parameters, so a script for a
-different week is a copy of the script; it has no shebang line, so it is replayed with
-`ikigai --quiet < file` and never run as a program; and a script stored as a resource cannot
-yet be run by name from inside the REPL, only through standard input. Those four are the
-subject of one ledger item, the `.iki` format's missing pieces (ledger #2485). It is a list
-of what is missing, not a promise of when.
+## 6. Comments, parameters and named scripts
+
+The CLI this book checks, {{#include ../../ikigai-cli.version}}, supports these features
+in `.iki` scripts:
+
+- **Comments:** a line beginning with `#` is ignored.
+- **Parameters:** `# @param threshold = 6` declares a parameter with a default; `{threshold}`
+  inserts its value into a line. Pass `threshold=7` after the script's filename to change it.
+- **Executable scripts:** `#!/usr/bin/env -S ikigai --quiet --files . --script` is a shebang
+  line for a script you make executable with `chmod +x`. It needs `ikigai` on your PATH;
+  run it from the workspace directory.
+- **Scripts by name:** `script urn:file:refresh.iki` runs the saved refresh inside the REPL.
+
+At a shell, `ikigai --quiet --files . refresh.iki` runs the refresh as a script. Unlike
+`ikigai --quiet --files . < refresh.iki`, this form stops at the first failing line,
+reports its line number and exits 1. Flags go before the filename; parameter values go
+after it. The standard-input replays above still work, with the continue-after-error
+behavior shown in [When a line fails](#when-a-line-fails).
 
 Next, the same parts over many publishers at once, each with its own rules for how long a copy
 stays good, refreshed by a script like the one above: [A river of feeds](rss.md).
