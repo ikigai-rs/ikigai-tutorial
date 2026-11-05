@@ -1,9 +1,9 @@
 # Over the socket
 
-An agent does its work in a process, and a person reads its work in a browser. The browser
-came through gonk's HTTP door. The agent comes through the **socket**: a Unix socket beside the
-store, owner-only, which another ikigai process on the same machine mounts as part of its own
-namespace. Nothing on the other side of it is an HTTP route; it is the kernel's own wire, so
+In [The ledger in a browser](../ledger/browser.md), a person read the ledger through gonk's
+HTTP door. An agent does its work in a process. It comes through the **socket**: an owner-only
+Unix socket beside the store, which another ikigai process on the same machine mounts as part
+of its own namespace. Nothing on the other side of it is an HTTP route; it is the kernel's own wire, so
 the agent's tool calls are the ledger's resources, by their own names, with their own
 contracts.
 
@@ -32,6 +32,9 @@ ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   mount   mount = "prefer urn:iki:ledger:=…/.ikigai/gonk.sock"  (and the same for urn:iki:store:)
 ```
+
+Leave gonk running in this terminal. Run the remaining commands in a second terminal, in the
+same directory.
 
 Two lines of the banner are for this chapter. `socket` says where the door is and who may use
 it: the file is created owner-only, so the operating system decides who can connect, and
@@ -64,7 +67,8 @@ choice, not the ledger's. An answer gonk caches hangs from golden threads that l
 kernel, and a thread does not cross a wire; an answer that left the socket cacheable would arrive
 with nothing that could ever invalidate it, and a long-lived client would go on serving it. So
 every answer crosses the socket (and the QUIC door) uncacheable, and gonk keeps its own cache
-behind it: a mounted read costs one round trip to gonk's cache, never a recompute.
+behind it. A mounted read makes a round trip to gonk. If its cached answer is still valid,
+gonk reuses it; otherwise it computes a new one.
 
 `priority=1` was routed by name because the cli asked the remote for the resource's contract
 first, over the same socket, and the contract declares `priority`. That contract is the
@@ -273,7 +277,7 @@ The browser's [`/sparql`](../ledger/browser.md#the-pages) has a twin on the sock
 `urn:sparql:select` (and `:ask`, `:construct` and `:describe`) over the store it holds, so under
 the alias it is `urn:gk:sparql:select`. Naming no graph, a query's dataset is the **union of
 every named graph the caller may read**. At root over the socket that is every graph gonk holds:
-here the ledger's, and the one the delete above moved item 2's six quads into:
+here the ledger's, and the one the delete above moved item 2's seven quads into:
 
 <!-- transcript: run -->
 ```console
@@ -313,12 +317,12 @@ agents, a manager over both and a signed-out browser, and gets four answers.
 
 ## Over MCP
 
-An agent framework that speaks MCP rather than ikigai reaches the same ledger through
-`ikigai mcp`, which projects a kernel's capability-scoped manifold as MCP tools. It could do
-that over this socket with a sealed grant like the one above, and the tool list would be the
-ledger's actions under that grant; but every request would still be the owner's, with the
-residual shown above. The [next chapter](mcp.md) gives the agent an identity of its own on the
-QUIC door instead, so the author rule runs and the log names the agent.
+An agent framework that speaks the Model Context Protocol (MCP) rather than ikigai reaches
+the same ledger through `ikigai mcp`, which lists the actions allowed by a capability as MCP
+tools. It could do that over this socket with a sealed grant like the one above. The tool list
+would be the ledger's actions under that grant, but every request would still be the owner's,
+with the residual shown above. The [next chapter](mcp.md) gives the agent an identity of its own
+on the QUIC door instead, so the author rule runs and the log names the agent.
 
 ## What you have now
 
