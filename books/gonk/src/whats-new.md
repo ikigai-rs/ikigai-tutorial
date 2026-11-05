@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
+
+  Pages: [One-off review, and what a finding is](review/one-off.md), [The audit protocol, and why per-commit review is off](review/audit.md)
+
 - **2026-11-05**: Browse roots connects the repository browser to the agent's ledger and explains the watcher's pause. Explain distinguishes its Rust stub from gonk's mounted model and says how to create the example file.
 
   Pages: [Browse roots: a repository as resources](browse/roots.md), [Explain, with a mounted model](browse/explain.md)
