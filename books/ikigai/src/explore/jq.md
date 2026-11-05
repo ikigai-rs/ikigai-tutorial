@@ -57,11 +57,11 @@ source urn:json:query src=urn:file:quakes-2024-01-01.geojson q=".features | grou
 A jq program yields a stream of results, and a resource answers once. So
 `urn:json:query` says how the stream becomes one answer, and `as` picks the rule:
 
-- leave it out (`application/json`), and one result is the answer, while several become one
+- `as=application/json` (the default) gives one result as the answer, or several as one
   JSON array;
 - `as=application/x-ndjson` gives one result per line, which is the list shape `..` maps
   over;
-- `as=text/plain` gives one result as plain text, and refuses anything else, because a
+- `as=text/plain` gives one scalar result as plain text, and refuses anything else, because a
   template splicing text needs exactly one value.
 
 <div class="ikigai-run" data-cmd='source urn:json:query src=urn:file:quakes-2024-01-01.geojson q=".features[0:2][] | .id"
