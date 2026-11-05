@@ -47,10 +47,9 @@ Peninsula earthquake's place is its name, `"2024 Noto Peninsula, Japan Earthquak
 follows its last comma is `Japan Earthquake`.
 
 Count the earthquakes in each region, keep each region's strongest, and put the busiest region
-first. Splitting a string is not what makes this hard to ask as a rule: jq's `split` does it,
-and `split(", ") | last` gives a place's region. What does is that which weeks to count is
-data, kept in a file you change, and a rule reads only the inputs its caller names. A program
-can read the list, then read each week on it. And the Noto place needs one more step: when the
+first. jq's `split(", ") | last` gives a place's region. The difficulty is choosing which
+weeks to count: their names are data, kept in a file you change. A rule reads only the inputs
+its caller names. A program can read the list, then read each week on it. And the Noto place needs one more step: when the
 region ends in ` Earthquake`, take that off.
 
 ## 2. The program is a file
