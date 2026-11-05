@@ -1,7 +1,8 @@
 # Browse roots: a repository as resources
 
-A ledger item about a file is only as useful as the reader's way to the file. gonk can serve
-the repositories you work in beside the ledger, as resources under `urn:repo:{root}:*`: a
+In [Over MCP](../agent/mcp.md), you connected an agent to the ledger. To read the files a
+ledger item is about, gonk can also serve the repositories you work in as resources under
+`urn:repo:{root}:*`: a
 directory's listing, a file's bytes, the working tree's state, a content hash. They come from
 [`ikigai-browse`](https://github.com/ikigai-rs/ikigai-browse), and gonk adds the one thing a
 library cannot: it **watches** each repository, so the reads can be cached and still never be
@@ -165,7 +166,7 @@ both fast and right:
   across the socket and the QUIC door uncacheable, and keeps the cache entry, and the thread it
   hangs from, on its own side: a repeated read is one round trip to gonk's cache, never a
   recompute.
-- The `sleep 1` is honest, not decoration. The notification arrives with the platform's own
+- The `sleep 1` allows time for the watcher to receive the change. The notification arrives with the platform's own
   latency, well under a second, so a read issued in the same instant as the write can still
   see the previous version once.
 

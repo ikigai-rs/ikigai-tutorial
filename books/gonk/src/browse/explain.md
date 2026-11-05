@@ -1,6 +1,6 @@
 # Explain, with a mounted model
 
-The [previous chapter](roots.md) served a repository as resources: listings, bytes, hashes,
+[Browse roots](roots.md) showed how to serve a repository as resources: listings, bytes, hashes,
 state. Every one of them is computed from the files. This chapter adds the first resource a
 **model** writes: `urn:repo:{root}:explain:{path}`, a few sentences saying what a file is for,
 derived once per version of the file and kept.
@@ -8,9 +8,10 @@ derived once per version of the file and kept.
 Two things make that more than "call an LLM". The answer is **archived**, keyed by the file's
 content hash and a version tag, so the second reader of the same bytes gets it from the store
 with no model call. And gonk does not link a model at all: it **mounts** one, at `urn:llm:`,
-from another process. To browse, a kernel that binds `urn:llm:` to anything that answers is a
-kernel with a model, which is what lets this chapter show every rule of the archive with a stub
-that costs nothing and says the same thing every time.
+from another process. The Rust examples below bind a **stub model** directly in a kernel: it
+returns a fixed answer without calling a real model. This lets you check the archive rules
+without a model service. Later on this page, gonk mounts a socket to show what happens when
+a model cannot be reached.
 
 ## A model is two names
 
@@ -167,6 +168,8 @@ and start a gonk of your own with a mount whose socket nothing is listening on. 
 nothing answers, on purpose.) In a new empty directory, as in [every
 chapter](../introduction.md#a-gonk-per-chapter): if the gonk from [Browse roots](roots.md) is still
 running, stop it first, since this one takes the same port.
+
+Run `mkdir -p demo/src`, then save the following listing as `demo/src/lib.rs`:
 
 <!-- transcript: file demo/src/lib.rs -->
 ```rust,ignore

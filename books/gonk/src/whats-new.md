@@ -11,6 +11,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [One-off review, and what a finding is](review/one-off.md), [The audit protocol, and why per-commit review is off](review/audit.md)
 
+- **2026-11-05**: Browse roots connects the repository browser to the agent's ledger and explains the watcher's pause. Explain distinguishes its Rust stub from gonk's mounted model and says how to create the example file.
+
+  Pages: [Browse roots: a repository as resources](browse/roots.md), [Explain, with a mounted model](browse/explain.md)
+
 - **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
 
   Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The ledger in a browser](ledger/browser.md)
