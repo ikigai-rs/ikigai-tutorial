@@ -1,10 +1,10 @@
 # A lifecycle for your ledger
 
-So far an item has been open or closed. Real work stops at more places than that: filed and not
-looked at, being worked on, waiting for a reviewer, shipped. A **lifecycle** names those places.
-It is a small document you write, gonk loads it when it starts, and from then on the ledger holds
-every item to it: which states exist, which moves between them are legal, and who is responsible
-for an item parked in each one.
+[The Dashboard](dashboard.md) showed charts and agent activity across ledgers. So far an item has
+been open or closed. Real work stops at more places than that: filed and not looked at, being worked
+on, waiting for a reviewer, shipped. A **lifecycle** names those places. You write it as a small
+document. gonk loads it when it starts and holds every item to it: which states exist, which moves
+between them are legal, and who is responsible for an item parked in each one.
 
 This chapter writes one, assigns it to a ledger, and moves an item through it. On the way it shows
 the three things a lifecycle makes possible: a refusal that names the legal moves, a `next` that
@@ -291,8 +291,8 @@ no one, because the owner's socket has no name to give; [Remote workers](../ways
 later in the book, shows the same history with the worker's name on each line. An event written by a
 ledger older than 0.18.0 has no object and no version, and cannot be given them: nothing kept them.
 
-The doctor still has nothing to report, and would name an item stranded in a state the document no
-longer has:
+The ledger's `doctor` checks for problems such as an item stranded in a state the lifecycle document
+no longer has. Here it finds none:
 
 <!-- transcript: run -->
 ```console
@@ -322,5 +322,6 @@ doctor first.
 
 In resource terms: the lifecycle is a document gonk checks once, at the start, and serves as a resource;
 an item's state is one value, moved by one compare-and-set; `next` is still a view, now with a question
-about one step; and the history is a view of events that each write leaves behind. The next part
-reaches the ledger from another process, the way an agent does.
+about one step; and the history is a view of events that each write leaves behind.
+[Over the socket](../agent/socket.md), the next chapter, reaches the ledger from another process,
+the way an agent does.
