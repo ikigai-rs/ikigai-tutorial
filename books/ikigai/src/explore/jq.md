@@ -131,8 +131,10 @@ template's.
 
 ## 5. At a shell: the type comes from the name
 
-The REPL runs the same questions. Over the copy of the recorded week you downloaded in
-[A week of earthquakes](index.md#what-you-need), type the line after `ikigai>`:
+The REPL runs the same questions. In [A week of earthquakes](index.md#what-you-need),
+you downloaded the recorded week and started a REPL over `~/quakes`. Use that REPL
+here; if it is no longer running, start it with `ikigai --plain --files ~/quakes`.
+Type the line after `ikigai>`:
 
 <!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson -->
 
@@ -145,11 +147,7 @@ ikigai> source urn:json:query src=urn:file:quakes-2024-01-01.geojson q=".feature
 A file has no type of its own. The CLI's file workspace takes one from the name's
 extension: `.json` is JSON, and `.geojson` is GeoJSON's registered type,
 `application/geo+json`, which is JSON too, so the query reads it as the page's copy is
-read. (`ikigai-cli` 0.2.5 and later. On 0.2.4 the workspace did not know `.geojson` and
-served the file as plain text, which the query refused, `is text/plain, and nothing this
-kernel mounts converts it to application/json`; ledger #2529. There, copy it to a name
-ending in `.json` first: `source urn:file:quakes-2024-01-01.geojson | sink
-urn:file:quakes-2024-01-01.json`.)
+read.
 
 The answers in sections 5 and 6 over the recorded week are replayed against
 `ikigai-cli` {{#include ../../ikigai-cli.version}} by the book's checks, over the same file
@@ -217,9 +215,9 @@ This week: 189 earthquakes of M4.5 and up; the largest, M 7.0 - 191 km ENE of Na
 
 The headline is as fresh as the copy it reads: save the feed to `week.json` again and the
 next compose recomputes it. Pointing the template straight at `urn:http:get` with its `url`
-needs a request with arguments to be named as one resource. Named requests (ledger #2447) do
-that, with the REPL's `bind`, from `ikigai-cli` 0.2.6; this page was written before that
-release and does not use them yet, and the page this part builds later is where it matters.
+needs a request with arguments to be named as one resource. Later in this part,
+[Naming a composition](naming.md) introduces the REPL's `bind` command for that. Here,
+the template reads the saved file.
 
 Next, the questions get names of their own under `urn:quakes:`, and the data becomes a
 graph that keeps USGS's names for each earthquake: [Giving the data names](names.md). Later
