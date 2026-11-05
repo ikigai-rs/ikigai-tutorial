@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "A river of feeds now connects to your earthquake scripts and distinguishes shell commands from REPL lines. Its setup explains how to reuse the repository and substitute the local server's port."
+pages = ["explore/rss.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "Process scripts are files now names the chapter that supplies your Quakes workspace, templates, and notes, so you can see what carries forward."
 pages = ["explore/scripts.md"]
 

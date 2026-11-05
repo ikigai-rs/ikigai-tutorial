@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: A river of feeds now connects to your earthquake scripts and distinguishes shell commands from REPL lines. Its setup explains how to reuse the repository and substitute the local server's port.
+
+  Pages: [A river of feeds](explore/rss.md)
+
 - **2026-11-05**: Process scripts are files now names the chapter that supplies your Quakes workspace, templates, and notes, so you can see what carries forward.
 
   Pages: [Process scripts are files](explore/scripts.md)
