@@ -191,13 +191,13 @@ tally:
 ```text
 ikigai> source urn:file:quakes-2024-01-01.geojson | urn:text:wc
 178
-[1 computed · 1 uncacheable]
+[2 computed]
 ikigai> source urn:file:quakes-2024-01-01.geojson | urn:text:grep pattern=Japan | urn:text:wc
 62
-[1 cached · 2 uncacheable]
+[1 cached · 1 computed · 1 uncacheable]
 ikigai> source urn:file:quakes-2024-01-01.geojson | urn:text:grep pattern="Noto Peninsula" | urn:text:wc
 1
-[1 cached · 2 uncacheable]
+[1 cached · 1 computed · 1 uncacheable]
 ```
 
 The book's checks replay this block against `ikigai-cli` {{#include ../../ikigai-cli.version}},
@@ -208,37 +208,35 @@ the New Year's Day earthquake, and one line names the Noto Peninsula itself: the
 shock. Counting lines is a crude way to ask about JSON (a place name in another field
 would count too), and [Reshaping JSON with jq](jq.md) asks the same questions properly.
 
-The `1 computed` in the first tally is the file, read once and kept: the later lines found
-it in the cache, which is their `1 cached`. None of the text tools' answers were kept,
-which is every `uncacheable`. The kernel says why, if you ask:
+The file is read once and kept: the later lines find it in the cache, which is their
+`1 cached`. None of the text tools' answers are kept, even when the tally calls them
+`computed`. To see why a computed answer was not cached, ask:
 
 ```text
 source urn:kernel:uncached
 ```
 
-It printed this, on `ikigai-cli` 0.2.5:
+It printed this, on `ikigai-cli` 0.2.9:
 
 ```text
 uncached (why a computed read was not cached; the last 64, most recent first)
-  urn:text:wc        ×1  one-shot content b3:236f4cfad7f59de75883fed22dcbc1c0c8a7982e0fc989f1d526f0271e335199; upstream  [root]
-  urn:text:grep      ×1  one-shot content b3:4b04300f5127c249fc59806380cb1a6ab4e2a4d6c9f2f5997dcc33e09b0be210  [root]
-  urn:text:wc        ×1  one-shot content b3:aedbd75b64018f949e9dabc1a83829e1bc9559c7c1877715b2a1eb17e893a1e9; upstream  [root]
-  urn:text:grep      ×1  one-shot content b3:4939de7f64f2a335e38e45e1a998737dc6e20fa39b99171c1c8321e1397d7696  [root]
-  urn:text:wc        ×1  one-shot content b3:f06db695a3cfc70b1fd99f5e02b5b3528bc5d8589feb3d7403b9fd8a5662232d  [root]
+  urn:text:wc        ×1  one-shot content b3:ffedea0dad2bd5eb566984d8fa478332d5b4a0c36196b4d4ac678cba95445673  [root]
+  urn:text:grep      ×1  policy  [root]
+  urn:text:wc        ×1  one-shot content b3:0bee5d6eef33fe7e0bf9226e0c4b9bebd88cefd7739b668155213a7635fa4496  [root]
+  urn:text:grep      ×1  policy  [root]
+  urn:text:wc        ×1  policy  [root]
 
 [uncacheable]
 ```
 
-The pipe hands each text tool what came before it as a stream, read as it arrives, under
-a content id made up for that one hand-over (the `b3:` names, which are new every time, so
-this block is not replayed with the one above). An answer built on input that can be read
-only once is never stored (`one-shot content`), and a `wc` after a `grep` was handed a
-stream that was itself one-shot (`upstream`). The same tools over a short value typed on
-the line are cached as usual. This is a gap in the text tools, recorded as ledger #2530,
-not something to work around: for now, the questions worth caching go through
-`urn:json:query`, as the page's do. (On `ikigai-cli` 0.2.4 the counts were the same, but a
-text tool reading the file itself was tallied as computed, and the reason given for it was
-the cache's `policy`.)
+On this release, `wc` over the file and both calls to `grep` report `policy`: the kernel
+did not keep those answers under its cache policy. A `wc` after a `grep` instead reports
+`one-shot content`: its input is a stream that can be read only once. The pipe gives that
+input a content id for that one handover (the `b3:` names, which are new every time, so
+this block is not replayed with the one above).
+
+The same tools over a short value typed on the line are cached as usual. For now, the
+questions worth caching go through `urn:json:query`, as this page's do.
 
 Next, the same questions about data that is not yours and not still:
 [Somebody else's resource](http.md).
