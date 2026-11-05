@@ -1,8 +1,9 @@
 # Why an endpoint describes itself
 
-In most systems, documentation is a courtesy to humans. Here it is load-bearing
-machinery, and skipping it produces a system that *works* and is *unusable by anything but
-a person who already knows*.
+In [What resolution buys you](payoff.md#4-described), you read `camel-case`'s
+description as a graph. [Golden threads in practice](golden-threads.md) explained how
+cached answers stay valid. Now return to that description: it lets callers discover
+what an endpoint accepts and what it can do, without knowing the endpoint in advance.
 
 ## The `Description` does four jobs
 
@@ -13,8 +14,8 @@ a person who already knows*.
    types.
 3. **The catalog is built from it.** `urn:kernel:catalog` and `urn:kernel:actions` are
    assembled out of these descriptions, not maintained separately.
-4. **The agent tool list *is* it.** Projected over MCP, an endpoint's description becomes
-   a tool definition. Nobody writes that by hand.
+4. **The agent tool list *is* it.** Projected over the Model Context Protocol (MCP), an
+   endpoint's description becomes a tool definition. Nobody writes that by hand.
 
 The third job deserves one more sentence, because it looks circular and is not. The
 catalog is the arrangement describing itself — the kernel's own bindings, rendered from
@@ -33,6 +34,9 @@ Here is `camel-case`'s, included from the crate:
 ```
 
 ## ArgSpecs, from day one
+
+An `ArgSpec` describes one input: its name, whether it is required, and the type of
+value it accepts. Here is the `in` argument from `camel-case`'s description:
 
 ```rust
 # extern crate ikigai_core;
@@ -65,8 +69,9 @@ level up. It is why the description is not paperwork.
 
 ## The invariant that keeps it safe
 
-Type-driven affordance sounds alarming: whoever asserts types influences what gets
-offered. A hostile assertion could surface an action that should not be there.
+An **affordance** is an action offered for the things available. Choosing actions by
+type sounds alarming: whoever asserts types influences what gets offered. A hostile
+assertion could surface an action that should not be there.
 
 The defense is already in the model. **Type intersection only *offers* an action;
 executing it still requires the actor's capability.** Affordance is type-driven,
