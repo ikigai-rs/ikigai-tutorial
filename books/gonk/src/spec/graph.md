@@ -15,7 +15,7 @@ two stages that are worth keeping apart:
    of a requirement. Every word of OpenSpec in this chapter is in the mapping.
 
 `ikigai-markdown` is on crates.io (its first release was 0.1.0); this book's workspace takes
-0.1.4.
+0.2.0.
 
 ## The mapping, by name
 
