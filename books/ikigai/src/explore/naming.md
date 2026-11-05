@@ -1,12 +1,12 @@
 # Naming a composition
 
-Four chapters in a row worked around the same gap. [Giving the data names](names.md) kept
+Earlier chapters worked around the same gap. [Giving the data names](names.md) kept
 the filled graph as a file, `quakes.jsonld`, because `graph=` takes a name and a request with
 arguments was not one. [Composites, one layer at a time](composites.md) kept `notable.csv`
 and `notable.json` for the same reason. [Process scripts are files](scripts.md) replayed a
 file of lines to bring those copies up to date. And [A river of feeds](rss.md) wrote its
-build line out twice and listed three things that waited on one chapter. This is that
-chapter.
+build line out twice and listed three things that needed names. This chapter gives requests
+those names.
 
 The REPL's `bind` gives a request with its arguments a name of its own. The name is read like
 any resource, cached like one, and stale when anything it read changes, so a composite at a
@@ -16,8 +16,8 @@ shell no longer needs a copy in the middle.
 
 The `~/quakes` directory from the earlier chapters, a shell in it, and, for the last
 sections, the copy of this book's repository that [A river of feeds](rss.md#what-you-need)
-used. As in the last chapter, every step is a shell command: a file of REPL lines replayed
-with `ikigai --quiet`, or a few `-c` lines.
+used. As in [A river of feeds](rss.md), every step is a shell command: a file of REPL lines
+replayed with `ikigai --quiet`, or a few `-c` lines.
 
 ```bash
 cd ~/quakes
@@ -113,8 +113,9 @@ is your own.
 
 The questions are files, as before, and the names read them by reference. Save the count
 question from [Giving the data names](names.md#4-the-questions-are-resources), the strong filter
-from [Composites](composites.md#1-filter-a-question-whose-answer-is-a-graph), and bindings for
-both, as `bind-questions.iki`:
+from [Composites](composites.md#1-filter-a-question-whose-answer-is-a-graph), the notable
+earthquakes question from [Composites](composites.md#6-at-a-shell-your-own-notes), and their bindings
+as `bind-questions.iki`:
 
 <!-- transcript: file bind-questions.iki -->
 
@@ -180,8 +181,8 @@ us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
 
 The same three answers the earlier chapters printed, with no `quakes.jsonld`, no
 `notable.csv` and nothing to refresh. Each line is one stage, so each tally says
-`[computed]` once; the graph and the question file a name reads on its way, it reads through
-the kernel, and section 4 shows the kernel keeping track.
+`[computed]` once. A name reads its graph and question file through the kernel;
+section 4 shows how the kernel keeps track of those reads.
 
 ## 3. A fixed argument stays fixed
 
@@ -266,8 +267,8 @@ quakes
 Two earthquakes of magnitude 6 and up in the first week, the Noto Peninsula earthquake and
 its largest aftershock. The write cut the question file's thread; the strong layer hung from
 it and so did the count read from the layer, so both were stale. The graph did not read the
-question, so it was still cached. Nobody named the count, the layer or the file in between:
-the names say what they read, and the kernel kept track. Editing `queries/strong.rq` in an
+question, so it was still cached. Nobody told the kernel to invalidate the count or the layer:
+the bindings say what they read, and the kernel kept track. Editing `queries/strong.rq` in an
 editor does the same, because the CLI watches its workspace.
 
 Put the filter back, so the rest of the chapter counts the same twelve:
@@ -370,10 +371,11 @@ no binding there is shadowed.
 
 The river from [A river of feeds](rss.md) gets names of its own the same way, in its own
 file, `river.names`. Every step here runs in `examples/rss`, with the example's `./iki`, which
-passes `--names` through to `ikigai`:
+passes `--names` through to `ikigai`. Replace `/path/to` below with the directory that holds
+your repository clone, so this command works from `~/quakes` too:
 
 ```bash
-cd ikigai-tutorial/examples/rss
+cd /path/to/ikigai-tutorial/examples/rss
 ```
 
 The saved searches are not in git (the example's `.gitignore` leaves `ws/searches/` out), so
