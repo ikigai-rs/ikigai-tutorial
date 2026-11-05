@@ -99,11 +99,11 @@ Real bugs now come from **periodic unled audits**, one repository at a time, on 
   Code, tests, documentation and history are fair game.
 - **Read-only.** No fixes during an audit: the findings are about one known commit, and fixing
   is a separate piece of work scheduled from the report.
-- **A focus and a budget** — a file list or an area, and a number of tool calls — and a report
+- **Focus and budget** — a file list or an area, and a number of tool calls — and a report
   that says whether the budget ran out or the work did, and lists what was *not* read.
-- **A bug counts only with a reproduction.** An unreproduced suspicion is reported as a
+- **Bugs count only with a reproduction.** An unreproduced suspicion is reported as a
   suspicion, never as a bug.
-- **A finding is closed only with evidence**: fixed (the regression test and the change),
+- **Findings are closed only with evidence**: fixed (the regression test and the change),
   refuted (why the reproduction was wrong), or deferred (to what). The evidence is written on
   the ledger item before it is closed.
 
