@@ -68,7 +68,7 @@ https://earthquake.usgs.gov/earthquakes/eventpage/us6000m27f,5.5,southern East P
 [2 computed]</pre>
 </div>
 
-Seven of the twelve are the Noto Peninsula earthquake and its aftershocks, near Anamizu.
+Six of the twelve are the Noto Peninsula earthquake and its aftershocks, near Anamizu.
 
 ## 3. Group and count: by magnitude type
 
