@@ -5,9 +5,9 @@ are four ways to run those requests, starting with the one that needs no install
 
 ## In this page
 
-The published book carries its own kernel: Part I's space — `camel-case` and the endpoints
-[What resolution buys you](payoff.md) adds — compiled to WebAssembly, under the same engine
-the CLI uses. Where a chapter has a **Run** button, the lines beside it are real REPL lines
+The published book carries its own kernel, compiled to WebAssembly and using the same
+engine as the CLI. It includes `camel-case` and the endpoints that
+[What resolution buys you](payoff.md) adds. Where a chapter has a **Run** button, the lines beside it are real REPL lines
 and the answer is a real resolution, in your browser, with nothing installed:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:camel-case in="resource oriented computing"'>
@@ -18,9 +18,9 @@ and the answer is a real resolution, in your browser, with nothing installed:
 Nothing runs until you press Run, and nothing is answered in advance — the listing's
 expected output sits behind a disclosure under the cell. One kernel serves the whole page and keeps its cache
 between runs, so a second press answers `[cached]`, and every run is kept under the cell.
-The command is yours to edit — Reset puts the chapter's command back and empties the cell. The kernel binds Part I's
-names and nothing else — the other parts' hosts, and your own crate, are not in the page
-— and if it fails to load, the expected output stands in for the result and the cell says so.
+The command is yours to edit — Reset puts the chapter's command back and empties the cell. The kernel provides the book's built-in resources, including those used in later parts;
+it does not load your own crate. If it fails to load, the expected output stands in for
+the result and the cell says so.
 
 ## The tutorial binary (this repo, nothing else)
 
