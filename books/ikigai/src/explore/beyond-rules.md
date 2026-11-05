@@ -412,15 +412,15 @@ in Rust and runs it in its page.
 
 ## 8. The ladder
 
-- **A rule** (jq, SPARQL, XSLT, a template) answers from the inputs its caller names. It stops
+- **Rule** (jq, SPARQL, XSLT, a template) answers from the inputs its caller names. It stops
   where the question has to decide what to read.
-- **A name** for a rule ([Naming a composition](naming.md)) fixes its inputs and keeps it
+- **Name** for a rule ([Naming a composition](naming.md)) fixes its inputs and keeps it
   cached. It is still one request.
-- **A program** (Lisp, this chapter) reads what it decides to read, through the kernel, under
+- **Program** (Lisp, this chapter) reads what it decides to read, through the kernel, under
   the session's capability. If it declares its answer cacheable and writes nothing, the answer
   hangs from the threads of everything it read and is recomputed when any of them is cut. It
   stops at the sandbox's list of pure functions.
-- **A peer** (Python, this chapter) is any code you like, in a process of its own. It stops being
+- **Peer** (Python, this chapter) is any code you like, in a process of its own. It stops being
   the kernel's to govern: its own authority, and no copy of its answers in the CLI's cache.
 
 Each rung up gives you more to say and gives the kernel less it can check for you.
