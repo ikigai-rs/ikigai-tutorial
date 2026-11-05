@@ -11,13 +11,13 @@ This is the one idea to take seriously before any of the code makes sense. In a 
 call, the caller has already decided almost everything by the time it calls. In a
 resolution, the caller has decided only *what it wants*.
 
-Nine terms follow. Each is a paragraph here and a thing you *do* somewhere in Part I, and
-every one of them says where — this chapter is the map, not the territory.
+The sections below introduce Part I's vocabulary. Each links to a chapter where you
+will use it.
 
 ## The five verbs
 
-There is no method vocabulary to learn, because there are five verbs and they are the
-same five for every resource in the system:
+An **endpoint** is code that handles requests for a resource. Every request uses one of
+five verbs, with the same meaning for every resource in the system:
 
 | verb | meaning |
 |---|---|
