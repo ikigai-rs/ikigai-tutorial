@@ -1,7 +1,8 @@
 # OpenSpec in one chapter
 
-A ledger says what to do next. It does not say what the software is *supposed to do*, and an
-agent working from a ledger item alone is guessing at that. [OpenSpec](https://github.com/Fission-AI/OpenSpec)
+[A ledger of your own](../ledger/your-own.md) gave you a place to record work and ask what to
+do next. A ledger item alone does not say what the software is *supposed to do*, so an agent
+needs a spec to work from. [OpenSpec](https://github.com/Fission-AI/OpenSpec)
 (MIT, by Fission AI; this book follows the layout in version 1.14.1) is a small
 convention for writing it down where the code is: Markdown files in an `openspec/` directory,
 with just enough structure that a tool — or a SPARQL query — can find the parts.
@@ -71,8 +72,9 @@ group:
 name in parentheses — `(The last move can be undone)` — says which requirement it implements.
 OpenSpec does not require this link in a task; this book needs the link to file each task as a
 ledger item *about* its requirement, so it adds the parenthesis, and a task without one (1.1
-here) has no requirement link. A project adopting this would agree the same convention, or put
-the link somewhere else and change one construct.
+here) has no requirement link. A project adopting this would agree on the same convention, or
+put the link somewhere else and adjust the [mapping query](graph.md#the-mapping-by-name) that
+reads tasks.
 
 ## Archiving
 
@@ -80,14 +82,15 @@ When a change is done, OpenSpec **archives** it: the delta is merged into the cu
 added requirement appended to `specs/moves/spec.md`, the modified one replaced), and the change's
 folder **moves** to `changes/archive/<date>-<id>/`, intact, as the record of why the specs say
 what they say. The active change folders sit directly under `changes/`; completed changes sit under
-`changes/archive/`. The ledger in two chapters' time keys off that move.
+`changes/archive/`. [Changes and tasks as ledger items](ledger.md) uses that move to close the
+remaining items for a change.
 
 <a id="where-this-goes-next"></a>
 
 ## Where to go next
 
-Everything above is text, and a person reads it well. What a person cannot do is ask the tree a
-question across files: *which requirements does this change touch, which of its tasks are still
-open, which requirement has the most work against it, which items in the ledger are about a
-requirement that no longer exists.* The [next chapter](graph.md) turns the tree into a graph that
-can be asked, without writing a parser for any of it.
+The files above let a person read one spec or change at a time. Questions across files take
+more work: *which requirements does this change touch, which of its tasks are still open, which
+requirement has the most work against it, which items in the ledger are about a requirement that
+no longer exists?* [An openspec/ tree as a graph](graph.md) turns the tree into a graph you can
+query, without writing a parser for any of it.
