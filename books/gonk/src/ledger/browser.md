@@ -1,9 +1,10 @@
 # The ledger in a browser
 
-The last chapter reached gonk with `curl`, through paths that are a mechanical mapping of the
-ledger's own resources. This one opens the same server the way a person does: pages, forms, a
-sign-in. Everything a browser does here is still a request to a resource, so every step but
-one can be checked from a shell, and this chapter does check them. The one that cannot is the
+In [A ledger of your own](your-own.md), you started a scratch gonk, read its ledger with
+`curl`, and wrote to it with `ikigai` over the owner's socket. This chapter starts a fresh gonk
+and opens its ledger in a browser: pages, forms, and a sign-in. Everything a browser does here
+is still a request to a resource, so every step but one can be checked from a shell, and this
+chapter does check them. The one that cannot is the
 passkey ceremony, which needs a browser and an authenticator; it is marked, and described.
 
 ## Start one, and keep what it says
@@ -27,7 +28,8 @@ ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 gonk writes its banner and its log to standard error, so `2>&1 | tee gonk.log` is how a
 terminal keeps both: the screen shows them, and `gonk.log` is the record you will read at the
 end of this chapter. (Run as a service, the same lines go wherever the service manager sends
-standard error; gonk's README uses `/tmp/ikigai-gonk.log`.)
+standard error; gonk's README uses `/tmp/ikigai-gonk.log`.) Leave it running, then open another
+terminal in the **same directory** for the remaining commands.
 
 File something, so the pages have an item to show. An anonymous caller at the HTTP door only
 reads (the banner's `anonymous read: default`), so file it over the owner's socket, as in [the
@@ -289,8 +291,8 @@ Open the link the invite printed, in a browser on the machine gonk runs on:
 2. **Create passkey** brings up the browser's own passkey sheet. Approve it. gonk enrolls the
    credential's public key under the grant `ada`, and the page says so and asks you to sign in.
 3. **Sign in with passkey**, in the header, and approve a second time. The page reloads
-   signed in, and that browser holds the grant until it signs out, its session's twelve hours
-   end, or the server restarts.
+   signed in. By default, the session ends when you sign out, after twelve hours, after
+   sixty minutes with no request using that session, or when the server restarts.
 
 The second click is deliberate: when the creation sheet closes it still holds the window's
 focus, and a browser refuses a sign-in prompt from a page without it. The invite is
@@ -316,7 +318,7 @@ $ grep ' urn:iki:gonk:page:item:default:1 ' gonk.log
 
 Read them with four things in mind:
 
-- **The subject is the resource, not the URL.** `/l/default/item/1` (asked three times: by
+- **The resource, not the URL, is the subject.** `/l/default/item/1` (asked three times: by
   `curl` as itself, as an image another page loads, and as another page's link) was
   `urn:iki:gonk:page:item:default:1`; the form was `urn:iki:gonk:act`.
 - **`principal` is who the door could say was asking.** The form's line says `anon`, an
@@ -363,6 +365,9 @@ stylesheet.
 
 The pages added no authority and no state of their own. The ledger is the graph it was in the
 last chapter; a page is a view of it, a form is one of its actions, and an identity is a name
-for a list of tokens in `grants.json`. [The next chapter](checking.md) checks what those graphs say, [the one after it](dashboard.md) reads every ledger at once, [the one after that](lifecycle.md) gives a ledger states of its
-own, and the part after that reaches the ledger from another process, the way an agent does. (What a signed-out caller sees of a gonk that two teams share is in
+for a list of tokens in `grants.json`. [Checking what you have](checking.md) checks what those
+graphs say. Then [The Dashboard](dashboard.md)
+reads every ledger at once, and [A lifecycle for your ledger](lifecycle.md) gives a ledger states
+of its own. The following part, [An agent's ledger](../agent/socket.md), reaches the ledger from
+another process, the way an agent does. (What a signed-out caller sees of a gonk that two teams share is in
 [Two teams, one gonk](../teams/two-teams.md#what-a-signed-out-caller-sees).)

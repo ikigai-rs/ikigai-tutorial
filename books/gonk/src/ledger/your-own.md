@@ -10,7 +10,8 @@ thing rather than three things:
 
 1. **in this page**, where a kernel compiled to wasm holds it and every Run is real;
 2. **in a kernel of your own**, a few lines of Rust over two published modules; and
-3. **served by gonk**, a binary you start, reached with `curl`.
+3. **served by gonk**, a binary you start, read with `curl` and written to with `ikigai`
+   over the owner's socket.
 
 ## In the page
 
@@ -262,8 +263,8 @@ Port 1070 keeps it off a real gonk's 1062; `--no-quic` and `--no-backup` keep it
 network door or writing archives this chapter does not need.
 
 The banner is the server describing itself, a line per door and per family it did or did not
-compose. Leave it running and use another terminal. Every ledger resource is reachable over
-HTTP by a mechanical mapping: the path's segments become the name, the method the verb, query
+compose. Leave it running and open another terminal in the **same directory**. Every ledger
+resource is reachable over HTTP by a mechanical mapping: the path's segments become the name, the method the verb, query
 parameters the arguments, and the body the content. Read the ledger that way, and try to file
 into it:
 
