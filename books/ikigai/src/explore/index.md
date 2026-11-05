@@ -1,9 +1,10 @@
 # A week of earthquakes
 
-The parts before this one wrote endpoints in Rust. This part writes none. Everything in it
-is done with the `ikigai` command, the Run buttons on these pages, and files: a recorded
-download, a jq program, a template. If you can use a shell, `curl` and `jq`, you have what
-it needs.
+In [Twenty minutes with the CLI](../front-door/cli.md), you used the `ikigai` command
+to read resources and inspect cached answers. [The REPL grammar](../front-door/grammar.md)
+introduced pipes, maps and forks. This part uses those tools to explore a set of data,
+without writing Rust. You will use the command, the Run buttons on these pages, and files:
+a recorded download, a jq program, a template.
 
 It follows one set of data the whole way through: the U.S. Geological Survey's earthquake
 feeds, which publish every earthquake on Earth as GeoJSON, with no key and no account. We
