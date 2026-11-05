@@ -35,6 +35,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md)
 
+- **2026-11-05**: The resolution walkthrough corrects its CLI trace verdict and explains why a cached composite produces only a parent trace span. The golden-thread and endpoint-description chapters clarify expiry and the kernel’s enforcement of declared authority, introduce terms before using them, and connect the examples across chapters.
+
+  Pages: [What resolution buys you](getting-started/payoff.md), [Golden threads in practice](getting-started/golden-threads.md), [Why an endpoint describes itself](getting-started/self-description.md)
+
 - **2026-11-03**: "Checking a resource" now shows the RDF Toolbox page itself, in light and dark screenshots: Validate, Format, a SHACL finding, the SPARQL tab, and what a caller without the scope sees, including a verdict that can mislead when the data was refused.
 
   Pages: [Checking a resource](building/checking.md)
