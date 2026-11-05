@@ -47,13 +47,12 @@ In a new empty directory, save this as `gated.ttl`:
 
 Each state says four things:
 
-- **Its place.** `ledger:order` puts the states in order, and `filed` comes first, at 0. An item that
+- **Order.** `ledger:order` puts the states in order, and `filed` comes first, at 0. An item that
   holds no state is in `filed`, so a newly filed item needs no write to be in it.
-- **Whether it is in flight.** A state in flight is worked under a claim. `doing` is the only one
-  here.
-- **Its drain**, for every state that is not in flight: the name of the step responsible for an item
+- **In flight.** A state in flight is worked under a claim. `doing` is the only one here.
+- **Drain**, for every state that is not in flight: the name of the step responsible for an item
   parked there. Nothing can be left waiting with nobody named to collect it.
-- **Its moves.** `ledger:movesTo` lists where an item can go next, and a state may list several.
+- **Moves.** `ledger:movesTo` lists where an item can go next, and a state may list several.
   `shipped` lists none, so an item that reaches it stays. These lines are optional: a lifecycle that
   declares no moves at all lets any state move to any other, as the built-in one below does.
 
