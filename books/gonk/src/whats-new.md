@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: The OpenSpec chapters explain how to run their Rust examples, distinguish the sample's archive move from OpenSpec's spec merge, and clarify task links and chapter transitions. Their dependency versions now match the workspace and pinned gonk.
+
+  Pages: [OpenSpec in one chapter](spec/openspec.md), [An openspec/ tree as a graph](spec/graph.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md)
+
 - **2026-11-05**: Browse roots connects the repository browser to the agent's ledger and explains the watcher's pause. Explain distinguishes its Rust stub from gonk's mounted model and says how to create the example file.
 
   Pages: [Browse roots: a repository as resources](browse/roots.md), [Explain, with a mounted model](browse/explain.md)
