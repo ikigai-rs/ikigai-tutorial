@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Importing a kata ledger links directly to the owner's socket section instead of pointing to the wrong section."
+pages = ["bridges/kata.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook."
 pages = ["bridges/roborev.md"]
 
