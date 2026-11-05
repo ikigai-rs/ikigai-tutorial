@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook."
+pages = ["bridges/roborev.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door."
 pages = ["bridges/roborev.md"]
 

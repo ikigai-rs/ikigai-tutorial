@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook.
+
+  Pages: [Filing roborev findings](bridges/roborev.md)
+
 - **2026-11-05**: Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door.
 
   Pages: [Filing roborev findings](bridges/roborev.md)

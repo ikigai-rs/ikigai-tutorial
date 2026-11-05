@@ -19,6 +19,8 @@ with an identity: gonk PR 212, ledger #2075.)
 
 ## A review, as roborev hands it over
 
+Work in a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter).
+
 roborev's agent returns a structured document, and what a hook receives is that document
 **rendered as Markdown**, in this shape (save it as `review.md`):
 
@@ -79,8 +81,7 @@ renders differently, say) is refused, loudly, with nothing filed, rather than fi
 
 ## An identity for the hook
 
-Work in a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter). First
-give the hook a client of its own, enrolled to write the `default` ledger and nothing else:
+First give the hook a client of its own, enrolled to write the `default` ledger and nothing else:
 
 <!-- transcript: run -->
 ```console
@@ -154,7 +155,7 @@ would file medium: The retry delay is a fixed 100 ms, so two writers retrying to
 
 Each line of that is a decision the command made, and each is worth reading once:
 
-- **The low finding is skipped.** roborev renders low findings even on a passing review, and
+- **Low findings are skipped by default.** roborev renders low findings even on a passing review, and
   one ledger item per nit buries the findings worth a person's time. `--min-severity low` files
   them; `high` files less.
 - **Severity becomes a label and a priority**: critical 0, high 1, medium 2, low 3.
@@ -215,8 +216,8 @@ closing it is a decision with a reason rather than a report scrolling away.
 
 ## The completion hook
 
-What ran that by hand is one `[[hooks]]` entry in roborev's config (`~/.roborev/config.toml`,
-or a repository's `.roborev.toml`):
+To run the command automatically after each review, add one `[[hooks]]` entry to roborev's
+config (`~/.roborev/config.toml`, or a repository's `.roborev.toml`):
 
 ```toml
 [[hooks]]
