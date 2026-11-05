@@ -1,8 +1,12 @@
 # An openspec/ tree as a graph
 
-The [previous chapter](openspec.md)'s tree is five Markdown files. This chapter makes it a graph
-in which every requirement, scenario, change and task has a name — an IRI — and asks it
-questions with SPARQL. It writes no parser to do it.
+[OpenSpec in one chapter](openspec.md) introduced a tree of five Markdown files. This chapter
+makes it a graph in which every requirement, scenario, change and task has a name — an IRI —
+and asks it questions with SPARQL, without writing a parser.
+
+The Rust examples use this repository's `openspec-ledger` crate, not a running gonk. From the
+repository root, `cargo test -p openspec-ledger` checks the crate, and
+`./scripts/test-books.sh` runs the book's Rust examples, including the blocks below.
 
 The lifting is [`ikigai-markdown`](https://github.com/ikigai-rs/ikigai-markdown), and it works in
 two stages that are worth keeping apart:
@@ -30,17 +34,19 @@ so the book never reads yours:
 {{#include ../../../../crates/openspec-ledger/src/lib.rs:space}}
 ```
 
-The store and the ledger are the [first chapter](../ledger/your-own.md)'s; the lift is the third
-space. The graph will live in the same store as the ledger, which is what the next chapter needs.
+The store and the ledger are the ones from [A ledger of your own](../ledger/your-own.md); the
+lift is the third space. The graph will live in the same store as the ledger, which is what the
+next chapter needs.
 
 A mapping's constructs are SPARQL, and the lift runs them under a time budget, the same one the
 store's own doors use: 5 seconds for a caller, raised by a `urn:cap:store:budget:<ms>` grant, 120
 seconds for root, and a `Timeout` past it. An evaluation that cannot be stopped is counted, and
 while too many are still running the lift refuses new ones, so the count is what keeps a runaway
 mapping from holding the machine's cores. `space_with` makes that budget itself. A host that
-mounts the lift more than once, or wants other numbers, makes ONE `EvaluationBudget` and passes it
-to every `space_with_budget` it mounts, so that every lift shares one count. This host mounts one
-lift, so the default is already the one. The store keeps its own count for its own doors.
+mounts the lift more than once, or wants different limits, creates one `EvaluationBudget` and
+passes it to every `space_with_budget` it mounts. All those lifts then share the same count.
+This host mounts one lift and uses the default budget. The store keeps a separate count for its
+own doors.
 
 The mapping's **lift profile** has one entry. It turns every RFC 2119 keyword in the tree into a
 match the constructs can see, one per occurrence:
@@ -75,7 +81,8 @@ their steps; the keywords; a change, and the date it was archived if its folder 
 A task's checkbox is the generic lift's `md:checked`; its number, title and cited requirement
 are cut from its text. What a task does **not** get here is the requirement itself: the name
 `The last move can be undone` is in `tasks.md`, the requirement it names is in the delta spec,
-and a construct only ever sees one document. That join is a query, below.
+and a construct only ever sees one document. The query under
+[The tree, in the store](#the-tree-in-the-store) makes that join.
 
 ## Lifting one document
 
@@ -199,3 +206,6 @@ The **atoms** are the Markdown files and the mapping file; the **graph** is deri
 one named graph per document, and rebuilt from them whenever the host asks (`lift_tree` holds
 nothing). The lift and the mapping are **compositions** the host did not write; the queries are
 **views**. The code this chapter added to the book is a directory walk and two loops of requests.
+
+[Changes and tasks as ledger items](ledger.md) uses this graph to file open tasks in the ledger
+and close their items when the tree changes.
