@@ -42,9 +42,19 @@ In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-ch
 from [Spec first](spec-first.md) is still running, stop it first, since this one takes the same
 port.
 
+The review-job example at the end uses a worker's own QUIC identity. Enroll it before starting
+gonk, as in [Remote workers](workers.md#0-once-an-identity-per-worker). Keep the enrollment's
+principal for the dispatcher's trust list:
+
+<!-- transcript: run -->
+```console
+$ mkdir -p .config/ikigai
+$ ikigai-gonk client add auditor --worker default --port 1070 --config-home "$PWD/.config/ikigai" > auditor-client.txt
+```
+
 <!-- transcript: serve -->
 ```console
-$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
 ```
@@ -287,14 +297,13 @@ $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
 $ cd starter && python3 tools/new.py ../library --process audits
-generated the library-lending sample (python, process audits) in …/library: 66 files
+generated the library-lending sample (python, process audits) in …/library: 67 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
   python3 tools/gonk.py init --ledger <name> --socket ~/.ikigai/gonk.sock --holder <you>
   python3 tools/gonk.py seed                   file the open changes' tasks as items
   python3 tools/gonk.py next                   what to do first, and why
-
 AGENTS.md holds this process's rules; README.md walks through the sample.
 $ grep '^## ' library/AGENTS.md
 ## The loop
@@ -313,11 +322,11 @@ $ grep '^## ' library/AGENTS.md
 $ ls library/tools library/.gonk/templates
 library/.gonk/templates:
 audit.md
-
 library/tools:
 audit.py
 gonk.py
 harness.py
+review_findings.py
 $ cat library/.gonk/process.toml
 # How this repository's team works: the process profiles it was generated with, and what
 # each one asks of it. Committed. Written by ikigai-gonk-starter's tools/new.py from its
@@ -394,3 +403,160 @@ written by hand, and there is nothing to do until gonk offers it.
 Every other pair of profiles combines: `--process solo,audits` is one person auditing their own
 repository on a schedule, and `--process solo,spec` is [Solo](solo.md) with [spec
 first](spec-first.md)'s rules.
+
+## Review jobs with a dispatcher
+
+The hand filing above works for a coordinator merging two independent reports. A **review job**
+packages the other path: one worker reviews a commit range and returns a JSON block; the dispatcher
+files its findings. The class `https://ikigai-rs.dev/ns/ledger#ReviewJob` selects that mode in
+`tools/worker.py`. Its `revision` is the head, and its body must name a range ending at that head.
+The worker reads the range and surrounding code, changes nothing and opens no pull request.
+
+Here, play the worker and dispatcher on one machine, with the enrolled worker's narrow grant.
+This is the hand-back protocol by hand, using the reproductions already run above; it does not
+run an agent or the unattended worker loop. In that loop the agent writes the report, and
+`worker.py` validates it, checks that the worktree stayed unchanged, posts the block and releases.
+
+First add a usage note to the tools repository. The range adds the note; the surrounding tools
+still contain the two reproduced bugs. File the job on the same scratch ledger as the audit:
+
+<!-- transcript: file tools/README.md -->
+```text
+Pass each name or title as one argument, including any spaces.
+```
+
+<!-- transcript: run -->
+```console
+$ git -C tools add README.md
+$ git -C tools -c user.name=Ada -c user.email=ada@example.com commit -q -m 'Document the argument'
+$ printf 'Review tools\n\nRead %s..%s and the surrounding shell tools. Reproduce every finding; change nothing.\n' "$(git -C tools rev-parse HEAD~1)" "$(git -C tools rev-parse HEAD)" | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c "sink urn:gk:iki:ledger:append kind=https://ikigai-rs.dev/ns/ledger#ReviewJob revision=$(git -C tools rev-parse HEAD) labels=repo:tools"
+#4 urn:iki:ledger:default:item:…
+[uncacheable]
+```
+
+### The worker returns a block
+
+The worker claims and comments over QUIC, so gonk verifies its author. A free-text author over
+the owner's socket cannot substitute for that identity. The report contains the actual glob
+reproduction from step 2, a proposed fix, and a location relative to the repository:
+
+<!-- transcript: file review-report.json -->
+```json
+{
+  "findings": [
+    {
+      "severity": "major",
+      "title": "initials.sh expands a name as a glob pattern",
+      "problem": "In a directory holding only zebra, sh bin/initials.sh '*' prints z instead of *.",
+      "fix": "Split words without pathname expansion.",
+      "path": "bin/initials.sh",
+      "line": 3
+    }
+  ]
+}
+```
+
+Use the starter's validator and block formatter to carry the report with the full range. The
+`| ` prefix below is only for displaying the fenced block. The worker posts the original as
+`handback=true`, then releases its claim; it makes no append and no parent link:
+
+<!-- transcript: file make-handback.py -->
+```python
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, "library/tools")
+import review_findings
+
+findings, problems = review_findings.parse_report(Path("review-report.json").read_text(), Path("tools"))
+if problems:
+    raise SystemExit("; ".join(problems))
+
+def commit(ref):
+    return subprocess.check_output(["git", "-C", "tools", "rev-parse", ref], text=True).strip()
+
+print("Evidence: the reproduced glob bug in tools; no files changed.")
+print()
+print(review_findings.findings_block(findings, commit("HEAD~1"), commit("HEAD")))
+```
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/auditor -c 'sink urn:iki:ledger:claim item=4 auditor'
+#4 claimed by auditor
+[uncacheable]
+$ python3 make-handback.py > review-handback.txt
+$ sed 's/^/| /' review-handback.txt
+| Evidence: the reproduced glob bug in tools; no files changed.
+|
+| ```json
+| {
+|   "base": "…",
+|   "revision": "…",
+|   "findings": [
+|     {
+|       "severity": "major",
+|       "title": "initials.sh expands a name as a glob pattern",
+|       "problem": "In a directory holding only zebra, sh bin/initials.sh '*' prints z instead of *.",
+|       "fix": "Split words without pathname expansion.",
+|       "path": "bin/initials.sh",
+|       "line": 3
+|     }
+|   ]
+| }
+| ```
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/auditor -c 'sink urn:iki:ledger:comment item=4 handback=true' < review-handback.txt
+commented on #4 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/auditor -c 'delete urn:iki:ledger:claim item=4 from=auditor'
+#4 released
+[uncacheable]
+```
+
+### The dispatcher files and checks the children
+
+Only the dispatcher files findings, never the worker. `append` and `link` require ledger write
+authority, which would also let a worker close and relabel. Returning a comment keeps the worker's
+grant at read, claim and comment; the dispatcher already holds write authority for accepting work.
+
+The dispatcher trusts only enrolled worker identities it has checked. Its git-ignored
+`.gonk/dispatcher.toml` lists those principals; a pull request cannot widen that list. This example
+uses the principal from the certificate enrolled on this page. `findings` requires both a verified
+author and membership in that list, and prints whose hand-back it read:
+
+<!-- transcript: run -->
+```console
+$ awk '/^  principal / {printf "workers = [\"%s\"]\n", $2}' auditor-client.txt > library/.gonk/dispatcher.toml
+$ (cd library && python3 tools/gonk.py findings 4)
+#4: the hand-back by urn:iki:host:gonk:client:… at …
+5 urn:iki:ledger:default:item:… (filed)
+$ (cd library && python3 tools/gonk.py findings 4 --close)
+#4: the hand-back by urn:iki:host:gonk:client:… at …
+5 urn:iki:ledger:default:item:… (existing)
+closed #4 done (1 evidence)
+```
+
+The second call finds the existing key and closes the review job on the finding's IRI. Repeating
+filing cannot create another copy: the key combines the job number and a digest of the path, line
+and title. Each child is a `https://ikigai-rs.dev/ns/ledger#Finding`, pinned to the reviewed head,
+with `severity:major`, `repo:tools`, an `about` IRI for its file and a parent link to the job:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:5' 2>/dev/null | head -9
+   #5  open    p-  initials.sh expands a name as a glob pattern  [repo:tools severity:major]
+  iri:      urn:iki:ledger:default:item:…
+  key:      review:4:15cb53806b6daa2b
+  kind:     https://ikigai-rs.dev/ns/ledger#Finding
+  filed:    …
+  updated:  …
+  revision: …
+  about:    urn:repo:file:tools/bin/initials.sh
+  parent:   urn:iki:ledger:default:item:…
+```
+
+This path files the worker's findings separately; it does not merge two auditors' root causes.
+Use the coordinator's merge above when running the blind pair. An empty `findings` list is a
+successful review with nothing to file. A malformed block or an untrusted author files nothing;
+check the report and identity rather than expanding the worker's grant.

@@ -184,7 +184,7 @@ the item waits for its dispatcher. Evidence is required:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py report 7)
-gonk.py: --evidence is a URL (the pull request, or the reproduction that shows it is not a defect): a report without evidence is a claim nobody can check
+gonk.py: --evidence is a URL (the pull request, or the reproduction that shows it is not a defect): evidence must be something a reader can check
 ```
 
 The rules ask for the pull request, and this repository has no forge. A made-up URL is the easy wrong
@@ -241,16 +241,16 @@ the next task ready:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py close 7 --evidence http://127.0.0.1:1070/browse/urn:repo:library:file:artifacts/service/lending/domain.py --note 'Checked: on main, 1000 cents at 101 days')
-closed library#7 (done)
+closed library#7 done (1 evidence)
 $ (cd library && python3 tools/gonk.py next | grep -E '^ [0-9]\.')
  1. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
  2. library#8  open    p-  cap-late-fees 1.2: Add a vector for the capped return to openspec/vectors.json  [artifact:service change:cap-late-fees]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:item:7:history' 2>/dev/null | grep -E 'claim|release|closed'
-… claim ada
-… release ada (released)
-… claim ada
-… release ada (released)
-… closed done
+…  claim ada
+…  release ada (released)
+…  claim ada
+…  release ada (released)
+…  closed done, evidence http://127.0.0.1:1070/browse/urn:repo:library:file:artifacts/service/lending/domain.py
 ```
 
 Task 1.2 is yours if you want it: write the vector for "Returning very late owes at most ten dollars"
