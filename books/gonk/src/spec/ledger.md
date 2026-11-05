@@ -1,10 +1,12 @@
 # Changes and tasks as ledger items, and next over them
 
-The [previous chapter](graph.md) put the spec and the ledger in one store. This one connects
-them: every open task of a change in flight becomes a ledger item **about the requirement it
-implements**, `next` ranks them beside everything else in the ledger, checking a box closes its
-item, and archiving the change closes the rest. The tree stays the source of truth for *what*;
-the ledger is where *who, when and what next* live; and neither copies the other's job.
+[An openspec/ tree as a graph](graph.md) put the spec graph and the ledger in one store. This
+chapter connects them: every open task of a change in flight becomes a ledger item about the
+task. If the task names a requirement that the change adds or modifies, the item is also
+**about that requirement**. `next` ranks those items beside everything else in the ledger.
+Checking a box closes its item, and archiving the change closes the rest. The tree stays the
+source of truth for *what*; the ledger is where *who, when and what next* live; and neither
+copies the other's job.
 
 ## Which tasks, and which items
 
@@ -15,11 +17,12 @@ graph — the join gonk's single store exists to make cheap:
 {{#include ../../../../crates/openspec-ledger/src/lib.rs:queries}}
 ```
 
-`OPEN_TASKS` is every open task of an unarchived change, with the requirement its parenthesis
-names *if the change adds or modifies one by that name* — so a typo in a task files an item about
-the task alone rather than about the wrong requirement. It does not ask whether a task already has
-an item; the ledger answers that. `FINISHED` is an open item about a task that is checked off, or
-whose change has been archived. Acting on the rows is one ledger request each:
+`OPEN_TASKS` selects every open task of an unarchived change, with the requirement named in
+parentheses *if the change adds or modifies one by that name* — so a typo in a task files an
+item about the task alone rather than about the wrong requirement. It does not ask whether a
+task already has an item; the ledger answers that. `FINISHED` selects open items about tasks
+that are checked off or whose changes have been archived. Acting on each row takes one ledger
+request:
 
 ```rust,ignore
 {{#include ../../../../crates/openspec-ledger/src/lib.rs:sync}}
