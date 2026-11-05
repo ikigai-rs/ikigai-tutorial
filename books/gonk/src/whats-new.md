@@ -11,6 +11,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Checking what you have](ledger/checking.md), [The Dashboard](ledger/dashboard.md), [A lifecycle for your ledger](ledger/lifecycle.md)
 
+- **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
+
+  Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The ledger in a browser](ledger/browser.md)
+
 - **2026-11-05**: The starter now records a pull request alias when the dispatcher closes an item. Periodic unled audits adds review jobs: a worker hands back a JSON block, and the dispatcher files keyed, parented findings from a trusted worker, keeping the worker's narrow grant.
 
   Pages: [A workflow of your own](project/script.md), [Periodic unled audits](ways/audits.md)

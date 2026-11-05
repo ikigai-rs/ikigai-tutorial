@@ -17,8 +17,8 @@ transports. gonk is the host that composes them, which is why this book can show
 
 Each part is one way gonk is used **standalone**, and each builds on the one before it.
 
-- **A ledger of your own.** File, comment, link, claim, close and ask `next` — in this page,
-  in a kernel of your own, and against a gonk you start. Then the same ledger in a browser, a check of what
+- **A ledger of your own.** File, comment, link, claim, close and ask `next` — in the next
+  chapter's runnable cells, in a kernel of your own, and against a gonk you start. Then the same ledger in a browser, a check of what
   it says with the RDF Toolbox, the Dashboard over several ledgers and their agents, shown in
   screenshots over a seeded history, and a
   lifecycle of your own: the states an item moves through and the moves it may make.
@@ -103,8 +103,10 @@ What each move of these pins changed for a reader, and the pages that show it, i
 [What's new](whats-new.md) page.
 
 Where a chapter needs a model, its kernel binds a **stub** at `urn:llm:` that answers the same thing
-every time: no example in this book calls a real model or the network. From [Your first saved
-query](scripts/first.md) on, a page also starts that stub as a process of its own, `model-stub`,
+every time. The automated checks use stubs instead of real models; [A model of your
+own](project/model.md), later in the book, marks the commands that need a real model or the network
+as manual. From [Your first saved query](scripts/first.md) on, a page also starts that stub as a
+process of its own, `model-stub`,
 for gonk to mount. It is this book's own crate (`crates/model-stub`), not published anywhere, so it
 is installed from this repository:
 
