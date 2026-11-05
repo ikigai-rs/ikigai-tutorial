@@ -353,7 +353,7 @@ trace  urn:iki:fn:toUpper
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 
-urn:iki:fn:toUpper   toUpper · cached · main · 0ms   → 3b  A B
+urn:iki:fn:toUpper   toUpper · computed · main · 0ms   → 3b  A B
 ikigai> describe urn:iki:fn:toUpper text/turtle
 @prefix ik: <https://ikigai-rs.dev/ns#> .
 
@@ -384,7 +384,8 @@ threads (cut generations)
 
 Line by line: `|` pipes one resolution's output into the next one's unnamed argument, and
 the `[2 computed]` tally is the kernel counting invocations. `cache` is `is_cached` from a
-shell. `trace` is `issue_traced` with the CLI's own tracer rendering the tree. `describe
+shell. `trace` is `issue_traced` with the CLI's own tracer rendering the tree. This
+trace computes its answer; repeating the same trace shows a cached node. `describe
 … text/turtle` is `Meta` with `as=text/turtle`. The file is the `title` of this chapter,
 one level up: its endpoint declared a thread named after the file, so the `sink` that wrote
 it cut that thread, and `sink urn:kernel:cut` cuts it again by hand — the resource for
