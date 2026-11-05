@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
+
+  Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)
+
 - **2026-11-05**: The jq, data-naming, and composites walkthroughs clarify which steps run in a shell or the REPL and connect the files and questions carried between chapters. The composites chapter corrects its count of strong earthquakes in Japan from seven to six.
 
   Pages: [Reshaping JSON with jq](explore/jq.md), [Giving the data names](explore/names.md), [Composites, one layer at a time](explore/composites.md)

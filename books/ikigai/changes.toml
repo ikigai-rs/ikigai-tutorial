@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "\"Resolution\" defines endpoint before using it. \"Running it\" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides."
+pages = ["getting-started/resolution.md", "getting-started/running-it.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The jq, data-naming, and composites walkthroughs clarify which steps run in a shell or the REPL and connect the files and questions carried between chapters. The composites chapter corrects its count of strong earthquakes in Japan from seven to six."
 pages = ["explore/jq.md", "explore/names.md", "explore/composites.md"]
 
