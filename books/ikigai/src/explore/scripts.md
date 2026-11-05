@@ -10,8 +10,9 @@ script.
 
 ## What you need
 
-The `~/quakes` directory from the last chapter, and a shell in it. Every step here is a shell
-command, not a line at the REPL prompt; quit the REPL from the last chapter first, or use
+The `~/quakes` directory from [Composites, one layer at a time](composites.md), with
+its recorded weeks, context and templates, and a shell in that directory. Every step here
+is a shell command, not a line at the REPL prompt; quit an earlier REPL first, or use
 another terminal.
 
 ```bash
@@ -31,8 +32,9 @@ cached from one `$` line to the next.
 
 A script is a text file with one REPL line on each line. This one holds what the composites
 are made from: the two fill templates, the question, the row and report templates, and the
-stand-in for a note not written yet. If you worked through the last chapter, you have all of
-them, and replaying it writes the same bytes again. If you are starting here, it is how you
+stand-in for a note not written yet. If you worked through
+[Composites, one layer at a time](composites.md#6-at-a-shell-your-own-notes), you have
+all of them, and replaying it writes the same bytes again. If you are starting here, it is how you
 catch up. Save it as `chapter5.iki`:
 
 <!-- transcript: file chapter5.iki -->
@@ -106,7 +108,8 @@ $ cat report.html
 ```
 
 Every copy is rewritten from its sources, in order, and the page fragment at the end is new.
-(If you wrote notes in the last chapter, the report has them where this one says
+(If you wrote notes in [Composites, one layer at a time](composites.md#6-at-a-shell-your-own-notes),
+the report has them where this one says
 `no note yet`, and the byte count is larger.) After an edit to the context, the question or a
 template, this one command brings every copy up to date.
 
