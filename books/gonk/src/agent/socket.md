@@ -67,7 +67,8 @@ choice, not the ledger's. An answer gonk caches hangs from golden threads that l
 kernel, and a thread does not cross a wire; an answer that left the socket cacheable would arrive
 with nothing that could ever invalidate it, and a long-lived client would go on serving it. So
 every answer crosses the socket (and the QUIC door) uncacheable, and gonk keeps its own cache
-behind it: a mounted read costs one round trip to gonk's cache, never a recompute.
+behind it. A mounted read makes a round trip to gonk. If its cached answer is still valid,
+gonk reuses it; otherwise it computes a new one.
 
 `priority=1` was routed by name because the cli asked the remote for the resource's contract
 first, over the same socket, and the contract declares `priority`. That contract is the
@@ -276,7 +277,7 @@ The browser's [`/sparql`](../ledger/browser.md#the-pages) has a twin on the sock
 `urn:sparql:select` (and `:ask`, `:construct` and `:describe`) over the store it holds, so under
 the alias it is `urn:gk:sparql:select`. Naming no graph, a query's dataset is the **union of
 every named graph the caller may read**. At root over the socket that is every graph gonk holds:
-here the ledger's, and the one the delete above moved item 2's six quads into:
+here the ledger's, and the one the delete above moved item 2's seven quads into:
 
 <!-- transcript: run -->
 ```console

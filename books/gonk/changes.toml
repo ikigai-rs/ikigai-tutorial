@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Over the socket now describes reuse of valid cached answers and recomputation after invalidation. Its SPARQL explanation counts the deleted item's seven quads, matching the transcript."
+pages = ["agent/socket.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "Over MCP defines the manifold and certificate bundle, marks the QUIC chapter as a later explanation, and names each JSON file to save. It also says where to run client commands, labels the author refusal directly, and points onward to Browse roots."
 pages = ["agent/mcp.md"]
 
