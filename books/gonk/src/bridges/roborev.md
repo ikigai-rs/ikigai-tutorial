@@ -14,7 +14,7 @@ Filing is a write, so the command files with an identity: a **client certificate
 write one ledger, at gonk's QUIC door, which is how this page files; or, as a shortcut for a hook
 that runs as the same user as gonk, gonk's owner-only **socket**, shown at the end of the page.
 (Through gonk 3edf830 it filed through the HTTP door as that door's anonymous caller. Since gonk
-PR 186, ledger #1687, that caller reads and writes nothing, and the gonk this book pins files only
+PR 186, ledger #1687, that caller writes nothing, and the gonk this book pins files only
 with an identity: gonk PR 212, ledger #2075.)
 
 ## A review, as roborev hands it over
