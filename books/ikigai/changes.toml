@@ -54,6 +54,11 @@ summary = "The earthquake walkthrough now connects to the CLI chapters, installs
 pages = ["explore/index.md", "explore/lab.md"]
 
 [[change]]
+date = "2026-11-05"
+summary = "The resolution walkthrough corrects its CLI trace verdict and explains why a cached composite produces only a parent trace span. The golden-thread and endpoint-description chapters clarify expiry and the kernel’s enforcement of declared authority, introduce terms before using them, and connect the examples across chapters."
+pages = ["getting-started/payoff.md", "getting-started/golden-threads.md", "getting-started/self-description.md"]
+
+[[change]]
 date = "2026-11-03"
 summary = "\"Checking a resource\" now shows the RDF Toolbox page itself, in light and dark screenshots: Validate, Format, a SHACL finding, the SPARQL tab, and what a caller without the scope sees, including a verdict that can mislead when the data was refused."
 pages = ["building/checking.md"]

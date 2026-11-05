@@ -1,9 +1,9 @@
 # What resolution buys you
 
-[Hello, resource](hello-resource.md) built an endpoint that camel-cases text, and if you
-are honest about it, a function would have done the same job in fewer lines. This chapter
-is where the difference shows up. Four things happen to a resolution that never happen to
-a function call, and you run each of them.
+[Hello, resource](hello-resource.md) gave you an endpoint that camel-cases text. A
+function would have done the same job in fewer lines. This chapter shows what resolving
+a name adds: caching, invalidation, tracing, and a queryable description. You run each
+of them.
 
 Everything here resolves through the tutorial host — `hello_camel::kernel()`, a kernel
 over this book's `space()` — which you have not built yet. [Binding, and a host of your
@@ -39,7 +39,7 @@ caller performs from outside, made from inside an invocation. That one line is w
 it a composite, and the rest of this chapter is the consequences of that line.
 
 The four demonstrations are tests in `crates/hello-camel/tests/payoff.rs`. Each is included
-below from the file that runs it. To see their output rather than take the book's word:
+below from the file that runs it. From the root of this repository, run:
 
 ```bash
 cargo test -p hello-camel --test payoff -- --nocapture --test-threads 1
@@ -94,8 +94,9 @@ name to one that is not bound and run that.
 The cache is keyed on the request, *the capability*, and the chain the request was
 resolved in — a result computed under one authority is never handed to a caller holding
 another, and a result computed in one context is never served in another. You will not
-feel either here, where everything runs as root in the plain root, but it is why
-`.cacheable()` is safe to say on an endpoint whose answer depends on who is asking.
+see either distinction here: every request has full authority and uses the same chain.
+That separation is why `.cacheable()` is safe to say on an endpoint whose answer
+depends on who is asking.
 [Golden threads in practice](golden-threads.md) states the rule; [Scope and
 alias](scope-and-alias.md) shows the third slot at work.
 
@@ -173,8 +174,9 @@ The child prints first, because it *finished* first — an event is recorded whe
 invocation completes. `(span, parent)` pairs reconstruct the tree: `title` ran as span 1,
 inside span 0. Each event also records whether the cache served it, which worker thread it
 ran on, and the capability it ran under, so an attenuation down a call chain is visible
-node by node. Run the traced resolution a second time on the same kernel and both spans
-report `cache_hit=true`.
+node by node. Run the traced resolution a second time on the same kernel and only the
+parent span appears, with `cache_hit=true`: the cached answer needs no sub-request to
+`title`.
 
 The events are plain, serializable data. That matters in [Part
 III](../beyond/socket.md), where a remote kernel records its own events and ships them back
@@ -351,7 +353,7 @@ trace  urn:iki:fn:toUpper
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 
-urn:iki:fn:toUpper   toUpper · cached · main · 0ms   → 3b  A B
+urn:iki:fn:toUpper   toUpper · computed · main · 0ms   → 3b  A B
 ikigai> describe urn:iki:fn:toUpper text/turtle
 @prefix ik: <https://ikigai-rs.dev/ns#> .
 
@@ -382,7 +384,8 @@ threads (cut generations)
 
 Line by line: `|` pipes one resolution's output into the next one's unnamed argument, and
 the `[2 computed]` tally is the kernel counting invocations. `cache` is `is_cached` from a
-shell. `trace` is `issue_traced` with the CLI's own tracer rendering the tree. `describe
+shell. `trace` is `issue_traced` with the CLI's own tracer rendering the tree. This
+trace computes its answer; repeating the same trace shows a cached node. `describe
 … text/turtle` is `Meta` with `as=text/turtle`. The file is the `title` of this chapter,
 one level up: its endpoint declared a thread named after the file, so the `sink` that wrote
 it cut that thread, and `sink urn:kernel:cut` cuts it again by hand — the resource for
@@ -411,9 +414,10 @@ own tree. An endpoint answered "what are you?" with a graph you could query. Fou
 properties, zero lines of code in `camel-case` to get any of them — they came from
 resolving a *name* rather than calling a function.
 
-After [Golden threads in practice](golden-threads.md), the two chapters that follow it are
-about the two things that made the fourth one possible: [the description](self-description.md)
-an endpoint carries, and [the host](binding.md) that knows how to render it.
+Continue with [Golden threads in practice](golden-threads.md) to see how invalidation
+works. Then [Why an endpoint describes itself](self-description.md) explains the
+description behind the graph, and [Binding, and a host of your own](binding.md) builds
+the host that renders it.
 
 ## Try it
 
