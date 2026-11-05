@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "The ledger chapters clarify resource checks, the Dashboard's seed setup and polling, and lifecycle diagnostics. Links name the surrounding chapters, and lifecycle state properties lead with their names."
+pages = ["ledger/checking.md", "ledger/dashboard.md", "ledger/lifecycle.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow."
 pages = ["introduction.md", "ledger/your-own.md", "ledger/browser.md"]
 
