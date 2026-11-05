@@ -67,8 +67,10 @@ task's item by hand, file it as the sync would, with `key=<the task's IRI>`; the
 
 ## The walk
 
-A copy of the committed tree, in a scratch directory, so a box can be checked and the change
-archived for real:
+The example copies the committed tree into a scratch directory, checks a box, and moves the
+change into the archive. `Workspace::archive` only moves the folder; it does not merge the delta
+specs into the current specs as OpenSpec does. That move is enough for the sync to close the
+remaining items:
 
 ```rust
 # extern crate openspec_ledger;
@@ -166,7 +168,7 @@ through it. So the split is the natural one. A host of your own links the lift a
 The graphs then live in gonk's durable store beside the ledger, and gonk's own pages show the
 items. The key needs a gonk whose ledger knows it, `ikigai-ledger` 0.4.0 or later, and `count`
 one that links 0.9.0 or later; the gonk this book pins ([`gonk.rev`](../introduction.md#which-gonk))
-links 0.9.0, so both are served there as `urn:gk:iki:ledger:append` and `urn:gk:iki:ledger:count`.
+links 0.18.1, so both are served there as `urn:gk:iki:ledger:append` and `urn:gk:iki:ledger:count`.
 (This book's checks run the in-process host above, not that arrangement.) gonk does not run the sync itself; doing that
 on a watcher over a browse root's `openspec/` directory would be a separate piece of work.
 
