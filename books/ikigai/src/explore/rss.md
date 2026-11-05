@@ -471,9 +471,10 @@ wrote 559 bytes to out/caching.opml
 
 Open `ws/out/river.html` in a browser, or read the others in an editor. The OPML is built
 from `search-feeds.rq`, the same search counted per feed, because a directory lists each feed
-once. In the REPL, each written file is as fresh as the river: these four lines are the end
-of a pipeline that starts at the directory, and every answer in it hangs from every file it
-read.
+once. Each written file reflects the current `river.nt`, so rebuild the river before
+writing the views after a feed changes. Saving the river as a file breaks the dependency
+path: these queries read `river.nt`, not the feeds that produced it. Replaying
+`ws/refresh.iki` in section 7 runs the build and the four view writes in that order.
 
 ## 7. Saved searches and the refresh script
 
@@ -493,7 +494,7 @@ rss.rq
 [uncacheable]
 ikigai> source urn:file:searches | urn:text:wc
 2
-[1 computed · 1 uncacheable]
+[2 uncacheable]
 ```
 
 `ws/save-searches.iki` is those two lines in a file: a script that writes scripts, because each
@@ -519,6 +520,7 @@ mapped over it is handed the short name. In the same REPL as the saves above:
 ikigai> source urn:file:searches .. urn:iki:fn:compose
 error: invalid argument `src`: not an IRI: invalid IRI: No scheme found in an absolute IRI
        `src`: the IRI of the template to fill
+[uncacheable]
 ```
 
 So `ws/refresh.iki`, which rebuilds the river and all four faces, names its searches one by
@@ -530,8 +532,10 @@ feed, the directory or a stylesheet:
 ./iki --quiet < ws/refresh.iki
 ```
 
-Only what the change reached is computed again; the rest comes from the cache of that one
-REPL. `examples/rss/check.sh` runs both scripts and fails if `river.nt` or anything in
+This command starts a fresh REPL, so it recomputes the river and all four views on every
+run. Its cache lasts only for that replay; it does not carry over from an earlier run.
+The selective rebuild in section 4 works because its commands share one running REPL.
+`examples/rss/check.sh` runs both scripts and fails if `river.nt` or anything in
 `ws/out/` differs from the committed copy, which is how the example knows it still works.
 
 ## 8. What the river is waiting for
@@ -550,9 +554,9 @@ the same reason: in this chapter, a request with arguments is not a name.
   every use. Named once, with the politeness in the name, no line could forget it.
 - The saved searches are a set of files, but not yet a set of names a map can walk.
 
-Named requests (ledger #2447) remove all three, and `ikigai-cli` 0.2.6, the release this
-book is checked against, has them: the REPL's `bind` names a request with its arguments. This
-chapter was written before that release and does not use them yet (nor does [Reshaping JSON
-with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) for its headline). The next
-chapter introduces them and comes back to this river: [Naming a composition](naming.md)
+Named requests (ledger #2447) address these gaps, and the CLI this book checks,
+{{#include ../../ikigai-cli.version}}, has them: the REPL's `bind` names a request with its
+arguments. This chapter was written before named requests were released and does not use
+them yet (nor does [Reshaping JSON with jq](jq.md#6-at-a-shell-programs-and-templates-are-files)
+for its headline). The next chapter introduces them and comes back to this river: [Naming a composition](naming.md)
 names the live feed and the saved searches, and says why the build line is not a name yet.
