@@ -173,8 +173,8 @@ The child prints first, because it *finished* first — an event is recorded whe
 invocation completes. `(span, parent)` pairs reconstruct the tree: `title` ran as span 1,
 inside span 0. Each event also records whether the cache served it, which worker thread it
 ran on, and the capability it ran under, so an attenuation down a call chain is visible
-node by node. Run the traced resolution a second time on the same kernel and both spans
-report `cache_hit=true`.
+node by node. Run the traced resolution a second time on the same kernel and only the parent span
+appears, with `cache_hit=true`: the cached answer needs no sub-request to `title`.
 
 The events are plain, serializable data. That matters in [Part
 III](../beyond/socket.md), where a remote kernel records its own events and ships them back
