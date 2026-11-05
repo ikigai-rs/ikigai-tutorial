@@ -47,10 +47,9 @@ Peninsula earthquake's place is its name, `"2024 Noto Peninsula, Japan Earthquak
 follows its last comma is `Japan Earthquake`.
 
 Count the earthquakes in each region, keep each region's strongest, and put the busiest region
-first. Splitting a string is not what makes this hard to ask as a rule: jq's `split` does it,
-and `split(", ") | last` gives a place's region. What does is that which weeks to count is
-data, kept in a file you change, and a rule reads only the inputs its caller names. A program
-can read the list, then read each week on it. And the Noto place needs one more step: when the
+first. jq's `split(", ") | last` gives a place's region. The difficulty is choosing which
+weeks to count: their names are data, kept in a file you change. A rule reads only the inputs
+its caller names. A program can read the list, then read each week on it. And the Noto place needs one more step: when the
 region ends in ` Earthquake`, take that off.
 
 ## 2. The program is a file
@@ -174,7 +173,7 @@ program made went through the kernel inside the evaluation.
 An evaluation is uncacheable unless the program says otherwise, because a program may write.
 This one wraps its answer in `(cacheable …)`. The kernel honors that only when the evaluation
 wrote nothing, and the answer is never fresher than what it read. It hangs from the thread of
-every resource the program read: the program file, `weeks.txt` and both weeks.
+every resource the program read: the program file, `weeks.txt` and each week it lists.
 
 Give the program a name, the way [Naming a composition](naming.md#1-a-name-for-a-request) did.
 `in` is `urn:lisp:eval`'s input for the program text, and `<urn:file:regions.scm>` is a
@@ -290,9 +289,10 @@ So the next question is not one for this program.
 ## 5. Where composition stops: a peer in Python
 
 Name a point, and ask how far each earthquake was from it. Here the point is Tokyo, at
-latitude 35.68 and longitude 139.69. The distance between two points on the Earth's surface is a
-great circle, and the sum needs a sine, a cosine and an arcsine. jq has those, so a long `q=`
-could hold the sum, and the Lisp sandbox has none of them. Neither is where this code belongs.
+latitude 35.68 and longitude 139.69. Treating the Earth as a sphere, the shortest path between
+two points on its surface follows an arc of a great circle. Calculating its length needs a
+sine, a cosine, a square root and an arcsine. jq has those, so a long `q=` could hold the
+calculation, and the Lisp sandbox has none of them. Neither is where this code belongs.
 The day you want the Earth as an ellipsoid rather than a sphere, or a coastline from a shapefile,
 you want a library, and the libraries are in languages like Python.
 
@@ -307,7 +307,7 @@ pip install git+https://github.com/ikigai-rs/ikigai-python
 Save this as `near.py` (it is `examples/quakes/near.py` in this book's repository):
 
 ```python
-{{#include ../../../../examples/quakes/near.py:near}}
+{{#include ../../../../examples/quakes/near.py}}
 ```
 
 `@endpoint` gives the function a name, and the signature is its contract. `{lat}` and `{lon}`
@@ -412,14 +412,15 @@ in Rust and runs it in its page.
 
 ## 8. The ladder
 
-- **A rule** (jq, SPARQL, XSLT, a template) answers from the inputs its caller names. It stops
+- **Rule** (jq, SPARQL, XSLT, a template) answers from the inputs its caller names. It stops
   where the question has to decide what to read.
-- **A name** for a rule ([Naming a composition](naming.md)) fixes its inputs and keeps it
+- **Name** for a rule ([Naming a composition](naming.md)) fixes its inputs and keeps it
   cached. It is still one request.
-- **A program** (Lisp, this chapter) reads what it decides to read, through the kernel, under
-  the session's capability, and its answer is cached and recomputed by the threads of everything
-  it read. It stops at the sandbox's list of pure functions.
-- **A peer** (Python, this chapter) is any code you like, in a process of its own. It stops being
+- **Program** (Lisp, this chapter) reads what it decides to read, through the kernel, under
+  the session's capability. If it declares its answer cacheable and writes nothing, the answer
+  hangs from the threads of everything it read and is recomputed when any of them is cut. It
+  stops at the sandbox's list of pure functions.
+- **Peer** (Python, this chapter) is any code you like, in a process of its own. It stops being
   the kernel's to govern: its own authority, and no copy of its answers in the CLI's cache.
 
 Each rung up gives you more to say and gives the kernel less it can check for you.

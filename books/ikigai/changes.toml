@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "\"Naming a composition\" clarifies its earlier examples and the path to the RSS workspace. \"When a rule is not enough\" shows the complete Python peer to save and run, clarifies which files a program depends on and when it can be cached, and explains great-circle distance."
+pages = ["explore/naming.md", "explore/beyond-rules.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "A river of feeds now distinguishes a fresh refresh process from selective rebuilding in one REPL, explains that saving the river breaks dependencies back to feeds, and corrects directory-read verdicts. The named-request discussion uses the book's tested CLI version."
 pages = ["explore/rss.md"]
 
