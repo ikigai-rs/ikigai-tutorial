@@ -2,7 +2,7 @@
 
 A ledger says what to do next. It does not say what the software is *supposed to do*, and an
 agent working from a ledger item alone is guessing at that. [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-(MIT, by Fission AI; this book follows its 1.x layout, current release 1.14.1) is a small
+(MIT, by Fission AI; this book follows the layout in version 1.14.1) is a small
 convention for writing it down where the code is: Markdown files in an `openspec/` directory,
 with just enough structure that a tool — or a SPARQL query — can find the parts.
 
@@ -69,9 +69,9 @@ group:
 
 ⚠ **One convention here is this book's, not OpenSpec's.** A task that ends in a requirement's
 name in parentheses — `(The last move can be undone)` — says which requirement it implements.
-OpenSpec's tasks are free text and name nothing; this book needs the link to file each task as a
+OpenSpec does not require this link in a task; this book needs the link to file each task as a
 ledger item *about* its requirement, so it adds the parenthesis, and a task without one (1.1
-here) is about its change alone. A project adopting this would agree the same convention, or put
+here) has no requirement link. A project adopting this would agree the same convention, or put
 the link somewhere else and change one construct.
 
 ## Archiving
@@ -79,8 +79,8 @@ the link somewhere else and change one construct.
 When a change is done, OpenSpec **archives** it: the delta is merged into the current specs (the
 added requirement appended to `specs/moves/spec.md`, the modified one replaced), and the change's
 folder **moves** to `changes/archive/<date>-<id>/`, intact, as the record of why the specs say
-what they say. So at any moment, `changes/` is exactly the work in flight, and `changes/archive/`
-the work done. The ledger in two chapters' time keys off that move.
+what they say. The active change folders sit directly under `changes/`; completed changes sit under
+`changes/archive/`. The ledger in two chapters' time keys off that move.
 
 <a id="where-this-goes-next"></a>
 
