@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "The jq, data-naming, and composites walkthroughs clarify which steps run in a shell or the REPL and connect the files and questions carried between chapters. The composites chapter corrects its count of strong earthquakes in Japan from seven to six."
+pages = ["explore/jq.md", "explore/names.md", "explore/composites.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace. The lab’s text pipelines show the cache tallies and uncached reasons from CLI 0.2.9."
 pages = ["explore/index.md", "explore/lab.md"]
 
