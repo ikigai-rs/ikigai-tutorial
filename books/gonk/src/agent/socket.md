@@ -1,9 +1,9 @@
 # Over the socket
 
-An agent does its work in a process, and a person reads its work in a browser. The browser
-came through gonk's HTTP door. The agent comes through the **socket**: a Unix socket beside the
-store, owner-only, which another ikigai process on the same machine mounts as part of its own
-namespace. Nothing on the other side of it is an HTTP route; it is the kernel's own wire, so
+In [The ledger in a browser](../ledger/browser.md), a person read the ledger through gonk's
+HTTP door. An agent does its work in a process. It comes through the **socket**: an owner-only
+Unix socket beside the store, which another ikigai process on the same machine mounts as part
+of its own namespace. Nothing on the other side of it is an HTTP route; it is the kernel's own wire, so
 the agent's tool calls are the ledger's resources, by their own names, with their own
 contracts.
 
@@ -32,6 +32,9 @@ ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
   mount   mount = "prefer urn:iki:ledger:=…/.ikigai/gonk.sock"  (and the same for urn:iki:store:)
 ```
+
+Leave gonk running in this terminal. Run the remaining commands in a second terminal, in the
+same directory.
 
 Two lines of the banner are for this chapter. `socket` says where the door is and who may use
 it: the file is created owner-only, so the operating system decides who can connect, and
@@ -313,12 +316,12 @@ agents, a manager over both and a signed-out browser, and gets four answers.
 
 ## Over MCP
 
-An agent framework that speaks MCP rather than ikigai reaches the same ledger through
-`ikigai mcp`, which projects a kernel's capability-scoped manifold as MCP tools. It could do
-that over this socket with a sealed grant like the one above, and the tool list would be the
-ledger's actions under that grant; but every request would still be the owner's, with the
-residual shown above. The [next chapter](mcp.md) gives the agent an identity of its own on the
-QUIC door instead, so the author rule runs and the log names the agent.
+An agent framework that speaks the Model Context Protocol (MCP) rather than ikigai reaches
+the same ledger through `ikigai mcp`, which lists the actions allowed by a capability as MCP
+tools. It could do that over this socket with a sealed grant like the one above. The tool list
+would be the ledger's actions under that grant, but every request would still be the owner's,
+with the residual shown above. The [next chapter](mcp.md) gives the agent an identity of its own
+on the QUIC door instead, so the author rule runs and the log names the agent.
 
 ## What you have now
 

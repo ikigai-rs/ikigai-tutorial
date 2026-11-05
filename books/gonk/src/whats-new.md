@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: Over the socket links back to the browser chapter, says where to run commands while gonk is running, and introduces MCP by its full name.
+
+  Pages: [Over the socket](agent/socket.md)
+
 - **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
 
   Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The ledger in a browser](ledger/browser.md)
