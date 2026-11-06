@@ -1,8 +1,9 @@
 # The editor as a client
 
-The chapters so far in this part were plumbing, and the reasonable question at the end of them
-is who benefits. This chapter and the next are the two answers, and they are the same answer twice:
-a client that reads the manifold gets a command surface it did not have to write.
+[Twenty minutes with the CLI](../front-door/cli.md) introduced the **manifold**: the actions
+your capability lets you invoke. An editor can read that same list to generate commands.
+This chapter shows how; later in the book, [The machine client](agent.md) uses it to
+generate tools for an agent.
 
 Start with the human one. `ikigai-emacs` is a thin client — it shells out to the `ikigai`
 binary and does nothing heavier — and its most interesting command is a dozen lines long, half of
@@ -65,12 +66,13 @@ that still reaches the resource. This file is `load`ed, so an unreadable form st
 loading: earlier definitions remain, but later ones are never evaluated. Skipping one alias
 keeps that name from interrupting the rest of the generated file.
 
-It is the same rule the projection to agent tools follows, and the next chapter meets it
-again: **certify the output, not the input.**
+The projection to agent tools follows the same rule, as
+[The machine client](agent.md) explains later in the book: **certify the output, not the input.**
 
 ## The topology is a `defcustom`
 
-The other half of the package is where the previous chapter shows up in a user's config.
+[Preferential resolution](preference.md) gave you three kinds of mount: alias, override
+and prefer. `ikigai-emacs` lets you configure those mounts in your editor.
 `ikigai-mounts` is an ordinary Emacs customization variable holding a list of mounts —
 prefix, target, and which of the three kinds — so a user writes their own topology in
 their own init file, and every command the package runs composes it.
