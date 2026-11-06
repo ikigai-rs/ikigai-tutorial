@@ -1,9 +1,9 @@
 # Graph to page with XSLT
 
-The card in the last chapter was filled from named parts. Most of what the inspector shows is
-not like that: the kernel describes its cache, its threads, its arrangement and its endpoints
-as **graphs**, and a page about a graph has to walk it. There is a standard for turning a
-document into another document by walking it, and ikigai uses it: **XSLT**. When the input is a
+In [A page is a composed resource](composed.md), you filled a card from named parts. Most of
+what the inspector shows is different: the kernel describes its cache, its threads, its
+arrangement and its endpoints as **graphs**, and a page about a graph has to walk it. There is a
+standard for turning a document into another document by walking it, and ikigai uses it: **XSLT**. When the input is a
 graph the page is an XSLT transform, and when the input is named arguments the page is a
 compose template (UI conventions D2).
 
@@ -16,7 +16,9 @@ spreadsheet, and the two chapters after this one build views over exactly those,
 them: [Views from JSON](views-from-json.md) and [Views from CSV: one model, two
 sources](views-from-csv.md).
 
-This chapter builds the threads view, then reads the four others built the same way.
+This chapter builds the threads view, then reads the other kernel views. Run the cells in
+order: this page has a fresh kernel, so the first two cells read the card and write the note
+again to cut its golden thread.
 
 ## The input: a readout, as a graph
 
@@ -53,10 +55,10 @@ That graph is what the view is made from. Two steps stand between it and a page.
 
 ## Step one: the graph a stylesheet can read
 
-XSLT reads XML, and RDF has an XML syntax, so the first step is a transreption: the same graph,
-in RDF/XML. ikigai-rdf serves that as a resource, `urn:rdf:transrept`; the inspector does not
-write a serializer. It does add one thing first. A thread's page has a URL, and building a URL
-means percent-encoding the thread's name, which XSLT 1.0 cannot do. So the link arrives as data
+XSLT reads XML, and RDF has an XML syntax, so the first step converts the graph from Turtle
+to RDF/XML. This conversion between representations is called **transreption**. ikigai-rdf
+serves that as a resource, `urn:rdf:transrept`; the inspector does not write a serializer. It
+does add one thing first. A thread's page has a URL, and building a URL means percent-encoding the thread's name, which XSLT 1.0 cannot do. So the link arrives as data
 on the node it belongs to, computed once, by the shared encoder. That is `graph:{view}`, the one
 piece of the views that is code:
 
