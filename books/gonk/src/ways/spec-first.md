@@ -308,6 +308,13 @@ item per open task, keyed by the task's IRI, and `blocks` links in `tasks.md` or
 `--dry-run`, each item is also `about` the requirement its task cites and labeled with its change,
 and a second run files nothing (the key answers `existing`).
 
+The example below uses `default` for initialization and a dry run only. At this starter revision,
+a real `seed` in `default` files the tasks but reports each as failed and adds no `blocks` links:
+its parser expects `library#1`, while `default` prints `#1`. Before seeding for real, rerun `init`
+from the generated `library/` directory with `--ledger library`, keeping the other arguments
+unchanged. [Start a project](../project/start.md#a-gonk-on-this-machine), later in the book, uses
+that named ledger.
+
 <!-- transcript: run -->
 ```console
 $ (cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent)
