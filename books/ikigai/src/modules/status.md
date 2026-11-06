@@ -133,10 +133,12 @@ the difference.
 
 The chapters above build against `ikigai-core` 0.2.12. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
-The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
-chapters they touch. Of the nine since, 0.1.104 (the principal vocabulary), 0.1.106 and
+Those seventeen releases are summarized after the newer changes below. The eight releases
+from 0.1.96 to 0.1.103 are taught in the chapters they touch. Of the nine from 0.1.104 to
+0.1.112, 0.1.104 (the principal vocabulary), 0.1.106 and
 0.1.107 change nothing a page shows, and six are worth a line, because they change what
-an endpoint you write can rely on, or what a page shows:
+an endpoint you write can rely on, or what a page shows. The list also includes 0.2.0,
+the streams release:
 
 - **0.1.105 changed behavior: a declared default is filled in.** The kernel fills a
   declared `default_value` into the request before dispatch, so an endpoint reads an
