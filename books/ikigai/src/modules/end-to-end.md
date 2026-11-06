@@ -1,8 +1,14 @@
 # A module, end to end
 
-Everything from the previous two chapters, running.
+In [Two ways to reach a kernel](two-ways.md), you saw the host route a prefix to a
+module. In [The callback](the-callback.md), you saw the module ask that host to resolve
+`urn:host:name`. Here you will run them together.
 
 ## Run it
+
+Run this command in a terminal, from the root of your `ikigai-tutorial` clone. If you
+need a clone, [Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else)
+shows how to get one.
 
 ```bash
 cargo run -p loadable-module
@@ -61,8 +67,8 @@ live there, not in the byte format.
 
 ## Three tests worth reading
 
-The crate's tests pin the three properties this book claims, and they are short enough to
-be worth opening:
+The [crate's tests](https://github.com/ikigai-rs/ikigai-tutorial/blob/main/crates/loadable-module/src/lib.rs)
+check the three properties below:
 
 - `the_module_resolves_a_host_resource_mid_invocation` — the callback works. This single
   assertion is the difference between a module and a peer.
