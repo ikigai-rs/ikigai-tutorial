@@ -23,8 +23,8 @@ routes the request to whatever is bound to answer for it.
 
 That idea is not new, and this book does not pretend it is. Resource-oriented computing was worked
 out in detail in **NetKernel**, designed by **Peter Rodgers and Tony Butterfield**, and ikigai owes
-it the core of its thinking. You do not need to know NetKernel to read this book — everything is
-taught here from the ground — but it is honest to name where the ideas come from.
+it the core of its thinking. You do not need to know NetKernel to read this book, but it is honest to name where the ideas
+come from. The ikigai background this book assumes is listed [below](#how-this-book-is-organized-and-what-it-assumes).
 
 What does a reader get from a system built this way? A few things, and they compound:
 
@@ -117,10 +117,10 @@ text says plainly which is which and promises the runnable version as the toolin
 
 The chapters, in order:
 
-1. **One substrate, two faces** — the thesis, on the worked item.
-2. **The capability spine** — authority resolved once per request, and the user interface that falls
+1. **[One substrate, two faces](substrate/two-faces.md)** — the thesis, on the worked item.
+2. **[The capability spine](spine/spine.md)** — authority resolved once per request, and the user interface that falls
    out of it.
-3. **The door** — the one place where the spine meets a browser.
-4. **The overlay chain** — the governors that wrap a resource to make it resilient and bounded.
-5. **The economics** — golden threads and caching, and why they are the system's accounting.
-6. **Closing the loop** — the human-in-the-loop action and the record it leaves.
+3. **[The door](door/door.md)** — the one place where the spine meets a browser.
+4. **[The overlay chain](overlays/overlays.md)** — the governors that wrap a resource to make it resilient and bounded.
+5. **[The economics](economics/economics.md)** — golden threads and caching, and why they are the system's accounting.
+6. **[Closing the loop](closing/closing.md)** — the human-in-the-loop action and the record it leaves.
