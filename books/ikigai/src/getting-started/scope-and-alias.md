@@ -422,15 +422,15 @@ route inside the chain), **the cache probe** (`is_cached_in`, and a scope column
 and **the pipe** (`issue_with_incoming_in`). What remains, stated so you do not discover
 it at a keyboard (`docs/design/resolution-scope.md` in `ikigai-core` is the full account):
 
-- **The REPL's pipeline runs in the plain root**, so nothing on this page has a Run
+- **REPL pipelines run in the plain root**, so nothing on this page has a Run
   button.
-- **The chain does not cross the wire.** A mount inside a confining corridor forwards
+- **Wire transport does not carry the chain.** A mount inside a confining corridor forwards
   with no chain, and the remote resolves in its own root — confining to a corridor that
   contains a mount confines to whatever the mount reaches. The wire's default refuses a
   non-empty chain rather than dropping it, so a module endpoint inside a confinement
   fails loudly instead of quietly escaping. Carrying it is a protocol bump, its own
   decision.
-- **The key holds the whole chain, not the corridors consulted.** Sound and
+- **Cache keys hold the whole chain, not the corridors consulted.** Sound and
   over-partitioned, as above. The datum a consulted-corridors key would need —
   *which* space answered — is reported since 0.1.78 (`Resolved::answered_by`); keying
   on it is not built.
