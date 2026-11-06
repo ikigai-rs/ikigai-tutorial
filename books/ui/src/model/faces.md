@@ -2,11 +2,12 @@
 
 *This chapter is not written yet.*
 
-It will cover **transreption** for user interfaces: the thing a view shows is a resource with
-one model, and each delivery is a face of it reached by transreption, `text/html` for a
-browser, `text/plain` for a terminal, Turtle or JSON-LD for an agent or a dashboard. The
-precedent is already in front of you: the cache, threads and scheduler readouts have a text face
-(the one The ikigai Book prints) and a Turtle face (the one the inspector's stylesheets read).
+It will cover **transreption** for user interfaces: converting a resource's representation
+into another form. The same model can have a `text/html` face for a browser, a `text/plain`
+face for a terminal, and a Turtle or JSON-LD face for an agent or a dashboard.
+
+In [Graph to page with XSLT](xslt.md), the inspector already reads the kernel's Turtle graphs.
+The cache, threads and scheduler readouts also have a text face (the one The ikigai Book prints).
 The chapter will make the inspector's own views answer the same way, and show a page linking
 its other faces with `rel=alternate`.
 
