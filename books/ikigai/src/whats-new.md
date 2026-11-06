@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-06**: A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request.
+
+  Pages: [A module, end to end](modules/end-to-end.md)
+
 - **2026-11-06**: The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features.
 
   Pages: [The wire session](modules/wire-session.md)

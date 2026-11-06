@@ -68,11 +68,12 @@ live there, not in the byte format.
 ## Three tests worth reading
 
 The [crate's tests](https://github.com/ikigai-rs/ikigai-tutorial/blob/main/crates/loadable-module/src/lib.rs)
-check the three properties below:
+exercise the callback, the host's own resource, and the routing boundary:
 
 - `the_module_resolves_a_host_resource_mid_invocation` — the callback works. This single
   assertion is the difference between a module and a peer.
-- `the_host_routes_by_prefix_not_by_knowing_the_endpoint` — the host bound no
-  `urn:iki:tutorial:module:greeting`.
+- `the_host_routes_by_prefix_not_by_knowing_the_endpoint` — despite its name, this
+  test checks that the host still answers `urn:host:name` with `Peter` while the module
+  is mounted. The demo above exercises the route to the module.
 - `a_name_outside_the_module_prefix_does_not_reach_it` — routing is bounded; the module
   does not become a catch-all.

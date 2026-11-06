@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-06"
+summary = "A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request."
+pages = ["modules/end-to-end.md"]
+
+[[change]]
+date = "2026-11-06"
 summary = "The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features."
 pages = ["modules/wire-session.md"]
 
