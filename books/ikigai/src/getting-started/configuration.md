@@ -101,20 +101,33 @@ the next read sees the override.
 
 ## Try it
 
-Write a file into this machine's config home and ask the host for its banner:
+From the repository root you used in [Running it](running-it.md), run this block in
+your shell. It uses a temporary config home for the example. The parentheses keep
+`XDG_CONFIG_HOME` local to this block; your usual config files stay in place.
+
+The three runs read the shared file, then the app-scoped override, then the default
+with both files removed:
 
 ```bash
-mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/ikigai"
-printf '[banner]\ntext = "hello from a file"\n' > "${XDG_CONFIG_HOME:-$HOME/.config}/ikigai/tutorial.toml"
-cargo run -p building-endpoints -- --banner
+(
+  banner_config=$(mktemp -d)
+  export XDG_CONFIG_HOME="$banner_config"
+  mkdir -p "$XDG_CONFIG_HOME/ikigai"
+  printf '[banner]\ntext = "hello from a file"\n' > "$XDG_CONFIG_HOME/ikigai/tutorial.toml"
+  cargo run -p building-endpoints -- --banner
+  printf '[banner]\ntext = "hello from yours"\n' > "$XDG_CONFIG_HOME/ikigai/yours.tutorial.toml"
+  cargo run -p building-endpoints -- --banner
+  rm "$XDG_CONFIG_HOME/ikigai/tutorial.toml" "$XDG_CONFIG_HOME/ikigai/yours.tutorial.toml"
+  cargo run -p building-endpoints -- --banner
+  rm -r "$banner_config"
+)
 ```
 
 ```text
 hello from a file
+hello from yours
+The ikigai Book
 ```
-
-Then write `yours.tutorial.toml` beside it with a different `text` and run again: the
-app-scoped layer wins. Delete both and the default answers.
 
 ## The other channels
 
