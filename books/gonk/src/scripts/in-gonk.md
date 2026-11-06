@@ -525,7 +525,9 @@ $ grep -c ': all the open items$' model.log
 The refusal's second line is the `save` argument's own description, which `ikigai` prints under
 an invalid argument; the model log shows the model was never asked.
 
-## The same, signed in
+<a id="the-same-signed-in"></a>
+
+## Signed-in HTTP
 
 `ann` does all of this over HTTP, with the session cookie her passkey's sign-in set (see [The
 ledger in a browser](../ledger/browser.md) for the ceremony). These commands are the HTTP spelling
@@ -554,8 +556,8 @@ Everything above, in one table:
 
 | what | HTTP, signed out | HTTP, signed in | QUIC (a machine) | the socket (the owner) |
 | --- | --- | --- | --- | --- |
-| run and read a PUBLIC script | **yes**, within the shared budget | yes | with `--script public=run` | yes |
-| run and read a named script | no | per `--script` | per `--script` | yes |
+| PUBLIC script: run and read | **yes**, within the shared budget | yes | with `--script public=run` | yes |
+| named script: run and read | no | per `--script` | per `--script` | yes |
 | publish, replace, retire | no | per `--script … =publish` | **no**: drafts only | yes |
 | see a draft | no | its own | its own | every draft |
 | draft from a sentence | **no**, before any model call | with `--nl draft` | with `--nl draft` | yes |
