@@ -61,10 +61,9 @@ generator will not emit something it has not verified *reads* in the target lang
 "contains only legal characters", which proves nothing, but parses.
 
 When it cannot, it emits a comment saying which name was skipped, why, and the generic call
-that still reaches the resource. That choice is worth stealing. This file is `load`ed, and
-`load` is all-or-nothing: one unreadable form takes the entire generated surface down with
-it. A refused alias costs a shortcut; a refused *file* costs the user their editor
-integration, and they will blame the editor.
+that still reaches the resource. This file is `load`ed, so an unreadable form stops
+loading: earlier definitions remain, but later ones are never evaluated. Skipping one alias
+keeps that name from interrupting the rest of the generated file.
 
 It is the same rule the projection to agent tools follows, and the next chapter meets it
 again: **certify the output, not the input.**
