@@ -1,8 +1,9 @@
 # The file workspace
 
-Files are resources like anything else. `urn:file:{path}` is bound with a URI template, so
-one binding covers a whole tree, and reading a file is a `Source` — the same verb as
-everything else.
+In [Binding, and a host of your own](binding.md), you saw how a URI template lets
+`urn:file:{path}` cover a whole tree with one binding. This chapter shows the CLI’s
+file workspace: the directory that binding serves. Files are resources like anything
+else, and reading a file is a `Source` — the same verb as everything else.
 
 ## The jail
 
@@ -82,7 +83,11 @@ the first place.
 
 ## Try it
 
-At the REPL (`ikigai`), or one line at a time with `ikigai --plain -c '…'`:
+Use the CLI installed in [Running it](running-it.md), rather than the `hello-camel`
+host or the page’s Run cells. At its REPL (`ikigai`), enter the lines after each
+`ikigai>` prompt below. If a CLI REPL is still open from [Twenty minutes with the
+CLI](../front-door/cli.md), you can use it; a REPL started with `--files` keeps that
+workspace. You can also run each line from a shell with `ikigai --plain -c '…'`:
 
 ```text
 ikigai> sink urn:file:notes.txt a note
@@ -142,7 +147,9 @@ requires `content`, so that sink is refused and the file keeps what it held. A s
 empty and closed (`< /dev/null`) is different: it answers at once, and its answer is an empty
 body.
 
-Then look in `~/.ikigai/workspace`: it is an ordinary directory. Nothing about the model
+Then look in the workspace directory selected for your CLI (`~/.ikigai/workspace`
+by default): `notes.txt` holds `"a" and "b"` after the transcript above, or `a note`
+if you also ran the pipe command. It is an ordinary directory. Nothing about the model
 requires the storage to be exotic; it requires the *access* to be named.
 
 ## Files as bodies
