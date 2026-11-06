@@ -1,10 +1,10 @@
 # Spec first
 
-Behavior is written down before it is built. A change starts as a proposal in the repository, with
-the requirements it adds or modifies and a list of tasks; once that is agreed, the tasks become
-ledger items in the order the list gives them, `next` hands them out one at a time, each task's box
-is checked in the same pull request as its code, and when the last one is done the change is
-archived and the spec says what the system now does.
+Behavior is written down before it is built. A change starts as a proposal in the repository,
+with the requirements it adds or modifies and a list of tasks. Once the proposal is agreed, the
+tasks become ledger items in list order, and `next` offers them one at a time. Each task's box is
+checked in the same pull request as its code. When the last task is done, the change is archived
+and the spec says what the system now does.
 
 The machinery is [A spec in the repository](../spec/openspec.md): OpenSpec's `openspec/` tree,
 lifted to RDF, and a sync that files and closes items from it. This chapter is the process around
