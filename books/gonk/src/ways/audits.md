@@ -186,8 +186,9 @@ linked #3 parent #1
 — batch: 2 commands · 2 uncacheable
 ```
 
-What is not a finding goes on the audit's own item, so the next audit of this repository starts
-from it: the budget, what was not read, and the suspicion.
+What is not a finding goes on the audit's own item: the budget, what was not read, and the
+suspicion. The coordinator can use these notes to plan the next audit, but keeps them out of
+the auditors' briefs so that both auditors stay blind to earlier findings.
 
 <!-- transcript: file audit-notes.txt -->
 ```text
@@ -244,9 +245,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 ```
 
 The audit's item stays with the coordinator until its last finding is closed, and then closes with
-a line saying what the audit found and what came of it. Its scope, budget and notes are what the
-next audit of this repository starts from, and its key names the date, so a later audit is a new
-item, never this one reopened.
+a line saying what the audit found and what came of it. Its scope, budget and notes remain for
+the coordinator to plan the next audit. Its key names the date, so a later audit is a new item,
+never this one reopened.
 
 ## What holds it
 
