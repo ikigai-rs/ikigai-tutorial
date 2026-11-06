@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-05"
-summary = "Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities and worker setup; all three make their comparison lists easier to scan."
+summary = "Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities, hand-backs, and worker setup; all three make their comparison lists easier to scan."
 pages = ["teams/two-teams.md", "ways/solo.md", "ways/workers.md"]
 
 [[change]]

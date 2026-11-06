@@ -7,7 +7,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-05**: Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities and worker setup; all three make their comparison lists easier to scan.
+- **2026-11-05**: Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities, hand-backs, and worker setup; all three make their comparison lists easier to scan.
 
   Pages: [Two teams, one gonk](teams/two-teams.md), [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md)
 
