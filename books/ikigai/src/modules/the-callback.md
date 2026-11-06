@@ -14,10 +14,9 @@ or the module asks. It asks.
 
 ## Where the seam already was
 
-The good news is that nothing had to be invented. An endpoint never touches the kernel
-directly in the first place; it reaches it through its `Invocation`, which holds an
-**`Issuer`**. That indirection was already there so that sub-requests could inherit the
-caller's capability and be traced.
+An endpoint reaches the kernel through its `Invocation`, which holds an **`Issuer`**:
+the interface for issuing sub-requests. That indirection already lets sub-requests inherit
+the caller's capability and be traced.
 
 So a module is simply handed *the host* as its issuer. From inside the endpoint, the call
 is the same one you would write in a linked-in endpoint:
