@@ -6,9 +6,10 @@ capabilities and golden threads from the first endpoint up. Its chapter
 the mechanism the overlay chain here is built from.
 
 The worked resource throughout — the ledger item — is the subject of [The gonk Book](../gonk/index.html),
-the work ledger and review host built from those same pieces; the kernel this book's cells run
-against is that ledger, compiled to WebAssembly. [Building ikigai UIs](../ui/index.html) takes the
-"a view is a resource" idea this book leans on and builds a real inspector with it.
+the work ledger and review host built from those same pieces. This book's ledger cells run
+against that ledger, compiled to WebAssembly; the overlay cells run against a separate resilience
+harness. [Building ikigai UIs](../ui/index.html) takes the "a view is a resource" idea this book
+leans on and builds a real inspector with it.
 [Running ikigai](../operations/index.html) is the operator's side: the `ikigai` binary that serves
 the door and the capabilities this book describes, and how to run it for real.
 
