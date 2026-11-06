@@ -230,7 +230,7 @@ code inside it, or an `onclick=` attribute, does not run. `style-src 'self'` doe
 `<style>` element and a `style=` attribute. Write a page that tries it:
 
 <!-- transcript: file faces/open/inline.html -->
-```html
+```text
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><title>Inline</title></head>
