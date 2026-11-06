@@ -3,7 +3,7 @@
 [Transreption](transreption.md) ended on a rule: the format is a property of the route, not
 of the resource. Follow it one step further. If a route reaches Turtle, the resource has a
 **Turtle face**, whatever it was written in, and anything with a Turtle face can be
-*checked*: does it parse, and does what it says fit the shapes it is supposed to fit. This
+*checked*: does it parse, and does what it says fit the shapes it is supposed to fit? This
 chapter calls that a CHECK. The RDF Toolbox
 ([`ikigai-toolbox`](https://github.com/ikigai-rs/ikigai-toolbox)) is the page that does it in a
 browser, and this chapter builds what the page reads and how it reads it.
