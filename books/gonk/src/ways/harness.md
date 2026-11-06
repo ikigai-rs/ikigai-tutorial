@@ -45,10 +45,10 @@ starter from the beginning.
 
 | role | who | does |
 | --- | --- | --- |
-| the person who steers | whoever owns the process | reads the coverage answers; turns a recurring failure into a new or better control |
-| the agent | any agent working in the repository | reads the guides; trips the sensors; is told why |
-| the sensors | the repository's own tools and hooks | refuse or warn, and record one line each time |
-| the dispatcher | the owner of the gonk the work lives in | loads the harness into gonk and asks the coverage questions |
+| person who steers | whoever owns the process | reads the coverage answers; turns a recurring failure into a new or better control |
+| agent | any agent working in the repository | reads the guides; trips the sensors; is told why |
+| sensors | the repository's own tools and hooks | refuse or warn, and record one line each time |
+| dispatcher | the owner of the gonk the work lives in | loads the harness into gonk and asks the coverage questions |
 | gonk | the same gonk as the ledger | holds the harness graph and the firings beside the ledger, and answers SPARQL over them |
 
 ## What runs where
