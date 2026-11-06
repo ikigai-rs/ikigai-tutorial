@@ -399,10 +399,10 @@ auditor> source urn:iki:store:graph-select graph="urn:iki:tutorial:graph:north u
 
 **The cache is keyed on the capability.** The workshop's second read is served from the cache;
 the auditor's read of the same text over the same graph is computed, because the auditor's
-capability is a different key. Two callers never share an entry, so an answer computed under one
-tenant's authority is never served under another's, whatever the two answers happen to be. (Two
-callers holding the same scopes do share, which is the point: the key is the authority, not the
-identity.)
+capability is a different key. These two capabilities never share an entry, so an answer
+computed under the auditor's broader authority is never served to the workshop, whatever
+the two answers happen to be. (Two callers holding the same scopes do share, which is the
+point: the key is the authority, not the identity.)
 
 **A read the kernel cannot keep fresh is not cached at all.** The second half runs a store with a
 second writer: the supplier's price feed loads straight into the store's handle, which the kernel
@@ -420,7 +420,8 @@ up on the very next read, with nothing to invalidate. A read over several graphs
 if every graph in it is one no invisible writer touches.
 
 That second rule has a cost that is easy to misread as a bug. A join that includes a shared graph
-is as slow on the hundredth read as on the first, while each of its graphs read alone is fast.
+is recomputed on the hundredth read as on the first, while a read of an unshared graph alone
+can still be cached.
 That is correct; the alternative is a cached answer that is silently out of date for as long as
 the process lives. The promise is also only as good as the host that makes it: a `SharerWrites`
 that leaves out a graph the sharer does write makes reads of that graph stale with no error at all,
@@ -493,16 +494,17 @@ What a deadline cannot do is stop every evaluation. Some loops inside the SPARQL
 aggregate over rows already in memory among them, do not check for cancellation, so the caller is
 answered on time while a core stays busy until the loop ends. The store therefore caps how many
 reads evaluate at once (`TimeBudget::with_max_overdue`; by default a quarter of the machine's
-cores, at least one), and a read that finds every slot taken waits within its own budget or is
+cores, at least two), and a read that finds every slot taken waits within its own budget or is
 refused with a transient `Unavailable` that names the cap.
 
-That cap is one pool for everyone in the published releases, so one caller able to start
-evaluations the engine cannot stop can fill it, and then every other tenant, the host included,
-is refused until those evaluations end. The next release of `ikigai-store` divides it: a reserve
-only the host's own work may use, a pool for every other caller together, and a share no single
-caller may exceed, where a caller is a principal (every capability that names none counts as one
-caller). That change is merged and not yet published, so this book's crate cannot run it; until
-it ships, a host that serves callers it does not trust keeps their budgets short.
+The store divides that cap: a reserve only root and the host's designated jobs may use,
+a pool for every other caller together, and a share no single caller may exceed. A caller is
+a principal; every capability that names none counts as one caller. The host configures the
+reserve with `TimeBudget::with_reserve` and each caller's share with
+`TimeBudget::with_caller_share`. By default, one slot is reserved for the host and each caller
+may use half the remaining pool, at least one slot. The reserve is clamped to leave callers
+at least one slot: if the host sets the total cap to one, there is no reserve, and one runaway
+evaluation can still hold everyone up.
 
 ## The rule, once more
 
