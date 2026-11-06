@@ -1,10 +1,10 @@
 # Spec first
 
-Behavior is written down before it is built. A change starts as a proposal in the repository, with
-the requirements it adds or modifies and a list of tasks; once that is agreed, the tasks become
-ledger items in the order the list gives them, `next` hands them out one at a time, each task's box
-is checked in the same pull request as its code, and when the last one is done the change is
-archived and the spec says what the system now does.
+Behavior is written down before it is built. A change starts as a proposal in the repository,
+with the requirements it adds or modifies and a list of tasks. Once the proposal is agreed, the
+tasks become ledger items in list order, and `next` offers them one at a time. Each task's box is
+checked in the same pull request as its code. When the last task is done, the change is archived
+and the spec says what the system now does.
 
 The machinery is [A spec in the repository](../spec/openspec.md): OpenSpec's `openspec/` tree,
 lifted to RDF, and a sync that files and closes items from it. This chapter is the process around
@@ -14,10 +14,10 @@ that machinery, run against gonk.
 
 | role | who | does |
 | --- | --- | --- |
-| the proposer | a person, or an agent asked to draft | writes the change: proposal, delta spec, tasks |
-| the approver | a person | merges the change's pull request, which is the agreement to build it |
-| the seeder | a host or a script, over the socket | files one item per open task, keyed by the task, in order |
-| a worker | an agent or a person | takes the next task, implements it, checks its box in the same pull request |
+| proposer | a person, or an agent asked to draft | writes the change: proposal, delta spec, tasks |
+| approver | a person | merges the change's pull request, which is the agreement to build it |
+| seeder | a host or a script, over the socket | files one item per open task, keyed by the task, in order |
+| worker | an agent or a person | takes the next task, implements it, checks its box in the same pull request |
 | whoever archives | the proposer, usually | moves the change to the archive once every box is checked |
 
 ## What runs where
@@ -261,7 +261,7 @@ in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter) says more):
 ```console
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
-$ cd starter && python3 tools/new.py ../library --process solo,spec
+$ (cd starter && python3 tools/new.py ../library --process solo,spec)
 generated the library-lending sample (python, process solo, spec) in …/library: 65 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
@@ -308,9 +308,16 @@ item per open task, keyed by the task's IRI, and `blocks` links in `tasks.md` or
 `--dry-run`, each item is also `about` the requirement its task cites and labeled with its change,
 and a second run files nothing (the key answers `existing`).
 
+The example below uses `default` for initialization and a dry run only. At this starter revision,
+a real `seed` in `default` files the tasks but reports each as failed and adds no `blocks` links:
+its parser expects `library#1`, while `default` prints `#1`. Before seeding for real, rerun `init`
+from the generated `library/` directory with `--ledger library`, keeping the other arguments
+unchanged. [Start a project](../project/start.md#a-gonk-on-this-machine), later in the book, uses
+that named ledger.
+
 <!-- transcript: run -->
 ```console
-$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent
+$ (cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder agent)
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
   note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
@@ -334,7 +341,7 @@ agents over MCP (configure the agent with this command):
 
   ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
-$ cd library && python3 tools/gonk.py seed --dry-run
+$ (cd library && python3 tools/gonk.py seed --dry-run)
 would file  add-holds 1.1: Accept a hold on a title whose copies are all out
             key=urn:openspec:change:add-holds:task:1.1
 would file  add-holds 1.2: Keep a returned copy for the first holder
@@ -359,7 +366,7 @@ would link  add-holds 2.1 blocks 2.2
 would link  cap-late-fees 1.1 blocks 1.2
 
 seed --dry-run: 8 open task(s) would be filed, in 6 order link(s); 0 checked off
-$ cd library && python3 tools/gonk.py status
+$ (cd library && python3 tools/gonk.py status)
 process: solo, spec
 no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
 ```
