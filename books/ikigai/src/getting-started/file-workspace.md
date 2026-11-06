@@ -7,7 +7,10 @@ else, and reading a file is a `Source` — the same verb as everything else.
 
 ## The jail
 
-The tree is **`$IKIGAI_FILES`, else `~/.ikigai/workspace`**. The CLI creates it if it is
+The CLI selects the root from **`--files <dir>`, else `files` in `config.toml`, else
+`$IKIGAI_FILES`, else `~/.ikigai/workspace`**. An instance-specific `<name>.files` setting
+overrides the shared `files` key; relative paths in either key start at the config home
+described in [Configuration](configuration.md). The CLI creates the root if it is
 missing, and since `ikigai-cli` 0.1.41 it creates it private (`0700`) whatever your umask;
 a directory that already exists is left as you made it. The file endpoint never creates its
 own root: a root it cannot open serves nothing.
@@ -84,7 +87,7 @@ the first place.
 ## Try it
 
 Use the CLI installed in [Running it](running-it.md), rather than the `hello-camel`
-host or the page’s Run cells. At its REPL (`ikigai`), enter the lines after each
+host or the book’s Run buttons. At its REPL (`ikigai`), enter the lines after each
 `ikigai>` prompt below. If a CLI REPL is still open from [Twenty minutes with the
 CLI](../front-door/cli.md), you can use it; a REPL started with `--files` keeps that
 workspace. You can also run each line from a shell with `ikigai --plain -c '…'`:
