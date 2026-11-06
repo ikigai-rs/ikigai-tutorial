@@ -16,9 +16,9 @@ it. Reading needs no authority; writing and resetting do.
 {{#include ../../../../crates/building-endpoints/src/multi_verb.rs:endpoint}}
 ```
 
-The implementation is one closure branching on `inv.request.verb`. The description is
-three `ActionSpec`s, and that is not repetition: each verb has a different input list, a
-different output, and a different `requires`. Flattening them would make the catalog say
+The implementation is one closure branching on `inv.request.verb`. The description
+uses three `ActionSpec`s because the inputs, output and authority requirements depend
+on the verb. Flattening them would make the catalog say
 `counter` takes `content` — on a read, which it does not — and requires the write scope
 — on a read, which it must not.
 
