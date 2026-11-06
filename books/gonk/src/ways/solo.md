@@ -298,13 +298,13 @@ dispatcher closes. And the item's body, which says what done means.
 
 The **sensors**:
 
-- **The claim and its lease.** A second claim on a held item is refused, naming the holder; a
+- **Claim and lease.** A second claim on a held item is refused, naming the holder; a
   lease that runs out shows up in `next` rather than freeing the work silently.
 - **CI** on the pull request, the one check that does not depend on anyone's word.
-- **The hand-back**, which takes the item out of `next` until a dispatcher answers it.
+- **Hand-back**, which takes the item out of `next` until a dispatcher answers it.
 - **Your own evidence check** at close: the weakest sensor here, because the checker is the
   worker. Make it a habit to open the pull request before closing, not after.
-- **The doctor**, which reports claims nobody is working (a closed item still held, a lease long
+- **Doctor**, which reports claims nobody is working (a closed item still held, a lease long
   expired). Clean here: the worker let go of its claim when it handed the item back.
 
 ## What it costs, and when to choose it
