@@ -57,7 +57,7 @@ Three consequences, and the third is the one that makes this more than convenien
 
 ## A refused name is a comment, not a gap
 
-Projecting a URI into an identifier can fail. `urn:` names are not elisp symbols, and the
+Projecting an IRI into an identifier can fail. `urn:` names are not elisp symbols, and the
 generator will not emit something it has not verified *reads* in the target language — not
 "contains only legal characters", which proves nothing, but parses.
 
