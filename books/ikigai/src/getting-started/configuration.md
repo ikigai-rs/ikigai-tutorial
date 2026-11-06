@@ -50,10 +50,11 @@ the same rule over `config_home()`.
 {{#include ../../../../crates/building-endpoints/src/config.rs:settings}}
 ```
 
-Two rules in that loader. A **missing** file is a missing *layer* — skipped, silently,
-because "no override here" is ordinary. A file that is **present and broken** stops the
-read, because a config that is silently ignored is an operator believing one thing while
-the process does another, and nothing anywhere disagreeing until an outage.
+A **missing** file is a missing layer, skipped silently because "no override here" is
+ordinary. **Invalid TOML** stops the read with an error naming the file. This small
+loader does not validate every failure: it also skips other file-read errors and uses
+the default banner when `banner.text` is absent or is not a string. A production loader
+should distinguish missing files from unreadable ones and reject wrong value types.
 
 And the endpoint that serves it:
 
@@ -152,8 +153,9 @@ an env var, treat that as a question worth raising rather than a pattern worth c
 
 > ⚠ The house rule, and the opposite of what most frameworks do: **something expected but
 > unset must stop the program.** Not warn, not silently substitute, not carry on degraded.
-> The loader above draws the line where it belongs — absent is legal, broken is not — and
-> a required value with no default should refuse to start and say which key is missing.
+> The loader above rejects invalid TOML; the unreadable-file and value-type checks
+> described above would complete that boundary. A required value with no default should
+> refuse to start and say which key is missing.
 > The worst version of getting this wrong is a service that blocks on a keychain prompt
 > *before its first line of output*, so the log shows nothing at all: an empty log reads
 > as "still starting" and means "blocked, forever". One `println!` before the call would
