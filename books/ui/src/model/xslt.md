@@ -147,9 +147,10 @@ found, with the reason, rather than shown as an empty page:
 
 ## The scheduler, the stopgap
 
-`urn:kernel:scheduler` has a text face and no Turtle face in the kernel this book runs on, so
-there is no graph for a stylesheet to read. Its view shows the text, escaped, and says so
-rather than pretending to be a graph view:
+The kernel now serves `urn:kernel:scheduler` as Turtle too, but the inspector still uses its
+text face. There is no scheduler stylesheet or graph binding in the inspector yet. The view
+escapes the text; its notice below still says "has no Turtle face," which is out of date for
+the kernel this book runs on:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:inspect:fragment:scheduler'>
 <pre class="ikigai-run-expected">&lt;section id="view" class="inspect"&gt;
@@ -163,7 +164,7 @@ rather than pretending to be a graph view:
 [uncacheable]</pre>
 </div>
 
-When a Turtle face arrives, the scheduler becomes one more stylesheet.
+A graph view would need a scheduler stylesheet and a binding to the Turtle readout.
 
 ## In Rust
 
