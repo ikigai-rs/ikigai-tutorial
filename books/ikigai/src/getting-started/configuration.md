@@ -1,12 +1,14 @@
 # Configuration
 
-A host reads a config file. This chapter is about *where* it looks, *how* two files
-combine, and — because the point of a book with tests is that the tests are the claim —
-how an endpoint that reads configuration is tested against a directory the test owns.
+In [Binding, and a host of your own](binding.md), you built a host around the book's
+endpoints. [Scope and alias](scope-and-alias.md) showed how to choose the names and
+spaces a request resolves against. Here the host reads a config file: you will see
+where it looks, how two files combine, and how to test the endpoint with a directory
+the test owns.
 
-The code is in `crates/building-endpoints`, one part ahead, because it is the first
-endpoint in the book whose answer comes from a file. It is bound in that part's host at
-`urn:iki:tutorial:banner`.
+The code is in `crates/building-endpoints`, the host used later in
+[Transreption](../building/transreption.md). Its `urn:iki:tutorial:banner` endpoint is
+the first in the book whose answer comes from a file.
 
 ## Where files live
 
