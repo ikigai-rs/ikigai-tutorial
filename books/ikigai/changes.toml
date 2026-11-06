@@ -20,6 +20,12 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
+pages = ["beyond/emacs-aliases.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-05"
 summary = "The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching."
 pages = ["front-door/grammar.md"]
 
