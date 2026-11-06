@@ -1,9 +1,10 @@
 # Live data and history
 
-A page about a cache is out of date the moment something is written. The usual answer is to ask
-again every second. ikigai has a better one, because the kernel already knows exactly when an
-answer goes stale: that is what golden threads are for. This chapter makes the inspector's
-views follow the kernel as it changes, and makes every view a URL that Back returns to.
+In [Views from CSV: one model, two sources](views-from-csv.md), each view was recomputed on its
+next read after a write to its source. A browser also needs to know when to ask for that read.
+The kernel already knows when a write makes an answer stale: that is what golden threads are
+for. This chapter makes the inspector's views follow the kernel as it changes, and makes every
+view a URL that Back returns to.
 
 ## What a write does to the cache
 
@@ -68,8 +69,9 @@ and turns every `cut` into one event on the page:
 {{#include ../../../../crates/inspector/artifacts/live.js}}
 ```
 
-and a view that shows changing data refetches itself when it hears that event. The cache view's
-stylesheet puts this at the top of the view:
+A `resync` means events may have been missed, so the script dispatches the same event to refresh
+the views. A view that shows changing data refetches itself when it hears that event. The cache
+view's stylesheet puts this at the top of the view:
 
 ```html
 <span hidden="" data-ui-quiet="" hx-get="/inspect/fragment/cache"
