@@ -1,5 +1,9 @@
 # A page is a composed resource
 
+The [Introduction](../introduction.md) introduced the inspector and its views as resources.
+Here you will read a card, change the note it shows, and see the card recompute. Run the cells
+in order with each cell's **Run** button; they share one kernel on this page.
+
 A page in this book is a name. Ask the kernel for `urn:iki:tutorial:inspect:page:cache` and it
 answers with HTML, the way it answers any other name: it finds the door bound to the pattern,
 the endpoint behind the door runs, and the answer comes back as a representation with a media
@@ -28,7 +32,7 @@ resource; read it as text:
 the template is filled, compose (`ikigai-fn`'s template language) resolves the name inside the
 braces and splices the answer in its place. The `h` says how: as **text, escaped for HTML**, so
 whatever the note holds can never become markup. The `hx-get`, `hx-trigger` and `hx-swap`
-attributes tell htmx how to update the card; the chapter on live data explains them.
+attributes tell htmx how to update the card; [Live data and history](live.md) explains them.
 
 The card is the template, filled. It is bound at its own name, `demo:card`, by a `composeOver`:
 compose with its template fixed, so the view is a resource like any other.
