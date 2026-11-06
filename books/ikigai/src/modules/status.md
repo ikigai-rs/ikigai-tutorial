@@ -31,13 +31,13 @@ What is actually there, at `ikigai-module` 0.4.0 (0.4.0 over 0.3.2 holds a modul
 
 | piece | state |
 |---|---|
-| the callback machinery | **proven** — `InProcessTransport`, exercised end to end |
-| the wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |
-| an out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
-| a module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`); since 0.3.0 the module's **cards** cross at `connect` (`ModuleCall::Cards`), so the host enforces against the module's own description and the manifold through a `ModuleSpace` lists the module's actions rather than one endpoint named `module` |
-| the error type across the wire | **since 0.3.0** — `ModuleReply::ErrorTyped` and `ModuleCall::HostError`: a module-side denial arrives at the host as a `Denied`, a host resource's `NotFound` arrives in the module as a `NotFound`; before that the wire flattened both to a string |
+| callback machinery | **proven** — `InProcessTransport`, exercised end to end |
+| wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |
+| out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
+| module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`); since 0.3.0 the module's **cards** cross at `connect` (`ModuleCall::Cards`), so the host enforces against the module's own description and the manifold through a `ModuleSpace` lists the module's actions rather than one endpoint named `module` |
+| error type across the wire | **since 0.3.0** — `ModuleReply::ErrorTyped` and `ModuleCall::HostError`: a module-side denial arrives at the host as a `Denied`, a host resource's `NotFound` arrives in the module as a `NotFound`; before that the wire flattened both to a string |
 | golden threads across the wire | **since 0.3.0** — `ModuleReply::ResolvedThreaded` carries a result's declared threads; before that a module result through the loopback or wasm session was cached forever with nothing to cut it, and a `Sink` through the mount left it stale. Since 0.3.2 a callback that **failed** is a dependency on the wasm path too, by core's rule for a failed sub-request (`record_failure`): a `NotFound` or `Unresolved` hangs the module's answer from the missing name, any other failure makes it uncacheable; the native transports (in-process, loopback, Unix socket) already had that, through the host's own issuer |
-| an embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
+| embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
 | isolation | **not there** — a process boundary is not a resource budget |
 | hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-10-10) |
 
@@ -89,10 +89,10 @@ are unchanged; the new messages are appended.)
 
 ## What is genuinely usable now
 
-- The dual-mode pattern, as a way to keep a heavy dependency out of hosts that do not need
+- Dual-mode pattern, as a way to keep a heavy dependency out of hosts that do not need
   it ([Dual-mode crates](dual-mode.md)).
-- The browser case, which is real and running.
-- The `InProcessTransport`, as a way to develop and test a module's *semantics* long before
+- Browser host, which is real and running ([The wire session](wire-session.md#the-browser-host)).
+- `InProcessTransport`, as a way to develop and test a module's *semantics* long before
   its transport exists — which is what this book's demo does.
 
 ## Where isolation would come from (direction, not shipped)
