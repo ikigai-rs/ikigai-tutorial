@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-11
 
+- **2026-11-06**: The introduction clarifies HTTP methods, conversion routes, and prerequisites, and links the reading order. The first two worked chapters now explain where each ledger runs, define IRI, and link back to what you have already done; the authority sections put their distinguishing terms first.
+
+  Pages: [Introduction](introduction.md), [One mechanism, read two ways](substrate/two-faces.md), [Resolve the viewer's authority once](spine/spine.md)
+
 - **2026-11-03**: "The manifold, and the UI that falls out of it" now lists what a newer ledger offers: an item's history and daily counts, which a reader's narrowed list keeps, and two write actions, which it drops.
 
   Pages: [The manifold, and the UI that falls out of it](spine/manifold.md)
