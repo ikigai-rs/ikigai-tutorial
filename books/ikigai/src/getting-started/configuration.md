@@ -155,7 +155,14 @@ ikigai --plain -c 'source urn:kernel:scheduler'
 scheduler
   backend    single
   threads    1
+  active     0
+  spawned    0
+  completed  0
   source     default
+  routing    off
+  routing.by default
+
+[uncacheable]
 ```
 
 That `source` row is the shape of the argument rather than a settlement of it: what makes
