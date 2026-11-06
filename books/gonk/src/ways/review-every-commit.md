@@ -17,10 +17,10 @@ links there rather than teaching them again.
 
 | role | who | holds |
 | --- | --- | --- |
-| the author | whoever commits: a person, or an agent | nothing of the review's; their hook drops a request, which spends nothing and needs no grant |
-| the reviewer | a model, run by gonk on each request, unattended | read every browse root, the browse graph, the model's host; **never** `urn:cap:annotate` |
-| the judge | the same mount, asked once more for each serious finding | the reviewer's grant: it runs inside the pass |
-| the triager | a person, at gonk's Queue page or over the socket | `urn:cap:annotate`, the one token that publishes |
+| author | whoever commits: a person, or an agent | nothing of the review's; their hook drops a request, which spends nothing and needs no grant |
+| reviewer | a model, run by gonk on each request, unattended | read every browse root, the browse graph, the model's host; **never** `urn:cap:annotate` |
+| judge | the same mount, asked once more for each serious finding | the reviewer's grant: it runs inside the pass |
+| triager | a person, at gonk's Queue page or over the socket | `urn:cap:annotate`, the one token that publishes |
 | whoever fixes it | the [ordinary loop](solo.md) on a ledger item | the ledger's writer |
 
 ## What runs where
@@ -359,11 +359,11 @@ The **guides**, the rules written down before anything runs:
 
 The **sensors**, which say when it is going wrong:
 
-- **The judge**, a second reading with the context the reviewer lacked, on every serious finding.
-- **The depth**, `urn:iki:gonk:review:depth`, and the Queue badge that polls it: a queue that is
+- **Judge**, a second reading with the context the reviewer lacked, on every serious finding.
+- **Depth**, `urn:iki:gonk:review:depth`, and the Queue badge that polls it: a queue that is
   armed and not empty with nothing in flight is stuck, and says so.
-- **The serious share** of what a run minted, for label inflation.
-- **The keyed append**, so a re-run or a second person files nothing twice.
+- **Serious share** of what a run minted, for label inflation.
+- **Keyed append**, so a re-run or a second person files nothing twice.
 
 And one thing that is deliberately **not** a sensor: the queue blocks nothing. A finding never
 fails a commit, a push or CI. If you want a gate, it is a test, and the reproduction is where it
