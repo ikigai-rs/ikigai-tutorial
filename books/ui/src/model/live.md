@@ -89,11 +89,12 @@ Three choices in that line are rules:
 - **The trigger is a cut, not a clock.** Polling a cacheable fragment on a timer is ruled out;
   the door knows when to refetch, and an unchanged fragment would answer `304` anyway.
 - **The fragment is fetched, not the page.** The page composes the fragment, so refreshing the
-  fragment is refreshing exactly what changed.
+  fragment replaces only that view.
 
-⚠ `live.js` is a stopgap. The shared shell script is meant to carry this mapping itself (UI
-conventions D14: one first-party script per page), and ikigai-ui 0.1.0 does not yet, so the
-inspector serves its own and says so.
+⚠ `live.js` is a stopgap. ikigai-ui 0.4.1's shared shell script supports push with
+`data-ui-push` subscriptions on individual views (UI conventions D14: one first-party script
+per page). The inspector has not adopted that mapping yet: it still serves `live.js`, which
+broadcasts every cut to all views listening on the body.
 
 ## Every view is a URL
 
@@ -125,10 +126,11 @@ In the page it does not refresh itself: the book has no push stream, so its `hx-
 
 ## Why it is cheap
 
-A push stream rides the cache the reads already built. The door registers one listener per
-open page, in that page's cache partition, and the kernel tells it about a cut only when an
-entry that page's reads made depends on the thread that was cut. Nothing polls. The page asks
-again only when its answer is known to have changed.
+A push stream uses the cache the reads already built. The door registers one listener per
+open stream, under the same capability as the viewer's reads. The kernel tells it about a cut
+only when an entry cached under that capability depends on the thread that was cut. Tabs using
+the same capability share that cache partition. Nothing polls: the inspector refetches its
+listening views on each cut or resync, and an unchanged fragment can answer `304`.
 
 ## In Rust
 
@@ -175,7 +177,7 @@ The cells above run in this page's own kernel, so they show the cache changing a
 page does not yet show the cache *view* rendered and changing in place. Nothing in the kernel
 stops it: a kernel compiled to WebAssembly can listen for its own cuts, and
 [Spreadsheet, VII: push](../../applied/spreadsheet-7.html) does exactly that in its page. What
-is missing is this book's half: its kernel does not export a listener to the page yet, and no
-script here renders a view's HTML in place of a cell's text. That is the next step for this
-book's kernel; until then, [htmx: server-rendered HTML with push](../delivery/htmx.md) runs
-the real thing.
+is missing is this book's half: its kernel does not export a listener to the page yet. The cell
+for a thread's detail above already renders HTML, but it does not refresh when a thread is cut.
+Connecting rendered views to a listener is the next step for this book's kernel; until then,
+[htmx: server-rendered HTML with push](../delivery/htmx.md) runs the real thing.
