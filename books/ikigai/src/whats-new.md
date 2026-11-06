@@ -7,7 +7,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
-- **2026-11-05**: Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home.
+- **2026-11-05**: Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home, with the pinned CLI's full scheduler output.
 
   Pages: [Binding, and a host of your own](getting-started/binding.md), [Scope and alias](getting-started/scope-and-alias.md), [Configuration](getting-started/configuration.md)
 
