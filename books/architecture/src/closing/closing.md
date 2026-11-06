@@ -1,10 +1,10 @@
 # Presence and the audit axis
 
-Two patterns close the loop the rest of the book opened: the one that puts a **person** in the
-loop at the moment of a consequential action, and the one that keeps the **record** of what was
-done. They are the human-in-the-loop and its provenance — the front and the back of a single
-accountable action — and both are drawn here as pictures, because a real passkey ceremony and a
-real on-disk log need parts of the system a page cannot stand in for.
+In [Golden threads and the cost of a read](../economics/economics.md), you watched a write
+invalidate a cached answer. Two patterns complete the account of that action: **presence** puts
+a person in the loop when the action needs confirmation, and **provenance** records who did what
+and when. Both are drawn here as pictures, because a real passkey ceremony and a real on-disk
+log need parts of the system a page cannot stand in for.
 
 ## Presence: a prompt that is a proof
 
@@ -63,8 +63,8 @@ The passkey ceremony above can run for real in a browser that has a platform aut
 *downstream* enforcement — a door minting a one-request scope and a resolution consuming it — needs
 the door, which is why this chapter is a picture. The hash-chained log is on disk, across rotations,
 which a page has no file system for. Both are real in a deployment and drawn here, labeled as drawn,
-with the same promise the overlay chapter made: a runnable version follows as the tooling to drive
-it lands.
+with the same promise [Spaces that wrap spaces](../overlays/overlays.md) made: a runnable version
+follows as the tooling to drive it lands.
 
 ## The thesis, once more
 
