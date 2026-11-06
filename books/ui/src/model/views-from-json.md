@@ -34,8 +34,9 @@ one row per record.
 
 ## A row is a template
 
-The card in the first chapter was a template whose markers named resources. A row needs
-something slightly different: its values are not resources, they are the fields of one record.
+The card in [A page is a composed resource](composed.md) was a template whose markers named
+resources. A row needs something slightly different: its values are not resources, they are the
+fields of one record.
 Compose (`ikigai-fn`'s template language) already has a marker for that. `$h{{name}}` splices the
 template's **argument** `name`, escaped as text, the same way `$h{urn:…}` splices a resource. So
 the row template is three arguments in a table row:
@@ -53,8 +54,7 @@ fields as its arguments.
 
 Compose fills one template once. A table wants the row template filled once for every record, and
 compose has no "for each": a template can splice a resource or an argument, but nothing in it
-repeats. Writing this chapter is how that gap was found, and it was filled where it belongs, in
-ikigai-fn beside compose. Since ikigai-fn 0.6.0 there is a resource for exactly this step:
+repeats. ikigai-fn provides that step beside compose. Since ikigai-fn 0.6.0, it has offered:
 
 > `urn:iki:fn:each?src=<a JSON array>&template=<a row template>`: the template filled once for
 > each element of the array, with the element's fields as its arguments, concatenated in order.
@@ -99,7 +99,7 @@ $r{urn:iki:fn:each?src=urn:iki:tutorial:inspect:records:{source}&amp;template=ur
 </div>
 
 `records:json` is a composition too. Its template is one marker that splices the JSON document,
-so for this source the records ARE the document. The inspector binds the view at
+so for this source the records are the document itself. The inspector binds the view at
 `fragment:planets-{source}`, with the same `composeOver` the card used, and ikigai-ui's shell turns
 it into a page at `page:planets-json`, in the inspector's navigation beside the graph views:
 
