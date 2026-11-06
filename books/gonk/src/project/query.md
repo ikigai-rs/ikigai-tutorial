@@ -95,8 +95,9 @@ number,title,priority,holder
 
 ## Write your own, keep it in the repository
 
-Which tasks has nobody taken yet, among those ready to start? A query is a file in `.gonk/queries/`,
-so it is reviewed, versioned and shared like code. The parameter is declared the same way:
+Which open tasks in one change are unclaimed, and which of them are blocked? A query is a file in
+`.gonk/queries/`, so it is reviewed, versioned and shared like code. The parameter is declared the
+same way:
 
 <!-- transcript: file library/.gonk/queries/unclaimed-in-change.rq -->
 ```sparql
