@@ -6,9 +6,10 @@ that makes the whole security model tractable: **the viewer's authority is resol
 edge, and there is no ambient root underneath it.** Nothing deep in the system quietly has more
 power than the request that reached it.
 
-If you have read The ikigai Book you have met capabilities and `clamp`. Here we follow the spine
-end to end — capability, clamp, principal, grant, corridor — on the worked item, and watch an
-attenuation take effect for real.
+In [One mechanism, read two ways](../substrate/two-faces.md), you filed and read a ledger item:
+the same resource served the reader and underwent a capability check. Here we follow that
+authority end to end — capability, clamp, principal, grant, corridor — and watch a capability
+narrow for real.
 
 <a id="a-capability-is-a-resource-and-it-only-narrows"></a>
 
