@@ -186,14 +186,15 @@ $ echo 'echo hi' > faces/open/run.sh
 $ ln -s ../secret.txt faces/open/secret.txt
 ```
 
-None of them is served. A `..` is refused whether it is written plainly or percent-encoded (curl's
-`--path-as-is` sends it as typed, as an attacker would):
+None of them is served. A `..` is refused whether it is written plainly or percent-encoded. curl's
+`--path-as-is` sends the path as typed, as an attacker would; without it, some curl versions remove
+the `..` before sending:
 
 <!-- transcript: run -->
 ```console
 $ curl -s --path-as-is -w ' [%{http_code}]\n' http://localhost:1070/face/name/open/../secret.txt
 not found: urn:face:name:open:..:secret.txt: a face serves no hidden name [404]
-$ curl -s -w ' [%{http_code}]\n' http://localhost:1070/face/name/open/%2E%2E/secret.txt
+$ curl -s --path-as-is -w ' [%{http_code}]\n' http://localhost:1070/face/name/open/%2E%2E/secret.txt
 not found: urn:face:name:open:..:secret.txt: a face serves no hidden name [404]
 $ curl -s -w ' [%{http_code}]\n' http://localhost:1070/face/name/open/.env
 not found: urn:face:name:open:.env: a face serves no hidden name [404]
