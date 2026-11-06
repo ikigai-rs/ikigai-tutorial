@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "The three doors names the other machines it introduces and explains why an HTTP access line includes arguments the caller did not type."
+pages = ["machines/doors.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
 
