@@ -118,10 +118,10 @@ capability, and a page's action list is the manifold under the viewer's capabili
 
 A page built this way draws its buttons from the manifold and its forms from each action's
 self-description (its argument names, their types, which are required, which take an enumerated
-value). The consequence is a UI that cannot lie about authority: an action the viewer lacks is not
-rendered at all, so there is no disabled button inviting a person to wonder why, and no form field
-offering input the action would refuse. The thing that makes an agent's tool list *safe* — it only
-contains what the agent may do — is the thing that makes a human UI *honest*.
+value). An action outside the viewer's capability families is not rendered, so there is no
+disabled button inviting a person to wonder why. An offered action can still be refused for a
+particular ledger or graph, as the next section shows. Both the agent's tool list and the human
+UI use the same menu; the kernel checks the exact authority when either makes a request.
 
 Put your authority back:
 
@@ -135,13 +135,11 @@ There is a subtlety here that is itself a lesson. The manifold matches on a **fa
 appears when you hold *some* grant under its declared prefix (`urn:cap:ledger:read:*` means "some
 ledger-read grant"). But a ledger grant names **exactly one ledger**, and a store-read grant names
 **exactly one graph**. So holding the family wildcard is enough to be *offered* `next`, and not
-enough to *resolve* it:
+enough to *resolve* it. Running `source urn:iki:ledger:next` under the reader capability above,
+before `cap reset`, gives:
 
 ```text
-denied: reading <urn:iki:ledger:graph:default> through `urn:iki:store:graph-select` needs the grant
-`urn:cap:store:read:graph:urn:iki:ledger:graph:default`, which this capability does not hold. Every
-graph a scoped read names must be granted: the read is refused rather than answered over the graphs
-that are, because a narrower dataset than the one asked for returns rows that look right and are not.
+error: denied: this capability does not hold `urn:cap:ledger:read:default`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:read:*` but not this resource, which is the point of naming them
 ```
 
 This is deliberate, and it is the right shape. The manifold is a **menu**, and a menu may list a
