@@ -20,8 +20,9 @@ it is for and where to start.
 
 ## What you need
 
-- The ikigai Book's first part, or the same ideas from somewhere else: resources, spaces,
-  capabilities and golden threads. This book uses them and does not teach them again.
+- The ikigai Book's Getting started chapters, beginning with [Resolution](../getting-started/resolution.html),
+  or the same ideas from somewhere else: resources, spaces, capabilities and golden threads.
+  This book uses them and does not teach them again.
 - A browser, for the runnable cells in Part I. They talk to a kernel compiled to WebAssembly
   that holds the whole inspector, the same crates the rest of the book builds.
 - Rust, for the listings and for serving the inspector yourself in Part II. The runnable Rust
@@ -64,3 +65,6 @@ means at `ikigai`.
 The rules every page follows (how a view is made, how its URL is spelled, what the door allows,
 what accessible means and how it is checked) were decided before any code was written. Each
 chapter names the ones it uses, and what they rule out.
+
+Start with [A page is a composed resource](model/composed.md): read a template, fill it with a
+note, then write the note and see the cached view recompute.
