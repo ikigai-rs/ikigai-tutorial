@@ -2,6 +2,10 @@
 
 <!-- transcripts: normalize workdir, home -->
 
+The [Introduction](../introduction.md) identifies the binary and release used here. This chapter
+shows how to run it interactively in a **read-eval-print loop (REPL)**, in scripts, and as a client
+of another kernel.
+
 `ikigai` is one engine with several ways in. The grammar is the same in all of them (`source`,
 `sink`, `describe`, pipes, named arguments); what changes is who is typing, what else gets printed,
 and how long the process lives. The process's lifetime matters more than it looks: the cache lives
@@ -16,7 +20,8 @@ in the process, so a REPL remembers what it resolved and a one-shot command does
 | `ikigai -e '(…)'` | one Lisp form, then exit | a computation the grammar cannot say |
 | `ikigai --load <iri>` | a Lisp script, read as a resource | a program kept beside its data |
 
-Every command on this page ran in an empty directory, with an empty config home. If yours composes
+Run the shell commands on this page in one working directory, starting empty, and keep the files
+you create for the later examples. Every command here ran with an empty config home. If yours composes
 mounts (a `mount` line in its `config.toml`), `ikigai` names them on stderr where this page shows
 `none composed`, and nothing else here changes. *The config home*, a later chapter, is about that.
 

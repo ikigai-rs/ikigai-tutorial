@@ -7,6 +7,10 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
+- **2026-11-06**: The REPL chapter now defines its name, links back to the release in the Introduction, and asks you to keep one working directory for its examples.
+
+  Pages: [The REPL and its modes](binary/repl.md)
+
 - **2026-11-03**: A new chapter, "Logging": a host that opens an ikigai-log log, per-request attribution, reading segments as text and Turtle, escaped values, rotation and drops, encrypted backups, restores from a decrypted backup proved with verify against a tampered copy, and grep, awk and SPARQL queries over the segments.
 
   Pages: [Logging](running/logging.md)
