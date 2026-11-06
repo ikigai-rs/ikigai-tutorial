@@ -2,23 +2,25 @@
 
 A read-only reviewer reads every file every commit touches. Each claim it makes is a **pending
 finding**; a second model, the judge, checks the serious ones; a person declines or publishes
-each finding with a reason or a reproduction; and a real one becomes a ledger item that goes
-through the ordinary loop. gonk does all of that from a `post-commit` hook and one setting.
+each finding with a reason or a reproduction. A separate command files published findings as
+ledger items that go through the ordinary loop. The `post-commit` hook requests the review;
+publishing and filing remain separate steps.
 
 This is the process gonk's review machinery was first built for, and the one its own authors
 turned off: [The audit protocol](../review/audit.md) has the measurement. This chapter shows how
-it works end to end, so you can decide for yourself; the last section says what it costs and when
-it is still the right choice. The pieces are the ones [One-off review](../review/one-off.md)
-taught one at a time, and this page links there rather than teaching them again.
+it works end to end, so you can decide for yourself.
+[What it costs, and when to choose it](#what-it-costs-and-when-to-choose-it) weighs the tradeoffs.
+The pieces are the ones [One-off review](../review/one-off.md) taught one at a time, and this page
+links there rather than teaching them again.
 
 ## Who
 
 | role | who | holds |
 | --- | --- | --- |
-| the author | whoever commits: a person, or an agent | nothing of the review's; their hook drops a request, which spends nothing and needs no grant |
-| the reviewer | a model, run by gonk on each request, unattended | read every browse root, the browse graph, the model's host; **never** `urn:cap:annotate` |
-| the judge | the same mount, asked once more for each serious finding | the reviewer's grant: it runs inside the pass |
-| the triager | a person, at gonk's Queue page or over the socket | `urn:cap:annotate`, the one token that publishes |
+| author | whoever commits: a person, or an agent | nothing of the review's; their hook drops a request, which spends nothing and needs no grant |
+| reviewer | a model, run by gonk on each request, unattended | read every browse root, the browse graph, the model's host; **never** `urn:cap:annotate` |
+| judge | the same mount, asked once more for each serious finding | the reviewer's grant: it runs inside the pass |
+| triager | a person, at gonk's Queue page or over the socket | `urn:cap:annotate`, the one token that publishes |
 | whoever fixes it | the [ordinary loop](solo.md) on a ledger item | the ledger's writer |
 
 ## What runs where
@@ -357,11 +359,11 @@ The **guides**, the rules written down before anything runs:
 
 The **sensors**, which say when it is going wrong:
 
-- **The judge**, a second reading with the context the reviewer lacked, on every serious finding.
-- **The depth**, `urn:iki:gonk:review:depth`, and the Queue badge that polls it: a queue that is
+- **Judge**, a second reading with the context the reviewer lacked, on every serious finding.
+- **Depth**, `urn:iki:gonk:review:depth`, and the Queue badge that polls it: a queue that is
   armed and not empty with nothing in flight is stuck, and says so.
-- **The serious share** of what a run minted, for label inflation.
-- **The keyed append**, so a re-run or a second person files nothing twice.
+- **Serious share** of what a run minted, for label inflation.
+- **Keyed append**, so a re-run or a second person files nothing twice.
 
 And one thing that is deliberately **not** a sensor: the queue blocks nothing. A finding never
 fails a commit, a push or CI. If you want a gate, it is a test, and the reproduction is where it

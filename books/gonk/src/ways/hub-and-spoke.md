@@ -18,9 +18,9 @@ private tooling of their own around it; none of that is needed, or shown, here.
 
 | role | who | does |
 | --- | --- | --- |
-| the person | whoever owns the goal | sets it; answers the hub when it asks before merging its own work |
-| the hub | one coordinating session (an agent, or a person) | splits, briefs, dispatches, checks evidence, closes |
-| a spoke | one agent per arc, in its own working tree | claims one arc, does it, self-merges on green, hands back |
+| person | whoever owns the goal | sets it; answers the hub when it asks before merging its own work |
+| hub | one coordinating session (an agent, or a person) | splits, briefs, dispatches, checks evidence, closes |
+| spoke | one agent per arc, in its own working tree | claims one arc, does it, self-merges on green, hands back |
 | CI | the forge | the gate a spoke's self-merge waits on |
 
 A spoke may merge its own work because that authority was **delegated through the brief**: the
@@ -157,6 +157,11 @@ with identities of their own ([Remote workers](workers.md)) make it a fence no s
 another.
 
 ### 4. The spoke works, and merges on green
+
+The first command assumes a checkout at `lib/`. It creates `lib-arc-2/` beside it; it does not
+change the shell's directory. In that new working tree, make the change, test it, commit it and
+push the branch. Run the three `gh` commands from `lib-arc-2/`, then return to this chapter's
+directory for the ledger commands.
 
 <!-- transcript: manual — an agent, a forge and its CI, which this book's checks do not have -->
 ```console

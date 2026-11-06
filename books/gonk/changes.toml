@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Routing work to agents clarifies the agent's permissions; Review every commit separates review requests from publishing and filing findings. Hub and spoke says where to run its pull request commands, and all three chapters put role names first in their tables."
+pages = ["ways/routing.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
 

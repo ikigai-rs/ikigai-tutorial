@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: Routing work to agents clarifies the agent's permissions; Review every commit separates review requests from publishing and filing findings. Hub and spoke says where to run its pull request commands, and all three chapters put role names first in their tables.
+
+  Pages: [Routing work to agents](ways/routing.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md)
+
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 
   Pages: [One-off review, and what a finding is](review/one-off.md), [The audit protocol, and why per-commit review is off](review/audit.md)

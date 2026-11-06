@@ -1,10 +1,10 @@
 # Routing work to agents
 
 [Remote workers](workers.md) had the workers ask `next` by hand and take what it offered. An
-unattended loop cannot be that trusting. It runs an agent with its own checks opened and a token
-that pushes, so **which** items it takes, and **what** it tells the agent about each, decide what
-that agent does. This chapter runs the starter's loop, `tools/worker.py`, far enough to show both
-decisions: an item reaches a worker only when a **router** it trusts has dispatched it, and the
+unattended loop cannot be that trusting. It runs an agent with permission checks disabled and
+a token that can push to GitHub. **Which** items it takes, and **what** it tells the agent about
+each, decide what that agent does. This chapter runs the starter's loop, `tools/worker.py`, far
+enough to show both decisions: an item reaches a worker only when a **router** it trusts has dispatched it, and the
 item's comments reach the agent as **quoted data** under their authors, never as its brief. Then
 it splits one worker machine into one loop per agent, so a dispatcher can choose the agent too.
 
@@ -35,9 +35,9 @@ again.
 
 | role | who | holds |
 | --- | --- | --- |
-| the owner | a person on the gonk machine | the owner's socket, which names nobody |
-| the router | the dispatching machine, here `hub` | a certificate whose grant may write the ledger (label, comment) |
-| the worker | one machine, `lawnboy`, running one loop per agent | a certificate under the ledger's worker role |
+| owner | a person on the gonk machine | the owner's socket, which names nobody |
+| router | the dispatching machine, here `hub` | a certificate whose grant may write the ledger (label, comment) |
+| worker | one machine, `lawnboy`, running one loop per agent | a certificate under the ledger's worker role |
 
 A router is a **principal**, never a name. A person routes with their passkey, the
 `urn:iki:gonk:passkey:<credential id>` gonk attributes their signed-in writes to ([The ledger in
