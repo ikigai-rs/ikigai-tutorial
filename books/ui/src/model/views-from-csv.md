@@ -127,7 +127,7 @@ JSON document, as the last chapter did:
 [uncacheable]</pre>
 </div>
 
-The CSV view was read from nothing that write touched, so it is still cached:
+The CSV view depends on the CSV atom, which the write did not touch, so it is still cached:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:inspect:fragment:planets-csv'>
 <pre class="ikigai-run-expected">&lt;section id="view" class="inspect"&gt;
