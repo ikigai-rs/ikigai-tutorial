@@ -7,6 +7,10 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
+- **2026-11-06**: Logging now links back to the socket connection, creates the config home before saving its settings, explains which terminal runs each command, and defines transreption before using the term.
+
+  Pages: [Logging](running/logging.md)
+
 - **2026-11-06**: The REPL chapter now defines its name, links back to the release in the Introduction, and asks you to keep one working directory for its examples.
 
   Pages: [The REPL and its modes](binary/repl.md)
