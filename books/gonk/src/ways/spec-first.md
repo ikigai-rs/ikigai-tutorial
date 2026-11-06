@@ -14,10 +14,10 @@ that machinery, run against gonk.
 
 | role | who | does |
 | --- | --- | --- |
-| the proposer | a person, or an agent asked to draft | writes the change: proposal, delta spec, tasks |
-| the approver | a person | merges the change's pull request, which is the agreement to build it |
-| the seeder | a host or a script, over the socket | files one item per open task, keyed by the task, in order |
-| a worker | an agent or a person | takes the next task, implements it, checks its box in the same pull request |
+| proposer | a person, or an agent asked to draft | writes the change: proposal, delta spec, tasks |
+| approver | a person | merges the change's pull request, which is the agreement to build it |
+| seeder | a host or a script, over the socket | files one item per open task, keyed by the task, in order |
+| worker | an agent or a person | takes the next task, implements it, checks its box in the same pull request |
 | whoever archives | the proposer, usually | moves the change to the archive once every box is checked |
 
 ## What runs where
