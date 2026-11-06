@@ -4,10 +4,13 @@
 it has whatever formats the kernel can reach from what it has. This chapter is where you
 find out what "reach" means, by using a transreptor and then writing one.
 
-The code is `crates/building-endpoints`, this part's crate. Its host chains onto Part I's
-space, so everything you built there is bound here too, plus four endpoints: `banner`, which
-[Configuration](../getting-started/configuration.md) borrowed from this part, and the three these
-chapters add:
+The code is in `crates/building-endpoints`. Its host extends the space from
+[Binding, and a host of your own](../getting-started/binding.md), so `camel-case`,
+`title`, `camel-title` and the function library are still bound here. It adds four
+endpoints: `banner`, which [Configuration](../getting-started/configuration.md) already
+used, plus `markdown`, `counter` and `stamp`, which this part explains. Run the
+`cargo run` commands below from the repository root you opened in
+[Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else):
 
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/lib.rs:space}}
@@ -15,7 +18,8 @@ chapters add:
 
 ## Using one
 
-The `ikigai` CLI links a transreptor between RDF syntaxes, `urn:rdf:transrept`. It
+A **transreptor** is an endpoint that converts a representation from one format to
+another. The `ikigai` CLI links one for RDF syntaxes, `urn:rdf:transrept`. It
 declares what it converts — `describe` it and look for the `transrepts:` line — and it is
 driven the way every transreptor is driven: content in through the pipe, the target type
 in `as`:
