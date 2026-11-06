@@ -183,7 +183,7 @@ representation is the same mechanism: a declaration, and a plan the kernel makes
 
 - `urn:json:query` runs a jq program over any resource;
 - `urn:json:from-csv` reads CSV as JSON;
-- `urn:json:to-csv` goes the other way.
+- `urn:json:to-csv` writes JSON as CSV.
 
 `from-csv` declares `.transreptor(["text/csv"], ["application/json"])`, so it is also the
 kernel's route from CSV to JSON. Nothing about it involves Turtle.
