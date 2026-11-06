@@ -15,7 +15,9 @@ which are the message it prints afterwards.
 **one function per resource this capability may invoke, with the arguments that resource
 declares**. Not a hand-written wrapper library: a projection of the live manifold, so
 `(ikigai-fn-toUpper "hi")` exists because an endpoint says it takes an argument called
-`in`, and it will keep existing in that shape for exactly as long as the endpoint does.
+`in`. The generated file is a snapshot of those declarations.
+[Keeping them current](emacs-aliases.md#keeping-them-current) explains when to refresh and
+why an alias already loaded can outlive its endpoint.
 
 The whole of it is a resolution:
 
@@ -33,7 +35,9 @@ its arguments into a list and hands them to the verbs' own primitive, `%verb-arg
 the allowlist carries for exactly this. Two representations of one resource, which is the
 oldest idea in this book applied to tooling.
 
-## Why it cannot drift
+<a id="why-it-cannot-drift"></a>
+
+## Where the function signatures come from
 
 The generator does not read a config file listing what to emit. It resolves
 `urn:kernel:actions` — the capability-scoped manifold, already narrowed to what the caller
