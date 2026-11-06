@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-06**: Preferential resolution distinguishes mount precedence from failure handling and identifies Sink as the verb that cannot be replayed. Failure has a class clarifies which request repeats and which errors fall through. The editor as a client links its earlier concepts and corrects what happens when loading generated Lisp stops.
+
+  Pages: [Preferential resolution](beyond/preference.md), [Failure has a class](beyond/failure.md), [The editor as a client](beyond/emacs.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
