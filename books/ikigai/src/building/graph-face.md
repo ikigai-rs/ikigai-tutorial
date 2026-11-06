@@ -3,16 +3,17 @@
 [What resolution buys you](../getting-started/payoff.md) ended with the catalog as one
 Turtle graph, and [Why an endpoint describes itself](../getting-started/self-description.md)
 claimed that "what can I do with these things?" is a query over it. This chapter runs the
-query. It is the shortest chapter in the part, because the RDF audience already knows
-what happens next and everybody else only needs to see that it does.
+query. You already have the `markdown` endpoint from [Transreption](transreption.md)
+and the `counter` endpoint from [Multi-verb endpoints](multi-verb.md). Here you will
+find endpoints by the input types they declare, without adding another endpoint.
 
 ## Two endpoints, no new code
 
 Nothing is written here. `urn:kernel:catalog` already answers as Turtle. The published
 `ikigai-sparql` crate binds `urn:sparql:select` (and `ask`, `construct`, `describe`), and
-this part's host mounts its space beside Part I's — the `Fallback` in
-`building_endpoints::space()`. The SPARQL endpoint holds no store of its own: its `graph`
-argument names a resource, and it **resolves that resource through the kernel** and
+the host in `crates/building-endpoints` combines its space with the tutorial bindings
+you already have — the `Fallback` in `building_endpoints::space()`. The SPARQL endpoint
+holds no store of its own: its `graph` argument names a resource, and it **resolves that resource through the kernel** and
 queries whatever came back.
 
 So the graph you query is the catalog, fetched the ordinary way, by name.
@@ -30,6 +31,9 @@ And the test that asks it of this host:
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/graph.rs:select}}
 ```
+
+Run this from the repository root you opened in
+[Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else):
 
 ```bash
 cargo run -p building-endpoints -- --strings
@@ -53,13 +57,15 @@ toUpper
 wrap
 ```
 
-The host asked is the whole of this part's space: its own endpoints, Part I's (and the
-`ikigai-fn` functions Part I chains in), and the SPARQL face. Every one of them that declared a
-string input is in the answer, and that is the question working, not noise.
+The query covers the whole host: the endpoints this part adds, the bindings from
+[Binding, and a host of your own](../getting-started/binding.md) (including the
+`ikigai-fn` function library), and the SPARQL endpoints. Every endpoint that declared a
+string input is in the answer.
 
-Three things that test pins down are the chapter.
+The test checks three things:
 
-**Declaring `class` is what made the answer possible.** `camel-case` and `title` declared
+**Declaring `class` is what made the answer possible.** An input's `class` names the
+RDF type of value it accepts. `camel-case` and `title` declared
 `.class(xsd:string)` on an input, so they are in the result. `counter` declared
 `xsd:nonNegativeInteger`, so it is correctly absent. `markdown` declared no class at all —
 and it is invisible to the question, not because it takes something else but because it
@@ -78,7 +84,9 @@ like any other, with a type you asked for.
 
 ## From a shell
 
-The CLI links the same crate, so the same question works against its much larger catalog:
+The CLI links the same SPARQL crate, so the same question works against its larger
+catalog. Run this in your shell. The CLI's catalog contains its own endpoints, so its
+results differ from the tutorial host's list above:
 
 ```bash
 ikigai --plain -c 'source urn:sparql:select graph=urn:kernel:catalog query="PREFIX ik: <https://ikigai-rs.dev/ns#> SELECT DISTINCT ?id WHERE { ?e a ik:Endpoint ; ik:id ?id ; (ik:input | ik:action/ik:input) ?i . ?i ik:class <http://www.w3.org/2001/XMLSchema#string> } ORDER BY ?id" as=text/csv'
