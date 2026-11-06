@@ -311,7 +311,8 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 SELECT DISTINCT ?number ?title WHERE {
   ?claim a ledger:ClaimEvent ;
          ledger:claimedBy "alpha-claude" ;
-         ledger:onItem ?item .
+         ledger:onItem ?item ;
+         dcterms:created ?at .
   ?item ledger:number ?number ;
         dcterms:title ?title .
 }

@@ -204,13 +204,34 @@ fi
 # matching branch; the starter's `main` moving past the pin is what exposed it.
 git -C "$starter" checkout --quiet -B main "$starter_rev"
 
+# deno, when none is on PATH, is Deno at the version below, the release's own Linux x86_64
+#         build, unzipped into `target/deno/<version>/` (ignored by git) once: the runner has a
+#         python3 and no deno. Elsewhere, install Deno yourself; the script says it is missing.
+#         It is fetched HERE, before any book runs, because the gonk Book's "Pages of your own"
+#         part runs a face's own modules with it (as the starter's tests do), and the polyglot
+#         tracks below need it too. `deno_path` is the directory the gonk pages get on PATH.
+deno_version=2.9.7
+deno_path="$(dirname "$(command -v deno 2> /dev/null || echo /nonexistent/deno)")"
+if ! command -v deno > /dev/null 2>&1 && [ "$(uname -s)-$(uname -m)" = Linux-x86_64 ]; then
+    deno_root="target/deno/$deno_version"
+    if [ ! -x "$deno_root/deno" ]; then
+        echo "fetching deno $deno_version into $deno_root (once per version)"
+        mkdir -p "$deno_root"
+        curl -fsSL -o "$deno_root/deno.zip" \
+            "https://github.com/denoland/deno/releases/download/v$deno_version/deno-x86_64-unknown-linux-gnu.zip"
+        unzip -q -o "$deno_root/deno.zip" -d "$deno_root"
+        rm "$deno_root/deno.zip"
+    fi
+    deno_path="$PWD/$deno_root"
+fi
+
 status=0
 
 echo "── gonk (ikigai-gonk $rev, ikigai-cli $cli, starter $starter_rev) ──────────────────"
 TOOLBOX_DIST="$toolbox_dist" GIT_CONFIG_COUNT=1 \
     GIT_CONFIG_KEY_0="url.$PWD/$starter.insteadOf" GIT_CONFIG_VALUE_0="$starter_url" \
     cargo run --quiet -p book-transcripts -- books/gonk --strict --path "$root/bin" --path "$cli_root/bin" \
-    --path "$stub_root" \
+    --path "$stub_root" --path "$deno_path" \
     || status=1
 
 # The gonk Book's "The Dashboard" commits its images, so nothing here compares them. This proves the
@@ -271,24 +292,9 @@ cargo test -p book-urns --test book_urns -- --ignored --nocapture || status=1
 # and family steps start a Python or Deno peer and mount it with `ikigai --mount`, which no REPL
 # replay can do, so `scripts/polyglot-tracks.sh` starts them from the pages' own lines (with
 # ikigai-python and ikigai-deno cloned at `main`) and compares what every command prints,
-# verdicts included (ledger #2612). It needs python3 and deno; under CI a missing one fails it.
-#
-#   deno, when none is on PATH, is Deno at the version below, the release's own Linux x86_64
-#         build, unzipped into `target/deno/<version>/` (ignored by git) once: the runner has a
-#         python3 and no deno. Elsewhere, install Deno yourself; the script says it is missing.
-deno_version=2.9.7
-if ! command -v deno > /dev/null 2>&1 && [ "$(uname -s)-$(uname -m)" = Linux-x86_64 ]; then
-    deno_root="target/deno/$deno_version"
-    if [ ! -x "$deno_root/deno" ]; then
-        echo "fetching deno $deno_version into $deno_root (once per version)"
-        mkdir -p "$deno_root"
-        curl -fsSL -o "$deno_root/deno.zip" \
-            "https://github.com/denoland/deno/releases/download/v$deno_version/deno-x86_64-unknown-linux-gnu.zip"
-        unzip -q -o "$deno_root/deno.zip" -d "$deno_root"
-        rm "$deno_root/deno.zip"
-    fi
-    PATH="$PWD/$deno_root:$PATH"
-fi
+# verdicts included (ledger #2612). It needs python3 and deno (fetched above); under CI a
+# missing one fails it.
+PATH="$deno_path:$PATH"
 echo "── the polyglot tracks' peers (ikigai-cli $book_cli) ──────────────────"
 ./scripts/polyglot-tracks.sh || status=1
 

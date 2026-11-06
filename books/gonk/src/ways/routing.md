@@ -196,7 +196,7 @@ own bundle. Then it routes #2 to lawnboy's Claude loop and #3 to its Codex loop:
 <!-- transcript: run -->
 ```console
 $ python3 lawnboy/gonk-worker/tools/new.py hub/library --process workers | head -n 1
-generated the library-lending sample (python, process workers) in …/hub/library: 73 files
+generated the library-lending sample (python, process workers) in …/hub/library: 102 files
 $ cd hub/library && git init -q && python3 tools/gonk.py init --ledger default --quic quic://127.0.0.1:1070 --cert-dir ../gonk --holder hub | tail -n 1
 ready.
 $ cd hub/library && python3 tools/gonk.py dispatch 2 --labels worker:lawnboy,agent:claude
@@ -257,7 +257,7 @@ without `--as`, the principal the dispatch is from:
 <!-- transcript: run -->
 ```console
 $ python3 lawnboy/gonk-worker/tools/new.py owner --process workers | head -n 1
-generated the library-lending sample (python, process workers) in …/owner: 73 files
+generated the library-lending sample (python, process workers) in …/owner: 102 files
 $ cd owner && git init -q && python3 tools/gonk.py init --ledger default --socket "$PWD/../.ikigai/gonk.sock" --holder ada | tail -n 1
 ready.
 $ cd owner && python3 tools/gonk.py dispatch 1 --labels worker:lawnboy,agent:claude
