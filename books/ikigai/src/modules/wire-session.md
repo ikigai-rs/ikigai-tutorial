@@ -44,7 +44,8 @@ the other two have their own proofs.
 
 The one host that loads modules today is the web demo, and it uses the wasm-facing side of
 this: `WasmModuleSpace`, `ModuleSessionTransport`, and `serve_host_call` — the last being
-the module-side loop that receives a `HostCall` reply, resolves it against the host, and
-sends back a `ModuleCall::HostResult`.
+the host-side handler that receives a `HostCall` reply and resolves it against the
+host kernel. It sends back a `ModuleCall::HostResult` on success or for an endpoint
+error, and a `ModuleCall::HostError` for other errors so their types survive the crossing.
 
 If you want to read one real implementation, that is the one that exists.

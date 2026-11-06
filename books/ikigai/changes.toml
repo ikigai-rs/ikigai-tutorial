@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-06"
+summary = "The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
 summary = "A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests."
 pages = ["modules/end-to-end.md"]
 

@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-06**: The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors.
+
+  Pages: [The wire session](modules/wire-session.md)
+
 - **2026-11-06**: A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests.
 
   Pages: [A module, end to end](modules/end-to-end.md)
