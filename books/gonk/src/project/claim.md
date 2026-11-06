@@ -5,6 +5,9 @@ cannot hold work forever, and an expired lease is **not free**, so nobody picks 
 by accident. This chapter runs a claim through its whole life with two holders, then shows what gonk
 says about who holds it.
 
+[A spec change, and the items it becomes](change.md) showed how `seed` files tasks and `next` finds
+ready items. Here you will claim one of those items, so another worker knows it is taken.
+
 ## Catch up
 
 In a new empty directory, as in [Start a project](start.md), with one difference: gonk's QUIC door is
@@ -74,8 +77,8 @@ $ (cd library && python3 tools/gonk.py claim 1)
 gonk.py: this working tree already holds item 7 on `library`: one item per working tree. Release or close it first
 ```
 
-`claim 7 --renew` extends your own lease, and long work renews as it goes, at each commit or push. To
-stop without finishing, `release` hands the item back and says why:
+`claim 7 --renew` extends your own lease. During long work, renew it before it expires, including at
+each commit or push. To stop without finishing, `release` hands the item back and says why:
 
 <!-- transcript: run -->
 ```console
