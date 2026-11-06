@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-05"
-summary = "Transreption, Multi-verb endpoints, and The graph face now connect their examples to the host you already have and clarify terms and command locations. The stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb."
+summary = "The endpoint chapters connect their examples to the host you already have, clarify terms and command locations, and distinguish the tutorial host from the CLI. Transreption specifies the description format; the stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb."
 pages = ["building/transreption.md", "building/multi-verb.md", "building/graph-face.md"]
 
 [[change]]

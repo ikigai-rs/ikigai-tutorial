@@ -7,7 +7,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
-- **2026-11-05**: Transreption, Multi-verb endpoints, and The graph face now connect their examples to the host you already have and clarify terms and command locations. The stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb.
+- **2026-11-05**: The endpoint chapters connect their examples to the host you already have, clarify terms and command locations, and distinguish the tutorial host from the CLI. Transreption specifies the description format; the stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb.
 
   Pages: [Transreption](building/transreption.md), [Multi-verb endpoints](building/multi-verb.md), [The graph face](building/graph-face.md)
 
