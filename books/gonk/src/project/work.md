@@ -223,8 +223,8 @@ $ (cd library && python3 tools/gonk.py next | grep -E '^ 1\.')
  1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 ```
 
-So the worker claims it again, merges, and reports again. With a forge, this merge is the pull request
-going green:
+So the worker claims it again, merges, and reports again. With a forge, wait for the pull request
+checks to pass before merging, then report the merged result:
 
 <!-- transcript: run -->
 ```console
