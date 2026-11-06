@@ -321,18 +321,18 @@ fixing, report with evidence), in the repository it works in; and the forge's br
 
 The **sensors**, and here they are enforced rather than habits:
 
-- **The grant.** A worker cannot close, relabel, file or delete, and the door refuses it before
+- **Grant.** A worker cannot close, relabel, file or delete, and the door refuses it before
   the ledger is asked.
 - **Claims bound to a principal.** One worker cannot release or renew another's claim; a takeover
   works only on an expired lease, and only as a compare-and-set against the holder it names.
-- **The lease**, which turns a dead worker into a visible `lease-expired` rather than a silently
+- **Lease**, which turns a dead worker into a visible `lease-expired` rather than a silently
   stuck item.
-- **The hand-back state**, which keeps finished work out of `next` until a dispatcher answers.
+- **Hand-back state**, which keeps finished work out of `next` until a dispatcher answers.
 - **CI and the forge's merge rule**: the worker's machine user can open a pull request and not
   merge it.
-- **The dispatcher's evidence check.** Someone other than the worker checks the evidence and
+- **Dispatcher's evidence check.** Someone other than the worker checks the evidence and
   rejects a hand-back that does not hold, sending work back with a reason.
-- **The access log**, which names every worker on every request it made.
+- **Access log**, which names every worker on every request it made.
 
 ## What it costs, and when to choose it
 
