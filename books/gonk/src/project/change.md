@@ -33,8 +33,16 @@ $ git -C library -c user.name=Ada -c user.email=ada@example.com commit -q -m 'Ge
 
 A change is a folder under `openspec/changes/`: why, what the requirements become, and how, as tasks
 ([OpenSpec in one chapter](../spec/openspec.md)). The library should waive a member's first late fee,
-because a first late return is usually a mistake. Start with why, and name the artifacts it touches on
-the line `seed` reads:
+because a first late return is usually a mistake. Create the change's directories from this chapter's
+directory:
+
+<!-- transcript: run -->
+```console
+$ mkdir -p library/openspec/changes/waive-first-fee/specs/overdue
+```
+
+Save the following as `library/openspec/changes/waive-first-fee/proposal.md`. Start with why, and name
+the artifacts it touches on the `Artifacts:` line that `seed` reads:
 
 <!-- transcript: file library/openspec/changes/waive-first-fee/proposal.md -->
 ```markdown
@@ -54,7 +62,8 @@ A first late return is usually a mistake, and a fee for it costs more goodwill t
 - Affected specs: `overdue`
 ```
 
-The delta spec says what the requirements become. Its scenario will become a test:
+The delta spec says what the requirements become. Its scenario will become a test. Save it as
+`library/openspec/changes/waive-first-fee/specs/overdue/spec.md`:
 
 <!-- transcript: file library/openspec/changes/waive-first-fee/specs/overdue/spec.md -->
 ```markdown
@@ -70,7 +79,8 @@ A member's first late return SHALL owe 0 cents, however late it is.
 - **THEN** the return is three days late and owes 0 cents
 ```
 
-The tasks say how, in order. Each names the requirement it implements in a trailing parenthesis:
+The tasks say how, in order. Each names the requirement it implements in a trailing parenthesis.
+Save them as `library/openspec/changes/waive-first-fee/tasks.md`:
 
 <!-- transcript: file library/openspec/changes/waive-first-fee/tasks.md -->
 ```markdown
