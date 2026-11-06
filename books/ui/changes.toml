@@ -19,7 +19,7 @@
 
 [[change]]
 date = "2026-11-06"
-summary = "The opening UI chapters explain how to run their cells in order, distinguish the note from the other state atoms, and clarify when a cached view recomputes. The XSLT chapter now identifies the scheduler view's outdated notice: the kernel already serves Turtle, but the inspector still shows text."
+summary = "The opening UI chapters explain how to run their cells in order, distinguish the note from the other state atoms, and clarify when a cached view recomputes. The XSLT chapter explains why live transforms are uncached and identifies the scheduler view's outdated notice: the kernel already serves Turtle, but the inspector still shows text."
 pages = ["introduction.md", "model/composed.md", "model/xslt.md"]
 
 [[change]]
