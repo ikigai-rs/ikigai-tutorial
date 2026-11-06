@@ -50,7 +50,9 @@ opaque failure. Put your authority back before moving on:
 (In a real deployment you do not hold root; a door hands you exactly your grant and nothing wider.
 The page gives you root so you have something to narrow *from*.)
 
-## The principal: one identity, minted at the edge
+<a id="the-principal-one-identity-minted-at-the-edge"></a>
+
+## Principal: one identity, minted at the edge
 
 Authority has to start somewhere, and in ikigai it starts at a **door** — the component that turns
 a proof (a passkey assertion, a client certificate, a token) into a **principal**, a capability
@@ -63,7 +65,9 @@ A session, crucially, caches **authentication only, never authority**: "this is 
 cached; "Dana may close this item" is resolved fresh each request. Authority that was cached would
 be authority that could not be revoked, and a system that cannot revoke cannot be trusted.
 
-## The grant: what a delegation is made of
+<a id="the-grant-what-a-delegation-is-made-of"></a>
+
+## Grant: what a delegation is made of
 
 Between a principal and an action sits a **grant**: a small record with a grantee, a scope, and an
 expiry (`notAfter`). Its reader is fail-closed — a grant that cannot be read is a grant that does
