@@ -243,13 +243,14 @@ source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[] | select(.count | 
 [cached]</pre>
 </div>
 
-Now change the table. The line below reads the stock as JSON and keeps only what is on a
-shelf. Then it writes that back as CSV through `urn:json:to-csv` and sinks it to the stock.
+Now change the table. The line below reads the stock as JSON and keeps only records
+whose count is greater than zero. Then it writes that back as CSV through
+`urn:json:to-csv` and sinks it to the stock.
 The round trip is three resources and a pipe. The `Sink` cuts the stock's thread, as every
 `Sink` does ([Golden threads in practice](../getting-started/golden-threads.md)), and both
 cached selections above go with it. The first recomputes to the same answer, since flour and
-rice are still on their shelves. The list of items, read in the first cell, recomputes without
-sugar:
+rice still have counts greater than ten. The list of items, read in the first cell,
+recomputes without sugar:
 
 <div class="ikigai-run" data-cmd='source urn:json:query src=urn:iki:tutorial:shop:stock q="map(select(.count | tonumber > 0))" | urn:json:to-csv | sink urn:iki:tutorial:shop:stock
 source urn:iki:tutorial:shop:stock
