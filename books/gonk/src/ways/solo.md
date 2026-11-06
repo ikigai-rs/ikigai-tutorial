@@ -153,12 +153,61 @@ model-stub: ask 1: explain
 
 ### 4. Branch, fix, commit
 
-One branch per item, named for it. The fix comes with the test the item's body asked for.
+One branch per item, named for it. First add the test the item's brief asked for, and run it
+against the original function. This small repository has no `Cargo.toml`, so `rustc --test` runs
+the test directly.
 
 <!-- transcript: run -->
 ```console
 $ git -C demo switch -q -c item-1-empty-word
+```
+
+<!-- transcript: file demo/initials_test.rs -->
+```rust,ignore
+#[path = "src/lib.rs"]
+mod names;
+
+#[test]
+fn skips_empty_words() {
+    assert_eq!(names::initials("Ada  Lovelace"), "AL");
+}
+```
+
+<!-- transcript: run -->
+```console
+$ rustc --test demo/initials_test.rs -o initials-test && ./initials-test
+
+running 1 test
+test skips_empty_words ... FAILED
+
+failures:
+
+---- skips_empty_words stdout ----
+
+thread 'skips_empty_words' (…) panicked at demo/src/lib.rs:3:37:
+end byte index 1 is out of bounds for string of length 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    skips_empty_words
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in …
+```
+
+The test fails on the empty word between the two spaces. Replace the function, then run the same
+test again before committing both files:
+
+<!-- transcript: run -->
+```console
 $ printf '/// A name'"'"'s initials: "Ada Lovelace" is "AL", and so is "Ada  Lovelace".\npub fn initials(name: &str) -> String {\n    name.split_whitespace().filter_map(|word| word.get(..1)).collect()\n}\n' > demo/src/lib.rs
+$ rustc --test demo/initials_test.rs -o initials-test && ./initials-test
+
+running 1 test
+test skips_empty_words ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in …
+$ git -C demo add initials_test.rs
 $ git -C demo -c user.name=Agent -c user.email=agent@example.com commit -q -am 'initials: skip empty words (ledger item 1)'
 $ git -C demo log --oneline
 … initials: skip empty words (ledger item 1)
@@ -167,12 +216,18 @@ $ git -C demo log --oneline
 
 ### 5. Open a pull request, and wait for CI
 
+For this step, create an empty repository on your forge and set it as `demo`'s `origin` remote
+(`git -C demo remote add origin <repository-url>`). It needs CI that runs the test above. Push
+`main` first so the pull request has a base branch. Run `gh` inside `demo`; the parentheses below
+keep your terminal in the chapter's directory for the ledger commands that follow.
+
 <!-- transcript: manual — it needs a forge (GitHub here) and its CI, which this book's checks do not reach -->
 ```console
+$ git -C demo push -u origin main
 $ git -C demo push -u origin item-1-empty-word
-$ gh pr create --fill
+$ (cd demo && gh pr create --fill)
 https://github.com/you/demo/pull/7
-$ gh pr checks 7 --watch
+$ (cd demo && gh pr checks 7 --watch)
 ```
 
 The pull request is where the change is reviewed and where CI says whether it holds. Green CI is
