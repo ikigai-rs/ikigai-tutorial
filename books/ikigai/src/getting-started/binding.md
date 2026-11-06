@@ -1,8 +1,9 @@
 # Binding, and a host of your own
 
-An endpoint is inert. Until something **binds** it to a name, nothing can resolve it —
-defining and naming are separate acts, which is the whole point of
-[Resolution](resolution.md) showing up in the code.
+In [Why an endpoint describes itself](self-description.md), you saw the `Description`
+that tells the kernel what `camel-case` accepts and returns. The endpoint still needs a
+name in a space before a request can reach it. **Binding** connects that name to the
+endpoint: defining and naming are separate acts, as [Resolution](resolution.md) described.
 
 ## Binding
 
@@ -132,13 +133,15 @@ kind.
 ## Finding your crate from another project
 
 When you want your endpoints in a host that lives in a different repository, the
-dependency is an ordinary Cargo one. During development, a path reference:
+dependency is an ordinary Cargo one. During development, add a path reference under
+`[dependencies]` in the host's `Cargo.toml`:
 
 ```toml
 hello-camel = { path = "../ikigai-tutorial/crates/hello-camel" }
 ```
 
-and once published, a version.
+The path is relative to that `Cargo.toml`; adjust it to match your directories. Once
+the endpoint crate is published, use a version dependency instead.
 
 > ⚠ A path reference is a *local* arrangement: never commit one into a shared repository,
 > because it only resolves on the machine that has both checkouts laid out that way. This
