@@ -19,6 +19,26 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-06"
+summary = "A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request."
+pages = ["modules/end-to-end.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests."
+pages = ["modules/end-to-end.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
 pages = ["beyond/emacs-aliases.md"]
