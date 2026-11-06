@@ -15,7 +15,7 @@ how-to.
 
 | role | who | does |
 | --- | --- | --- |
-| the coordinator | a person, or a hub | picks the repository, pins the commit, writes the scope and budget, merges the reports, files the findings |
+| coordinator | a person, or a hub | picks the repository, pins the commit, writes the scope and budget, merges the reports, files the findings |
 | auditor A, auditor B | two agents (or people), independent | read, reproduce, report; never fix, never see each other's report |
 | whoever fixes | the [ordinary loop](solo.md), later | one finding at a time, each closed with its evidence |
 
@@ -257,15 +257,15 @@ the three kinds of closing evidence.
 
 The **sensors**:
 
-- **The reproduction.** It is the whole filter: a claim that cannot be made to fail at the pinned
+- **Reproduction.** It is the whole filter: a claim that cannot be made to fail at the pinned
   commit is not filed as a bug, however plausible it reads. It also becomes the regression test.
-- **The second auditor.** Independent, same protocol, and the check that the first did not miss
+- **Second auditor.** Independent, same protocol, and the check that the first did not miss
   half of what was there; where the two overlap, the overlap is a confidence, and where they do
   not, it is the reason to run two.
-- **The pinned commit and detached trees**, so every finding is about one known state, and no
+- **Pinned commit and detached trees**, so every finding is about one known state, and no
   auditor can change what another reads.
-- **The keys**, so the coordinator filing again (or a second coordinator) files each finding once.
-- **The report's own account**: what was not read, and whether the budget ran out, which turns "we
+- **Keys**, so the coordinator filing again (or a second coordinator) files each finding once.
+- **Report's own account**: what was not read, and whether the budget ran out, which turns "we
   audited it" into a statement someone can check.
 
 ## What it costs, and when to choose it
