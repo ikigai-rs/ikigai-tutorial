@@ -1,16 +1,18 @@
 # Ask the project in SPARQL
 
-`next` answers one question. Everything else a project wants to know, like how much of each change is
-left or which requirements have work against them, is a query over the graphs gonk holds. A query you
-keep is a **script**: published at a name, versioned by its content, and run by reading that name.
-None of this chapter needs a model.
+[Two agents in one repository](two-agents.md) used `next` to find work for each agent. Other project
+questions, such as how much of each change is left or which requirements have open work, can be
+answered by queries over the graphs gonk holds. A query you keep is a **script**: published at a
+name, versioned by its content, and run by reading that name. None of this chapter needs a model.
 
 ## Catch up
 
-In a new empty directory, as in [Start a project](start.md). `gonk.http.ledger` lets a signed-out
-browser on this machine read the project's ledger; without it, only `default` is readable that way. If
-the gonk from [the previous chapter](two-agents.md) is still running, stop it first, since this one
-takes the same port.
+Start in a new empty directory, as in [Start a project](start.md); this chapter regenerates the
+sample and seeds a fresh ledger. `gonk.http.ledger` lets a signed-out browser on this machine read
+the project's ledger; without it, only `default` is readable that way. If the gonk from
+[the previous chapter](two-agents.md) is still running, stop it first, since this one takes the same
+port. Keep gonk running in one terminal and run the remaining commands in another, from the same
+directory.
 
 <!-- transcript: run -->
 ```console
@@ -165,9 +167,10 @@ capability,requirement,open
 [uncacheable]
 ```
 
-Nothing has lifted the tree. The lift is not in gonk
-([In gonk, and not in this page](../spec/ledger.md#in-gonk-and-not-in-this-page)): the full one is
-`ikigai-markdown` and the mapping in a host of your own, which is what `crates/openspec-ledger` runs.
+The spec files have not been turned into RDF graphs yet. That conversion is a **lift**, and gonk
+does not provide it ([In gonk, and not in this page](../spec/ledger.md#in-gonk-and-not-in-this-page)).
+The full lift uses `ikigai-markdown` and the mapping in a host of your own, which is what
+`crates/openspec-ledger` runs.
 For this page, a few lines of Python write just what the query reads, using the same IRIs `seed`
 derives:
 
@@ -249,8 +252,8 @@ renewals,A loan of a held title is not renewed,1
 Each row is a requirement, from the tree, with a count of open items, from the ledger. That join is
 what one store buys. Two things follow if you keep this up:
 
-- **It goes stale.** Nothing reloads the graphs when the tree changes. A host that lifts on every
-  commit does ([Changes and tasks as ledger items](../spec/ledger.md)).
+- **Spec graphs go stale.** Nothing reloads the graphs when the tree changes. A host that lifts on
+  every commit does ([Changes and tasks as ledger items](../spec/ledger.md)).
 - **The join belongs to whoever holds the graphs.** `graph-select` needs a read grant for every graph
   it names, and a published script still cannot read them here.
 
