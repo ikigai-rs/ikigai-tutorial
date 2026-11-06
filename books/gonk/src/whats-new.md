@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: The saved-query chapters say which terminals and query files to use, distinguish the two count columns, and define grounding before using it. The signed-in HTTP heading and script table put their distinguishing words first.
+
+  Pages: [Your first saved query](scripts/first.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
+
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 
   Pages: [One-off review, and what a finding is](review/one-off.md), [The audit protocol, and why per-commit review is off](review/audit.md)
