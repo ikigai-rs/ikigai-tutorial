@@ -116,8 +116,9 @@ preview (LIMIT 5):
 
 The answer is a **draft**: the model's query, checked (it parses, and reads only what you may
 read), run once as a preview that already says 1, and saved at `how-many-open`, where nobody can
-run it yet. Look at it. It is the query you wrote by hand in step 1. Publishing it is a person's
-act: the draft's own text, sunk again with `state=published`, and `public=true` as before:
+run it yet. Look at it: it counts the same open items as the query in step 1, but names the result
+`count` instead of `open`. Publishing it is a person's act: the draft's own text, sunk again with
+`state=published`, and `public=true` as before:
 
 <!-- transcript: run -->
 ```console
