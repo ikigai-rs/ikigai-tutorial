@@ -1,7 +1,8 @@
 # Where this actually stands
 
-This chapter exists because a tutorial that leaves you to discover the maturity of a
-feature by hitting its edges has wasted your afternoon.
+In [A module, end to end](end-to-end.md), you ran a host whose module calls back into
+it. [The wire session](wire-session.md) showed how that conversation crosses a boundary.
+This chapter separates what you can use today from what still needs to be built.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
@@ -258,12 +259,13 @@ a resource, `urn:kernel:topology` ([Tic-tac-toe, VII](../applied/tic-tac-toe-7.m
 
 ## Exercises
 
-Four, and all four run against **your** module — `crates/your-endpoints/src/module.rs`,
+These four exercises run against **your** module — `crates/your-endpoints/src/module.rs`,
 the same shape as the `loadable-module` crate this part quotes, with a `greeting` endpoint
 under `urn:iki:tutorial:yours:module:` that calls back to the host's
-`urn:iki:tutorial:yours:name`. The loop is `cargo test -p your-endpoints`; the test module
-at the bottom of that file already has the `greet` helper that builds a kernel and resolves
-a name under a capability, so a new question is a copy of it with something changed.
+`urn:iki:tutorial:yours:name`. Run `cargo test -p your-endpoints` from the tutorial
+workspace root after each change. The test module at the bottom of that file already has
+the `greet` helper that builds a kernel and resolves a name under a capability. Copy the
+existing greeting test and change its inputs to try another resolution.
 
 ### 1. Break the prefix
 
@@ -358,7 +360,7 @@ in `host_space()`.
 <details>
 <summary>Hint</summary>
 
-Nothing about your code changes, which is the observation. What changes underneath is that
+Your endpoints and test assertions stay the same. What changes underneath is that
 every message in the session — the invocation, each `HostCall`, each `HostResult`, the
 final representation — is now genuinely encoded and decoded, in one process, over an
 in-memory channel.
