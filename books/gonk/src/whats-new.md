@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-05**: A QUIC client distinguishes refusals at the door from refusals by a resource and states that grant changes take effect on each call. Its introduction reflects the requests shown in The three doors.
+
+  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md)
+
 - **2026-11-05**: The three doors names the other machines it introduces and explains why an HTTP access line includes arguments the caller did not type.
 
   Pages: [The three doors, and who is asking](machines/doors.md)

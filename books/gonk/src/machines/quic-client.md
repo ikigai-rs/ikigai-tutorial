@@ -1,6 +1,6 @@
 # A QUIC client, and the grant it runs under
 
-The [previous chapter](doors.md) opened gonk's QUIC door and sent one request through it. This one
+The [previous chapter](doors.md) opened gonk's QUIC door and sent requests through it. This one
 sets up a client the way you would for a second machine: an identity minted on the server, a grant
 that says exactly what that identity may do, the identity moved to the client, and the server
 refusing everything outside the grant — including a certificate it was never told to trust.
@@ -68,8 +68,9 @@ read of `urn:collab:participants` that [The three doors](doors.md#who-wrote-it) 
 the `notes` root, and reading browse's graph through the store's narrow door (so the client can
 join its items to what browse knows, as [the embedding chapter](../embedding/own-kernel.md), at the
 end of the book, does in a kernel of its own).
-`clients.json`, beside it, maps the fingerprint to the grant's name. Two files, re-read on every
-connection: editing either changes what a client may do, or revokes it, without a restart. The
+`clients.json`, beside it, maps the fingerprint to the grant's name. Both files are checked on every
+call as well as at connection: editing either changes what a client may do, or revokes it,
+without a restart. The
 **certificates** gonk trusts are read once, at startup — so start it now:
 
 <!-- transcript: serve -->
@@ -115,8 +116,8 @@ for the other, and that is the whole of the trust.
 
 ## Outside the grant
 
-Everything this client is not granted is refused, by the resource that was asked, naming what it
-wanted:
+A request outside this client's grant is refused either at the door or by the resource itself.
+These two requests show the difference:
 
 <!-- transcript: run -->
 ```console
