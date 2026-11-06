@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-06**: The opening UI chapters explain how to run their cells in order, distinguish the note from the other state atoms, and clarify when a cached view recomputes. The XSLT chapter explains why live transforms are uncached and identifies the scheduler view's outdated notice: the kernel already serves Turtle, but the inspector still shows text.
+
+  Pages: [Introduction](introduction.md), [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md)
+
 - **2026-11-02**: "A page is a composed resource" now shows the theme chooser ikigai-ui 0.4 puts in every page's header, and "Live data and history" shows the cache's policy and evictions.
 
   Pages: [A page is a composed resource](model/composed.md), [Live data and history](model/live.md)
