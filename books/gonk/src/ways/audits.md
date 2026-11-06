@@ -297,7 +297,7 @@ $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
 $ cd starter && python3 tools/new.py ../library --process audits
-generated the library-lending sample (python, process audits) in …/library: 67 files
+generated the library-lending sample (python, process audits) in …/library: 96 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them

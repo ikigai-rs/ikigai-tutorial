@@ -19,6 +19,16 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-06"
+summary = "A new part, Pages of your own, serves a deployment's own pages from gonk: what a face is, what its jail and CSP refuse, a first page of open items built from the starter's template, then the starter's board, flight plan, project view and claims page, each checked from a shell with Deno."
+pages = ["faces/own.md", "faces/board.md", "faces/plans.md", "introduction.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "Every page is replayed at a gonk that serves faces and a starter that ships them. A generated repository now holds faces/, so each With the starter section counts 29 more files, and the Dashboard's link from an agent's claims asks a slightly longer query."
+pages = ["ways/solo.md", "ways/workers.md", "ways/routing.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md", "ways/spec-first.md", "ways/audits.md", "ways/harness.md", "project/start.md", "ledger/dashboard.md", "introduction.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]

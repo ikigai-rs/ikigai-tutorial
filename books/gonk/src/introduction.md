@@ -55,6 +55,10 @@ Each part is one way gonk is used **standalone**, and each builds on the one bef
   sample: start it against a local or remote gonk, change its spec, turn that into items, claim, work,
   close with evidence, run two agents side by side, ask it questions in SPARQL, publish a workflow,
   set up a model, and draft a query from a sentence.
+- **Pages of your own.** A deployment's own pages, which gonk calls faces: a directory of static
+  files that gonk serves read-only from its origin, under its default CSP, and that read gonk's
+  routes as the person viewing them. A first page of open items built from the starter's template,
+  then the starter's samples: a board for an epic, a flight plan, a project view and a claims page.
 - **Embedding.** The ledger, the store and browse in a kernel of your own, with no gonk at all.
 
 ## Three kinds of example, and how each is checked
@@ -87,7 +91,7 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{
 ```
 
 The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.18.1,
-`ikigai-store` 0.3.3, `ikigai-browse` 0.20.7, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
+`ikigai-store` 0.3.3, `ikigai-browse` 0.20.8, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
 book's own crates (the ones its Rust listings and in-page cells run) take the same ledger and store,
 so a cell, a listing and a `console` block all answer from one ledger. Three patch releases differ, and
 no page shows any of them: those crates lock `ikigai-core` 0.2.12, `ikigai-ledger` 0.18.0 and

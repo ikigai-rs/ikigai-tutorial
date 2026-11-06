@@ -7,6 +7,14 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-06**: A new part, Pages of your own, serves a deployment's own pages from gonk: what a face is, what its jail and CSP refuse, a first page of open items built from the starter's template, then the starter's board, flight plan, project view and claims page, each checked from a shell with Deno.
+
+  Pages: [Pages of your own](faces/own.md), [A board for an epic](faces/board.md), [Plans, projects and who has what](faces/plans.md), [Introduction](introduction.md)
+
+- **2026-11-06**: Every page is replayed at a gonk that serves faces and a starter that ships them. A generated repository now holds faces/, so each With the starter section counts 29 more files, and the Dashboard's link from an agent's claims asks a slightly longer query.
+
+  Pages: [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Routing work to agents](ways/routing.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md), [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md), [Start a project](project/start.md), [The Dashboard](ledger/dashboard.md), [Introduction](introduction.md)
+
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 
   Pages: [One-off review, and what a finding is](review/one-off.md), [The audit protocol, and why per-commit review is off](review/audit.md)

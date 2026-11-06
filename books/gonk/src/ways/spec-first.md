@@ -262,7 +262,7 @@ in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter) says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo,spec
-generated the library-lending sample (python, process solo, spec) in …/library: 65 files
+generated the library-lending sample (python, process solo, spec) in …/library: 94 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
