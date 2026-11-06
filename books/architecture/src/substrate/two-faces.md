@@ -1,18 +1,21 @@
 # One mechanism, read two ways
 
-Take one resource and hold it still: a **ledger item**. In
+The [Introduction](../introduction.md) described resources as named values reached through the
+same five verbs. Now take one resource and hold it still: a **ledger item**. In
 [The gonk Book](../../gonk/index.html) you built a whole host around items like this one; here it
 is just a resource, and we are going to look at it from every side.
 
 File one now. This page carries its own kernel — the same work ledger, compiled to WebAssembly —
-so the item you file is real, and every later cell on this page reads the ledger you are building.
+so the item you file is real. Press Run on each cell in order: every later cell on this page reads
+the ledger you are building. Each page starts with a fresh ledger; items do not carry over to the
+next chapter.
 
 <div class="ikigai-run" data-cmd='sink urn:iki:ledger:append Translate the research note'>
 <pre class="ikigai-run-expected">#1 urn:iki:ledger:default:item:…
 [uncacheable]</pre>
 </div>
 
-It has a number for people and an IRI for machines. Read it back:
+It has a number for people and an IRI (Internationalized Resource Identifier) for machines. Read it back:
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:item:1'>
 <pre class="ikigai-run-expected">   #1  open    p-  Translate the research note
@@ -63,8 +66,9 @@ thing that confines them.
 
 ## A word on what you will and will not see run
 
-The demonstrations in the capability and economics chapters run in this page, against this kernel,
-for real: you will narrow your own authority and watch an action vanish, cut a golden thread and
+The demonstrations in the [capability](../spine/spine.md) and
+[economics](../economics/economics.md) chapters run in their own pages, against the same kind of
+kernel: you will narrow your own authority and watch an action vanish, cut a golden thread and
 watch a view recompute. A handful of patterns in the overlay and closing chapters depend on parts
 of the system a browser cannot stand in for — a real network peer, a real passkey ceremony end to
 end, the hash-chained log on disk. Those are drawn as pictures and labeled as pictures, with the
