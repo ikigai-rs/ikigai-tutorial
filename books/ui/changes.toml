@@ -18,6 +18,12 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-06"
+summary = "The reserved chapters on faces, artifacts and themes clarify which readouts have text faces, how to run the directory delivery, and how Auto selects among three palettes. Links point back to the earlier examples."
+pages = ["model/faces.md", "model/artifacts.md", "model/themes.md"]
+maintenance = true
+
+[[change]]
 date = "2026-11-02"
 summary = "\"A page is a composed resource\" now shows the theme chooser ikigai-ui 0.4 puts in every page's header, and \"Live data and history\" shows the cache's policy and evictions."
 pages = ["model/composed.md", "model/live.md"]
