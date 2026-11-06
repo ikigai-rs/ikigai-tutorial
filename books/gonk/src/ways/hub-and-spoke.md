@@ -158,6 +158,11 @@ another.
 
 ### 4. The spoke works, and merges on green
 
+The first command assumes a checkout at `lib/`. It creates `lib-arc-2/` beside it; it does not
+change the shell's directory. In that new working tree, make the change, test it, commit it and
+push the branch. Run the three `gh` commands from `lib-arc-2/`, then return to this chapter's
+directory for the ledger commands.
+
 <!-- transcript: manual — an agent, a forge and its CI, which this book's checks do not have -->
 ```console
 $ git -C lib worktree add ../lib-arc-2 -b arc-2-empty-words
