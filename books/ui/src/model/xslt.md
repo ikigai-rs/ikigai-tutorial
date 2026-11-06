@@ -94,7 +94,9 @@ Every link is a real `href` that works without a script, plus `hx-get` for the f
 `hx-push-url` for the page, so htmx can swap the view in place and the address bar still names
 what you see.
 
-## The view is the two, composed
+<a id="the-view-is-the-two-composed"></a>
+
+## Compose the graph and stylesheet
 
 The fragment is a compose template whose one marker asks `urn:xslt:transform` for the transform
 of the graph by the stylesheet:
