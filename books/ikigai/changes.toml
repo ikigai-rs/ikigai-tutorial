@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching."
+pages = ["front-door/grammar.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "Tic-tac-toe, VII explains what a native host must supply before a stored Lisp rule can replace a Rust endpoint, and which reads preserve the game's caching behavior."
 pages = ["applied/tic-tac-toe-7.md"]
 

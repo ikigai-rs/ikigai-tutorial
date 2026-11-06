@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
+
+  Pages: [The REPL grammar](front-door/grammar.md)
+
 - **2026-11-05**: Tic-tac-toe, VII explains what a native host must supply before a stored Lisp rule can replace a Rust endpoint, and which reads preserve the game's caching behavior.
 
   Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
