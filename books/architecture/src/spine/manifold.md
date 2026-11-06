@@ -108,7 +108,7 @@ urn:iki:ledger:{ledger}:items
 [computed]</pre>
 </div>
 
-`append`, `comment`, `close`, `claim`, `link`, `graph-update` are **gone**. Not greyed, not
+`append`, `comment`, `close`, `claim`, `link`, `graph-update` are **gone**. Not grayed, not
 disabled — absent. The manifold narrowed because it is computed *from your capability*, and a
 capability that cannot write has nothing to say about a write action.
 
