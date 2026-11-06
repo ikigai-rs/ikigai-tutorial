@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities, hand-backs, and worker setup; all three make their comparison lists easier to scan."
+pages = ["teams/two-teams.md", "ways/solo.md", "ways/workers.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
 
