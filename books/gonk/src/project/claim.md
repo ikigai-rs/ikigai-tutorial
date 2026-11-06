@@ -163,7 +163,8 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:l
 | --- | --- | --- | --- |
 | a live claim | `claimed by ada` | refused | the holder's `release`, or a dispatcher's |
 | the lease ran out | `lease expired` | refused | the holder's renewal, or a `--takeover-from ada` |
-| released, reported or closed | offered, unless it waits for a dispatcher or is closed | taken | a new claim |
+| released or reported | offered, unless it waits for a dispatcher | taken | a new claim |
+| closed | not offered | refused | reopen it, then make a new claim |
 
 ## A person or a machine
 
