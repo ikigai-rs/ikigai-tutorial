@@ -8,8 +8,8 @@ Take the socket. It is the smallest thing that is genuinely on the other side: a
 process, its own address space, its own memory, gone when it crashes. Everything in this
 part is downstream of that one step, because once a resolution can leave the process, four
 questions arrive at once — who is asking, what may they do, what happens when the far side
-is not there, and who benefits. This chapter is the first step and the easiest of the
-four. The rest of the part is the other three.
+is not there, and who benefits. This chapter establishes the connection; the rest of
+the part takes up those questions.
 
 ## Serving
 
@@ -39,8 +39,9 @@ process or a round trip to another one, and neither can the engine, which is wha
 [Preferential resolution](preference.md) possible at all: a thing that answers requests is
 a thing a local kernel can compose.
 
-The book's test says it flatly. Serve `hello_camel::space()` — the space Part I built —
-on a socket, connect to it, and resolve `urn:iki:tutorial:camel-case`. The answer is
+The book's test says it flatly. Serve `hello_camel::space()` — the space you built in
+[Hello, resource](../getting-started/hello-resource.md) — on a socket, connect to it, and
+resolve `urn:iki:tutorial:camel-case`. The answer is
 `resourceOrientedComputing`, the same string the in-process test gets, and the two calls
 differ only in which constructor built the resolver.
 
@@ -64,8 +65,9 @@ does, you create and protect the parent directory yourself.
 
 That is the whole authentication story, and it is complete: **on one machine, between one
 user's processes, the operating system already knows who is asking.** Adding a certificate
-here would re-implement something the kernel underneath already does better. The next
-chapter is what happens when that sentence stops being true.
+here would re-implement something the kernel underneath already does better.
+[Who is asking](identity.md) takes the kernel onto a network, where the operating
+system can no longer establish the remote caller's identity.
 
 ## A second boundary, underneath the capability model
 
@@ -79,7 +81,17 @@ gonk](../gonk/introduction.html#which-gonk)), start it in one terminal and conne
 
 ```bash
 ikigai-gonk                      # its socket: ~/.ikigai/gonk.sock
+```
+
+In the other terminal, open a connected REPL:
+
+```bash
 ikigai --connect ~/.ikigai/gonk.sock
+```
+
+Exit that REPL with Ctrl-D, then read the catalog from the shell:
+
+```bash
 ikigai --connect ~/.ikigai/gonk.sock -c 'source urn:kernel:catalog'
 ```
 
