@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-06"
+summary = "Spec first warns that real seeding needs a non-default ledger at the pinned starter revision; Periodic unled audits keeps earlier notes with the coordinator; Harness engineering makes its empty-directory setup explicit. All three keep directory changes inside subshells so later commands run from the chapter directory, and put role names first for scanning."
+pages = ["ways/spec-first.md", "ways/audits.md", "ways/harness.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
