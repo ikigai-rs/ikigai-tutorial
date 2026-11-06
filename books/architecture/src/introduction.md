@@ -52,7 +52,7 @@ needs and the substrate a careful application needs turn out to be the same subs
 
 The quickest way to understand ikigai is to notice that you already use a resource-oriented system
 every day. The Web is one. It names things (URLs), it has a small fixed set of verbs
-(`GET`, `POST`, `PUT`, `DELETE`), it negotiates representations (an `Accept` header asks for HTML or
+(such as `GET`, `POST`, `PUT`, and `DELETE`), it negotiates representations (an `Accept` header asks for HTML or
 JSON of the same resource), and it caches by URL (with `ETag` and `Cache-Control`). Those are the
 same four ideas — naming, verbs, representation, caching — that this book is about.
 
@@ -62,8 +62,8 @@ The Web made each of those choices in one particular way, and froze it. ikigai t
 | axis | the Web | ikigai |
 |---|---|---|
 | **naming** | `http(s)` URLs | any `urn:` scheme — a file, a function, a ledger item, a capability, the catalog itself all have names in the same space |
-| **verbs** | four, and not uniform (much sits behind `POST`) | five — Source, Sink, Exists, Delete, Meta — over **every** resource, uniformly |
-| **representation** | content negotiation on a mostly-fixed set of types | **transreption**: any representation converts to any other through converters, with one canonical hub (Turtle), so a new face is a converter, not a new endpoint |
+| **verbs** | HTTP methods such as `GET`, `POST`, `PUT`, and `DELETE` (much sits behind `POST`) | five — Source, Sink, Exists, Delete, Meta — over **every** resource, uniformly |
+| **representation** | content negotiation on a mostly-fixed set of types | **transreption**: registered converters provide a direct route or a two-step route through Turtle, so a new face is a converter, not a new endpoint |
 | **caching** | by URL, with time-to-live and validators | **golden threads**: the kernel tracks what each answer depended on and invalidates exactly those, so a write cuts precisely the derived answers it should and no others |
 | **authority** | bolted on per application (cookies, sessions, OAuth) | **capabilities**: authority is a resource too, attenuated down every call, and the kernel's capability check is the only authorization |
 
