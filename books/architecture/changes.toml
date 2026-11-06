@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-06"
+summary = "The manifold chapter distinguishes the family menu from exact authorization and shows the ledger's refusal. The door chapter links its prerequisites, and the overlay chapter clarifies governor behavior and the slow call's six-second wait."
+pages = ["spine/manifold.md", "door/door.md", "overlays/overlays.md"]
+
+[[change]]
 date = "2026-11-03"
 summary = "\"The manifold, and the UI that falls out of it\" now lists what a newer ledger offers: an item's history and daily counts, which a reader's narrowed list keeps, and two write actions, which it drops."
 pages = ["spine/manifold.md"]
