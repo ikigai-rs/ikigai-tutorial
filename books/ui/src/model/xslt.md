@@ -119,9 +119,10 @@ Here is the threads view, in this page's kernel:
 [uncacheable]</pre>
 </div>
 
-The stylesheet, the template and the transform of an unchanged input are cached. The readout
-is not: what the kernel holds changes from one read to the next, so the view over it is
-recomputed every time, and it says so.
+The stylesheet and template are cached. A transform can be cached when its inputs are
+cacheable, but these readouts are not: what the kernel holds changes from one read to the
+next. The graph, the transform and the view over it are therefore recomputed on every read;
+the fragment reports `[uncacheable]`.
 
 ## The other views
 
