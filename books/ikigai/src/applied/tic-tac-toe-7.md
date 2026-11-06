@@ -58,6 +58,19 @@ Eighteen endpoints, each the same function earlier parts wrote: the atom, the ce
 the board, the rules, the templates, the views, the two view writes, and `conditional`. None
 of them changed to be declared.
 
+If you want to replace `turn` or `winner` with Lisp, that is a change to the host before it
+is a change to this file. A native host can construct a stored-program endpoint with
+`ikigai_lisp::program(id, program_text)`, register it under that id, and bind the game's door
+to it. Merely writing a Scheme form or a new endpoint id in the arrangement does not install
+an evaluator. This chapter's host and the page's WebAssembly kernel do not link `ikigai-lisp`;
+the stock CLI does not bind the tutorial's game either.
+
+The Lisp rules must read the same resources through `source` and opt into caching with
+`cacheable`: `winner` reads all eight lines, and `turn` reads the winner, then the board only
+while play continues. Those reads carry the dependencies that invalidate the answer on a
+move. [When a rule is not enough](../explore/beyond-rules.md) walks through a stored program
+and its cache in the CLI.
+
 The five views need one thing here. Each is `composeOver` bound to a different template, and
 an unnamed `composeOver` answers the name `composeOver`. A registry holds one endpoint per
 name, because a door that said "`composeOver`" could otherwise mean any of the five:
