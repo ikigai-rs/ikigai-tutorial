@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-06"
+summary = "The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits."
+pages = ["beyond/socket.md", "beyond/identity.md", "beyond/datasets.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
 pages = ["beyond/emacs-aliases.md"]

@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-06**: The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits.
+
+  Pages: [A kernel behind a socket](beyond/socket.md), [Who is asking](beyond/identity.md), [A query's authority is its dataset](beyond/datasets.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
