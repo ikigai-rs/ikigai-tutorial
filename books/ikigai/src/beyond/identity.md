@@ -1,8 +1,8 @@
 # Who is asking
 
-The previous chapter got away with having no authentication code, because the operating
-system had already answered the question. Put the same kernel on a network and nothing
-answers it. A UDP datagram arrives from an address; addresses are not identities, and the
+[A kernel behind a socket](socket.md) gave you a resolver in another process without
+adding authentication code: the operating system already knew the socket peer's user.
+Put the same kernel on a network and nothing answers it. A UDP datagram arrives from an address; addresses are not identities, and the
 `0600` on a socket file protects nothing that is not a file.
 
 So the QUIC transport has to answer three questions the IPC one could delegate: who is on
@@ -142,7 +142,8 @@ A served kernel decides authority in one of three ways, most specific first:
 2. **A fixed ceiling** — `serve --cap urn:cap:personal:calendar:read:freebusy` gives every
    authenticated client the same authority and nothing else. It also remains the outer
    bound under posture 1.
-3. **Neither** — each client gets its own filesystem workspace, transparently rooted at its
+3. **Per-client workspaces** — with neither per-identity grants nor a fixed ceiling, each
+   client gets its own filesystem workspace, transparently rooted at its
    own segment, so a tenant addresses files as if its segment were the root and cannot name
    another's.
 
