@@ -147,7 +147,7 @@ requires the storage to be exotic; it requires the *access* to be named.
 
 ## Files as bodies
 
-The transcripts above are replayed against the book's pinned `ikigai-cli` 0.2.6, which
+The transcripts above are replayed against the book's pinned `ikigai-cli` 0.2.9, which
 links `ikigai-fs` 0.3.0. Until `ikigai-fs` 0.2.3 (`ikigai-cli` 0.2.3) a file read answered
 one buffer; from it a file is a **body** ([Streams, I](../streams/bytes.md)) on the native backend:
 
