@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: The module introduction links its prerequisites, explains where to run the demo, and identifies its in-process transport. The module use cases have distinct openings, and the callback chapter defines the issuer interface.
+
+  Pages: [What a module is](modules/index.md), [Two ways to reach a kernel](modules/two-ways.md), [The callback](modules/the-callback.md)
+
 - **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
 
   Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)
