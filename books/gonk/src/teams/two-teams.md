@@ -179,7 +179,7 @@ a named ledger always says which ledger it means.
 ## One text, four answers
 
 `next` is the ledger's own question. A question the ledger did not anticipate is SPARQL, and here
-the ikigai Book's chapter applies directly. Here is one, with no graph in it:
+the ikigai Book's chapter applies directly. Here is one, with no fixed graph name in it:
 
 <!-- transcript: file open.rq -->
 ```sparql
@@ -542,10 +542,10 @@ Three things to read in that:
   alpha's list and not in beta's, because its description declares alpha's graph: the manifold
   offers a published query only to a caller who could run it, which is the ikigai Book's
   [Authority from the text](../../beyond/datasets.html#authority-from-the-text) in gonk.
-- **The manager's list has no writer's tools.** Reading two ledgers is not writing either, so
-  `append`, `claim`, `close` and the store's update door are absent, not offered and refused.
-- **The manager's list has the repository's.** Twenty-one of the browse root's resources, which
-  neither agent holds a token for.
+- **Write tools are absent from the manager's list.** Reading two ledgers is not writing either,
+  so `append`, `claim`, `close` and the store's update door are absent, not offered and refused.
+- **Repository tools appear in the manager's list.** Twenty-one of the browse root's resources,
+  which neither agent holds a token for.
 
 So an MCP agent built on alpha's certificate is not told what beta's report is called, and an
 agent built on the manager's cannot be talked into filing anything: the tool it would need is not
