@@ -1,7 +1,8 @@
 # Work, evidence, review, close
 
-This chapter takes one task from claim to close: reproduce it, fix it, get a second opinion, report
-with evidence, and let the dispatcher decide. You hold both roles, as in
+[Claiming](claim.md) showed how to take and renew a lease. This chapter takes one task from claim
+to close: reproduce it, fix it, get a second opinion, report with evidence, and let the dispatcher
+decide. You hold both roles, as in
 [Solo on one machine](../ways/solo.md), and the process still keeps them apart: **a report is not a
 close**, and a close says the evidence held.
 
@@ -9,9 +10,12 @@ close**, and a close says the evidence held.
 
 This gonk also serves the repository as a browse root, so it can show the work and have it reviewed.
 The model is this book's stub, as in [Review every commit](../ways/review-every-commit.md): it gives
-the same review every time, so this page prints the same thing on every machine. In a new empty
-directory, as in [Start a project](start.md). If the gonk from [the previous chapter](claim.md) is
-still running, stop it first, since this one takes the same port.
+the same review every time, so this page prints the same thing on every machine.
+
+Start in a new empty directory, as in [Start a project](start.md); this chapter regenerates the
+sample and seeds a fresh ledger. If the gonk from [the previous chapter](claim.md) is still running,
+stop it first, since this one takes the same port. Run `model-stub` and gonk in separate terminals,
+and use a third terminal for the remaining commands. Keep all three terminals in this directory.
 
 <!-- transcript: serve -->
 ```console
@@ -160,8 +164,10 @@ $ PYTHONDONTWRITEBYTECODE=1 python3 repro.py 2026-12-01 2026-12-02
 {'copy': 'pp-1', 'member': 'ada', 'returned': '2026-12-02', 'days_late': 41, 'fee_cents': 1000}
 ```
 
-It does not hold, so decline it, with a reason from the closed set and what you ran. A published
-finding would need a reproduction that does show the defect; both are records nobody overwrites.
+The finding does not hold, so decline it with a reason from the
+[allowed list](../review/one-off.md#deciding-on-a-finding) and the result of your reproduction. A
+published finding would need a reproduction that does show the defect; both decisions are records
+nobody overwrites.
 
 <!-- transcript: run -->
 ```console
