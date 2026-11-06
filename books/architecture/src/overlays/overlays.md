@@ -1,12 +1,14 @@
 # Spaces that wrap spaces
 
-The capability spine decided *who may* reach a resource. This chapter is about what happens to a
-request *on the way* — the governors that make a resource resilient and bounded: rate limits,
+In [One module, a boundary and a surface](../door/door.md), the door resolved a request under the
+viewer's authority. This chapter follows that request *on the way* to a resource — through the
+governors that make it resilient and bounded: rate limits,
 retries, circuit breakers, failover, timeouts, and concurrency caps. In ikigai these are not
 features baked into each endpoint. They are **overlays**: a space wraps another space and changes
 how requests pass through it, and because a space can wrap a space, they **stack**.
 
-This builds directly on dynamic spaces from The ikigai Book. An overlay is a space whose job is
+This builds on [A space that changes while it runs](../../applied/live-space.html) in *The ikigai
+Book*, where you changed the doors inside a dynamic space. An overlay is a space whose job is
 not to answer but to *govern* the space it wraps. A governor can refuse a request, delay it,
 or re-issue it; a successful answer still comes from the wrapped space.
 
@@ -39,7 +41,8 @@ Retry and Failover share a vocabulary. They decide whether to re-issue a request
   idempotent cannot. Retry and Failover refuse to re-run what is unsafe to re-run.
 - **What class is the failure?** A failure is *transient* (worth another try or a different target)
   or *permanent* (do not bother). A `429`-style "try again after" carries its own delay.
-- **What is left of the retry budget?** A single counter shared across the whole resolution tree.
+- **What is left of the retry budget?** Each re-issue spends one from a single counter shared
+  across the whole resolution tree.
 
 That third fact is the one security hook in the resilience family, and it is worth dwelling on.
 Nested retries *multiply*: a Retry wrapping a space that itself wraps a Retry could turn one request
