@@ -134,7 +134,8 @@ Declare it in the description with `optional()` and a `default_value`.
   there too): the `ArgSpec` list in the description *and* the implementation.
 - **Run** — `cargo test -p your-endpoints`
 - **Right when** — resolving with no `separator` gives the same answers as before, and
-  resolving with `separator=","` camel-cases `"a,b,c"` into `"aBC"`. A test asserting your
+  resolving with `separator=","` turns `"a,b,c"` into `"aBC"` for `lower-camel-case`
+  or `"3"` for `word-count`. A test asserting your
   `ArgSpec` is present is worth writing too — `your_thing().describe().inputs` is a list
   you can look at.
 - **Read again** — [Why an endpoint describes itself](self-description.md), the ArgSpecs
