@@ -109,8 +109,8 @@ not written: add the lines above to …/.config/ikigai/config.toml, or run again
 
 A root gonk already serves needs no restart after an update: gonk watches it, and a
 fast-forward is a change on disk like any other (the watcher is shown working in
-[Browse roots](../browse/roots.md)). A NEW root needs none either, as the first run's last line
-said: a running gonk watches `config.toml` and mounts it.
+[Browse roots](../browse/roots.md)). A new root needs no restart either, as the
+`--write-config` run reported: a running gonk watches `config.toml` and mounts it.
 
 ### Every checkout, without the URLs
 
