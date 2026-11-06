@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = '"Checking a resource" identifies its earlier space and where to run its check. "Testing an endpoint hermetically" links the clock exercise, defines hermetic tests, clarifies clock setup and the shared-clock discussion, and shows how to run its three tests.'
+pages = ["building/checking.md", "building/hermetic.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "\"Resolution\" defines endpoint before using it. \"Running it\" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides."
 pages = ["getting-started/resolution.md", "getting-started/running-it.md"]
 
