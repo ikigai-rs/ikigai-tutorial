@@ -210,7 +210,7 @@ What keeps it current:
 
 | what changes | what brings it in | restart? |
 | --- | --- | --- |
-| a repository upstream | `ikigai-gonk checkout --all`, by hand or [on a timer](checkout.md#on-a-timer) | no: the watcher sees the fast-forward |
-| a new repository | `ikigai-gonk checkout <url> --write-config` | no: a running gonk watches `config.toml` |
+| upstream repository | `ikigai-gonk checkout --all`, by hand or [on a timer](checkout.md#on-a-timer) | no: the watcher sees the fast-forward |
+| new repository | `ikigai-gonk checkout <url> --write-config` | no: a running gonk watches `config.toml` |
 | kata | `ikigai-gonk kata import <a new export>` | no |
-| a roborev review | the hook, by itself | no |
+| roborev review | the hook, by itself | no |
