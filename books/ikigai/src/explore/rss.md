@@ -218,6 +218,12 @@ feed and writes RDF/XML in RSS 1.0's own terms (`rss:item`, `rss:title`, `rss:li
 `dcterms:isPartOf` for the feed an item belongs to). `urn:rdf:transrept` then rewrites the
 RDF/XML as N-Triples, one statement per line.
 
+One thing the stylesheet keeps belongs to the feed, not to an item. A feed's `<ttl>` is the
+feed's own hint of how many minutes a copy stays good, and Alice's feed says `60`. The
+stylesheet keeps it on the feed as `dcterms:valid`, but only as data. No query or view in this
+chapter reads it, and nothing uses it as a cache lifetime. How long a copy of a feed is kept is
+decided by its HTTP headers and your `max_age=`, as section 2 showed.
+
 An item in RDF needs a name, an IRI, and an RSS item has two candidates. Its `guid` is the
 publisher's own identifier, but it is only a web address when the feed says
 `isPermaLink` (the default) and it starts with `http`. Its `link` is always an address. The
