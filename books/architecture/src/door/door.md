@@ -75,7 +75,7 @@ seen from two sides.
 ## Bodies larger than memory
 
 A door also frames what it sends and bounds what it takes, and since the streams release it
-does both without holding a whole body. What follows is `ikigai serve --http` from
+does both without holding a whole body. What follows is `ikigai serve --http <port>` from
 `ikigai-cli` 0.2.2 (ikigai-web 0.2.2, built with the CLI's `web` feature), with the file
 answers of 0.2.3; [Streams, II: a body you can read again](../../streams/replay.html) in
 *The ikigai Book* introduces bodies and streams.
@@ -112,8 +112,7 @@ cannot fill the disk are one rule seen from two sides.
 
 ## Where this runs, and where it is drawn
 
-A browser's content-security policy and its Origin checks are enforced by the *real* browser, which
-a kernel compiled into a page cannot stand in for. So the door is the one pattern in this book that
-is partly a **picture**: the kernel logic runs in the page, but the headers above are shown as
-annotations rather than exercised, and the escaping is the piece you can run for real against reader
-input. The boundary is real in a deployment; here it is drawn, and labeled as drawn.
+A kernel compiled into a page cannot stand in for an HTTP door and a browser enforcing its
+response headers. This chapter draws that boundary and describes its rules; it has no runnable
+cells for the headers or escaping. The boundary is real in a deployment; here it is drawn,
+and labeled as drawn.
