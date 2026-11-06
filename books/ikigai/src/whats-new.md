@@ -7,7 +7,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
-- **2026-11-06**: Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, and corrects what happens when loading generated Lisp stops.
+- **2026-11-06**: Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops.
 
   Pages: [Preferential resolution](beyond/preference.md), [Failure has a class](beyond/failure.md), [The editor as a client](beyond/emacs.md)
 
