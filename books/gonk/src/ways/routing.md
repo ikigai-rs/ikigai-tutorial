@@ -35,9 +35,9 @@ again.
 
 | role | who | holds |
 | --- | --- | --- |
-| the owner | a person on the gonk machine | the owner's socket, which names nobody |
-| the router | the dispatching machine, here `hub` | a certificate whose grant may write the ledger (label, comment) |
-| the worker | one machine, `lawnboy`, running one loop per agent | a certificate under the ledger's worker role |
+| owner | a person on the gonk machine | the owner's socket, which names nobody |
+| router | the dispatching machine, here `hub` | a certificate whose grant may write the ledger (label, comment) |
+| worker | one machine, `lawnboy`, running one loop per agent | a certificate under the ledger's worker role |
 
 A router is a **principal**, never a name. A person routes with their passkey, the
 `urn:iki:gonk:passkey:<credential id>` gonk attributes their signed-in writes to ([The ledger in
