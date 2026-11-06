@@ -1,11 +1,11 @@
 # Multi-verb endpoints
 
-`camel-case` answers one verb, so its flat description *is* its contract — the 93% case,
-and the reason the flat form exists. `title`, in [What resolution buys
-you](../getting-started/payoff.md), answered two and quietly declared two `ActionSpec`s.
-This chapter is that move made deliberate: one endpoint, three verbs, three contracts —
-and a capability on your own endpoint that the kernel enforces, per verb, before your
-code runs.
+In [Transreption](transreption.md), you used `camel-case`'s description to reach a new
+format. That endpoint answers one verb, so its flat description is its contract.
+`title`, in [What resolution buys you](../getting-started/payoff.md), answers two verbs
+and declares an `ActionSpec` for each. Here you will write an endpoint with three
+verbs, give each verb its own contract, and declare the authority each needs. The
+kernel checks that authority before your code runs.
 
 ## Three verbs, three actions
 
@@ -16,10 +16,9 @@ it. Reading needs no authority; writing and resetting do.
 {{#include ../../../../crates/building-endpoints/src/multi_verb.rs:endpoint}}
 ```
 
-The implementation is one closure branching on `inv.request.verb`. The description is
-three `ActionSpec`s, and that is not repetition: each verb has a different input list, a
-different output, and a different `requires`. Flattening them would make the catalog say
-`counter` takes `content` — on a read, which it does not — and requires the write scope
+The implementation is one closure branching on `inv.request.verb`. The description
+uses three `ActionSpec`s because the inputs, output and authority requirements depend
+on the verb. Flattening them would make the catalog say `counter` takes `content` — on a read, which it does not — and requires the write scope
 — on a read, which it must not.
 
 The per-verb view is what everything above the endpoint consumes:
@@ -29,16 +28,17 @@ The per-verb view is what everything above the endpoint consumes:
 ```
 
 That is the catalog's `ik:Action` nodes, the manifold's rows, and the agent's tool list —
-one per verb, each with its own contract. An agent holding a read-only capability is
-offered `Source` on `counter` and not `Sink`, because the offer is computed from exactly
-this.
+one per verb, each with its own contract. The **manifold** is the list of actions the
+current caller may invoke, filtered by its capability; later in the book,
+[The machine client](../beyond/agent.md) shows how clients use it. An agent holding a
+read-only capability is offered `Source` on `counter` and not `Sink`, because the offer
+is computed from exactly this.
 
 ## Declared, therefore enforced
 
-The rule [Resolution](../getting-started/resolution.md) stated three times is now
-something you can feel. `.requires(WRITE)` on the `Sink` and `Delete` actions is checked
-by the **kernel**, before dispatch: a caller whose capability does not satisfy it never
-reaches the closure.
+Here is the authority rule from [Resolution](../getting-started/resolution.md) in code.
+`.requires(WRITE)` on the `Sink` and `Delete` actions is checked by the **kernel**,
+before dispatch: a caller whose capability does not satisfy it never reaches the closure.
 
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/multi_verb.rs:enforced}}
@@ -51,12 +51,10 @@ writes — and the narrow reader then sees `7`, because the `Sink` cut `counter`
 thread and the reader's cached `0` went with it. And `Delete` follows the same rule as
 `Sink`, because it declared the same requirement.
 
-Now look at the closure again. There is no capability check in it. There is deliberately
-no capability check in it, because a check the catalog does not know about is the
-mirror-image lie: an action that *enforces* authority it never *declared* fails callers
-the catalog told were fine. The description is the only place authority is stated, and
-the kernel is the only place it is checked — which is what keeps the offer, the
-pre-flight and the enforcement from ever disagreeing.
+The closure has no capability check. A check there that the description does not
+declare would refuse callers the catalog said could proceed. Stating the requirement
+in the description lets the kernel use the same rule when it lists available actions,
+checks a request before execution, and dispatches it.
 
 > ⚠ The two authoring forms are **exclusive per verb**. Had `counter` also carried a
 > flat `.requires(..)` on its description, that scope would be dead for every verb with an
@@ -77,7 +75,7 @@ its declared `requires` enforced by the host since `ikigai-module` 0.2.0, and th
 0.3.0 the module's own descriptions cross at connect time, so the host gates against them
 exactly as it gates a linked-in one. Everything on this page is about the linked-in case,
 where the kernel resolving the name is the kernel enforcing the floor with nothing in
-between. That is the 95% case, and it is the case this book stands you in.
+between. This is the host you have been building in these chapters.
 
 ## Try it
 
