@@ -107,9 +107,10 @@ manager
   urn:cap:script:run:report-*
 ```
 
-Read them as datasets. Each agent's store tokens name one graph, its own ledger's. The manager's
-name three: both ledgers and browse's graph, where the review's annotations will land. Nothing
-here is a team concept; a team is the set of tokens its ledger's name appears in.
+Read the store read tokens as datasets. Each agent can read its own ledger's graph and the
+shared `urn:collab:participants` graph. The manager can read three graphs: both ledgers and
+browse's graph, where the review's annotations will land. Each team's ledger name in the tokens
+sets the boundary between teams.
 
 ## Start gonk, and fill both ledgers
 
@@ -271,7 +272,7 @@ error: invalid argument `query`: this query names <urn:iki:ledger:graph:beta> in
 <…beta>` block names a graph outside it. Evaluated, that block would match nothing, and "no
 overlap" is the answer alpha's agent would act on: a statement about its grant, not about the
 teams. So the store does not evaluate it. Since `ikigai-store` 0.2.22 (the gonk this book pins
-links 0.2.23) a query that names a graph outside its dataset is refused, naming the graph, as the
+links 0.3.3) a query that names a graph outside its dataset is refused, naming the graph, as the
 ikigai Book's [escape table](../../beyond/datasets.html#confinement-by-construction) shows; the
 gonk this book pinned before linked 0.2.21, which answered the same query with an empty table.
 The refusal is not the one before it: that one was a grant `graph=` asked for and alpha does not
