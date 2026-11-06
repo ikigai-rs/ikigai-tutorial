@@ -17,6 +17,12 @@
 
 [[change]]
 date = "2026-11-06"
+summary = "The full-screen REPL's input is identified as the request field; ikigai> labels submitted commands in its history."
+pages = ["binary/repl.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-06"
 summary = "Logging now links back to the socket connection, creates the config home before saving its settings, explains which terminal runs each command, and defines transreption before using the term."
 pages = ["running/logging.md"]
 

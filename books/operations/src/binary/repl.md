@@ -33,9 +33,9 @@ mounts (a `mount` line in its `config.toml`), `ikigai` names them on stderr wher
 $ ikigai
 ```
 
-Type a line at the `ikigai>` prompt and press Return. `help` lists the grammar, `quit` (or Ctrl-D)
-leaves. The REPL keeps its cache for as long as it runs, so the second read of the same thing is
-answered from memory, and says so.
+Type a line in the `request` field at the bottom of the screen and press Return. `help` lists the
+grammar, `quit` (or Ctrl-D) leaves. The REPL keeps its cache for as long as it runs, so the second
+read of the same thing is answered from memory, and says so.
 
 You can try the grammar here without installing anything. The lines beside each **Run** button are
 REPL lines, answered by a kernel compiled into this page: the same engine, over a smaller set of
