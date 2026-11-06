@@ -325,8 +325,9 @@ least cacheable resource there is — a live door, `Always`, and anything that r
 inherits that — and a corridor that binds `now` to one fixed instant turns it into a pure
 function of its context. Since 0.1.75 the chain can carry a **clock** as well as doors:
 `Scope::with_named_at(name, space, clock)` injects the corridor and sets the chain's clock
-in one call, the only way a chain acquires one, so the binding and the clock cannot
-disagree. `inv.now()` then answers from the chain's clock before the kernel's. An endpoint
+in one call. The host must make the time binding and the clock agree; core cannot
+verify that they return the same instant. `inv.now()` then answers from the chain's
+clock before the kernel's. An endpoint
 that reads time by *resolution* and one that reads it from the *clock* see the same
 instant, and the result is `Never` under the corridor and `Always` under the root —
 checked here with `Kernel::is_cached_in`, the cache probe for a chain, rather than by
@@ -375,7 +376,7 @@ let kernel = Kernel::new(Arc::new(
 let root = Capability::root();
 let stamp = || Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:stamp").unwrap());
 
-// The corridor: `now` pinned to one instant AND the clock derived from it, in one call.
+// The corridor: the host supplies a `now` binding and a clock for the same instant.
 let six_pm = || {
     Scope::empty().with_named_at(
         Iri::parse("urn:iki:tutorial:ctx:six-pm").unwrap(),
