@@ -4,8 +4,9 @@ A dispatcher files work; unattended **worker** machines take it, do it and hand 
 evidence; the dispatcher checks the evidence and closes. The difference from
 [Solo on one machine](solo.md) is not the steps, which are the same, but who may take which of
 them. A worker reaches gonk over QUIC with an identity of its own, and its grant lets it read,
-claim, renew, comment and release. It **cannot close**, and it cannot merge: whatever it says
-about its own work stays a claim until someone else checks it.
+claim, renew, comment and release. It **cannot close**. The forge must also prevent its machine
+user from merging: whatever the worker says about its own work stays a claim until someone else
+checks it.
 
 ## Who
 
@@ -165,9 +166,16 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:i
 Two refusals, and they are different. The claim is a `conflict`: the item is held, and the answer
 says by whom. The release is `denied`: a claim taken over QUIC records the claimant's
 **principal**, so worker-2 cannot drop worker-1's claim by spelling its name. Over the socket in
-the previous chapter there was no principal, and a holder was only a name.
+[Solo on one machine](solo.md), every caller was the owner, so the holder name alone distinguished
+one worker from another.
 
 ### 3. The worker does the work
+
+On a real worker machine, start in a clone of the repository you want the agent to change. The
+next commands use `gonk.local:1062` for the real server and `~/gonk` for that worker's certificate
+bundle; replace both with your server's address and the bundle's location. `your-agent` stands
+for your agent's command. These commands need the real repository and forge; the scratch setup
+above checks only the ledger exchanges.
 
 <!-- transcript: manual — a worker machine running an agent, and a forge; this book's checks have neither -->
 ```console
@@ -181,8 +189,9 @@ agent's brief; the push and the pull request are made as a machine user the forg
 requests and not merge them. The command above hands the agent everything `item:1` prints,
 comments included, which is fine for a page whose ledger only you write to and is the hazard on a
 shared one: a comment is whatever its writer typed. [Routing work to agents](routing.md) shows
-how the starter's loop gives an agent the comments as quoted data, under their authors, instead. While the agent works, the worker renews its lease, which renews and never
-takes:
+how the starter's loop gives an agent the comments as quoted data, under their authors, instead.
+
+While the agent works, the worker renews its lease. `renew=true` renews and never takes:
 
 <!-- transcript: run -->
 ```console
@@ -321,8 +330,8 @@ The **sensors**, and here they are enforced rather than habits:
 - **The hand-back state**, which keeps finished work out of `next` until a dispatcher answers.
 - **CI and the forge's merge rule**: the worker's machine user can open a pull request and not
   merge it.
-- **The dispatcher's evidence check**, now a separate party from the worker, and the reject that
-  sends work back with a reason.
+- **The dispatcher's evidence check.** Someone other than the worker checks the evidence and
+  rejects a hand-back that does not hold, sending work back with a reason.
 - **The access log**, which names every worker on every request it made.
 
 ## What it costs, and when to choose it
