@@ -57,9 +57,10 @@ cannot, and every degradation rule in this part is built on the distinction.
 
 ## The transport does not authenticate, and that is not an oversight
 
-There is no credential in either listing. `ikigai-ipc` puts the socket in a `0700`
-directory, makes it `0600`, and then — belt and braces — refuses any connection whose
-kernel-verified UID is not the server's own.
+There is no credential in either listing. `ikigai-ipc` makes the socket `0600` and
+refuses any connection whose kernel-verified UID is not the server's own. Its default
+socket-path helper creates a `0700` directory; when you supply a path, as the listing
+does, you create and protect the parent directory yourself.
 
 That is the whole authentication story, and it is complete: **on one machine, between one
 user's processes, the operating system already knows who is asking.** Adding a certificate
