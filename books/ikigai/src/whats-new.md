@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-06**: The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features.
+
+  Pages: [The wire session](modules/wire-session.md)
+
 - **2026-11-06**: The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors.
 
   Pages: [The wire session](modules/wire-session.md)

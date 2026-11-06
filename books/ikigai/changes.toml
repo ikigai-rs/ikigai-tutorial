@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-06"
+summary = "The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
 summary = "The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors."
 pages = ["modules/wire-session.md"]
 
