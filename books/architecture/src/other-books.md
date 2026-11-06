@@ -1,8 +1,9 @@
 # The other books
 
 This book builds on [The ikigai Book](../index.html), which teaches resources, spaces,
-capabilities and golden threads from the first endpoint up, and on its chapters on dynamic spaces
-in particular, which are the mechanism the overlay chain here is built from.
+capabilities and golden threads from the first endpoint up. Its chapter
+[A space that changes while it runs](../applied/live-space.html) introduces dynamic spaces,
+the mechanism the overlay chain here is built from.
 
 The worked resource throughout — the ledger item — is the subject of [The gonk Book](../gonk/index.html),
 the work ledger and review host built from those same pieces; the kernel this book's cells run
