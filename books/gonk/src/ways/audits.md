@@ -124,7 +124,7 @@ reproduction runs the tool in a directory with one file in it:
 <!-- transcript: run -->
 ```console
 $ mkdir -p probe-a && touch probe-a/zebra
-$ cd probe-a && sh ../audit-a/bin/initials.sh '*'
+$ (cd probe-a && sh ../audit-a/bin/initials.sh '*')
 z
 ```
 
@@ -295,9 +295,9 @@ the reason. The book checks the starter at the revision in `books/gonk/starter.r
 ```console
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
-$ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
+$ (cd starter && python3 tools/new.py ../library --process audits,review-every-commit)
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
-$ cd starter && python3 tools/new.py ../library --process audits
+$ (cd starter && python3 tools/new.py ../library --process audits)
 generated the library-lending sample (python, process audits) in …/library: 67 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
@@ -345,7 +345,7 @@ roles = ["auditor: claims an audit item, reads only what it lists, files one ite
 
 <!-- transcript: run -->
 ```console
-$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder coordinator
+$ (cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder coordinator)
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
   note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
@@ -368,7 +368,7 @@ agents over MCP (configure the agent with this command):
 
   ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
-$ cd library && python3 tools/audit.py artifacts/service/lending/domain.py artifacts/cli/library.py --dry-run
+$ (cd library && python3 tools/audit.py artifacts/service/lending/domain.py artifacts/cli/library.py --dry-run)
 Audit library: 2 file(s), 60 tool calls
 
 Repository: `library`. Budget: 60 tool calls. Files, and nothing else:
@@ -388,7 +388,7 @@ someone already suspected.
 - **Stop at the budget.** Say where you stopped and what you did not read.
 - **Report** with `--note` listing the items you filed; close `--reason audit-no-change` when
   you found nothing.
-$ cd library && python3 tools/gonk.py status
+$ (cd library && python3 tools/gonk.py status)
 process: audits
 no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
 ```
