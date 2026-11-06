@@ -1,7 +1,8 @@
 # The manifold, and the UI that falls out of it
 
-The last chapter resolved a viewer's authority. This one asks the kernel a question that authority
-answers directly: **what can I do here?** The answer is the **action manifold** — the set of
+In [Resolve the viewer's authority once](spine.md), you narrowed a capability and saw a write
+refused. This chapter asks the kernel a question that authority answers directly: **what can I do
+here?** The answer is the **action manifold** — the set of
 actions available to the caller *under their capability* — and the quiet claim of this chapter is
 that the manifold a safe agent reads and the action list a page draws are **one list**.
 
