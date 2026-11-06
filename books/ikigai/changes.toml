@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-06"
-summary = "Preferential resolution distinguishes mount precedence from failure handling and identifies Sink as the verb that cannot be replayed. Failure has a class clarifies which request repeats and which errors fall through. The editor as a client links its earlier concepts and corrects what happens when loading generated Lisp stops."
+summary = "Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, and corrects what happens when loading generated Lisp stops."
 pages = ["beyond/preference.md", "beyond/failure.md", "beyond/emacs.md"]
 
 [[change]]
