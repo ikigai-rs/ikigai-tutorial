@@ -229,9 +229,9 @@ commented on #2 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 — batch: 2 commands · 2 uncacheable
 ```
 
-The hand-back rides on the one write a worker has, a comment, and makes the item wait for its
-dispatcher; the release lets go of the claim. The worker's attempt to close its own work is
-refused at the grant. (The pull request URLs are the shape step 3 would print; this page has no
+The worker marks its comment as a hand-back, which makes the item wait for its dispatcher;
+the release lets go of the claim. The worker's attempt to close its own work is refused at the
+grant. (The pull request URLs are the shape step 3 would print; this page has no
 forge.)
 
 ### 5. The dispatcher checks, and closes or sends it back
