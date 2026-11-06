@@ -9,8 +9,9 @@ chapter calls that a CHECK. The RDF Toolbox
 browser, and this chapter builds what the page reads and how it reads it.
 
 The code is `crates/check-resource`. Unlike the other chapters of this part, it does not chain
-onto Part I's space: its host holds two players of tic-tac-toe, a transreptor, the shapes a player
-must fit, and two published spaces beside them. Nothing in it starts a server, so there is nothing
+onto the space you built in [Hello, resource](../getting-started/hello-resource.md): its host
+holds two players of tic-tac-toe, a transreptor, the shapes a player must fit, and two published
+spaces beside them. Nothing in it starts a server, so there is nothing
 to stop afterwards.
 
 ```rust,ignore
@@ -162,10 +163,10 @@ assert_eq!(found[0].path.as_deref(), Some("http://example.org/ttt#wins"));
 assert_eq!(found[0].component, "http://www.w3.org/ns/shacl#ClosedConstraintComponent");
 ```
 
-The same check runs in this page, written the way a shell writes it: the Turtle face piped
-into `urn:shacl:validate`, where it fills `data`, the one required input left unnamed. X
-conforms. O's report is the graph the paragraph below describes, and its one result names the
-property: `sh:resultPath ttt:wins`, from `sh:ClosedConstraintComponent`. The toolbox's own
+Run the cell below in this page's kernel, which has the chapter's resources bound. It pipes
+the Turtle face into `urn:shacl:validate`, filling its required `data` argument without naming
+it in the command. X conforms. O's report is the graph the paragraph below describes, and its
+one result names the property: `sh:resultPath ttt:wins`, from `sh:ClosedConstraintComponent`. The toolbox's own
 engine checks the same two players further down, in [The page itself](#the-page-itself).
 
 <!-- urn-gate: illustration urn:ikigai:shacl:report:b3:1258eb4246e33211b9d99fd84328c8723a8aae4c2627e1c1973fca3041184544:report — the report graph's own
