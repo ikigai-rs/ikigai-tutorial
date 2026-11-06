@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-06"
+summary = "The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging."
+pages = ["project/work.md", "project/two-agents.md", "project/query.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]

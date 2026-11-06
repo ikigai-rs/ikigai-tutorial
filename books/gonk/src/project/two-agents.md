@@ -1,12 +1,15 @@
 # Two agents in one repository
 
-The reason to claim at all shows up when two agents share a repository. This chapter runs two, says
-exactly what claiming prevents, and says what it leaves to you.
+[Work, evidence, review, close](work.md) took one task through the worker and dispatcher roles.
+This chapter adds a second worker to the same repository, shows what claiming prevents, and says
+what it leaves to you.
 
 ## Catch up
 
-In a new empty directory, as in [Start a project](start.md). If the gonk (and the `model-stub`) from
+Start in a new empty directory, as in [Start a project](start.md); this chapter regenerates the
+sample and seeds a fresh ledger. If the gonk (and the `model-stub`) from
 [the previous chapter](work.md) is still running, stop it first, since this one takes the same port.
+Keep gonk running in one terminal and run the remaining commands in another, from the same directory.
 
 <!-- transcript: serve -->
 ```console
@@ -32,8 +35,9 @@ seed: 8 filed, 0 already filed, 0 checked off (not filed), 6 order link(s) added
 ## One working tree each
 
 Two agents in one directory overwrite each other's files, whatever the ledger says. So each gets its
-own working tree and its own holder name. The tree's name for itself is git-ignored, so it does not
-travel, and the ledger's name is committed, so it does.
+own working tree and its own holder name. The holder name is stored in the git-ignored
+`.gonk/local.toml`, so each working tree sets its own. The ledger name is stored in the committed
+`.gonk/gonk.toml`, so both working trees use the same ledger.
 
 <!-- transcript: run -->
 ```console
@@ -86,7 +90,7 @@ $ (cd second && python3 tools/gonk.py claim 3)
 gonk.py: this working tree already holds item 1 on `library`: one item per working tree. Release or close it first
 ```
 
-**A task taken out of order is not on this list.** `next` will not offer a blocked item, but that is
+**Blocked tasks can still be claimed.** `next` will not offer a blocked item, but that is
 advice rather than a refusal. This tree hands its item back and claims the blocked `library#8`, and the
 claim goes through, so an agent has to ask `next` and not pick for itself:
 
@@ -155,7 +159,7 @@ A claim fences an *item*. The ledger does not know which files an item will touc
 So the claim is one control among several, and the rest are the ones [Harness
 engineering](../ways/harness.md) lists. With two agents you also become their dispatcher, and the part
 that grows is checking evidence. [Remote workers](../ways/workers.md) and [Hub and
-spoke](../ways/hub-and-spoke.md) are the shapes that takes when two becomes many.
+spoke](../ways/hub-and-spoke.md) show how this works when two agents become many.
 
 <a id="what-you-built"></a>
 
