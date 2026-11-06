@@ -20,9 +20,9 @@ used, plus `markdown`, `counter` and `stamp`, which this part explains. Run the
 
 A **transreptor** is an endpoint that converts a representation from one format to
 another. The `ikigai` CLI links one for RDF syntaxes, `urn:rdf:transrept`. It
-declares what it converts — `describe` it and look for the `transrepts:` line — and it is
-driven the way every transreptor is driven: content in through the pipe, the target type
-in `as`:
+declares what it converts: run `describe urn:rdf:transrept text/plain` in the CLI REPL
+and look for the `transrepts:` line. To use it, pass content through the pipe and the
+target type in `as`:
 
 ```bash
 ikigai --plain -c 'source urn:kernel:catalog | urn:rdf:transrept as=application/ld+json'
@@ -163,8 +163,8 @@ The error is an `Endpoint` error on purpose. The face is not absent, so it is no
 `NotFound`; no capability is at issue, so it is not `Denied` — consent is per request,
 not per holder; and the arguments are well-formed, so it is not `InvalidArgument`. A
 mistyped consent (`lossy=alow`) *is* an `InvalidArgument`, rather than being read as the
-default and blamed on the face. At the REPL the same refusal is what
-`describe urn:iki:tutorial:camel-case text/markdown` prints.
+default and blamed on the face. These examples use the tutorial host; the stock
+`ikigai` CLI does not bind `urn:iki:tutorial:camel-case`.
 
 > ⚠ One thing the declaration still does not do. When **no route at all** reaches the
 > type a `Meta` request asked for, the kernel **substitutes** the canonical Turtle rather
