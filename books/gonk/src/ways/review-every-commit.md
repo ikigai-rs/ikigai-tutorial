@@ -2,14 +2,16 @@
 
 A read-only reviewer reads every file every commit touches. Each claim it makes is a **pending
 finding**; a second model, the judge, checks the serious ones; a person declines or publishes
-each finding with a reason or a reproduction; and a real one becomes a ledger item that goes
-through the ordinary loop. gonk does all of that from a `post-commit` hook and one setting.
+each finding with a reason or a reproduction. A separate command files published findings as
+ledger items that go through the ordinary loop. The `post-commit` hook requests the review;
+publishing and filing remain separate steps.
 
 This is the process gonk's review machinery was first built for, and the one its own authors
 turned off: [The audit protocol](../review/audit.md) has the measurement. This chapter shows how
-it works end to end, so you can decide for yourself; the last section says what it costs and when
-it is still the right choice. The pieces are the ones [One-off review](../review/one-off.md)
-taught one at a time, and this page links there rather than teaching them again.
+it works end to end, so you can decide for yourself.
+[What it costs, and when to choose it](#what-it-costs-and-when-to-choose-it) weighs the tradeoffs.
+The pieces are the ones [One-off review](../review/one-off.md) taught one at a time, and this page
+links there rather than teaching them again.
 
 ## Who
 
