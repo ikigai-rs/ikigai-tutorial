@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: Transreption, Multi-verb endpoints, and The graph face now connect their examples to the host you already have and clarify terms and command locations. The stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb.
+
+  Pages: [Transreption](building/transreption.md), [Multi-verb endpoints](building/multi-verb.md), [The graph face](building/graph-face.md)
+
 - **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
 
   Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)

@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Transreption, Multi-verb endpoints, and The graph face now connect their examples to the host you already have and clarify terms and command locations. The stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb."
+pages = ["building/transreption.md", "building/multi-verb.md", "building/graph-face.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "\"Resolution\" defines endpoint before using it. \"Running it\" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides."
 pages = ["getting-started/resolution.md", "getting-started/running-it.md"]
 
