@@ -25,8 +25,8 @@ Neptune,ice giant,60190
 ## One model
 
 The view's model is the one the JSON chapter used: **an array of records**, each a set of named
-fields. A JSON document of objects already is one. A CSV table becomes one by a transreption that
-changes the form and not the data: one record per row, keyed by the header. That is a conversion
+fields. A JSON array of objects already has that model. A CSV table becomes one by a transreption
+that changes the form and not the data: one record per row, keyed by the header. That is a conversion
 between two representations of the same thing, which is exactly what ikigai's transreptors are
 for. The one needed takes a CSV table and gives a JSON array of objects keyed by its header row.
 
@@ -113,9 +113,9 @@ and the view over the JSON document, with `source=json`:
 [computed]</pre>
 </div>
 
-The two tables are the same, row for row. Only the sentence above each one names its source,
-because the template prints its `source` argument there. The inspector's navigation has both
-pages, `Planets (JSON)` and `Planets (CSV)`, so a browser shows the same thing.
+The two tables have the same rows. The sentence above each table and its caption name the source,
+because the template prints its `source` argument in both places. The inspector's navigation has
+both pages, `Planets (JSON)` and `Planets (CSV)`, so a browser shows the same thing.
 
 ## Two sources, two threads
 
@@ -200,7 +200,6 @@ needs, and the smallest step from the form the data has to that model.
 
 One view and one row template over two sources, a CSV table and a JSON document, each source one
 template naming where its records come from, and each with its own golden thread. Ruled out: a
-second view for a second format, and a model the data has to be converted into before it can be
-shown.
+second view for a second format, and converting the data to RDF before it can be shown.
 
 Next: [Live data and history](live.md).
