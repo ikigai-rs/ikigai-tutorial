@@ -232,6 +232,10 @@ impl ScratchHome {
         let screen = std::env::temp_dir().join(format!("{base}.screen"));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join(".config")).expect("a scratch home");
+        // Steel creates its own data directory with create_dir, so its parent must exist.
+        // Match the shell transcript runner's empty home; keep startup warnings in the
+        // comparison rather than filtering them out of Lisp transcripts.
+        std::fs::create_dir_all(dir.join(".local/share")).expect("a scratch data home");
         let files = (!workspace.is_empty()).then(|| {
             let files = dir.join("files");
             std::fs::create_dir_all(&files).expect("a scratch workspace");
