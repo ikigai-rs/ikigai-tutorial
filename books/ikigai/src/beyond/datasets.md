@@ -14,7 +14,9 @@ holding a grant for every graph in it. The text then runs inside the dataset and
 because nothing outside it is there.
 
 So the same SPARQL text is three different queries in the hands of three different callers. This
-chapter runs that, and then tries to break it:
+chapter runs that, and then tries to break it. Run its shell commands from the root of the
+tutorial repository you cloned in [Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else).
+If you have not cloned it yet, that section shows how:
 
 <!-- transcript: manual — every section at once; each section's block below is checked. -->
 ```bash
@@ -52,9 +54,10 @@ reading and writing one graph are two grants. The broad keys, `urn:cap:store:rea
 `urn:iki:store:update`), and a graph-scoped door does not take one in place of the graph grant it
 declares.
 
-The kernel is [Scripts are resources](../code/scripts.md)' host, the script space in front of an
-in-memory store, seeded with the two graphs instead of that chapter's work items. Scripts are a
-later part of this book; the one fact about them this chapter needs comes in its own section.
+The kernel puts a script space in front of an in-memory store seeded with these two graphs.
+[Scripts are resources](../code/scripts.md), later in the book, explains that host and how it
+runs scripts. Here, [Authority from the text](#authority-from-the-text) introduces the one
+published query we need.
 
 ```rust,ignore
 {{#include ../../../../crates/graph-authority/src/lib.rs:kernel}}
