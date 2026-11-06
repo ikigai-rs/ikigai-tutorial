@@ -66,8 +66,9 @@ thing that confines them.
 
 ## A word on what you will and will not see run
 
-The demonstrations in the capability and economics chapters run in this page, against this kernel,
-for real: you will narrow your own authority and watch an action vanish, cut a golden thread and
+The demonstrations in the [capability](../spine/spine.md) and
+[economics](../economics/economics.md) chapters run in their own pages, against the same kind of
+kernel: you will narrow your own authority and watch an action vanish, cut a golden thread and
 watch a view recompute. A handful of patterns in the overlay and closing chapters depend on parts
 of the system a browser cannot stand in for — a real network peer, a real passkey ceremony end to
 end, the hash-chained log on disk. Those are drawn as pictures and labeled as pictures, with the
