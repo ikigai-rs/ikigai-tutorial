@@ -18,6 +18,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-06"
+summary = "The opening UI chapters explain how to run their cells in order, distinguish the note from the other state atoms, and clarify when a cached view recomputes. The XSLT chapter now identifies the scheduler view's outdated notice: the kernel already serves Turtle, but the inspector still shows text."
+pages = ["introduction.md", "model/composed.md", "model/xslt.md"]
+
+[[change]]
 date = "2026-11-02"
 summary = "\"A page is a composed resource\" now shows the theme chooser ikigai-ui 0.4 puts in every page's header, and \"Live data and history\" shows the cache's policy and evictions."
 pages = ["model/composed.md", "model/live.md"]
