@@ -9,10 +9,13 @@ Start with the human one. `ikigai-emacs` is a thin client — it shells out to t
 binary and does nothing heavier — and its most interesting command is a dozen lines long, half of
 which are the message it prints afterwards.
 
-## One function per resource you may call
+<a id="one-function-per-resource-you-may-call"></a>
 
-`M-x ikigai-refresh-aliases` writes a file of elisp and loads it. What is in the file is
-**one function per resource this capability may invoke, with the arguments that resource
+## One function per action you may call
+
+`M-x ikigai-refresh-aliases` writes a file of elisp and loads it. An action pairs a resource
+with a verb, so a resource that answers both `Source` and `Sink` gets two functions. The file
+contains **one function per action this capability may invoke, with the arguments that action
 declares**. Not a hand-written wrapper library: a projection of the live manifold, so
 `(ikigai-fn-toUpper "hi")` exists because an endpoint says it takes an argument called
 `in`. The generated file is a snapshot of those declarations.
