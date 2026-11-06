@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: The file workspace clarifies how the CLI selects its root and where to find the files you write. The getting-started exercises connect to the earlier examples, identify where to run commands, and give word-count its own success check.
+
+  Pages: [The file workspace](getting-started/file-workspace.md), [Exercises: getting started](getting-started/exercises.md)
+
 - **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
 
   Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)

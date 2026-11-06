@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "The file workspace clarifies how the CLI selects its root and where to find the files you write. The getting-started exercises connect to the earlier examples, identify where to run commands, and give word-count its own success check."
+pages = ["getting-started/file-workspace.md", "getting-started/exercises.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "\"Resolution\" defines endpoint before using it. \"Running it\" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides."
 pages = ["getting-started/resolution.md", "getting-started/running-it.md"]
 
