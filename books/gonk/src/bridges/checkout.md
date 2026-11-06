@@ -155,7 +155,9 @@ What `--all` never does is as deliberate: it clones nothing, writes no config (`
 error that names `--all`, rather than quietly being it, because a command that fetches every
 repository should say so on its own line.
 
-## And nothing else
+<a id="and-nothing-else"></a>
+
+## Refusing unsafe updates
 
 A fast-forward is all it does. A checkout with local changes (untracked files included), on
 another branch, or with commits upstream does not have is **refused and left exactly as it
