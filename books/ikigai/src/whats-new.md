@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: "Checking a resource" identifies its earlier space and where to run its check. "Testing an endpoint hermetically" links the clock exercise, defines hermetic tests, clarifies clock setup and the shared-clock discussion, and shows how to run its three tests.
+
+  Pages: [Checking a resource](building/checking.md), [Testing an endpoint hermetically](building/hermetic.md)
+
 - **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
 
   Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)
