@@ -7,8 +7,8 @@ features baked into each endpoint. They are **overlays**: a space wraps another 
 how requests pass through it, and because a space can wrap a space, they **stack**.
 
 This builds directly on dynamic spaces from The ikigai Book. An overlay is a space whose job is
-not to answer but to *govern* the space it wraps, so a wrapped resource answers exactly as before
-until a governor has something to say — at which point what it says is a refusal.
+not to answer but to *govern* the space it wraps. A governor can refuse a request, delay it,
+or re-issue it; a successful answer still comes from the wrapped space.
 
 ```text
    request
@@ -29,10 +29,11 @@ until a governor has something to say — at which point what it says is a refus
   └──────────────────────────────────────────────────┘
 ```
 
-## The three facts every overlay reads
+<a id="the-three-facts-every-overlay-reads"></a>
 
-The overlays share a vocabulary. Each one makes its decision from the same three facts about a
-request, and no more:
+## The three facts behind a re-issue
+
+Retry and Failover share a vocabulary. They decide whether to re-issue a request from three facts:
 
 - **Is the verb idempotent?** A Source or an Exists can be safely re-issued; a Sink that is not
   idempotent cannot. Retry and Failover refuse to re-run what is unsafe to re-run.
@@ -67,13 +68,14 @@ hook. Same mechanism, read by what the refusal is *for*.
 
 ## Transparency: a governor you can see through
 
-One property makes all of this drawable, and it is worth naming because it is unusual. The overlays
+One property makes most of this drawable, and it is worth naming because it is unusual. Most overlays
 are **transparent to structure**: a governor reports the topology, the identity, and the cache
 identity of the space it wraps. So `Retry(CircuitBreaker(Timeout(space)))` still reports the doors
 underneath it; the system's own introspection sees *through* the stack to what is guarded. What a
 governor *adds* is only ever a refusal — and the kernel never caches a refusal — so the arrangement
 can be harvested from the topology while the governor's **state** (a breaker open or closed, a
-budget's remaining count) is a separate thing drawn on top.
+budget's remaining count) is a separate thing drawn on top. `Failover` is the exception: it wraps
+several spaces and reports no structure, so the harness below draws it as an opaque box.
 
 ## The governor as a constraint made explicit
 
@@ -91,14 +93,14 @@ to exploit the constraint — is the next chapter.)
 The box diagram above is a picture. Below it runs: a **resilience harness** in this page, the
 real `ikigai-throttle` governors wrapped around a stub dependency you control, so you can make
 the dependency fail, stall or push back and watch what each governor does about it. Nothing is
-mocked except the dependency. The breaker that trips here is the `CircuitBreaker` every ikigai
-host runs, and the timeout is its `Timeout`.
+mocked except the dependency. The breaker that trips here is `ikigai-throttle`'s
+`CircuitBreaker`, and the timeout is its `Timeout`.
 
 The harness is a kernel of its own (`crates/resilience-harness`), started the first time you
 press Run in a cell below that says "in the resilience harness", or a button beside the
 picture. It binds a handful of names:
 
-- `urn:iki:tutorial:harness:mode`, the one thing you write: what the stub does when called.
+- `urn:iki:tutorial:harness:mode`, the stub's mode: what it does when called.
   `ok` answers; `slow` takes 10 seconds, past the timeout's budget; `fail` fails transiently
   (`unavailable`); `limited` asks to be called again after a second (`retry after`). Anything
   else is refused as an invalid argument.
@@ -492,7 +494,8 @@ For contrast, call the same stub with no governor in the way:
 </div>
 
 It answers, after the full 10 seconds. Without the stack, a caller waits as long as the
-dependency takes; with it, the caller hears in 2. And those 10 seconds were harness time: the
+dependency takes; with it, each attempt times out after 2 seconds, and the caller hears the
+failure after all three attempts, 6 seconds in all. And those 10 seconds were harness time: the
 clock moved past the open circuit's 5-second cooldown while this call waited, so the circuit went
 half-open with nobody calling through it, the same way it did in stage 3:
 
