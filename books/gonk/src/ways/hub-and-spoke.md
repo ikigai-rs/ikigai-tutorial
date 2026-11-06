@@ -18,9 +18,9 @@ private tooling of their own around it; none of that is needed, or shown, here.
 
 | role | who | does |
 | --- | --- | --- |
-| the person | whoever owns the goal | sets it; answers the hub when it asks before merging its own work |
-| the hub | one coordinating session (an agent, or a person) | splits, briefs, dispatches, checks evidence, closes |
-| a spoke | one agent per arc, in its own working tree | claims one arc, does it, self-merges on green, hands back |
+| person | whoever owns the goal | sets it; answers the hub when it asks before merging its own work |
+| hub | one coordinating session (an agent, or a person) | splits, briefs, dispatches, checks evidence, closes |
+| spoke | one agent per arc, in its own working tree | claims one arc, does it, self-merges on green, hands back |
 | CI | the forge | the gate a spoke's self-merge waits on |
 
 A spoke may merge its own work because that authority was **delegated through the brief**: the
