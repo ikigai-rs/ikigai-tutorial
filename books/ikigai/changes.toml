@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Process scripts are files now shows one script calling another, a plan that ends in a sink and writes its own copy, and an edit followed along its golden thread inside one session, each checked against the pinned CLI."
+pages = ["explore/scripts.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching."
 pages = ["front-door/grammar.md"]
 
