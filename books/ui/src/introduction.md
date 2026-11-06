@@ -22,11 +22,11 @@ it is for and where to start.
 
 - The ikigai Book's first part, or the same ideas from somewhere else: resources, spaces,
   capabilities and golden threads. This book uses them and does not teach them again.
-- A browser. Every chapter in Part I runs in the page: the cells talk to a kernel compiled to
-  WebAssembly that holds the whole inspector, the same crates the rest of the book builds.
-- Rust, for the listings and for serving the inspector yourself in Part II. Each listing is
-  compiled and run by `mdbook test` whenever the book is built, so a listing that stopped
-  matching the code would fail the build before it reached you.
+- A browser, for the runnable cells in Part I. They talk to a kernel compiled to WebAssembly
+  that holds the whole inspector, the same crates the rest of the book builds.
+- Rust, for the listings and for serving the inspector yourself in Part II. The runnable Rust
+  listings are compiled and run by `mdbook test` as part of the repository's book checks.
+  Listings marked `ignore` show code for discussion and are not run by that check.
 
 ## How the book is laid out
 
@@ -52,7 +52,8 @@ lists a chapter when it is written.
 The inspector is two crates in this book's repository, split the way every target will be:
 
 - `crates/inspector` is the **model and its artifacts**: the stylesheets, the templates, the
-  route-to-view names, and the one atom that holds state. It is the same crate in every target.
+  route-to-view names, and the atoms that hold the note and the example data. It is the same
+  crate in every target.
 - `crates/inspector-htmx` is a **thin renderer**: a host that serves the inspector over HTTP,
   through the same door library the cli uses.
 
