@@ -410,9 +410,9 @@ too. The kernel side is one call, beside the engine the cells use:
 {{#include ../../../../crates/book-wasm/src/lib.rs:page_issue}}
 ```
 
-The page's copy of the markup has one problem a server's does not. The kernel cuts every
-cached answer a move depended on, but a board on the screen is HTML the kernel handed out
-earlier, and nothing cuts that. A click keeps its own board current, because the markup asks
+The page's copy of the markup has one problem a server's does not. The kernel cuts cached
+answers that depend on a square the move changed, but a board on the screen is HTML the
+kernel handed out earlier, and nothing cuts that. A click keeps its own board current, because the markup asks
 for the status and the board after every move. A runnable cell does not, so after a cell runs
 in a board's game, the page asks that board to fetch its status again, and the board follows.
 Across processes this is the same gap Part IV's store contract names: a write the kernel did
@@ -477,20 +477,20 @@ broke. The contract gained a clause in this part: `Exists` answers `true` or `fa
 that way; the Rust one used to answer `Exists` as if it were `Source`, and now does not.
 
 Both of those stores are in their own repositories, as `examples/tictactoe_store.py` and
-`examples/tictactoe_store.ts`. To play against one, start it on a socket, then start the host
-with a game over that socket. From a clone of `ikigai-python`:
+`examples/tictactoe_store.ts`. The host command below uses both stores. Start each in its
+own terminal and leave it running. In the first terminal, from a clone of `ikigai-python`:
 
 ```sh
 PYTHONPATH=src python3 -m examples.tictactoe_store /tmp/ttt-py.sock
 ```
 
-or from a clone of `ikigai-deno`:
+In the second terminal, from a clone of `ikigai-deno`:
 
 ```sh
 deno run -A examples/tictactoe_store.ts /tmp/ttt-ts.sock
 ```
 
-and then, from this repository:
+With both stores running, open a third terminal in your `ikigai-tutorial` clone:
 
 <!-- transcript: manual — a server, over two stores another repository's process holds on
      sockets; crates/ttt-host/tests/host.rs tests the host itself. -->
@@ -514,9 +514,10 @@ whether a mark is cacheable.
 
 ## What the board does for a reader who cannot see it
 
-The board is buttons, so it works with a keyboard and a screen reader with no extra code.
-Every square has a name that says where it is and what is on it: `2,0: empty, play here`,
-`X at 1,1`. A square that cannot be played, taken or closed by the end of the game, is
+The board uses native buttons for keyboard controls and exposes each square to assistive
+technology. Screen-reader behavior has not been tested, as [Accessibility](https://github.com/ikigai-rs/ikigai-tutorial/blob/main/ACCESSIBILITY.md)
+records. Every square has a name that says where it is and what is on it:
+`2,0: empty, play here`, `X at 1,1`. A square that cannot be played, taken or closed by the end of the game, is
 `aria-disabled` rather than `disabled`: it stays in the tab order and keeps its name, so a
 reader can still find out what is on it, and it does nothing when pressed. The status line
 is a live region (`role="status"`), which a screen reader announces when it changes, and it
@@ -547,8 +548,8 @@ forbid, and it refuses by reading resources the game already had.
 game a corridor around the names rather than a part of them, and it turned the store into a
 seam any process in any language can fill.
 
-**And this part** put a face on it without moving any of that. The views are more resources
-of the same kind: composites, cached, per game, recomputed by the moves that touch them, and
+**Views as resources.** This part put a face on it without moving any of that. The views
+are more resources of the same kind: composites, cached, per game, recomputed by the moves that touch them, and
 written as templates with no view code at all. The markup is resources too, so a page, a
 server and a program in another language show the same game from the same bytes.
 

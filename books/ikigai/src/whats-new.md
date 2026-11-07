@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: Tic-tac-toe, IV clarifies game state, cache isolation, and the handoff to the playable board. Part V makes the two-store startup sequence explicit, corrects the cache-invalidation explanation, qualifies untested screen-reader behavior, and gives the views recap a parallel label.
+
+  Pages: [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md), [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
