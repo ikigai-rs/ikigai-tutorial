@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: The notebook connects its catalog exploration to the Python client you already used and explains where to run the script and which setup steps you can reuse.
+
+  Pages: [The notebook: the catalog as a graph](polyglot/notebook.md)
+
 - **2026-11-07**: The TypeScript track connects its examples to the Python track, shows where to clone ikigai-deno and run commands, and explains explicit input declarations and typed refusals.
 
   Pages: [The TypeScript track](polyglot/typescript.md)

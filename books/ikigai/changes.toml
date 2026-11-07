@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "The notebook connects its catalog exploration to the Python client you already used and explains where to run the script and which setup steps you can reuse."
+pages = ["polyglot/notebook.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "The TypeScript track connects its examples to the Python track, shows where to clone ikigai-deno and run commands, and explains explicit input declarations and typed refusals."
 pages = ["polyglot/typescript.md"]
 

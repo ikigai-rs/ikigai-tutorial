@@ -1,12 +1,17 @@
 # The notebook: the catalog as a graph
 
-Four cells, one story: the catalog is a list, then a card, then a graph, then a query.
+[The Python track](python.md) gave you a client connection and an endpoint's description
+as a dictionary. These four cells use that client to explore the catalog: first as a list,
+then one endpoint's card, then a graph, then a query over it.
 `examples/python/catalog.ipynb` is the notebook; `examples/python/catalog.py` is the same
 cells as a script, which is what was run to produce the output below (against a served
 `ikigai-cli` 0.1.18 — the counts are that host's, and yours will differ).
 
-Both of the first two lines are the [Python track](python.md)'s; skip them if that kernel is
-still serving `/tmp/ikbook-kernel.sock` (the [TypeScript track](typescript.md) used the same one).
+Run these commands from this repository's root. If you followed the Python track, you
+already installed `rdflib` and `ikigai-python`; skip the `pip install` line. Replace
+`/path/to/ikigai-python` with your checkout's path if you need to install them. If the kernel
+from the Python or [TypeScript track](typescript.md) is still serving
+`/tmp/ikbook-kernel.sock`, skip the `ikigai serve` line too.
 
 <!-- transcript: serve -->
 ```bash
