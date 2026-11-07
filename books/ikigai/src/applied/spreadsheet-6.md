@@ -1,8 +1,10 @@
 # Spreadsheet, VI: a sheet is a space, and spaces stack
 
-Five parts have composed *resources*: a value is a function of other values, a view is a template
-over names, and the kernel keeps the dependencies. This part composes the *context* the names are
-read in. The same name, `urn:iki:tutorial:sheet:cell:B2`, answers one thing on the shared sheet,
+In [Data that changes outside the sheet](spreadsheet-5.md), you built a sheet whose formulas
+read a live feed and whose page polls for changes. Its *resources* are already composed: a value
+is a function of other values, a view is a template over names, and the kernel keeps the
+dependencies. This part composes the *context* the names are read in. The same name,
+`urn:iki:tutorial:sheet:cell:B2`, answers one thing on the shared sheet,
 another in the sheet one person is playing with ("what if we sold twelve?"), and a third in the
 sheet as it stood last Tuesday. None of the three is a copy of the sheet, and not one line of the
 code that computes a value knows which of them it is computing in.
@@ -12,13 +14,17 @@ answering a few of them its own way and letting every other name through. Tic-ta
 game ([Part IV](tic-tac-toe-4.md) of that arc). This part builds two kinds, a personal one and a
 temporal one, and then stacks them.
 
+Run the cells on this page in order. Each page has its own kernel: the sheet you built earlier
+does not carry its values here. The cells below populate this sheet and use resources supplied
+by the page, rather than by a standalone `ikigai` REPL.
+
 ## The model, on paper
 
 One atom changes, and two corridors are added:
 
 | the space | its name | what it answers | built from |
 |---|---|---|---|
-| the shared sheet | the root | every name, as Parts I–V built it | the input, which now keeps every write it was given |
+| the shared sheet | the root | every name, as Parts I–V built it | the input's existing write history |
 | a person's **scenario** | `urn:iki:tutorial:sheet:scenario:{who}` | `input:{ref}` for the cells that person overrode, and nothing else | a store of overrides, behind a capability of their own |
 | the sheet **as of** an instant | `urn:ctx:time:{instant}` | every `input:{ref}` as it stood then; `now` and `today` at that instant | the input's history, and the time chapter's clock |
 | both at once | a stack of the two | whatever the innermost corridor answers, then the next | `Scope::stack` |
@@ -205,7 +211,7 @@ source urn:iki:tutorial:sheet:input:A2'>
 </div>
 
 Still 500, and `A2` is still 10. But look at the verdict: the shared `B2` was *computed*, not
-served, although nothing on the shared sheet changed. Alice's write cut it. A golden thread is a
+cached, although nothing on the shared sheet changed. Alice's write cut it. A golden thread is a
 name, `input:A2`, and a write in her corridor cuts that name's thread for everybody: for her
 values, which needed it, and for the shared sheet's, which did not. The shared value is computed
 again and comes out the same, so nothing is ever wrong. It is only work, and the next section
