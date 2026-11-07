@@ -70,9 +70,9 @@ not cached
 cached</pre>
 </div>
 
-`A1`, `A2`, `A3` and `B2` are gone from the cache: the edited cell, the chain that reads it, and
-the total over the chain. `B1` and `C1` are still cached, because neither read `A1`. And the
-edit itself computed nothing. The four values are computed again when something next reads
+`A1`, `A2`, `A3` and `B2` are stale: the edited cell, the chain that reads it, and
+the total over the chain. Their entries remain in the cache, but cannot be served. `B1` and
+`C1` are still cached, because neither read `A1`. And the edit itself computed nothing. The four values are computed again when something next reads
 them, which here is the grid, straight after the cell. A spreadsheet engine recalculates when
 you type; this sheet recalculates when you look.
 
