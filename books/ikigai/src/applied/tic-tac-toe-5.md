@@ -548,8 +548,8 @@ forbid, and it refuses by reading resources the game already had.
 game a corridor around the names rather than a part of them, and it turned the store into a
 seam any process in any language can fill.
 
-**And this part** put a face on it without moving any of that. The views are more resources
-of the same kind: composites, cached, per game, recomputed by the moves that touch them, and
+**Views as resources.** This part put a face on it without moving any of that. The views
+are more resources of the same kind: composites, cached, per game, recomputed by the moves that touch them, and
 written as templates with no view code at all. The markup is resources too, so a page, a
 server and a program in another language show the same game from the same bytes.
 
