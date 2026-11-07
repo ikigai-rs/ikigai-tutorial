@@ -115,10 +115,10 @@ that fit, and what the collect drew is given back.
 
 The pool's size comes from the caller's capability, the way the retry budget's does:
 
-- a host sets a **base** and a **ceiling** with `Kernel::with_stream_memory(base, ceiling)`, both
-  64 MiB unless it says otherwise;
-- a capability with no grant gets the base, and root gets the ceiling;
-- a grant `urn:cap:stream:memory:<bytes>` (`cap_stream_memory(bytes)`) raises its holder's budget,
+- Hosts set a **base** and a **ceiling** with `Kernel::with_stream_memory(base, ceiling)`, both
+  64 MiB unless the host says otherwise;
+- Capabilities with no grant get the base, and root gets the ceiling;
+- Grants `urn:cap:stream:memory:<bytes>` (`cap_stream_memory(bytes)`) raise their holders' budgets,
   never above the ceiling and never below the base. Attenuating a capability can only remove the
   grant, so it can only lower the budget.
 
