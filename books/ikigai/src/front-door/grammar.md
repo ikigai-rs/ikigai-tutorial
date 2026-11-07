@@ -592,6 +592,50 @@ the host's own stdin are out of reach, and the forms that would leave the evalua
 `require`, `defmacro`, are refused before compiling. A refusal is an error the program can
 catch, and a typed `Denied` if it does not.
 
+These forms need the native CLI; this page's browser kernel does not provide the Lisp
+evaluator. In `ikigai --plain`, try:
+
+```text
+ikigai> (+ 1 2)
+3
+[uncacheable]
+ikigai> source urn:lisp:eval in="(+ 1 2)"
+3
+[uncacheable]
+```
+
+`in` is the argument for the program text, not `code`. Ask
+`describe urn:lisp:eval text/plain` to see its arguments; `data` supplies the separate value
+that the program reads with `(input)`. At the REPL, use the double quotes shown above.
+Single quotes belong to Scheme's quote syntax, or to a shell around a whole `-c` command;
+they do not group a REPL argument.
+
+For several forms, type `:lisp`, enter these two lines, then press Enter on an empty line
+to evaluate them together:
+
+```scheme
+(define (twice n) (+ n n))
+(twice 3)
+```
+
+The answer is `6`. Another `:lisp` cancels the buffer. Each evaluation has its own Scheme
+environment: a `define` from an earlier evaluation is gone, even in the same REPL. Keep the
+definitions and their calls in one program. The `-e` and `--load` shell options are other
+ways to submit one program; [When a rule is not enough](../explore/beyond-rules.md) loads one
+from a file and follows its dependencies.
+
+The Scheme helper `(source iri value)` sends `value` as the argument named `in`; it does
+not discover the endpoint's argument name as the REPL does. For example, `urn:demo:wrap`
+requires `text`, so `(source "urn:demo:wrap" "hello")` fails with a missing-argument error.
+Name it through the general verb instead:
+`(invoke 'source "urn:demo:wrap" "text" "hello")`, which answers `[hello]`.
+
+An evaluation is uncacheable by default. Wrap a read-only answer in `(cacheable …)` to opt
+in; a write prevents that opt-in, and the answer still depends on every resource it read.
+The sandbox's allowlist also applies to pure Scheme functions: familiar names such as
+`string-join` are unavailable. The [ikigai-lisp README](https://github.com/ikigai-rs/ikigai-lisp#the-sandbox-an-allowlist)
+explains the sandbox and links to the list of allowed functions.
+
 <!-- urn-gate: illustration urn:demo:echo/{message} — a URI template printed in the
      in-page `list` output above; the family is bound (ikigai-fn's echo), the braces are
      the template's, not a name. -->

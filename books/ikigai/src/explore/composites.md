@@ -13,10 +13,10 @@ because the feed moves: they are what the REPL printed on 2026-10-29, and they s
 
 ## 1. Filter: a question whose answer is a graph
 
-The questions in the last chapter answered rows. A layer that another layer reads has to
-answer something that can be read the same way the graph was: a graph. SPARQL's `CONSTRUCT`
-does that. This one keeps the earthquakes of magnitude 5.5 and up, with the facts the next
-layers need:
+In [Giving the data names](names.md#4-the-questions-are-resources), the `SELECT`
+questions answered rows. To filter the graph for more SPARQL questions, this layer
+answers another graph. SPARQL's `CONSTRUCT` does that. This one keeps the earthquakes
+of magnitude 5.5 and up, with the facts the next layers need:
 
 <div class="ikigai-run" data-cmd='source urn:quakes:question:strong'>
 <pre class="ikigai-run-expected">PREFIX qk: &lt;https://ikigai-rs.dev/ns/quakes#&gt; CONSTRUCT { ?quake a qk:Earthquake ; qk:mag ?mag ; qk:magType ?magType ; qk:place ?place ; qk:time ?time } WHERE { ?quake a qk:Earthquake ; qk:mag ?mag ; qk:magType ?magType ; qk:place ?place ; qk:time ?time FILTER(?mag &gt;= 5.5) }
@@ -28,8 +28,9 @@ is typed as a number by the context, `>=` compares numbers, not text.
 
 This page holds the question's answer at a name of its own, `urn:quakes:strong`: the question
 read through the kernel and asked of `urn:quakes:graph`, whenever someone reads the name. So the
-next layer can ask its questions of it, exactly as the last chapter asked them of the graph. The
-count question from that chapter, unchanged, now counts the strong ones:
+next layer can ask questions of the filtered graph. The count question from
+[Giving the data names](names.md#4-the-questions-are-resources), unchanged, now counts
+the strong ones:
 
 <div class="ikigai-run" data-cmd='source urn:quakes:question:count | urn:sparql:select graph=urn:quakes:strong as=text/csv
 cache urn:quakes:strong'>
@@ -68,11 +69,12 @@ https://earthquake.usgs.gov/earthquakes/eventpage/us6000m27f,5.5,southern East P
 [2 computed]</pre>
 </div>
 
-Seven of the twelve are the Noto Peninsula earthquake and its aftershocks, near Anamizu.
+Six of the twelve are the Noto Peninsula earthquake and its aftershocks, near Anamizu.
 
 ## 3. Group and count: by magnitude type
 
-The last chapter's `by-magtype` question, asked of the strong layer instead of the whole week:
+The `by-magtype` question from [Giving the data names](names.md#4-the-questions-are-resources),
+asked of the strong layer instead of the whole week:
 
 <div class="ikigai-run" data-cmd='source urn:quakes:question:by-magtype | urn:sparql:select graph=urn:quakes:strong as=text/csv'>
 <pre class="ikigai-run-expected">magType,quakes
@@ -180,8 +182,10 @@ recomputed, from the recomputed layer. A cut reaches exactly what hangs from the
 
 ## 6. At a shell: your own notes
 
-The REPL has none of this page's `urn:quakes:` names, so at a shell each layer is a file. In
-the REPL you started over `~/quakes`, download the week after beside the first:
+The REPL has none of this page's `urn:quakes:` names, so these steps keep each layer in
+a file. [Giving the data names](names.md#6-at-a-shell) left you with a REPL over
+`~/quakes`, `graph.txt`, `quakes.jsonld`, and the restored context. Keep that REPL open.
+In a separate shell, download the week after beside the first:
 
 ```bash
 cd ~/quakes
@@ -190,7 +194,8 @@ curl -sO https://raw.githubusercontent.com/ikigai-rs/ikigai-tutorial/main/crates
 
 <!-- transcripts: workspace crates/quakes/quakes-2024-01-01.geojson crates/quakes/quakes-2024-01-08.geojson books/ikigai/ns/quakes.context.jsonld -->
 
-Fill both weeks as JSON-LD, as [the last chapter](names.md#6-at-a-shell) did for one (if you
+Back in the REPL, fill both weeks as JSON-LD, as
+[Giving the data names](names.md#6-at-a-shell) did for one (if you
 still have `graph.txt` and `quakes.jsonld` from it, the first two lines are done already):
 
 ```text
@@ -228,9 +233,9 @@ wrote 11 bytes to notes/none.txt
 
 Now the earthquakes the notes are about: the ones of magnitude 6 and up in either week, with
 each one's id. A question with both graphs reads both weeks; its answer goes to a file,
-because this page gives an answer with arguments no name of its own (the REPL's `bind` can,
-from `ikigai-cli` 0.2.6: named requests, ledger #2447, which this part has not taken up yet),
-and `urn:json:query` turns the CSV into the JSON list the next step reads:
+so the next step can read it by name. `urn:json:query` turns the CSV into a JSON list.
+Later in this part, [Naming a composition](naming.md) uses `bind` to name a request
+with its arguments, instead of saving its answer to a file:
 
 <!-- transcript: continues -->
 

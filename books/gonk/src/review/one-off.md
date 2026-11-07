@@ -171,11 +171,13 @@ proposal). The annotation keeps the finding's id and says which finding it was *
 the published note and the model's claim behind it stay one hop apart. And a decision is never
 overwritten: a second, different one must name the first with `revises=`, and both are kept.
 
-## Who may do which
+<a id="who-may-do-which"></a>
 
-The rule at the top of the chapter is not a convention. Deriving a review spends the model, so it
-needs the network grant; publishing writes what everyone else reads, so it needs
-`urn:cap:annotate`; and nothing that may derive is given the other by default:
+## Review and publication permissions
+
+The rule at the top of the chapter is not a convention. Running a review calls the model, so it
+needs the network grant. Publishing writes what everyone else reads, so it needs
+`urn:cap:annotate`. Permission to run a review does not include permission to publish by default:
 
 ```rust
 # extern crate browse_host;

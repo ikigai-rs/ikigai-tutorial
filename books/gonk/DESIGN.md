@@ -56,6 +56,9 @@ used stand alone."
 | | A workflow of your own | transcripts: `next-for-artifact`, a plan of the reader's own, a writing plan refused at publish, a close-with-evidence check over both places evidence lives at this pin (the close's `ledger:evidence`, `gonk.py close`'s `Evidence:` comment), three closes, one listed | **written** |
 | | A model of your own | transcripts with no model: `llm.json` as `file` blocks for Ollama, an OpenAI-compatible server, a QUIC peer (certificate exchange and a second gonk on 1071, port 4470) and a hosted API, each read back with `urn:llm:config` through the real `ikigai serve` and, for two, gonk's mount; a peer whose server is down. The final `urn:llm:ask` needs a model, so it is manual, its output by hand against Ollama on 2026-11-03. Written to what the PINNED cli takes (`ikigai-llm` 0.17.1: `api_key`, not `api_key_secret`) | **written** |
 | | A query from a sentence | transcripts, the stub model (`ASK_LIBRARY_*`, which name the `library` graph): a draft and its attempts, a draft the check cannot repair, a draft refused a run, a corrected file checked and published by `init`, the drafts retired. One real model's draft (Ollama, `qwen3:8b`, 2026-11-03) is quoted as such, not replayed | **written** |
+| Pages of your own | Pages of your own | transcripts (ledger #3219, gonk PR 295, ledger #3199): the pinned starter cloned and its `faces/template` copied to `faces/open`; three `gonk.face` lines refused at start (no directory, a capital in the name, no directory named); the header link; the trailing slash a relative `app.js` needs (the header link at e08ac9f has none, and `/face/name/app.js` answers `404`); the jail refusing a plain and an encoded `..`, a hidden `.env`, a symbolic link out and a `.sh`, and a `PUT`; the CSP header, and an inline-script page served as written with `script-src 'self'` beside it (that the browser then refuses it is `manual`); a same-origin read `200` and a cross-site one `403` (ledger #880); `notes` refused to the anonymous viewer; the first face built in four steps (`open.js` with no DOM, `app.js`, `index.html` as `file` blocks) and run with **Deno** (`--location` the face's address, `--allow-net` gonk's origin, `DENO_DIR` in the page) printing what the page shows, and `notes` refused in words · manual (a browser, and the starter's browser checklist, none of which this book runs) | **written** |
+| | A board for an epic | transcripts: `new.py --face board` printing the line; an epic, five children by `parent`, one `blocks`; a close, a lease, a hand-back; `item.children` against the listing (a closed child only in the first); a child's `links`, `claim` and `awaiting`; the board's own `board.js` run with Deno, every column, then a blocker closed and the blocked child Ready; the label tally and gonk's `/l/default?labels=pin` · manual (the page in a browser) | **written** |
+| | Plans, projects and who has what | transcripts: three `gonk.face` lines and three header links; a record with three children, a `related` item and a `blocks` chain; `plan.js` run with Deno, next to land before and after a close; `projects.json` served, replaced by a `file` block, the two listings the project page reads (`ops` refused to the anonymous viewer); a one-second lease run out and the claims read with `kit.js`'s `stateOf`, beside the doctor's `lease-expired`; a table of face versus gonk's pages; live updates as future (ledger #3209, #3210; design ledger #2968) · manual (each page in a browser) | **written** |
 | Embedding | The ledger, store and browse in your own kernel | Rust (`crates/embed-host`): one dataset handed to the store and to browse with a `SharerWrites` promise (`in_memory_shared_declaring`) and browse confined to that graph; the stub model; three callers' capabilities (agent, headless reviewer, person) each refused outside its lines; the ledger↔browse join through `graph-select` over both graphs; a cached ledger read asserted with `Kernel::is_cached` | **written** |
 
 **A project of your own sits after "Ways of working" and before "Embedding"** (ledger #1137): its
@@ -65,6 +68,17 @@ uses a gonk where Embedding has none. Its ledger is named `library`, never `defa
 `seed` files every task, reports each as failed and links none. Move the warning in "Start a project"
 when the starter's pin fixes that. Each chapter regenerates the sample in a new empty directory, so
 it stands alone, in the "Catch up" section.
+
+**Pages of your own sits after "A project of your own" and before "Embedding"** (ledger #3219): a
+face reads items with `parent`, `blocks`, claims, leases and hand-backs, which the parts before it
+teach, so all its links point backward; Embedding stays last. A face runs in a browser, which no
+check here has, so each chapter keeps its question in a module with no DOM (`open.js`, the
+starter's `board.js` and `plan.js`, `kit.js`'s `stateOf`) and runs that module with Deno against
+the page's gonk: the same JavaScript, the same `kit.js` reads, printed. What the page draws is
+`manual`. Deno is the version the polyglot tracks use, and `scripts/test-transcripts.sh` now
+fetches it before the gonk run and puts it on the gonk pages' PATH; every Deno command sets
+`DENO_DIR="$PWD/.deno"`, since Deno otherwise writes its caches under `~/.cache/deno`, which the
+trap refuses.
 
 **Several teams sits after "Scripts and sentences"** (ledger #1603): its one chapter uses the
 QUIC identities of "Several machines", the review of "Review without a reviewer" and the published
@@ -274,6 +288,13 @@ crates at 0.1.67; at ca0810b (ledger #2060) the same but `ikigai-core` 0.1.108; 
 directly because browse takes an `oxigraph::store::Store`. A newer release that gonk does not link
 yet waits for the pin, so a transcript and a listing are always answered by the same module, unless
 the book needs it first.
+
+**The eighth move, for faces** (ledger #3219, 2026-11-06): `gonk.rev` moved to e08ac9f (gonk PR
+295, ledger #3199), the first gonk that serves `gonk.face`. It links `ikigai-browse` 0.20.8 (one
+patch past dce6578's 0.20.7) and otherwise the same crates; the cli stays at 0.2.3, whose transports
+it links. The starter moved with it, from 8958273 to 1766b42 (starter PR 78, ledger #3218: `faces/`,
+`new.py --face`, `init --face`), so every generated repository now carries `faces/`. What that
+changed on the other pages is in `changes.toml`.
 
 **The seventh move, for the Dashboard** (ledger #2973, 2026-11-03): `gonk.rev` moved to dce6578, gonk's main that day, with the Dashboard's polling (#2967), its Ledgers and Agents tabs (#2971) and its Cache and System tabs (#2972). It links `ikigai-ledger` 0.18.1, where the workspace's crates stay at 0.18.0: `cargo update -p ikigai-ledger --precise 0.18.1` also dropped `md-5` and `sha1` 0.11 from the lock, and `spareval` then does not compile, too much to carry for a patch no page shows (0.18.1 makes `counts` faster on a large ledger). Core, store and browse are where the paragraph below leaves them, so three patch differences remain.
 

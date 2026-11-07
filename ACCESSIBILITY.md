@@ -73,6 +73,18 @@ a review comment.
   the panel and Before | After as the run leaves them, not the other panels; the structure gate
   and the no-kernel check read every panel's markup.
 
+### Run-cell announcements
+
+Run cells announce the caption only: completion includes “answered, N lines,” followed by
+rendering or chapter-comparison guidance where needed. The full answer is outside the live
+region in a keyboard-focusable region named “Latest answer”; completion does not move focus.
+This avoids automatically reading long answers or raw RSS/HTML markup after each run. The
+shared script applies this choice in every book with Run cells, in every theme. Line counts
+include blank lines and cache-verdict lines, but not the final newline. This is a usability
+choice, not a claim that WCAG 4.1.3 requires brief announcements. DOM regression tests exercise
+long text, raw markup, empty answers, blank lines and repeated runs; screen-reader behavior
+has not been tested.
+
 ### Not ours to fix, still ours to report
 
 - **mdbook's page template and its scripts.** We do not fork the template (a fork stops tracking

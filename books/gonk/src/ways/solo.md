@@ -279,7 +279,7 @@ machine.)
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process solo
-generated the library-lending sample (python, process solo) in …/library: 65 files
+generated the library-lending sample (python, process solo) in …/library: 94 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -298,6 +298,7 @@ CLAUDE.md
 README.md
 artifacts
 docs
+faces
 hooks
 justfile
 openspec
@@ -336,7 +337,9 @@ roles = ["you: both the dispatcher and whoever does the work"]
 `AGENTS.md`'s numbered sections 1 to 6 are this chapter's guides, and `CLAUDE.md` is a link to it.
 Section 7 is one every generated repository carries, whatever its profile: read the repository's
 `ACCESSIBILITY.md` (what the project shows people, and how that is tested) before changing a page,
-terminal text or anything else people see, and never claim testing that did not happen. The one
+terminal text or anything else people see, and never claim testing that did not happen.
+`faces/`, also in every generated repository, holds the starter's pages for gonk to serve; [Pages
+of your own](../faces/own.md), later in the book, serves them. The one
 hook every profile carries, `claude:require-claim`, is an optional Claude Code hook that refuses an
 edit while the working tree holds no claim; it is off until its settings are merged. `init` names
 the ledger, the socket and the holder this working tree claims under, then asks this page's gonk:

@@ -20,6 +20,57 @@
 
 [[change]]
 date = "2026-11-05"
+summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
+pages = ["beyond/emacs-aliases.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-05"
+summary = "The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching."
+pages = ["front-door/grammar.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Tic-tac-toe, VII explains what a native host must supply before a stored Lisp rule can replace a Rust endpoint, and which reads preserve the game's caching behavior."
+pages = ["applied/tic-tac-toe-7.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "\"Resolution\" defines endpoint before using it. \"Running it\" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides."
+pages = ["getting-started/resolution.md", "getting-started/running-it.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "\"Naming a composition\" clarifies its earlier examples and the path to the RSS workspace. \"When a rule is not enough\" shows the complete Python peer to save and run, clarifies which files a program depends on and when it can be cached, and explains great-circle distance."
+pages = ["explore/naming.md", "explore/beyond-rules.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "A river of feeds now distinguishes a fresh refresh process from selective rebuilding in one REPL, explains that saving the river breaks dependencies back to feeds, and corrects directory-read verdicts. The named-request discussion uses the book's tested CLI version."
+pages = ["explore/rss.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Process scripts are files now shows the tested CLI's support for comments, parameters, executable scripts, and running scripts by name, including how filename execution stops on an error. Its generated-script advice uses a sealed capability so later lines cannot restore full authority."
+pages = ["explore/scripts.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "A river of feeds now connects to your earthquake scripts and distinguishes shell commands from REPL lines. Its setup explains how to reuse the repository and substitute the local server's port."
+pages = ["explore/rss.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Process scripts are files now names the chapter that supplies your Quakes workspace, templates, and notes, so you can see what carries forward."
+pages = ["explore/scripts.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The jq, data-naming, and composites walkthroughs clarify which steps run in a shell or the REPL and connect the files and questions carried between chapters. The composites chapter corrects its count of strong earthquakes in Japan from seven to six."
+pages = ["explore/jq.md", "explore/names.md", "explore/composites.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace. The lab’s text pipelines show the cache tallies and uncached reasons from CLI 0.2.9."
 pages = ["explore/index.md", "explore/lab.md"]
 

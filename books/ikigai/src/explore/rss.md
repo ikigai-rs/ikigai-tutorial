@@ -1,10 +1,11 @@
 # A river of feeds
 
-The earthquakes came from one publisher, in one format, on one schedule. A feed reader has
-the opposite problem: many small publishers, each with a feed of their own, each deciding
-how often it changes and how long a copy stays good. This chapter builds a reader of that
-kind out of the same parts as the rest of this part, SPARQL among them, as [Giving the data
-names](names.md) asked it of the earthquakes, plus one more: XSLT, which reads XML.
+[Process scripts are files](scripts.md) left you with scripts that rebuild the earthquake
+reports. Those earthquakes came from one publisher, in one format, on one schedule. A feed
+reader has the opposite problem: many small publishers, each with a feed of their own, each
+deciding how often it changes and how long a copy stays good. This chapter builds a reader
+out of the same parts. SPARQL asks questions about the feeds, as it did about earthquakes in
+[Giving the data names](names.md). XSLT adds one more part: it transforms their XML into RDF.
 
 The feeds are a directory of personal blogs, and a directory is a list of names. Each feed
 becomes RDF, the feeds together become one graph called the **river**, questions about the
@@ -15,7 +16,10 @@ is XSLT, SPARQL and three files of REPL lines.
 ## What you need
 
 The `ikigai` command, 0.2.5 or later (section 2's revalidation needs 0.2.6), and a copy of
-this book's repository, which holds the example in `examples/rss/`:
+this book's repository, which holds the example in `examples/rss/`. If you installed ikigai
+in [A week of earthquakes](index.md#what-you-need), you already have the command. Run the
+following commands at a shell; quit an earlier REPL first, or use another terminal. If you
+already have the repository, use its `examples/rss/` directory instead of cloning it again:
 
 ```bash
 git clone https://github.com/ikigai-rs/ikigai-tutorial
@@ -56,8 +60,8 @@ workspace, and section 7 writes and lists files.
 ## 1. A directory is a list of names
 
 `ws/directory.opml` is the directory. OPML is a small XML format for lists of feeds; each
-`<outline>` names one, with its address in `xmlUrl`. A directory of four looks like this,
-one line per feed:
+`<outline>` names one, with its address in `xmlUrl`. Here is one entry from the directory
+of four feeds:
 
 ```xml
 <outline type="rss" version="RSS" text="Alice Writes Things" title="Alice Writes Things" description="Notes on static sites, feeds and the small web." xmlUrl="https://alice.example.com/feed.xml" htmlUrl="https://alice.example.com/"/>
@@ -118,8 +122,11 @@ python3 -I tools/origin.py ws/feeds /tmp/origin.log
 ```
 
 It prints the port it chose, `port 46413` here. The port is different every run, which is
-why the blocks in this section are not replayed: each one prints the port. Yours will show
-your port; everything else is what `ikigai-cli` 0.2.6 printed on 2026-10-29.
+why the book's checks do not replay this section. Replace `46413` in each command below
+with the port your server printed, and type the commands at the `./iki --plain` REPL prompt
+in your first terminal. The output below was
+recorded with `ikigai-cli` 0.2.6 on 2026-10-29; timestamps and the user-agent version in the
+log will differ on your run.
 
 A feed that says `max-age=60` is kept for sixty seconds, as USGS's was. The second read is
 served from the cache, and the origin's log shows one request:
@@ -303,7 +310,7 @@ Editing the file does the same, with no cut by hand: the CLI watches its workspa
 file's thread when the file changes. Change a title in `ws/feeds/dave.example.org.xml` with
 your editor and build again, and the tally is the same, `[7 cached · 2 computed · 1
 uncacheable]`, with the new title in `river.nt` (and 7 more bytes, if you add `, again` to
-it). Put the file back afterwards (`git checkout ws/feeds`), because the next sections expect
+it). Put the file back afterward (`git checkout ws/feeds`), because the next sections expect
 the fixture as it was.
 
 ## 5. Questions are files
@@ -444,8 +451,8 @@ And a directory of the feeds that search matched:
 [3 computed]</pre>
 </div>
 
-A cell in this page cannot write a file. At a shell, each line ends in a `sink`, which
-writes the face into `ws/out/`:
+A cell in this page cannot write a file. At the `./iki --plain` REPL prompt, each line
+below ends in a `sink`, which writes the face into `ws/out/`:
 
 ```text
 ikigai> source urn:file:queries/river.rq | urn:sparql:select graph=urn:file:river.nt as=application/sparql-results+xml | urn:xslt:transform stylesheet=urn:file:views/page.xsl | sink urn:file:out/river.html
@@ -464,9 +471,10 @@ wrote 559 bytes to out/caching.opml
 
 Open `ws/out/river.html` in a browser, or read the others in an editor. The OPML is built
 from `search-feeds.rq`, the same search counted per feed, because a directory lists each feed
-once. At a shell, each written file is as fresh as the river: these four lines are the end
-of a pipeline that starts at the directory, and every answer in it hangs from every file it
-read.
+once. Each written file reflects the current `river.nt`, so rebuild the river before
+writing the views after a feed changes. Saving the river as a file breaks the dependency
+path: these queries read `river.nt`, not the feeds that produced it. Replaying
+`ws/refresh.iki` in section 7 runs the build and the four view writes in that order.
 
 ## 7. Saved searches and the refresh script
 
@@ -486,7 +494,7 @@ rss.rq
 [uncacheable]
 ikigai> source urn:file:searches | urn:text:wc
 2
-[1 computed · 1 uncacheable]
+[2 uncacheable]
 ```
 
 `ws/save-searches.iki` is those two lines in a file: a script that writes scripts, because each
@@ -512,6 +520,7 @@ mapped over it is handed the short name. In the same REPL as the saves above:
 ikigai> source urn:file:searches .. urn:iki:fn:compose
 error: invalid argument `src`: not an IRI: invalid IRI: No scheme found in an absolute IRI
        `src`: the IRI of the template to fill
+[uncacheable]
 ```
 
 So `ws/refresh.iki`, which rebuilds the river and all four faces, names its searches one by
@@ -523,8 +532,10 @@ feed, the directory or a stylesheet:
 ./iki --quiet < ws/refresh.iki
 ```
 
-Only what the change reached is computed again; the rest comes from the cache of that one
-REPL. `examples/rss/check.sh` runs both scripts and fails if `river.nt` or anything in
+This command starts a fresh REPL, so it recomputes the river and all four views on every
+run. Its cache lasts only for that replay; it does not carry over from an earlier run.
+The selective rebuild in section 4 works because its commands share one running REPL.
+`examples/rss/check.sh` runs both scripts and fails if `river.nt` or anything in
 `ws/out/` differs from the committed copy, which is how the example knows it still works.
 
 ## 8. What the river is waiting for
@@ -543,9 +554,9 @@ the same reason: in this chapter, a request with arguments is not a name.
   every use. Named once, with the politeness in the name, no line could forget it.
 - The saved searches are a set of files, but not yet a set of names a map can walk.
 
-Named requests (ledger #2447) remove all three, and `ikigai-cli` 0.2.6, the release this
-book is checked against, has them: the REPL's `bind` names a request with its arguments. This
-chapter was written before that release and does not use them yet (nor does [Reshaping JSON
-with jq](jq.md#6-at-a-shell-programs-and-templates-are-files) for its headline). The next
-chapter introduces them and comes back to this river: [Naming a composition](naming.md)
+Named requests (ledger #2447) address these gaps, and the CLI this book checks,
+{{#include ../../ikigai-cli.version}}, has them: the REPL's `bind` names a request with its
+arguments. This chapter was written before named requests were released and does not use
+them yet (nor does [Reshaping JSON with jq](jq.md#6-at-a-shell-programs-and-templates-are-files)
+for its headline). The next chapter introduces them and comes back to this river: [Naming a composition](naming.md)
 names the live feed and the saved searches, and says why the build line is not a name yet.

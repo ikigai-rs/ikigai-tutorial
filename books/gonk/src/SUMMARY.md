@@ -76,6 +76,12 @@
 - [A model of your own](project/model.md)
 - [A query from a sentence](project/sentence.md)
 
+# Pages of your own
+
+- [Pages of your own](faces/own.md)
+- [A board for an epic](faces/board.md)
+- [Plans, projects and who has what](faces/plans.md)
+
 # Embedding
 
 - [The ledger, the store and browse in your own kernel](embedding/own-kernel.md)
