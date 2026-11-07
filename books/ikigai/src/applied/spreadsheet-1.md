@@ -1,8 +1,8 @@
 # Spreadsheet, I: cells are atoms
 
-Tic-tac-toe built an application out of names, and every answer in it changed for one
-reason: somebody played a move. This arc builds something a little bigger, a spreadsheet,
-and it brings two things tic-tac-toe did not have. A cell can hold **code**: a formula, which
+[Tic-tac-toe](tic-tac-toe-1.md) gave you atoms for the marks and composites for the
+rules and board. Every answer changed for one reason: somebody played a move. This arc
+builds something a little bigger, a spreadsheet, and it brings two things tic-tac-toe did not have. A cell can hold **code**: a formula, which
 has to be compiled before it can run. And one edit ripples: change one number and every
 total that reads it, and every total that reads those, is wrong until it is computed again.
 Spreadsheet engines are built around that second problem. This arc's claim is that the
@@ -14,6 +14,10 @@ atoms: the cells as a person types into them, the values of those that hold no f
 the grid that shows them. [Part II](spreadsheet-2.md) makes a formula a resource, compiled
 and cached like any other answer. [Part III](spreadsheet-3.md) edits one cell and watches
 exactly the cells that depend on it compute again.
+
+Run the examples in this page's **Run** cells, in order. They share a kernel with the sheet
+at the bottom of the page. Each spreadsheet chapter starts with a fresh sheet; edits do not
+carry between pages. The stock `ikigai` CLI does not bind these spreadsheet resources.
 
 ## The model, on paper
 
