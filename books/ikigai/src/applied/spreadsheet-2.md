@@ -241,7 +241,8 @@ the branch is the interesting part:
 {{#include ../../../../crates/spreadsheet/src/lib.rs:cell}}
 ```
 
-For a formula, the value reads the cell's precedents (the next section but one), then the
+For a formula, the value reads the cell's precedents (defined in
+[A cycle is named, not chased](#a-cycle-is-named-not-chased)), then the
 compiled formula, reads it back into an expression, and evaluates it:
 
 ```rust,ignore
