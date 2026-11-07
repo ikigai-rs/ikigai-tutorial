@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "The Python track names the working directory and Python version, shows an isolated package installation and the complete client command, and recreates the deleted note before checking whether it exists."
+pages = ["polyglot/python.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "One wire, three languages connects the tracks to the Rust examples you already built, labels their broader coverage, and explains L0's limits in plain terms."
 pages = ["polyglot/index.md"]
 
