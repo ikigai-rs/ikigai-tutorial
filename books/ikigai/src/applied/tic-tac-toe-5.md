@@ -410,9 +410,9 @@ too. The kernel side is one call, beside the engine the cells use:
 {{#include ../../../../crates/book-wasm/src/lib.rs:page_issue}}
 ```
 
-The page's copy of the markup has one problem a server's does not. The kernel cuts every
-cached answer a move depended on, but a board on the screen is HTML the kernel handed out
-earlier, and nothing cuts that. A click keeps its own board current, because the markup asks
+The page's copy of the markup has one problem a server's does not. The kernel cuts cached
+answers that depend on a square the move changed, but a board on the screen is HTML the
+kernel handed out earlier, and nothing cuts that. A click keeps its own board current, because the markup asks
 for the status and the board after every move. A runnable cell does not, so after a cell runs
 in a board's game, the page asks that board to fetch its status again, and the board follows.
 Across processes this is the same gap Part IV's store contract names: a write the kernel did
