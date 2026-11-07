@@ -18,6 +18,8 @@
 // "best-practice" are reported in the survey and do not gate; violations of WCAG 2.x A/AA
 // rules do. `print.html` (every chapter concatenated) and `toc.html` (the sidebar as a
 // fragment mdbook loads into pages, not a document) are skipped, as book-a11y skips them.
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { createRequire } from "node:module";
@@ -32,6 +34,12 @@ if (!bookArg) {
     process.exit(2);
 }
 const survey = flags.includes("--survey");
+
+// Axe cannot judge announcement length. Exercise the shared Run UI with a stub kernel
+// as part of this existing jsdom gate, in addition to auditing the built pages below.
+execFileSync(process.execPath, ["--test", fileURLToPath(new URL("./run-announcement.test.mjs", import.meta.url))], {
+    stdio: "inherit",
+});
 
 // The tags axe attaches to the rules this gate enforces: WCAG 2.0/2.1/2.2, levels A and
 // AA. Anything else (best-practice, experimental, AAA) is survey-only.

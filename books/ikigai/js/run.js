@@ -510,17 +510,18 @@
         form.appendChild(buttons);
         cell.appendChild(form);
 
-        // ── the latest result: one status region ─────────────────────────────
-        // Caption and output pane together (SC 4.1.3): "running…", "run 2 — from the
-        // kernel" and "the kernel did not load" are the status of what the reader did,
-        // and a caption outside the region would be the message that is never heard.
+        // Only the caption is live: announce completion and the answer's size, leaving
+        // potentially long text or raw markup for the reader to visit at their own pace.
         var result = el("div", "ikigai-run-result");
-        result.setAttribute("role", "status");
-        result.setAttribute("aria-live", "polite");
-        result.setAttribute("aria-atomic", "true");
         var caption = el("div", "ikigai-run-caption",
             "press Run to resolve it in this page");
+        caption.setAttribute("role", "status");
+        caption.setAttribute("aria-live", "polite");
+        caption.setAttribute("aria-atomic", "true");
         var pane = el("pre", "ikigai-run-out", "");
+        pane.tabIndex = 0;
+        pane.setAttribute("role", "region");
+        pane.setAttribute("aria-label", "Latest answer");
         result.appendChild(caption);
         result.appendChild(pane);
         cell.appendChild(result);
@@ -586,8 +587,8 @@
         cell.appendChild(expectedWrap);
 
         // No kernel: the cell cannot run, and says so — it does not answer. Called the
-        // moment the load fails, so Run is disabled before anyone presses it. The result
-        // stops being a live region first: nothing can ever happen in it now, and the
+        // moment the load fails, so Run is disabled before anyone presses it. The
+        // caption stops being live first: nothing can ever happen in it now, and the
         // page's one kernel status line (announceKernel) is what a screen reader should
         // hear, once, rather than this caption once per cell.
         var unavailable = false;
@@ -596,9 +597,9 @@
                 return;
             }
             unavailable = true;
-            result.removeAttribute("role");
-            result.removeAttribute("aria-live");
-            result.removeAttribute("aria-atomic");
+            caption.removeAttribute("role");
+            caption.removeAttribute("aria-live");
+            caption.removeAttribute("aria-atomic");
             pane.textContent = "";
             caption.textContent =
                 "the in-page kernel did not load (" + (err && err.message ? err.message : err) +
@@ -733,7 +734,9 @@
                                 (err && err.message ? err.message : err) + "), so its HTML is shown as text";
                         });
                     return drawn.then(function (rendered) {
-                        caption.textContent = "run " + runs + " — from the kernel in this page" +
+                        var lineCount = acc ? acc.replace(/\n$/, "").split("\n").length : 0;
+                        caption.textContent = "run " + runs + " — answered, " +
+                            plural(lineCount, "line", "lines") + " — from the kernel in this page" +
                             rendered + against.says + (runs > 1 ? "; compare it with the runs below" : "");
                         run.disabled = false;
                         // A cell may have changed a game a board on this page shows; the board

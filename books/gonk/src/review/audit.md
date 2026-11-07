@@ -1,11 +1,11 @@
 # The audit protocol, and why per-commit review is off
 
-The last chapter showed the machinery: a review pass reads a file, a model proposes findings,
-and a person declines them or publishes them with the evidence that they are real. gonk can
-run that pass on every commit, from a `post-commit` hook. On the machine this book was written
-on, that hook is installed in every repository and does nothing, because
-`gonk.review.arm` is not `true`. This chapter is why, told with the numbers that decided it,
-and what replaced it.
+The [One-off review](one-off.md) chapter showed the machinery: a review pass reads a file, a
+model proposes findings, and a person declines them or publishes them with the evidence that
+they are real. gonk can run that pass on every commit, from a `post-commit` hook. On the
+machine this book was written on, that hook is installed in every repository and does
+nothing, because `gonk.review.arm` is not `true`. This chapter is why, told with the numbers
+that decided it, and what replaced it.
 
 There is nothing to run on this page. It is the one chapter in the book whose claims are
 measurements someone else made, so it says where they are and what they do and do not show.
@@ -22,8 +22,8 @@ So the question was put as an experiment, with the rule for deciding written dow
 data came in: **per serious bug actually found, which costs less — following the reviewer's
 leads, or a strong model auditing the same code with no leads at all?** A bug counted only if
 it came with a reproduction: a test or probe that fails, on the pinned commit, *because of* the
-defect. "Serious" meant wrong output, a crash, a security hole or lost data. The cost was the
-tokens each arm spent.
+defect. "Serious" meant wrong output, a crash, a security hole or lost data. The experiment
+compared two approaches, called **arms**. The cost was the tokens each arm spent.
 
 ## Round 1: the local reviewer's leads (2026-10-03)
 
@@ -99,11 +99,11 @@ Real bugs now come from **periodic unled audits**, one repository at a time, on 
   Code, tests, documentation and history are fair game.
 - **Read-only.** No fixes during an audit: the findings are about one known commit, and fixing
   is a separate piece of work scheduled from the report.
-- **A focus and a budget** — a file list or an area, and a number of tool calls — and a report
+- **Focus and budget** — a file list or an area, and a number of tool calls — and a report
   that says whether the budget ran out or the work did, and lists what was *not* read.
-- **A bug counts only with a reproduction.** An unreproduced suspicion is reported as a
+- **Bugs count only with a reproduction.** An unreproduced suspicion is reported as a
   suspicion, never as a bug.
-- **A finding is closed only with evidence**: fixed (the regression test and the change),
+- **Findings are closed only with evidence**: fixed (the regression test and the change),
   refuted (why the reproduction was wrong), or deferred (to what). The evidence is written on
   the ledger item before it is closed.
 

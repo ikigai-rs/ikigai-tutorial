@@ -7,6 +7,38 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
+
+  Pages: [The REPL grammar](front-door/grammar.md)
+
+- **2026-11-05**: Tic-tac-toe, VII explains what a native host must supply before a stored Lisp rule can replace a Rust endpoint, and which reads preserve the game's caching behavior.
+
+  Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+
+- **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
+
+  Pages: [Resolution](getting-started/resolution.md), [Running it](getting-started/running-it.md)
+
+- **2026-11-05**: "Naming a composition" clarifies its earlier examples and the path to the RSS workspace. "When a rule is not enough" shows the complete Python peer to save and run, clarifies which files a program depends on and when it can be cached, and explains great-circle distance.
+
+  Pages: [Naming a composition](explore/naming.md), [When a rule is not enough](explore/beyond-rules.md)
+
+- **2026-11-05**: A river of feeds now distinguishes a fresh refresh process from selective rebuilding in one REPL, explains that saving the river breaks dependencies back to feeds, and corrects directory-read verdicts. The named-request discussion uses the book's tested CLI version.
+
+  Pages: [A river of feeds](explore/rss.md)
+
+- **2026-11-05**: Process scripts are files now shows the tested CLI's support for comments, parameters, executable scripts, and running scripts by name, including how filename execution stops on an error. Its generated-script advice uses a sealed capability so later lines cannot restore full authority.
+
+  Pages: [Process scripts are files](explore/scripts.md)
+
+- **2026-11-05**: A river of feeds now connects to your earthquake scripts and distinguishes shell commands from REPL lines. Its setup explains how to reuse the repository and substitute the local server's port.
+
+  Pages: [A river of feeds](explore/rss.md)
+
+- **2026-11-05**: Process scripts are files now names the chapter that supplies your Quakes workspace, templates, and notes, so you can see what carries forward.
+
+  Pages: [Process scripts are files](explore/scripts.md)
+
 - **2026-11-05**: The jq, data-naming, and composites walkthroughs clarify which steps run in a shell or the REPL and connect the files and questions carried between chapters. The composites chapter corrects its count of strong earthquakes in Japan from seven to six.
 
   Pages: [Reshaping JSON with jq](explore/jq.md), [Giving the data names](explore/names.md), [Composites, one layer at a time](explore/composites.md)
