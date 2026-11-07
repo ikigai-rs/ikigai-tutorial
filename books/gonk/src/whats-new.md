@@ -23,6 +23,22 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
   Pages: [Browse roots: a repository as resources](browse/roots.md), [Explain, with a mounted model](browse/explain.md)
 
+- **2026-11-05**: Over MCP counts all five grant scopes, including read access to the participants graph. It also counts the final check's five response lines, matching the transcript.
+
+  Pages: [Over MCP](agent/mcp.md)
+
+- **2026-11-05**: Over the socket now describes reuse of valid cached answers and recomputation after invalidation. Its SPARQL explanation counts the deleted item's seven quads, matching the transcript.
+
+  Pages: [Over the socket](agent/socket.md)
+
+- **2026-11-05**: Over MCP defines the manifold and certificate bundle, marks the QUIC chapter as a later explanation, and names each JSON file to save. It also says where to run client commands, labels the author refusal directly, and points onward to Browse roots.
+
+  Pages: [Over MCP](agent/mcp.md)
+
+- **2026-11-05**: Over the socket links back to the browser chapter, says where to run commands while gonk is running, and introduces MCP by its full name.
+
+  Pages: [Over the socket](agent/socket.md)
+
 - **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
 
   Pages: [Introduction](introduction.md), [A ledger of your own](ledger/your-own.md), [The ledger in a browser](ledger/browser.md)

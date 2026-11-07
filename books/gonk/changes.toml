@@ -40,6 +40,26 @@ pages = ["browse/roots.md", "browse/explain.md"]
 
 [[change]]
 date = "2026-11-05"
+summary = "Over MCP counts all five grant scopes, including read access to the participants graph. It also counts the final check's five response lines, matching the transcript."
+pages = ["agent/mcp.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Over the socket now describes reuse of valid cached answers and recomputation after invalidation. Its SPARQL explanation counts the deleted item's seven quads, matching the transcript."
+pages = ["agent/socket.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Over MCP defines the manifold and certificate bundle, marks the QUIC chapter as a later explanation, and names each JSON file to save. It also says where to run client commands, labels the author refusal directly, and points onward to Browse roots."
+pages = ["agent/mcp.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Over the socket links back to the browser chapter, says where to run commands while gonk is running, and introduces MCP by its full name."
+pages = ["agent/socket.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow."
 pages = ["introduction.md", "ledger/your-own.md", "ledger/browser.md"]
 
