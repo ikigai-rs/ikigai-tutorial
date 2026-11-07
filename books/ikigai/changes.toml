@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-06"
+summary = "A river of feeds now says what happens to a feed's `<ttl>`: the stylesheet keeps it as data, but nothing reads it as a cache lifetime. HTTP headers and `max_age=` decide how long a copy is kept."
+pages = ["explore/rss.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
 pages = ["beyond/emacs-aliases.md"]
@@ -73,6 +78,11 @@ pages = ["explore/jq.md", "explore/names.md", "explore/composites.md"]
 date = "2026-11-05"
 summary = "The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace. The lab’s text pipelines show the cache tallies and uncached reasons from CLI 0.2.9."
 pages = ["explore/index.md", "explore/lab.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The resolution walkthrough corrects its CLI trace verdict and explains why a cached composite produces only a parent trace span. The golden-thread and endpoint-description chapters clarify expiry and the kernel’s enforcement of declared authority, introduce terms before using them, and connect the examples across chapters."
+pages = ["getting-started/payoff.md", "getting-started/golden-threads.md", "getting-started/self-description.md"]
 
 [[change]]
 date = "2026-11-03"

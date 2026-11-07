@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-06**: A river of feeds now says what happens to a feed's `<ttl>`: the stylesheet keeps it as data, but nothing reads it as a cache lifetime. HTTP headers and `max_age=` decide how long a copy is kept.
+
+  Pages: [A river of feeds](explore/rss.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
@@ -46,6 +50,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-05**: The earthquake walkthrough now connects to the CLI chapters, installs the tested CLI version, and makes clear when to leave an earlier REPL and reuse the Quakes workspace. The lab’s text pipelines show the cache tallies and uncached reasons from CLI 0.2.9.
 
   Pages: [A week of earthquakes](explore/index.md), [A lab with names in it](explore/lab.md)
+
+- **2026-11-05**: The resolution walkthrough corrects its CLI trace verdict and explains why a cached composite produces only a parent trace span. The golden-thread and endpoint-description chapters clarify expiry and the kernel’s enforcement of declared authority, introduce terms before using them, and connect the examples across chapters.
+
+  Pages: [What resolution buys you](getting-started/payoff.md), [Golden threads in practice](getting-started/golden-threads.md), [Why an endpoint describes itself](getting-started/self-description.md)
 
 - **2026-11-03**: "Checking a resource" now shows the RDF Toolbox page itself, in light and dark screenshots: Validate, Format, a SHACL finding, the SPARQL tab, and what a caller without the scope sees, including a verdict that can mislead when the data was refused.
 

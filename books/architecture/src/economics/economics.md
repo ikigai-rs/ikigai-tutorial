@@ -1,5 +1,8 @@
 # Golden threads and the cost of a read
 
+In [Spaces that wrap spaces](../overlays/overlays.md), you saw governors bound a request's
+work. This chapter turns to the cost of repeating that work.
+
 The Web caches by URL: a resource carries a time-to-live or a validator, and a client re-fetches
 when the clock says so or the validator changes. That is a guess about staleness, made per
 resource, in advance. ikigai does something exact instead. The kernel tracks **what each answer was
@@ -79,14 +82,13 @@ Here is the trap, and it is the one thing from this chapter to carry away. Effec
 **propagates from dependencies**. A resource is cacheable only if everything it is made from is;
 join one uncacheable source into an otherwise-cached resource and the cached resource **silently
 stops being cached** — every read recomputes, forever. Nothing in the types changes and every test
-can still pass; the only signal is that reads got slower.
+can still pass even though reads got slower.
 
 So **adding a source to a cached resource is a performance change even when it is a correctness
 no-op.** The remedy is twofold: the kernel will *tell* you why an answer was not cached (it names
 the uncacheable dependency rather than leaving you to guess), and the discipline is to join mutable
 data into a resource that is *already* uncacheable, not into the expensive cached one. Measure a
-hot read before and after you add a source to it; that difference is the only thing that will warn
-you.
+hot read before and after you add a source to it to see what the change costs.
 
 Relatedly: a **refusal** is never cached. A resource that refuses bad input by erroring makes
 everything that reads it recompute on every read. Where "this input is wrong" is a legitimate
@@ -103,7 +105,8 @@ is not addressable under a different one.
 
 ## The throughput reading of the governors
 
-The last chapter framed the overlays as *governance* — constraints made explicit and enforceable.
+[Spaces that wrap spaces](../overlays/overlays.md) framed the overlays as *governance* —
+constraints made explicit and enforceable.
 Caching and golden threads are the **throughput** half of the same theory-of-constraints picture.
 The bottleneck in a resolution is the expensive computation; the cache **exploits** it by reclaiming
 a prior result at near-zero cost, the golden thread keeps that exploitation honest by cutting the

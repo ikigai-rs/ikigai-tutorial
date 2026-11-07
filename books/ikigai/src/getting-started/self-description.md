@@ -1,10 +1,13 @@
 # Why an endpoint describes itself
 
-In most systems, documentation is a courtesy to humans. Here it is load-bearing
-machinery, and skipping it produces a system that *works* and is *unusable by anything but
-a person who already knows*.
+In [What resolution buys you](payoff.md#4-described), you read `camel-case`'s
+description as a graph. [Golden threads in practice](golden-threads.md) explained how
+cached answers stay valid. Now return to that description: it lets callers discover
+what an endpoint accepts and what it can do, without knowing the endpoint in advance.
 
-## The `Description` does four jobs
+<a id="the-description-does-four-jobs"></a>
+
+## Four jobs for a `Description`
 
 1. **The engine routes named arguments by it.** `in="hello"` finds the right slot because
    the endpoint declared a slot called `in`.
@@ -13,8 +16,8 @@ a person who already knows*.
    types.
 3. **The catalog is built from it.** `urn:kernel:catalog` and `urn:kernel:actions` are
    assembled out of these descriptions, not maintained separately.
-4. **The agent tool list *is* it.** Projected over MCP, an endpoint's description becomes
-   a tool definition. Nobody writes that by hand.
+4. **The agent tool list *is* it.** Projected over the Model Context Protocol (MCP), an
+   endpoint's description becomes a tool definition. Nobody writes that by hand.
 
 The third job deserves one more sentence, because it looks circular and is not. The
 catalog is the arrangement describing itself — the kernel's own bindings, rendered from
@@ -33,6 +36,9 @@ Here is `camel-case`'s, included from the crate:
 ```
 
 ## ArgSpecs, from day one
+
+An `ArgSpec` describes one input: its name, whether it is required, and the type of
+value it accepts. Here is the `in` argument from `camel-case`'s description:
 
 ```rust
 # extern crate ikigai_core;
@@ -63,20 +69,30 @@ present. Set containment over the catalog. A SPARQL query.
 That is the same mechanism as finding a transreptor from one media type to another, one
 level up. It is why the description is not paperwork.
 
-## The invariant that keeps it safe
+<a id="the-invariant-that-keeps-it-safe"></a>
 
-Type-driven affordance sounds alarming: whoever asserts types influences what gets
-offered. A hostile assertion could surface an action that should not be there.
+## Capabilities gate execution
+
+An **affordance** is an action offered for the things available. Choosing actions by
+type sounds alarming: whoever asserts types influences what gets offered. A hostile
+assertion could surface an action that should not be there.
 
 The defense is already in the model. **Type intersection only *offers* an action;
 executing it still requires the actor's capability.** Affordance is type-driven,
 authorization is capability-driven, and they are separate gates. Adversarial data can make
 the menu wrong. It cannot make the kitchen cook.
 
-## The one that bites
+<a id="the-one-that-bites"></a>
 
-> ⚠ **Declared capabilities must be enforced capabilities.** If your endpoint checks
-> authority it never declared, the catalog over-offers — it advertises something that will
-> fail. If it declares authority it never checks, the catalog under-protects, which is
-> worse. Parameterized authority (network hosts, filesystem paths) declares the wildcard
-> form: `urn:cap:net:*` means "holds some grant under this prefix".
+## Declare the authority you enforce
+
+> ⚠ **Declare the authority your endpoint needs.** The kernel checks declared
+> requirements before dispatch, even if the endpoint does not repeat the check. If your
+> endpoint checks additional authority it never declared, the catalog over-offers — it
+> advertises something that will fail. Parameterized authority (network hosts, filesystem
+> paths) declares the wildcard form: `urn:cap:net:*` means "holds some grant under this
+> prefix". The endpoint must still check the grant for the specific host or path it uses.
+
+You now have `camel-case`'s description and the reasons to keep it complete.
+[Binding, and a host of your own](binding.md) connects that endpoint to a name and
+adds the renderer that turns its description into the graph you read.
