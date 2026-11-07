@@ -46,7 +46,7 @@ first thing that goes wrong.
 The second assertion is the one worth writing carefully. `matches!(err,
 Error::Unresolved(_))` is the claim; a looser `is_err()` would also pass if the socket had
 simply not been there, and then the test would be asserting nothing this chapter said. The
-error crossed a process boundary and kept its type — that is what makes the next exercise
+error crossed the socket and kept its type — that is what makes the next exercise
 possible.
 
 </details>
@@ -144,7 +144,7 @@ declared. The message says so:
 denied: capability does not grant `urn:cap:yours:name` (declared by `urn:iki:tutorial:yours:name`)
 ```
 
-Three things crossed the process boundary intact for that sentence to arrive: the
+Three things crossed the socket intact for that sentence to arrive: the
 capability you carried, the attenuation down the call chain inside the served kernel, and
 the typed error on the way back. That is Part II's claim — a module borrows the caller's
 authority and can only narrow it — holding across a socket.
