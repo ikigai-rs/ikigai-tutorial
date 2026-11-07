@@ -18,7 +18,8 @@ resolve on GitHub, the list moved before this page did — the organization is t
   grammar), resolve/wire/scheduler, the IPC and QUIC transports, the MCP projection, and
   the inbound-HTTP transport library.
 - [`ikigai-module`](https://github.com/ikigai-rs/ikigai-module) — the loadable-module
-  format: `ModuleSpace`, the transports, host-callback resolution. Part II.
+  format: `ModuleSpace`, the transports, host-callback resolution.
+  [What a module is](modules/index.md) introduces it.
 
 ## Compute and data
 
@@ -92,7 +93,7 @@ resolve on GitHub, the list moved before this page did — the organization is t
 
 - [`ikigai-sign`](https://github.com/ikigai-rs/ikigai-sign) and
   [`ikigai-encrypt`](https://github.com/ikigai-rs/ikigai-encrypt) — signatures as RDF
-  graphs, and their dual.
+  graphs, and encryption, respectively.
 - [`ikigai-throttle`](https://github.com/ikigai-rs/ikigai-throttle) — rate limit, retry,
   circuit breaker, failover and timeout as space overlays; `Failover` is what a
   prefer-mount is made of.
