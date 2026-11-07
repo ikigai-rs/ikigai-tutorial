@@ -11,9 +11,9 @@ changes no name and no endpoint above the atom to do it.
 
 ## Only the store holds a game
 
-Look back over the three parts for what holds state. The stored cell does. Everything
-above it is a pure function of names it sources: the platonic cell reads the stored cell,
-a line reads cells, the board reads rows, the winner reads lines, the turn reads the winner
+The stored cell holds the state of the game built in [Part III](tic-tac-toe-3.md).
+Everything above it is a pure function of names it sources: the platonic cell reads the
+stored cell, a line reads cells, the board reads rows, the winner reads lines, the turn reads the winner
 and the board, and the move reads four of those before it writes the stored cell. So a game
 *is* what `urn:iki:tutorial:ttt:stored:{x}:{y}` resolves to. Change that, for one request
 and everything it gives rise to, and the whole game changes with it. No code above the
@@ -209,7 +209,7 @@ urn:iki:tutorial:ttt:row:1
 [cached]</pre>
 </div>
 
-Game `b` has not got it, and computes the same two names again:
+Game `b` has no cached answer for this CheckSet, and computes the same two names again:
 
 <div class="ikigai-run" data-game='b' data-cmd='cache urn:iki:tutorial:ttt:checkset:2:1
 source urn:iki:tutorial:ttt:checkset:2:1'>
@@ -386,5 +386,6 @@ O--
 
 ## Next
 
-Part V puts a board in this page that you can play by clicking, over the same kernel and the
-same resources, and draws Parts I to V together.
+[Part V: a board you can play](tic-tac-toe-5.md) adds a clickable board to the game you
+now have: separate stores in one kernel, with the same names and endpoints in every game.
+It also draws the design together.
