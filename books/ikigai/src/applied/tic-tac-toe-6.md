@@ -1,7 +1,8 @@
 # Tic-tac-toe, VI: the same game in Python and TypeScript
 
-Five parts built one game in Rust, and nothing in the model said it had to be Rust. This
-part moves it into two other languages, in two different ways.
+In [Tic-tac-toe, V: a board you can play](tic-tac-toe-5.md), you built a browser board
+over the Rust game. Nothing in the model said it had to be Rust. This part moves the store
+and the app into Python and TypeScript, in two different ways.
 
 **The atom in another language.** Only the stored cell holds a game. Part IV turned it
 into a seam, the store contract, which any space in any language can fill. Here a Python
@@ -20,7 +21,7 @@ The polyglot faces are the ones the [Python](../polyglot/python.md) and
 families covers the templated, multi-verb doors this part uses; what this part needs of them is
 said as it goes.
 
-> **Nothing below runs in this page.** Both shapes need processes and sockets. The
+> **Run the shell commands in a terminal.** Both shapes need processes and sockets. The
 > transcripts were captured from real runs against `ikigai-python` and `ikigai-deno` at the
 > commits cited beside them, and `scripts/ttt-polyglot-demo.sh` in this repository runs the
 > whole part again. It starts both stores, the host and both apps, reruns every command
@@ -578,17 +579,16 @@ coordinate" tells them apart by type: the second, a square off the board, is sti
 
 ## What was built
 
-Across six parts: a game drawn as resources, then built as resources, played in many games
-at once, given a face, and now held and served from three languages without its model
-changing.
+The game was drawn as resources, then built as resources, played in many games at once,
+given a face, and now held and served from three languages without its model changing.
 
-The last part shows the model's seam holding. The store contract was written in Part IV
-for a store in *some* process. Two stores in other languages kept it on the first try, and
-`check_store` said so before the host accepted them. The markup was written in Part V for
-*some* host. Two apps in other languages serve it byte for byte, and their tests check
+This part shows the model's seam holding. The store contract was written in
+[Part IV](tic-tac-toe-4.md) for a store in *some* process. Two stores in other languages
+kept it on the first try, and `check_store` said so before the host accepted them. The markup
+was written in Part V for *some* host. Two apps in other languages serve it byte for byte, and their tests check
 that. What stayed in one place was everything that needed to know what depended on what:
 the composition, the cache and the rules, in the kernel.
 
-One thing in all six parts is still Rust that need not be: the arrangement, which doors exist
+One thing is still Rust that need not be: the arrangement, which doors exist
 and in what order. [Tic-tac-toe, VII: the game's space is a file](tic-tac-toe-7.md) moves it
 into a file.
