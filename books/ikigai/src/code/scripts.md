@@ -280,12 +280,12 @@ of the library. Publishing the old text again is the same thing, because it make
 
 | the set | the name | what it is |
 |---|---|---|
-| the host | `script_host::kernel_with` | composition: the script host, configured, in front of the store; a hook that cuts the bindings thread |
-| a script | `urn:script:{name}` | an atom, the library's: a head and every version, written only by a `Sink` here |
-| a version | `urn:script:{name}:version:{digest}` | an atom, never rewritten, named by its content |
-| a result | `urn:script:{name}:result` | composition: the head's text, run through the store's doors, cached as far as what it read |
-| a run | `urn:script:{name}:run:{id}` | an atom, written once by a `Sink` on `…:runs` |
-| the data | `urn:iki:tutorial:items` | a named graph in the store, written by the host and by `close-item` |
+| host | `script_host::kernel_with` | composition: the script host, configured, in front of the store; a hook that cuts the bindings thread |
+| script | `urn:script:{name}` | an atom, the library's: a head and every version, written only by a `Sink` here |
+| version | `urn:script:{name}:version:{digest}` | an atom, never rewritten, named by its content |
+| result | `urn:script:{name}:result` | composition: the head's text, run through the store's doors, cached as far as what it read |
+| run | `urn:script:{name}:run:{id}` | an atom, written once by a `Sink` on `…:runs` |
+| data | `urn:iki:tutorial:items` | a named graph in the store, written by the host and by `close-item` |
 
 This crate wrote no endpoint. Everything it does is configuration of two libraries and a kernel,
 which is the point: publishing code into a running host did not need a feature beside the
