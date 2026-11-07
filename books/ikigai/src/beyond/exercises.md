@@ -1,10 +1,13 @@
 # Exercises: beyond one host
 
-Three, and all three are written in **your** crate — `crates/your-endpoints/tests/beyond.rs`
-— against the code this part quotes, `crates/two-hosts`, which you use and do not edit.
+Write these three exercises in **your** crate, in `crates/your-endpoints/tests/beyond.rs`.
+Use the code this part quotes, `crates/two-hosts`, without editing it. If you worked through
+[Where this actually stands](../modules/status.md), you already have a module whose
+greeting calls back to its host; here you will carry that call across a socket.
 The file already holds the scaffolding an exercise would otherwise spend its time on: a
 socket path nothing collides with, a dial loop that waits for a server thread to bind, a
-peer that is always down, and one test proving the scaffolding works. The loop is:
+peer that is always down, and one test proving the scaffolding works. From the tutorial
+repository's root, run this command after each change:
 
 ```bash
 cargo test -p your-endpoints --test beyond
@@ -19,8 +22,8 @@ cargo test -p your-endpoints --test beyond
 ## 1. Serve Part I, and reach it
 
 Serve `hello_camel::space()` behind a socket, connect, and resolve
-`urn:iki:tutorial:camel-case` through the connection. Then ask the served kernel for a name
-it does not bind.
+`urn:iki:tutorial:camel-case` through the connection with `in` set to
+`"resource oriented computing"`. Then ask the served kernel for a name it does not bind.
 
 - **File** — `crates/your-endpoints/tests/beyond.rs`; `serve_in_background` and
   `connect_when_up` are already there.
@@ -53,7 +56,8 @@ possible.
 ## 2. Break the prefer-mount, and watch what falls through
 
 Build a prefer-mount over your own space with a peer that is always down, and resolve
-`urn:iki:tutorial:yours:word-count` through it. Then make the same mount an override. Then
+`urn:iki:tutorial:yours:word-count` through it with `in` set to `"a b c"`.
+Then make the same mount an override. Then
 make the peer *refuse* rather than fail.
 
 - **File** — `crates/your-endpoints/tests/beyond.rs`; `dead(Error::Unavailable)` gives
