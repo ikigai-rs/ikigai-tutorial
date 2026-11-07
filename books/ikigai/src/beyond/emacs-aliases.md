@@ -11,8 +11,16 @@ point of the whole exercise.
 
 ## Setting up
 
-`ikigai.el` needs the `ikigai` binary on `exec-path` and nothing else. Three lines in your
-init file:
+`ikigai.el` needs the `ikigai` binary on Emacs's `exec-path`. If you installed the CLI
+in [Twenty minutes with the CLI](../front-door/cli.md), you already have the binary;
+make sure Emacs can find it. If you have not cloned
+[`ikigai-emacs`](https://github.com/ikigai-rs/ikigai-emacs), run this in a shell:
+
+```bash
+git clone https://github.com/ikigai-rs/ikigai-emacs ~/src/ikigai-emacs
+```
+
+Then add these three lines to your Emacs init file:
 
 ```elisp
 (add-to-list 'load-path "~/src/ikigai-emacs")   ; wherever you cloned it
@@ -156,8 +164,14 @@ ikigai -c 'cap urn:cap:kernel:inspect' -c 'source urn:lisp:aliases as=text/x-ema
 
 Holding only the right to inspect, the same kernel gave 78 functions instead of 129. The
 51 that went are the resources that need some other grant: the repository facades, the
-HTTP verbs, the language models, the secret store and the scheduler among them. Narrow further, below
-the inspection right itself, and there is no file at all:
+HTTP verbs, the language models, the secret store and the scheduler among them. In a fresh
+shell invocation, narrow to a capability without the inspection right:
+
+```bash
+ikigai -c 'cap urn:cap:fn' -c 'source urn:lisp:aliases as=text/x-emacs-lisp'
+```
+
+There is no file at all:
 
 ```text
 narrowed — capability: urn:cap:fn

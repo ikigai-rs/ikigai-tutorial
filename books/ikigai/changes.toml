@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "The aliases, day to day gives the package-cloning step, connects setup to the earlier CLI installation, and supplies the command for its refused alias-generation example."
+pages = ["beyond/emacs-aliases.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "Tracing a resolution clarifies that an installed tracer collects resolutions from one kernel, even when a process hosts more than one kernel."
 pages = ["beyond/tracing.md"]
 
