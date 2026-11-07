@@ -288,13 +288,13 @@ in force. The status says what was refused and why.
 
 | what | where | what it is |
 |---|---|---|
-| the stock | `urn:iki:tutorial:shop:stock` | an atom: CSV, written by a `Sink`, cached and cut |
-| the CSV as JSON | `urn:json:query`, `urn:json:from-csv` | ikigai-json: jq over the stock, through the CSV transreptor |
-| the prefix table | `urn:iki:tutorial:shop:prefixes` | data: an alias of root-resolving prefix rules, written by a `Sink` |
-| the prefix space | `urn:iki:space:dynamic:shop` | ikigai-fn's `prefix_space`: the table, bound, and checked |
-| the corridor | `Kernel::issue_in` | the space carried by a request and every sub-request it makes |
-| the summary | `urn:iki:tutorial:shop:summary` | a template of three `$j` markers, filled |
-| the list | `urn:iki:fn:each` | a row template filled once per record |
+| stock | `urn:iki:tutorial:shop:stock` | an atom: CSV, written by a `Sink`, cached and cut |
+| CSV as JSON | `urn:json:query`, `urn:json:from-csv` | ikigai-json: jq over the stock, through the CSV transreptor |
+| prefix table | `urn:iki:tutorial:shop:prefixes` | data: an alias of root-resolving prefix rules, written by a `Sink` |
+| prefix space | `urn:iki:space:dynamic:shop` | ikigai-fn's `prefix_space`: the table, bound, and checked |
+| corridor | `Kernel::issue_in` | the space carried by a request and every sub-request it makes |
+| summary | `urn:iki:tutorial:shop:summary` | a template of three `$j` markers, filled |
+| list | `urn:iki:fn:each` | a row template filled once per record |
 
 The only code is the two atoms. The CSV reader, the query language, the template language, the
 iteration and the short names are published resources, composed. A prefix is not a feature of
