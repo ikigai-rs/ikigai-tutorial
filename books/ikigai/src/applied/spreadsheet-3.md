@@ -70,9 +70,9 @@ not cached
 cached</pre>
 </div>
 
-`A1`, `A2`, `A3` and `B2` are gone from the cache: the edited cell, the chain that reads it, and
-the total over the chain. `B1` and `C1` are still cached, because neither read `A1`. And the
-edit itself computed nothing. The four values are computed again when something next reads
+`A1`, `A2`, `A3` and `B2` are stale: the edited cell, the chain that reads it, and
+the total over the chain. Their entries remain in the cache, but cannot be served. `B1` and
+`C1` are still cached, because neither read `A1`. And the edit itself computed nothing. The four values are computed again when something next reads
 them, which here is the grid, straight after the cell. A spreadsheet engine recalculates when
 you type; this sheet recalculates when you look.
 
@@ -167,9 +167,9 @@ depend only on the one it read, each time.
 
 Here is the sheet, with one thing added under it: after each edit, before the grid is drawn
 again, the page asks the kernel what drawing it will cost, and shows the answer as a table the
-shape of the grid. A cell marked **computed** is a value the redraw will compute; the rest it will
-be served. Type into `A1` and watch the chain; type into `D6`, which nothing reads, and watch one
-cell.
+shape of the grid. A cell marked **computed** is a value the redraw will compute; values marked
+**cached** will be served from the cache. Type into `A1` and watch the chain; type into `D6`,
+which nothing reads, and watch one cell.
 
 <div class="sheet-play" data-cache data-shell='urn:iki:tutorial:sheet:template:page'><p class="sheet-unavailable">The sheet appears here when the in-page kernel has loaded.</p></div>
 
@@ -214,11 +214,11 @@ composition, and did.
 
 ## What it costs, and what it does not do
 
-**An edit costs nothing until somebody reads.** The work is done on the next read of each value
-that was cut, and only if something reads it. A cell nobody shows is never recomputed. That
+**An edit recalculates no values until somebody reads.** Each value that was cut is
+recalculated on its next read, and only if something reads it. A cell nobody shows is never recomputed. That
 suits a sheet on a page; it is the wrong shape for a sheet whose values must be pushed
-somewhere the moment they change, which needs something to read them, and a later part's
-subject.
+somewhere the moment they change. That needs something to read them, as
+[Part VII](spreadsheet-7.md) shows later in the book.
 
 **A cut is by name, not by content.** Type `9` into `A1` when it already holds `9`, and every
 value that reads it is still computed again:
