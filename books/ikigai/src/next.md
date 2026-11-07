@@ -1,10 +1,10 @@
 # Where to go next
 
-Three reference pages close the book: a [glossary](glossary.md) of the nine terms
-[Resolution](getting-started/resolution.md) introduced and three later chapters added, a [map of every
-repository](repositories.md) in the organization, and [how to contribute a
-module](contribute.md) of your own. The short list below is the handful this book leaned
-on.
+The reference pages include a [glossary](glossary.md) of the terms introduced in
+[Resolution](getting-started/resolution.md) and later chapters, a [map of the
+repositories](repositories.md) in the organization, and [how to contribute a
+module](contribute.md) of your own. The repository list below is the handful this book
+leaned on.
 
 ## The gonk Book
 
@@ -26,7 +26,7 @@ chain, the economics of golden threads and caching, and the audit axis, with the
 confine shown to be the patterns that serve. Read it after this book's chapters on dynamic spaces,
 which the overlay chain is built from: [The ikigai Architecture](architecture/index.html).
 
-[The library](library/index.html) lists all four books, with who each is for, what to read first
+[The library](library/index.html) lists the books, with who each is for, what to read first
 and where to start.
 
 ## The repositories
