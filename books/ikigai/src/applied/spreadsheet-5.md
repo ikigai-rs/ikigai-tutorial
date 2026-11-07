@@ -236,7 +236,7 @@ after each write computes exactly the values that read the feed, and serves the 
 is the lesson rather than a bug: the button is somebody else, and the grid is not told.
 
 The same thing as a test, with the market writing every third second and the grid polled every
-second:
+two seconds:
 
 ```rust,ignore
 {{#include ../../../../crates/spreadsheet/tests/live.rs:poll}}

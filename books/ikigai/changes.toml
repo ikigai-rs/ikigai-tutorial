@@ -20,6 +20,12 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "Spreadsheet, V corrects the stated polling interval to match its included test."
+pages = ["applied/spreadsheet-5.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-07"
 summary = "Spreadsheet, IV connects to the cached sheet you already built and explains how dependency deadlines combine and why a kernel without a clock keeps its time-cell errors cached."
 pages = ["applied/spreadsheet-4.md"]
 
