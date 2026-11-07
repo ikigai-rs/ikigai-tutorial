@@ -284,5 +284,5 @@ is the next part.
 | Formula bar's write | `urn:iki:tutorial:sheet:view:edit` | code: the human edge, a write through the kernel |
 
 No part of it caches anything or invalidates anything, and the empty cell went stale and
-came back without being told. The input is the only thing that holds state. The next part
-puts code in it.
+came back without being told. The input is the only thing that holds state.
+[Part II](spreadsheet-2.md) puts code in it.
