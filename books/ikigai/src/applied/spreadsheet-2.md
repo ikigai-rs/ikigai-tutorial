@@ -395,5 +395,5 @@ an argument. A view no longer needs one, since `compose_over` fixes the template
 mean "this resource, transrepted to that type", the compiled formula would be a rule,
 `formula:{ref}` = `input:{ref}` as `text/x-sexpr`, and no code at all.
 
-Every one of these is cacheable, and not one names a golden thread or lists a dependency. The
-next part edits a cell and asks what that cost.
+Every one of these is cacheable, and not one names a golden thread or lists a dependency.
+[Part III](spreadsheet-3.md) edits a cell and asks what that cost.
