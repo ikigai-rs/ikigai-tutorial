@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-07"
-summary = "The dynamic-space chapter clarifies host layers and the status door's behavior before any declaration binds. The prefix chapter defines a corridor before using it and clarifies its limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page."
+summary = "The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page."
 pages = ["applied/live-space.md", "applied/prefixes.md", "applied/time.md"]
 
 [[change]]

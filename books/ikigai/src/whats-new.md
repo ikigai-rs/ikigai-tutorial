@@ -7,7 +7,7 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
-- **2026-11-07**: The dynamic-space chapter clarifies host layers and the status door's behavior before any declaration binds. The prefix chapter defines a corridor before using it and clarifies its limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page.
+- **2026-11-07**: The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page.
 
   Pages: [A space that changes while it runs](applied/live-space.md), [Short names in a space](applied/prefixes.md), [Time is a resource](applied/time.md)
 
