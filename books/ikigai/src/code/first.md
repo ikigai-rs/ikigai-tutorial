@@ -2,7 +2,12 @@
 
 This section is about code you can **publish into a running host, at a name**, so that other
 people can run it without a release. Before the detail, four small steps, one idea each, and one
-command each. Nothing here needs more than the chapters before this one.
+command each.
+
+Run the `cargo run` commands in your shell, from the repository root you used in
+[Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else).
+Each command starts its own host with fresh data; you do not type the printed requests into
+a REPL or carry the shelf from one step into the next.
 
 The scripts are SPARQL queries, over a shelf of books. Each step is a program in this repository
 that prints every request it makes, the way the REPL would write it, and what came back. In the
@@ -21,9 +26,11 @@ It answers one row, and its second line is the first lesson of this section: **a
 data it reads, even a hello world.** `FROM <urn:iki:tutorial:empty>` says which graph this query
 reads. Nothing in it is used, and the graph is empty, but the line is not decoration: the host
 works out from what a script names the authority its publisher and its runners need (here, the
-right to read that one graph), and it runs the query over exactly those graphs and no others. A
-query that names none is refused when it is published, and the refusal says to name a graph with
-`FROM`. So even the smallest script says what it reads, and the rest of this section leans on that.
+right to read that one graph), and it runs the query over exactly those graphs and no others. Leaving
+`FROM` out of this hello query is refused when it is published, and the refusal says to name a
+graph with `FROM`. A query can also use `GRAPH ?g` to read the graphs its run is allowed to read;
+[Who a script runs as](authority.md#a-run-never-holds-more-than-its-publisher-held) shows that case.
+This hello query names its graph explicitly.
 
 <!-- urn-gate: illustration urn:iki:tutorial:empty — the name of a named GRAPH the hello script
      reads, which holds nothing; no space binds it. -->
@@ -189,16 +196,16 @@ books
 ```
 
 The model's query came back as a **draft**: saved at the name, visible only to the person who
-asked, and run by nobody. Before anyone saw it, it was checked (does it parse, and does it read
-only what you may read?) and run once as a preview, which already says 3. Publishing it is a
-person's act: the draft's own text, sunk again with `state=published`. After that it is a script
+asked, and not yet published for others to run. Before it was returned, it was checked (does it
+parse, and does it read only what you may read?) and run once as a preview, which already says 3.
+Publishing it is a person's act: the draft's own text, sunk again with `state=published`. After that it is a script
 like `hello` and `titles`.
 
 ## Next
 
 That is the whole idea: code at a name, run as a read, remembered until what it read changes, run
-only by someone who may, and written by a model only as a draft a person publishes. The next three
-chapters do the same things on a different shape of data, a handful of work items, in more depth:
+only by someone who may, and written by a model only as a draft a person publishes. The following
+chapters explore the same ideas with a handful of work items:
 [Scripts are resources](scripts.md) names every part of a script, [Who a script runs
 as](authority.md) says exactly whose authority a run holds, and [A sentence becomes a
 draft](sentence.md) shows how little the model is allowed to do.
