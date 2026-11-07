@@ -304,7 +304,7 @@ Alice held when she published it.
 | the term | who decides | when | what this chapter showed |
 |---|---|---|---|
 | declared | the text, for SPARQL | at publish | a `requires` that disagrees is refused |
-| the publisher's grant | the publisher's capability | at publish, kept as a snapshot | Carol cannot publish what she cannot read; Bob's run of Alice's query sees Alice's graphs |
+| the publisher's capability | the publisher's capability | at publish, kept as a snapshot | Carol cannot publish what she cannot read; Bob's run of Alice's query sees Alice's graphs |
 | the ceiling | the host, per script | on every run (cut the authority thread when it changes) | the payroll leaves only after the cut; no file, no run |
 | the runner's capability | the door that minted it | on every run | Alice cannot run what she wrote; Carol's run has nothing to narrow to |
 | exclusions | the publisher and the ceiling | travel with every run | Alice's `-team-payroll` is on Bob's run of `graphs` |
