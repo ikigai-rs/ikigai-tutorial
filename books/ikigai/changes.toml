@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "The TypeScript track connects its examples to the Python track, shows where to clone ikigai-deno and run commands, and explains explicit input declarations and typed refusals."
+pages = ["polyglot/typescript.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "The TypeScript track's Exists example writes the note again after the preceding batch deletes it, and includes the import and command needed to run it."
 pages = ["polyglot/typescript.md"]
 

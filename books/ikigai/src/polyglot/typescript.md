@@ -4,13 +4,22 @@
      the reader's own `--mount urn:ts:=`; not a name the CLI or this workspace binds. -->
 <!-- urn-gate: illustration urn:ts:shout — likewise. -->
 
-The same mirror of Part I, in Deno. Every listing is in `examples/deno/`. `ikigai-deno` is
-not on JSR yet, so the listings import it by path, from a sibling checkout of it beside this
-repository's; edit the import if yours is elsewhere. ikigai-deno's own code imports
-`@std/crypto` (for the BLAKE3 digests in its contract IRIs) by that bare name, which its own
-`deno.json` maps for it and a script importing it by path never sees. So every `deno run`
-here passes `--config examples/deno/deno.json`, a three-line import map beside the listings
-that maps `@std/crypto` to JSR. A first run fetches it from JSR before it starts.
+[The Python track](python.md) showed how a client resolves names and how a served peer
+answers mounted requests. Here are the same operations in TypeScript, using Deno.
+Every listing is in `examples/deno/`; run the shell commands from this repository's root.
+
+The listings import `ikigai-deno` by path because it is not on JSR yet. They expect its
+checkout beside this repository. If you do not already have it there, clone it:
+
+```bash
+git clone https://github.com/ikigai-rs/ikigai-deno ../ikigai-deno
+```
+
+Edit the listings' imports if your checkout is elsewhere. ikigai-deno imports `@std/crypto`
+for the BLAKE3 digests in its contract IRIs. Its own `deno.json` maps that name to JSR, but
+Deno does not use that configuration when another script imports ikigai-deno by path.
+Every `deno run` here therefore passes `--config examples/deno/deno.json`, which supplies
+the mapping for these listings. A first run fetches the dependency from JSR.
 
 The blocks that start a peer and mount it ([Binding](#binding) and the family below) are
 replayed against the book's pinned `ikigai-cli` on every change to this repository, with
@@ -56,8 +65,9 @@ connection.
 {{#include ../../../../examples/deno/hello.ts:serve}}
 ```
 
-Explicit `args:` here — the ArgSpec list stated the way the Rust chapter stated it, and
-zero-dependency. `ikigai-deno`'s `./zod` entry point derives the same list from a schema
+The explicit `args:` list declares the inputs by hand, as in
+[Why an endpoint describes itself](../getting-started/self-description.md), without a schema
+library. `ikigai-deno`'s `./zod` entry point derives the same list from a schema
 instead (`z.object({ who: z.string().describe(…) })`), and that is the closer analog to
 "the signature is the contract"; the sibling repository's `examples/endpoints.ts` shows
 it. Either way, a Rust host sees one description.
@@ -152,9 +162,10 @@ its answers; through `--mount`, the host does not keep them.
 {{#include ../../../../examples/deno/client.ts:scoped}}
 ```
 
-`instanceof DeniedError` — the taxonomy crossed the wire, which is wire protocol v7's
-whole point and what `examples/http_status.ts` in the sibling repository turns into a
-403.
+The kernel refuses the write, and the client receives a typed `DeniedError` across the
+wire. The client can test `instanceof DeniedError` instead of parsing an error message.
+`examples/http_status.ts` in the ikigai-deno checkout uses that distinction to return
+HTTP 403 for a denied request.
 
 ## Families: one door, many names, four verbs
 
