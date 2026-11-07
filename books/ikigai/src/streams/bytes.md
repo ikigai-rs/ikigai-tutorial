@@ -8,9 +8,9 @@ them. This first page needs only what the kernel already has, and its cells run 
 
 ## Two fields
 
-`ikigai-core`'s `Representation` holds a `repr_type`, whose `media_type` says what the bytes are
-(`text/csv`, `image/svg+xml`, `application/gzip`), and `bytes`, a `Vec<u8>`. It also carries an
-expiry and its golden threads, which is how the cache treats it, but those say how long the
+The buffered form of `ikigai-core`'s `Representation` holds a `repr_type`, whose `media_type` says
+what the bytes are (`text/csv`, `image/svg+xml`, `application/gzip`), and `bytes`, a `Vec<u8>`. It
+also carries an expiry and its golden threads, which is how the cache treats it, but those say how long the
 answer is good for, not what it is. The kernel does not look inside `bytes`. It caches them,
 passes them through a pipe, and hands them to the next endpoint. Whether they are UTF-8 matters
 only to whoever reads them.
@@ -186,5 +186,5 @@ two fields cannot say:
 
 That is where this part goes next: a representation whose bytes arrive in pieces, so an answer
 can start before it ends and a large one never has to be held whole (ledger #2228). The kernel
-now has its first half, and [the next page](replay.md) reads it: a body that can be read again,
-a file as one, and a range of a resource that reads only the range.
+now has its first half. [A body you can read again](replay.md) shows how to reopen a body, read a
+file as one, and read only a range of a resource.
