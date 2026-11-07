@@ -137,7 +137,8 @@ never seen. This part put a kernel behind a socket, gave it a way to know who wa
 and gave a caller three honest things to mean by "resolve this over there".
 
 What connects them is that none of it required a resource to know where it would be used.
-The camel-case endpoint from the first chapter can be linked into a host, reached through a
+The camel-case endpoint from [Binding, and a host of your own](../getting-started/binding.md)
+can be linked into a host, reached through a
 module boundary, served over a socket, mounted from another machine, called from an editor
 by a generated function, or offered to an agent as a tool — and it is the same short function
 throughout, because it was never asked to care.
