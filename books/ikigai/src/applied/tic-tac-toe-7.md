@@ -1,9 +1,10 @@
 # Tic-tac-toe, VII: the game's space is a file
 
-Six parts built tic-tac-toe as resources. The atom is code, because it holds the marks, and
-the rules and views are small functions and templates. But one thing about the game was still
-Rust in every part: its *arrangement*. Which doors exist, in what order they are tried, which
-names are only other names (the eight lines of Part II), and what a host puts beside the game
+In [Tic-tac-toe, VI: the same game in Python and TypeScript](tic-tac-toe-6.md), you
+used stores and apps in other languages with the Rust game. The atom is code, because it
+holds the marks, and the rules and views are small functions and templates. But one thing
+about the game was still Rust in every part: its *arrangement*. Which doors exist, in what
+order they are tried, which names are only other names (the eight lines of Part II), and what a host puts beside the game
 (`conditional`, for the views) were all calls in `space_with_store` and `kernel_over` (the
 crate's function that builds the coded game's kernel and puts `conditional` behind it).
 
@@ -39,8 +40,8 @@ Turtle that core builds a space from. Read it from the outside in:
 
 Eight doors say `:match template`. A door's pattern is text, and text alone cannot say how it
 matches: `urn:iki:tutorial:ttt:board` could be one exact name, or a URI template that happens
-to have no variables. Both match the same single name. The reader takes a pattern with no
-braces as exact, but the game's Rust binds every door through `UriTemplate::parse`, so those
+to have no variables. Both match the same single name. The arrangement reader takes a pattern
+with no braces as exact, but the game's Rust binds every door through `UriTemplate::parse`, so those
 eight are templates, and the file says so to declare the arrangement the code builds. Left
 out, the game would answer the same, but it would be a different arrangement. This part
 checks that it is the same one, so the file says it.
@@ -191,7 +192,7 @@ order the alias table tries them (longest name first), not the order the file li
 Everything else is the file. Building it and asking the result for its arrangement gives the
 arrangement you started with: the round trip is a fixpoint, and a test holds it to that.
 
-The second line was served from the cache. The build is a pure function of what it read, so
+The second request was served from the cache. The build is a pure function of what it read, so
 it hangs from the file's golden thread, and a change to the file would rebuild it.
 
 ### The same game, twice
