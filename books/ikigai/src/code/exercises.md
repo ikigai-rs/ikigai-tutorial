@@ -109,7 +109,9 @@ has produced, at the end, an answer saying so.
 
 ---
 
-## 4. Add the style note ledger item 1242 left out, as a composition
+<a id="4-add-the-style-note-ledger-item-1242-left-out-as-a-composition"></a>
+
+## 4. Add a warning for FROM paired with GRAPH, as a composition
 
 The live demo's draft pairs `FROM <g>` with `GRAPH <g> { … }`. On this host that is harmless (the
 script host runs a query over one set of graphs that serves as both its default and its named
