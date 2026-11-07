@@ -1,9 +1,10 @@
 # Spreadsheet, IV: cells that read the clock
 
-[Part III](spreadsheet-3.md) showed one way for a cached value to go: something writes, the
-kernel cuts a golden thread, and every value that read what was written is computed again the
-next time somebody looks. [Time is a resource](time.md) showed the other way: an answer says how
-long it is good for, and the kernel lets it go at that instant, with nobody writing anything.
+[Spreadsheet, III: recalculation is golden threads](spreadsheet-3.md) gave the sheet cached
+values that are invalidated by a write: the kernel cuts a golden thread, and every value that
+read what was written is computed again the next time somebody looks.
+[Time is a resource](time.md) showed the other way: an answer says how long it is good for, and
+the kernel lets it go at that instant, with nobody writing anything.
 
 A spreadsheet needs both. `=NOW()` is out of date a minute after it is computed, and so is
 every cell that reads it, however far down the chain. This part adds `NOW()` and `TODAY()` to
@@ -117,8 +118,8 @@ read `B1`.
 
 That is the rule the time chapter stated for a countdown, now on a sheet: **a value is never
 fresher than the least fresh thing it read.** `B1` declares itself cacheable with no deadline,
-like every value, and the kernel meets that with the deadline of everything it read. Here is
-what it read, one minute further on:
+like the sheet's other values. The kernel gives it the earliest deadline among everything it
+read. Here is what it read, one minute further on:
 
 <div class="ikigai-run" data-cmd='trace urn:iki:tutorial:sheet:cell:B1'>
 <pre class="ikigai-run-expected">trace  urn:iki:tutorial:sheet:cell:B1
@@ -204,8 +205,8 @@ time chapter's own test for this is `an_unguarded_reading_across_midnight_is_wro
 
 Almost every other page of this book runs a kernel with no clock, and the time chapter's names
 refuse there. The sheet does not pass the refusal on. A formula that reads the time on a kernel
-with no clock is `#N/A`, a value, like the sheet's other errors, and the evaluator does not even
-ask:
+with no clock is `#N/A`, a value, like the sheet's other errors. The evaluator checks whether the
+kernel has a clock before requesting either time resource, for two reasons:
 
 - A refusal is never cached. The kernel records every error except `NotFound` as already
   expired, so a value that caught one would be computed again on every read, and so would the
