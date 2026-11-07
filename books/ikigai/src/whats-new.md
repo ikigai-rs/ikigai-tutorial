@@ -7,6 +7,22 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: Tracing a resolution links the examples you already have, names the kernel consistently, clarifies what a dry run avoids, and leads into The machine client by name.
+
+  Pages: [Tracing a resolution](beyond/tracing.md)
+
+- **2026-11-07**: The aliases, day to day makes clear that its historical listings can differ from the pinned CLI in docstrings and error details as well as counts.
+
+  Pages: [The aliases, day to day](beyond/emacs-aliases.md)
+
+- **2026-11-07**: The aliases, day to day gives the package-cloning step, connects setup to the earlier CLI installation, and supplies the command for its refused alias-generation example.
+
+  Pages: [The aliases, day to day](beyond/emacs-aliases.md)
+
+- **2026-11-07**: Tracing a resolution clarifies that an installed tracer collects resolutions from one kernel, even when a process hosts more than one kernel.
+
+  Pages: [Tracing a resolution](beyond/tracing.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)

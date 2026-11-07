@@ -19,6 +19,26 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-07"
+summary = "Tracing a resolution links the examples you already have, names the kernel consistently, clarifies what a dry run avoids, and leads into The machine client by name."
+pages = ["beyond/tracing.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "The aliases, day to day makes clear that its historical listings can differ from the pinned CLI in docstrings and error details as well as counts."
+pages = ["beyond/emacs-aliases.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "The aliases, day to day gives the package-cloning step, connects setup to the earlier CLI installation, and supplies the command for its refused alias-generation example."
+pages = ["beyond/emacs-aliases.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "Tracing a resolution clarifies that an installed tracer collects resolutions from one kernel, even when a process hosts more than one kernel."
+pages = ["beyond/tracing.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
 pages = ["beyond/emacs-aliases.md"]
