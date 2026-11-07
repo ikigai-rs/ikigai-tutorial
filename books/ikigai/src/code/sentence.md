@@ -378,12 +378,12 @@ signal to look for.
 
 | the set | the name | what it is |
 |---|---|---|
-| the drafting host | `sentence_draft::kernel` | composition: the host from [Scripts are resources](scripts.md), `ikigai-nl`, the vocabulary, a model door |
-| the stub model | `urn:llm:ask` (in every gate) | code: canned drafts per attempt, the prompts it was sent, no network |
-| a real model | `urn:llm:ask` (with `--ollama`) | composition: `ikigai-llm` over a blocking HTTP client |
-| a grounding | `urn:nl:grounding` | composition, `ikigai-nl`'s: the caller's own view, cached per capability |
-| a check | `urn:nl:sparql:check` | composition, `ikigai-nl`'s: findings as values, so it caches |
-| a draft | `urn:script:{name}` with `state=draft` | an atom, the script host's, written under the caller and private to them |
+| drafting host | `sentence_draft::kernel` | composition: the host from [Scripts are resources](scripts.md), `ikigai-nl`, the vocabulary, a model door |
+| stub model | `urn:llm:ask` (in every gate) | code: canned drafts per attempt, the prompts it was sent, no network |
+| real model | `urn:llm:ask` (with `--ollama`) | composition: `ikigai-llm` over a blocking HTTP client |
+| grounding | `urn:nl:grounding` | composition, `ikigai-nl`'s: the caller's own view, cached per capability |
+| check | `urn:nl:sparql:check` | composition, `ikigai-nl`'s: findings as values, so it caches |
+| draft | `urn:script:{name}` with `state=draft` | an atom, the script host's, written under the caller and private to them |
 
 The one piece of code is the stub, and it is code for the reason the clock in [Time is a resource](../applied/time.md)
 was: it stands in for something outside the kernel that a gate cannot run. Everything else is
