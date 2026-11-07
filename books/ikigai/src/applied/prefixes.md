@@ -139,8 +139,8 @@ Follow one marker down. `$j{shop:stock length}` asks `urn:json:query` (its own n
 `src=shop:stock` and `q=length`. The query endpoint reads `shop:stock`, which the corridor
 rewrites to `urn:iki:tutorial:shop:stock` and asks again from the root. That answers `text/csv`,
 so the query plans the CSV transreptor, `urn:json:from-csv`, and runs `length` over the array of
-records it makes. Four resources, two of them reached by short names, and none of them written
-for this summary.
+records it makes. The query endpoint and CSV transreptor use full names; only the stock uses
+a short name in this marker. None of these resources was written for this summary.
 
 The same, in Rust:
 
