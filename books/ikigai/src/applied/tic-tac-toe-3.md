@@ -29,9 +29,9 @@ what makes data linked, and nothing about it needed a new mechanism: a list of n
 text, and newline-separated text is how the ecosystem writes a list.
 
 The list is not written anywhere by hand. The CheckSet reads Part II's table of eight
-aliases and keeps each alias whose line holds the square. So "three by three" still lives
-in that table and nowhere else. A board of another size, or Connect Four's sixty-nine
-lines, is another table, and the CheckSet would answer for it with no change of code.
+aliases and keeps each alias whose line holds the square. The CheckSet gets the board's
+edges from that table, without fixing a size in its own code. A board of another size, or
+Connect Four's sixty-nine lines, is another table, and the CheckSet would answer for it with no change of code.
 
 It answers the alias names, `row:1` rather than `cells:0.1,1.1,2.1`, because those read as
 the game. Each one resolves, through the alias, to its line, and the line's own name is
@@ -73,14 +73,16 @@ urn:iki:tutorial:ttt:row:0
 
 ### A platonic resource
 
-The CheckSet depends on its own name and a constant table, and on nothing else. It issues
-no sub-request, so it records no dependency that a `Sink` could cut. Its `.cacheable()` is
-`Expiry::Never`, and here that is literally true: once computed, it is served for the life
-of the kernel, whatever is played. The series has a name for a resource like this, a
-*platonic resource*, computed once in the life of the system. The cell in Part I was
-platonic in a weaker sense, because it answers for every square before anyone plays one.
-The CheckSet is platonic in the strong one: no move can make it wrong, so none ever
-recomputes it.
+The CheckSet computes its answer from its own name and a constant table. It issues no
+sub-request, so it has no dependency on the cells a move changes. Its `.cacheable()` uses
+`Expiry::Never`: the answer does not expire with time, and moves leave it cached. Like
+any cacheable read, it still hangs from the thread named after its own resource; an
+explicit cut of that thread would invalidate it.
+
+The series calls an answer that can be computed once and reused a *platonic resource*.
+The cell in [Part I](tic-tac-toe-1.md) was platonic in a weaker sense, because it answers
+for every square before anyone plays one. The CheckSet is platonic in the strong one:
+no move can make it wrong, so no move makes it recompute.
 
 ```rust,ignore
 {{#include ../../../../crates/tic-tac-toe/tests/rules.rs:platonic_checkset}}
@@ -134,8 +136,8 @@ full board with no line answers `draw`, the turn answers `-`, and a tenth move i
 
 ## The move: constraint at the edge
 
-So far nothing in the game refuses anything. The stored cell takes any mark at any square,
-the line takes any cells, and the winner and the turn only describe what is there. That is
+So far no resource enforces turns or prevents overwriting a played square. The stored cell
+takes any mark at any square, the line takes any cells, and the winner and the turn only describe what is there. That is
 deliberate. The rules arrive in one resource, the move,
 `urn:iki:tutorial:ttt:move:{x}:{y}`, which a player writes to and nobody reads.
 
@@ -160,9 +162,9 @@ so rather than silently playing for the other side.
 This is the original series' seventh part in one sentence: keep the model loose, and constrain it at
 the boundary of the application. The stored cell does not know about turns, and the move
 does not change it. The atoms are still the atoms Part I built. Another game on the same
-cells (Connect Four, or tic-tac-toe on a bigger board) would write its own move
-and its own table and reuse everything else. Put the rules into the stored cell, and the
-store would stop being reusable.
+cells (Connect Four, or tic-tac-toe on a bigger board) could reuse the stored cell, platonic
+cell and line endpoints. It would supply its own move, line table and board endpoint.
+Put the rules into the stored cell, and the store would stop being reusable.
 
 The move can play through the stored cell because a `Sink` issued from inside an endpoint
 is still a `Sink` to the kernel. It cuts the thread named after its target, exactly as a
