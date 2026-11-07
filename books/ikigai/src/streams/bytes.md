@@ -174,10 +174,10 @@ assert_eq!(issue(gunzip("60")).unwrap().bytes, stock.as_bytes());
 Everything above worked because every representation on this page is small. Look at what the
 two fields cannot say:
 
-- **It is one buffer.** `bytes` is a `Vec<u8>`: the whole answer, in memory, before anyone can
+- **One buffer.** `bytes` is a `Vec<u8>`: the whole answer, in memory, before anyone can
   read the first byte. The decompressor has to hold all of its output before it answers, which is
   one reason its bound exists.
-- **It has no beginning before its end.** The first line of the table is ready as soon as it is
+- **No output before completion.** The first line of the table is ready as soon as it is
   decompressed, but nothing can be handed on until the last line is. A pipe of three stages holds
   three whole buffers.
 - **The bound is the only limit.** Anything bigger than memory, or bigger than a sensible
