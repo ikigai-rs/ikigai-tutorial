@@ -15,9 +15,9 @@ host, supplying what the browser can provide.
 Everything that comes from outside the program comes from the host that built the kernel,
 through a seam the host fills:
 
-- a space to resolve against (`Kernel::new`);
-- a Meta renderer, so `describe` and the catalog answer (`Kernel::with_meta_renderer`);
-- a clock, so the kernel can say what time it is (`Kernel::with_clock`).
+- Space to resolve against (`Kernel::new`);
+- Meta renderer, so `describe` and the catalog answer (`Kernel::with_meta_renderer`);
+- Clock, so the kernel can say what time it is (`Kernel::with_clock`).
 
 The kernel uses only what it was handed. That is what lets one kernel crate run in a
 command-line tool, in a long-running service, under a test that stops time, and in a web
