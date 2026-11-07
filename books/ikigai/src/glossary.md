@@ -1,8 +1,7 @@
 # Glossary
 
-The nine terms of [Resolution](getting-started/resolution.md) and three the chapters
-after it needed, one paragraph each, with the chapter where you do the thing rather than
-read about it.
+The terms introduced in [Resolution](getting-started/resolution.md) and later chapters,
+with links to the chapters where you use them.
 
 **Resource.** Anything with a name — a URI, in this system a `urn:*`. A resource is not
 an object and not a function: it is a name a kernel can resolve, and what you get back
