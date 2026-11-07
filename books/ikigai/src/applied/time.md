@@ -69,8 +69,8 @@ Without a clock, the time endpoints do not guess. They refuse, and say why:
 {{#include ../../../../crates/time-resource/src/lib.rs:clock}}
 ```
 
-On any other page of this book, `source urn:iki:tutorial:time:now` answers with that
-refusal.
+On a page whose kernel has no clock, `source urn:iki:tutorial:time:now` answers with
+that refusal.
 
 ## Now, until the next minute
 
@@ -230,9 +230,9 @@ The spreadsheet's `NOW()` reads it, in [Spreadsheet, IV](spreadsheet-4.md).
 
 ## A page that polls
 
-Here is the clock. It is paused until you start it, so the cells above answer as they
-say; press **Poll** and it asks the kernel for the time once a second, and
-counts what that cost.
+Here is the clock view. Polling is paused until you press **Poll**, so it does not fill
+the cache before you run the cells above. The kernel's clock keeps running. Press **Poll**
+and the view asks the kernel for the time once a second and counts what that cost.
 
 <div class="ikigai-view" data-clock data-shell='urn:iki:tutorial:time:template:face'><p class="ikigai-view-unavailable">The clock appears here when the in-page kernel has loaded.</p></div>
 
