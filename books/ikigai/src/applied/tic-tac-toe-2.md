@@ -202,8 +202,9 @@ source urn:iki:tutorial:ttt:diagonal:1'>
 [computed]</pre>
 </div>
 
-Now play the corner. The four probes are row 0, column 0, diagonal 0 and the board, the
-four things that pass through (0,0). None of them is cached any more:
+Now play the corner. The four probes are row 0, column 0, diagonal 0 and the board.
+The three lines pass through (0,0), and the board depends on row 0. None of the four is
+cached any more:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:stored:0:0 X
 cache urn:iki:tutorial:ttt:cells:0.0,1.0,2.0
@@ -287,7 +288,7 @@ edge on two. That count is about to matter.
 
 ## Next
 
-Part III asks questions of the board. Which lines a cell is on becomes a resource of its
+[Part III](tic-tac-toe-3.md) asks questions of the board. Which lines a cell is on becomes a resource of its
 own: a representation that is a list of the names of other resources. Whose turn it is and
 who has won are questions about those lines, and the rules of tic-tac-toe arrive
 there, at the edge of the application, with the model underneath still loose.
