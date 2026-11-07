@@ -93,10 +93,14 @@ answers" — the counter proves *preferring* happened before *falling back*. `Un
 an override is "you named that machine, and it is not there" — a silent local answer would
 be a different question answered. `Denied` on a prefer-mount is "the peer said you may
 not" — and a fallback here would turn a capability boundary into a suggestion, which is
-why it is the one failure the rule never swallows.
+why the rule never swallows it. Other failures also stop a prefer-mount;
+[Preferential resolution](preference.md#only-a-failure-that-another-target-could-fix-falls-through)
+sets out which classes can fall through.
 
-If your override test *passes* the resolution instead of failing it, check the order
-`compose` put things in: an override composed after the local space overrides nothing.
+If your override test answers locally instead of failing, check how you built the root
+space. Pass the override in `compose`'s first argument and the local space in its second;
+the helper puts the override first. If you assemble the spaces yourself, an override
+placed after the local space overrides nothing.
 
 </details>
 
