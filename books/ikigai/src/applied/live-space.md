@@ -186,8 +186,8 @@ The space as it starts, which is the first stage:
 
 The status says what is in force (nothing), how many declarations have bound (none), and
 why: the loop's first read found no declaration. A space that cannot read its declaration
-binds nothing, rather than guessing. Until a declaration binds, every name in it answers
-`Unresolved`.
+binds nothing, rather than guessing. Until a declaration binds, the registered endpoints
+remain unreachable. The status door still answers, as it does above.
 
 
 </section>
