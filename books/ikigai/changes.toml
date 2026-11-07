@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "Tracing a resolution links the examples you already have, names the kernel consistently, clarifies what a dry run avoids, and leads into The machine client by name."
+pages = ["beyond/tracing.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "The aliases, day to day makes clear that its historical listings can differ from the pinned CLI in docstrings and error details as well as counts."
 pages = ["beyond/emacs-aliases.md"]
 
