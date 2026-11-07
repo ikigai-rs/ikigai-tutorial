@@ -1,8 +1,7 @@
 # The machine client
 
-[The editor as a client](emacs.md) generated a command surface for a person. This one generates the same
-thing for a program, out of the same catalog, and the fact that it is the same is the
-point the whole book has been walking toward.
+[The editor as a client](emacs.md) showed how the catalog generates commands for a
+person. This chapter uses the same catalog to generate tools for a program.
 
 Take the two halves in order: a resource that fronts a family of interchangeable
 implementations, and then the manifold as a tool list.
@@ -49,7 +48,7 @@ guess.
 
 ## An agent's tool list is the manifold under its capability
 
-Now the second half. The Model Context Protocol asks a server for three things: a list of
+Now the second half. The Model Context Protocol (MCP) asks a server for three things: a list of
 tools, a typed input schema for each, and a way to call one.
 
 ikigai has all three already, under other names, and had them before MCP existed — because
@@ -63,8 +62,10 @@ they are what a resolution needs, not what a protocol asked for:
 
 So the projection is a *translation*, not a feature: an action becomes a tool descriptor,
 and the tool name maps back to the endpoint and verb it came from. Nothing about an
-endpoint changes to make it available to an agent. The endpoint you wrote in Part I, with
-the description you wrote for the engine's benefit, is an agent tool already.
+endpoint changes to make it available to an agent. The endpoint you bound in
+[Binding, and a host of your own](../getting-started/binding.md), with the description
+introduced in [Why an endpoint describes itself](../getting-started/self-description.md),
+already supplies what the tool projection needs.
 
 Two properties fall out of that, and both are worth more than the integration itself.
 
@@ -105,10 +106,10 @@ than a half-executed action.
 
 ## What not to assume
 
-Part II ended with a list like this and this part should too, for the same reason: a
-tutorial that leaves you to discover a limit by hitting it has wasted your afternoon.
+[Where this actually stands](../modules/status.md) set out the limits of loadable
+modules. These are the limits to keep in mind when using a model or an MCP client:
 
-- **Generation is not cached by default.** An LLM call is not a pure function of its
+- **Generation is not cached by default.** A large language model (LLM) call is not a pure function of its
   inputs, so `urn:llm:ask` does not claim to be one. The caching that Part I taught applies
   to the deterministic parts of a pipeline, which is most of it, and deliberately not to
   this part.
