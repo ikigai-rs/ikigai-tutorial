@@ -477,20 +477,20 @@ broke. The contract gained a clause in this part: `Exists` answers `true` or `fa
 that way; the Rust one used to answer `Exists` as if it were `Source`, and now does not.
 
 Both of those stores are in their own repositories, as `examples/tictactoe_store.py` and
-`examples/tictactoe_store.ts`. To play against one, start it on a socket, then start the host
-with a game over that socket. From a clone of `ikigai-python`:
+`examples/tictactoe_store.ts`. The host command below uses both stores. Start each in its
+own terminal and leave it running. In the first terminal, from a clone of `ikigai-python`:
 
 ```sh
 PYTHONPATH=src python3 -m examples.tictactoe_store /tmp/ttt-py.sock
 ```
 
-or from a clone of `ikigai-deno`:
+In the second terminal, from a clone of `ikigai-deno`:
 
 ```sh
 deno run -A examples/tictactoe_store.ts /tmp/ttt-ts.sock
 ```
 
-and then, from this repository:
+With both stores running, open a third terminal in your `ikigai-tutorial` clone:
 
 <!-- transcript: manual — a server, over two stores another repository's process holds on
      sockets; crates/ttt-host/tests/host.rs tests the host itself. -->
