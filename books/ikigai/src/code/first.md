@@ -2,7 +2,12 @@
 
 This section is about code you can **publish into a running host, at a name**, so that other
 people can run it without a release. Before the detail, four small steps, one idea each, and one
-command each. Nothing here needs more than the chapters before this one.
+command each.
+
+Run the `cargo run` commands in your shell, from the repository root you used in
+[Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else).
+Each command starts its own host with fresh data; you do not type the printed requests into
+a REPL or carry the shelf from one step into the next.
 
 The scripts are SPARQL queries, over a shelf of books. Each step is a program in this repository
 that prints every request it makes, the way the REPL would write it, and what came back. In the
@@ -199,8 +204,8 @@ like `hello` and `titles`.
 ## Next
 
 That is the whole idea: code at a name, run as a read, remembered until what it read changes, run
-only by someone who may, and written by a model only as a draft a person publishes. The next three
-chapters do the same things on a different shape of data, a handful of work items, in more depth:
+only by someone who may, and written by a model only as a draft a person publishes. The following
+chapters explore the same ideas with a handful of work items:
 [Scripts are resources](scripts.md) names every part of a script, [Who a script runs
 as](authority.md) says exactly whose authority a run holds, and [A sentence becomes a
 draft](sentence.md) shows how little the model is allowed to do.
