@@ -170,7 +170,7 @@ the last cell had typed it. `A3` is new, so it was computed here.
 ## Editing a formula compiles exactly that formula
 
 Both formulas are compiled and cached now (the grid below read every value after that cell
-ran, and a value reads its formula). Three edits, three different things to change:
+ran, and a value reads its formula). Change a referenced number, then change a formula:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:sheet:input:A1 7
 cache urn:iki:tutorial:sheet:formula:A2
