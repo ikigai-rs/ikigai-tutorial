@@ -7,6 +7,14 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: Spreadsheet, V carries forward the sheet's time cells and polling grid, distinguishes a feed write from a cell edit, and gives concrete cells and formulas for watching the market.
+
+  Pages: [Spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md)
+
+- **2026-11-07**: Spreadsheet, IV connects to the cached sheet you already built and explains how dependency deadlines combine and why a kernel without a clock keeps its time-cell errors cached.
+
+  Pages: [Spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
