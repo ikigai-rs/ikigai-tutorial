@@ -8,12 +8,19 @@ implementations, and then the manifold as a tool list.
 
 ## One grammar, several backends
 
-`ikigai-llm` binds a facade at `urn:llm:ask` and a directly addressable endpoint per
-configured backend. Asking is the front grammar; a specific model is still a name you can
-resolve if you want that model and no other.
+`ikigai-llm` binds a facade at `urn:llm:ask`: one endpoint that chooses a backend and
+forwards the request. Each backend also has its own endpoint, so you can select it
+directly. A backend may serve different models; the `model=` argument selects a specific
+model.
 
-Both answer only with a backend configured in your config home's `llm.json`, which no
-earlier chapter sets up; without one, `urn:llm:models` lists nothing to ask.
+Run these commands in a shell with the CLI from
+[Running it](../getting-started/running-it.md#the-cli). The book tests them with
+`ikigai-cli` 0.2.9. No earlier chapter sets up a model server: without a custom `llm.json`
+in your config home, the CLI defaults to Ollama at `http://localhost:11434/v1`, with
+`llama3.2:3b` as its default model. The first command needs a running backend and returns
+model-generated text; if Ollama is not running, it reports `unavailable`. The second
+lists the backend even when its server is down. A custom `llm.json` selects other
+backends, and `IKIGAI_LLM_CONFIG` can point to a configuration file elsewhere.
 
 ```bash
 ikigai -c 'source urn:llm:ask prompt="name three uses for a paperclip"'
@@ -42,9 +49,9 @@ through the kernel is composable; a facade that holds its implementations is not
 
 <!-- urn-gate: illustration urn:llm:{provider}:ask — a template, and which providers exist depends on the reader's own llm.json. -->
 
-The provider-specific names follow the pattern `urn:llm:{provider}:ask` — which providers
-exist is a matter of local configuration, so `urn:llm:models` is how you ask rather than
-guess.
+The provider-specific names follow the pattern `urn:llm:{provider}:ask`. The CLI supplies
+the default Ollama provider unless you configure others, so use `urn:llm:models` to find
+the available backend names rather than guessing.
 
 ## An agent's tool list is the manifold under its capability
 
@@ -100,9 +107,9 @@ remains after the deterministic machinery has done what it can, and its answer i
 before it has any effect.
 
 Step 3 is not optional advice, either. The MCP server re-checks the capability on every
-`tools/call` and pre-flights the arguments through `urn:kernel:validate` before it invokes
-anything — so a model that hallucinates an argument gets a contract violation back rather
-than a half-executed action.
+`tools/call` and checks the arguments with the same contract checker used by
+`urn:kernel:validate` before it invokes the endpoint — so a model that supplies an invalid
+argument gets a contract violation back rather than a half-executed action.
 
 ## What not to assume
 
@@ -113,13 +120,12 @@ modules. These are the limits to keep in mind when using a model or an MCP clien
   inputs, so `urn:llm:ask` does not claim to be one. The caching that Part I taught applies
   to the deterministic parts of a pipeline, which is most of it, and deliberately not to
   this part.
-- **An MCP session with no grant runs as root, loudly** (`ikigai-cli` 0.1.28). `ikigai mcp`
-  with no `--grant` or `--scope` prints `running UNRESTRICTED (root)` and then does. A named grant that
-  resolves to no scopes lands in the same branch. That is the opposite of the served
-  kernel's rule from [Who is asking](identity.md), where an unrecognized certificate is
-  refused — the difference being that an MCP server is spawned by the human whose authority
-  it runs under, and a QUIC server is not. Convenient, and exactly the sort of asymmetry to
-  know about rather than discover.
+- **MCP sessions require explicit authority.** In `ikigai-cli` 0.2.9, `ikigai mcp`
+  refuses to start unless you pass `--grant`, `--scope`, `--principal`, or `--root`.
+  An unknown or empty named grant is refused too. Only an explicit `--root` starts an
+  unrestricted session and prints `--root given — serving UNRESTRICTED (root)`.
+  Like the served kernel in [Who is asking](identity.md), it refuses undecided authority.
+  The old default — **runs as root, loudly** (`ikigai-cli` 0.1.28) — no longer applies.
 - **The tool list is a projection, not a promise.** Endpoints appear and disappear as
   capability, configuration and mounts change. That is the design working, and a client
   that caches a tool list across sessions is fighting it.
