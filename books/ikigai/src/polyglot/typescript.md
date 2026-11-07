@@ -227,13 +227,30 @@ Read the verdicts. The note's Source declares itself cacheable, and, as in
 here reached the peer. The peer keeps no cache of its own either, and that is why the read
 after the second write saw the new text. The writes and the delete are uncacheable whatever
 the host does, because a Sink or Delete answer always is, and the index is uncacheable on
-purpose: it reads every note, and a write is about only the note it wrote. Exists, from a
-client:
+purpose: it reads every note, and a write is about only the note it wrote.
+
+To try Exists from a client, save this as `examples/deno/exists.ts`. The batch above
+deleted `milk`, so the script writes it again before checking:
 
 ```ts
+import { connect } from "../../../ikigai-deno/src/mod.ts";
+
 const k = await connect("/tmp/ts-notes.sock"); // the peer itself; Exists is a read
-console.log((await k.exists("urn:ts:note:milk")).text); // true, after `sink urn:ts:note:milk two liters`
+await k.sink("urn:ts:note:milk", "two liters");
+console.log((await k.exists("urn:ts:note:milk")).text); // true
 console.log((await k.exists("urn:ts:note:bread")).text); // false
+k.close();
+```
+
+With the notes peer still running, run the script from this repository's root:
+
+```text
+deno run -A --config examples/deno/deno.json examples/deno/exists.ts
+```
+
+```text
+true
+false
 ```
 
 ### Which door answers
