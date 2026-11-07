@@ -188,7 +188,7 @@
     color: var(--inline-code-color);
 }
 
-/* Caption and output pane together are the cell's one live region — see run.js. */
+/* The caption announces status; the answer below it is a separate keyboard stop. */
 .ikigai-run-result {
     display: block;
 }
