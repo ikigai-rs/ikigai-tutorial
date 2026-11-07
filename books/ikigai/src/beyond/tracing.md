@@ -29,7 +29,7 @@ load. The events are plain, serializable data, which is why they can cross a wir
 ## Two ways to install one, and they are exclusive
 
 `Kernel::set_tracer` installs a tracer on the kernel. Every resolution after it records
-there until `clear_tracer` — one collector for the whole process, which is what the
+there until `clear_tracer` — one collector for that kernel, which is what the
 REPL's `trace` does around exactly one call. `Kernel::issue_traced(request, cap, tracer)`
 records **this resolution** into `tracer` and nothing else, with its own span numbering
 starting at 0.
