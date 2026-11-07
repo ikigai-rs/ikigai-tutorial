@@ -1,9 +1,10 @@
 # Spreadsheet, V: data that changes outside the sheet
 
-Everything the sheet has shown so far changes for one of two reasons: somebody typed into it,
-or the clock moved. Real sheets read a third kind of thing, data that belongs to somebody else:
-a stock price, a sensor reading, a figure from another team's system. It changes when *they*
-change it, and the sheet is not told.
+[Spreadsheet, IV: cells that read the clock](spreadsheet-4.md) added time cells to the sheet
+and a grid that polls for changes. Its cached values change for one of two reasons: somebody
+typed into the sheet, or the clock moved. Real sheets read a third kind of thing, data that
+belongs to somebody else: a stock price, a sensor reading, a figure from another team's system.
+It changes when *they* change it, and the sheet is not told.
 
 This part gives the sheet a **feed**: a name that something outside the sheet writes, and a
 formula function, `FEED(name)`, that reads it. The claim is the one Part III made about
@@ -85,7 +86,7 @@ source urn:iki:tutorial:sheet:cell:A3'>
 [computed]</pre>
 </div>
 
-Now the price changes. The line below writes the feed, and nothing in it mentions the sheet:
+Now the price changes. The first line below writes the feed without changing any cell input:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:sheet:feed:acme 101.5
 cache urn:iki:tutorial:sheet:cell:A1
@@ -226,9 +227,10 @@ grid asks for itself again every two. Neither knows about the other. The market 
 the grid; it only writes the feed. The grid finds out the way anything that reads a name finds
 out about a write it did not make: it asks again.
 
-Put `=FEED(acme)` somewhere, and something that reads it, and watch the count and the table
-under the grid. Most polls are answered entirely from the cache, and cost a lookup. The poll
-after each write computes exactly the values that read the feed, and serves the rest.
+Put `=FEED(acme)` in `A1`, `10` in `A2`, and `=A1*A2` in `A3`, as in the cells above. Run the
+market and watch the count and the table under the grid. Most polls are answered entirely from
+the cache, and cost a lookup. The poll after each write computes exactly the values that read
+the feed, and serves the rest.
 
 <div class="sheet-play" data-cache data-shell='urn:iki:tutorial:sheet:template:market'><p class="sheet-unavailable">The sheet appears here when the in-page kernel has loaded.</p></div>
 
