@@ -4,10 +4,12 @@
 cannot drift. This page is the other half: how you get them, how you find out what you
 have, how you call them, and when to regenerate.
 
-Every transcript here is from one scratch run: `ikigai-cli` 0.1.41, `ikigai-emacs` at
-`6f03b98`, Emacs 30.2 started with `-Q`, and an empty config home, so no mounts. Your
-counts will differ, because they depend on what your kernel offers you, and that is the
-point of the whole exercise.
+Unless another version is named, the transcripts here are from one scratch run:
+`ikigai-cli` 0.1.41, `ikigai-emacs` at `6f03b98`, Emacs 30.2 started with `-Q`, and an
+empty config home, so no mounts. Your counts depend on what your kernel offers you.
+The book's pinned CLI, {{#include ../../ikigai-cli.version}}, also has longer docstrings
+and error messages in some of these examples. Treat the listings as that run's output;
+refresh against your own kernel to get its current functions and help text.
 
 ## Setting up
 

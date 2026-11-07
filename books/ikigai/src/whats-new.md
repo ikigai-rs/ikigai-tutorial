@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: The aliases, day to day makes clear that its historical listings can differ from the pinned CLI in docstrings and error details as well as counts.
+
+  Pages: [The aliases, day to day](beyond/emacs-aliases.md)
+
 - **2026-11-07**: The aliases, day to day gives the package-cloning step, connects setup to the earlier CLI installation, and supplies the command for its refused alias-generation example.
 
   Pages: [The aliases, day to day](beyond/emacs-aliases.md)
