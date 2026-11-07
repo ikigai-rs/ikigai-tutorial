@@ -1,8 +1,9 @@
 # A sentence becomes a draft
 
-The chapters before this one published code a person wrote, and [Your first
-script](first.md) showed a stand-in model drafting one in passing. This one lets a language model
-write it, and the interesting part is not the model. It is how little the model is allowed to do.
+[Scripts are resources](scripts.md) gave you a host that publishes and runs scripts, and
+[Who a script runs as](authority.md) showed how it limits each run's authority. [Your first
+script](first.md) also showed a stand-in model drafting a query. Here a language model drafts the
+query, and the interesting part is how little the model is allowed to do.
 
 [`ikigai-nl`](https://crates.io/crates/ikigai-nl) turns a sentence into a SPARQL query with the
 model as a **drafter, never an actor**. Every step is a resource read or write under the CALLER's
@@ -46,11 +47,17 @@ this one either. Its drafts are written down where a test can read them:
 {{#include ../../../../crates/sentence-draft/src/lib.rs:drafts}}
 ```
 
-The people are the previous chapter's, holding what drafting needs:
+Alice, Bob and Carol are from [Who a script runs as](authority.md), with grants for drafting
+added where needed:
 
 ```rust,ignore
 {{#include ../../../../crates/sentence-draft/src/lib.rs:people}}
 ```
+
+Run the commands below from this repository's root, in your shell. Each command starts the Rust
+program, which prints its requests and their answers; the `alice>` and `carol>` lines are output
+to read. The number selects which section to print. Every section still runs, so later examples
+have the drafts they need.
 
 ## What the model may know is what the caller may see
 
@@ -86,7 +93,8 @@ The graphs are the store's own listing of what the caller may read, each summari
 queries (its classes and predicates, with counts, and a few sample triples). Each predicate also
 says what KIND of value it takes, an IRI or a literal of some datatype, and, when its values are a
 small closed set, what they are: `ledger:status` is the IRI `ledger:open` or `ledger:closed`, never
-the string `"open"`. That line exists because of the draft in section 4. The examples are published
+the string `"open"`. That line exists because of the draft in
+[A draft the check passed, and should not have](#a-draft-the-check-passed-and-should-not-have). The examples are published
 scripts the caller may read: here the host names one, `open-items` from [Scripts are resources](scripts.md), and the
 grounding shows it to Alice and not to Carol, by asking the script host's own rule.
 
@@ -242,7 +250,8 @@ right one ("which items are overdue?" on a good day), so the check cannot refuse
 **warning, with its evidence**: the check runs each triple pattern of the query alone, in its graph,
 and names the ones that match nothing on their own. Here that is exactly one pattern, the string
 `"open"`. And the drafter treats a valid draft with an empty preview as a reason to repair: it sent
-the model the draft and that warning, the way it sends a refused draft and its errors in section 3.
+the model the draft and that warning, as it sent the refused draft and its errors in
+[A sentence, drafted, checked, repaired and saved](#a-sentence-drafted-checked-repaired-and-saved).
 The stub answers this ask with the live demo's draft whatever it is told, so its second answer was
 its first again, and drafting stopped there, because a model repeating itself is not converging. A
 real model, told that `ledger:status` takes the IRI `ledger:open` (the grounding now says so) and
@@ -336,8 +345,8 @@ ORDER BY ?number
 
 Alice writes the status as the IRI it is, drops the `FROM`, writes the bound into the text, and asks
 the same check the drafter asked. Then she publishes, with her own `Sink`, and it is a script like
-any other: Bob can read it, a runner can run it under the previous chapter's rule, and the draft's
-history is kept with it. The publish is the act, and a person made it.
+any other: Bob can read it, a runner can run it under the rule in [Who a script runs as](authority.md),
+and the draft's history is kept with it. The publish is the act, and a person made it.
 
 ## Against a real model
 
@@ -359,7 +368,8 @@ Every step is the same resource, under the same capability. Alice holds
 `urn:cap:net:localhost:11434`, the port-aware grant `ikigai-llm` checks before it reaches the
 server, and a caller holding no network grant could not draft at all. What changes is
 what comes back: the number of attempts, whether the first draft passes, and the query itself, none
-of which a book can promise. Section 4 is the one to run more than once: a model shown the warning
+of which a book can promise. [A draft the check passed, and should not have](#a-draft-the-check-passed-and-should-not-have)
+is the example to run more than once (use `-- 4 --ollama llama3.1`): a model shown the warning
 and the value kinds may repair the status on its second attempt, or may not. A model that gets the
 status right is answering this ask, not every ask, and the mark on an empty preview is still the
 signal to look for.
@@ -375,7 +385,7 @@ signal to look for.
 | a check | `urn:nl:sparql:check` | composition, `ikigai-nl`'s: findings as values, so it caches |
 | a draft | `urn:script:{name}` with `state=draft` | an atom, the script host's, written under the caller and private to them |
 
-The one piece of code is the stub, and it is code for the reason the clock in "Time is a resource"
+The one piece of code is the stub, and it is code for the reason the clock in [Time is a resource](../applied/time.md)
 was: it stands in for something outside the kernel that a gate cannot run. Everything else is
 configuration. The model's place in all of it is one door, called under the caller's capability,
 whose answer is text that is parsed, checked, and saved as something a person has to read.
