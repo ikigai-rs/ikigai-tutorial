@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: The machine client corrects MCP startup authority and the default Ollama backend, distinguishes backends from models, and clarifies argument validation. The beyond-one-host exercises specify their inputs and correct the fallback and composition guidance.
+
+  Pages: [The machine client](beyond/agent.md), [Exercises: beyond one host](beyond/exercises.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
