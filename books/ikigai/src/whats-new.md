@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: The dynamic-space chapter clarifies host layers and the status door's behavior before any declaration binds. The prefix chapter defines a corridor before using it and clarifies its limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page.
+
+  Pages: [A space that changes while it runs](applied/live-space.md), [Short names in a space](applied/prefixes.md), [Time is a resource](applied/time.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
