@@ -28,18 +28,18 @@ every kind of thing in it:
 
 | the set | its name | what it is | built in |
 |---|---|---|---|
-| a **cell** | `urn:iki:tutorial:ttt:cell:{x}:{y}` | the mark at one place, or empty | this part |
-| a **line** of cells | `urn:iki:tutorial:ttt:cells:{list}` | any cells, in order, named by their coordinates | part II |
-| a **row** | `urn:iki:tutorial:ttt:row:0` (and `:1`, `:2`) | a line of cells, by name — no code | part II |
-| a **column** | `urn:iki:tutorial:ttt:column:0` (and `:1`, `:2`) | the same, the other way | part II |
-| a **diagonal** | `urn:iki:tutorial:ttt:diagonal:0` (and `:1`) | the same, corner to corner | part II |
-| the **board** | `urn:iki:tutorial:ttt:board` | every row | part II |
+| **cell** | `urn:iki:tutorial:ttt:cell:{x}:{y}` | the mark at one place, or empty | this part |
+| **line** of cells | `urn:iki:tutorial:ttt:cells:{list}` | any cells, in order, named by their coordinates | part II |
+| **row** | `urn:iki:tutorial:ttt:row:0` (and `:1`, `:2`) | a line of cells, by name — no code | part II |
+| **column** | `urn:iki:tutorial:ttt:column:0` (and `:1`, `:2`) | the same, the other way | part II |
+| **diagonal** | `urn:iki:tutorial:ttt:diagonal:0` (and `:1`) | the same, corner to corner | part II |
+| **board** | `urn:iki:tutorial:ttt:board` | every row | part II |
 | which lines a cell is on | `urn:iki:tutorial:ttt:checkset:{x}:{y}` | a list of the names of other resources | part III |
 | **whose turn** | `urn:iki:tutorial:ttt:turn` | a question about the board | part III |
 | **who won** | `urn:iki:tutorial:ttt:winner` | another | part III |
-| a **move** | `urn:iki:tutorial:ttt:move:{x}:{y}` | a mark played, if the rules allow it | part III |
+| **move** | `urn:iki:tutorial:ttt:move:{x}:{y}` | a mark played, if the rules allow it | part III |
 | many games | — | the game as context: a corridor around the names, not a name | part IV |
-| a board you can **play** | `urn:iki:tutorial:ttt:view:board` (and `view:status`, `view:play:{x}:{y}`) | HTML over all of the above, from templates that are resources too | part V |
+| **playable board** | `urn:iki:tutorial:ttt:view:board` (and `view:status`, `view:play:{x}:{y}`) | HTML over all of the above, from templates that are resources too | part V |
 
 Read down the second column and notice how little of it is code. Only the cell holds
 state: everything above it is a set of cells, or a question about sets of cells, and a set
