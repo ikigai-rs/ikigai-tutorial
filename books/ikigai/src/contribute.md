@@ -1,7 +1,8 @@
 # Contribute a module
 
-A module is a crate with a `space()`. This page is the shape of a new one, from the first
-commit, in the order the pieces matter. The reference is
+In [Binding, and a host of your own](getting-started/binding.md), you built a host over
+a `space()`. A module packages a space in a crate so other hosts can use it. This page
+shows what to include from the first commit. The reference is
 [`ikigai-fn`](https://github.com/ikigai-rs/ikigai-fn): a library file, a README
 that says what each endpoint is for, and a shared CI workflow. It is the crate this book
 chains onto.
@@ -37,9 +38,10 @@ resource](getting-started/hello-resource.md) built one. The description is not o
 paperwork: the engine routes named arguments by it, the catalog is built from it, and an
 agent's tool is projected from it. So, from the first endpoint:
 
-- `ArgSpec` for every argument — `name`, `summary`, `optional()` where it is, `class(..)`
-  always: an XSD datatype IRI for a scalar, an `rdfs:Class` for an entity. The one people
-  leave off, and the one [The graph face](building/graph-face.md) shows is the point.
+- `ArgSpec` for every argument — `name`, `summary`, `optional()` when the argument is
+  optional, and `class(..)` always: an XSD datatype IRI for a scalar, an `rdfs:Class` for
+  an entity. [The graph face](building/graph-face.md) explains how that class makes the
+  argument usable in a graph.
 - `one_of(..)` for enums, `default_value(..)` where a default exists. The kernel fills a
   declared default in before dispatch (since `ikigai-core` 0.1.105), so your code reads the
   argument and does not apply the default a second time. A default makes its input
