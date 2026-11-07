@@ -5,7 +5,8 @@ has, and the board. None of it knows the rules of tic-tac-toe. This part adds
 them, and adds them the same way as everything else: as resources. Which lines a square is
 on, who has won and whose turn it is are each a name that answers. Then comes the one
 resource that changes the game, the move, and the rules are enforced there and nowhere
-else. It covers the ground of the sixth and seventh parts of the series Part I credits.
+else. It covers the ground of the sixth and seventh parts of the original series credited in
+[Part I](tic-tac-toe-1.md).
 
 ```rust,ignore
 {{#include ../../../../crates/tic-tac-toe/src/lib.rs:rule_names}}
@@ -156,7 +157,7 @@ make by hand.
 it must be the side to play, so a player who believes it is their turn and is wrong is told
 so rather than silently playing for the other side.
 
-This is the series' seventh part in one sentence: keep the model loose, and constrain it at
+This is the original series' seventh part in one sentence: keep the model loose, and constrain it at
 the boundary of the application. The stored cell does not know about turns, and the move
 does not change it. The atoms are still the atoms Part I built. Another game on the same
 cells (Connect Four, or tic-tac-toe on a bigger board) would write its own move
@@ -378,7 +379,7 @@ XO-
 Finally, follow the links. The CheckSet answers names, and the engine's map, `..`, runs a
 stage once for each line of its input. `urn:iki:fn:compose` sources the resource its `src`
 names and expands any transclusion markers in it. A line has none, so here it does exactly
-one thing: read the resource a name names. So this reads the four lines through the center,
+one thing: read the resource named by each input line. So this reads the four lines through the center,
 the winning diagonal among them:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:ttt:checkset:1:1 .. urn:iki:fn:compose
