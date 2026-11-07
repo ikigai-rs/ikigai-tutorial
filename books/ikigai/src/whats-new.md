@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: The failed-draft exercise includes the script read grant needed to check that no script was saved.
+
+  Pages: [Exercises: code and language](code/exercises.md)
+
 - **2026-11-07**: Exercises: code and language names the chapters that supply its hosts and says where to write and run the tests.
 
   Pages: [Exercises: code and language](code/exercises.md)

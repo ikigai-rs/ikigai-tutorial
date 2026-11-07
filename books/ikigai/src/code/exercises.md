@@ -82,7 +82,7 @@ the payroll in it. Narrowing can only keep what is already there.
 
 Script a stub whose only draft, for the ask "delete everything", is an UPDATE:
 `DELETE WHERE { GRAPH <urn:iki:tutorial:items> { ?s ?p ?o } }`. Draft with it, as a person who may
-write the script `wipe` and holds both item grants and a network grant, with
+read and write the script `wipe` and holds both item grants and a network grant, with
 `save=wipe`.
 
 - **File** — `crates/your-endpoints/tests/code.rs`; `stub_model` gives you the model and the
@@ -101,6 +101,9 @@ Your person holds the WRITE grant on the items graph, so this is not the capabil
 refusing the draft: the check refuses any UPDATE, because a draft reads. Read both attempts'
 errors. The second one is not about the UPDATE at all. Why did drafting stop at two when the bound
 is three?
+
+`Exists urn:script:wipe` needs `urn:cap:script:read:wipe` even when the script does not exist,
+so include that grant in your person's capability.
 
 Nothing was saved, and nothing ran. A model that answers with a destructive query on every attempt
 has produced, at the end, an answer saying so.

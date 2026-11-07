@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "The failed-draft exercise includes the script read grant needed to check that no script was saved."
+pages = ["code/exercises.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "The fourth code exercise names the query pattern its warning checks; its old heading link still works."
 pages = ["code/exercises.md"]
 maintenance = true
