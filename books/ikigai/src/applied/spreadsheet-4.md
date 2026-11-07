@@ -186,8 +186,8 @@ part would have put it.
 
 It is not here, because `NOW()` reads one name, `instant`, and `instant` is the guarded reading:
 the date read on both sides of the time. The guard is written once, in the resource, and every
-reader of that name is safe without knowing there was a trap. The crate's test runs `=NOW()` two
-hundred times across midnight, on a clock that moves a millisecond every time it is read:
+reader of that name is safe without knowing there was a trap. The crate's test runs `=NOW()` 199
+times across midnight, on a clock that moves a millisecond every time it is read:
 
 ```rust,ignore
 {{#include ../../../../crates/spreadsheet/tests/live.rs:torn}}

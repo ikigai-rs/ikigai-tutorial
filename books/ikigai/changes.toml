@@ -19,6 +19,12 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-07"
+summary = "Spreadsheet, IV corrects the stated number of midnight trials to match its included test."
+pages = ["applied/spreadsheet-4.md"]
+maintenance = true
+
+[[change]]
 date = "2026-11-05"
 summary = "Emacs aliases now names the ikigai-cli release the book replays against from the book's version pin, instead of an outdated release number."
 pages = ["beyond/emacs-aliases.md"]
