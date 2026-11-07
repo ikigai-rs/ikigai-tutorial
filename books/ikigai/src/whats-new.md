@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: Exercises: code and language names the chapters that supply its hosts and says where to write and run the tests.
+
+  Pages: [Exercises: code and language](code/exercises.md)
+
 - **2026-11-07**: A sentence becomes a draft explains how to run its examples and links the hosts, authority rules, and examples it builds on.
 
   Pages: [A sentence becomes a draft](code/sentence.md)

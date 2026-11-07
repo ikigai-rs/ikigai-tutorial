@@ -1,11 +1,13 @@
 # Exercises: code and language
 
-Four, and all four are written in **your** crate — `crates/your-endpoints/tests/code.rs` —
-against the code this section quotes, `crates/script-host`, `crates/script-authority` and
-`crates/sentence-draft`, which you use and do not edit. The file already holds the scaffolding:
+Write these four exercises as tests in **your** crate, in
+`crates/your-endpoints/tests/code.rs`. Use the hosts from [Scripts are resources](scripts.md),
+[Who a script runs as](authority.md) and [A sentence becomes a draft](sentence.md):
+`crates/script-host`, `crates/script-authority` and `crates/sentence-draft`. Leave those crates
+unchanged. Your test file already holds the scaffolding:
 `publish` (a SPARQL script, under a capability), `result` (an answer, and whether it came from the
 cache), `person` (a capability naming its principal, as a door would mint it), `stub_model` (a stub
-with drafts of your own), and one test proving all of it works. The loop is:
+with drafts of your own), and one test proving all of it works. Run your tests from the repository's root:
 
 ```bash
 cargo test -p your-endpoints --test code

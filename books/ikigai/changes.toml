@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-07"
+summary = "Exercises: code and language names the chapters that supply its hosts and says where to write and run the tests."
+pages = ["code/exercises.md"]
+
+[[change]]
+date = "2026-11-07"
 summary = "The drafting chapter's closing table puts each resource's distinguishing name first."
 pages = ["code/sentence.md"]
 maintenance = true
