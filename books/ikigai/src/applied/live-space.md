@@ -61,10 +61,13 @@ The declaration lives at a name of its own:
 written in; `Source` answers it as the `ik:` Turtle core builds from. Beside it is the dynamic
 space in words, `urn:iki:tutorial:live:arrangement`: a line for the space, and one for each
 space and door it holds, read from the kernel's topology, so it says what is in force rather
-than what was last written. The host's root is three layers: those two, then `ikigai-diagram`'s
-space (`urn:diagram:kernel`, the picture Tic-tac-toe VII drew from a file, here drawn from the
-running kernel, beside the `urn:diagram:state` pair that draws governors' state over an
-arrangement, which this chapter does not use), then the dynamic space:
+than what was last written.
+
+The host's root has three layers. The first serves the declaration and the space's words.
+The second is `ikigai-diagram`'s space: `urn:diagram:kernel` draws the running kernel, where
+[Tic-tac-toe, VII](tic-tac-toe-7.md) drew an arrangement from a file. That layer also serves the
+`urn:diagram:state` pair for drawing governors' state over an arrangement; this chapter does
+not use it. The third layer is the dynamic space:
 
 ```rust,ignore
 {{#include ../../../../crates/live-space/src/lib.rs:kernel}}
