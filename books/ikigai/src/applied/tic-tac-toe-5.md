@@ -514,9 +514,10 @@ whether a mark is cacheable.
 
 ## What the board does for a reader who cannot see it
 
-The board is buttons, so it works with a keyboard and a screen reader with no extra code.
-Every square has a name that says where it is and what is on it: `2,0: empty, play here`,
-`X at 1,1`. A square that cannot be played, taken or closed by the end of the game, is
+The board uses native buttons for keyboard controls and exposes each square to assistive
+technology. Screen-reader behavior has not been tested, as [Accessibility](https://github.com/ikigai-rs/ikigai-tutorial/blob/main/ACCESSIBILITY.md)
+records. Every square has a name that says where it is and what is on it:
+`2,0: empty, play here`, `X at 1,1`. A square that cannot be played, taken or closed by the end of the game, is
 `aria-disabled` rather than `disabled`: it stays in the tab order and keeps its name, so a
 reader can still find out what is on it, and it does nothing when pressed. The status line
 is a live region (`role="status"`), which a screen reader announces when it changes, and it
