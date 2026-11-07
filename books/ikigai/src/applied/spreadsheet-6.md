@@ -24,7 +24,7 @@ One atom changes, and two corridors are added:
 
 | the space | its name | what it answers | built from |
 |---|---|---|---|
-| the shared sheet | the root | every name, as Parts I–V built it | the input, which now keeps every write it was given |
+| the shared sheet | the root | every name, as Parts I–V built it | the input's existing write history |
 | a person's **scenario** | `urn:iki:tutorial:sheet:scenario:{who}` | `input:{ref}` for the cells that person overrode, and nothing else | a store of overrides, behind a capability of their own |
 | the sheet **as of** an instant | `urn:ctx:time:{instant}` | every `input:{ref}` as it stood then; `now` and `today` at that instant | the input's history, and the time chapter's clock |
 | both at once | a stack of the two | whatever the innermost corridor answers, then the next | `Scope::stack` |
