@@ -382,12 +382,12 @@ Try a formula of your own, a range, and a mistake.
 
 | the set | the name | what it is |
 |---|---|---|
-| the compiler | `urn:iki:tutorial:sheet:compile` | code: a pure function, declared as a lossy transreptor |
-| a compiled formula | `urn:iki:tutorial:sheet:formula:{ref}` | glue: the input, run through whatever plan the kernel finds |
-| references | `urn:iki:tutorial:sheet:refs:{ref}` | code: a small function of the compiled form and the ranges it names |
-| a range | `urn:iki:tutorial:sheet:range:{from}:{to}` | code: a pure function of its own name |
-| precedents | `urn:iki:tutorial:sheet:precedents:{ref}` | code: a walk over `refs`, the question "is this a cycle?" |
-| a value | `urn:iki:tutorial:sheet:cell:{ref}` | code: the evaluator, reading every value it needs by name |
+| Compiler | `urn:iki:tutorial:sheet:compile` | code: a pure function, declared as a lossy transreptor |
+| Compiled formula | `urn:iki:tutorial:sheet:formula:{ref}` | glue: the input, run through whatever plan the kernel finds |
+| References | `urn:iki:tutorial:sheet:refs:{ref}` | code: a small function of the compiled form and the ranges it names |
+| Range | `urn:iki:tutorial:sheet:range:{from}:{to}` | code: a pure function of its own name |
+| Precedents | `urn:iki:tutorial:sheet:precedents:{ref}` | code: a walk over `refs`, the question "is this a cycle?" |
+| Value | `urn:iki:tutorial:sheet:cell:{ref}` | code: the evaluator, reading every value it needs by name |
 
 `formula:{ref}` is glue for the reason the time chapter's view used to be: a name cannot carry
 an argument. A view no longer needs one, since `compose_over` fixes the template when it is bound
