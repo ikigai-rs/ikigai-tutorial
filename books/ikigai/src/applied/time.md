@@ -1,8 +1,9 @@
 # Time is a resource
 
-Everything the book has built so far changes only when something writes. A `Sink` plays a
-mark, the kernel cuts the stored cell's golden thread, and whatever was computed from that
-cell is computed again the next time somebody asks. Nothing changes on its own.
+[Short names in a space](prefixes.md) changed a prefix table by writing its declaration.
+The tic-tac-toe game changes the same way: a `Sink` plays a mark, the kernel cuts the stored
+cell's golden thread, and whatever was computed from that cell is computed again the next
+time somebody asks. Nothing in either example changes on its own.
 
 Time does. The answer to "what time is it?" goes out of date with nobody writing anything,
 so a golden thread cannot say when to let it go. The kernel has a second way to let an
@@ -174,7 +175,9 @@ code or its types to show for it. That is a performance change, even when it is 
 correctness one, and the only way to see it is to measure the read.
 
 The event's golden thread still works as it always did. Move the event, and the countdown
-goes at once, in the middle of the minute, while `now` stays cached:
+goes at once, in the middle of the minute, while `now` stays cached. The fixed instant below
+is thirty minutes ahead of the test clock. On the page, replace it with a future UTC instant
+of your own; a past instant gives a negative countdown:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:time:event:tea 2026-09-29T14:37Z
 cache urn:iki:tutorial:time:until:tea
