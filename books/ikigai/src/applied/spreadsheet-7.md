@@ -1,7 +1,7 @@
 # Spreadsheet, VII: push
 
-[Part V](spreadsheet-5.md) ended with a page that found out about a write it did not make the
-only way a reader of a name can: it asked again, every two seconds, whether anything had changed
+[Data that changes outside the sheet](spreadsheet-5.md) ended with a page that
+found out about a write it did not make the only way a reader of a name can: it asked again, every two seconds, whether anything had changed
 or not. It also listed what the other direction needs, the kernel telling the page. There were
 four pieces, and a caveat. Somebody to tell: the kernel has had that since core 0.1.82, `Kernel::listen`. What
 to redraw: the host's business. A channel: in this book the host is the page, so being told is a
@@ -11,6 +11,11 @@ early cutoff, a cost this part notes, not a piece it builds.)
 This part builds the host's half, in the page. It needs no server and no new core, and the sheet
 gains one template, the page that asks each cell to listen, and nothing else: not a line of its
 formulas, its evaluator or its views changes.
+
+Run the cells on this page in order, with **Run the market**, **Push**, and **Poll** off until you
+reach [The page, pushing](#the-page-pushing). This page has its own kernel and starts with an
+empty sheet; the cells below recreate the feed and formulas. Run them here, where the host
+supplies the sheet and listener resources, rather than in a standalone `ikigai` REPL.
 
 ## The model, on paper
 
@@ -39,8 +44,8 @@ resource that was written. That is information, so listening needs a capability,
 {{#include ../../../../crates/push/src/lib.rs:listener}}
 ```
 
-Narrow this cell's capability to Bob's, from Part VI, and ask to listen. Then ask again with the
-page's own:
+Narrow this cell's capability to Bob's, from [Who may read a scenario](spreadsheet-6.md#who-may-read-a-scenario),
+and ask to listen. Then ask again with the page's own:
 
 <div class="ikigai-run" data-cmd='cap urn:cap:iki:tutorial:sheet:scenario:bob
 sink urn:iki:tutorial:push:listener:mine urn:iki:tutorial:sheet:
@@ -70,8 +75,9 @@ The listener holds the registration and nothing else. The queue is the kernel's:
 
 ## A write, heard
 
-Part V's holding again: a price in a feed, a quantity, their value, and some arithmetic that has
-nothing to do with them. Then ask the listener what it heard:
+Recreate the holding from [Data that changes outside the sheet](spreadsheet-5.md): a price in a
+feed, a quantity, their value, and some arithmetic that has nothing to do with them. Then ask the
+listener what it heard:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:sheet:feed:acme 100
 sink urn:iki:tutorial:sheet:input:A1 =FEED(acme)
@@ -260,8 +266,8 @@ So push has two triggers, and the page needs both: a **cut**, announced by the k
 
 ## A scenario's write is heard by everybody
 
-Part VI admitted a limit: a golden thread is a name, not a name in a space, so Alice's override in
-her scenario cuts the shared sheet's values too (ledger item 581). They are computed again and
+[A sheet is a space, and spaces stack](spreadsheet-6.md) showed a limit: a golden thread
+is a name, not a name in a space, so Alice's override in her scenario cuts the shared sheet's values too (ledger item 581). They are computed again and
 come out the same, so nothing is ever wrong, only more work than necessary. With push, the work
 becomes visible. Alice sells twelve:
 
@@ -342,7 +348,8 @@ exactly what that session was sent.
 
 ## The page, pushing
 
-The sheet below is Part V's, drawn a different way. Each cell is a view of its own, and each says,
+The sheet below is the one from [Data that changes outside the sheet](spreadsheet-5.md), drawn a
+different way. Each cell is a view of its own, and each says,
 in its markup, when it wants to be drawn: when the page loads, when the page says it is **stale**,
 and every two seconds while polling is on. Here is the first row of the template:
 
