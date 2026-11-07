@@ -1,8 +1,9 @@
 # Time is a resource
 
-Everything the book has built so far changes only when something writes. A `Sink` plays a
-mark, the kernel cuts the stored cell's golden thread, and whatever was computed from that
-cell is computed again the next time somebody asks. Nothing changes on its own.
+[Short names in a space](prefixes.md) changed a prefix table by writing its declaration.
+The tic-tac-toe game changes the same way: a `Sink` plays a mark, the kernel cuts the stored
+cell's golden thread, and whatever was computed from that cell is computed again the next
+time somebody asks. Nothing in either example changes on its own.
 
 Time does. The answer to "what time is it?" goes out of date with nobody writing anything,
 so a golden thread cannot say when to let it go. The kernel has a second way to let an
@@ -69,8 +70,8 @@ Without a clock, the time endpoints do not guess. They refuse, and say why:
 {{#include ../../../../crates/time-resource/src/lib.rs:clock}}
 ```
 
-On any other page of this book, `source urn:iki:tutorial:time:now` answers with that
-refusal.
+On a page whose kernel has no clock, `source urn:iki:tutorial:time:now` answers with
+that refusal.
 
 ## Now, until the next minute
 
@@ -174,7 +175,9 @@ code or its types to show for it. That is a performance change, even when it is 
 correctness one, and the only way to see it is to measure the read.
 
 The event's golden thread still works as it always did. Move the event, and the countdown
-goes at once, in the middle of the minute, while `now` stays cached:
+goes at once, in the middle of the minute, while `now` stays cached. The fixed instant below
+is thirty minutes ahead of the test clock. On the page, replace it with a future UTC instant
+of your own; a past instant gives a negative countdown:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:time:event:tea 2026-09-29T14:37Z
 cache urn:iki:tutorial:time:until:tea
@@ -230,9 +233,9 @@ The spreadsheet's `NOW()` reads it, in [Spreadsheet, IV](spreadsheet-4.md).
 
 ## A page that polls
 
-Here is the clock. It is paused until you start it, so the cells above answer as they
-say; press **Poll** and it asks the kernel for the time once a second, and
-counts what that cost.
+Here is the clock view. Polling is paused until you press **Poll**, so it does not fill
+the cache before you run the cells above. The kernel's clock keeps running. Press **Poll**
+and the view asks the kernel for the time once a second and counts what that cost.
 
 <div class="ikigai-view" data-clock data-shell='urn:iki:tutorial:time:template:face'><p class="ikigai-view-unavailable">The clock appears here when the in-page kernel has loaded.</p></div>
 
