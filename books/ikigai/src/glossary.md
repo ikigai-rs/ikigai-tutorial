@@ -33,8 +33,9 @@ not have a format; it has whatever the kernel can reach. You write one in
 resolution derived from other resolutions inherits their threads; a write to a resource
 cuts the thread named after it, and every cached entry whose threads include that one —
 directly or transitively — stops being valid at that instant. Since core 0.1.73 every cacheable
-entry also hangs from the thread named after its own target, so even a pure function's, which
-declares none, is cut by a cut of its own name. Precise invalidation, not timeouts. You cut one in [What resolution buys
+entry also hangs from the thread named after its own target. Even a cached answer from a
+pure function that declares no dependencies is invalidated when its target's thread is cut.
+Precise invalidation, not timeouts. You cut one in [What resolution buys
 you](getting-started/payoff.md) and again, on a file, in
 [Configuration](getting-started/configuration.md).
 
@@ -45,18 +46,19 @@ equals enforced, and either half without the other is a defect. You declare one 
 own endpoint in [Multi-verb endpoints](building/multi-verb.md), and watch one cross a
 socket in Part III's [Exercises](beyond/exercises.md).
 
-**Failure class.** Who may repeat a failure, as one of seven words: `transient`,
-`retry-after`, `over-budget`, `denied`, `refused`, `permanent`, `unknown`. Every error has
-exactly one (`Error::class()`), and what may repeat it reads that rather than the message. A
+**Failure class.** A retry rule that says who may retry a failed request and when, as one
+of seven words: `transient`, `retry-after`, `over-budget`, `denied`, `refused`, `permanent`,
+`unknown`. Every error has exactly one (`Error::class()`); retry logic reads the class rather than the message. A
 **retry budget** (`urn:cap:retry:<n>`) is how many re-issues a whole run may spend, and a **run
 deadline** (`not_after`) is how long it has; both are taught in [Failure has a
 class](beyond/failure.md).
 
-**Scope.** (Not a *capability scope*, one `urn:cap:…` string in a capability, which is
-what most chapters mean by "a scope".) The resolution chain a request is resolved in: corridors a host injected
+**Scope.** The resolution chain a request is resolved in: corridors a host injected
 ahead of the kernel's root, innermost first, and whether the root is on the end at all.
-Every sub-request inherits it. Injecting a corridor (`Kernel::issue_in`) is the host's
-authority, since a corridor placed ahead of the root can stand in for any door; cutting
+This differs from a *capability scope*, one `urn:cap:…` string in a capability, which is
+what most chapters mean by "a scope". Every sub-request inherits the resolution chain.
+Injecting a corridor (`Kernel::issue_in`) is the host's authority, since a corridor placed
+ahead of the root can stand in for any door; cutting
 the root off (`Confine`) is the one chain-changing move an endpoint gets, and inside a
 severed chain a name outside it is unresolvable, never denied. The chain is part of the
 cache key. [Scope and alias](getting-started/scope-and-alias.md).
