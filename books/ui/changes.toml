@@ -21,6 +21,9 @@
 date = "2026-11-09"
 summary = "The htmx chapter links back to the live-view model, names the note form and cache row to watch, and shows how to pass host options through Cargo from the repository root."
 pages = ["delivery/htmx.md"]
+
+[[change]]
+date = "2026-11-09"
 summary = "The reserved WebTransport, terminal and component chapters clarify their connection to earlier examples and distinguish existing kernel readouts from planned inspector text views. The companion-book descriptions use shorter sentences."
 pages = ["delivery/webtransport.md", "delivery/terminal.md", "components/index.md", "other-books.md"]
 maintenance = true

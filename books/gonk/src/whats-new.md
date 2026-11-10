@@ -10,6 +10,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-09**: The workflow, model, and sentence chapters clarify fresh setup, server terminals, and the queries and plan you already have. The sentence chapter explains how to reuse your own model without replacing its mount configuration.
 
   Pages: [A workflow of your own](project/script.md), [A model of your own](project/model.md), [A query from a sentence](project/sentence.md)
+
 - **2026-11-09**: The embedding chapter clarifies its setup, dataset sharing and caller permissions, and identifies the unpublished finding as pending. The other books are listed separately so readers can scan their subjects.
 
   Pages: [The ledger, the store and browse in your own kernel](embedding/own-kernel.md), [The other books](ikigai-book.md)
