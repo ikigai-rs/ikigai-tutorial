@@ -24,6 +24,8 @@ summary = "A river of feeds now says what happens to a feed's `<ttl>`: the style
 pages = ["explore/rss.md"]
 summary = "The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits."
 pages = ["beyond/socket.md", "beyond/identity.md", "beyond/datasets.md"]
+summary = "Dual-mode crates distinguishes a declared module feature from a working WebAssembly build and says where to run the build command. Where this actually stands clarifies the exercise workflow, release overview, and links to earlier examples."
+pages = ["modules/dual-mode.md", "modules/status.md"]
 
 [[change]]
 date = "2026-11-05"

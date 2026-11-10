@@ -1,7 +1,8 @@
 # Where this actually stands
 
-This chapter exists because a tutorial that leaves you to discover the maturity of a
-feature by hitting its edges has wasted your afternoon.
+In [A module, end to end](end-to-end.md), you ran a host whose module calls back into
+it. [The wire session](wire-session.md) showed how that conversation crosses a boundary.
+This chapter separates what you can use today from what still needs to be built.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
@@ -30,13 +31,13 @@ What is actually there, at `ikigai-module` 0.4.0 (0.4.0 over 0.3.2 holds a modul
 
 | piece | state |
 |---|---|
-| the callback machinery | **proven** — `InProcessTransport`, exercised end to end |
-| the wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |
-| an out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
-| a module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`); since 0.3.0 the module's **cards** cross at `connect` (`ModuleCall::Cards`), so the host enforces against the module's own description and the manifold through a `ModuleSpace` lists the module's actions rather than one endpoint named `module` |
-| the error type across the wire | **since 0.3.0** — `ModuleReply::ErrorTyped` and `ModuleCall::HostError`: a module-side denial arrives at the host as a `Denied`, a host resource's `NotFound` arrives in the module as a `NotFound`; before that the wire flattened both to a string |
+| callback machinery | **proven** — `InProcessTransport`, exercised end to end |
+| wire session | **proven through the codec** — `LoopbackTransport` encodes and decodes every message |
+| out-of-process transport | **built, Unix only** — `UdsTransport` + `serve`: the module runs in its own process behind a `0600` socket, and `serve` refuses peers belonging to another user |
+| module's declared capability | **enforced** since 0.2.0 — `ModuleFloor` on the mount, and an endpoint's own `requires` honored across the boundary (the crate's test `a_module_endpoints_declared_requirement_is_enforced_like_a_linked_ones`); since 0.3.0 the module's **cards** cross at `connect` (`ModuleCall::Cards`), so the host enforces against the module's own description and the manifold through a `ModuleSpace` lists the module's actions rather than one endpoint named `module` |
+| error type across the wire | **since 0.3.0** — `ModuleReply::ErrorTyped` and `ModuleCall::HostError`: a module-side denial arrives at the host as a `Denied`, a host resource's `NotFound` arrives in the module as a `NotFound`; before that the wire flattened both to a string |
 | golden threads across the wire | **since 0.3.0** — `ModuleReply::ResolvedThreaded` carries a result's declared threads; before that a module result through the loopback or wasm session was cached forever with nothing to cut it, and a `Sink` through the mount left it stale. Since 0.3.2 a callback that **failed** is a dependency on the wasm path too, by core's rule for a failed sub-request (`record_failure`): a `NotFound` or `Unresolved` hangs the module's answer from the missing name, any other failure makes it uncacheable; the native transports (in-process, loopback, Unix socket) already had that, through the host's own issuer |
-| an embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
+| embedded wasm runtime | **not built** — no `wasmtime` in its manifest; a host embedding one is Phase 2 |
 | isolation | **not there** — a process boundary is not a resource budget |
 | hosts that load modules | **one**, the browser demo (`ikigai-web-demo`, `WasmModuleSpace`, as of 2026-10-10) |
 
@@ -88,10 +89,10 @@ are unchanged; the new messages are appended.)
 
 ## What is genuinely usable now
 
-- The dual-mode pattern, as a way to keep a heavy dependency out of hosts that do not need
+- Dual-mode pattern, as a way to keep a heavy dependency out of hosts that do not need
   it ([Dual-mode crates](dual-mode.md)).
-- The browser case, which is real and running.
-- The `InProcessTransport`, as a way to develop and test a module's *semantics* long before
+- Browser host, which is real and running ([The wire session](wire-session.md#the-browser-host)).
+- `InProcessTransport`, as a way to develop and test a module's *semantics* long before
   its transport exists — which is what this book's demo does.
 
 ## Where isolation would come from (direction, not shipped)
@@ -132,10 +133,12 @@ the difference.
 
 The chapters above build against `ikigai-core` 0.2.12. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
-The list below stops at 0.1.95. The eight releases from 0.1.96 to 0.1.103 are taught in the
-chapters they touch. Of the nine since, 0.1.104 (the principal vocabulary), 0.1.106 and
+Those seventeen releases are summarized after the newer changes below. The eight releases
+from 0.1.96 to 0.1.103 are taught in the chapters they touch. Of the nine from 0.1.104 to
+0.1.112, 0.1.104 (the principal vocabulary), 0.1.106 and
 0.1.107 change nothing a page shows, and six are worth a line, because they change what
-an endpoint you write can rely on, or what a page shows:
+an endpoint you write can rely on, or what a page shows. The list also includes 0.2.0,
+the streams release:
 
 - **0.1.105 changed behavior: a declared default is filled in.** The kernel fills a
   declared `default_value` into the request before dispatch, so an endpoint reads an
@@ -258,12 +261,13 @@ a resource, `urn:kernel:topology` ([Tic-tac-toe, VII](../applied/tic-tac-toe-7.m
 
 ## Exercises
 
-Four, and all four run against **your** module — `crates/your-endpoints/src/module.rs`,
+These four exercises run against **your** module — `crates/your-endpoints/src/module.rs`,
 the same shape as the `loadable-module` crate this part quotes, with a `greeting` endpoint
 under `urn:iki:tutorial:yours:module:` that calls back to the host's
-`urn:iki:tutorial:yours:name`. The loop is `cargo test -p your-endpoints`; the test module
-at the bottom of that file already has the `greet` helper that builds a kernel and resolves
-a name under a capability, so a new question is a copy of it with something changed.
+`urn:iki:tutorial:yours:name`. Run `cargo test -p your-endpoints` from the tutorial
+workspace root after each change. The test module at the bottom of that file already has
+the `greet` helper that builds a kernel and resolves a name under a capability. Copy the
+existing greeting test and change its inputs to try another resolution.
 
 ### 1. Break the prefix
 
@@ -358,7 +362,7 @@ in `host_space()`.
 <details>
 <summary>Hint</summary>
 
-Nothing about your code changes, which is the observation. What changes underneath is that
+Your endpoints and test assertions stay the same. What changes underneath is that
 every message in the session — the invocation, each `HostCall`, each `HostResult`, the
 final representation — is now genuinely encoded and decoded, in one process, over an
 in-memory channel.
