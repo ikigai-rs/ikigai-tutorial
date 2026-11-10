@@ -56,6 +56,9 @@ pages = ["applied/tic-tac-toe-7.md"]
 date = "2026-11-07"
 summary = "Tic-tac-toe, VI links back to the browser board you already built and distinguishes terminal commands from the page's runnable cells."
 pages = ["applied/tic-tac-toe-6.md"]
+date = "2026-11-07"
+summary = "Tic-tac-toe, IV clarifies game state, cache isolation, and the handoff to the playable board. Part V makes the two-store startup sequence explicit, corrects the cache-invalidation explanation, qualifies untested screen-reader behavior, and gives the views recap a parallel label."
+pages = ["applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md"]
 
 [[change]]
 date = "2026-11-05"
