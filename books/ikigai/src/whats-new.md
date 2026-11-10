@@ -27,6 +27,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-05**: The endpoint chapters connect their examples to the host you already have, clarify terms and command locations, and distinguish the tutorial host from the CLI. Transreption specifies the description format; the stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb.
 
   Pages: [Transreption](building/transreption.md), [Multi-verb endpoints](building/multi-verb.md), [The graph face](building/graph-face.md)
+- **2026-11-05**: "Checking a resource" identifies its earlier space and where to run its check. "Testing an endpoint hermetically" links the clock exercise, defines hermetic tests, clarifies clock setup and the shared-clock discussion, and shows how to run its three tests.
+
+  Pages: [Checking a resource](building/checking.md), [Testing an endpoint hermetically](building/hermetic.md)
 
 - **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
 
