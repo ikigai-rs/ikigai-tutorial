@@ -115,6 +115,13 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: The TypeScript track's Exists example writes the note again after the preceding batch deletes it, and includes the import and command needed to run it.
 
   Pages: [The TypeScript track](polyglot/typescript.md)
+- **2026-11-07**: The Python track names the working directory and Python version, shows an isolated package installation and the complete client command, and recreates the deleted note before checking whether it exists.
+
+  Pages: [The Python track](polyglot/python.md)
+
+- **2026-11-07**: One wire, three languages connects the tracks to the Rust examples you already built, labels their broader coverage, and explains L0's limits in plain terms.
+
+  Pages: [One wire, three languages](polyglot/index.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
