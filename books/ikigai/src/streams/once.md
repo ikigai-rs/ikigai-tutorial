@@ -1,10 +1,10 @@
 # Streams, III: a body read once, and its bound
 
-[The second streams page](replay.md) ended on the body it could not do much with: `Body::Once`, a
-one-shot stream, which the kernel would not cache and `urn:stream:range` would not slice. This
-page is about that body. It covers what a one-shot stream is and why it is never cached, how one
-is collected into a buffer under the run's **byte budget**, how one is decoded as text without
-being collected, and the refusal past the bound. The decoding runs in this page's kernel. The page
+In [A body you can read again](replay.md), you read the shop's stock through fresh readers and
+selected byte ranges. That page also introduced `Body::Once`, a one-shot stream, which the kernel
+would not cache and `urn:stream:range` would not slice. This page covers what a one-shot stream
+is and why it is never cached, how one is collected into a buffer under the run's **byte budget**,
+how one is decoded as text without being collected, and the refusal past the bound. The decoding runs in this page's kernel. The page
 has no one-shot source of its own, so the listings that make one run in `mdbook test`.
 
 ## A stream that can be read once
@@ -15,8 +15,8 @@ gone. Nothing in the stream can start it again from the first byte, so the kerne
 one: the next caller would find it already read. The endpoint runs again for each request
 instead, and a trace's uncached note gives the reason as `one-shot body`.
 
-The listing below answers the shop's stocktake, counted as it is read, as a one-shot body of one
-chunk per row. It counts how often the count is taken, and runs in `mdbook test`:
+The listing below answers the shop's stocktake as a one-shot body, with one chunk per row.
+It counts how often the endpoint runs, and runs in `mdbook test`:
 
 <!-- urn-gate: unbound urn:shop:count — bound by the listing below, in a space of its own. -->
 
@@ -115,10 +115,10 @@ that fit, and what the collect drew is given back.
 
 The pool's size comes from the caller's capability, the way the retry budget's does:
 
-- a host sets a **base** and a **ceiling** with `Kernel::with_stream_memory(base, ceiling)`, both
-  64 MiB unless it says otherwise;
-- a capability with no grant gets the base, and root gets the ceiling;
-- a grant `urn:cap:stream:memory:<bytes>` (`cap_stream_memory(bytes)`) raises its holder's budget,
+- Hosts set a **base** and a **ceiling** with `Kernel::with_stream_memory(base, ceiling)`, both
+  64 MiB unless the host says otherwise;
+- Capabilities with no grant get the base, and root gets the ceiling;
+- Grants `urn:cap:stream:memory:<bytes>` (`cap_stream_memory(bytes)`) raise their holders' budgets,
   never above the ceiling and never below the base. Attenuating a capability can only remove the
   grant, so it can only lower the budget.
 
@@ -187,10 +187,11 @@ assert_eq!(limits.for_capability(&Capability::scoped([cap_stream_memory(u64::MAX
 
 The refusal says `over budget`, that 4 bytes were left and at least 38 were needed, and that a
 `urn:cap:stream:memory:<bytes>` grant raises the budget up to the host's ceiling. The header and
-flour's row are 28 bytes, so four of the 32 were left when sugar's 10-byte row arrived. The collect refused at the first chunk that did not fit, read nothing after it, and did
-not hand back the 28 bytes it had. `OverBudget` is a failure class of its own, and nothing in the
-kernel retries it: the same request under the same budget fails the same way. Only a caller with a
-larger grant, making a new request, gets a different answer.
+flour's row are 28 bytes, so four of the 32 were left when sugar's 10-byte row arrived. The
+38 bytes in the refusal are the total needed to hold all three rows. The collect refused at the
+first chunk that did not fit, read nothing after it, and did not hand back the 28 bytes it had.
+`OverBudget` is a failure class of its own, and nothing in the kernel retries it: the same request
+under the same budget fails the same way. Only a caller with a larger grant, making a new request, gets a different answer.
 
 The budget belongs to the run, not to one collect. Two endpoints in the same request that each
 collect a stream draw from the same pool, so a request cannot get past its budget by splitting its
@@ -205,7 +206,7 @@ argument if there is one, else from the body's own media type, else it is UTF-8.
 charset it decodes. Any other is refused by name rather than guessed at.
 
 The shop's stock is UTF-8, so the first line below answers it as text and the second is a cache
-hit. The third gzips it first, as [the first streams page](bytes.md) did, and gzip's bytes are not
+hit. The third gzips it first, as [Bytes are a representation](bytes.md) did, and gzip's bytes are not
 text. The fourth asks for a charset the decoder does not have:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:shop:stock | urn:stream:text

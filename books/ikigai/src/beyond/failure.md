@@ -3,7 +3,7 @@
 [Preferential resolution](preference.md) let one question decide a whole mount: could another
 target fix this failure? That was the only use it made of a failure's type, and the type says
 more. [A kernel behind a socket](socket.md) showed a failure arriving typed. This chapter is what
-the type is for: **who may repeat a failure, when, and on whose authority.**
+the type is for: **who may repeat a request after a failure, when, and on whose authority.**
 
 Nothing here starts a server that outlives its listing, so a socket or a REPL still open from
 earlier in the book can stay open. Every listing below runs when the book is tested.
@@ -540,8 +540,9 @@ downgraded to the `Endpoint` it has always received, and that is `unknown`: it r
 Between two v9 peers the classes themselves cross typed, delay included, so the rule from
 [Preferential resolution](preference.md) holds over a real socket: the tests
 `a_prefer_mount_decides_by_a_class_that_crossed_a_socket` and `a_stated_delay_survives_the_wire` in
-`crates/two-hosts` serve a peer that answers `RetryAfter` or `Refused`. The first falls through, the
-second comes back as itself, and a `RetryAfter` read directly from the socket still has its delay.
+`crates/two-hosts` check both rules. A `RetryAfter` received over the socket falls through to the
+local binding; a `Refused` returns unchanged. A `RetryAfter` read directly from the socket still
+has its delay.
 
 ## What this does not do
 

@@ -5,9 +5,9 @@ WebAssembly and runs in your browser tab, under the same engine as the `ikigai` 
 This appendix covers how that kernel is put together. It compares what the browser gives a
 kernel with what a native host gives one, and explains why the same crates serve both.
 
-It assumes [Binding, and a host of your own](getting-started/binding.md): a host is the
-code that builds a kernel, binds its spaces and hands it what it needs. The page is one
-more host.
+In [Binding, and a host of your own](getting-started/binding.md), you built a host: code
+that builds a kernel, binds its spaces and hands it what it needs. The page is another
+host, supplying what the browser can provide.
 
 ## The kernel brings nothing from the platform
 
@@ -15,9 +15,9 @@ more host.
 Everything that comes from outside the program comes from the host that built the kernel,
 through a seam the host fills:
 
-- a space to resolve against (`Kernel::new`);
-- a Meta renderer, so `describe` and the catalog answer (`Kernel::with_meta_renderer`);
-- a clock, so the kernel can say what time it is (`Kernel::with_clock`).
+- Space to resolve against (`Kernel::new`);
+- Meta renderer, so `describe` and the catalog answer (`Kernel::with_meta_renderer`);
+- Clock, so the kernel can say what time it is (`Kernel::with_clock`).
 
 The kernel uses only what it was handed. That is what lets one kernel crate run in a
 command-line tool, in a long-running service, under a test that stops time, and in a web
@@ -40,8 +40,9 @@ A few things follow from this:
 - **One kernel per page.** Every cell on a page runs against the same kernel, so a value
   cached by one cell is cached for the next. Reloading the page builds a new kernel, so
   nothing you did on one page is on the next.
-- **The same spaces the chapters test.** The page's space is Part I's, the tic-tac-toe
-  game's, the spreadsheet's and the rest, in one fallback. These are the same spaces, with
+- **The same spaces the chapters test.** The page's space combines the space you built in
+  [Binding, and a host of your own](getting-started/binding.md), the tic-tac-toe game's
+  space, the spreadsheet's space and the rest in one fallback. These are the same spaces, with
   the same bindings and renderer, that the chapters' Rust tests run against. Nothing is
   mocked and nothing is replayed.
 - **The CLI's engine.** A cell's line goes through `ikigai-engine`, the REPL grammar the
@@ -79,11 +80,15 @@ published it: 178 events of magnitude 4.5 and up, from 2024-01-01 to 2024-01-08,
 GeoJSON. At a shell it is a file you save in the CLI's file workspace, where it is
 `urn:file:quakes-2024-01-01.geojson`. The page binds that same name to the same bytes,
 compiled into the module by the `quakes` crate, so a cell and a command name one resource.
-It answers only reads, and it never changes. The JSON-LD context that
+It answers only reads, and it never changes.
+
+The JSON-LD context that
 [Giving the data names](explore/names.md) reads beside it is bound the same way, at
 `urn:file:quakes.context.jsonld`, the name the copy you download there has, and so is the
 week after that [Composites, one layer at a time](explore/composites.md) joins, at
-`urn:file:quakes-2024-01-08.geojson`. [A river of feeds](explore/rss.md) reads the files of
+`urn:file:quakes-2024-01-08.geojson`.
+
+[A river of feeds](explore/rss.md) reads the files of
 its example, `examples/rss/ws/` in this book's repository, and the page binds each one at the
 name the example's own REPL gives it, from `urn:file:directory.opml` to
 `urn:file:views/page.xsl`, with the bytes compiled in by the `rss-river` crate. Its river,

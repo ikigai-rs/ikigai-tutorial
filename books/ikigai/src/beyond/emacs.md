@@ -1,20 +1,26 @@
 # The editor as a client
 
-The chapters so far in this part were plumbing, and the reasonable question at the end of them
-is who benefits. This chapter and the next are the two answers, and they are the same answer twice:
-a client that reads the manifold gets a command surface it did not have to write.
+[Twenty minutes with the CLI](../front-door/cli.md) introduced the **manifold**: the actions
+your capability lets you invoke. An editor can read that same list to generate commands.
+This chapter shows how; later in the book, [The machine client](agent.md) uses it to
+generate tools for an agent.
 
 Start with the human one. `ikigai-emacs` is a thin client — it shells out to the `ikigai`
 binary and does nothing heavier — and its most interesting command is a dozen lines long, half of
 which are the message it prints afterwards.
 
-## One function per resource you may call
+<a id="one-function-per-resource-you-may-call"></a>
 
-`M-x ikigai-refresh-aliases` writes a file of elisp and loads it. What is in the file is
-**one function per resource this capability may invoke, with the arguments that resource
+## One function per action you may call
+
+`M-x ikigai-refresh-aliases` writes a file of elisp and loads it. An action pairs a resource
+with a verb, so a resource that answers both `Source` and `Sink` gets two functions. The file
+contains **one function per action this capability may invoke, with the arguments that action
 declares**. Not a hand-written wrapper library: a projection of the live manifold, so
 `(ikigai-fn-toUpper "hi")` exists because an endpoint says it takes an argument called
-`in`, and it will keep existing in that shape for exactly as long as the endpoint does.
+`in`. The generated file is a snapshot of those declarations.
+[Keeping them current](emacs-aliases.md#keeping-them-current) explains when to refresh and
+why an alias already loaded can outlive its endpoint.
 
 The whole of it is a resolution:
 
@@ -32,7 +38,9 @@ its arguments into a list and hands them to the verbs' own primitive, `%verb-arg
 the allowlist carries for exactly this. Two representations of one resource, which is the
 oldest idea in this book applied to tooling.
 
-## Why it cannot drift
+<a id="why-it-cannot-drift"></a>
+
+## Where the function signatures come from
 
 The generator does not read a config file listing what to emit. It resolves
 `urn:kernel:actions` — the capability-scoped manifold, already narrowed to what the caller
@@ -56,22 +64,22 @@ Three consequences, and the third is the one that makes this more than convenien
 
 ## A refused name is a comment, not a gap
 
-Projecting a URI into an identifier can fail. `urn:` names are not elisp symbols, and the
+Projecting an IRI into an identifier can fail. `urn:` names are not elisp symbols, and the
 generator will not emit something it has not verified *reads* in the target language — not
 "contains only legal characters", which proves nothing, but parses.
 
 When it cannot, it emits a comment saying which name was skipped, why, and the generic call
-that still reaches the resource. That choice is worth stealing. This file is `load`ed, and
-`load` is all-or-nothing: one unreadable form takes the entire generated surface down with
-it. A refused alias costs a shortcut; a refused *file* costs the user their editor
-integration, and they will blame the editor.
+that still reaches the resource. This file is `load`ed, so an unreadable form stops
+loading: earlier definitions remain, but later ones are never evaluated. Skipping one alias
+keeps that name from interrupting the rest of the generated file.
 
-It is the same rule the projection to agent tools follows, and the next chapter meets it
-again: **certify the output, not the input.**
+The projection to agent tools follows the same rule, as
+[The machine client](agent.md) explains later in the book: **certify the output, not the input.**
 
 ## The topology is a `defcustom`
 
-The other half of the package is where the previous chapter shows up in a user's config.
+[Preferential resolution](preference.md) gave you three kinds of mount: alias, override
+and prefer. `ikigai-emacs` lets you configure those mounts in your editor.
 `ikigai-mounts` is an ordinary Emacs customization variable holding a list of mounts —
 prefix, target, and which of the three kinds — so a user writes their own topology in
 their own init file, and every command the package runs composes it.

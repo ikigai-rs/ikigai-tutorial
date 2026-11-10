@@ -1,10 +1,13 @@
 # Exercises: beyond one host
 
-Three, and all three are written in **your** crate — `crates/your-endpoints/tests/beyond.rs`
-— against the code this part quotes, `crates/two-hosts`, which you use and do not edit.
+Write these three exercises in **your** crate, in `crates/your-endpoints/tests/beyond.rs`.
+Use the code this part quotes, `crates/two-hosts`, without editing it. If you worked through
+[Where this actually stands](../modules/status.md), you already have a module whose
+greeting calls back to its host; here you will carry that call across a socket.
 The file already holds the scaffolding an exercise would otherwise spend its time on: a
 socket path nothing collides with, a dial loop that waits for a server thread to bind, a
-peer that is always down, and one test proving the scaffolding works. The loop is:
+peer that is always down, and one test proving the scaffolding works. From the tutorial
+repository's root, run this command after each change:
 
 ```bash
 cargo test -p your-endpoints --test beyond
@@ -19,8 +22,8 @@ cargo test -p your-endpoints --test beyond
 ## 1. Serve Part I, and reach it
 
 Serve `hello_camel::space()` behind a socket, connect, and resolve
-`urn:iki:tutorial:camel-case` through the connection. Then ask the served kernel for a name
-it does not bind.
+`urn:iki:tutorial:camel-case` through the connection with `in` set to
+`"resource oriented computing"`. Then ask the served kernel for a name it does not bind.
 
 - **File** — `crates/your-endpoints/tests/beyond.rs`; `serve_in_background` and
   `connect_when_up` are already there.
@@ -43,7 +46,7 @@ first thing that goes wrong.
 The second assertion is the one worth writing carefully. `matches!(err,
 Error::Unresolved(_))` is the claim; a looser `is_err()` would also pass if the socket had
 simply not been there, and then the test would be asserting nothing this chapter said. The
-error crossed a process boundary and kept its type — that is what makes the next exercise
+error crossed the socket and kept its type — that is what makes the next exercise
 possible.
 
 </details>
@@ -53,7 +56,8 @@ possible.
 ## 2. Break the prefer-mount, and watch what falls through
 
 Build a prefer-mount over your own space with a peer that is always down, and resolve
-`urn:iki:tutorial:yours:word-count` through it. Then make the same mount an override. Then
+`urn:iki:tutorial:yours:word-count` through it with `in` set to `"a b c"`.
+Then make the same mount an override. Then
 make the peer *refuse* rather than fail.
 
 - **File** — `crates/your-endpoints/tests/beyond.rs`; `dead(Error::Unavailable)` gives
@@ -89,10 +93,14 @@ answers" — the counter proves *preferring* happened before *falling back*. `Un
 an override is "you named that machine, and it is not there" — a silent local answer would
 be a different question answered. `Denied` on a prefer-mount is "the peer said you may
 not" — and a fallback here would turn a capability boundary into a suggestion, which is
-why it is the one failure the rule never swallows.
+why the rule never swallows it. Other failures also stop a prefer-mount;
+[Preferential resolution](preference.md#only-a-failure-that-another-target-could-fix-falls-through)
+sets out which classes can fall through.
 
-If your override test *passes* the resolution instead of failing it, check the order
-`compose` put things in: an override composed after the local space overrides nothing.
+If your override test answers locally instead of failing, check how you built the root
+space. Pass the override in `compose`'s first argument and the local space in its second;
+the helper puts the override first. If you assemble the spaces yourself, an override
+placed after the local space overrides nothing.
 
 </details>
 
@@ -136,7 +144,7 @@ declared. The message says so:
 denied: capability does not grant `urn:cap:yours:name` (declared by `urn:iki:tutorial:yours:name`)
 ```
 
-Three things crossed the process boundary intact for that sentence to arrive: the
+Three things crossed the socket intact for that sentence to arrive: the
 capability you carried, the attenuation down the call chain inside the served kernel, and
 the typed error on the way back. That is Part II's claim — a module borrows the caller's
 authority and can only narrow it — holding across a socket.

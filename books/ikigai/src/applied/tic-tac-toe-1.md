@@ -19,7 +19,7 @@ then builds only the atom: a single cell.
 
 > **This is deliberately more machinery than tic-tac-toe needs.** A game this small could be forty lines of ordinary code, and the parts that follow will sometimes feel like overkill: a name for every cell, row and rule, templates that are resources, a game that is a corridor rather than an object. The game is the excuse, not the point. What these parts build is a way of working in which only the few things that have to *hold* something are code, and everything else is a name composed from other names. That is what pays for itself as a system grows. Because every intermediate result is a resource, the kernel caches it, knows what it was computed from, and recomputes what a change affects, with no caching code in the application. A new rule, view or question is a new name, not an edit to the code already there. The same composition answers whether the state lives in this page, in a host process, or in a Python or TypeScript peer, and a thousand games share one set of rules. Change the domain and the shape stays: the board becomes a portfolio, a line becomes a group of positions, "who won" becomes a risk figure, and resolution, caching, invalidation and authority work exactly as they do here. Tic-tac-toe is small enough to hold the whole model in your head while you watch that happen.
 >
-> Part IV makes each game a *corridor*, a term the [Scope and alias](../getting-started/scope-and-alias.md) chapter introduces; a look there first will help.
+> [Part IV](tic-tac-toe-4.md), later in this series, makes each game a *corridor*, a term the [Scope and alias](../getting-started/scope-and-alias.md) chapter introduces; a look there first will help.
 
 ## The model, on paper
 
@@ -28,21 +28,21 @@ every kind of thing in it:
 
 | the set | its name | what it is | built in |
 |---|---|---|---|
-| a **cell** | `urn:iki:tutorial:ttt:cell:{x}:{y}` | the mark at one place, or empty | this part |
-| a **line** of cells | `urn:iki:tutorial:ttt:cells:{list}` | any cells, in order, named by their coordinates | part II |
-| a **row** | `urn:iki:tutorial:ttt:row:0` (and `:1`, `:2`) | a line of cells, by name — no code | part II |
-| a **column** | `urn:iki:tutorial:ttt:column:0` (and `:1`, `:2`) | the same, the other way | part II |
-| a **diagonal** | `urn:iki:tutorial:ttt:diagonal:0` (and `:1`) | the same, corner to corner | part II |
-| the **board** | `urn:iki:tutorial:ttt:board` | every row | part II |
+| **cell** | `urn:iki:tutorial:ttt:cell:{x}:{y}` | the mark at one place, or empty | this part |
+| **line** of cells | `urn:iki:tutorial:ttt:cells:{list}` | any cells, in order, named by their coordinates | part II |
+| **row** | `urn:iki:tutorial:ttt:row:0` (and `:1`, `:2`) | a line of cells, by name — no code | part II |
+| **column** | `urn:iki:tutorial:ttt:column:0` (and `:1`, `:2`) | the same, the other way | part II |
+| **diagonal** | `urn:iki:tutorial:ttt:diagonal:0` (and `:1`) | the same, corner to corner | part II |
+| **board** | `urn:iki:tutorial:ttt:board` | every row | part II |
 | which lines a cell is on | `urn:iki:tutorial:ttt:checkset:{x}:{y}` | a list of the names of other resources | part III |
 | **whose turn** | `urn:iki:tutorial:ttt:turn` | a question about the board | part III |
 | **who won** | `urn:iki:tutorial:ttt:winner` | another | part III |
-| a **move** | `urn:iki:tutorial:ttt:move:{x}:{y}` | a mark played, if the rules allow it | part III |
+| **move** | `urn:iki:tutorial:ttt:move:{x}:{y}` | a mark played, if the rules allow it | part III |
 | many games | — | the game as context: a corridor around the names, not a name | part IV |
-| a board you can **play** | `urn:iki:tutorial:ttt:view:board` (and `view:status`, `view:play:{x}:{y}`) | HTML over all of the above, from templates that are resources too | part V |
+| **playable board** | `urn:iki:tutorial:ttt:view:board` (and `view:status`, `view:play:{x}:{y}`) | HTML over all of the above, from templates that are resources too | part V |
 
 Read down the second column and notice how little of it is code. Only the cell holds
-state: everything above it is a set of cells, or a question about sets of cells, and a set
+state: everything built on it is a set of cells, or a question about sets of cells, and a set
 of names can be *named* rather than computed. That is the bet this part and the next are
 testing. The names past the first row are plans, not promises; each part settles its own.
 
@@ -84,14 +84,14 @@ and the next section is why.
 {{#include ../../../../crates/tic-tac-toe/src/lib.rs:stored}}
 ```
 
-The state lives in a `CellStore` the host holds, the same shape as Part I's `title`, and
-for the same reason: a test can hold the read counter and prove that an answer was
+The state lives in a `CellStore` the host holds, like the `title` resource you built in
+[What resolution buys you](../getting-started/payoff.md), and for the same reason: a test can hold the read counter and prove that an answer was
 *served* rather than recomputed.
 
 Look at what the `Source` arm does not say. It is `.cacheable()` and names no golden
 thread. The kernel does both halves of the bookkeeping itself: since `ikigai-core` 0.1.73
 every cacheable read hangs from the thread named after the resource it read, and every
-successful `Sink` or `Delete` cuts the thread named after its target. (Part I's `title`
+successful `Sink` or `Delete` cuts the thread named after its target. (`title`
 still declares `.depends_on(TITLE)` by hand; it was written before 0.1.73, and the line is
 now redundant.)
 

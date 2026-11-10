@@ -1,11 +1,11 @@
 # Streams, II: a body you can read again
 
-[The first streams page](bytes.md) ended on what a representation could not do: its `bytes` were
-one buffer, held whole before anyone read the first byte. The kernel now has the start of an
-answer, and this page covers the part of it that can be read more than once: a **body**, which may
-be a buffer or something that opens a fresh reader each time it is asked, and a **byte range**,
-which reads part of a resource without reading the rest. The ranges run in this page's kernel. Files do not, because the page has no file system,
-so the listings that read a file run in `mdbook test`.
+In [Bytes are a representation](bytes.md), you compressed the shop's stock and read it back,
+but each answer was one buffer, held whole before anyone read the first byte. A **body** lets an
+answer arrive in pieces. This page covers bodies that can be read more than once: a buffer or
+something that opens a fresh reader each time it is asked. It also covers a **byte range**, which
+reads part of a resource without reading the rest. The ranges run in this page's kernel. The page
+has no file system, so the listings that read a file run in `mdbook test`.
 
 ## Three shapes
 
@@ -177,7 +177,8 @@ A body that can open a reader at an offset can be read in part. The kernel answe
 `urn:stream:range` itself, as it answers `urn:kernel:*`, so no module can bind it and every
 resource can be asked for one: `of` names the resource, `start` is the first byte's offset, and
 `end`, which may be left out, is the offset just past the last. The stock's header is 17 bytes and
-its first row is 11, so its first row is bytes 17 to 28. The second line asks again:
+its first row is 11, so its first row starts at byte 17 and ends just before byte 28. The second
+line asks again:
 
 <div class="ikigai-run" data-cmd='source urn:stream:range of=urn:iki:tutorial:shop:stock start=17 end=28
 source urn:stream:range of=urn:iki:tutorial:shop:stock start=17 end=28'>
@@ -307,10 +308,10 @@ assert!(matches!(read_all(held.open()), Err(Error::Conflict(_))));
 std::fs::remove_dir_all(&dir).unwrap();
 ```
 
-The last four lines are the promise a `Replay` makes. It records the file's version when it is
-opened, its size, inode and times, and checks it when each reader opens and again at the end. A
-file written in place while a reader is open ends that reader with `Conflict` ("changed while
-read"), never with a short body or one that is half old and half new. A `Sink` through the kernel
+The final check exercises the file replay's promise to detect a changed file. `ikigai-fs` records
+the file's version when it is opened: its size, inode and times. It checks that version when each
+reader opens and again at the end. A file written in place while a reader is open ends that
+reader with `Conflict` ("changed while read"), never with a short body or one that is half old and half new. A `Sink` through the kernel
 does not do that to anyone: it writes a staging file and renames it over the old one, so a reader
 already open keeps the old file and reads it whole, and the cut sends every later lookup to the
 new one.
@@ -320,5 +321,6 @@ new one.
 Everything on this page could be read again. A buffer can, a file can, and a range of either is a
 buffer. What is left is the third shape, the body that can be read once: a response still
 arriving, a generator, an upload. The kernel already refuses to cache one, and
-`urn:stream:range` already refuses to slice one. [The next page](once.md) reads one: collected
-under the run's byte budget, decoded as text as it streams, and refused past the bound.
+`urn:stream:range` already refuses to slice one. [A body read once, and its bound](once.md)
+shows how to collect one under the run's byte budget, decode it as it streams, and refuse it past
+the bound.

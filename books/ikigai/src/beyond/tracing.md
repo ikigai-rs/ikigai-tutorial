@@ -1,12 +1,12 @@
 # Tracing a resolution
 
-`trace` has appeared twice already as a command — in the [front door](../front-door/cli.md)
-and in [What resolution buys you](../getting-started/payoff.md), where `issue_traced` drew a
-tree with one child. This chapter makes it the subject, because the plumbing chapters
-earlier in this part have given a resolution more ways to go somewhere you did not expect: a
-socket, a clamp, a mount that fell back. The trace is how you find out what actually
-happened, and — the part worth a chapter — it is where the kernel records the facts that
-name something which *never ran*.
+[Twenty minutes with the CLI](../front-door/cli.md) introduced the `trace` command.
+In [What resolution buys you](../getting-started/payoff.md), you used `issue_traced` to
+draw a tree with one child. You have also seen requests cross a socket in
+[A kernel behind a socket](socket.md) and mounts fall back in
+[Preferential resolution](preference.md). A trace shows which route a request took,
+which capability it used, and where it stopped. It can also record a refusal before an
+endpoint runs.
 
 ## An event per invocation
 
@@ -29,7 +29,7 @@ load. The events are plain, serializable data, which is why they can cross a wir
 ## Two ways to install one, and they are exclusive
 
 `Kernel::set_tracer` installs a tracer on the kernel. Every resolution after it records
-there until `clear_tracer` — one collector for the whole process, which is what the
+there until `clear_tracer` — one collector for that kernel, which is what the
 REPL's `trace` does around exactly one call. `Kernel::issue_traced(request, cap, tracer)`
 records **this resolution** into `tracer` and nothing else, with its own span numbering
 starting at 0.
@@ -98,7 +98,7 @@ denial; without it a denial reaches no observer inside the kernel.
 
 In the REPL the same refusal draws as a tree. Since `ikigai-cli` 0.1.46 `trace` renders the
 nodes it collected even when the resolution failed (core 0.1.92 made a failed invocation a trace
-node, and the floor's refusal was already an event), then prints where it stopped:
+node, and the kernel's refusal was already an event), then prints where it stopped:
 
 ```text
 ikigai> cap urn:cap:kernel:inspect
@@ -114,14 +114,14 @@ urn:file:notes.txt   cap ✗ denied: denied: capability does not grant `urn:cap:
 
 The first line is a denial *event*, the kind the listing above records, drawn: the endpoint that would have
 answered (`file`), the outcome (`denied`), no duration (`—`, it never ran), the authority mark,
-and the scope the floor found missing as the event's note. The last line is the error, and its
+and the scope the kernel found missing as the event's note. The last line is the error, and its
 `cap ✗` is the authority dimension made visible: the message names the scope lacked and the
 resource that declared it.
 
 The node's mark says what happened to the session's authority at that hop. Under a narrowed
 session, `cap ✓` is a hop that ran under that capability unchanged; `cap ↓` followed by scopes
 is a hop that ran under less (an attenuation, or a mount's clamp), and names what it held; and
-`cap ✗` is a hop the floor refused, as here, so the mark and the outcome agree. A refused hop
+`cap ✗` is a hop the kernel refused, as here, so the mark and the outcome agree. A refused hop
 that had been attenuated first keeps its scopes (`cap ↓ … ✗`), because which authority was
 refused is the diagnosis. A root session draws no mark at all. Before `ikigai-cli` 0.1.48 a
 refused hop under an unchanged capability was drawn `cap ✓`, which read as "authorized", the
@@ -132,7 +132,7 @@ alone, and the event existed in the kernel undrawn.
 
 A trace is an autopsy: it tells you what happened to a request you already sent, and for a
 write that means the write has happened (or has been refused) by the time you read it.
-`urn:kernel:explain` asks the same question **without sending anything**. Give it a
+`urn:kernel:explain` asks the same question **without invoking the target endpoint**. Give it a
 `target` and a `verb`, and it walks the chain a real request would walk, asking each space
 whether it would answer, and stops short of invoking the endpoint: no endpoint runs, no
 cache entry is touched, no alias counter moves. What comes back is the route and the
@@ -365,5 +365,5 @@ execution shows where the local one handed off.
   There is no denial-only reporter yet; a host that wants only refusals filters in its own
   `record`. Stated so the cost is not a surprise.
 
-The next chapter is the client that never traces anything and needs none of this to
-work: it reads the manifold instead.
+Next, [The machine client](agent.md) builds its tools by reading the manifold, the
+same source of resource names and contracts that supplies the Emacs aliases.

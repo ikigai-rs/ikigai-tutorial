@@ -7,9 +7,141 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-07**: The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page.
+
+  Pages: [A space that changes while it runs](applied/live-space.md), [Short names in a space](applied/prefixes.md), [Time is a resource](applied/time.md)
+
+- **2026-11-07**: Tic-tac-toe, VII names the polyglot game you already have, identifies the arrangement reader, and clarifies which build request hits the cache.
+
+  Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+
+- **2026-11-07**: Tic-tac-toe, VI links back to the browser board you already built and distinguishes terminal commands from the page's runnable cells.
+
+  Pages: [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
+
+- **2026-11-07**: Tic-tac-toe, IV clarifies game state, cache isolation, and the handoff to the playable board. Part V makes the two-store startup sequence explicit, corrects the cache-invalidation explanation, qualifies untested screen-reader behavior, and gives the views recap a parallel label.
+
+  Pages: [Tic-tac-toe, IV: many games, and where the game belongs](applied/tic-tac-toe-4.md), [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
+
+- **2026-11-07**: Tic-tac-toe I–III makes model names easier to scan, clarifies earlier chapter references and invalidation, and explains which endpoints a larger board can reuse. The CheckSet discussion distinguishes staying cached through moves from explicit invalidation.
+
+  Pages: [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md), [Tic-tac-toe, II: lines, aliases and the board](applied/tic-tac-toe-2.md), [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md)
+
+- **2026-11-07**: The machine client corrects MCP startup authority and the default Ollama backend, distinguishes backends from models, and clarifies argument validation. The beyond-one-host exercises specify their inputs and correct the fallback and composition guidance.
+
+  Pages: [The machine client](beyond/agent.md), [Exercises: beyond one host](beyond/exercises.md)
+
+- **2026-11-07**: Tracing a resolution links the examples you already have, names the kernel consistently, clarifies what a dry run avoids, and leads into The machine client by name.
+
+  Pages: [Tracing a resolution](beyond/tracing.md)
+
+- **2026-11-07**: The aliases, day to day makes clear that its historical listings can differ from the pinned CLI in docstrings and error details as well as counts.
+
+  Pages: [The aliases, day to day](beyond/emacs-aliases.md)
+
+- **2026-11-07**: The aliases, day to day gives the package-cloning step, connects setup to the earlier CLI installation, and supplies the command for its refused alias-generation example.
+
+  Pages: [The aliases, day to day](beyond/emacs-aliases.md)
+
+- **2026-11-07**: Tracing a resolution clarifies that an installed tracer collects resolutions from one kernel, even when a process hosts more than one kernel.
+
+  Pages: [Tracing a resolution](beyond/tracing.md)
+
+- **2026-11-07**: The Streams chapters name what carries forward, clarify buffered representations, byte-range ends, file-version checks, and byte-budget totals, and make the buffer limitations and budget rules easier to scan.
+
+  Pages: [Streams, I: bytes are a representation](streams/bytes.md), [Streams, II: a body you can read again](streams/replay.md), [Streams, III: a body read once, and its bound](streams/once.md)
+
+- **2026-11-07**: The failed-draft exercise includes the script read grant needed to check that no script was saved.
+
+  Pages: [Exercises: code and language](code/exercises.md)
+
+- **2026-11-07**: Exercises: code and language names the chapters that supply its hosts and says where to write and run the tests.
+
+  Pages: [Exercises: code and language](code/exercises.md)
+
+- **2026-11-07**: A sentence becomes a draft explains how to run its examples and links the hosts, authority rules, and examples it builds on.
+
+  Pages: [A sentence becomes a draft](code/sentence.md)
+
+- **2026-11-07**: The script chapters clarify where to run the examples, how graph-variable queries differ from the hello query, and how a draft's preview differs from publication. They also connect the example hosts and use clearer table labels.
+
+  Pages: [Your first script](code/first.md), [Scripts are resources](code/scripts.md), [Who a script runs as](code/authority.md)
+
+- **2026-11-07**: Spreadsheet, VI and VII explain which sheet state carries forward and where to run their cells. The chapters link earlier examples by name, distinguish recomputation from a cache hit, and clarify that the input history already exists.
+
+  Pages: [Spreadsheet, VI: a sheet is a space, and spaces stack](applied/spreadsheet-6.md), [Spreadsheet, VII: push](applied/spreadsheet-7.md)
+
+- **2026-11-07**: Spreadsheet, V carries forward the sheet's time cells and polling grid, distinguishes a feed write from a cell edit, and gives concrete cells and formulas for watching the market.
+
+  Pages: [Spreadsheet, V: data that changes outside the sheet](applied/spreadsheet-5.md)
+
+- **2026-11-07**: Spreadsheet, IV connects to the cached sheet you already built and explains how dependency deadlines combine and why a kernel without a clock keeps its time-cell errors cached.
+
+  Pages: [Spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md)
+
+- **2026-11-07**: Spreadsheet I–III now explain where to run the examples, put resource names first in the model tables, and distinguish stale cache entries from removed ones. The formula-edit walkthrough and chapter references are clearer.
+
+  Pages: [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [Spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [Spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md)
+
+- **2026-11-07**: Contribute a module aligns its dependency recipe with the tested crates and clarifies argument descriptions. The other books names the architecture prerequisite, and the browser appendix connects to your earlier host and separates its recorded-file examples.
+
+  Pages: [Contribute a module](contribute.md), [The other books](other-books.md), [Appendix: the kernel in the browser](browser.md)
+
+- **2026-11-07**: The closing reference pages correct stale counts, link the chapters behind the reading suggestions, and clarify glossary definitions and repository descriptions.
+
+  Pages: [Where to go next](next.md), [Glossary](glossary.md), [The repositories](repositories.md)
+
+- **2026-11-07**: The notebook connects its catalog exploration to the Python client you already used and explains where to run the script and which setup steps you can reuse.
+
+  Pages: [The notebook: the catalog as a graph](polyglot/notebook.md)
+
+- **2026-11-07**: The TypeScript track connects its examples to the Python track, shows where to clone ikigai-deno and run commands, and explains explicit input declarations and typed refusals.
+
+  Pages: [The TypeScript track](polyglot/typescript.md)
+
+- **2026-11-07**: The TypeScript track's Exists example writes the note again after the preceding batch deletes it, and includes the import and command needed to run it.
+
+  Pages: [The TypeScript track](polyglot/typescript.md)
+
+- **2026-11-07**: The Python track names the working directory and Python version, shows an isolated package installation and the complete client command, and recreates the deleted note before checking whether it exists.
+
+  Pages: [The Python track](polyglot/python.md)
+
+- **2026-11-07**: One wire, three languages connects the tracks to the Rust examples you already built, labels their broader coverage, and explains L0's limits in plain terms.
+
+  Pages: [One wire, three languages](polyglot/index.md)
+
 - **2026-11-06**: A river of feeds now says what happens to a feed's `<ttl>`: the stylesheet keeps it as data, but nothing reads it as a cache lifetime. HTTP headers and `max_age=` decide how long a copy is kept.
 
   Pages: [A river of feeds](explore/rss.md)
+
+- **2026-11-06**: The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits.
+
+  Pages: [A kernel behind a socket](beyond/socket.md), [Who is asking](beyond/identity.md), [A query's authority is its dataset](beyond/datasets.md)
+
+- **2026-11-06**: Dual-mode crates distinguishes a declared module feature from a working WebAssembly build and says where to run the build command. Where this actually stands clarifies the exercise workflow, release overview, and links to earlier examples.
+
+  Pages: [Dual-mode crates](modules/dual-mode.md), [Where this actually stands](modules/status.md)
+
+- **2026-11-06**: A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request.
+
+  Pages: [A module, end to end](modules/end-to-end.md)
+
+- **2026-11-06**: The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features.
+
+  Pages: [The wire session](modules/wire-session.md)
+
+- **2026-11-06**: The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors.
+
+  Pages: [The wire session](modules/wire-session.md)
+
+- **2026-11-06**: A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests.
+
+  Pages: [A module, end to end](modules/end-to-end.md)
+
+- **2026-11-06**: Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops.
+
+  Pages: [Preferential resolution](beyond/preference.md), [Failure has a class](beyond/failure.md), [The editor as a client](beyond/emacs.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
@@ -54,6 +186,26 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-05**: The resolution walkthrough corrects its CLI trace verdict and explains why a cached composite produces only a parent trace span. The golden-thread and endpoint-description chapters clarify expiry and the kernel’s enforcement of declared authority, introduce terms before using them, and connect the examples across chapters.
 
   Pages: [What resolution buys you](getting-started/payoff.md), [Golden threads in practice](getting-started/golden-threads.md), [Why an endpoint describes itself](getting-started/self-description.md)
+
+- **2026-11-05**: Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home, with the pinned CLI's full scheduler output.
+
+  Pages: [Binding, and a host of your own](getting-started/binding.md), [Scope and alias](getting-started/scope-and-alias.md), [Configuration](getting-started/configuration.md)
+
+- **2026-11-05**: The file workspace clarifies how the CLI selects its root and where to find the files you write. The getting-started exercises connect to the earlier examples, identify where to run commands, and give word-count its own success check.
+
+  Pages: [The file workspace](getting-started/file-workspace.md), [Exercises: getting started](getting-started/exercises.md)
+
+- **2026-11-05**: The endpoint chapters connect their examples to the host you already have, clarify terms and command locations, and distinguish the tutorial host from the CLI. Transreption specifies the description format; the stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb.
+
+  Pages: [Transreption](building/transreption.md), [Multi-verb endpoints](building/multi-verb.md), [The graph face](building/graph-face.md)
+
+- **2026-11-05**: "Checking a resource" identifies its earlier space and where to run its check. "Testing an endpoint hermetically" links the clock exercise, defines hermetic tests, clarifies clock setup and the shared-clock discussion, and shows how to run its three tests.
+
+  Pages: [Checking a resource](building/checking.md), [Testing an endpoint hermetically](building/hermetic.md)
+
+- **2026-11-05**: The module introduction links its prerequisites, explains where to run the demo, and identifies its in-process transport. The module use cases have distinct openings, and the callback chapter defines the issuer interface.
+
+  Pages: [What a module is](modules/index.md), [Two ways to reach a kernel](modules/two-ways.md), [The callback](modules/the-callback.md)
 
 - **2026-11-03**: "Checking a resource" now shows the RDF Toolbox page itself, in light and dark screenshots: Validate, Format, a SHACL finding, the SPARQL tab, and what a caller without the scope sees, including a verdict that can mislead when the data was refused.
 

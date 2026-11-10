@@ -4,7 +4,8 @@
      the reader's own `--mount urn:py:=`; not a name the CLI or this workspace binds. -->
 <!-- urn-gate: illustration urn:py:shout — likewise. -->
 
-Part I, chapter for chapter, from a language with no kernel in it. Every listing is in
+This track revisits the Rust examples linked in [One wire, three languages](index.md)
+from Python. The Python process contains no kernel. Every listing is in
 `examples/python/`. The blocks that start a peer and mount it
 ([Binding](#binding-a-mount-is-a-binding) and the family below) are replayed against the
 book's pinned `ikigai-cli` on every change to this repository, with ikigai-python at its
@@ -14,18 +15,45 @@ listings and the `describe` card were run against a served `ikigai-cli` 0.1.18 a
 written and are not replayed (the refusal text shown in the capabilities section is a later
 kernel's: see the note there).
 
+Run the shell commands from the root of the `ikigai-tutorial` checkout you used in
+[Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else).
+You also need a checkout of [ikigai-python](https://github.com/ikigai-rs/ikigai-python).
+If you do not have one, clone it beside the tutorial repository:
+
+```bash
+git clone https://github.com/ikigai-rs/ikigai-python ../ikigai-python
+```
+
+Use Python 3.11 or later. Create and activate a virtual environment for this track. If
+your ikigai-python checkout is elsewhere, replace `../ikigai-python` in the install command with its path.
+If you installed the CLI in [Twenty minutes with the CLI](../front-door/cli.md), it is
+already available. Otherwise, follow that chapter's install steps first.
+
 If the `ttt-host` from [Tic-tac-toe, VI](../applied/tic-tac-toe-6.md) or its apps are still
 running, they can stay: this kernel is on a socket of its own.
 
 <!-- transcript: serve -->
 ```bash
-pip install rdflib /path/to/ikigai-python     # a checkout; not on PyPI yet
+python3 -m venv .venv
+. .venv/bin/activate
+pip install rdflib ../ikigai-python           # a checkout; not on PyPI yet
 ikigai serve /tmp/ikbook-kernel.sock &         # a kernel to talk to
 until [ -S /tmp/ikbook-kernel.sock ]; do sleep 0.2; done   # wait for its socket
 ```
 
 The `pip install` brings ikigai-python's one dependency with it: `blake3`, for the digests in
 the contract IRIs a served door publishes.
+
+Run the complete client script against that kernel:
+
+```bash
+python3 examples/python/client.py /tmp/ikbook-kernel.sock
+```
+
+The client sections below explain excerpts from that script. Run the whole script to
+supply their imports and the `path` variable, which takes the socket path above.
+The peer listings (`hello.py` and `notes.py`) run separately, as shown in
+[Binding](#binding-a-mount-is-a-binding) and [Families](#families-one-door-many-names-four-verbs).
 
 ## Resolution: a name, over the wire
 
@@ -248,13 +276,17 @@ answers, so every read here reached the peer. The peer keeps no cache of its own
 that is why the read after the second write saw the new text. The writes and the delete are
 uncacheable whatever the host does, because a Sink or Delete answer always is, and the index
 is uncacheable on purpose: it reads every note, and a write is about only the note it wrote.
-Exists, from a client (the block above ended by deleting `milk`, so sink it again
-first):
+To try Exists in a Python session, connect to the peer itself. The batch above deleted
+`milk`, so recreate it before checking:
 
 ```python
+import ikigai
+
 k = ikigai.connect("/tmp/py-notes.sock")   # the peer itself; Exists is a read
-print(k.exists("urn:py:note:milk").text)    # true, after `sink urn:py:note:milk two liters`
+k.sink("urn:py:note:milk", "two liters")
+print(k.exists("urn:py:note:milk").text)    # true
 print(k.exists("urn:py:note:bread").text)   # false
+k.close()
 ```
 
 ### Which door answers

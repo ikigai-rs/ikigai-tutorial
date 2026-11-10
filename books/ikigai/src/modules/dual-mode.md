@@ -1,24 +1,29 @@
 # Dual-mode crates
 
-Three crates in the ecosystem support being modules — `ikigai-xslt` 0.1.3,
-`ikigai-jsonld` 0.1.2 and `ikigai-shacl` 0.1.2, the versions published as this was
-re-checked (2026-09-26) — and **none of them is module-only**. All three are ordinary linked libraries by default (each has a
-`module` Cargo feature), and become loadable WebAssembly when you ask:
+`ikigai-xslt` 0.1.3 and `ikigai-jsonld` 0.1.2 support both linked libraries and loadable
+WebAssembly modules. Both are ordinary linked libraries by default; their `module` Cargo
+feature adds the loadable form. From the root of either library crate's source tree, run:
 
 ```bash
 cargo build --release --lib --features module --target wasm32-unknown-unknown
 ```
 
-That needs the target's standard library (`rustup target add wasm32-unknown-unknown`) in
+The WebAssembly build needs the target's standard library (`rustup target add wasm32-unknown-unknown`) in
 the `rustc` cargo actually runs. If the build fails with E0463, "can't find crate for
 `core`", after you have added the target, another Rust is ahead of rustup's on PATH —
 Homebrew's, for example, which ships no wasm32 standard library. `command -v rustc` says
 which one you have; put `~/.cargo/bin` first on PATH.
 
+`ikigai-shacl` 0.1.2 also declares a `module` feature, but its WebAssembly build fails:
+its validator dependency is disabled on wasm. It is usable as a native linked library;
+the feature's presence alone does not mean the loadable form works. In the browser,
+validation is provided by JavaScript's `shacl-engine` instead, checked against the same
+parity corpus (the same validation cases).
+
 ## How it is wired
 
 The `module` feature turns on optional dependencies rather than changing the crate's
-identity:
+identity. For example, `ikigai-xslt` 0.1.3 declares:
 
 ```toml
 [dependencies.ikigai-module]
@@ -40,10 +45,11 @@ surface that lets a host instantiate the artifact and drive a session against it
 
 Because *linked or loaded* should be the **host's** decision, not the library's.
 
-The same argument as binding authority in Part I: a library that can only be a module has
-decided something on its consumer's behalf. A CLI that wants XSLT compiled in should be
-able to have it; a browser page that cannot link anything should be able to fetch it. One
-crate, two deployments, one set of endpoints.
+In [Binding, and a host of your own](../getting-started/binding.md), you bound an endpoint
+to a name chosen by the host. Packaging follows the same rule: a library that can only be
+a module has decided something on its consumer's behalf. A CLI that wants XSLT compiled
+in should be able to have it; a browser page that cannot link anything should be able to
+fetch it. One crate, two deployments, one set of endpoints.
 
 ## The one that is module-only, and why
 
@@ -59,7 +65,8 @@ It is `publish = false` — it is a build product, not a library anyone should d
 
 ## What this means for your own crate
 
-Write it as an ordinary space, the way Part I did. Add the `module` feature only when
-somebody actually needs the loadable shape.
+Write it as an ordinary space, like the one you built in
+[Binding, and a host of your own](../getting-started/binding.md). Add the `module` feature
+only when somebody actually needs to load it separately.
 
 Nothing about the endpoint changes; the module feature is packaging.

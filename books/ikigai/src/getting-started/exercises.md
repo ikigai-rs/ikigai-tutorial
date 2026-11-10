@@ -1,12 +1,14 @@
 # Exercises: getting started
 
-Four ways to find out whether Part I landed. None of them needs anything beyond this
-repository.
+In [Hello, resource](hello-resource.md) and [What resolution buys you](payoff.md),
+you built `camel-case` and a writable `title`. These four exercises extend that work in
+a crate of your own. All four use code in this repository.
 
 ## First: where your code goes, and how to run it
 
-This book has shown you how to run *its* code four times and never once how to run yours.
-So, before the exercises:
+Run the commands below in the repository root, as you did in [Running it](running-it.md).
+The exercises use a separate crate so you can change your code without changing the
+examples the book quotes:
 
 **Your endpoints go in `crates/your-endpoints/src/lib.rs`.** Not in `hello-camel` — that
 is the file the chapters quote, and editing it would change what the book says. Nothing
@@ -28,7 +30,7 @@ The prefix `urn:iki:tutorial:yours:` is a stand-in for one you own. Rename it th
 stops being a tutorial, and notice nothing else has to change.
 
 One thing your crate cannot do is run in this page. The kernel the published book carries
-is Part I's space compiled once, when the book was built; your code is compiled on your
+includes the tutorial endpoints compiled when the book was built; your code is compiled on your
 machine, so the loop for it is `cargo test` and the binary, not a Run button.
 
 **The fastest loop is a test**, because a test needs no wiring at all:
@@ -37,9 +39,9 @@ machine, so the loop for it is `cargo test` and the binary, not a Run button.
 cargo test -p your-endpoints
 ```
 
-The test module at the bottom of that file already contains the four lines that build a
-kernel, resolve a name and hand back a `String` — the `text_of` helper. Copy it, change
-the IRI, and you have a way to ask your endpoint a question and assert the answer.
+The test module at the bottom of `crates/your-endpoints/src/lib.rs` has a `text_of` helper.
+It builds a kernel, resolves a name and returns a `String`. Copy it, change the IRI,
+and you have a way to ask your endpoint a question and assert the answer.
 
 **To see it from a shell**, `crates/your-endpoints/src/bin/yours.rs` resolves one name
 and prints the result. Point its `NAME` at yours and run:
@@ -134,7 +136,8 @@ Declare it in the description with `optional()` and a `default_value`.
   there too): the `ArgSpec` list in the description *and* the implementation.
 - **Run** — `cargo test -p your-endpoints`
 - **Right when** — resolving with no `separator` gives the same answers as before, and
-  resolving with `separator=","` camel-cases `"a,b,c"` into `"aBC"`. A test asserting your
+  resolving with `separator=","` turns `"a,b,c"` into `"aBC"` for `lower-camel-case`
+  or `"3"` for `word-count`. A test asserting your
   `ArgSpec` is present is worth writing too — `your_thing().describe().inputs` is a list
   you can look at.
 - **Read again** — [Why an endpoint describes itself](self-description.md), the ArgSpecs

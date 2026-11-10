@@ -43,12 +43,12 @@ to code it has never seen.
 
 Link it in when you can. It is simpler, faster, and has fewer failure modes.
 
-Reach for a module when one of these is true:
+Reach for a module when you have one of these:
 
-- **The dependency is expensive and rarely used.** `ikigai-xslt` exists as a module
+- **An expensive, rarely used dependency.** `ikigai-xslt` exists as a module
   precisely so that its XSLT engine is not linked into every host that will never
   transform an XML document.
-- **The host cannot link it.** A kernel running as WebAssembly in a browser page cannot
+- **A host that cannot link the code.** A kernel running as WebAssembly in a browser page cannot
   grow a new statically linked space; it can fetch one.
-- **The code arrives after the host was built.** Which is the whole point, and also the
+- **Code that arrives after the host was built.** This is the whole point, and also the
   part that is not finished — see [Where this actually stands](status.md).

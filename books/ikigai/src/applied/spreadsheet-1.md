@@ -1,8 +1,8 @@
 # Spreadsheet, I: cells are atoms
 
-Tic-tac-toe built an application out of names, and every answer in it changed for one
-reason: somebody played a move. This arc builds something a little bigger, a spreadsheet,
-and it brings two things tic-tac-toe did not have. A cell can hold **code**: a formula, which
+[Tic-tac-toe](tic-tac-toe-1.md) gave you atoms for the marks and composites for the
+rules and board. Every answer changed for one reason: somebody played a move. This arc
+builds something a little bigger, a spreadsheet, and it brings two things tic-tac-toe did not have. A cell can hold **code**: a formula, which
 has to be compiled before it can run. And one edit ripples: change one number and every
 total that reads it, and every total that reads those, is wrong until it is computed again.
 Spreadsheet engines are built around that second problem. This arc's claim is that the
@@ -15,6 +15,10 @@ the grid that shows them. [Part II](spreadsheet-2.md) makes a formula a resource
 and cached like any other answer. [Part III](spreadsheet-3.md) edits one cell and watches
 exactly the cells that depend on it compute again.
 
+Run the examples in this page's **Run** cells, in order. They share a kernel with the sheet
+at the bottom of the page. Each spreadsheet chapter starts with a fresh sheet; edits do not
+carry between pages. The stock `ikigai` CLI does not bind these spreadsheet resources.
+
 ## The model, on paper
 
 As before, the names come first. A cell is named by its column and row, `A1` to `D6`: a
@@ -23,15 +27,15 @@ to see all of it at once.
 
 | the set | its name | what it is | built in |
 |---|---|---|---|
-| an **input** | `urn:iki:tutorial:sheet:input:{ref}` | what a person typed: a number, some text, or a formula starting with `=` | this part |
-| a **value** | `urn:iki:tutorial:sheet:cell:{ref}` | what the cell shows: a literal as typed, or its formula's result | this part (literals), part II (formulas) |
-| the **grid** | `urn:iki:tutorial:sheet:view:grid` | every value, as an HTML table, from a template that is a resource | this part |
-| the **compiler** | `urn:iki:tutorial:sheet:compile` | a transreptor from formula text to an s-expression | part II |
-| a **compiled formula** | `urn:iki:tutorial:sheet:formula:{ref}` | the cell's formula, compiled: code, as a resource | part II |
-| a cell's **references** | `urn:iki:tutorial:sheet:refs:{ref}` | the cells its formula reads, by name | part II |
-| a **range** | `urn:iki:tutorial:sheet:range:{from}:{to}` | the cells in a rectangle, by name, for `SUM` | part II |
-| a cell's **precedents** | `urn:iki:tutorial:sheet:precedents:{ref}` | every cell its value depends on, however far back | part II |
-| what a redraw **costs** | `urn:iki:tutorial:sheet:view:cost` | which values drawing the grid again will compute, and which the cache will serve | part III |
+| **Input** | `urn:iki:tutorial:sheet:input:{ref}` | what a person typed: a number, some text, or a formula starting with `=` | this part |
+| **Value** | `urn:iki:tutorial:sheet:cell:{ref}` | what the cell shows: a literal as typed, or its formula's result | this part (literals), part II (formulas) |
+| **Grid** | `urn:iki:tutorial:sheet:view:grid` | every value, as an HTML table, from a template that is a resource | this part |
+| **Compiler** | `urn:iki:tutorial:sheet:compile` | a transreptor from formula text to an s-expression | part II |
+| **Compiled formula** | `urn:iki:tutorial:sheet:formula:{ref}` | the cell's formula, compiled: code, as a resource | part II |
+| **References** | `urn:iki:tutorial:sheet:refs:{ref}` | the cells its formula reads, by name | part II |
+| **Range** | `urn:iki:tutorial:sheet:range:{from}:{to}` | the cells in a rectangle, by name, for `SUM` | part II |
+| **Precedents** | `urn:iki:tutorial:sheet:precedents:{ref}` | every cell its value depends on, however far back | part II |
+| **Redraw cost** | `urn:iki:tutorial:sheet:view:cost` | which values drawing the grid again will compute, and which the cache will serve | part III |
 
 Only the input holds state. Everything below it in the table is a question about inputs:
 what does this one compile to, which cells does it read, what is its value. That is the
@@ -273,12 +277,12 @@ is the next part.
 
 | the set | the name | what it is |
 |---|---|---|
-| an input | `urn:iki:tutorial:sheet:input:{ref}` | code: the one atom |
-| a value | `urn:iki:tutorial:sheet:cell:{ref}` | code: a small function of the input (and, in Part II, of other values) |
-| a value, as HTML | `urn:iki:tutorial:sheet:view:cell:{ref}` | a template bound at a name: no code |
-| the grid | `urn:iki:tutorial:sheet:view:grid` | a template bound at a name: no code |
-| the formula bar's write | `urn:iki:tutorial:sheet:view:edit` | code: the human edge, a write through the kernel |
+| Input | `urn:iki:tutorial:sheet:input:{ref}` | code: the one atom |
+| Value | `urn:iki:tutorial:sheet:cell:{ref}` | code: a small function of the input (and, in Part II, of other values) |
+| Cell view | `urn:iki:tutorial:sheet:view:cell:{ref}` | a template bound at a name: no code |
+| Grid | `urn:iki:tutorial:sheet:view:grid` | a template bound at a name: no code |
+| Formula bar's write | `urn:iki:tutorial:sheet:view:edit` | code: the human edge, a write through the kernel |
 
 No part of it caches anything or invalidates anything, and the empty cell went stale and
-came back without being told. The input is the only thing that holds state. The next part
-puts code in it.
+came back without being told. The input is the only thing that holds state.
+[Part II](spreadsheet-2.md) puts code in it.

@@ -1,9 +1,10 @@
 # Testing an endpoint hermetically
 
-Exercise 4 in Part I asked you to write a clock and cache it wrongly, and the hint said
-the time should come from `inv.now()` rather than `SystemTime::now()`. This chapter is
-the why, and the how: an endpoint that reads the clock, and three tests that never touch
-one.
+[Break cacheability on purpose](../getting-started/exercises.md#4-break-cacheability-on-purpose)
+asked you to write a clock and cache it wrongly. Its hint introduced `inv.now()` as the way
+to read the kernel's clock rather than calling `SystemTime::now()`. This chapter shows why:
+an endpoint that reads the clock, and three tests that never read the wall clock. Here,
+**hermetic** means the tests control the endpoint's inputs, including time.
 
 The design note this follows is `docs/design/hermetic-endpoint-tests.md` in `ikigai-core`.
 Its diagnosis is worth carrying around: a test written *around* an ambient read rather
@@ -42,7 +43,7 @@ The full one: a real kernel, a `FixedClock`, and an exact answer the test chose.
 ```
 
 The cheap one: no kernel at all. `Invocation::detached` builds a context with nothing
-behind it, `with_clock` attaches the instant, and the implementation is called as a
+behind it, `with_clock` attaches a `FixedClock`, and the implementation is called as a
 function.
 
 ```rust,ignore
@@ -73,10 +74,20 @@ Deliberately. A test that needs two instants builds two kernels, each with its o
 handing the next kernel a clock derived from the last one's. A test that needs time to
 *move past a deadline* inside one kernel wants a settable clock, and core does not ship
 one: three crates carry their own `AtomicU64`-backed version, all correct, none drifted,
-and that is the bar for pushing a shape down — a count *plus* observed drift — not met.
-The note records what would change it.
+so they do not meet the design note's bar for adding a shared implementation to core:
+repeated implementations *plus* observed drift. The note records what would change it.
 
 ## Try it
+
+From the tutorial repository's root, run the three tests shown above:
+
+```text
+cargo test -p building-endpoints hermetic::tests
+```
+
+All three should pass: the kernel returns the chosen timestamp and caches it, the detached
+invocation returns its own chosen timestamp, and the kernel without a clock returns an error.
+The listing below makes one more request under a fixed clock and checks the exact answer.
 
 ```rust
 # extern crate building_endpoints;

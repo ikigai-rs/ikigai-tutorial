@@ -1,10 +1,11 @@
 # Contribute a module
 
-A module is a crate with a `space()`. This page is the shape of a new one, from the first
-commit, in the order the pieces matter. The reference is
-[`ikigai-fn`](https://github.com/ikigai-rs/ikigai-fn): one file, eight endpoints, a
-README that says what each is for, and a three-line CI — the smallest complete example,
-and the crate this book chains onto.
+In [Binding, and a host of your own](getting-started/binding.md), you built a host over
+a `space()`. A module packages a space in a crate so other hosts can use it. This page
+shows what to include from the first commit. The reference is
+[`ikigai-fn`](https://github.com/ikigai-rs/ikigai-fn): a library file, a README
+that says what each endpoint is for, and a shared CI workflow. It is the crate this book
+chains onto.
 
 ## The crate
 
@@ -22,7 +23,7 @@ publish = false
 [dependencies]
 # The PUBLISHED kernel, at the version whose API you actually use. Never a path to a
 # sibling checkout: a path dependency only resolves on the machine that has both.
-ikigai-core = "0.1.78"
+ikigai-core = "0.2.12"
 ```
 
 No OS or platform API unless the module is about one — read files through the kernel
@@ -37,9 +38,10 @@ resource](getting-started/hello-resource.md) built one. The description is not o
 paperwork: the engine routes named arguments by it, the catalog is built from it, and an
 agent's tool is projected from it. So, from the first endpoint:
 
-- `ArgSpec` for every argument — `name`, `summary`, `optional()` where it is, `class(..)`
-  always: an XSD datatype IRI for a scalar, an `rdfs:Class` for an entity. The one people
-  leave off, and the one [The graph face](building/graph-face.md) shows is the point.
+- `ArgSpec` for every argument — `name`, `summary`, `optional()` when the argument is
+  optional, and `class(..)` always: an XSD datatype IRI for a scalar, an `rdfs:Class` for
+  an entity. [The graph face](building/graph-face.md) explains how that class makes the
+  argument usable in a graph.
 - `one_of(..)` for enums, `default_value(..)` where a default exists. The kernel fills a
   declared default in before dispatch (since `ikigai-core` 0.1.105), so your code reads the
   argument and does not apply the default a second time. A default makes its input
@@ -112,17 +114,18 @@ module in the ecosystem runs: [`ikigai-conformance`](https://github.com/ikigai-r
 walks every endpoint of a kernel and reports every departure from the recipe on this
 page at once — a missing class, an undeclared scope, a `Sink` without `content`. It is
 what "done" means for a module, and it is a dev-dependency, not a rule you remember. Pin
-it as a range you read in both directions: under Cargo's 0.x rules `"0.10.0"` means
-`>=0.10.0, <0.11.0`, and most of the ecosystem's adopters sat one minor behind the current
-definition of done for weeks without a test saying so.
+it as a range you read in both directions. The worked crate uses `"0.11.0"`, which
+means `>=0.11.0, <0.12.0` under Cargo's 0.x rules. A new minor release needs an explicit
+dependency update.
 
 Version 0.9 added `RECOMPUTE`: cut a never-expiring cached answer's golden threads
 and recompute it repeatedly, checking that its bytes agree. A cache hit alone cannot prove that the
 computation is repeatable. Version 0.10 added `FAILURES`, which compares observed
 failures with the action's declared classes. In 0.10 it is opt-in with
-`Suite::check_failures()`; it becomes the default from 0.11. A `"0.10.0"` pin is a
-ceiling below that default, so adopting it takes a deliberate version move. An action
-that states no classes is reported as unstated, never as a `FAILURES` finding.
+`Suite::check_failures()`. Version 0.11 enables `FAILURES` by default and adds
+`DATATYPES`, which checks typed RDF literals. The worked crate uses that version, so its
+explicit `check_failures()` is no longer needed to enable the check. An action that
+states no classes is reported as unstated, never as a `FAILURES` finding.
 
 `crates/your-endpoints/tests/conformance.rs` runs the suite with `check_failures()` over
 `space()`, scoped to its own `word-count` endpoint; the endpoints inherited from

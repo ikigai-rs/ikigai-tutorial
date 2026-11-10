@@ -27,8 +27,9 @@ overstate it either. What those grants mean at the store itself, and why a query
 its caller was not granted is refused rather than answered over the rest, is [A query's authority
 is its dataset](../beyond/datasets.md).
 
-This chapter runs every case it describes. The host is [the previous
-chapter's](scripts.md), with the same items, under a ceiling policy of its own:
+In [Scripts are resources](scripts.md), you built a host with four work items and two salaries.
+This chapter uses the same host and data, under a ceiling policy of its own, and runs every case
+it describes:
 
 <!-- transcript: manual — every section at once; each section's block below is checked. -->
 ```bash
@@ -49,8 +50,8 @@ The program runs all five sections every time; each block below prints one of th
      taken by the store's doors as an argument; no space binds it. -->
 
 Alice writes scripts and reads only the items. Bob runs them, and reads more than Alice does: the
-payroll graph too. Carol reads nothing. All three are capabilities a host's door would mint, each
-naming its person as the principal.
+payroll graph too. Carol reads no graph. The program represents each person with a capability
+a host's door would mint, naming that person as the principal.
 
 ## The host's ceilings
 
@@ -303,7 +304,7 @@ Alice held when she published it.
 | the term | who decides | when | what this chapter showed |
 |---|---|---|---|
 | declared | the text, for SPARQL | at publish | a `requires` that disagrees is refused |
-| the publisher's grant | the publisher's capability | at publish, kept as a snapshot | Carol cannot publish what she cannot read; Bob's run of Alice's query sees Alice's graphs |
+| the publisher's capability | the publisher's capability | at publish, kept as a snapshot | Carol cannot publish what she cannot read; Bob's run of Alice's query sees Alice's graphs |
 | the ceiling | the host, per script | on every run (cut the authority thread when it changes) | the payroll leaves only after the cut; no file, no run |
 | the runner's capability | the door that minted it | on every run | Alice cannot run what she wrote; Carol's run has nothing to narrow to |
 | exclusions | the publisher and the ceiling | travel with every run | Alice's `-team-payroll` is on Bob's run of `graphs` |

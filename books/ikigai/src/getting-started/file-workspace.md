@@ -1,12 +1,16 @@
 # The file workspace
 
-Files are resources like anything else. `urn:file:{path}` is bound with a URI template, so
-one binding covers a whole tree, and reading a file is a `Source` — the same verb as
-everything else.
+In [Binding, and a host of your own](binding.md), you saw how a URI template lets
+`urn:file:{path}` cover a whole tree with one binding. This chapter shows the CLI’s
+file workspace: the directory that binding serves. Files are resources like anything
+else, and reading a file is a `Source` — the same verb as everything else.
 
 ## The jail
 
-The tree is **`$IKIGAI_FILES`, else `~/.ikigai/workspace`**. The CLI creates it if it is
+The CLI selects the root from **`--files <dir>`, else `files` in `config.toml`, else
+`$IKIGAI_FILES`, else `~/.ikigai/workspace`**. An instance-specific `<name>.files` setting
+overrides the shared `files` key; relative paths in either key start at the config home
+described in [Configuration](configuration.md). The CLI creates the root if it is
 missing, and since `ikigai-cli` 0.1.41 it creates it private (`0700`) whatever your umask;
 a directory that already exists is left as you made it. The file endpoint never creates its
 own root: a root it cannot open serves nothing.
@@ -82,7 +86,11 @@ the first place.
 
 ## Try it
 
-At the REPL (`ikigai`), or one line at a time with `ikigai --plain -c '…'`:
+Use the CLI installed in [Running it](running-it.md), rather than the `hello-camel`
+host or the book’s Run buttons. At its REPL (`ikigai`), enter the lines after each
+`ikigai>` prompt below. If a CLI REPL is still open from [Twenty minutes with the
+CLI](../front-door/cli.md), you can use it; a REPL started with `--files` keeps that
+workspace. You can also run each line from a shell with `ikigai --plain -c '…'`:
 
 ```text
 ikigai> sink urn:file:notes.txt a note
@@ -142,12 +150,14 @@ requires `content`, so that sink is refused and the file keeps what it held. A s
 empty and closed (`< /dev/null`) is different: it answers at once, and its answer is an empty
 body.
 
-Then look in `~/.ikigai/workspace`: it is an ordinary directory. Nothing about the model
+Then look in the workspace directory selected for your CLI (`~/.ikigai/workspace`
+by default): `notes.txt` holds `"a" and "b"` after the transcript above, or `a note`
+if you also ran the pipe command. It is an ordinary directory. Nothing about the model
 requires the storage to be exotic; it requires the *access* to be named.
 
 ## Files as bodies
 
-The transcripts above are replayed against the book's pinned `ikigai-cli` 0.2.6, which
+The transcripts above are replayed against the book's pinned `ikigai-cli` 0.2.9, which
 links `ikigai-fs` 0.3.0. Until `ikigai-fs` 0.2.3 (`ikigai-cli` 0.2.3) a file read answered
 one buffer; from it a file is a **body** ([Streams, I](../streams/bytes.md)) on the native backend:
 

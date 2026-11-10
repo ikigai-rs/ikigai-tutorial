@@ -9,26 +9,27 @@ other implementations of the same codec — [`ikigai-python`](https://github.com
 (TypeScript, with one dependency, `@std/crypto`, for the same digests, and `zod` only for its optional `./zod` entry point). Each is both halves at once: a **client** that drives a
 running kernel, and a **servable peer** that a Rust host mounts as a space.
 
-That pairing is called **L0** of the polyglot ladder, and the name is honest about what it
-is. A Python or TypeScript process can resolve any name a kernel binds, be described,
-be cached and traced by that kernel, and be refused by its capabilities. What it cannot do
-is what a Rust endpoint does with `inv.source(..)` — reach back into the kernel from
+That pairing is called **L0**, the first level of the polyglot ladder. A client can resolve
+names the kernel binds, use its cache and trace, and be refused by its capabilities. A
+servable peer supplies descriptions and answers requests the host forwards to it. What a
+peer cannot do is what a Rust endpoint does with `inv.source(..)` — reach back into the kernel from
 inside its own invocation. An L0 peer is a leaf: it answers, it does not compose. There is
-no back-channel yet, and the two tracks below say so where it bites rather than pretending
-the ladder is taller than it is.
+no back-channel yet; the tracks below show where that limits what a peer can do.
 
 ## The two tracks
 
-Both tracks mirror Part I chapter for chapter, in a language with no kernel in it:
+Both tracks revisit the endpoints, bindings, cache, and trace you built in
+[What resolution buys you](../getting-started/payoff.md), then cover capabilities and
+endpoint families. Each uses a language with no kernel in it:
 
-| Part I | in Python and TypeScript |
+| Rust chapter or topic | Python and TypeScript equivalent |
 |---|---|
 | [Resolution](../getting-started/resolution.md) | `connect()` and `source()`: a name resolved over the wire, a representation back |
 | [Hello, resource](../getting-started/hello-resource.md) | an endpoint as a decorated function, served on a socket |
 | [Why an endpoint describes itself](../getting-started/self-description.md) | the signature is the contract: ArgSpecs derived from annotations, `describe()` as data |
 | [Binding, and a host of your own](../getting-started/binding.md) | `ikigai --mount urn:py:=<socket>` — a mount is a binding, and the host owns the name |
 | [What resolution buys you](../getting-started/payoff.md) | `is_cached`, `source_traced`: the kernel's cache and trace, seen from outside |
-| capabilities | a scoped `connect()`, and a typed `DeniedError` |
+| Capabilities | a scoped `connect()`, and a typed `DeniedError` |
 | [Multi-verb endpoints](../building/multi-verb.md) | a **family**: one URI template, a contract per verb (Source, Sink, Delete, Exists), and which door answers a name |
 
 Then a [notebook](notebook.md): the catalog as a graph, in rdflib, with one SPARQL query.

@@ -1,8 +1,8 @@
 # Who is asking
 
-The previous chapter got away with having no authentication code, because the operating
-system had already answered the question. Put the same kernel on a network and nothing
-answers it. A UDP datagram arrives from an address; addresses are not identities, and the
+[A kernel behind a socket](socket.md) gave you a resolver in another process without
+adding authentication code: the operating system already knew the socket peer's user.
+Put the same kernel on a network and nothing answers it. A UDP datagram arrives from an address; addresses are not identities, and the
 `0600` on a socket file protects nothing that is not a file.
 
 So the QUIC transport has to answer three questions the IPC one could delegate: who is on
@@ -18,9 +18,13 @@ call — with **mutual certificate pinning and no certificate authority**. Each 
 self-signed identity and the exact peer certificate it will accept: the client pins the
 server's, the server requires and pins the client's.
 
-Both commands, and every `quic://` address in this part, need a CLI built with the `quic`
-feature, which the [front door](../front-door/cli.md#0-install)'s install leaves out: `cargo
-install ikigai-cli --locked --features quic`.
+The certificate commands below, and every `quic://` address in this part, need a CLI built with the `quic`
+feature, which the [front door](../front-door/cli.md#0-install)'s install leaves out. Reinstall
+with that feature, using the CLI release this book tests:
+
+```bash
+cargo install ikigai-cli --locked --version {{#include ../../ikigai-cli.version}} --features quic
+```
 
 ```bash
 ikigai cert generate            # a server identity and a client identity
@@ -34,9 +38,9 @@ yourself with extra steps. Pinning says the same thing with no infrastructure.
 
 There is a second gate in the handshake worth knowing about, because its failure mode is
 confusing if you do not: the wire version is the **ALPN protocol id**. Each side offers the range of
-wire versions it speaks, newest first (`ikigai/8` then `ikigai/7` in the 0.1.63 crates this
-book builds; `ikigai/9` leads from `ikigai-cli` 0.1.66), and the handshake settles on the
-newest both share. Only a peer whose versions share none with yours fails, and it does not
+wire versions it speaks, newest first (`ikigai/10`, `ikigai/9`, `ikigai/8`, then
+`ikigai/7` in both the book's transport crates and its pinned CLI), and the handshake settles
+on the newest both share. Only a peer whose versions share none with yours fails, and it does not
 connect and get a polite error; it fails the TLS handshake.
 
 ## The certificate is the credential
@@ -138,7 +142,8 @@ A served kernel decides authority in one of three ways, most specific first:
 2. **A fixed ceiling** — `serve --cap urn:cap:personal:calendar:read:freebusy` gives every
    authenticated client the same authority and nothing else. It also remains the outer
    bound under posture 1.
-3. **Neither** — each client gets its own filesystem workspace, transparently rooted at its
+3. **Per-client workspaces** — with neither per-identity grants nor a fixed ceiling, each
+   client gets its own filesystem workspace, transparently rooted at its
    own segment, so a tenant addresses files as if its segment were the root and cannot name
    another's.
 
@@ -391,11 +396,10 @@ never served outside it — nor the other way round. That is why `.cacheable()` 
 an endpoint whose answer depends on who is asking. Two callers holding the *same* scopes
 do share, which is the point: the fingerprint is of the authority, not the identity.
 
-The hole, stated: a result built on a **denial** is cached like any other. A change of
-grant has no golden thread, so an endpoint that catches `Denied` and returns a cacheable
-fallback serves that fallback after the grant is widened. The fix — no caching at all for
-a result built on a refusal — is designed with the rest of the cache-soundness work and
-not built.
+A result built on a **denial** is not cached. A change of grant has no golden thread,
+so an endpoint that catches `Denied` and returns a cacheable fallback must be run again
+on the next request. The kernel enforces that rule even when the endpoint marks its
+fallback cacheable.
 
 ## Denied, or nowhere
 

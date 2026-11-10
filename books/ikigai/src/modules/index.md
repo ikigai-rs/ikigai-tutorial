@@ -1,8 +1,10 @@
 # What a module is
 
-Part I built an endpoint and **linked it in**: your crate exposed a `space()`, the host
-depended on it at compile time, and the endpoints ended up in the binary. That is how
-nearly all of ikigai works today, including every endpoint in the `ikigai` CLI.
+[Hello, resource](../getting-started/hello-resource.md) built your endpoint, and
+[Binding, and a host of your own](../getting-started/binding.md) **linked it in**: your
+crate exposed a `space()`, the host depended on it at compile time, and the endpoints
+ended up in the binary. That is how nearly all of ikigai works today, including every
+endpoint in the `ikigai` CLI.
 
 This part is about the other shape — a **module**: an independently compiled `space()`
 that a host routes some names to *without linking it*.
@@ -11,9 +13,11 @@ that a host routes some names to *without linking it*.
 
 A module is **not** a remote kernel, and the difference is not a matter of degree.
 
-When you resolve against an IPC or QUIC peer ([Part III](../beyond/socket.md) builds one), that peer resolves every sub-request on its
-own side. It has its own catalog, its own cache, its own spaces. You hand it a name and it
-hands you back an answer; nothing crosses back.
+When you resolve against an IPC or QUIC peer
+([A kernel behind a socket](../beyond/socket.md) builds an IPC peer later in the book),
+that peer resolves every sub-request on its own side. It has its own catalog, its own
+cache, its own spaces. You hand it a name and it hands you back an answer; nothing
+crosses back.
 
 A module is the opposite arrangement. Its endpoints must resolve *their* resource
 references — an XSLT stylesheet, a SHACL shapes graph, a configuration file — against the
@@ -25,7 +29,12 @@ Everything else here is consequences of that one asymmetry.
 ## What you will build
 
 A module with one endpoint, a host with one resource, and a greeting that can only be
-produced by the module asking the host a question mid-invocation:
+produced by the module asking the host a question mid-invocation. The demo uses
+`InProcessTransport`: the host and module run in one process to exercise the callback.
+
+Run this in a terminal from the repository root. If you followed
+[Running it](../getting-started/running-it.md), you already have the clone; otherwise,
+follow that chapter's clone instructions first.
 
 ```bash
 cargo run -p loadable-module
@@ -37,12 +46,14 @@ cargo run -p loadable-module
 
 ## Before you start
 
-This part assumes [Part I](../getting-started/resolution.md) — what a `space()` is, and
-why binding is separate from defining.
+This part assumes you have built the endpoint in
+[Hello, resource](../getting-started/hello-resource.md).
+[Binding, and a host of your own](../getting-started/binding.md) explains the other
+prerequisites: what a `space()` is and why binding is separate from defining.
 
 The code is in
 [`crates/loadable-module`](https://github.com/ikigai-rs/ikigai-tutorial/tree/main/crates/loadable-module),
-and as in Part I the listings are pulled from it by anchor rather than copied.
+and the listings are pulled from it by anchor rather than copied.
 
 > ⚠ **Read [Where this actually stands](status.md) before you plan around any of this.**
 > `ikigai-module` (0.4.0) still describes itself as "Phase 1: in-process proof". The callback machinery
