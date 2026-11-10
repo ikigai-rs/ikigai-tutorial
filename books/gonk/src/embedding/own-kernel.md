@@ -46,8 +46,9 @@ code, and each piece of that code should hold only what its job needs. Three cal
 ```
 
 The agent is the four-token ledger writer from [the first chapter](../ledger/your-own.md), plus
-reading the repository and browse's graph. The reviewer may spend the model and nothing else. The
-person may do both and decide. Watch each one stay inside its lines:
+reading the repository and browse's graph. The reviewer may read the repository and spend the
+model, but may not publish findings or touch the ledger. The person may do both and decide.
+Watch each one stay inside its lines:
 
 ```rust
 # extern crate embed_host;
@@ -145,7 +146,7 @@ assert!(matches!(refused, Err(Error::Denied(_))));
 ```
 
 Item 1 is about the file, and the file carries one published annotation, on the line that panics.
-The declined finding is not an annotation and does not appear; the pending ones never did.
+The other finding is still pending, so it is not an annotation and does not appear.
 
 ## What gonk adds
 
