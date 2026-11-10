@@ -135,6 +135,9 @@ date = "2026-11-07"
 summary = "Spreadsheet, IV corrects the stated number of midnight trials to match its included test."
 pages = ["applied/spreadsheet-4.md"]
 maintenance = true
+date = "2026-11-07"
+summary = "Spreadsheet I–III now explain where to run the examples, put resource names first in the model tables, and distinguish stale cache entries from removed ones. The formula-edit walkthrough and chapter references are clearer."
+pages = ["applied/spreadsheet-1.md", "applied/spreadsheet-2.md", "applied/spreadsheet-3.md"]
 
 [[change]]
 date = "2026-11-05"

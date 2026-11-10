@@ -170,7 +170,7 @@ the last cell had typed it. `A3` is new, so it was computed here.
 ## Editing a formula compiles exactly that formula
 
 Both formulas are compiled and cached now (the grid below read every value after that cell
-ran, and a value reads its formula). Three edits, three different things to change:
+ran, and a value reads its formula). Change a referenced number, then change a formula:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:sheet:input:A1 7
 cache urn:iki:tutorial:sheet:formula:A2
@@ -241,7 +241,8 @@ the branch is the interesting part:
 {{#include ../../../../crates/spreadsheet/src/lib.rs:cell}}
 ```
 
-For a formula, the value reads the cell's precedents (the next section but one), then the
+For a formula, the value reads the cell's precedents (defined in
+[A cycle is named, not chased](#a-cycle-is-named-not-chased)), then the
 compiled formula, reads it back into an expression, and evaluates it:
 
 ```rust,ignore
@@ -381,12 +382,12 @@ Try a formula of your own, a range, and a mistake.
 
 | the set | the name | what it is |
 |---|---|---|
-| the compiler | `urn:iki:tutorial:sheet:compile` | code: a pure function, declared as a lossy transreptor |
-| a compiled formula | `urn:iki:tutorial:sheet:formula:{ref}` | glue: the input, run through whatever plan the kernel finds |
-| references | `urn:iki:tutorial:sheet:refs:{ref}` | code: a small function of the compiled form and the ranges it names |
-| a range | `urn:iki:tutorial:sheet:range:{from}:{to}` | code: a pure function of its own name |
-| precedents | `urn:iki:tutorial:sheet:precedents:{ref}` | code: a walk over `refs`, the question "is this a cycle?" |
-| a value | `urn:iki:tutorial:sheet:cell:{ref}` | code: the evaluator, reading every value it needs by name |
+| Compiler | `urn:iki:tutorial:sheet:compile` | code: a pure function, declared as a lossy transreptor |
+| Compiled formula | `urn:iki:tutorial:sheet:formula:{ref}` | glue: the input, run through whatever plan the kernel finds |
+| References | `urn:iki:tutorial:sheet:refs:{ref}` | code: a small function of the compiled form and the ranges it names |
+| Range | `urn:iki:tutorial:sheet:range:{from}:{to}` | code: a pure function of its own name |
+| Precedents | `urn:iki:tutorial:sheet:precedents:{ref}` | code: a walk over `refs`, the question "is this a cycle?" |
+| Value | `urn:iki:tutorial:sheet:cell:{ref}` | code: the evaluator, reading every value it needs by name |
 
 `formula:{ref}` is glue for the reason the time chapter's view used to be: a name cannot carry
 an argument. A view no longer needs one, since `compose_over` fixes the template when it is bound
@@ -394,5 +395,5 @@ an argument. A view no longer needs one, since `compose_over` fixes the template
 mean "this resource, transrepted to that type", the compiled formula would be a rule,
 `formula:{ref}` = `input:{ref}` as `text/x-sexpr`, and no code at all.
 
-Every one of these is cacheable, and not one names a golden thread or lists a dependency. The
-next part edits a cell and asks what that cost.
+Every one of these is cacheable, and not one names a golden thread or lists a dependency.
+[Part III](spreadsheet-3.md) edits a cell and asks what that cost.

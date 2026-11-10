@@ -95,6 +95,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: Spreadsheet, IV connects to the cached sheet you already built and explains how dependency deadlines combine and why a kernel without a clock keeps its time-cell errors cached.
 
   Pages: [Spreadsheet, IV: cells that read the clock](applied/spreadsheet-4.md)
+- **2026-11-07**: Spreadsheet I–III now explain where to run the examples, put resource names first in the model tables, and distinguish stale cache entries from removed ones. The formula-edit walkthrough and chapter references are clearer.
+
+  Pages: [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [Spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [Spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
