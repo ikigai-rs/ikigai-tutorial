@@ -37,6 +37,13 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page.
 
   Pages: [A space that changes while it runs](applied/live-space.md), [Short names in a space](applied/prefixes.md), [Time is a resource](applied/time.md)
+- **2026-11-07**: Tic-tac-toe, VII names the polyglot game you already have, identifies the arrangement reader, and clarifies which build request hits the cache.
+
+  Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+
+- **2026-11-07**: Tic-tac-toe, VI links back to the browser board you already built and distinguishes terminal commands from the page's runnable cells.
+
+  Pages: [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 

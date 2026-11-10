@@ -48,6 +48,14 @@ pages = ["beyond/preference.md", "beyond/failure.md", "beyond/emacs.md"]
 date = "2026-11-07"
 summary = "The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page."
 pages = ["applied/live-space.md", "applied/prefixes.md", "applied/time.md"]
+date = "2026-11-07"
+summary = "Tic-tac-toe, VII names the polyglot game you already have, identifies the arrangement reader, and clarifies which build request hits the cache."
+pages = ["applied/tic-tac-toe-7.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "Tic-tac-toe, VI links back to the browser board you already built and distinguishes terminal commands from the page's runnable cells."
+pages = ["applied/tic-tac-toe-6.md"]
 
 [[change]]
 date = "2026-11-05"
