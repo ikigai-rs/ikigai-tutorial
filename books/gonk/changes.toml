@@ -22,6 +22,8 @@
 date = "2026-11-09"
 summary = "The workflow, model, and sentence chapters clarify fresh setup, server terminals, and the queries and plan you already have. The sentence chapter explains how to reuse your own model without replacing its mount configuration."
 pages = ["project/script.md", "project/model.md", "project/sentence.md"]
+summary = "The embedding chapter clarifies its setup, dataset sharing and caller permissions, and identifies the unpublished finding as pending. The other books are listed separately so readers can scan their subjects."
+pages = ["embedding/own-kernel.md", "ikigai-book.md"]
 
 [[change]]
 date = "2026-11-06"
