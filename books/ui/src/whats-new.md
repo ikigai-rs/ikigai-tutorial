@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-09**: The htmx chapter links back to the live-view model, names the note form and cache row to watch, and shows how to pass host options through Cargo from the repository root.
+
+  Pages: [htmx: server-rendered HTML with push](delivery/htmx.md)
+
 - **2026-11-06**: The opening UI chapters explain how to run their cells in order, distinguish the note from the other state atoms, and clarify when a cached view recomputes. The XSLT chapter explains why live transforms are uncached and identifies the scheduler view's outdated notice: the kernel already serves Turtle, but the inspector still shows text.
 
   Pages: [Introduction](introduction.md), [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md)
