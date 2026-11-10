@@ -104,6 +104,17 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: The closing reference pages correct stale counts, link the chapters behind the reading suggestions, and clarify glossary definitions and repository descriptions.
 
   Pages: [Where to go next](next.md), [Glossary](glossary.md), [The repositories](repositories.md)
+- **2026-11-07**: The notebook connects its catalog exploration to the Python client you already used and explains where to run the script and which setup steps you can reuse.
+
+  Pages: [The notebook: the catalog as a graph](polyglot/notebook.md)
+
+- **2026-11-07**: The TypeScript track connects its examples to the Python track, shows where to clone ikigai-deno and run commands, and explains explicit input declarations and typed refusals.
+
+  Pages: [The TypeScript track](polyglot/typescript.md)
+
+- **2026-11-07**: The TypeScript track's Exists example writes the note again after the preceding batch deletes it, and includes the import and command needed to run it.
+
+  Pages: [The TypeScript track](polyglot/typescript.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
