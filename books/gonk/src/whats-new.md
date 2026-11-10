@@ -14,6 +14,17 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-06**: Every page is replayed at a gonk that serves faces and a starter that ships them. A generated repository now holds faces/, so each With the starter section counts 29 more files, and the Dashboard's link from an agent's claims asks a slightly longer query.
 
   Pages: [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Routing work to agents](ways/routing.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md), [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md), [Start a project](project/start.md), [The Dashboard](ledger/dashboard.md), [Introduction](introduction.md)
+- **2026-11-05**: Importing a kata ledger links directly to the owner's socket section instead of pointing to the wrong section.
+
+  Pages: [Importing a kata ledger](bridges/kata.md)
+
+- **2026-11-05**: Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook.
+
+  Pages: [Filing roborev findings](bridges/roborev.md)
+
+- **2026-11-05**: Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door.
+
+  Pages: [Filing roborev findings](bridges/roborev.md)
 
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 
