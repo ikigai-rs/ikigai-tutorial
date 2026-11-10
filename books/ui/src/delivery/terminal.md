@@ -2,9 +2,10 @@
 
 *This chapter is not written yet.*
 
-It will deliver the inspector to a terminal: the same views, as text. The kernel's readouts
-already have a text face, the one The ikigai Book prints at the REPL, so the terminal target
-starts as the text face of each of the inspector's views, reached by transreption
-([One model, many faces](../model/faces.md)).
+It will deliver the inspector to a terminal: the same views, as text. The kernel's cache,
+threads and scheduler readouts already have text faces, as
+[One model, many faces](../model/faces.md) explains. The inspector's own views still need
+theirs. This chapter will use those text faces through **transreption**, converting a
+resource's representation into another form.
 
-It waits on those text faces.
+It waits on the inspector's text faces.
