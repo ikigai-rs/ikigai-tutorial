@@ -26,6 +26,23 @@ summary = "The socket and identity chapters clarify terminal steps, directory pr
 pages = ["beyond/socket.md", "beyond/identity.md", "beyond/datasets.md"]
 summary = "Dual-mode crates distinguishes a declared module feature from a working WebAssembly build and says where to run the build command. Where this actually stands clarifies the exercise workflow, release overview, and links to earlier examples."
 pages = ["modules/dual-mode.md", "modules/status.md"]
+summary = "A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request."
+pages = ["modules/end-to-end.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests."
+pages = ["modules/end-to-end.md"]
 
 [[change]]
 date = "2026-11-05"

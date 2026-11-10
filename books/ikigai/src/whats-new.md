@@ -16,6 +16,21 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-06**: Dual-mode crates distinguishes a declared module feature from a working WebAssembly build and says where to run the build command. Where this actually stands clarifies the exercise workflow, release overview, and links to earlier examples.
 
   Pages: [Dual-mode crates](modules/dual-mode.md), [Where this actually stands](modules/status.md)
+- **2026-11-06**: A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request.
+
+  Pages: [A module, end to end](modules/end-to-end.md)
+
+- **2026-11-06**: The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features.
+
+  Pages: [The wire session](modules/wire-session.md)
+
+- **2026-11-06**: The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors.
+
+  Pages: [The wire session](modules/wire-session.md)
+
+- **2026-11-06**: A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests.
+
+  Pages: [A module, end to end](modules/end-to-end.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
