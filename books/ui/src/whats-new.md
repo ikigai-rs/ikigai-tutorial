@@ -7,12 +7,13 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
-- **2026-11-05**: The JSON and CSV chapters clarify their template progression, source labels, and conversion to a shared model. Live data and history distinguishes the inspector's push script from ikigai-ui's shared support, explains which views refresh, and identifies the remaining step for live views in the book.
-
-  Pages: [Views from JSON](model/views-from-json.md), [Views from CSV: one model, two sources](model/views-from-csv.md), [Live data and history](model/live.md)
 - **2026-11-06**: The opening UI chapters explain how to run their cells in order, distinguish the note from the other state atoms, and clarify when a cached view recomputes. The XSLT chapter explains why live transforms are uncached and identifies the scheduler view's outdated notice: the kernel already serves Turtle, but the inspector still shows text.
 
   Pages: [Introduction](introduction.md), [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md)
+
+- **2026-11-05**: The JSON and CSV chapters clarify their template progression, source labels, and conversion to a shared model. Live data and history distinguishes the inspector's push script from ikigai-ui's shared support, explains which views refresh, and identifies the remaining step for live views in the book.
+
+  Pages: [Views from JSON](model/views-from-json.md), [Views from CSV: one model, two sources](model/views-from-csv.md), [Live data and history](model/live.md)
 
 - **2026-11-02**: "A page is a composed resource" now shows the theme chooser ikigai-ui 0.4 puts in every page's header, and "Live data and history" shows the cache's policy and evictions.
 

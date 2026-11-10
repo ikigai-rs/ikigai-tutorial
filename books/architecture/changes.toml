@@ -19,8 +19,14 @@
 date = "2026-11-06"
 summary = "The caching and presence chapters now link back to the examples they build on, and the caching advice distinguishes diagnostics from measuring read cost. \"The other books\" links the dynamic-space example and distinguishes the ledger cells from the overlay harness."
 pages = ["economics/economics.md", "closing/closing.md", "other-books.md"]
+
+[[change]]
+date = "2026-11-06"
 summary = "The manifold chapter distinguishes the family menu from exact authorization and shows the ledger's refusal. The door chapter links its prerequisites, and the overlay chapter clarifies governor behavior and the slow call's six-second wait."
 pages = ["spine/manifold.md", "door/door.md", "overlays/overlays.md"]
+
+[[change]]
+date = "2026-11-06"
 summary = "The introduction clarifies HTTP methods, conversion routes, and prerequisites, and links the reading order. The first two worked chapters now explain where each ledger runs, define IRI, and link back to what you have already done; the authority sections put their distinguishing terms first."
 pages = ["introduction.md", "substrate/two-faces.md", "spine/spine.md"]
 

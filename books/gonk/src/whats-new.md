@@ -14,45 +14,18 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-06**: Every page is replayed at a gonk that serves faces and a starter that ships them. A generated repository now holds faces/, so each With the starter section counts 29 more files, and the Dashboard's link from an agent's claims asks a slightly longer query.
 
   Pages: [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md), [Routing work to agents](ways/routing.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md), [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md), [Start a project](project/start.md), [The Dashboard](ledger/dashboard.md), [Introduction](introduction.md)
-- **2026-11-05**: Importing a kata ledger links directly to the owner's socket section instead of pointing to the wrong section.
 
-  Pages: [Importing a kata ledger](bridges/kata.md)
-
-- **2026-11-05**: Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook.
-
-  Pages: [Filing roborev findings](bridges/roborev.md)
-
-- **2026-11-05**: Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door.
-
-  Pages: [Filing roborev findings](bridges/roborev.md)
-- **2026-11-05**: Checking out repositories clarifies its setup, update refusals, and timer paths. A fresh machine links the three bridges, names the sample files to save, and distinguishes a simulated review hook from a configured one.
-
-  Pages: [Checking out repositories](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
-- **2026-11-05**: A QUIC client distinguishes refusals at the door from refusals by a resource and states that grant changes take effect on each call. Its introduction reflects the requests shown in The three doors.
-
-  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md)
-
-- **2026-11-05**: The three doors names the other machines it introduces and explains why an HTTP access line includes arguments the caller did not type.
-
-  Pages: [The three doors, and who is asking](machines/doors.md)
-- **2026-11-05**: The saved-query chapters say which terminals and query files to use, distinguish the two count columns, and define grounding before using it. The signed-in HTTP heading and script table put their distinguishing words first.
-
-  Pages: [Your first saved query](scripts/first.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
-- **2026-11-05**: Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities, hand-backs, and worker setup; all three make their comparison lists easier to scan.
-
-  Pages: [Two teams, one gonk](teams/two-teams.md), [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md)
-- **2026-11-05**: Routing work to agents clarifies the agent's permissions; Review every commit separates review requests from publishing and filing findings. Hub and spoke says where to run its pull request commands, and all three chapters put role names first in their tables.
-
-  Pages: [Routing work to agents](ways/routing.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md)
 - **2026-11-06**: Start a project explains which terminal keeps gonk running. The next chapters say where to save a spec change's files, connect claiming to seeded tasks, make lease renewal explicit, and distinguish closed items from released claims.
 
   Pages: [Start a project](project/start.md), [A spec change, and the items it becomes](project/change.md), [Claiming: lease, expiry, takeover](project/claim.md)
-- **2026-11-06**: The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging.
 
-  Pages: [Work, evidence, review, close](project/work.md), [Two agents in one repository](project/two-agents.md), [Ask the project in SPARQL](project/query.md)
 - **2026-11-06**: Spec first warns that real seeding needs a non-default ledger at the pinned starter revision; Periodic unled audits keeps earlier notes with the coordinator; Harness engineering makes its empty-directory setup explicit. All three keep directory changes inside subshells so later commands run from the chapter directory, and put role names first for scanning.
 
   Pages: [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md)
+
+- **2026-11-06**: The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging.
+
+  Pages: [Work, evidence, review, close](project/work.md), [Two agents in one repository](project/two-agents.md), [Ask the project in SPARQL](project/query.md)
 
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 
@@ -81,9 +54,6 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-05**: Over the socket links back to the browser chapter, says where to run commands while gonk is running, and introduces MCP by its full name.
 
   Pages: [Over the socket](agent/socket.md)
-- **2026-11-05**: The ledger chapters clarify resource checks, the Dashboard's seed setup and polling, and lifecycle diagnostics. Links name the surrounding chapters, and lifecycle state properties lead with their names.
-
-  Pages: [Checking what you have](ledger/checking.md), [The Dashboard](ledger/dashboard.md), [A lifecycle for your ledger](ledger/lifecycle.md)
 
 - **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
 
@@ -92,6 +62,46 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-05**: The starter now records a pull request alias when the dispatcher closes an item. Periodic unled audits adds review jobs: a worker hands back a JSON block, and the dispatcher files keyed, parented findings from a trusted worker, keeping the worker's narrow grant.
 
   Pages: [A workflow of your own](project/script.md), [Periodic unled audits](ways/audits.md)
+
+- **2026-11-05**: The ledger chapters clarify resource checks, the Dashboard's seed setup and polling, and lifecycle diagnostics. Links name the surrounding chapters, and lifecycle state properties lead with their names.
+
+  Pages: [Checking what you have](ledger/checking.md), [The Dashboard](ledger/dashboard.md), [A lifecycle for your ledger](ledger/lifecycle.md)
+
+- **2026-11-05**: Importing a kata ledger links directly to the owner's socket section instead of pointing to the wrong section.
+
+  Pages: [Importing a kata ledger](bridges/kata.md)
+
+- **2026-11-05**: Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook.
+
+  Pages: [Filing roborev findings](bridges/roborev.md)
+
+- **2026-11-05**: Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door.
+
+  Pages: [Filing roborev findings](bridges/roborev.md)
+
+- **2026-11-05**: Checking out repositories clarifies its setup, update refusals, and timer paths. A fresh machine links the three bridges, names the sample files to save, and distinguishes a simulated review hook from a configured one.
+
+  Pages: [Checking out repositories](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
+
+- **2026-11-05**: A QUIC client distinguishes refusals at the door from refusals by a resource and states that grant changes take effect on each call. Its introduction reflects the requests shown in The three doors.
+
+  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md)
+
+- **2026-11-05**: The three doors names the other machines it introduces and explains why an HTTP access line includes arguments the caller did not type.
+
+  Pages: [The three doors, and who is asking](machines/doors.md)
+
+- **2026-11-05**: The saved-query chapters say which terminals and query files to use, distinguish the two count columns, and define grounding before using it. The signed-in HTTP heading and script table put their distinguishing words first.
+
+  Pages: [Your first saved query](scripts/first.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
+
+- **2026-11-05**: Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities, hand-backs, and worker setup; all three make their comparison lists easier to scan.
+
+  Pages: [Two teams, one gonk](teams/two-teams.md), [Solo on one machine](ways/solo.md), [Remote workers](ways/workers.md)
+
+- **2026-11-05**: Routing work to agents clarifies the agent's permissions; Review every commit separates review requests from publishing and filing findings. Hub and spoke says where to run its pull request commands, and all three chapters put role names first in their tables.
+
+  Pages: [Routing work to agents](ways/routing.md), [Review every commit](ways/review-every-commit.md), [Hub and spoke](ways/hub-and-spoke.md)
 
 - **2026-11-03**: A new chapter, The Dashboard, seeds three ledgers with weeks of invented history and goes through each tab in screenshots: charts and the backfill sentence, agents' numbers as SPARQL you can click, polling and its pause control, then the Cache and System tabs.
 
