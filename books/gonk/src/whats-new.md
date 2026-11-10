@@ -42,6 +42,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-05**: Over the socket links back to the browser chapter, says where to run commands while gonk is running, and introduces MCP by its full name.
 
   Pages: [Over the socket](agent/socket.md)
+- **2026-11-05**: The ledger chapters clarify resource checks, the Dashboard's seed setup and polling, and lifecycle diagnostics. Links name the surrounding chapters, and lifecycle state properties lead with their names.
+
+  Pages: [Checking what you have](ledger/checking.md), [The Dashboard](ledger/dashboard.md), [A lifecycle for your ledger](ledger/lifecycle.md)
 
 - **2026-11-05**: The opening chapters distinguish HTTP reads from socket writes, say where to run the second terminal, and include the browser session's idle limit. The introduction distinguishes automated model stubs from manual examples, and the browser chapter names the chapters that follow.
 

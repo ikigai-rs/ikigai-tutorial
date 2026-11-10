@@ -2,8 +2,8 @@
 
 [The ledger in a browser](browser.md) opened one ledger's pages. The Dashboard is the page above them,
 at `/dashboard`: a chart of every ledger you may read, a table of every agent working in them, and,
-for an operator, what the server's cache and disks are doing. It answers the question a person
-running several agents asks most, which is what they have all been doing.
+for an operator, what the server's cache and disks are doing. Use it to see what agents have been doing
+across your ledgers.
 
 An empty ledger makes a dull Dashboard, so this chapter fills a scratch gonk with eight weeks of fake
 history first. Then it goes through the page one tab at a time. The pictures are screenshots of a real
@@ -15,17 +15,17 @@ today. The numbers will not.
 
 [`seed.py`](dashboard/seed.py) writes the history of *Pinwheel*, a project nobody has built, with no
 real names in it. It has three ledgers, `app`, `docs` and `infra`. Two machines, `alpha` and `beta`, each
-run a Claude loop and a Codex loop, as [Routing work to agents](../ways/routing.md) sets them up, which
-makes four holders: `alpha-claude`, `alpha-codex`, `beta-claude` and `beta-codex`. Every third item carries
-the shared `worker:pool` label, so either machine takes it.
+run a Claude loop and a Codex loop, as [Routing work to agents](../ways/routing.md) shows later in the
+book. That makes four holders: `alpha-claude`, `alpha-codex`, `beta-claude` and `beta-codex`. Every third
+item carries the shared `worker:pool` label, so either machine takes it.
 
 Over those weeks the loops do what loops do: items are filed, claimed and handed back; a dispatcher
 closes them; some are sent back with a reason and handed back again; some are claimed and plainly
 released, or a run stops, and another holder picks them up; a few are closed as not worth doing, or
 reopened. For nine days the dispatcher is away, so finished work waits and is closed in a batch.
 
-Nothing in it is random. Download it beside where you will run this chapter, and look at it: the story
-is a short table.
+Nothing in it is random. In a new empty directory, save the linked file as `seed.py`. Run the commands
+in this chapter from that directory. Look through the file first: the story is a short table.
 
 <!-- transcripts: workspace books/gonk/src/ledger/dashboard/seed.py -->
 <!-- transcript: run -->
@@ -248,7 +248,7 @@ The second tab is a table per ledger, with a row per holder who ever took a clai
 <figcaption>The Agents tab: one table per ledger, one row per holder, every number a link.</figcaption>
 </figure>
 
-This tab asks anyone who may read a ledger, so it answers `curl` as it does a browser. The words each link
+Anyone who may read a ledger can read its Agents table, with `curl` or a browser. The words each link
 carries are written for a screen reader, and they are the plainest way to read the row:
 
 <!-- transcript: run -->
@@ -334,8 +334,9 @@ tab's sentence says so. It is also why your first look at a long-lived ledger ma
 ## Polling, and pausing it
 
 While a tab is showing, each chart and table asks for itself every 30 seconds. Only the tab on screen
-asks, so an unopened tab's questions cost nothing. A fragment answers with a validator, and the next ask
-sends it back, so an unchanged chart costs no body. Here is that exchange by hand:
+asks, so an unopened tab's questions cost nothing. Each response includes an `ETag`, a validator for
+that content. The next request sends it back in `If-None-Match`; unchanged content gets HTTP `304`
+with no response body. Here is that exchange by hand:
 
 <!-- transcript: run -->
 ```console
