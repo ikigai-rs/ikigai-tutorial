@@ -12,9 +12,18 @@ this one assumes them.
 
 The check on this page uses `model-stub`, this book's fixed answers, so it prints the same thing on
 every machine. **With your own model from the [previous chapter](model.md), the drafts will be
-different**, for better or worse, and the steps stay the same. Keep your own `gonk.mount` line and skip
-the stub. In a new empty directory, as in [Start a project](start.md). If the gonk and peers from
-[that chapter](model.md) are still running, stop them first, since this gonk takes the same port.
+different**, for better or worse, and the steps stay the same.
+
+Start in a new empty directory, as in [Start a project](start.md); this chapter regenerates the
+sample and seeds a fresh ledger. If the gonk from [A model of your own](model.md) is still running,
+stop it first, since this gonk takes the same port. For the stand-in route, stop that chapter's
+peers too. Keep each server running in its own terminal and run the remaining commands in another,
+from this chapter's directory.
+
+To use your own model, keep its peer running. Skip the next two blocks, which start and configure
+the stand-in. Instead, create `.config/ikigai/config.toml` in this chapter's directory with your
+own `gonk.mount` line from [A model of your own](model.md). Use absolute paths for its socket or
+certificate directory so the line still works from here. Then start gonk below.
 
 <!-- transcript: serve -->
 ```console
