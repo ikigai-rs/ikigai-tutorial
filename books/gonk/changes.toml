@@ -74,6 +74,8 @@ summary = "Routing work to agents clarifies the agent's permissions; Review ever
 pages = ["ways/routing.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md"]
 summary = "Start a project explains which terminal keeps gonk running. The next chapters say where to save a spec change's files, connect claiming to seeded tasks, make lease renewal explicit, and distinguish closed items from released claims."
 pages = ["project/start.md", "project/change.md", "project/claim.md"]
+summary = "The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging."
+pages = ["project/work.md", "project/two-agents.md", "project/query.md"]
 
 [[change]]
 date = "2026-11-05"

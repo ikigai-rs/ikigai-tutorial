@@ -47,6 +47,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-06**: Start a project explains which terminal keeps gonk running. The next chapters say where to save a spec change's files, connect claiming to seeded tasks, make lease renewal explicit, and distinguish closed items from released claims.
 
   Pages: [Start a project](project/start.md), [A spec change, and the items it becomes](project/change.md), [Claiming: lease, expiry, takeover](project/claim.md)
+- **2026-11-06**: The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging.
+
+  Pages: [Work, evidence, review, close](project/work.md), [Two agents in one repository](project/two-agents.md), [Ask the project in SPARQL](project/query.md)
 
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 
