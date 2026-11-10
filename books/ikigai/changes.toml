@@ -94,6 +94,14 @@ pages = ["code/exercises.md"]
 date = "2026-11-07"
 summary = "The fourth code exercise names the query pattern its warning checks; its old heading link still works."
 pages = ["code/exercises.md"]
+date = "2026-11-07"
+summary = "Spreadsheet, V carries forward the sheet's time cells and polling grid, distinguishes a feed write from a cell edit, and gives concrete cells and formulas for watching the market."
+pages = ["applied/spreadsheet-5.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "Spreadsheet, V corrects the stated polling interval to match its included test."
+pages = ["applied/spreadsheet-5.md"]
 maintenance = true
 
 [[change]]
@@ -117,6 +125,16 @@ pages = ["code/first.md", "code/scripts.md", "code/authority.md"]
 date = "2026-11-07"
 summary = "Spreadsheet, VI and VII explain which sheet state carries forward and where to run their cells. The chapters link earlier examples by name, distinguish recomputation from a cache hit, and clarify that the input history already exists."
 pages = ["applied/spreadsheet-6.md", "applied/spreadsheet-7.md"]
+
+[[change]]
+summary = "Spreadsheet, IV connects to the cached sheet you already built and explains how dependency deadlines combine and why a kernel without a clock keeps its time-cell errors cached."
+pages = ["applied/spreadsheet-4.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "Spreadsheet, IV corrects the stated number of midnight trials to match its included test."
+pages = ["applied/spreadsheet-4.md"]
+maintenance = true
 
 [[change]]
 date = "2026-11-05"
