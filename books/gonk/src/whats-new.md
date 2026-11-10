@@ -25,6 +25,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-05**: Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door.
 
   Pages: [Filing roborev findings](bridges/roborev.md)
+- **2026-11-05**: Checking out repositories clarifies its setup, update refusals, and timer paths. A fresh machine links the three bridges, names the sample files to save, and distinguishes a simulated review hook from a configured one.
+
+  Pages: [Checking out repositories](bridges/checkout.md), [A fresh machine, end to end](bridges/fresh-machine.md)
 
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 

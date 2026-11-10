@@ -1,10 +1,10 @@
 # A fresh machine, end to end
 
-The three bridges in the order a new machine needs them: the repositories first, then gonk
-serving them, then the work already tracked elsewhere brought in, then the hook that keeps new
-review findings arriving. Every step is a command from the last three chapters, and this page
-runs them in sequence in one scratch home, so the sequence itself is checked, not only its
-parts.
+You have now tried [Filing roborev findings](roborev.md), [Importing a kata ledger](kata.md),
+and [Checking out repositories](checkout.md) separately. This chapter puts the three bridges
+together in the order a new machine needs them: clone the repositories, start gonk to serve
+them, import the existing work, and set up the review hook. The transcript check runs the
+sequence in one scratch home, so it checks how the steps fit together as well as each step.
 
 Before it: gonk and `ikigai` installed at the versions this book pins
 ([Which gonk](../introduction.md#which-gonk)), and git. In a new empty directory, as in [every
@@ -66,11 +66,10 @@ client `roborev`  …/.config/ikigai/gonk/quic/clients/roborev
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 ```
 
-gonk reads the certificates it trusts when it starts, which is what the last lines of the `client
-add` say; a running gonk would mount the new roots by itself. If it is already running as a service,
-restart it the way that service is
-run; under launchd, with the label your plist gives it (`dev.ikigai-rs.gonk` here; the checkout
-stopped printing one, because a label is one operator's choice):
+gonk reads trusted certificates at startup, so enrolling a client requires a restart if gonk
+is already running. Adding browse roots alone needs no restart. For a gonk running as a
+service, use that service's restart command. Under launchd, use the label in your plist
+(`dev.ikigai-rs.gonk` in this example):
 
 <!-- transcript: manual — it restarts a launchd service, which a scratch check does not have -->
 ```console
@@ -78,7 +77,8 @@ $ launchctl kickstart -k gui/$(id -u)/dev.ikigai-rs.gonk
 ```
 
 Here it starts for the first time, with the same two homes the checkout and the enrollment were
-given, so it reads the `config.toml` the checkout wrote and the client `client add` enrolled:
+given, so it reads the `config.toml` the checkout wrote and trusts the certificate enrolled by
+`client add`:
 
 <!-- transcript: serve -->
 ```console
@@ -105,7 +105,8 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:flight:
 
 ## 3. The work already tracked
 
-A `kata export` from the old tracker, here two issues, one blocking the other:
+Save this sample `kata export` from the old tracker as `kata.jsonl` in the directory where you
+have been running the commands. It contains two issues, one blocking the other:
 
 <!-- transcript: file kata.jsonl -->
 ```json
@@ -139,8 +140,8 @@ another user, takes a client of its own instead, `--quic` and `--cert-dir` as th
 
 ## 4. The hook
 
-The last piece is one `[[hooks]]` entry in roborev's config, so every completed review files
-its findings here from now on, as the client enrolled in step 2 ([Filing roborev
+The last piece is one `[[hooks]]` entry in roborev's `~/.roborev/config.toml`, so every completed
+review files its findings here from now on, as the client enrolled in step 2 ([Filing roborev
 findings](roborev.md)):
 
 <!-- transcript: file .roborev/config.toml -->
@@ -150,10 +151,10 @@ event = "review.completed"
 command = "ikigai-gonk roborev file --quic 127.0.0.1:1062 --cert-dir ~/.config/ikigai/gonk/quic/clients/roborev --ledger default --root {repo_name} --repo-path {repo} --job {job_id} --sha {sha} --agent {agent} --findings {findings}"
 ```
 
-That is the line for your machine: gonk's own port, 1062, and the bundle where `client add`
-writes it in your config home. This page's gonk is on 1070 with a scratch config home, so the next
-review roborev completes on `notes` runs that line with roborev's values in place, and this
-page's port and bundle; this is what it receives and runs:
+That line uses gonk's default port, 1062, and the bundle in your default config home. Use your
+own port and bundle path when you configure roborev. This page's gonk is on 1070 with a scratch
+config home; the command below uses those settings to simulate a hook invocation for `notes`.
+You do not need to run roborev for this example. Save these sample findings as `review.md`:
 
 <!-- transcript: file review.md -->
 ```markdown
@@ -209,7 +210,7 @@ What keeps it current:
 
 | what changes | what brings it in | restart? |
 | --- | --- | --- |
-| a repository upstream | `ikigai-gonk checkout --all`, by hand or [on a timer](checkout.md#on-a-timer) | no: the watcher sees the fast-forward |
-| a new repository | `ikigai-gonk checkout <url> --write-config` | no: a running gonk watches `config.toml` |
+| upstream repository | `ikigai-gonk checkout --all`, by hand or [on a timer](checkout.md#on-a-timer) | no: the watcher sees the fast-forward |
+| new repository | `ikigai-gonk checkout <url> --write-config` | no: a running gonk watches `config.toml` |
 | kata | `ikigai-gonk kata import <a new export>` | no |
-| a roborev review | the hook, by itself | no |
+| roborev review | the hook, by itself | no |

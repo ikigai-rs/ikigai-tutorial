@@ -45,6 +45,11 @@ pages = ["bridges/roborev.md"]
 
 [[change]]
 date = "2026-11-05"
+summary = "Checking out repositories clarifies its setup, update refusals, and timer paths. A fresh machine links the three bridges, names the sample files to save, and distinguishes a simulated review hook from a configured one."
+pages = ["bridges/checkout.md", "bridges/fresh-machine.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
 
