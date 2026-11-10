@@ -100,12 +100,12 @@ rewrites it to `urn:iki:tutorial:ttt:cells:0.0,1.0,2.0`, and the line endpoint a
 that. The table parses from text, so it could as easily have been read from a file.
 Nothing about it is compiled logic.
 
-This table is also where "three by three" lives, and nowhere else does. The cell takes any
-coordinates and the line takes any cells, so the size of the board is the one thing the
-game has to say for itself, and it says it here, as data. Connect Four is a board of seven
+This table defines the eight winning lines of a three-by-three board. The cell takes any
+coordinates and the line takes any cells, so neither endpoint needs to know the board's size.
+The board endpoint below also fixes the number of rows at three. Connect Four is a board of seven
 columns and six rows, won by four in a line, and it has sixty-nine such lines. It would be
-another table over the same two endpoints, not another crate. That is what keeping Part I's
-model loose was for: the atoms do not change when the game does, only the names laid over
+another table over the same cell and line endpoints, with a board endpoint that reads
+all six rows. That is what keeping [Part I](tic-tac-toe-1.md)'s model loose was for: the atoms do not change when the game does, only the names laid over
 them.
 
 `y` runs down the board, so row 0 is the top row. A line reads left to right, or top to
@@ -202,8 +202,9 @@ source urn:iki:tutorial:ttt:diagonal:1'>
 [computed]</pre>
 </div>
 
-Now play the corner. The four probes are row 0, column 0, diagonal 0 and the board, the
-four things that pass through (0,0). None of them is cached any more:
+Now play the corner. The four probes are row 0, column 0, diagonal 0 and the board.
+The three lines pass through (0,0), and the board depends on row 0. None of the four is
+cached any more:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:ttt:stored:0:0 X
 cache urn:iki:tutorial:ttt:cells:0.0,1.0,2.0
@@ -287,7 +288,7 @@ edge on two. That count is about to matter.
 
 ## Next
 
-Part III asks questions of the board. Which lines a cell is on becomes a resource of its
+[Part III](tic-tac-toe-3.md) asks questions of the board. Which lines a cell is on becomes a resource of its
 own: a representation that is a list of the names of other resources. Whose turn it is and
 who has won are questions about those lines, and the rules of tic-tac-toe arrive
 there, at the edge of the application, with the model underneath still loose.
