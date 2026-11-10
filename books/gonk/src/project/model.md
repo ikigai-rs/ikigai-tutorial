@@ -44,7 +44,7 @@ blue
 On macOS, install the app or use `brew install ollama && brew services start ollama`.
 
 Now tell `ikigai` about it. This page keeps the file in a scratch config home, `peer/ikigai/`; yours is
-`~/.config/ikigai/llm.json`, and and then the commands below need no `env XDG_CONFIG_HOME=…`. In a
+`~/.config/ikigai/llm.json`, and then the commands below need no `env XDG_CONFIG_HOME=…`. In a
 new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter):
 
 <!-- transcript: file peer/ikigai/llm.json -->
