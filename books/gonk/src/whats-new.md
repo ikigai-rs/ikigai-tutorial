@@ -50,6 +50,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 - **2026-11-06**: The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging.
 
   Pages: [Work, evidence, review, close](project/work.md), [Two agents in one repository](project/two-agents.md), [Ask the project in SPARQL](project/query.md)
+- **2026-11-06**: Spec first warns that real seeding needs a non-default ledger at the pinned starter revision; Periodic unled audits keeps earlier notes with the coordinator; Harness engineering makes its empty-directory setup explicit. All three keep directory changes inside subshells so later commands run from the chapter directory, and put role names first for scanning.
+
+  Pages: [Spec first](ways/spec-first.md), [Periodic unled audits](ways/audits.md), [Harness engineering](ways/harness.md)
 
 - **2026-11-05**: One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list.
 

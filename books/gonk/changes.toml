@@ -76,6 +76,8 @@ summary = "Start a project explains which terminal keeps gonk running. The next 
 pages = ["project/start.md", "project/change.md", "project/claim.md"]
 summary = "The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging."
 pages = ["project/work.md", "project/two-agents.md", "project/query.md"]
+summary = "Spec first warns that real seeding needs a non-default ledger at the pinned starter revision; Periodic unled audits keeps earlier notes with the coordinator; Harness engineering makes its empty-directory setup explicit. All three keep directory changes inside subshells so later commands run from the chapter directory, and put role names first for scanning."
+pages = ["ways/spec-first.md", "ways/audits.md", "ways/harness.md"]
 
 [[change]]
 date = "2026-11-05"

@@ -45,10 +45,10 @@ starter from the beginning.
 
 | role | who | does |
 | --- | --- | --- |
-| the person who steers | whoever owns the process | reads the coverage answers; turns a recurring failure into a new or better control |
-| the agent | any agent working in the repository | reads the guides; trips the sensors; is told why |
-| the sensors | the repository's own tools and hooks | refuse or warn, and record one line each time |
-| the dispatcher | the owner of the gonk the work lives in | loads the harness into gonk and asks the coverage questions |
+| person who steers | whoever owns the process | reads the coverage answers; turns a recurring failure into a new or better control |
+| agent | any agent working in the repository | reads the guides; trips the sensors; is told why |
+| sensors | the repository's own tools and hooks | refuse or warn, and record one line each time |
+| dispatcher | the owner of the gonk the work lives in | loads the harness into gonk and asks the coverage questions |
 | gonk | the same gonk as the ledger | holds the harness graph and the firings beside the ledger, and answers SPARQL over them |
 
 ## What runs where
@@ -74,9 +74,9 @@ a reviewed change like any other; the firing log is per working tree and never c
 
 ## The loop, step by step
 
-This page's gonk, as in [every chapter](../introduction.md#a-gonk-per-chapter) before it: if the
-one from [Periodic unled audits](audits.md) is still running, stop it first, since this one takes
-the same port.
+In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
+from [Periodic unled audits](audits.md) is still running, stop it first, since this one takes the
+same port.
 
 <!-- transcript: serve -->
 ```console
@@ -95,7 +95,7 @@ carries the harness and the vocabulary's complete definition:
 ```console
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
-$ cd starter && python3 tools/new.py ../library --process solo
+$ (cd starter && python3 tools/new.py ../library --process solo)
 generated the library-lending sample (python, process solo) in …/library: 94 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
@@ -171,7 +171,7 @@ the graph to its vocabulary, and each guide's section to a heading of `AGENTS.md
 
 <!-- transcript: run -->
 ```console
-$ cd library && python3 tools/harness.py check
+$ (cd library && python3 tools/harness.py check)
 harness check: 20 guide(s) and 14 other control(s) agree with the code
 ```
 
@@ -184,7 +184,7 @@ which says the Claude Code claim hook is off. Step 5 comes back to that one.
 
 <!-- transcript: run -->
 ```console
-$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder ada
+$ (cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder ada)
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
   note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
@@ -215,11 +215,11 @@ evidence:
 
 <!-- transcript: run -->
 ```console
-$ cd library && python3 tools/gonk.py file 'Renew a loan before it is due'
+$ (cd library && python3 tools/gonk.py file 'Renew a loan before it is due')
 #1 urn:iki:ledger:default:item:…
-$ cd library && python3 tools/gonk.py claim 1
+$ (cd library && python3 tools/gonk.py claim 1)
 #1 claimed by ada until …
-$ cd library && python3 tools/gonk.py report 1 --note 'renewal works'
+$ (cd library && python3 tools/gonk.py report 1 --note 'renewal works')
 gonk.py: --evidence is a URL (the pull request, or the reproduction that shows it is not a defect): evidence must be something a reader can check
 ```
 
@@ -253,7 +253,7 @@ corrupt segment leaves the refusal and its message exactly as they were. Read ba
 
 <!-- transcript: run -->
 ```console
-$ cd library && python3 tools/harness.py firings
+$ (cd library && python3 tools/harness.py firings)
     1  refusal  evidence-required                    last …
 1 firing(s) in urn:log:harness:tree-…
 ```
@@ -270,7 +270,7 @@ one that is not, and loads that beside the graph:
 
 <!-- transcript: run -->
 ```console
-$ cd library && python3 tools/gonk.py harness
+$ (cd library && python3 tools/gonk.py harness)
 harness: 20 rule(s), 14 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
   not wired: ctl:edit-hook-not-wired
   not wired: ctl:edit-hook-unreadable-input
@@ -333,7 +333,7 @@ nothing, and every working tree's firings land in the same graph beside each oth
 
 <!-- transcript: run -->
 ```console
-$ cd library && python3 tools/gonk.py harness | grep '^loaded'
+$ (cd library && python3 tools/gonk.py harness | grep '^loaded')
 loaded:  updated <urn:iki:harness:graph:default>: +0 -0 quads
 ```
 
@@ -375,11 +375,11 @@ by hand the way Claude Code would run it, after the claim is released:
 
 <!-- transcript: run -->
 ```console
-$ cd library && python3 tools/gonk.py release 1 --note 'stopping here'
+$ (cd library && python3 tools/gonk.py release 1 --note 'stopping here')
 #1 released
 $ printf '{"tool_name": "Edit", "tool_input": {"file_path": "%s/library/README.md"}}' "$PWD" | python3 library/hooks/claude/require-claim.py
 require-claim: refused an edit to README.md: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
-$ cd library && python3 tools/harness.py firings
+$ (cd library && python3 tools/harness.py firings)
     1  refusal  evidence-required                    last …
     1  refusal  edit-without-live-claim              last …
 2 firing(s) in urn:log:harness:tree-…
