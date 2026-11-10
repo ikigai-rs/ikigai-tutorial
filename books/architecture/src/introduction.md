@@ -23,8 +23,8 @@ routes the request to whatever is bound to answer for it.
 
 That idea is not new, and this book does not pretend it is. Resource-oriented computing was worked
 out in detail in **NetKernel**, designed by **Peter Rodgers and Tony Butterfield**, and ikigai owes
-it the core of its thinking. You do not need to know NetKernel to read this book — everything is
-taught here from the ground — but it is honest to name where the ideas come from.
+it the core of its thinking. You do not need to know NetKernel to read this book, but it is honest to name where the ideas
+come from. The ikigai background this book assumes is listed [below](#how-this-book-is-organized-and-what-it-assumes).
 
 What does a reader get from a system built this way? A few things, and they compound:
 
@@ -52,7 +52,7 @@ needs and the substrate a careful application needs turn out to be the same subs
 
 The quickest way to understand ikigai is to notice that you already use a resource-oriented system
 every day. The Web is one. It names things (URLs), it has a small fixed set of verbs
-(`GET`, `POST`, `PUT`, `DELETE`), it negotiates representations (an `Accept` header asks for HTML or
+(such as `GET`, `POST`, `PUT`, and `DELETE`), it negotiates representations (an `Accept` header asks for HTML or
 JSON of the same resource), and it caches by URL (with `ETag` and `Cache-Control`). Those are the
 same four ideas — naming, verbs, representation, caching — that this book is about.
 
@@ -62,8 +62,8 @@ The Web made each of those choices in one particular way, and froze it. ikigai t
 | axis | the Web | ikigai |
 |---|---|---|
 | **naming** | `http(s)` URLs | any `urn:` scheme — a file, a function, a ledger item, a capability, the catalog itself all have names in the same space |
-| **verbs** | four, and not uniform (much sits behind `POST`) | five — Source, Sink, Exists, Delete, Meta — over **every** resource, uniformly |
-| **representation** | content negotiation on a mostly-fixed set of types | **transreption**: any representation converts to any other through converters, with one canonical hub (Turtle), so a new face is a converter, not a new endpoint |
+| **verbs** | HTTP methods such as `GET`, `POST`, `PUT`, and `DELETE` (much sits behind `POST`) | five — Source, Sink, Exists, Delete, Meta — over **every** resource, uniformly |
+| **representation** | content negotiation on a mostly-fixed set of types | **transreption**: registered converters provide a direct route or a two-step route through Turtle, so a new face is a converter, not a new endpoint |
 | **caching** | by URL, with time-to-live and validators | **golden threads**: the kernel tracks what each answer depended on and invalidates exactly those, so a write cuts precisely the derived answers it should and no others |
 | **authority** | bolted on per application (cookies, sessions, OAuth) | **capabilities**: authority is a resource too, attenuated down every call, and the kernel's capability check is the only authorization |
 
@@ -117,10 +117,10 @@ text says plainly which is which and promises the runnable version as the toolin
 
 The chapters, in order:
 
-1. **One substrate, two faces** — the thesis, on the worked item.
-2. **The capability spine** — authority resolved once per request, and the user interface that falls
+1. **[One substrate, two faces](substrate/two-faces.md)** — the thesis, on the worked item.
+2. **[The capability spine](spine/spine.md)** — authority resolved once per request, and the user interface that falls
    out of it.
-3. **The door** — the one place where the spine meets a browser.
-4. **The overlay chain** — the governors that wrap a resource to make it resilient and bounded.
-5. **The economics** — golden threads and caching, and why they are the system's accounting.
-6. **Closing the loop** — the human-in-the-loop action and the record it leaves.
+3. **[The door](door/door.md)** — the one place where the spine meets a browser.
+4. **[The overlay chain](overlays/overlays.md)** — the governors that wrap a resource to make it resilient and bounded.
+5. **[The economics](economics/economics.md)** — golden threads and caching, and why they are the system's accounting.
+6. **[Closing the loop](closing/closing.md)** — the human-in-the-loop action and the record it leaves.
