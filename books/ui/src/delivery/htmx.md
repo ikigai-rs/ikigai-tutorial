@@ -1,10 +1,10 @@
 # htmx: server-rendered HTML with push
 
-Part I built the inspector as resources and never said where they would be shown. This chapter
-puts them in a browser: a host that serves the inspector's pages over HTTP, with htmx swapping
-views in place and the push stream keeping them current. It is the first delivery target, and
-it is deliberately thin. Everything a page shows is the `inspector` crate's; this crate adds
-only what a door owns.
+In [Live data and history](../model/live.md), you read the inspector's cache and golden threads
+and saw how its views follow cuts. This chapter puts those views in a browser: a host that
+serves the inspector's pages over HTTP, with htmx swapping views in place and the push stream
+keeping them current. It is the first delivery target, and it is deliberately thin. Everything
+a page shows is the `inspector` crate's; this crate adds only what a door owns.
 
 If you played the board in [Tic-tac-toe, V: a board you can play](../../applied/tic-tac-toe-5.html),
 you have seen the pattern: htmx markup served as a resource, and a door that maps a URL to a
@@ -12,7 +12,7 @@ name. The inspector follows the same pattern, with the rules this book has colle
 
 ## Running it
 
-From a checkout of this book's repository:
+From the root of a checkout of this book's repository:
 
 <!-- transcript: manual — a server that runs until it is stopped; crates/inspector-htmx/tests/host.rs runs the same binary and speaks to it -->
 ```bash
@@ -20,13 +20,18 @@ cargo run -p inspector-htmx
 ```
 
 It prints the address it is serving on (`inspector: http://127.0.0.1:8071/`); open it. The
-cache view is the front page. Open the note in a second tab, write it, and watch the card's
-row in the first tab turn `cut`. Follow a thread's link, then press Back.
+cache view is the front page. Open `/inspect/note` at the same address in a second tab,
+enter text in **The note**, and press **Write it**. In the first tab, the row for
+`urn:iki:tutorial:inspect:demo:card` should show `cut`. Follow a thread's link, then press Back.
 
-`--http 127.0.0.1:0` picks a free port and prints it. `--artifacts DIR` serves the inspector's
-artifacts from a directory instead of the compiled-in copies: copy `crates/inspector/artifacts`
-somewhere, change `cache.xsl`, and reload. The next chapter of Part I to be written,
-[Artifacts: from a directory or compiled in](../model/artifacts.md), is about that.
+Stop the host with Ctrl+C before running it with different options.
+Run `cargo run -p inspector-htmx -- --http 127.0.0.1:0` to pick a free port and print its
+address. To serve artifacts from a directory, copy `crates/inspector/artifacts` to a directory
+of your choice, then run `cargo run -p inspector-htmx -- --artifacts DIR`, replacing `DIR`
+with that directory's path. Change `cache.xsl` there and reload the page to see your change.
+The `--` separates Cargo's options from the host's.
+[Artifacts: from a directory or compiled in](../model/artifacts.md) outlines the directory
+delivery and what the reserved chapter will cover.
 
 ## What the door owns
 
