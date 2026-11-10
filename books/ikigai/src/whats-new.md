@@ -50,6 +50,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: Tic-tac-toe I–III makes model names easier to scan, clarifies earlier chapter references and invalidation, and explains which endpoints a larger board can reuse. The CheckSet discussion distinguishes staying cached through moves from explicit invalidation.
 
   Pages: [Tic-tac-toe, I: the model and the atoms](applied/tic-tac-toe-1.md), [Tic-tac-toe, II: lines, aliases and the board](applied/tic-tac-toe-2.md), [Tic-tac-toe, III: the rules as resources](applied/tic-tac-toe-3.md)
+- **2026-11-07**: The machine client corrects MCP startup authority and the default Ollama backend, distinguishes backends from models, and clarifies argument validation. The beyond-one-host exercises specify their inputs and correct the fallback and composition guidance.
+
+  Pages: [The machine client](beyond/agent.md), [Exercises: beyond one host](beyond/exercises.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 

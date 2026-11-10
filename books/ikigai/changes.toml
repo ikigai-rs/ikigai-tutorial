@@ -62,6 +62,9 @@ pages = ["applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md"]
 date = "2026-11-07"
 summary = "Tic-tac-toe I–III makes model names easier to scan, clarifies earlier chapter references and invalidation, and explains which endpoints a larger board can reuse. The CheckSet discussion distinguishes staying cached through moves from explicit invalidation."
 pages = ["applied/tic-tac-toe-1.md", "applied/tic-tac-toe-2.md", "applied/tic-tac-toe-3.md"]
+date = "2026-11-07"
+summary = "The machine client corrects MCP startup authority and the default Ollama backend, distinguishes backends from models, and clarifies argument validation. The beyond-one-host exercises specify their inputs and correct the fallback and composition guidance."
+pages = ["beyond/agent.md", "beyond/exercises.md"]
 
 [[change]]
 date = "2026-11-05"
