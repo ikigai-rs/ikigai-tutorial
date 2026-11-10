@@ -50,6 +50,16 @@ pages = ["bridges/checkout.md", "bridges/fresh-machine.md"]
 
 [[change]]
 date = "2026-11-05"
+summary = "A QUIC client distinguishes refusals at the door from refusals by a resource and states that grant changes take effect on each call. Its introduction reflects the requests shown in The three doors."
+pages = ["machines/quic-client.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The three doors names the other machines it introduces and explains why an HTTP access line includes arguments the caller did not type."
+pages = ["machines/doors.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
 
