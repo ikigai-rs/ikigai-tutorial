@@ -138,6 +138,9 @@ maintenance = true
 date = "2026-11-07"
 summary = "Spreadsheet I–III now explain where to run the examples, put resource names first in the model tables, and distinguish stale cache entries from removed ones. The formula-edit walkthrough and chapter references are clearer."
 pages = ["applied/spreadsheet-1.md", "applied/spreadsheet-2.md", "applied/spreadsheet-3.md"]
+date = "2026-11-07"
+summary = "Contribute a module aligns its dependency recipe with the tested crates and clarifies argument descriptions. The other books names the architecture prerequisite, and the browser appendix connects to your earlier host and separates its recorded-file examples."
+pages = ["contribute.md", "other-books.md", "browser.md"]
 
 [[change]]
 date = "2026-11-05"

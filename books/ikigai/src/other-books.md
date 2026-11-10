@@ -8,7 +8,8 @@ Four more books build on this one, and each runs in the page as this one does.
   the cache, the golden threads and the arrangement this book prints as text.
 - [The ikigai Architecture](architecture/index.html): how the pieces fit, carrying one ledger item
   through capabilities, the door, the overlay chain, caching and the audit axis. Read it after this
-  book's chapters on dynamic spaces.
+  book's [A space that changes while it runs](applied/live-space.md), where you build a
+  host that rebuilds a space when its declaration changes.
 - [Running ikigai](operations/index.html): the operator's book. The `ikigai` binary, its flags and
   subcommands, and what it takes to serve, secure and run kernels for real, with every command run
   against a pinned release whenever the books are built.

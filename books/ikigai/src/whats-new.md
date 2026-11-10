@@ -98,6 +98,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: Spreadsheet I–III now explain where to run the examples, put resource names first in the model tables, and distinguish stale cache entries from removed ones. The formula-edit walkthrough and chapter references are clearer.
 
   Pages: [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [Spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md), [Spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md)
+- **2026-11-07**: Contribute a module aligns its dependency recipe with the tested crates and clarifies argument descriptions. The other books names the architecture prerequisite, and the browser appendix connects to your earlier host and separates its recorded-file examples.
+
+  Pages: [Contribute a module](contribute.md), [The other books](other-books.md), [Appendix: the kernel in the browser](browser.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
