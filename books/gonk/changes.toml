@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-09"
+summary = "The embedding chapter clarifies its setup, dataset sharing and caller permissions, and identifies the unpublished finding as pending. The other books are listed separately so readers can scan their subjects."
+pages = ["embedding/own-kernel.md", "ikigai-book.md"]
+
+[[change]]
 date = "2026-11-06"
 summary = "A new part, Pages of your own, serves a deployment's own pages from gonk: what a face is, what its jail and CSP refuse, a first page of open items built from the starter's template, then the starter's board, flight plan, project view and claims page, each checked from a shell with Deno."
 pages = ["faces/own.md", "faces/board.md", "faces/plans.md", "introduction.md"]
