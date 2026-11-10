@@ -16,6 +16,22 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-06"
+summary = "The full-screen REPL's input is identified as the request field; ikigai> labels submitted commands in its history."
+pages = ["binary/repl.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-06"
+summary = "Logging now links back to the socket connection, creates the config home before saving its settings, explains which terminal runs each command, and defines transreption before using the term."
+pages = ["running/logging.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The REPL chapter now defines its name, links back to the release in the Introduction, and asks you to keep one working directory for its examples."
+pages = ["binary/repl.md"]
+
+[[change]]
 date = "2026-11-03"
 summary = "The log host's install line is pinned to its commit on main."
 pages = ["running/logging.md"]
