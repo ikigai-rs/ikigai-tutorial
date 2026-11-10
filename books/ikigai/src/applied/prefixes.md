@@ -10,8 +10,9 @@ any other name means.
 The answer here is the one [Scope and alias](../getting-started/scope-and-alias.md) gave for
 renaming: a name is resolved in a space, and an alias rule is a declaration in one. A **prefix
 table** is an alias whose rules rewrite `json:` to `urn:json:` and `shop:` to
-`urn:iki:tutorial:shop:`. It lives in a dynamic space, and the space is carried as a corridor
-around the requests that compose. Inside, `shop:stock` is a name. Outside, there is no such name.
+`urn:iki:tutorial:shop:`. It lives in a dynamic space, carried as a **corridor**: a space
+that a request and all its sub-requests carry with them. Inside, `shop:stock` is a name.
+Outside, there is no such name.
 
 The data is the shop's stock from [Transreption](../building/transreption.md#a-format-that-is-not-rdf):
 a CSV table, read as JSON by `urn:json:query`. The code is `crates/shop`. Nothing here needs a
@@ -138,8 +139,8 @@ Follow one marker down. `$j{shop:stock length}` asks `urn:json:query` (its own n
 `src=shop:stock` and `q=length`. The query endpoint reads `shop:stock`, which the corridor
 rewrites to `urn:iki:tutorial:shop:stock` and asks again from the root. That answers `text/csv`,
 so the query plans the CSV transreptor, `urn:json:from-csv`, and runs `length` over the array of
-records it makes. Four resources, two of them reached by short names, and none of them written
-for this summary.
+records it makes. The query endpoint and CSV transreptor use full names; only the stock uses
+a short name in this marker. None of these resources was written for this summary.
 
 The same, in Rust:
 
@@ -265,8 +266,8 @@ in force. The status says what was refused and why.
 
 ## What it does not do
 
-- **The cut is coarse**, as in that chapter (ledger #2034): any new table recomputes
-  everything composed through the space.
+- **The cut is coarse**, as in [A space that changes while it runs](live-space.md#stage-3-a-door-removed-and-what-it-served)
+  (ledger #2034): any new table recomputes everything composed through the space.
 - **The reserved schemes are the whole guarantee.** A host that serves names under a scheme of
   its own (`page:`, say) and also declares a prefix `page:` would have that prefix stand in for
   its names inside the corridor. Core has no placement for "answer only if the root misses", so
@@ -278,21 +279,22 @@ in force. The status says what was refused and why.
   the forwarding endpoint the rule binds, which declares no inputs. So `source json:query
   src=shop:stock q=.` sends `src=…` as positional text and is refused for a missing `q`. The
   cells above name the endpoint in full and pass short names as values.
-- **A sandbox bound in the page is an abort.** jq runs metered and bounded. Natively a bound
-  reached is a typed refusal. In this page, WebAssembly cannot unwind, so it traps the page's
-  kernel until a reload. The cells here are far inside the bounds; keep an edited program small.
+- **Reaching a sandbox limit aborts the page's kernel.** jq runs metered and bounded.
+  Natively, reaching a limit returns a typed refusal. In this page, WebAssembly cannot unwind,
+  so it traps the page's kernel until a reload. The cells here are far inside the limits;
+  keep an edited program small.
 
 ## What was built
 
 | what | where | what it is |
 |---|---|---|
-| the stock | `urn:iki:tutorial:shop:stock` | an atom: CSV, written by a `Sink`, cached and cut |
-| the CSV as JSON | `urn:json:query`, `urn:json:from-csv` | ikigai-json: jq over the stock, through the CSV transreptor |
-| the prefix table | `urn:iki:tutorial:shop:prefixes` | data: an alias of root-resolving prefix rules, written by a `Sink` |
-| the prefix space | `urn:iki:space:dynamic:shop` | ikigai-fn's `prefix_space`: the table, bound, and checked |
-| the corridor | `Kernel::issue_in` | the space carried by a request and every sub-request it makes |
-| the summary | `urn:iki:tutorial:shop:summary` | a template of three `$j` markers, filled |
-| the list | `urn:iki:fn:each` | a row template filled once per record |
+| stock | `urn:iki:tutorial:shop:stock` | an atom: CSV, written by a `Sink`, cached and cut |
+| CSV as JSON | `urn:json:query`, `urn:json:from-csv` | ikigai-json: jq over the stock, through the CSV transreptor |
+| prefix table | `urn:iki:tutorial:shop:prefixes` | data: an alias of root-resolving prefix rules, written by a `Sink` |
+| prefix space | `urn:iki:space:dynamic:shop` | ikigai-fn's `prefix_space`: the table, bound, and checked |
+| corridor | `Kernel::issue_in` | the space carried by a request and every sub-request it makes |
+| summary | `urn:iki:tutorial:shop:summary` | a template of three `$j` markers, filled |
+| list | `urn:iki:fn:each` | a row template filled once per record |
 
 The only code is the two atoms. The CSV reader, the query language, the template language, the
 iteration and the short names are published resources, composed. A prefix is not a feature of

@@ -45,6 +45,9 @@ summary = "A module, end to end links back to the host routing and callback exam
 pages = ["modules/end-to-end.md"]
 summary = "Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops."
 pages = ["beyond/preference.md", "beyond/failure.md", "beyond/emacs.md"]
+date = "2026-11-07"
+summary = "The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page."
+pages = ["applied/live-space.md", "applied/prefixes.md", "applied/time.md"]
 
 [[change]]
 date = "2026-11-05"

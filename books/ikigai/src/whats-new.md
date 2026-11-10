@@ -34,6 +34,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-06**: Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops.
 
   Pages: [Preferential resolution](beyond/preference.md), [Failure has a class](beyond/failure.md), [The editor as a client](beyond/emacs.md)
+- **2026-11-07**: The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page.
+
+  Pages: [A space that changes while it runs](applied/live-space.md), [Short names in a space](applied/prefixes.md), [Time is a resource](applied/time.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
