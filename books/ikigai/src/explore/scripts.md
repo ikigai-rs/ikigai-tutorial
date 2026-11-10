@@ -545,7 +545,7 @@ dependents of urn:file:queries/notable.rq  (cut 0 times)
 
 Two cached answers would go stale: the question's own read and the `urn:sparql:select` answer
 computed from it. Now make the edit inside a session. `thread.iki` runs the section 2 plan
-twice, raises the question's threshold from 6 to 6.5, and runs the plan twice more:
+twice, raises the question's threshold from 6 to 6.5, and runs the plan once more:
 
 <!-- transcript: file thread.iki -->
 
@@ -553,7 +553,6 @@ twice, raises the question's threshold from 6 to 6.5, and runs the plan twice mo
 execute urn:file:plans/notable.ttl
 execute urn:file:plans/notable.ttl
 sink urn:file:queries/notable.rq PREFIX qk: <https://ikigai-rs.dev/ns/quakes#> SELECT ?id ?mag ?place WHERE { ?quake qk:mag ?mag ; qk:place ?place FILTER(?mag >= 6.5) BIND(STRAFTER(STR(?quake), "eventpage/") AS ?id) } ORDER BY DESC(?mag)
-execute urn:file:plans/notable.ttl
 execute urn:file:plans/notable.ttl
 ```
 
@@ -566,22 +565,21 @@ us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
 us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
 us6000m31m,6.4,"45 km SSW of Jurm, Afghanistan"
 us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
+
 [3 computed]
 id,mag,place
 us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
 us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
 us6000m31m,6.4,"45 km SSW of Jurm, Afghanistan"
 us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
+
 [2 cached · 1 computed]
 wrote 204 bytes to queries/notable.rq
 [uncacheable]
 id,mag,place
 us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
 us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
-[1 cached · 2 computed]
-id,mag,place
-us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
-us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+
 [1 cached · 2 computed]
 exit 0
 ```
@@ -589,9 +587,7 @@ exit 0
 Before the edit, the second run took two answers from the cache, as in section 2. After the
 `sink`, the next run read the new question and answered with the two earthquakes at 6.5 and
 above, with no restart and nothing cleared by hand: the write cut the thread, and the run
-recomputed two answers where the second run had recomputed one. The fourth run is the same as
-the third in `ikigai-cli` {{#include ../../ikigai-cli.version}}: it does not return to two
-cached answers. This page records the counts that release prints.
+recomputed two answers where the second run had recomputed one.
 
 The thread lives in one session's cache. Each `ikigai` command at the shell starts a new one, so
 an edit made between two commands is seen because nothing is cached yet. Inside a single session,
