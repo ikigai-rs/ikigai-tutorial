@@ -1,10 +1,16 @@
 # The ledger, the store and browse in your own kernel
 
-Every part of this book has shown a piece twice: as modules in a kernel the reader builds, and as
-gonk. This last chapter puts the pieces together the way gonk does, in a kernel of your own, and
-leaves out only what makes gonk a server — the doors. What is left is short, and the part of it
-worth reading closely is not the composition but the capabilities: with no doors, *who is asking*
-is no longer decided by which socket a request came in on, so the host has to say it, per caller.
+[A ledger of your own](../ledger/your-own.md) built a kernel from the ledger and store modules.
+[One-off review](../review/one-off.md) composed browse with a stub model. This chapter puts those
+pieces together the way gonk does, in a kernel of your own without the server's doors. With no
+doors, the host must pass a capability for each caller: *who is asking* is no longer decided by
+which door a request came in through.
+
+The Rust examples use `crates/embed-host` in the
+[tutorial repository](https://github.com/ikigai-rs/ikigai-tutorial). To run them, use
+`./scripts/test-books.sh` from that repository's root, as in the
+[introduction](../introduction.md#how-to-read-this-book). `Scratch` creates a temporary Git
+repository, and the model is a stub; these examples need no running gonk or model server.
 
 ## One dataset, three families
 
@@ -19,18 +25,17 @@ file* — is a join across them. Here is the whole composition, from
 
 Three things in it are decisions rather than plumbing.
 
-- **The dataset is handed out once.** `in_memory_shared_declaring` gives the store's space its
+- **Dataset sharing.** `in_memory_shared_declaring` gives the store's space its
   dataset and returns a second handle for browse, which takes an `oxigraph` store directly. A
   durable host does the same with `open_shared_declaring(path, …)`; gonk does exactly this, with
   RocksDB under it.
-- **The store is told where the other holder writes.** The store caches a read confined to one
-  graph only if nothing it does not see can change that graph. Browse writes behind the store's
-  back, so without `SharerWrites` the store would have to treat every read as uncacheable — and
-  since a resource is only as cacheable as what it reads, every ledger read with it. With the
-  promise, ledger reads stay cached.
-- **browse is confined to the graph that was promised.** `Mount::graph` is browse's half of the
-  same statement. A promise the sharer does not keep is the worst case — cached answers that never
-  expire — so the two are written from one constant.
+- **Store caching.** Browse writes to the shared dataset directly, without going through the
+  store. `SharerWrites` tells the store which graphs browse may change. Reads confined to other
+  graphs can still be cached. Without that promise, the store must treat every read as
+  uncacheable, including the reads that ledger resources depend on.
+- **Browse writes.** `Mount::graph` confines browse to the graph named in the promise. It is
+  browse's half of the same statement. A promise the sharer does not keep is the worst case —
+  cached answers that never expire — so the two are written from one constant.
 
 The model is the stub from [the explain chapter](../browse/explain.md). In a host of your own it
 would be a mount of a peer serving `urn:llm:`, as in gonk.
