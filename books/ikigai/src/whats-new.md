@@ -18,6 +18,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-05**: Tic-tac-toe, VII explains what a native host must supply before a stored Lisp rule can replace a Rust endpoint, and which reads preserve the game's caching behavior.
 
   Pages: [Tic-tac-toe, VII: the game's space is a file](applied/tic-tac-toe-7.md)
+- **2026-11-05**: Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home, with the pinned CLI's full scheduler output.
+
+  Pages: [Binding, and a host of your own](getting-started/binding.md), [Scope and alias](getting-started/scope-and-alias.md), [Configuration](getting-started/configuration.md)
 
 - **2026-11-05**: "Resolution" defines endpoint before using it. "Running it" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides.
 

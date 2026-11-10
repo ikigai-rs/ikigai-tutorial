@@ -41,6 +41,11 @@ pages = ["applied/tic-tac-toe-7.md"]
 
 [[change]]
 date = "2026-11-05"
+summary = "Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home, with the pinned CLI's full scheduler output."
+pages = ["getting-started/binding.md", "getting-started/scope-and-alias.md", "getting-started/configuration.md"]
+
+[[change]]
+date = "2026-11-05"
 summary = "\"Resolution\" defines endpoint before using it. \"Running it\" explains where to run the tutorial commands, distinguishes the two REPL interfaces, and clarifies which resources the page kernel provides."
 pages = ["getting-started/resolution.md", "getting-started/running-it.md"]
 

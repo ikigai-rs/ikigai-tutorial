@@ -1,12 +1,14 @@
 # Configuration
 
-A host reads a config file. This chapter is about *where* it looks, *how* two files
-combine, and — because the point of a book with tests is that the tests are the claim —
-how an endpoint that reads configuration is tested against a directory the test owns.
+In [Binding, and a host of your own](binding.md), you built a host around the book's
+endpoints. [Scope and alias](scope-and-alias.md) showed how to choose the names and
+spaces a request resolves against. Here the host reads a config file: you will see
+where it looks, how two files combine, and how to test the endpoint with a directory
+the test owns.
 
-The code is in `crates/building-endpoints`, one part ahead, because it is the first
-endpoint in the book whose answer comes from a file. It is bound in that part's host at
-`urn:iki:tutorial:banner`.
+The code is in `crates/building-endpoints`, the host used later in
+[Transreption](../building/transreption.md). Its `urn:iki:tutorial:banner` endpoint is
+the first in the book whose answer comes from a file.
 
 ## Where files live
 
@@ -50,10 +52,11 @@ the same rule over `config_home()`.
 {{#include ../../../../crates/building-endpoints/src/config.rs:settings}}
 ```
 
-Two rules in that loader. A **missing** file is a missing *layer* — skipped, silently,
-because "no override here" is ordinary. A file that is **present and broken** stops the
-read, because a config that is silently ignored is an operator believing one thing while
-the process does another, and nothing anywhere disagreeing until an outage.
+A **missing** file is a missing layer, skipped silently because "no override here" is
+ordinary. **Invalid TOML** stops the read with an error naming the file. This small
+loader does not validate every failure: it also skips other file-read errors and uses
+the default banner when `banner.text` is absent or is not a string. A production loader
+should distinguish missing files from unreadable ones and reject wrong value types.
 
 And the endpoint that serves it:
 
@@ -98,20 +101,33 @@ the next read sees the override.
 
 ## Try it
 
-Write a file into this machine's config home and ask the host for its banner:
+From the repository root you used in [Running it](running-it.md), run this block in
+your shell. It uses a temporary config home for the example. The parentheses keep
+`XDG_CONFIG_HOME` local to this block; your usual config files stay in place.
+
+The three runs read the shared file, then the app-scoped override, then the default
+with both files removed:
 
 ```bash
-mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/ikigai"
-printf '[banner]\ntext = "hello from a file"\n' > "${XDG_CONFIG_HOME:-$HOME/.config}/ikigai/tutorial.toml"
-cargo run -p building-endpoints -- --banner
+(
+  banner_config=$(mktemp -d)
+  export XDG_CONFIG_HOME="$banner_config"
+  mkdir -p "$XDG_CONFIG_HOME/ikigai"
+  printf '[banner]\ntext = "hello from a file"\n' > "$XDG_CONFIG_HOME/ikigai/tutorial.toml"
+  cargo run -p building-endpoints -- --banner
+  printf '[banner]\ntext = "hello from yours"\n' > "$XDG_CONFIG_HOME/ikigai/yours.tutorial.toml"
+  cargo run -p building-endpoints -- --banner
+  rm "$XDG_CONFIG_HOME/ikigai/tutorial.toml" "$XDG_CONFIG_HOME/ikigai/yours.tutorial.toml"
+  cargo run -p building-endpoints -- --banner
+  rm -r "$banner_config"
+)
 ```
 
 ```text
 hello from a file
+hello from yours
+The ikigai Book
 ```
-
-Then write `yours.tutorial.toml` beside it with a different `text` and run again: the
-app-scoped layer wins. Delete both and the default answers.
 
 ## The other channels
 
@@ -139,7 +155,14 @@ ikigai --plain -c 'source urn:kernel:scheduler'
 scheduler
   backend    single
   threads    1
+  active     0
+  spawned    0
+  completed  0
   source     default
+  routing    off
+  routing.by default
+
+[uncacheable]
 ```
 
 That `source` row is the shape of the argument rather than a settlement of it: what makes
@@ -152,8 +175,9 @@ an env var, treat that as a question worth raising rather than a pattern worth c
 
 > ⚠ The house rule, and the opposite of what most frameworks do: **something expected but
 > unset must stop the program.** Not warn, not silently substitute, not carry on degraded.
-> The loader above draws the line where it belongs — absent is legal, broken is not — and
-> a required value with no default should refuse to start and say which key is missing.
+> The loader above rejects invalid TOML; the unreadable-file and value-type checks
+> described above would complete that boundary. A required value with no default should
+> refuse to start and say which key is missing.
 > The worst version of getting this wrong is a service that blocks on a keychain prompt
 > *before its first line of output*, so the log shows nothing at all: an empty log reads
 > as "still starting" and means "blocked, forever". One `println!` before the call would

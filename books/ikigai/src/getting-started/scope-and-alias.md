@@ -18,8 +18,8 @@ combinators compose them:
 
 - **`Fallback::new(vec![a, b, …])`** tries each space in order; the first hit wins. Order
   is precedence, and precedence is the semantics: whatever `a` binds, `b` never sees.
-  `building_endpoints::space()` in [Transreption](../building/transreption.md) is one —
-  this book's bindings first, then the published SPARQL face.
+  `building_endpoints::space()` in [Transreption](../building/transreption.md), later
+  in the book, is one — this book's bindings first, then the published SPARQL face.
 - **`Mount::new(prefix, inner)`** admits only names that start with `prefix` and hands
   those to `inner`, unchanged. Nothing is rewritten: the inner space's names are already
   full names. The prefix is a fence, and a name outside it is not there at all.
@@ -153,9 +153,9 @@ A table can be listed. Prefer the table.
 ## Where you are standing
 
 Everything above resolved against the kernel's **root** — the space you handed it at
-construction. Since 0.1.72 a request also resolves in a **chain**: corridors placed ahead
-of the root, chosen per request, and whether the root is on the end of the chain at all.
-That chain is `Scope`, and it has two faces.
+construction. A **corridor** is another space placed ahead of that root for a request.
+Since 0.1.72, `Scope` describes the **chain** of corridors a request searches and whether
+it searches the root afterward. It has two faces.
 
 ### Injection: a corridor ahead of the root
 
@@ -325,9 +325,9 @@ least cacheable resource there is — a live door, `Always`, and anything that r
 inherits that — and a corridor that binds `now` to one fixed instant turns it into a pure
 function of its context. Since 0.1.75 the chain can carry a **clock** as well as doors:
 `Scope::with_named_at(name, space, clock)` injects the corridor and sets the chain's clock
-in one call, the only way a chain acquires one, so the binding and the clock cannot
-disagree. `inv.now()` then answers from the chain's clock before the kernel's. An endpoint
-that reads time by *resolution* and one that reads it from the *clock* see the same
+in one call. The host must make the time binding and the clock agree; core cannot
+verify that they return the same instant. `inv.now()` then answers from the chain's
+clock before the kernel's. An endpoint that reads time by *resolution* and one that reads it from the *clock* see the same
 instant, and the result is `Never` under the corridor and `Always` under the root —
 checked here with `Kernel::is_cached_in`, the cache probe for a chain, rather than by
 counting entries:
@@ -375,7 +375,7 @@ let kernel = Kernel::new(Arc::new(
 let root = Capability::root();
 let stamp = || Request::new(Verb::Source, Iri::parse("urn:iki:tutorial:stamp").unwrap());
 
-// The corridor: `now` pinned to one instant AND the clock derived from it, in one call.
+// The corridor: the host supplies a `now` binding and a clock for the same instant.
 let six_pm = || {
     Scope::empty().with_named_at(
         Iri::parse("urn:iki:tutorial:ctx:six-pm").unwrap(),
@@ -416,21 +416,21 @@ decides whether to serve.
 
 The chain landed in 0.1.72, and by 0.1.75 three of the four kernel faces that used to
 answer for the empty chain answer for the chain instead: **selection**
-(`select_transreptor_in`, `select_action_in` — a confined endpoint's manifold no longer
-offers an action its chain cannot resolve, and `Meta … as=` plans its route inside the
-chain), **the cache probe** (`is_cached_in`, and a scope column on `urn:kernel:cache`),
+(`select_transreptor_in`, `select_action_in` — a confined endpoint's set of available
+actions no longer offers an action its chain cannot resolve, and `Meta … as=` plans its
+route inside the chain), **the cache probe** (`is_cached_in`, and a scope column on `urn:kernel:cache`),
 and **the pipe** (`issue_with_incoming_in`). What remains, stated so you do not discover
 it at a keyboard (`docs/design/resolution-scope.md` in `ikigai-core` is the full account):
 
-- **The REPL's pipeline runs in the plain root**, so nothing on this page has a Run
+- **REPL pipelines run in the plain root**, so nothing on this page has a Run
   button.
-- **The chain does not cross the wire.** A mount inside a confining corridor forwards
+- **Wire transport does not carry the chain.** A mount inside a confining corridor forwards
   with no chain, and the remote resolves in its own root — confining to a corridor that
   contains a mount confines to whatever the mount reaches. The wire's default refuses a
   non-empty chain rather than dropping it, so a module endpoint inside a confinement
   fails loudly instead of quietly escaping. Carrying it is a protocol bump, its own
   decision.
-- **The key holds the whole chain, not the corridors consulted.** Sound and
+- **Cache keys hold the whole chain, not the corridors consulted.** Sound and
   over-partitioned, as above. The datum a consulted-corridors key would need —
   *which* space answered — is reported since 0.1.78 (`Resolved::answered_by`); keying
   on it is not built.
@@ -444,5 +444,6 @@ injected with `with_named` is the same wall at a position in the chain. A limite
 is `Unresolved`, never `Denied`, and the catalog subtracts it too.
 
 The three constructs — mount, alias, scope — are the arrangement, the naming, and the
-context of resolution. [What resolution buys you](payoff.md) is what you get for having
-them.
+context of resolution. You now have a host whose names and resolution context you can
+choose. [Configuration](configuration.md) adds a file-backed resource and shows how to
+choose its configuration directory in a test.
