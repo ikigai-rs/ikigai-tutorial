@@ -22,6 +22,9 @@ date = "2026-11-06"
 summary = "The reserved chapters on faces, artifacts and themes clarify which readouts have text faces, how to run the directory delivery, and how Auto selects among three palettes. Links point back to the earlier examples."
 pages = ["model/faces.md", "model/artifacts.md", "model/themes.md"]
 maintenance = true
+date = "2026-11-05"
+summary = "The JSON and CSV chapters clarify their template progression, source labels, and conversion to a shared model. Live data and history distinguishes the inspector's push script from ikigai-ui's shared support, explains which views refresh, and identifies the remaining step for live views in the book."
+pages = ["model/views-from-json.md", "model/views-from-csv.md", "model/live.md"]
 
 [[change]]
 date = "2026-11-02"
