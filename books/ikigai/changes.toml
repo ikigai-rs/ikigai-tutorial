@@ -22,6 +22,8 @@
 date = "2026-11-06"
 summary = "A river of feeds now says what happens to a feed's `<ttl>`: the stylesheet keeps it as data, but nothing reads it as a cache lifetime. HTTP headers and `max_age=` decide how long a copy is kept."
 pages = ["explore/rss.md"]
+summary = "The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits."
+pages = ["beyond/socket.md", "beyond/identity.md", "beyond/datasets.md"]
 
 [[change]]
 date = "2026-11-05"
