@@ -1,5 +1,9 @@
 # A page is a composed resource
 
+The [Introduction](../introduction.md) introduced the inspector and its views as resources.
+Here you will read a card, change the note it shows, and see the card recompute. Run the cells
+in order with each cell's **Run** button; they share one kernel on this page.
+
 A page in this book is a name. Ask the kernel for `urn:iki:tutorial:inspect:page:cache` and it
 answers with HTML, the way it answers any other name: it finds the door bound to the pattern,
 the endpoint behind the door runs, and the answer comes back as a representation with a media
@@ -9,8 +13,8 @@ media type is `text/html` and a browser will show it.
 What makes it worth building this way is what the page is made *from*. It is not written by a
 function that fetches the cache and formats a string. It is a **template** filled with other
 resources: a header, a title and the view itself, each a name of its own. The kernel resolves
-each part, caches the whole, and remembers which parts it read, so a change to any part
-recomputes the page and nothing else.
+each part and remembers which parts it read. When the parts are cacheable, it caches the whole.
+Writing a part cuts its golden thread, making the cached page stale; the next read recomputes it.
 
 ## A template, and what it is filled with
 
@@ -24,11 +28,11 @@ resource; read it as text:
 [computed]</pre>
 </div>
 
-Three things in it are not HTML. `$h{urn:iki:tutorial:inspect:demo:note}` is a **marker**: when
+`$h{urn:iki:tutorial:inspect:demo:note}` is a **marker**: when
 the template is filled, compose (`ikigai-fn`'s template language) resolves the name inside the
 braces and splices the answer in its place. The `h` says how: as **text, escaped for HTML**, so
-whatever the note holds can never become markup. The others are htmx attributes, which the
-chapter on live data explains.
+whatever the note holds can never become markup. The `hx-get`, `hx-trigger` and `hx-swap`
+attributes tell htmx how to update the card; [Live data and history](live.md) explains them.
 
 The card is the template, filled. It is bound at its own name, `demo:card`, by a `composeOver`:
 compose with its template fixed, so the view is a resource like any other.
@@ -50,12 +54,14 @@ was made from has changed.
 [cached]</pre>
 </div>
 
-## The one atom
+<a id="the-one-atom"></a>
 
-Almost nothing in the inspector holds state. The views are compositions, the stylesheets are
-artifacts, and the kernel's readouts belong to the kernel. The note is the exception, so it is
-the one place the inspector has code that keeps something: an **atom**. Write it, with something
-in it that would be markup if it were not escaped:
+## The note atom
+
+The card is a composition, and its template is an artifact. The note holds the state: it is an
+**atom**, a resource whose code keeps the text you write. The JSON and CSV chapters introduce
+two more atoms for their example data. For now, write the note with text that would be markup
+if it were not escaped:
 
 <div class="ikigai-run" data-cmd='sink urn:iki:tutorial:inspect:demo:note A &lt;b&gt;bold&lt;/b&gt; claim'>
 <pre class="ikigai-run-expected">written
@@ -73,7 +79,7 @@ of the card is computed again, from the new note, and the tags arrive as text:
 </div>
 
 That is the whole model of a page, at its smallest: a template that is a resource, filled with
-resources, cached, and recomputed exactly when one of its parts is written.
+resources, cached, and recomputed on the next read after the note is written.
 
 ## The page around a view
 
@@ -209,8 +215,8 @@ assert!(page.contains(&card));
 ## What was built, and what it rules out
 
 The card, its template, the note and the page are resources; only the note is code that holds
-state. What this rules out is the thing most web code does: Rust (or any language) assembling
-HTML strings per view (UI conventions D1). There is no `format!` building markup anywhere in the
-inspector, and the escaping lives in exactly one place, compose's `$h`.
+state in this example. What this rules out is the thing most web code does: Rust (or any
+language) assembling HTML strings per view (UI conventions D1). There is no `format!` building
+markup anywhere in the inspector, and compose's `$h` handles the note's HTML escaping.
 
 Next, the views whose input is a graph: [Graph to page with XSLT](xslt.md).

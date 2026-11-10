@@ -1,7 +1,7 @@
 # The three doors, and who is asking
 
 Everything so far reached gonk from the same machine, apart from [Over MCP](../agent/mcp.md), which
-used as much of the QUIC door as an agent needs. This part is about reaching it from others,
+used as much of the QUIC door as an agent needs. This part is about reaching it from other machines,
 and it starts with what every request has to answer first: **who is asking, and what may they
 do?** A kernel answers that with a capability, and gonk's doors are where a request is given one.
 There are three, and each authenticates something different.
@@ -136,11 +136,11 @@ say was asking:
   asking whatever it asks. The connection line below the access lines says the same thing with
   the grant it mapped to.
 
-`q=` is the request's arguments as served, and on HTTP only (`-` on the other doors). The `curl`
-read sent none, yet its line carries six: the kernel fills in every default the resource
-declares before dispatching (`ikigai-core` 0.1.104 and later, ledger #19), as the arguments a
-caller spelling them out would send, so the line says what the read actually ran with, the first
-50 open items as plain text, whether or not the caller typed any of it.
+`q=` shows the request's arguments as served, on HTTP only (`-` on the other doors). The `curl`
+read sent no arguments, yet its line carries six. Before dispatching, the kernel fills in every
+default the resource declares (`ikigai-core` 0.1.104 and later, ledger #19), just as if the caller
+had typed those arguments. The line therefore says what the read actually requested: the first
+50 open items as plain text.
 
 The QUIC name is not only in the log. The door mints it into the request's **capability**, as
 core's principal scope (`urn:cap:principal:<iri>`, `ikigai-core` 0.1.93), and that is where gonk

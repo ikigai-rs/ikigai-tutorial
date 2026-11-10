@@ -20,8 +20,9 @@ $ model-stub "$PWD/model.sock"
 model-stub: urn:llm:ask and urn:llm:config on …/model.sock (model stub)
 ```
 
-Tell gonk where the model is, in its config home, and start a scratch gonk, as in [A ledger of
-your own](../ledger/your-own.md):
+Leave the stub running. In a second terminal, switch to the same directory. Tell gonk where
+the model is, in its config home, and start a scratch gonk, as in [A ledger of your
+own](../ledger/your-own.md):
 
 <!-- transcript: run -->
 ```console
@@ -39,7 +40,9 @@ ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 
 ## 1. Your first saved query
 
-The query counts the open items in the default ledger, `open-count.rq`:
+Leave gonk running too. In a third terminal, switch to the same directory and run the rest of
+this page's commands there. Save this query as `open-count.rq`; it counts the open items in the
+default ledger:
 
 <!-- transcript: file open-count.rq -->
 ```sparql
@@ -116,8 +119,9 @@ preview (LIMIT 5):
 
 The answer is a **draft**: the model's query, checked (it parses, and reads only what you may
 read), run once as a preview that already says 1, and saved at `how-many-open`, where nobody can
-run it yet. Look at it. It is the query you wrote by hand in step 1. Publishing it is a person's
-act: the draft's own text, sunk again with `state=published`, and `public=true` as before:
+run it yet. Look at it: it counts the same open items as the query in step 1, but names the result
+`count` instead of `open`. Publishing it is a person's act: the draft's own text, sunk again with
+`state=published`, and `public=true` as before:
 
 <!-- transcript: run -->
 ```console

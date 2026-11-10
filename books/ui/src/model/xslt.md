@@ -1,9 +1,9 @@
 # Graph to page with XSLT
 
-The card in the last chapter was filled from named parts. Most of what the inspector shows is
-not like that: the kernel describes its cache, its threads, its arrangement and its endpoints
-as **graphs**, and a page about a graph has to walk it. There is a standard for turning a
-document into another document by walking it, and ikigai uses it: **XSLT**. When the input is a
+In [A page is a composed resource](composed.md), you filled a card from named parts. Most of
+what the inspector shows is different: the kernel describes its cache, its threads, its
+arrangement and its endpoints as **graphs**, and a page about a graph has to walk it. There is a
+standard for turning a document into another document by walking it, and ikigai uses it: **XSLT**. When the input is a
 graph the page is an XSLT transform, and when the input is named arguments the page is a
 compose template (UI conventions D2).
 
@@ -16,7 +16,9 @@ spreadsheet, and the two chapters after this one build views over exactly those,
 them: [Views from JSON](views-from-json.md) and [Views from CSV: one model, two
 sources](views-from-csv.md).
 
-This chapter builds the threads view, then reads the four others built the same way.
+This chapter builds the threads view, then reads the other kernel views. Run the cells in
+order: this page has a fresh kernel, so the first two cells read the card and write the note
+again to cut its golden thread.
 
 ## The input: a readout, as a graph
 
@@ -53,10 +55,10 @@ That graph is what the view is made from. Two steps stand between it and a page.
 
 ## Step one: the graph a stylesheet can read
 
-XSLT reads XML, and RDF has an XML syntax, so the first step is a transreption: the same graph,
-in RDF/XML. ikigai-rdf serves that as a resource, `urn:rdf:transrept`; the inspector does not
-write a serializer. It does add one thing first. A thread's page has a URL, and building a URL
-means percent-encoding the thread's name, which XSLT 1.0 cannot do. So the link arrives as data
+XSLT reads XML, and RDF has an XML syntax, so the first step converts the graph from Turtle
+to RDF/XML. This conversion between representations is called **transreption**. ikigai-rdf
+serves that as a resource, `urn:rdf:transrept`; the inspector does not write a serializer. It
+does add one thing first. A thread's page has a URL, and building a URL means percent-encoding the thread's name, which XSLT 1.0 cannot do. So the link arrives as data
 on the node it belongs to, computed once, by the shared encoder. That is `graph:{view}`, the one
 piece of the views that is code:
 
@@ -92,7 +94,9 @@ Every link is a real `href` that works without a script, plus `hx-get` for the f
 `hx-push-url` for the page, so htmx can swap the view in place and the address bar still names
 what you see.
 
-## The view is the two, composed
+<a id="the-view-is-the-two-composed"></a>
+
+## Compose the graph and stylesheet
 
 The fragment is a compose template whose one marker asks `urn:xslt:transform` for the transform
 of the graph by the stylesheet:
@@ -115,9 +119,10 @@ Here is the threads view, in this page's kernel:
 [uncacheable]</pre>
 </div>
 
-The stylesheet, the template and the transform of an unchanged input are cached. The readout
-is not: what the kernel holds changes from one read to the next, so the view over it is
-recomputed every time, and it says so.
+The stylesheet and template are cached. A transform can be cached when its inputs are
+cacheable, but these readouts are not: what the kernel holds changes from one read to the
+next. The graph, the transform and the view over it are therefore recomputed on every read;
+the fragment reports `[uncacheable]`.
 
 ## The other views
 
@@ -143,9 +148,10 @@ found, with the reason, rather than shown as an empty page:
 
 ## The scheduler, the stopgap
 
-`urn:kernel:scheduler` has a text face and no Turtle face in the kernel this book runs on, so
-there is no graph for a stylesheet to read. Its view shows the text, escaped, and says so
-rather than pretending to be a graph view:
+The kernel now serves `urn:kernel:scheduler` as Turtle too, but the inspector still uses its
+text face. There is no scheduler stylesheet or graph binding in the inspector yet. The view
+escapes the text; its notice below still says "has no Turtle face," which is out of date for
+the kernel this book runs on:
 
 <div class="ikigai-run" data-cmd='source urn:iki:tutorial:inspect:fragment:scheduler'>
 <pre class="ikigai-run-expected">&lt;section id="view" class="inspect"&gt;
@@ -159,7 +165,7 @@ rather than pretending to be a graph view:
 [uncacheable]</pre>
 </div>
 
-When a Turtle face arrives, the scheduler becomes one more stylesheet.
+A graph view would need a scheduler stylesheet and a binding to the Turtle readout.
 
 ## In Rust
 

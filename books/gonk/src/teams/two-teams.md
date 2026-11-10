@@ -107,9 +107,10 @@ manager
   urn:cap:script:run:report-*
 ```
 
-Read them as datasets. Each agent's store tokens name one graph, its own ledger's. The manager's
-name three: both ledgers and browse's graph, where the review's annotations will land. Nothing
-here is a team concept; a team is the set of tokens its ledger's name appears in.
+Read the store read tokens as datasets. Each agent can read its own ledger's graph and the
+shared `urn:collab:participants` graph. The manager can read three graphs: both ledgers and
+browse's graph, where the review's annotations will land. Each team's ledger name in the tokens
+sets the boundary between teams.
 
 ## Start gonk, and fill both ledgers
 
@@ -178,7 +179,7 @@ a named ledger always says which ledger it means.
 ## One text, four answers
 
 `next` is the ledger's own question. A question the ledger did not anticipate is SPARQL, and here
-the ikigai Book's chapter applies directly. Here is one, with no graph in it:
+the ikigai Book's chapter applies directly. Here is one, with no fixed graph name in it:
 
 <!-- transcript: file open.rq -->
 ```sparql
@@ -271,7 +272,7 @@ error: invalid argument `query`: this query names <urn:iki:ledger:graph:beta> in
 <…beta>` block names a graph outside it. Evaluated, that block would match nothing, and "no
 overlap" is the answer alpha's agent would act on: a statement about its grant, not about the
 teams. So the store does not evaluate it. Since `ikigai-store` 0.2.22 (the gonk this book pins
-links 0.2.23) a query that names a graph outside its dataset is refused, naming the graph, as the
+links 0.3.3) a query that names a graph outside its dataset is refused, naming the graph, as the
 ikigai Book's [escape table](../../beyond/datasets.html#confinement-by-construction) shows; the
 gonk this book pinned before linked 0.2.21, which answered the same query with an empty table.
 The refusal is not the one before it: that one was a grant `graph=` asked for and alpha does not
@@ -541,10 +542,10 @@ Three things to read in that:
   alpha's list and not in beta's, because its description declares alpha's graph: the manifold
   offers a published query only to a caller who could run it, which is the ikigai Book's
   [Authority from the text](../../beyond/datasets.html#authority-from-the-text) in gonk.
-- **The manager's list has no writer's tools.** Reading two ledgers is not writing either, so
-  `append`, `claim`, `close` and the store's update door are absent, not offered and refused.
-- **The manager's list has the repository's.** Twenty-one of the browse root's resources, which
-  neither agent holds a token for.
+- **Write tools are absent from the manager's list.** Reading two ledgers is not writing either,
+  so `append`, `claim`, `close` and the store's update door are absent, not offered and refused.
+- **Repository tools appear in the manager's list.** Twenty-one of the browse root's resources,
+  which neither agent holds a token for.
 
 So an MCP agent built on alpha's certificate is not told what beta's report is called, and an
 agent built on the manager's cannot be talked into filing anything: the tool it would need is not

@@ -15,7 +15,7 @@ how-to.
 
 | role | who | does |
 | --- | --- | --- |
-| the coordinator | a person, or a hub | picks the repository, pins the commit, writes the scope and budget, merges the reports, files the findings |
+| coordinator | a person, or a hub | picks the repository, pins the commit, writes the scope and budget, merges the reports, files the findings |
 | auditor A, auditor B | two agents (or people), independent | read, reproduce, report; never fix, never see each other's report |
 | whoever fixes | the [ordinary loop](solo.md), later | one finding at a time, each closed with its evidence |
 
@@ -124,7 +124,7 @@ reproduction runs the tool in a directory with one file in it:
 <!-- transcript: run -->
 ```console
 $ mkdir -p probe-a && touch probe-a/zebra
-$ cd probe-a && sh ../audit-a/bin/initials.sh '*'
+$ (cd probe-a && sh ../audit-a/bin/initials.sh '*')
 z
 ```
 
@@ -186,8 +186,9 @@ linked #3 parent #1
 — batch: 2 commands · 2 uncacheable
 ```
 
-What is not a finding goes on the audit's own item, so the next audit of this repository starts
-from it: the budget, what was not read, and the suspicion.
+What is not a finding goes on the audit's own item: the budget, what was not read, and the
+suspicion. The coordinator can use these notes to plan the next audit, but keeps them out of
+the auditors' briefs so that both auditors stay blind to earlier findings.
 
 <!-- transcript: file audit-notes.txt -->
 ```text
@@ -244,9 +245,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 ```
 
 The audit's item stays with the coordinator until its last finding is closed, and then closes with
-a line saying what the audit found and what came of it. Its scope, budget and notes are what the
-next audit of this repository starts from, and its key names the date, so a later audit is a new
-item, never this one reopened.
+a line saying what the audit found and what came of it. Its scope, budget and notes remain for
+the coordinator to plan the next audit. Its key names the date, so a later audit is a new item,
+never this one reopened.
 
 ## What holds it
 
@@ -256,15 +257,15 @@ the three kinds of closing evidence.
 
 The **sensors**:
 
-- **The reproduction.** It is the whole filter: a claim that cannot be made to fail at the pinned
+- **Reproduction.** It is the whole filter: a claim that cannot be made to fail at the pinned
   commit is not filed as a bug, however plausible it reads. It also becomes the regression test.
-- **The second auditor.** Independent, same protocol, and the check that the first did not miss
+- **Second auditor.** Independent, same protocol, and the check that the first did not miss
   half of what was there; where the two overlap, the overlap is a confidence, and where they do
   not, it is the reason to run two.
-- **The pinned commit and detached trees**, so every finding is about one known state, and no
+- **Pinned commit and detached trees**, so every finding is about one known state, and no
   auditor can change what another reads.
-- **The keys**, so the coordinator filing again (or a second coordinator) files each finding once.
-- **The report's own account**: what was not read, and whether the budget ran out, which turns "we
+- **Keys**, so the coordinator filing again (or a second coordinator) files each finding once.
+- **Report's own account**: what was not read, and whether the budget ran out, which turns "we
   audited it" into a statement someone can check.
 
 ## What it costs, and when to choose it
@@ -294,9 +295,9 @@ the reason. The book checks the starter at the revision in `books/gonk/starter.r
 ```console
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
-$ cd starter && python3 tools/new.py ../library --process audits,review-every-commit
+$ (cd starter && python3 tools/new.py ../library --process audits,review-every-commit)
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
-$ cd starter && python3 tools/new.py ../library --process audits
+$ (cd starter && python3 tools/new.py ../library --process audits)
 generated the library-lending sample (python, process audits) in …/library: 96 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
@@ -344,7 +345,7 @@ roles = ["auditor: claims an audit item, reads only what it lists, files one ite
 
 <!-- transcript: run -->
 ```console
-$ cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder coordinator
+$ (cd library && git init -q && python3 tools/gonk.py init --ledger default --socket ../.ikigai/gonk.sock --holder coordinator)
 gonk init: …/library
   ok       layout    openspec at openspec/; artifacts at artifacts/; queries at .gonk/queries/; scripts at .gonk/scripts/
   note     harness   4 harness question(s) in .gonk/queries/ are asked by `python3 tools/gonk.py harness` through gonk's store, not published: gonk runs a script under a ceiling of ledger reads, and they read the harness graph
@@ -367,7 +368,7 @@ agents over MCP (configure the agent with this command):
 
   ikigai mcp --grant agent --override urn:iki:ledger:=…/.ikigai/gonk.sock
 ready.
-$ cd library && python3 tools/audit.py artifacts/service/lending/domain.py artifacts/cli/library.py --dry-run
+$ (cd library && python3 tools/audit.py artifacts/service/lending/domain.py artifacts/cli/library.py --dry-run)
 Audit library: 2 file(s), 60 tool calls
 
 Repository: `library`. Budget: 60 tool calls. Files, and nothing else:
@@ -387,7 +388,7 @@ someone already suspected.
 - **Stop at the budget.** Say where you stopped and what you did not read.
 - **Report** with `--note` listing the items you filed; close `--reason audit-no-change` when
   you found nothing.
-$ cd library && python3 tools/gonk.py status
+$ (cd library && python3 tools/gonk.py status)
 process: audits
 no live claim: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
 ```

@@ -43,8 +43,9 @@ $ model-stub "$PWD/model.sock" | tee model.log
 model-stub: urn:llm:ask and urn:llm:config on …/model.sock (model stub)
 ```
 
-The config names the mount, and lowers the anonymous run budget from its default of 30 a minute to
-3, so the page can show the limit without sending thirty requests:
+Leave the stub running. In a second terminal, switch to the same directory and write the config.
+It names the mount and lowers the anonymous run budget from its default of 30 a minute to 3, so
+the page can show the limit without sending thirty requests:
 
 <!-- transcript: run -->
 ```console
@@ -167,7 +168,8 @@ held to the ledgers' reads), and the two rules this page shows: anonymous caller
 scripts, within a shared budget, and a QUIC client drafts while a person publishes. `nl` says who
 may draft: a caller holding the mount's host.
 
-A ledger to ask about, filed by the owner over the socket:
+Leave gonk running. In a third terminal, switch to the same directory and run the remaining
+commands there. File a few items as the owner over the socket:
 
 <!-- transcript: run -->
 ```console
@@ -295,13 +297,13 @@ $ grep -c ' ask ' model.log
 ```
 
 The token it names is the one `--nl draft` mints. gonk DECLARES it on `urn:nl:sparql`, so the
-kernel refuses before the grounding is computed, and the manifold offers the drafter only to the
-callers who may draft.
+kernel refuses before computing the **grounding**, the context the drafter gives the model about
+what the caller may see. The manifold offers the drafter only to callers who may draft.
 
 ### What the model is shown, and `focus=`
 
-The drafter tells the model what the caller may see, and refuses a grounding over 1 MiB rather than
-trimming it. Of the grounding it reads only what a query needs, asked for with `parts=`: the
+The drafter refuses a grounding over 1 MiB rather than trimming it. It reads only what a query
+needs, asked for with `parts=`: the
 vocabulary, the shape of each graph the caller may read, and the worked examples. It never reads
 the actions, the caller's manifold, because a query calls none of them, and they are what grows
 with a gonk: each browse root adds its own family. So the size of a gonk does not refuse a draft.
@@ -523,12 +525,15 @@ $ grep -c ': all the open items$' model.log
 The refusal's second line is the `save` argument's own description, which `ikigai` prints under
 an invalid argument; the model log shows the model was never asked.
 
-## The same, signed in
+<a id="the-same-signed-in"></a>
+
+## Signed-in HTTP
 
 `ann` does all of this over HTTP, with the session cookie her passkey's sign-in set (see [The
 ledger in a browser](../ledger/browser.md) for the ceremony). These commands are the HTTP spelling
 of what `bot` and the owner did above; the body of a `POST` is the ask or the query, and every
-argument is a query argument:
+argument is a query argument. When you fetch `/script/team-ann-titles`, save the returned query
+as `team-ann-titles.rq` and review it before running the publish command:
 
 <!-- transcript: manual — needs a session cookie, which only a passkey ceremony in a browser can mint -->
 ```console
@@ -551,8 +556,8 @@ Everything above, in one table:
 
 | what | HTTP, signed out | HTTP, signed in | QUIC (a machine) | the socket (the owner) |
 | --- | --- | --- | --- | --- |
-| run and read a PUBLIC script | **yes**, within the shared budget | yes | with `--script public=run` | yes |
-| run and read a named script | no | per `--script` | per `--script` | yes |
+| PUBLIC script: run and read | **yes**, within the shared budget | yes | with `--script public=run` | yes |
+| named script: run and read | no | per `--script` | per `--script` | yes |
 | publish, replace, retire | no | per `--script … =publish` | **no**: drafts only | yes |
 | see a draft | no | its own | its own | every draft |
 | draft from a sentence | **no**, before any model call | with `--nl draft` | with `--nl draft` | yes |

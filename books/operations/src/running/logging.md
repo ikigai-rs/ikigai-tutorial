@@ -2,6 +2,10 @@
 
 <!-- transcripts: normalize workdir, timestamp -->
 
+In [The REPL and its modes](../binary/repl.md#--connect-the-same-repl-another-kernel), you connected
+the `ikigai` client to a kernel served on a Unix socket. This chapter uses that connection to run
+commands against a kernel with logging enabled.
+
 A kernel's log answers the questions you ask after something happened: who asked for what, under
 which authority, and whether the record has been touched since. This chapter turns one on, reads
 it, backs it up, proves a restore, and queries it. What a
@@ -42,8 +46,15 @@ states a hash of everything so far, and a segment's `@prev` header names the las
 segment before it, so the chain crosses rotations and restarts. And a segment is a resource: it
 resolves to Turtle (PROV-O terms) at its own IRI.
 
-Its settings are in `log.toml`, in the config home, with a `<app>.log.toml` layered over it. Save
-this as `home/log.toml`:
+Its settings are in `log.toml`, in the config home, with a `<app>.log.toml` layered over it.
+Create a directory for this chapter's config home:
+
+<!-- transcript: run -->
+```console
+$ mkdir -p home
+```
+
+Save this as `home/log.toml`:
 
 <!-- transcript: file home/log.toml -->
 ```toml
@@ -83,6 +94,9 @@ the record.
 ## Examples, end to end
 
 ### Turn it on
+
+Run the host below and leave it running. Run the later commands in another terminal in the same
+working directory.
 
 The `--clock-from` flag is only for this page: a clock that starts at a stated time and advances a
 second per reading, so that the names below are the ones you will see. Leave it off in real use.
@@ -524,7 +538,7 @@ $ cat home/log/*.log | awk '/^[0-9]/ { n[$2]++ } END { for (c in n) print n[c], 
 2 log:Rotation
 ```
 
-Start here, and stay here if it answers the question. No transreption, no kernel, and it works on
+Start here, and stay here if it answers the question. These commands need no kernel and work on
 a dead host's files.
 
 ### Listing segments
@@ -542,8 +556,9 @@ $ tr , '\n' < segments.txt | wc -l | tr -d ' '
 
 ### Transreption to Turtle
 
-A segment's bytes transrept without a directory or a host's file access: `urn:log:transrept` is a
-pure function of what you pipe in, which is how a browser or another machine reads one:
+Converting a segment's log text to Turtle is a **transreption**. `urn:log:transrept` is a pure
+function of what you pipe in: it needs neither a log directory nor access to the host's files, so
+a browser or another machine can use it to read a segment:
 
 <!-- transcript: run -->
 ```console

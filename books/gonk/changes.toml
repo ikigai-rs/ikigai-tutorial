@@ -29,6 +29,21 @@ summary = "Every page is replayed at a gonk that serves faces and a starter that
 pages = ["ways/solo.md", "ways/workers.md", "ways/routing.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md", "ways/spec-first.md", "ways/audits.md", "ways/harness.md", "project/start.md", "ledger/dashboard.md", "introduction.md"]
 
 [[change]]
+date = "2026-11-06"
+summary = "Start a project explains which terminal keeps gonk running. The next chapters say where to save a spec change's files, connect claiming to seeded tasks, make lease renewal explicit, and distinguish closed items from released claims."
+pages = ["project/start.md", "project/change.md", "project/claim.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "Spec first warns that real seeding needs a non-default ledger at the pinned starter revision; Periodic unled audits keeps earlier notes with the coordinator; Harness engineering makes its empty-directory setup explicit. All three keep directory changes inside subshells so later commands run from the chapter directory, and put role names first for scanning."
+pages = ["ways/spec-first.md", "ways/audits.md", "ways/harness.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The project walkthrough clarifies fresh setup, terminal use, holder configuration, and finding decisions. The SPARQL chapter distinguishes unclaimed work from ready work and defines the spec lift; the work chapter separates passing checks from merging."
+pages = ["project/work.md", "project/two-agents.md", "project/query.md"]
+
+[[change]]
 date = "2026-11-05"
 summary = "One-off review clarifies the permissions to run a review and publish a finding. The audit protocol links back to that chapter, defines an experiment's arms, and puts the protocol's requirements first in its list."
 pages = ["review/one-off.md", "review/audit.md"]
@@ -72,6 +87,56 @@ pages = ["introduction.md", "ledger/your-own.md", "ledger/browser.md"]
 date = "2026-11-05"
 summary = "The starter now records a pull request alias when the dispatcher closes an item. Periodic unled audits adds review jobs: a worker hands back a JSON block, and the dispatcher files keyed, parented findings from a trusted worker, keeping the worker's narrow grant."
 pages = ["project/script.md", "ways/audits.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The ledger chapters clarify resource checks, the Dashboard's seed setup and polling, and lifecycle diagnostics. Links name the surrounding chapters, and lifecycle state properties lead with their names."
+pages = ["ledger/checking.md", "ledger/dashboard.md", "ledger/lifecycle.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Importing a kata ledger links directly to the owner's socket section instead of pointing to the wrong section."
+pages = ["bridges/kata.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Filing roborev findings puts the scratch-directory setup before the review file, leads its severity explanation with the severity, and says directly how to add the completion hook."
+pages = ["bridges/roborev.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Filing roborev findings corrects its opening permission note: anonymous HTTP callers cannot write, but can still read the ledgers exposed through that door."
+pages = ["bridges/roborev.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Checking out repositories clarifies its setup, update refusals, and timer paths. A fresh machine links the three bridges, names the sample files to save, and distinguishes a simulated review hook from a configured one."
+pages = ["bridges/checkout.md", "bridges/fresh-machine.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "A QUIC client distinguishes refusals at the door from refusals by a resource and states that grant changes take effect on each call. Its introduction reflects the requests shown in The three doors."
+pages = ["machines/quic-client.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The three doors names the other machines it introduces and explains why an HTTP access line includes arguments the caller did not type."
+pages = ["machines/doors.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The saved-query chapters say which terminals and query files to use, distinguish the two count columns, and define grounding before using it. The signed-in HTTP heading and script table put their distinguishing words first."
+pages = ["scripts/first.md", "scripts/in-gonk.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Solo on one machine runs a regression test before and after the fix and spells out the forge setup. Two teams accounts for the shared participants graph, and Remote workers clarifies identities, hand-backs, and worker setup; all three make their comparison lists easier to scan."
+pages = ["teams/two-teams.md", "ways/solo.md", "ways/workers.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Routing work to agents clarifies the agent's permissions; Review every commit separates review requests from publishing and filing findings. Hub and spoke says where to run its pull request commands, and all three chapters put role names first in their tables."
+pages = ["ways/routing.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md"]
 
 [[change]]
 date = "2026-11-03"

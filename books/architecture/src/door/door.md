@@ -1,7 +1,8 @@
 # One module, a boundary and a surface
 
-Everything so far has been inside the kernel: a capability, a manifold, a grant. A **door** is
-where that inside meets a browser. It is the component that accepts a request from the outside,
+In [The manifold, and the UI that falls out of it](../spine/manifold.md), you read the action list
+under a narrowed capability. A **door** is where that kernel meets a browser. It is the component
+that accepts a request from the outside,
 turns a proof of identity into a principal, hands the resolution exactly that principal's authority
 and no more, and serves the answer back as a page. The claim of this chapter is that a door is the
 single clearest example of the whole book's thesis, because it is *at once* a security boundary and
@@ -27,7 +28,8 @@ a user-experience surface, and it is written **once** so that every page gets bo
 ```
 
 Read that list once as a security engineer and once as a front-end engineer. The security engineer
-sees authentication, CSRF defense, a content-security policy, and output encoding. The front-end
+sees authentication, cross-site request forgery (CSRF) defense, a content-security policy (CSP),
+and output encoding. The front-end
 engineer sees sign-in, forms that submit safely, a page that renders, and errors that read well.
 **They are the same five steps.** A door that did the security half without the UX half would serve
 blank pages; one that did the UX half without the security half is the vulnerability. Writing the
@@ -73,9 +75,10 @@ seen from two sides.
 ## Bodies larger than memory
 
 A door also frames what it sends and bounds what it takes, and since the streams release it
-does both without holding a whole body. What follows is `ikigai serve --http` from
-`ikigai-cli` 0.2.2 (ikigai-web 0.2.2, built with the cli's `web` feature), with the file
-answers of 0.2.3; *The ikigai Book*'s part on streams says what a body is.
+does both without holding a whole body. What follows is `ikigai serve --http <port>` from
+`ikigai-cli` 0.2.2 (ikigai-web 0.2.2, built with the CLI's `web` feature), with the file
+answers of 0.2.3; [Streams, II: a body you can read again](../../streams/replay.html) in
+*The ikigai Book* introduces bodies and streams.
 
 - **Framing.** An answer that is one buffer goes whole, with `Content-Length`, as every
   answer did before. An answer that streams is framed by `Content-Length` when its length is
@@ -109,8 +112,7 @@ cannot fill the disk are one rule seen from two sides.
 
 ## Where this runs, and where it is drawn
 
-A browser's content-security policy and its Origin checks are enforced by the *real* browser, which
-a kernel compiled into a page cannot stand in for. So the door is the one pattern in this book that
-is partly a **picture**: the kernel logic runs in the page, but the headers above are shown as
-annotations rather than exercised, and the escaping is the piece you can run for real against reader
-input. The boundary is real in a deployment; here it is drawn, and labeled as drawn.
+A kernel compiled into a page cannot stand in for an HTTP door and a browser enforcing its
+response headers. This chapter draws that boundary and describes its rules; it has no runnable
+cells for the headers or escaping. The boundary is real in a deployment; here it is drawn,
+and labeled as drawn.

@@ -1,12 +1,14 @@
 # Checking out repositories
 
-A browse root has to be on disk before gonk starts: gonk refuses to start on a root that names
-a missing directory, because that is the shape of a typo. On a new machine that means cloning
+A [browse root](../browse/roots.md) has to be on disk before gonk starts: gonk refuses to start
+on a root that names a missing directory, because that is the shape of a typo. On a new machine that means cloning
 every repository and writing one `gonk.browse.root` line for each. `ikigai-gonk checkout`
 does both, and keeps the clones current afterwards.
 
 It is a command, like `roborev file`: it opens no store and binds no door, and the server
 itself has no code that fetches anything. So this page does not start a gonk at all.
+Start in a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter);
+none of the files from [Importing a kata ledger](kata.md) are reused.
 
 ## Two repositories to check out
 
@@ -109,8 +111,8 @@ not written: add the lines above to …/.config/ikigai/config.toml, or run again
 
 A root gonk already serves needs no restart after an update: gonk watches it, and a
 fast-forward is a change on disk like any other (the watcher is shown working in
-[Browse roots](../browse/roots.md)). A NEW root needs none either, as the first run's last line
-said: a running gonk watches `config.toml` and mounts it.
+[Browse roots](../browse/roots.md)). A new root needs no restart either, as the
+`--write-config` run reported: a running gonk watches `config.toml` and mounts it.
 
 ### Every checkout, without the URLs
 
@@ -153,7 +155,9 @@ What `--all` never does is as deliberate: it clones nothing, writes no config (`
 error that names `--all`, rather than quietly being it, because a command that fetches every
 repository should say so on its own line.
 
-## And nothing else
+<a id="and-nothing-else"></a>
+
+## Refusing unsafe updates
 
 A fast-forward is all it does. A checkout with local changes (untracked files included), on
 another branch, or with commits upstream does not have is **refused and left exactly as it
@@ -175,8 +179,8 @@ work in progress
 ```
 
 Each checkout is reported on its own and the rest still run. Any refusal or failure makes the
-exit status 1, so a scheduled run that something has stopped is visible to whatever ran it, and
-a refusal names the command that shows what is in the way.
+exit status 1, so a scheduler can detect a failed update. A refusal names the command that
+shows what is in the way.
 
 git runs with its standard input closed and `GIT_TERMINAL_PROMPT=0`, and ssh in `BatchMode`
 unless you have already said how to run ssh, so a repository that wants a password fails with
@@ -190,8 +194,13 @@ worktree by hand if that is what you want to read.
 ## On a timer
 
 Nothing in the server fetches, so a periodic update is `checkout --all` run by the system's
-scheduler, and gonk needs no restart for it. On macOS, a `launchd` agent beside gonk's own
-(`~/Library/LaunchAgents/dev.ikigai-rs.gonk-checkout.plist`), every fifteen minutes:
+scheduler, and gonk needs no restart for it. The examples below use the default config and data
+homes. To update this chapter's clones instead, add the same `--config-home` and `--data-home`
+flags used above, with absolute paths to those directories.
+
+On macOS, save this as `~/Library/LaunchAgents/dev.ikigai-rs.gonk-checkout.plist`, beside gonk's
+own agent, to run every fifteen minutes. Replace `/Users/you/.cargo/bin/ikigai-gonk` with the
+absolute path to your installed binary:
 
 ```xml
 <plist version="1.0"><dict>
