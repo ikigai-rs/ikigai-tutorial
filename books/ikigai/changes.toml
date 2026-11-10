@@ -141,6 +141,9 @@ pages = ["applied/spreadsheet-1.md", "applied/spreadsheet-2.md", "applied/spread
 date = "2026-11-07"
 summary = "Contribute a module aligns its dependency recipe with the tested crates and clarifies argument descriptions. The other books names the architecture prerequisite, and the browser appendix connects to your earlier host and separates its recorded-file examples."
 pages = ["contribute.md", "other-books.md", "browser.md"]
+date = "2026-11-07"
+summary = "The closing reference pages correct stale counts, link the chapters behind the reading suggestions, and clarify glossary definitions and repository descriptions."
+pages = ["next.md", "glossary.md", "repositories.md"]
 
 [[change]]
 date = "2026-11-05"
