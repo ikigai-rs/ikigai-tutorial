@@ -425,5 +425,201 @@ reports its line number and exits 1. Flags go before the filename; parameter val
 after it. The standard-input replays above still work, with the continue-after-error
 behavior shown in [When a line fails](#when-a-line-fails).
 
+## 7. One script calling another
+
+`script` runs a saved script as one line of another. This one, `all.iki`, runs the refresh by
+name and then reads the page fragment it rewrote. Save it:
+
+<!-- transcript: file all.iki -->
+
+```text
+script urn:file:refresh.iki
+source urn:file:report.html
+```
+
+Replay it the way section 1 replayed its scripts, on standard input:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . < all.iki; echo "exit $?"
+wrote 126539 bytes to quakes.jsonld
+[1 computed · 1 uncacheable]
+wrote 75659 bytes to quakes-2024-01-08.jsonld
+[1 computed · 1 uncacheable]
+wrote 216 bytes to notable.csv
+[2 computed · 1 uncacheable]
+wrote 299 bytes to notable.json
+[1 computed · 1 uncacheable]
+wrote 243 bytes to report.html
+[1 computed · 1 uncacheable]
+<ul><li>M7.5 2024 Noto Peninsula, Japan Earthquake: no note yet</li><li>M6.7 93 km SE of Sarangani, Philippines: no note yet</li><li>M6.4 45 km SSW of Jurm, Afghanistan: no note yet</li><li>M6.2 8 km SW of Anamizu, Japan: no note yet</li></ul>
+[computed]
+exit 0
+```
+
+The called script's lines answer as if they were typed in its place, and the caller goes on
+after them. Two limits in `ikigai-cli` {{#include ../../ikigai-cli.version}} decide where `script`
+works. Run as a script file, with its name after the flags, `all.iki` stops at its first line,
+because that form does not know the `script` command:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . all.iki; echo "exit $?"
+error: line 1: unknown command `script` (try `help`)
+exit 1
+```
+
+And a script run by name has its `{…}` read as parameters, the ones section 6 declares with
+`# @param`. `chapter5.iki` writes templates whose placeholders are braces, such as `$h{{mag}}`, so
+by name it is refused before any of its lines runs:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . -c 'script urn:file:chapter5.iki'; echo "exit $?"
+error: line 4: `{mag}` names no declared parameter (declare it with `# @param mag`; the script declares none)
+exit 1
+```
+
+So call a script by name when it has no braces of its own, and replay one that writes templates
+on standard input, as section 1 did.
+
+## 8. A plan that writes its copy, and an edit it follows
+
+The plan in section 2 ends at its answer, and the shell's `>` kept it. A plan can end in a
+`sink` instead, so that running it writes the copy. Plan the notable question with a sink to
+`urn:file:notable-plan.csv` as its last stage, and look at the steps:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . -c 'plan urn:file:queries/notable.rq | urn:sparql:select graph="urn:file:quakes.jsonld urn:file:quakes-2024-01-08.jsonld" as=text/csv | sink urn:file:notable-plan.csv' > plans/notable-csv.ttl
+$ grep 'ik:verb' plans/notable-csv.ttl
+    ik:verb "Source" ;
+    ik:verb "Source" ;
+    ik:verb "Sink" ;
+```
+
+Writing the plan wrote no CSV: the sink is its third step, and it runs only when the plan does.
+Run it, and read what it wrote:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . -c 'execute urn:file:plans/notable-csv.ttl' -c 'source urn:file:notable-plan.csv'
+wrote 216 bytes to notable-plan.csv
+[3 computed · 1 uncacheable]
+id,mag,place
+us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
+us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+us6000m31m,6.4,"45 km SSW of Jurm, Afghanistan"
+us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
+[computed]
+— batch: 2 commands · 4 computed · 1 uncacheable
+```
+
+The plan, the question and the graphs are all files, so an edit to one of them is an edit to
+what the plan answers. Within one session, the cache follows the edit along its **golden
+thread**: each cached answer hangs from the resources it read, and a write to one of them cuts
+the thread. `dependents` shows what hangs from the question once the plan has run:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . -c 'execute urn:file:plans/notable.ttl' -c 'dependents urn:file:queries/notable.rq'
+id,mag,place
+us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
+us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+us6000m31m,6.4,"45 km SSW of Jurm, Afghanistan"
+us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
+[3 computed]
+dependents of urn:file:queries/notable.rq  (cut 0 times)
+  2 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
+  urn:file:queries/notable.rq  application/sparql-query      202 B  1 thread    root
+  urn:sparql:select            text/csv                      216 B  4 threads   root
+[uncacheable]
+— batch: 2 commands · 3 computed · 1 uncacheable
+```
+
+Two cached answers would go stale: the question's own read and the `urn:sparql:select` answer
+computed from it. Now make the edit inside a session. `thread.iki` runs the section 2 plan
+twice, raises the question's threshold from 6 to 6.5, and runs the plan twice more:
+
+<!-- transcript: file thread.iki -->
+
+```text
+execute urn:file:plans/notable.ttl
+execute urn:file:plans/notable.ttl
+sink urn:file:queries/notable.rq PREFIX qk: <https://ikigai-rs.dev/ns/quakes#> SELECT ?id ?mag ?place WHERE { ?quake qk:mag ?mag ; qk:place ?place FILTER(?mag >= 6.5) BIND(STRAFTER(STR(?quake), "eventpage/") AS ?id) } ORDER BY DESC(?mag)
+execute urn:file:plans/notable.ttl
+execute urn:file:plans/notable.ttl
+```
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . < thread.iki; echo "exit $?"
+id,mag,place
+us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
+us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+us6000m31m,6.4,"45 km SSW of Jurm, Afghanistan"
+us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
+
+[3 computed]
+id,mag,place
+us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
+us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+us6000m31m,6.4,"45 km SSW of Jurm, Afghanistan"
+us6000m0xm,6.2,"8 km SW of Anamizu, Japan"
+
+[2 cached · 1 computed]
+wrote 204 bytes to queries/notable.rq
+[uncacheable]
+id,mag,place
+us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
+us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+
+[1 cached · 2 computed]
+id,mag,place
+us6000m0xl,7.5,"2024 Noto Peninsula, Japan Earthquake"
+us6000m2jp,6.7,"93 km SE of Sarangani, Philippines"
+
+[2 cached · 1 computed]
+exit 0
+```
+
+Before the edit, the second run took two answers from the cache, as in section 2. After the
+`sink`, the next run read the new question and answered with the two earthquakes at 6.5 and
+above, with no restart and nothing cleared by hand: the write cut the thread, and the run
+recomputed two answers where the second run had recomputed one. On the fourth run, the
+question and its answer came from the cache again: `2 cached · 1 computed`.
+
+The thread lives in one session's cache. Each `ikigai` command at the shell starts a new one, so
+an edit made between two commands is seen because nothing is cached yet. Inside a single session,
+the edit is seen because the write cut the thread.
+
+The question now says 6.5. Replay `chapter5.iki` to put the threshold back to 6, so the copies
+match the rest of this part:
+
+<!-- transcript: run -->
+
+```console
+$ ikigai --quiet --files . < chapter5.iki
+wrote 125 bytes to graph.txt
+[uncacheable]
+wrote 125 bytes to graph-2024-01-08.txt
+[uncacheable]
+wrote 202 bytes to queries/notable.rq
+[uncacheable]
+wrote 87 bytes to row.txt
+[uncacheable]
+wrote 80 bytes to report.txt
+[uncacheable]
+wrote 11 bytes to notes/none.txt
+[uncacheable]
+```
+
 Next, the same parts over many publishers at once, each with its own rules for how long a copy
 stays good, refreshed by a script like the one above: [A river of feeds](rss.md).

@@ -143,6 +143,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
   Pages: [Preferential resolution](beyond/preference.md), [Failure has a class](beyond/failure.md), [The editor as a client](beyond/emacs.md)
 
+- **2026-11-05**: Process scripts are files now shows one script calling another, a plan that ends in a sink and writes its own copy, and an edit followed along its golden thread inside one session, each checked against the pinned CLI.
+
+  Pages: [Process scripts are files](explore/scripts.md)
+
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
   Pages: [The REPL grammar](front-door/grammar.md)
