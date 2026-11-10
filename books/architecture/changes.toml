@@ -19,6 +19,8 @@
 date = "2026-11-06"
 summary = "The caching and presence chapters now link back to the examples they build on, and the caching advice distinguishes diagnostics from measuring read cost. \"The other books\" links the dynamic-space example and distinguishes the ledger cells from the overlay harness."
 pages = ["economics/economics.md", "closing/closing.md", "other-books.md"]
+summary = "The manifold chapter distinguishes the family menu from exact authorization and shows the ledger's refusal. The door chapter links its prerequisites, and the overlay chapter clarifies governor behavior and the slow call's six-second wait."
+pages = ["spine/manifold.md", "door/door.md", "overlays/overlays.md"]
 
 [[change]]
 date = "2026-11-03"

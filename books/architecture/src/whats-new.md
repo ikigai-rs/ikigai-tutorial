@@ -10,6 +10,9 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 - **2026-11-06**: The caching and presence chapters now link back to the examples they build on, and the caching advice distinguishes diagnostics from measuring read cost. "The other books" links the dynamic-space example and distinguishes the ledger cells from the overlay harness.
 
   Pages: [Golden threads and the cost of a read](economics/economics.md), [Presence and the audit axis](closing/closing.md), [The other books](other-books.md)
+- **2026-11-06**: The manifold chapter distinguishes the family menu from exact authorization and shows the ledger's refusal. The door chapter links its prerequisites, and the overlay chapter clarifies governor behavior and the slow call's six-second wait.
+
+  Pages: [The manifold, and the UI that falls out of it](spine/manifold.md), [One module, a boundary and a surface](door/door.md), [Spaces that wrap spaces](overlays/overlays.md)
 
 - **2026-11-03**: "The manifold, and the UI that falls out of it" now lists what a newer ledger offers: an item's history and daily counts, which a reader's narrowed list keeps, and two write actions, which it drops.
 
