@@ -4,10 +4,13 @@
 it has whatever formats the kernel can reach from what it has. This chapter is where you
 find out what "reach" means, by using a transreptor and then writing one.
 
-The code is `crates/building-endpoints`, this part's crate. Its host chains onto Part I's
-space, so everything you built there is bound here too, plus four endpoints: `banner`, which
-[Configuration](../getting-started/configuration.md) borrowed from this part, and the three these
-chapters add:
+The code is in `crates/building-endpoints`. Its host extends the space from
+[Binding, and a host of your own](../getting-started/binding.md), so `camel-case`,
+`title`, `camel-title` and the function library are still bound here. It adds four
+endpoints: `banner`, which [Configuration](../getting-started/configuration.md) already
+used, plus `markdown`, `counter` and `stamp`, which this part explains. Run the
+`cargo run` commands below from the repository root you opened in
+[Running it](../getting-started/running-it.md#the-tutorial-binary-this-repo-nothing-else):
 
 ```rust,ignore
 {{#include ../../../../crates/building-endpoints/src/lib.rs:space}}
@@ -15,10 +18,11 @@ chapters add:
 
 ## Using one
 
-The `ikigai` CLI links a transreptor between RDF syntaxes, `urn:rdf:transrept`. It
-declares what it converts — `describe` it and look for the `transrepts:` line — and it is
-driven the way every transreptor is driven: content in through the pipe, the target type
-in `as`:
+A **transreptor** is an endpoint that converts a representation from one format to
+another. The `ikigai` CLI links one for RDF syntaxes, `urn:rdf:transrept`. It
+declares what it converts: run `describe urn:rdf:transrept text/plain` in the CLI REPL
+and look for the `transrepts:` line. To use it, pass content through the pipe and the
+target type in `as`:
 
 ```bash
 ikigai --plain -c 'source urn:kernel:catalog | urn:rdf:transrept as=application/ld+json'
@@ -159,8 +163,8 @@ The error is an `Endpoint` error on purpose. The face is not absent, so it is no
 `NotFound`; no capability is at issue, so it is not `Denied` — consent is per request,
 not per holder; and the arguments are well-formed, so it is not `InvalidArgument`. A
 mistyped consent (`lossy=alow`) *is* an `InvalidArgument`, rather than being read as the
-default and blamed on the face. At the REPL the same refusal is what
-`describe urn:iki:tutorial:camel-case text/markdown` prints.
+default and blamed on the face. These examples use the tutorial host; the stock
+`ikigai` CLI does not bind `urn:iki:tutorial:camel-case`.
 
 > ⚠ One thing the declaration still does not do. When **no route at all** reaches the
 > type a `Meta` request asked for, the kernel **substitutes** the canonical Turtle rather
@@ -179,7 +183,7 @@ representation is the same mechanism: a declaration, and a plan the kernel makes
 
 - `urn:json:query` runs a jq program over any resource;
 - `urn:json:from-csv` reads CSV as JSON;
-- `urn:json:to-csv` goes the other way.
+- `urn:json:to-csv` writes JSON as CSV.
 
 `from-csv` declares `.transreptor(["text/csv"], ["application/json"])`, so it is also the
 kernel's route from CSV to JSON. Nothing about it involves Turtle.
@@ -243,13 +247,14 @@ source urn:json:query src=urn:iki:tutorial:shop:stock q="[.[] | select(.count | 
 [cached]</pre>
 </div>
 
-Now change the table. The line below reads the stock as JSON and keeps only what is on a
-shelf. Then it writes that back as CSV through `urn:json:to-csv` and sinks it to the stock.
+Now change the table. The line below reads the stock as JSON and keeps only records
+whose count is greater than zero. Then it writes that back as CSV through
+`urn:json:to-csv` and sinks it to the stock.
 The round trip is three resources and a pipe. The `Sink` cuts the stock's thread, as every
 `Sink` does ([Golden threads in practice](../getting-started/golden-threads.md)), and both
 cached selections above go with it. The first recomputes to the same answer, since flour and
-rice are still on their shelves. The list of items, read in the first cell, recomputes without
-sugar:
+rice still have counts greater than ten. The list of items, read in the first cell,
+recomputes without sugar:
 
 <div class="ikigai-run" data-cmd='source urn:json:query src=urn:iki:tutorial:shop:stock q="map(select(.count | tonumber > 0))" | urn:json:to-csv | sink urn:iki:tutorial:shop:stock
 source urn:iki:tutorial:shop:stock
