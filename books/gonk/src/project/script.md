@@ -1,13 +1,16 @@
 # A workflow of your own
 
-The [previous chapter](query.md) kept questions. Some questions are steps in how you work: what should
-I do next on this artifact, and has anything been closed without evidence? This chapter publishes both
+In [Ask the project in SPARQL](query.md), you published queries you can run again. Some questions
+are steps in how you work: what should I do next on this artifact, and has anything been closed
+without evidence? This chapter publishes both
 kinds. One is a **plan**, a fixed set of requests, and the other is a query used as a check.
 
 ## Catch up
 
-In a new empty directory, as in [Start a project](start.md). If the gonk from [that
-chapter](query.md) is still running, stop it first, since this one takes the same port.
+Start in a new empty directory, as in [Start a project](start.md); this chapter regenerates the
+sample and seeds a fresh ledger. If the gonk from [Ask the project in SPARQL](query.md) is still
+running, stop it first, since this one takes the same port. Keep gonk running in one terminal and
+run the remaining commands in another, from the same directory.
 
 The close example uses a dispatcher identity, because an alias scheme belongs to a principal.
 Enroll a QUIC client with both ledger write and `gh` alias authority before starting gonk

@@ -18,6 +18,17 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-09"
+summary = "The htmx chapter links back to the live-view model, names the note form and cache row to watch, and shows how to pass host options through Cargo from the repository root."
+pages = ["delivery/htmx.md"]
+
+[[change]]
+date = "2026-11-09"
+summary = "The reserved WebTransport, terminal and component chapters clarify their connection to earlier examples and distinguish existing kernel readouts from planned inspector text views. The companion-book descriptions use shorter sentences."
+pages = ["delivery/webtransport.md", "delivery/terminal.md", "components/index.md", "other-books.md"]
+maintenance = true
+
+[[change]]
 date = "2026-11-06"
 summary = "The reserved chapters on faces, artifacts and themes clarify which readouts have text faces, how to run the directory delivery, and how Auto selects among three palettes. Links point back to the earlier examples."
 pages = ["model/faces.md", "model/artifacts.md", "model/themes.md"]

@@ -1,8 +1,9 @@
 # A model of your own
 
-[A query from a sentence](sentence.md), the next chapter, needs a language model. The query and
-scripting chapters needed none, and neither does anything else in this part except review. This chapter
-sets one up, by whichever route suits you, and each route ends in the same check: **`urn:llm:ask`
+[A query from a sentence](sentence.md), the next chapter, needs a language model. You already have
+published queries and a plan from [A workflow of your own](script.md). Those need no model, and
+neither does anything else in this part except review. This chapter sets one up, by whichever
+route suits you, and each route ends in the same check: **`urn:llm:ask`
 answers**.
 
 ## How gonk reaches a model
@@ -44,7 +45,7 @@ blue
 On macOS, install the app or use `brew install ollama && brew services start ollama`.
 
 Now tell `ikigai` about it. This page keeps the file in a scratch config home, `peer/ikigai/`; yours is
-`~/.config/ikigai/llm.json`, and and then the commands below need no `env XDG_CONFIG_HOME=…`. In a
+`~/.config/ikigai/llm.json`, and then the commands below need no `env XDG_CONFIG_HOME=…`. In a
 new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter):
 
 <!-- transcript: file peer/ikigai/llm.json -->
@@ -63,7 +64,9 @@ OpenAI-compatible root.
 
 Serve it on a socket, for this user alone. `--no-config-mounts` keeps this process a leaf, so it cannot
 end up mounting gonk while gonk mounts it. If the gonk from [the previous chapter](script.md) is still
-running, stop it first, since a later step here takes the same port.
+running, stop it first, since a later step here takes the same port. Keep each `serve` process and
+gonk running in its own terminal. Run the remaining commands in another terminal, from the same
+chapter directory.
 
 <!-- transcript: serve -->
 ```console
@@ -73,7 +76,8 @@ ikigai: mount   declined (--no-config-mounts) — the config home's `mount` line
 ikigai: serving on …/llm.sock  (Ctrl-C to stop)
 ```
 
-Check that it read the file. `urn:llm:config` needs no server and no capability, and never shows a key:
+Check that it read the file. `urn:llm:config` needs no running model server and no capability, and
+never shows a key:
 
 <!-- transcript: run -->
 ```console
@@ -359,4 +363,5 @@ The final check is the same, `urn:llm:ask`, and it is manual here, since it woul
 ## What you have now
 
 `urn:llm:ask` answering through gonk, however you chose to run the model, and a table for when it does
-not. The [next chapter](sentence.md) spends it.
+not. In [A query from a sentence](sentence.md), you use the model to draft a query and review it
+before publishing.
