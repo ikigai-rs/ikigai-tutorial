@@ -71,6 +71,17 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-07**: The Streams chapters name what carries forward, clarify buffered representations, byte-range ends, file-version checks, and byte-budget totals, and make the buffer limitations and budget rules easier to scan.
 
   Pages: [Streams, I: bytes are a representation](streams/bytes.md), [Streams, II: a body you can read again](streams/replay.md), [Streams, III: a body read once, and its bound](streams/once.md)
+- **2026-11-07**: The failed-draft exercise includes the script read grant needed to check that no script was saved.
+
+  Pages: [Exercises: code and language](code/exercises.md)
+
+- **2026-11-07**: Exercises: code and language names the chapters that supply its hosts and says where to write and run the tests.
+
+  Pages: [Exercises: code and language](code/exercises.md)
+
+- **2026-11-07**: A sentence becomes a draft explains how to run its examples and links the hosts, authority rules, and examples it builds on.
+
+  Pages: [A sentence becomes a draft](code/sentence.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 

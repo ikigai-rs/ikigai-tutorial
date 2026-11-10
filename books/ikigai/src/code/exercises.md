@@ -1,11 +1,13 @@
 # Exercises: code and language
 
-Four, and all four are written in **your** crate — `crates/your-endpoints/tests/code.rs` —
-against the code this section quotes, `crates/script-host`, `crates/script-authority` and
-`crates/sentence-draft`, which you use and do not edit. The file already holds the scaffolding:
+Write these four exercises as tests in **your** crate, in
+`crates/your-endpoints/tests/code.rs`. Use the hosts from [Scripts are resources](scripts.md),
+[Who a script runs as](authority.md) and [A sentence becomes a draft](sentence.md):
+`crates/script-host`, `crates/script-authority` and `crates/sentence-draft`. Leave those crates
+unchanged. Your test file already holds the scaffolding:
 `publish` (a SPARQL script, under a capability), `result` (an answer, and whether it came from the
 cache), `person` (a capability naming its principal, as a door would mint it), `stub_model` (a stub
-with drafts of your own), and one test proving all of it works. The loop is:
+with drafts of your own), and one test proving all of it works. Run your tests from the repository's root:
 
 ```bash
 cargo test -p your-endpoints --test code
@@ -80,7 +82,7 @@ the payroll in it. Narrowing can only keep what is already there.
 
 Script a stub whose only draft, for the ask "delete everything", is an UPDATE:
 `DELETE WHERE { GRAPH <urn:iki:tutorial:items> { ?s ?p ?o } }`. Draft with it, as a person who may
-write the script `wipe` and holds both item grants and a network grant, with
+read and write the script `wipe` and holds both item grants and a network grant, with
 `save=wipe`.
 
 - **File** — `crates/your-endpoints/tests/code.rs`; `stub_model` gives you the model and the
@@ -100,6 +102,9 @@ refusing the draft: the check refuses any UPDATE, because a draft reads. Read bo
 errors. The second one is not about the UPDATE at all. Why did drafting stop at two when the bound
 is three?
 
+`Exists urn:script:wipe` needs `urn:cap:script:read:wipe` even when the script does not exist,
+so include that grant in your person's capability.
+
 Nothing was saved, and nothing ran. A model that answers with a destructive query on every attempt
 has produced, at the end, an answer saying so.
 
@@ -107,7 +112,9 @@ has produced, at the end, an answer saying so.
 
 ---
 
-## 4. Add the style note ledger item 1242 left out, as a composition
+<a id="4-add-the-style-note-ledger-item-1242-left-out-as-a-composition"></a>
+
+## 4. Add a warning for FROM paired with GRAPH, as a composition
 
 The live demo's draft pairs `FROM <g>` with `GRAPH <g> { … }`. On this host that is harmless (the
 script host runs a query over one set of graphs that serves as both its default and its named
