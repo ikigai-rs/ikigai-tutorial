@@ -114,6 +114,9 @@ pages = ["code/sentence.md"]
 date = "2026-11-07"
 summary = "The script chapters clarify where to run the examples, how graph-variable queries differ from the hello query, and how a draft's preview differs from publication. They also connect the example hosts and use clearer table labels."
 pages = ["code/first.md", "code/scripts.md", "code/authority.md"]
+date = "2026-11-07"
+summary = "Spreadsheet, VI and VII explain which sheet state carries forward and where to run their cells. The chapters link earlier examples by name, distinguish recomputation from a cache hit, and clarify that the input history already exists."
+pages = ["applied/spreadsheet-6.md", "applied/spreadsheet-7.md"]
 
 [[change]]
 date = "2026-11-05"
