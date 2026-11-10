@@ -111,6 +111,9 @@ maintenance = true
 date = "2026-11-07"
 summary = "A sentence becomes a draft explains how to run its examples and links the hosts, authority rules, and examples it builds on."
 pages = ["code/sentence.md"]
+date = "2026-11-07"
+summary = "The script chapters clarify where to run the examples, how graph-variable queries differ from the hello query, and how a draft's preview differs from publication. They also connect the example hosts and use clearer table labels."
+pages = ["code/first.md", "code/scripts.md", "code/authority.md"]
 
 [[change]]
 date = "2026-11-05"

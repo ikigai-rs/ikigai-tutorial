@@ -15,8 +15,9 @@ HTTP, an agent's tool list, a timer) reaches it the way it reaches anything else
 script is a read or a write, so the cache, the golden threads and the capabilities already
 apply to it, and none of them is written again.
 
-[Your first script](first.md) showed each of these once, on a shelf of books. Three chapters
-take them in depth, on a handful of work items. This one publishes a query and runs it. [Who a script runs
+[Your first script](first.md) showed publishing, running, caching and grants on a shelf of books.
+Here you build the host behind those examples, using a handful of work items. This chapter
+publishes a query and runs it. [Who a script runs
 as](authority.md) asks under whose authority it runs, which is the question a published piece of
 code always raises. [A sentence becomes a draft](sentence.md) lets a language model write one, and
 shows how little the model is allowed to do.
@@ -279,12 +280,12 @@ of the library. Publishing the old text again is the same thing, because it make
 
 | the set | the name | what it is |
 |---|---|---|
-| the host | `script_host::kernel_with` | composition: the script host, configured, in front of the store; a hook that cuts the bindings thread |
-| a script | `urn:script:{name}` | an atom, the library's: a head and every version, written only by a `Sink` here |
-| a version | `urn:script:{name}:version:{digest}` | an atom, never rewritten, named by its content |
-| a result | `urn:script:{name}:result` | composition: the head's text, run through the store's doors, cached as far as what it read |
-| a run | `urn:script:{name}:run:{id}` | an atom, written once by a `Sink` on `…:runs` |
-| the data | `urn:iki:tutorial:items` | a named graph in the store, written by the host and by `close-item` |
+| host | `script_host::kernel_with` | composition: the script host, configured, in front of the store; a hook that cuts the bindings thread |
+| script | `urn:script:{name}` | an atom, the library's: a head and every version, written only by a `Sink` here |
+| version | `urn:script:{name}:version:{digest}` | an atom, never rewritten, named by its content |
+| result | `urn:script:{name}:result` | composition: the head's text, run through the store's doors, cached as far as what it read |
+| run | `urn:script:{name}:run:{id}` | an atom, written once by a `Sink` on `…:runs` |
+| data | `urn:iki:tutorial:items` | a named graph in the store, written by the host and by `close-item` |
 
 This crate wrote no endpoint. Everything it does is configuration of two libraries and a kernel,
 which is the point: publishing code into a running host did not need a feature beside the
