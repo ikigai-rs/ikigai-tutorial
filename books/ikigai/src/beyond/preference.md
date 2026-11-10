@@ -5,9 +5,8 @@ So the interesting question was never *how do I call another machine* — that w
 behind a socket](socket.md) and [Who is asking](identity.md), and the answer is a function call. It is: **what do that machine's answers
 mean here?**
 
-There are exactly three answers, they are three different intentions rather than three
-settings, and the difference between them is entirely about what happens when the peer is
-not there.
+There are three kinds of mount. Each decides which names go to the peer, whether local
+bindings take precedence, and what happens when the peer cannot answer.
 
 ## Alias — a local name for somebody else's namespace
 
@@ -128,7 +127,9 @@ route around turns a capability boundary into a suggestion. Every argument in th
 about authority attenuating correctly would be worth nothing if any client could get the
 answer anyway by having a local copy.
 
-### A mutating verb is never replayed
+<a id="a-mutating-verb-is-never-replayed"></a>
+
+### A `Sink` is never replayed
 
 `a_prefer_mount_never_replays_a_sink` — the peer is transiently down, the verb is `Sink`,
 and the error surfaces rather than the write landing locally. The peer may have applied it

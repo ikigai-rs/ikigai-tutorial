@@ -31,6 +31,9 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 - **2026-11-06**: A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests.
 
   Pages: [A module, end to end](modules/end-to-end.md)
+- **2026-11-06**: Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops.
+
+  Pages: [Preferential resolution](beyond/preference.md), [Failure has a class](beyond/failure.md), [The editor as a client](beyond/emacs.md)
 
 - **2026-11-05**: The REPL grammar now shows how to submit Lisp, names the evaluator's program and data arguments, and explains multiline definitions, isolation, named arguments, and opt-in caching.
 
