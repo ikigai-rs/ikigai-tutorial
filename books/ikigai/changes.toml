@@ -19,35 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
-date = "2026-11-06"
-summary = "A river of feeds now says what happens to a feed's `<ttl>`: the stylesheet keeps it as data, but nothing reads it as a cache lifetime. HTTP headers and `max_age=` decide how long a copy is kept."
-pages = ["explore/rss.md"]
-summary = "The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits."
-pages = ["beyond/socket.md", "beyond/identity.md", "beyond/datasets.md"]
-summary = "Dual-mode crates distinguishes a declared module feature from a working WebAssembly build and says where to run the build command. Where this actually stands clarifies the exercise workflow, release overview, and links to earlier examples."
-pages = ["modules/dual-mode.md", "modules/status.md"]
-summary = "A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request."
-pages = ["modules/end-to-end.md"]
-
-[[change]]
-date = "2026-11-06"
-summary = "The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features."
-pages = ["modules/wire-session.md"]
-
-[[change]]
-date = "2026-11-06"
-summary = "The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors."
-pages = ["modules/wire-session.md"]
-
-[[change]]
-date = "2026-11-06"
-summary = "A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests."
-pages = ["modules/end-to-end.md"]
-summary = "Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops."
-pages = ["beyond/preference.md", "beyond/failure.md", "beyond/emacs.md"]
 date = "2026-11-07"
 summary = "The dynamic-space and prefix chapters explain host layers, the status door, corridor scope, and sandbox limits. The time chapter distinguishes a running clock from paused polling and explains how to choose an event time on the live page."
 pages = ["applied/live-space.md", "applied/prefixes.md", "applied/time.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "Tic-tac-toe, VII names the polyglot game you already have, identifies the arrangement reader, and clarifies which build request hits the cache."
 pages = ["applied/tic-tac-toe-7.md"]
@@ -56,15 +32,23 @@ pages = ["applied/tic-tac-toe-7.md"]
 date = "2026-11-07"
 summary = "Tic-tac-toe, VI links back to the browser board you already built and distinguishes terminal commands from the page's runnable cells."
 pages = ["applied/tic-tac-toe-6.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "Tic-tac-toe, IV clarifies game state, cache isolation, and the handoff to the playable board. Part V makes the two-store startup sequence explicit, corrects the cache-invalidation explanation, qualifies untested screen-reader behavior, and gives the views recap a parallel label."
 pages = ["applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "Tic-tac-toe I–III makes model names easier to scan, clarifies earlier chapter references and invalidation, and explains which endpoints a larger board can reuse. The CheckSet discussion distinguishes staying cached through moves from explicit invalidation."
 pages = ["applied/tic-tac-toe-1.md", "applied/tic-tac-toe-2.md", "applied/tic-tac-toe-3.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The machine client corrects MCP startup authority and the default Ollama backend, distinguishes backends from models, and clarifies argument validation. The beyond-one-host exercises specify their inputs and correct the fallback and composition guidance."
 pages = ["beyond/agent.md", "beyond/exercises.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "Tracing a resolution links the examples you already have, names the kernel consistently, clarifies what a dry run avoids, and leads into The machine client by name."
 pages = ["beyond/tracing.md"]
@@ -83,9 +67,13 @@ pages = ["beyond/emacs-aliases.md"]
 date = "2026-11-07"
 summary = "Tracing a resolution clarifies that an installed tracer collects resolutions from one kernel, even when a process hosts more than one kernel."
 pages = ["beyond/tracing.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The Streams chapters name what carries forward, clarify buffered representations, byte-range ends, file-version checks, and byte-budget totals, and make the buffer limitations and budget rules easier to scan."
 pages = ["streams/bytes.md", "streams/replay.md", "streams/once.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The failed-draft exercise includes the script read grant needed to check that no script was saved."
 pages = ["code/exercises.md"]
@@ -94,14 +82,6 @@ pages = ["code/exercises.md"]
 date = "2026-11-07"
 summary = "The fourth code exercise names the query pattern its warning checks; its old heading link still works."
 pages = ["code/exercises.md"]
-date = "2026-11-07"
-summary = "Spreadsheet, V carries forward the sheet's time cells and polling grid, distinguishes a feed write from a cell edit, and gives concrete cells and formulas for watching the market."
-pages = ["applied/spreadsheet-5.md"]
-
-[[change]]
-date = "2026-11-07"
-summary = "Spreadsheet, V corrects the stated polling interval to match its included test."
-pages = ["applied/spreadsheet-5.md"]
 maintenance = true
 
 [[change]]
@@ -119,14 +99,30 @@ maintenance = true
 date = "2026-11-07"
 summary = "A sentence becomes a draft explains how to run its examples and links the hosts, authority rules, and examples it builds on."
 pages = ["code/sentence.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The script chapters clarify where to run the examples, how graph-variable queries differ from the hello query, and how a draft's preview differs from publication. They also connect the example hosts and use clearer table labels."
 pages = ["code/first.md", "code/scripts.md", "code/authority.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "Spreadsheet, VI and VII explain which sheet state carries forward and where to run their cells. The chapters link earlier examples by name, distinguish recomputation from a cache hit, and clarify that the input history already exists."
 pages = ["applied/spreadsheet-6.md", "applied/spreadsheet-7.md"]
 
 [[change]]
+date = "2026-11-07"
+summary = "Spreadsheet, V carries forward the sheet's time cells and polling grid, distinguishes a feed write from a cell edit, and gives concrete cells and formulas for watching the market."
+pages = ["applied/spreadsheet-5.md"]
+
+[[change]]
+date = "2026-11-07"
+summary = "Spreadsheet, V corrects the stated polling interval to match its included test."
+pages = ["applied/spreadsheet-5.md"]
+maintenance = true
+
+[[change]]
+date = "2026-11-07"
 summary = "Spreadsheet, IV connects to the cached sheet you already built and explains how dependency deadlines combine and why a kernel without a clock keeps its time-cell errors cached."
 pages = ["applied/spreadsheet-4.md"]
 
@@ -135,15 +131,23 @@ date = "2026-11-07"
 summary = "Spreadsheet, IV corrects the stated number of midnight trials to match its included test."
 pages = ["applied/spreadsheet-4.md"]
 maintenance = true
+
+[[change]]
 date = "2026-11-07"
 summary = "Spreadsheet I–III now explain where to run the examples, put resource names first in the model tables, and distinguish stale cache entries from removed ones. The formula-edit walkthrough and chapter references are clearer."
 pages = ["applied/spreadsheet-1.md", "applied/spreadsheet-2.md", "applied/spreadsheet-3.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "Contribute a module aligns its dependency recipe with the tested crates and clarifies argument descriptions. The other books names the architecture prerequisite, and the browser appendix connects to your earlier host and separates its recorded-file examples."
 pages = ["contribute.md", "other-books.md", "browser.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The closing reference pages correct stale counts, link the chapters behind the reading suggestions, and clarify glossary definitions and repository descriptions."
 pages = ["next.md", "glossary.md", "repositories.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The notebook connects its catalog exploration to the Python client you already used and explains where to run the script and which setup steps you can reuse."
 pages = ["polyglot/notebook.md"]
@@ -157,6 +161,8 @@ pages = ["polyglot/typescript.md"]
 date = "2026-11-07"
 summary = "The TypeScript track's Exists example writes the note again after the preceding batch deletes it, and includes the import and command needed to run it."
 pages = ["polyglot/typescript.md"]
+
+[[change]]
 date = "2026-11-07"
 summary = "The Python track names the working directory and Python version, shows an isolated package installation and the complete client command, and recreates the deleted note before checking whether it exists."
 pages = ["polyglot/python.md"]
@@ -165,6 +171,46 @@ pages = ["polyglot/python.md"]
 date = "2026-11-07"
 summary = "One wire, three languages connects the tracks to the Rust examples you already built, labels their broader coverage, and explains L0's limits in plain terms."
 pages = ["polyglot/index.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "A river of feeds now says what happens to a feed's `<ttl>`: the stylesheet keeps it as data, but nothing reads it as a cache lifetime. HTTP headers and `max_age=` decide how long a copy is kept."
+pages = ["explore/rss.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The socket and identity chapters clarify terminal steps, directory protection, wire versions, and refusal caching. The dataset chapter corrects cache reuse and explains the published caller limits."
+pages = ["beyond/socket.md", "beyond/identity.md", "beyond/datasets.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "Dual-mode crates distinguishes a declared module feature from a working WebAssembly build and says where to run the build command. Where this actually stands clarifies the exercise workflow, release overview, and links to earlier examples."
+pages = ["modules/dual-mode.md", "modules/status.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "A module, end to end describes what the host-resource test actually checks and distinguishes it from the demo's module request."
+pages = ["modules/end-to-end.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The wire session connects its encoded messages to the running module example and separates the two message directions from the protocol's added features."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "The wire session identifies serve_host_call as a host-side handler and explains which callback answers carry typed errors."
+pages = ["modules/wire-session.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "A module, end to end links back to the host routing and callback examples, says where to run the demo, and links to its tests."
+pages = ["modules/end-to-end.md"]
+
+[[change]]
+date = "2026-11-06"
+summary = "Mount and failure examples now distinguish precedence from fallback, name the verb that cannot be replayed, and clarify which errors fall through. The editor as a client links its earlier concepts, distinguishes generated snapshots from live endpoints, counts aliases per action, and corrects what happens when loading generated Lisp stops."
+pages = ["beyond/preference.md", "beyond/failure.md", "beyond/emacs.md"]
 
 [[change]]
 date = "2026-11-05"
@@ -181,31 +227,6 @@ pages = ["front-door/grammar.md"]
 date = "2026-11-05"
 summary = "Tic-tac-toe, VII explains what a native host must supply before a stored Lisp rule can replace a Rust endpoint, and which reads preserve the game's caching behavior."
 pages = ["applied/tic-tac-toe-7.md"]
-
-[[change]]
-date = "2026-11-05"
-summary = "Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home, with the pinned CLI's full scheduler output."
-pages = ["getting-started/binding.md", "getting-started/scope-and-alias.md", "getting-started/configuration.md"]
-
-[[change]]
-date = "2026-11-05"
-summary = "The file workspace clarifies how the CLI selects its root and where to find the files you write. The getting-started exercises connect to the earlier examples, identify where to run commands, and give word-count its own success check."
-pages = ["getting-started/file-workspace.md", "getting-started/exercises.md"]
-
-[[change]]
-date = "2026-11-05"
-summary = "The endpoint chapters connect their examples to the host you already have, clarify terms and command locations, and distinguish the tutorial host from the CLI. Transreption specifies the description format; the stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb."
-pages = ["building/transreption.md", "building/multi-verb.md", "building/graph-face.md"]
-
-[[change]]
-date = "2026-11-05"
-summary = '"Checking a resource" identifies its earlier space and where to run its check. "Testing an endpoint hermetically" links the clock exercise, defines hermetic tests, clarifies clock setup and the shared-clock discussion, and shows how to run its three tests.'
-pages = ["building/checking.md", "building/hermetic.md"]
-
-[[change]]
-date = "2026-11-05"
-summary = "The module introduction links its prerequisites, explains where to run the demo, and identifies its in-process transport. The module use cases have distinct openings, and the callback chapter defines the issuer interface."
-pages = ["modules/index.md", "modules/two-ways.md", "modules/the-callback.md"]
 
 [[change]]
 date = "2026-11-05"
@@ -251,6 +272,31 @@ pages = ["explore/index.md", "explore/lab.md"]
 date = "2026-11-05"
 summary = "The resolution walkthrough corrects its CLI trace verdict and explains why a cached composite produces only a parent trace span. The golden-thread and endpoint-description chapters clarify expiry and the kernel’s enforcement of declared authority, introduce terms before using them, and connect the examples across chapters."
 pages = ["getting-started/payoff.md", "getting-started/golden-threads.md", "getting-started/self-description.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "Binding clarifies Cargo dependency setup, and Scope and alias defines corridors and states the host's responsibility for matching a clock to its time binding. Configuration now explains its loader's validation limits and walks through shared, app-scoped, and default banners in a temporary config home, with the pinned CLI's full scheduler output."
+pages = ["getting-started/binding.md", "getting-started/scope-and-alias.md", "getting-started/configuration.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The file workspace clarifies how the CLI selects its root and where to find the files you write. The getting-started exercises connect to the earlier examples, identify where to run commands, and give word-count its own success check."
+pages = ["getting-started/file-workspace.md", "getting-started/exercises.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The endpoint chapters connect their examples to the host you already have, clarify terms and command locations, and distinguish the tutorial host from the CLI. Transreption specifies the description format; the stock filter explanation names its numeric conditions, and the counter discussion explains which requirements depend on the verb."
+pages = ["building/transreption.md", "building/multi-verb.md", "building/graph-face.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = '"Checking a resource" identifies its earlier space and where to run its check. "Testing an endpoint hermetically" links the clock exercise, defines hermetic tests, clarifies clock setup and the shared-clock discussion, and shows how to run its three tests.'
+pages = ["building/checking.md", "building/hermetic.md"]
+
+[[change]]
+date = "2026-11-05"
+summary = "The module introduction links its prerequisites, explains where to run the demo, and identifies its in-process transport. The module use cases have distinct openings, and the callback chapter defines the issuer interface."
+pages = ["modules/index.md", "modules/two-ways.md", "modules/the-callback.md"]
 
 [[change]]
 date = "2026-11-03"
