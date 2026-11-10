@@ -83,6 +83,9 @@ pages = ["beyond/emacs-aliases.md"]
 date = "2026-11-07"
 summary = "Tracing a resolution clarifies that an installed tracer collects resolutions from one kernel, even when a process hosts more than one kernel."
 pages = ["beyond/tracing.md"]
+date = "2026-11-07"
+summary = "The Streams chapters name what carries forward, clarify buffered representations, byte-range ends, file-version checks, and byte-budget totals, and make the buffer limitations and budget rules easier to scan."
+pages = ["streams/bytes.md", "streams/replay.md", "streams/once.md"]
 
 [[change]]
 date = "2026-11-05"
