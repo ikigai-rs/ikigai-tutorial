@@ -72,6 +72,8 @@ pages = ["teams/two-teams.md", "ways/solo.md", "ways/workers.md"]
 date = "2026-11-05"
 summary = "Routing work to agents clarifies the agent's permissions; Review every commit separates review requests from publishing and filing findings. Hub and spoke says where to run its pull request commands, and all three chapters put role names first in their tables."
 pages = ["ways/routing.md", "ways/review-every-commit.md", "ways/hub-and-spoke.md"]
+summary = "Start a project explains which terminal keeps gonk running. The next chapters say where to save a spec change's files, connect claiming to seeded tasks, make lease renewal explicit, and distinguish closed items from released claims."
+pages = ["project/start.md", "project/change.md", "project/claim.md"]
 
 [[change]]
 date = "2026-11-05"

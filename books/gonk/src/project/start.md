@@ -104,6 +104,9 @@ If the gonk from [Harness engineering](../ways/harness.md) is still running, sto
 this one takes the same port. The page starts a scratch gonk; on your own machine yours is probably
 already running, at `~/.ikigai/gonk.sock`.
 
+Run the next command in a second terminal, from the same chapter directory. Leave it running and
+return to the first terminal for the commands that follow.
+
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
