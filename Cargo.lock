@@ -2614,7 +2614,6 @@ dependencies = [
  "ikigai-store",
  "ikigai-vocab",
  "ledger-host",
- "openspec-ledger",
 ]
 
 [[package]]

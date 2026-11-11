@@ -323,12 +323,11 @@ pub fn sync_ledger(kernel: &Kernel) -> Result<Vec<String>> {
 }
 // ANCHOR_END: sync
 
-#[cfg(feature = "testkit")]
 pub use scratch::Workspace;
 
-/// Test support, behind the `testkit` feature: a scratch copy of the tree to edit.
-// ambient: fs: test support only; a scratch tree in the temp dir, written, moved and removed.
-#[cfg(feature = "testkit")]
+/// Test and book support: a scratch copy of the tree to edit. Not gated behind a feature,
+/// because the gonk Book's walk uses it as a reader would copy it.
+// ambient: fs: test and book support; a scratch tree in the temp dir, written, moved, removed.
 #[allow(clippy::disallowed_methods)]
 mod scratch {
     use super::{crate_dir, read_tree};

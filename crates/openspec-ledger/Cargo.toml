@@ -25,11 +25,3 @@ ledger-host = { path = "../ledger-host" }
 # release on ikigai-core 0.2 whose `Source` of a directory answers its listing.
 ikigai-fs = "0.3.0"
 
-[features]
-# `Workspace`, the scratch copy the chapters check a box in and archive a change in: test support,
-# so off unless asked for. The crate's own tests turn it on (below), and `scripts/test-books.sh`
-# builds with it for the book's listings.
-testkit = []
-
-[dev-dependencies]
-openspec-ledger = { path = ".", features = ["testkit"] }

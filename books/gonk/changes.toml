@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-11"
-summary = "The OpenSpec part reads its tree through urn:file: requests instead of walking the disk itself, and its scratch Workspace is test support behind the testkit feature."
+summary = "The OpenSpec part reads its tree through urn:file: requests instead of walking the disk itself, and its scratch Workspace is its one named filesystem exception."
 pages = ["spec/openspec.md", "spec/ledger.md"]
 
 [[change]]
