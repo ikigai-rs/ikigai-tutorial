@@ -175,6 +175,9 @@ fn an_event_is_an_atom_with_one_spelling() {
     for refused in [
         "16:00",
         "2026-09-29T16:00",
+        "2026-09-29T16:00+02:00", // the chapter accepts UTC only
+        "2026-11-01T01:30-07:00", // no local DST ambiguity is interpreted
+        "2026-03-08T02:30-08:00", // nor a local time skipped by DST
         "2026-02-30T16:00Z",
         "+090",
         "+",

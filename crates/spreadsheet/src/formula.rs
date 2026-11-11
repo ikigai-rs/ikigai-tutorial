@@ -26,6 +26,9 @@ const MAX_DIGITS: usize = 7;
 /// rather than truncates: past it the formula is a syntax error, never a crashed page.
 const MAX_DEPTH: usize = 64;
 
+/// The compiled tree's bound, shared by the compiler and s-expression reader.
+const MAX_EXPR_DEPTH: usize = MAX_DEPTH * 2;
+
 /// A cell's address: a column (0 for `A`) and a row (1 for the top row).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CellRef {
@@ -161,6 +164,24 @@ impl Op {
 }
 
 impl Expr {
+    /// The reader bounds the expression tree, including nesting introduced by a flat
+    /// chain of binary operators. Keep compiled output inside that same bound.
+    fn readable_depth(&self, depth: usize) -> bool {
+        if depth > MAX_EXPR_DEPTH {
+            return false;
+        }
+        match self {
+            Expr::Negate(inner) => inner.readable_depth(depth + 1),
+            Expr::Binary(_, left, right) => {
+                left.readable_depth(depth + 1) && right.readable_depth(depth + 1)
+            }
+            Expr::Sum(args) => args.iter().all(|arg| arg.readable_depth(depth + 1)),
+            // The serialized range has two cell arguments.
+            Expr::Range(..) => depth < MAX_EXPR_DEPTH,
+            _ => true,
+        }
+    }
+
     /// The cells and the ranges this expression names, each once, in the order they first
     /// appear.
     pub fn names(&self) -> (Vec<CellRef>, Vec<(CellRef, CellRef)>) {
@@ -196,7 +217,8 @@ impl Expr {
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Expr::Number(n) => f.write_str(&number_text(*n)),
+            // Compiled code must preserve the literal; only cell output is rounded.
+            Expr::Number(n) => write!(f, "{n}"),
             Expr::Cell(r) => write!(f, "{r}"),
             Expr::Range(a, b) => write!(f, "(range {a} {b})"),
             Expr::Negate(inner) => write!(f, "(- {inner})"),
@@ -244,7 +266,7 @@ pub fn number_text(n: f64) -> String {
 
 /// `text` as a number, if it is spelled as one: digits, then optionally a point and more
 /// digits, with a minus in front if it is negative (`-2.5`). Nothing else is a number:
-/// not `1e3`, not `.5`, not `5.`.
+/// not `1e3`, not `.5`, not `5.`. Values outside the finite `f64` range are not numbers.
 pub fn parse_number(text: &str) -> Option<f64> {
     let unsigned = text.strip_prefix('-').unwrap_or(text);
     let (whole, fraction) = match unsigned.split_once('.') {
@@ -253,7 +275,7 @@ pub fn parse_number(text: &str) -> Option<f64> {
     };
     let digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
     if digits(whole) && fraction.is_none_or(digits) {
-        text.parse().ok()
+        text.parse::<f64>().ok().filter(|n| n.is_finite())
     } else {
         None
     }
@@ -296,7 +318,8 @@ pub fn compile(formula: &str) -> Expr {
         depth: 0,
     };
     match parser.formula() {
-        Ok(expr) => expr,
+        Ok(expr) if expr.readable_depth(0) => expr,
+        Ok(_) => Expr::SyntaxError("the compiled formula nests too deeply".to_string()),
         Err(why) => Expr::SyntaxError(why),
     }
 }
@@ -457,9 +480,9 @@ impl Parser<'_> {
             }
         }
         let text = String::from_utf8_lossy(&self.text[start..self.at]);
-        text.parse()
+        parse_number(&text)
             .map(Expr::Number)
-            .map_err(|_| format!("`{text}` is not a number"))
+            .ok_or_else(|| format!("`{text}` is not a finite number"))
     }
 
     /// Letters and digits, as one word: `A1`, `sum`, `b12`.
@@ -615,7 +638,7 @@ fn tokens(text: &str) -> std::result::Result<Vec<Token>, String> {
 }
 
 fn read_form(tokens: &[Token], at: &mut usize, depth: usize) -> std::result::Result<Expr, String> {
-    if depth > MAX_DEPTH * 2 {
+    if depth > MAX_EXPR_DEPTH {
         return Err("nested too deeply".to_string());
     }
     let token = tokens.get(*at).ok_or("the text ended")?;
@@ -752,6 +775,31 @@ mod tests {
             let expr = compile(formula);
             assert_eq!(expr.to_string(), compiled, "{formula}");
             assert_eq!(read(compiled), Ok(expr), "{compiled} reads back");
+        }
+    }
+
+    #[test]
+    fn compiled_numbers_preserve_finite_floating_point_values() {
+        for n in [
+            f64::MIN_POSITIVE,
+            f64::from_bits(1),
+            1e-11,
+            1.00000000001,
+            f64::MAX,
+        ] {
+            let expr = Expr::Number(n);
+            assert_eq!(read(&expr.to_string()), Ok(expr));
+        }
+        assert_eq!(parse_number(&"9".repeat(400)), None);
+    }
+
+    #[test]
+    fn compiled_expression_depth_matches_the_reader() {
+        for count in [127, 128, 129, 150] {
+            let formula = format!("=1{}", "+1".repeat(count));
+            let expr = compile(&formula);
+            assert_eq!(read(&expr.to_string()), Ok(expr.clone()));
+            assert_eq!(matches!(expr, Expr::SyntaxError(_)), count > MAX_EXPR_DEPTH);
         }
     }
 

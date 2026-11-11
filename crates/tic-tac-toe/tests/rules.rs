@@ -283,3 +283,63 @@ fn one_move_recomputes_only_the_lines_through_its_square() -> Result<()> {
     Ok(())
 }
 // ANCHOR_END: one_move
+
+/// Exercise legal play on every winning line for both sides, rather than only the
+/// diagonal used by the chapter's transcript.
+#[test]
+fn either_side_can_win_on_each_of_the_eight_lines() -> Result<()> {
+    let lines = [
+        [(0, 0), (1, 0), (2, 0)],
+        [(0, 1), (1, 1), (2, 1)],
+        [(0, 2), (1, 2), (2, 2)],
+        [(0, 0), (0, 1), (0, 2)],
+        [(1, 0), (1, 1), (1, 2)],
+        [(2, 0), (2, 1), (2, 2)],
+        [(0, 0), (1, 1), (2, 2)],
+        [(2, 0), (1, 1), (0, 2)],
+    ];
+    for line in lines {
+        let outside: Vec<_> = (0..3)
+            .flat_map(|y| (0..3).map(move |x| (x, y)))
+            .filter(|cell| !line.contains(cell))
+            .collect();
+        // O needs three X moves outside its line; choose ones that do not win first.
+        let decoys = outside
+            .iter()
+            .enumerate()
+            .find_map(|(a, &first)| {
+                outside
+                    .iter()
+                    .enumerate()
+                    .skip(a + 1)
+                    .find_map(|(b, &second)| {
+                        outside.iter().skip(b + 1).find_map(|&third| {
+                            let three = [first, second, third];
+                            (!lines.iter().any(|l| l.iter().all(|c| three.contains(c))))
+                                .then_some(three)
+                        })
+                    })
+            })
+            .expect("three nonwinning squares outside every line");
+        for mark in ["X", "O"] {
+            let kernel = kernel_over(Arc::default());
+            for i in 0..3 {
+                if mark == "O" {
+                    play(&kernel, decoys[i].0, decoys[i].1)?;
+                }
+                assert_eq!(source(&kernel, TURN)?, mark);
+                play(&kernel, line[i].0, line[i].1)?;
+                if i < 2 {
+                    assert_eq!(source(&kernel, WINNER)?, EMPTY);
+                    if mark == "X" {
+                        play(&kernel, decoys[i].0, decoys[i].1)?;
+                    }
+                }
+            }
+            assert_eq!(source(&kernel, WINNER)?, mark, "{line:?}");
+            assert_eq!(source(&kernel, TURN)?, EMPTY);
+            assert!(matches!(play(&kernel, 0, 0), Err(Error::Conflict(_))));
+        }
+    }
+    Ok(())
+}
