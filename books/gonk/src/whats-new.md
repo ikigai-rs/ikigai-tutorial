@@ -7,7 +7,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-11**: The OpenSpec part reads its tree through urn:file: requests instead of walking the disk itself, and its scratch Workspace is its one named filesystem exception.
+- **2026-11-11**: The OpenSpec part names its two direct filesystem uses as exceptions, each with its reason: the walk of the tree it is handed, which moves behind urn:file: requests in a later release, and the scratch Workspace the chapters edit.
 
   Pages: [OpenSpec in one chapter](spec/openspec.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md)
 

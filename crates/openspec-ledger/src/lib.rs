@@ -32,8 +32,7 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use futures::executor::block_on;
-use ikigai_core::{ArgRef, Capability, Error, Fallback, Iri, Kernel, Request, Result, Space, Verb};
+use ikigai_core::{Error, Fallback, Kernel, Result, Space, Verb};
 use ikigai_markdown::MappingHome;
 use ikigai_store::DurableStore;
 
@@ -80,63 +79,29 @@ pub fn kernel() -> Kernel {
 // ANCHOR_END: space
 
 /// Every Markdown file under `<root>/openspec`, as `(path relative to root, text)`, sorted.
-///
-/// Read through the kernel, not around it: `ikigai-fs` is mounted at `urn:file:{path}`, jailed
-/// to `root`, and the walk is requests. A directory's `Source` under `as=text/uri-list` answers
-/// its children's `urn:file:` names; a file refuses that face, so the walk sources it as text.
+// ambient: fs: reads the openspec tree it was handed; moves behind urn:file: with ikigai-fs 0.3 (ledger #3506)
+#[allow(clippy::disallowed_methods)]
 pub fn read_tree(root: &Path) -> Vec<(String, String)> {
-    let files = Kernel::new(Arc::new(ikigai_fs::space(root)));
-    let mut out = Vec::new();
-    walk(&files, "urn:file:openspec", &mut out);
-    out.sort();
-    out
-}
-
-fn walk(files: &Kernel, dir: &str, out: &mut Vec<(String, String)>) {
-    let Ok(children) = file_source(files, dir, Some("text/uri-list")) else {
-        return;
-    };
-    for child in children.lines().filter(|line| !line.is_empty()) {
-        if file_source(files, child, Some("text/uri-list")).is_ok() {
-            walk(files, child, out);
-        } else if child.ends_with(".md") {
-            let text = file_source(files, child, None).expect("a readable Markdown file");
-            let rel = child.strip_prefix("urn:file:").expect("a urn:file: name");
-            out.push((percent_decoded(rel), text));
-        }
-    }
-}
-
-/// One `Source` of a `urn:file:` name, as text.
-fn file_source(files: &Kernel, iri: &str, face: Option<&str>) -> Result<String> {
-    let mut request = Request::new(
-        Verb::Source,
-        Iri::parse(iri).map_err(|e| Error::Endpoint(format!("{iri}: {e}")))?,
-    );
-    if let Some(face) = face {
-        request = request.with_arg("as", ArgRef::Inline(face.as_bytes().to_vec()));
-    }
-    let repr = block_on(files.issue(request, &Capability::root()))?;
-    String::from_utf8(repr.bytes.to_vec()).map_err(|e| Error::Endpoint(format!("{iri}: {e}")))
-}
-
-/// `urn:file:` paths percent-encode everything but unreserved ASCII and `/`.
-fn percent_decoded(path: &str) -> String {
-    let bytes = path.as_bytes();
-    let mut out = Vec::with_capacity(bytes.len());
-    let mut at = 0;
-    while at < bytes.len() {
-        if bytes[at] == b'%' && at + 2 < bytes.len() {
-            if let Ok(byte) = u8::from_str_radix(&path[at + 1..at + 3], 16) {
-                out.push(byte);
-                at += 3;
-                continue;
+    fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, String)>) {
+        let Ok(entries) = std::fs::read_dir(dir) else {
+            return;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                walk(&path, root, out);
+            } else if path.extension().is_some_and(|e| e == "md") {
+                let rel = path.strip_prefix(root).expect("under root");
+                let rel = rel.to_string_lossy().replace('\\', "/");
+                let text = std::fs::read_to_string(&path).expect("a readable Markdown file");
+                out.push((rel, text));
             }
         }
-        out.push(bytes[at]);
-        at += 1;
     }
-    String::from_utf8_lossy(&out).into_owned()
+    let mut out = Vec::new();
+    walk(&root.join("openspec"), root, &mut out);
+    out.sort();
+    out
 }
 
 // ANCHOR: lift
@@ -410,32 +375,25 @@ mod scratch {
 mod tests {
     use super::*;
 
-    /// The walk moved behind the kernel (`urn:file:`); the tree it answers is the one a direct
-    /// walk of the disk reads, path for path and byte for byte.
+    /// The walk answers the committed tree: its five documents, by path, each with its text.
     #[test]
-    fn the_tree_through_urn_file_is_the_tree_on_disk() {
-        fn direct(dir: &Path, root: &Path, out: &mut Vec<(String, String)>) {
-            for entry in std::fs::read_dir(dir).unwrap().flatten() {
-                let path = entry.path();
-                if path.is_dir() {
-                    direct(&path, root, out);
-                } else if path.extension().is_some_and(|e| e == "md") {
-                    let rel = path
-                        .strip_prefix(root)
-                        .unwrap()
-                        .to_string_lossy()
-                        .replace('\\', "/");
-                    out.push((rel, std::fs::read_to_string(&path).unwrap()));
-                }
-            }
-        }
-        let root = crate_dir();
-        let mut on_disk = Vec::new();
-        direct(&root.join("openspec"), &root, &mut on_disk);
-        on_disk.sort();
-        assert_eq!(on_disk.len(), 5, "the committed tree's five documents");
-        assert_eq!(read_tree(&root), on_disk);
+    fn the_walk_returns_the_committed_tree() {
+        let tree = read_tree(&crate_dir());
+        let paths: Vec<&str> = tree.iter().map(|(p, _)| p.as_str()).collect();
+        assert_eq!(
+            paths,
+            [
+                "openspec/changes/add-undo/proposal.md",
+                "openspec/changes/add-undo/specs/moves/spec.md",
+                "openspec/changes/add-undo/tasks.md",
+                "openspec/specs/board/spec.md",
+                "openspec/specs/moves/spec.md",
+            ],
+            "the committed tree's five documents, sorted"
+        );
+        assert!(tree.iter().all(|(_, text)| !text.is_empty()));
         let scratch = Workspace::new();
+        assert_eq!(scratch.tree(), tree, "the scratch copy is the committed tree");
         scratch.archive("add-undo", "2026-11-11");
         assert!(scratch
             .tree()

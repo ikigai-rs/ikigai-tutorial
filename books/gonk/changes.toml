@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-11"
-summary = "The OpenSpec part reads its tree through urn:file: requests instead of walking the disk itself, and its scratch Workspace is its one named filesystem exception."
+summary = "The OpenSpec part names its two direct filesystem uses as exceptions, each with its reason: the walk of the tree it is handed, which moves behind urn:file: requests in a later release, and the scratch Workspace the chapters edit."
 pages = ["spec/openspec.md", "spec/ledger.md"]
 
 [[change]]

@@ -267,7 +267,7 @@ dependencies = [
  "hello-camel",
  "ikigai-compress",
  "ikigai-core",
- "ikigai-fs 0.2.2",
+ "ikigai-fs",
  "live-space",
  "loadable-module",
  "push",
@@ -1634,22 +1634,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ikigai-fs"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c12a9aeca272435637a4daa915f4df312b9d0ed108335840047b34bc4e3bfc7c"
-dependencies = [
- "async-trait",
- "base64 0.22.1",
- "futures-core",
- "getrandom 0.3.4",
- "ikigai-core",
- "mime_guess",
- "rustix",
- "web-sys",
-]
-
-[[package]]
 name = "ikigai-http"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2099,7 +2083,7 @@ dependencies = [
  "futures",
  "ikigai-core",
  "ikigai-fn",
- "ikigai-fs 0.2.2",
+ "ikigai-fs",
  "ikigai-json",
  "ikigai-rdf",
  "ikigai-ui",
@@ -2116,7 +2100,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fs 0.2.2",
+ "ikigai-fs",
  "ikigai-web",
  "inspector",
  "tokio",
@@ -2431,22 +2415,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mime"
-version = "0.3.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5848f5a9e8117cf94f2f90faac24a87ff81600ff8628c1e3deaab572e76bfa1"
-
-[[package]]
-name = "mime_guess"
-version = "2.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7c44f8e672c00fe5308fa235f821cb4198414e1c77935c1ab6948d3fd78550e"
-dependencies = [
- "mime",
- "unicase",
-]
-
-[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2608,7 +2576,6 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "ikigai-core",
- "ikigai-fs 0.3.0",
  "ikigai-ledger",
  "ikigai-markdown",
  "ikigai-store",

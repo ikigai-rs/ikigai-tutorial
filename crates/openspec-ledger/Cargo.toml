@@ -21,7 +21,3 @@ ikigai-markdown.workspace = true
 futures.workspace = true
 # `ask` and the story clock, as every gonk-book host uses them.
 ledger-host = { path = "../ledger-host" }
-# The tree is read through `urn:file:{path}`, jailed to the root it is given: 0.3.0 is the first
-# release on ikigai-core 0.2 whose `Source` of a directory answers its listing.
-ikigai-fs = "0.3.0"
-
