@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-11"
+summary = "The OpenSpec part reads its tree through urn:file: requests instead of walking the disk itself, and its scratch Workspace is test support behind the testkit feature."
+pages = ["spec/openspec.md", "spec/ledger.md"]
+
+[[change]]
 date = "2026-11-09"
 summary = "The workflow, model, and sentence chapters clarify fresh setup, server terminals, and the queries and plan you already have. The sentence chapter explains how to reuse your own model without replacing its mount configuration."
 pages = ["project/script.md", "project/model.md", "project/sentence.md"]
