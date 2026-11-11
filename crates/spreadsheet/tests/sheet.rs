@@ -239,6 +239,7 @@ fn formulas_evaluate_and_errors_are_values() {
     ] {
         type_into(&kernel, "B1", formula);
         assert_eq!(value(&kernel, "B1"), expected, "{formula}");
+        assert!(value_cached(&kernel, "B1"), "{formula} stays cacheable");
     }
     // An error propagates to what reads it.
     type_into(&kernel, "B1", "=A1/0");
@@ -507,4 +508,34 @@ fn a_fallback_over_a_composites_not_found_is_cut_when_the_atom_changes() {
         "the write cut the fallback"
     );
     assert_eq!(source(&kernel, "urn:test:has-formula:A1").unwrap(), "yes");
+}
+
+#[test]
+fn compiling_preserves_numeric_literals_before_display_rounding() {
+    let kernel = kernel();
+    for (formula, expected) in [
+        ("=0.00000000001*100000000000", "1"),
+        ("=1/0.00000000001", "100000000000"),
+        ("=(1.00000000001-1)*100000000000", "1.0000000827"),
+    ] {
+        type_into(&kernel, "A1", formula);
+        assert_eq!(value(&kernel, "A1"), expected, "{formula}");
+        assert!(value_cached(&kernel, "A1"));
+    }
+}
+
+#[test]
+fn an_oversized_numeric_literal_is_a_cacheable_syntax_error() {
+    let kernel = kernel();
+    type_into(&kernel, "A1", &format!("={}", "9".repeat(400)));
+    assert_eq!(value(&kernel, "A1"), "#SYNTAX");
+    assert!(value_cached(&kernel, "A1"));
+}
+
+#[test]
+fn a_formula_beyond_the_readers_depth_is_a_cacheable_syntax_error() {
+    let kernel = kernel();
+    type_into(&kernel, "A1", &format!("=1{}", "+1".repeat(150)));
+    assert_eq!(value(&kernel, "A1"), "#SYNTAX");
+    assert!(value_cached(&kernel, "A1"));
 }

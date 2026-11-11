@@ -42,6 +42,13 @@ precedence of `*` over `+`, which the text only implies, is the nesting of the l
 sheet carries its own small reader rather than `ikigai-sexpr`'s, because a formula needs
 decimals and that datum has only integers.
 
+Numbers use finite `f64` values. The compiled form preserves each parsed numeric literal;
+rounding to ten decimal places happens when a formula's result is displayed, so
+`=0.00000000001*100000000000` answers `1`. This is floating-point arithmetic, not exact
+money arithmetic. A literal too large for a finite value is `#SYNTAX`, as is an expression
+whose compiled tree exceeds the reader's depth limit (128 levels), including a long chain
+of operators without parentheses.
+
 The compiler itself is a short recursive-descent parser, and its one entry point never
 fails:
 
