@@ -393,7 +393,11 @@ mod tests {
         );
         assert!(tree.iter().all(|(_, text)| !text.is_empty()));
         let scratch = Workspace::new();
-        assert_eq!(scratch.tree(), tree, "the scratch copy is the committed tree");
+        assert_eq!(
+            scratch.tree(),
+            tree,
+            "the scratch copy is the committed tree"
+        );
         scratch.archive("add-undo", "2026-11-11");
         assert!(scratch
             .tree()
