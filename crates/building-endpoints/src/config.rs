@@ -34,6 +34,11 @@ impl Settings {
     /// an error — the process is under-configured, which is legal — but a file that is
     /// present and is not TOML stops the read, because a silently ignored config is the
     /// operator believing one thing while the process does another.
+    ///
+    /// The one read that is not a request: the layers are the host's own configuration, read
+    /// from the home the host was given, so the read is named as an exception, not hidden.
+    // ambient: fs: the host's own config layers, under the home it was handed at construction.
+    #[allow(clippy::disallowed_methods)]
     pub fn load_in(home: &Path, app: Option<&str>) -> Result<Settings> {
         let mut merged = toml::Table::new();
         for path in layered_paths_in(home, STEM, app) {

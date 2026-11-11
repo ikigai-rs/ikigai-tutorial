@@ -79,6 +79,8 @@ pub fn kernel() -> Kernel {
 // ANCHOR_END: space
 
 /// Every Markdown file under `<root>/openspec`, as `(path relative to root, text)`, sorted.
+// ambient: fs: reads the openspec tree it was handed; moves behind urn:file: with ikigai-fs 0.3 (ledger #3506)
+#[allow(clippy::disallowed_methods)]
 pub fn read_tree(root: &Path) -> Vec<(String, String)> {
     fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, String)>) {
         let Ok(entries) = std::fs::read_dir(dir) else {
@@ -286,80 +288,122 @@ pub fn sync_ledger(kernel: &Kernel) -> Result<Vec<String>> {
 }
 // ANCHOR_END: sync
 
-/// A copy of this crate's `openspec/` tree in a fresh temporary directory, removed when
-/// dropped — somewhere the chapters can check a box and archive a change.
-pub struct Workspace {
-    root: PathBuf,
-}
+pub use scratch::Workspace;
 
-impl Workspace {
-    /// A copy of the committed tree.
-    pub fn new() -> Workspace {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static NEXT: AtomicUsize = AtomicUsize::new(0);
-        let root = std::env::temp_dir().join(format!(
-            "gonk-book-openspec-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::SeqCst)
-        ));
-        for (path, text) in read_tree(&crate_dir()) {
-            let to = root.join(&path);
-            std::fs::create_dir_all(to.parent().expect("a parent")).expect("a scratch tree");
-            std::fs::write(to, text).expect("a scratch file");
+/// Test and book support: a scratch copy of the tree to edit. Not gated behind a feature,
+/// because the gonk Book's walk uses it as a reader would copy it.
+// ambient: fs: test and book support; a scratch tree in the temp dir, written, moved, removed.
+#[allow(clippy::disallowed_methods)]
+mod scratch {
+    use super::{crate_dir, read_tree};
+    use std::path::{Path, PathBuf};
+
+    /// A copy of this crate's `openspec/` tree in a fresh temporary directory, removed when
+    /// dropped — somewhere the chapters can check a box and archive a change.
+    pub struct Workspace {
+        root: PathBuf,
+    }
+
+    impl Workspace {
+        /// A copy of the committed tree.
+        pub fn new() -> Workspace {
+            use std::sync::atomic::{AtomicUsize, Ordering};
+            static NEXT: AtomicUsize = AtomicUsize::new(0);
+            let root = std::env::temp_dir().join(format!(
+                "gonk-book-openspec-{}-{}",
+                std::process::id(),
+                NEXT.fetch_add(1, Ordering::SeqCst)
+            ));
+            for (path, text) in read_tree(&crate_dir()) {
+                let to = root.join(&path);
+                std::fs::create_dir_all(to.parent().expect("a parent")).expect("a scratch tree");
+                std::fs::write(to, text).expect("a scratch file");
+            }
+            Workspace { root }
         }
-        Workspace { root }
+
+        /// The directory holding `openspec/`.
+        pub fn root(&self) -> &Path {
+            &self.root
+        }
+
+        /// The tree as it is now.
+        pub fn tree(&self) -> Vec<(String, String)> {
+            read_tree(&self.root)
+        }
+
+        /// Check off the task numbered `number` in `change`'s `tasks.md`.
+        pub fn check(&self, change: &str, number: &str) {
+            let path = self
+                .root
+                .join(format!("openspec/changes/{change}/tasks.md"));
+            let text = std::fs::read_to_string(&path).expect("the change's tasks.md");
+            let from = format!("- [ ] {number} ");
+            assert!(text.contains(&from), "no open task {number} in {change}");
+            std::fs::write(&path, text.replace(&from, &format!("- [x] {number} ")))
+                .expect("written");
+        }
+
+        /// Archive `change` as OpenSpec does, by MOVING its folder to
+        /// `changes/archive/<date>-<change>/`. (OpenSpec's `archive` also merges the change's delta
+        /// specs into the current ones; that half is OpenSpec's, and not repeated here.)
+        pub fn archive(&self, change: &str, date: &str) {
+            let changes = self.root.join("openspec/changes");
+            std::fs::create_dir_all(changes.join("archive")).expect("an archive folder");
+            std::fs::rename(
+                changes.join(change),
+                changes.join(format!("archive/{date}-{change}")),
+            )
+            .expect("the change folder moves");
+        }
     }
 
-    /// The directory holding `openspec/`.
-    pub fn root(&self) -> &Path {
-        &self.root
+    impl Default for Workspace {
+        fn default() -> Self {
+            Workspace::new()
+        }
     }
 
-    /// The tree as it is now.
-    pub fn tree(&self) -> Vec<(String, String)> {
-        read_tree(&self.root)
-    }
-
-    /// Check off the task numbered `number` in `change`'s `tasks.md`.
-    pub fn check(&self, change: &str, number: &str) {
-        let path = self
-            .root
-            .join(format!("openspec/changes/{change}/tasks.md"));
-        let text = std::fs::read_to_string(&path).expect("the change's tasks.md");
-        let from = format!("- [ ] {number} ");
-        assert!(text.contains(&from), "no open task {number} in {change}");
-        std::fs::write(&path, text.replace(&from, &format!("- [x] {number} "))).expect("written");
-    }
-
-    /// Archive `change` as OpenSpec does, by MOVING its folder to
-    /// `changes/archive/<date>-<change>/`. (OpenSpec's `archive` also merges the change's delta
-    /// specs into the current ones; that half is OpenSpec's, and not repeated here.)
-    pub fn archive(&self, change: &str, date: &str) {
-        let changes = self.root.join("openspec/changes");
-        std::fs::create_dir_all(changes.join("archive")).expect("an archive folder");
-        std::fs::rename(
-            changes.join(change),
-            changes.join(format!("archive/{date}-{change}")),
-        )
-        .expect("the change folder moves");
-    }
-}
-
-impl Default for Workspace {
-    fn default() -> Self {
-        Workspace::new()
-    }
-}
-
-impl Drop for Workspace {
-    fn drop(&mut self) {
-        std::fs::remove_dir_all(&self.root).ok();
+    impl Drop for Workspace {
+        fn drop(&mut self) {
+            std::fs::remove_dir_all(&self.root).ok();
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The walk answers the committed tree: its five documents, by path, each with its text.
+    #[test]
+    fn the_walk_returns_the_committed_tree() {
+        let tree = read_tree(&crate_dir());
+        let paths: Vec<&str> = tree.iter().map(|(p, _)| p.as_str()).collect();
+        assert_eq!(
+            paths,
+            [
+                "openspec/changes/add-undo/proposal.md",
+                "openspec/changes/add-undo/specs/moves/spec.md",
+                "openspec/changes/add-undo/tasks.md",
+                "openspec/specs/board/spec.md",
+                "openspec/specs/moves/spec.md",
+            ],
+            "the committed tree's five documents, sorted"
+        );
+        assert!(tree.iter().all(|(_, text)| !text.is_empty()));
+        let scratch = Workspace::new();
+        assert_eq!(
+            scratch.tree(),
+            tree,
+            "the scratch copy is the committed tree"
+        );
+        scratch.archive("add-undo", "2026-11-11");
+        assert!(scratch
+            .tree()
+            .iter()
+            .any(|(p, _)| p.starts_with("openspec/changes/archive/2026-11-11-add-undo/")));
+    }
 
     #[test]
     fn the_committed_tree_lifts_and_files_three_tasks() {

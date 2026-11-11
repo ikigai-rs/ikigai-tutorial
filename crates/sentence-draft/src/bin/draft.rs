@@ -10,7 +10,12 @@
 //! Each line that starts `alice>`, `bob>`, `carol>` or `host>` is one request under that
 //! capability, written the way the REPL grammar would write it; what follows is the answer.
 
+use std::io::Read;
+use std::sync::Arc;
+
+use async_trait::async_trait;
 use ikigai_core::{Capability, Kernel, Verb};
+use ikigai_http::{HttpRequest, HttpResponse, HttpTransport};
 use ikigai_nl::Grounding;
 use script_host::first::SHELF;
 use script_host::show::{self, line, say, section};
@@ -29,7 +34,10 @@ fn main() {
     show::from_args();
     // ANCHOR: model
     let model = match args.iter().position(|a| a == "--ollama") {
-        Some(at) => Model::Ollama(args.get(at + 1).cloned().unwrap_or("llama3.1".into())),
+        Some(at) => Model::Ollama(
+            args.get(at + 1).cloned().unwrap_or("llama3.1".into()),
+            Arc::new(Ureq), // the host's HTTP client: the one place this program opens a socket
+        ),
         None => Model::stub(),
     };
     let kernel = kernel(&model);
@@ -265,7 +273,7 @@ fn compact(iri: &str) -> String {
 fn asked(model: &Model) -> Option<usize> {
     match model {
         Model::Stub(stub) => Some(stub.lock().expect("the stub").prompts.len()),
-        Model::Ollama(_) => None,
+        Model::Ollama(..) => None,
     }
 }
 
@@ -328,4 +336,31 @@ fn first_ask() {
         &[("as", "text/csv")],
         "source urn:script:book-count:result as=text/csv",
     );
+}
+
+/// The HTTP seam `ikigai-llm` reaches a server through, filled by this host with a blocking
+/// client, as that crate's own `ask` example fills it. Only `--ollama` uses it. It lives in the
+/// host, not the library: the library is handed a transport and never reaches the network itself.
+struct Ureq;
+
+#[async_trait]
+impl HttpTransport for Ureq {
+    async fn send(&self, request: HttpRequest) -> Result<HttpResponse, String> {
+        let mut req = ureq::request(request.method.as_str(), &request.url);
+        for (name, value) in &request.headers {
+            req = req.set(name, value);
+        }
+        let (status, mut reader) = match req.send_bytes(&request.body) {
+            Ok(response) => (response.status(), response.into_reader()),
+            Err(ureq::Error::Status(code, response)) => (code, response.into_reader()),
+            Err(e) => return Err(e.to_string()),
+        };
+        let mut body = Vec::new();
+        reader.read_to_end(&mut body).map_err(|e| e.to_string())?;
+        Ok(HttpResponse {
+            status,
+            headers: vec![],
+            body: body.into(),
+        })
+    }
 }

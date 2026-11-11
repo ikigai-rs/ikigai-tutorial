@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-11**: The OpenSpec part names its two direct filesystem uses as exceptions, each with its reason: the walk of the tree it is handed, which moves behind urn:file: requests in a later release, and the scratch Workspace the chapters edit.
+
+  Pages: [OpenSpec in one chapter](spec/openspec.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md)
+
 - **2026-11-09**: The workflow, model, and sentence chapters clarify fresh setup, server terminals, and the queries and plan you already have. The sentence chapter explains how to reuse your own model without replacing its mount configuration.
 
   Pages: [A workflow of your own](project/script.md), [A model of your own](project/model.md), [A query from a sentence](project/sentence.md)

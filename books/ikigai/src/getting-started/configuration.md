@@ -58,6 +58,13 @@ loader does not validate every failure: it also skips other file-read errors and
 the default banner when `banner.text` is absent or is not a string. A production loader
 should distinguish missing files from unreadable ones and reject wrong value types.
 
+The file read is the one thing in this listing that is not a request to the kernel, and it says
+so: `#[allow(clippy::disallowed_methods)]` on the smallest item that reads, with a comment that
+starts `// ambient: fs:` and gives the reason. A workspace that denies `std::fs` in library code
+with clippy's `disallowed-methods` then lists every such read, each with its reason beside it.
+Copy the convention with the code: an exception that is named can be reviewed, and one that is
+not is only found by reading.
+
 And the endpoint that serves it:
 
 ```rust,ignore
