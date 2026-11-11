@@ -11,12 +11,10 @@
 //! test is the funnel around the model, never the model, and nothing reaches a network. A
 //! reader with a local Ollama swaps in the real `urn:llm:ask` ([`Model::Ollama`]).
 
-use std::io::Read;
 use std::sync::{Arc, Mutex};
 
-use async_trait::async_trait;
 use ikigai_core::{Capability, Fallback, Kernel, Space, Verb};
-use ikigai_http::{HttpRequest, HttpResponse, HttpTransport};
+use ikigai_http::HttpTransport;
 use ikigai_nl::{Examples, SpaceConfig};
 use ikigai_script::authority::{same_for_all, Ceiling};
 use script_host::{issue, READ_ITEMS, READ_PAYROLL};
@@ -99,8 +97,10 @@ ORDER BY ?number";
 pub enum Model {
     /// The [`stub`]: canned drafts, recorded prompts, no network.
     Stub(Arc<Mutex<stub::Stub>>),
-    /// `ikigai-llm`'s `urn:llm:ask` over a local Ollama, at this model.
-    Ollama(String),
+    /// `ikigai-llm`'s `urn:llm:ask` over a local Ollama, at this model, reaching the server
+    /// through the transport the HOST hands it. This crate opens no connection of its own: the
+    /// network is the host's, as the file system is (`src/bin/draft.rs` fills it).
+    Ollama(String, Arc<dyn HttpTransport>),
 }
 
 impl Model {
@@ -116,8 +116,8 @@ impl Model {
     fn space(&self) -> Arc<dyn Space> {
         match self {
             Model::Stub(stub) => Arc::new(stub::space(Arc::clone(stub))),
-            Model::Ollama(model) => Arc::new(ikigai_llm::space(
-                Arc::new(Ureq),
+            Model::Ollama(model, transport) => Arc::new(ikigai_llm::space(
+                Arc::clone(transport),
                 ikigai_llm::OpenAiConfig::ollama(model.as_str()),
             )),
         }
@@ -225,30 +225,4 @@ fn person(name: &str, scopes: &[&str]) -> Capability {
     Capability::scoped(scopes.iter().copied())
         .with_principal(&format!("urn:iki:tutorial:person:{name}"))
         .expect("a principal IRI")
-}
-
-/// The HTTP seam `ikigai-llm` reaches a server through, filled with a blocking client, as
-/// that crate's own `ask` example fills it. Only `--ollama` uses it.
-struct Ureq;
-
-#[async_trait]
-impl HttpTransport for Ureq {
-    async fn send(&self, request: HttpRequest) -> Result<HttpResponse, String> {
-        let mut req = ureq::request(request.method.as_str(), &request.url);
-        for (name, value) in &request.headers {
-            req = req.set(name, value);
-        }
-        let (status, mut reader) = match req.send_bytes(&request.body) {
-            Ok(response) => (response.status(), response.into_reader()),
-            Err(ureq::Error::Status(code, response)) => (code, response.into_reader()),
-            Err(e) => return Err(e.to_string()),
-        };
-        let mut body = Vec::new();
-        reader.read_to_end(&mut body).map_err(|e| e.to_string())?;
-        Ok(HttpResponse {
-            status,
-            headers: vec![],
-            body: body.into(),
-        })
-    }
 }

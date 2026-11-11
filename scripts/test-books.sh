@@ -20,7 +20,8 @@ node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs a11y
 
 TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"
-CARGO_TARGET_DIR="$TARGET" cargo build
+# `--features openspec-ledger/testkit`: The gonk Book's spec chapters use its scratch `Workspace`.
+CARGO_TARGET_DIR="$TARGET" cargo build --features openspec-ledger/testkit
 
 # Each book's "What's new" page, from its changes.toml, BEFORE any `mdbook build`, so the page
 # every build (and the deploy) publishes is the one the entries say. The page is committed too:

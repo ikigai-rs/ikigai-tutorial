@@ -22,7 +22,8 @@ ikigai-vocab.workspace = true
 ikigai-script.workspace = true
 ikigai-nl.workspace = true
 # The model door the drafter asks, for a reader with a local Ollama (`--ollama MODEL`): the
-# real `urn:llm:ask`, over the HTTP seam this crate fills with a blocking client.
+# real `urn:llm:ask`, over the HTTP seam the HOST fills: `ureq` is the `draft` binary's client,
+# handed to the library as a transport (the library opens no connection of its own).
 ikigai-llm.workspace = true
 ikigai-http.workspace = true
 ureq.workspace = true
