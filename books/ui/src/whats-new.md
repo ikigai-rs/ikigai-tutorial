@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-12**: The accessibility chapter adds a design review to answer before code, with WCAG 2.2 A and AA references, annotation guidance, and links to ikigai-ui's button, link and field criteria.
+
+  Pages: [Accessibility, done and not bolted on](model/accessibility.md)
+
 - **2026-11-09**: The htmx chapter links back to the live-view model, names the note form and cache row to watch, and shows how to pass host options through Cargo from the repository root.
 
   Pages: [htmx: server-rendered HTML with push](delivery/htmx.md)
