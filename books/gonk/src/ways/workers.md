@@ -132,7 +132,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 
 ### 2. Workers take work
 
-Each worker asks `next` and claims the top item on a lease. The claim is the fence between them:
+Each worker asks `next` and claims the top item on a lease. The claim is the fence between them.
+Its epoch identifies this take; the starter presents that epoch on subsequent writes, so a
+worker holding an older take cannot write after the claim changes hands:
 
 <!-- transcript: run -->
 ```console
@@ -145,7 +147,7 @@ policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=1 lease=30m worker-1'
-#1 claimed by worker-1 until …
+#1 claimed by worker-1 at epoch 1 until …
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:claim item=1 lease=30m worker-2'
 error: conflict: #1 is already claimed by worker-1. Release it first (`delete urn:iki:ledger:claim item=1`), or take it up with them — a claim is a fence, and stealing one silently is how two workers end up in the same tree
@@ -159,7 +161,7 @@ ready: 1   excluded: 1
   not #1: claimed by worker-1
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:claim item=2 lease=30m worker-2'
-#2 claimed by worker-2 until …
+#2 claimed by worker-2 at epoch 1 until …
 [uncacheable]
 ```
 
@@ -196,7 +198,7 @@ While the agent works, the worker renews its lease. `renew=true` renews and neve
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=1 renew=true lease=30m worker-1'
-#1 renewed by worker-1 until …
+#1 renewed by worker-1 at epoch 1 until …
 [uncacheable]
 ```
 
@@ -211,9 +213,41 @@ agents](routing.md) runs it: the dispatch it waits for, and one loop per agent.
 
 ### 4. The worker hands back, with evidence
 
+The starter runs Claude Code with `--output-format json` and Codex with `exec --json`, and
+reads that output for a **session summary**: the session id, machine name, harness, model,
+exit status, wall-clock time, turns, tool-call count and tokens by category (input, cached
+input, cache creation and output, where the harness reports them). It sends no cost, prompt,
+transcript text, tool result or file content. The agent's words stay in the worker's local log.
+
+After posting the hand-back, the starter records the summary on
+`urn:iki:ledger:<ledger>:item:<N>:sessions`. Its hand-back ends with
+`Session summary: <harness> session <id> (<model>, exit <N>), sent to the item's sessions after this hand-back.`
+If it cannot make a summary, the last line is `No session summary: <why>.` A missing or
+unparseable result, an unsupported harness or a run stopped at its budget leaves no summary.
+Failure to make a summary does not itself fail the run. The summary is checked against the ledger's shape before it is
+sent; a refusal to record it is logged and leaves the hand-back standing. Recording needs
+ikigai-ledger 0.22.0 or newer and `urn:cap:ledger:session:<ledger>` in the worker's grant.
+The gonk revision this book pins still links ledger 0.21.1, so it refuses that recording;
+the starter logs the refusal and keeps the hand-back.
+
+This chapter runs the ledger exchanges by hand, without an agent harness. Save the two
+hand-backs with that reason on their last line:
+
+<!-- transcript: file handback-1.txt -->
+```text
+https://github.com/you/demo/pull/8 adds the test, CI green
+No session summary: this chapter runs ledger commands by hand.
+```
+
+<!-- transcript: file handback-2.txt -->
+```text
+https://github.com/you/demo/pull/9 README example, CI green
+No session summary: this chapter runs ledger commands by hand.
+```
+
 <!-- transcript: run -->
 ```console
-$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:comment item=1 handback=true https://github.com/you/demo/pull/8 adds the test, CI green' -c 'delete urn:iki:ledger:claim item=1 from=worker-1'
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:comment item=1 handback=true' -c 'delete urn:iki:ledger:claim item=1 from=worker-1' < handback-1.txt
 commented on #1 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
 #1 released
@@ -221,7 +255,7 @@ commented on #1 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 — batch: 2 commands · 2 uncacheable
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:close item=1 reason=done'
 error: denied: this capability holds neither `urn:cap:ledger:close:default` nor `urn:cap:ledger:write:default`, and this resource takes either. A ledger grant names exactly one ledger, and a grant for another verb (a worker's claim and comment, say) does not reach this one
-$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:comment item=2 handback=true https://github.com/you/demo/pull/9 README example, CI green' -c 'delete urn:iki:ledger:claim item=2 from=worker-2'
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:comment item=2 handback=true' -c 'delete urn:iki:ledger:claim item=2 from=worker-2' < handback-2.txt
 commented on #2 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
 #2 released
@@ -272,7 +306,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 2 comment(s):
   … urn:iki:host:gonk:client:…
     https://github.com/you/demo/pull/9 README example, CI green
+    No session summary: this chapter runs ledger commands by hand.
   … ada (claimed, free text)
+  rejects: urn:iki:ledger:default:comment:…
     PR 9 is red on main: the README example does not compile.
 [uncacheable]
 ```
@@ -305,10 +341,10 @@ what a history holds.
 
 <!-- transcript: run -->
 ```console
-$ grep -E 'door=quic .*outcome=(conflict|denied)' gonk.log
-… gonk:Access urn:iki:ledger:claim door=quic verb=sink outcome=conflict bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:claim door=quic verb=delete outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:close door=quic verb=sink outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
+$ grep -E 'door=quic .*outcome=(conflict|denied)' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:ledger:claim seq=… door=quic verb=sink outcome=conflict dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:claim seq=… door=quic verb=delete outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:close seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 ```
 
 Every refusal above, each with the principal that asked.
@@ -351,11 +387,11 @@ of the workers is [Hub and spoke](hub-and-spoke.md), three chapters on.
 The [gonk starter](https://github.com/ikigai-rs/ikigai-gonk-starter)'s `workers` profile is this
 chapter packaged: `tools/new.py --process workers` adds a "Worker machines" section to the
 repository's `AGENTS.md`, carries `tools/worker.py` (the claim, work, report loop above, run
-unattended) with its three helpers, `tools/worker_repos.py` (which enrolls an owner's repositories
+unattended) with its four helpers, `tools/worker_repos.py` (which enrolls an owner's repositories
 in the worker's configuration and checks the worker's token may push to them),
 `tools/worker_usage.py` (which reads an agent's usage against its plan's weekly limit between
-items) and `tools/worker_onboard.py` (which enrolls a new machine with a pairing code), its
-configuration's template and its service units, and the `just worker` recipes that
+items), `tools/worker_session.py` (which reads the session summary) and
+`tools/worker_onboard.py` (which enrolls a new machine with a pairing code), its configuration's template and its service units, and the `just worker` recipes that
 run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 ([Solo](solo.md#with-the-starter) says more):
 
@@ -364,7 +400,7 @@ run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process workers
-generated the library-lending sample (python, process workers) in …/library: 102 files
+generated the library-lending sample (python, process workers) in …/library: 103 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -394,6 +430,7 @@ review_findings.py
 worker.py
 worker_onboard.py
 worker_repos.py
+worker_session.py
 worker_usage.py
 library/worker:
 units
@@ -472,14 +509,16 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
 $ cd library && python3 tools/gonk.py claim 3
-#3 claimed by worker-1 until …
+#3 claimed by worker-1 at epoch 1 until …
+gonk.py: item 3 is held at epoch 1
 $ cd library && python3 tools/gonk.py claim 3 --renew
-#3 renewed by worker-1 until …
+#3 renewed by worker-1 at epoch 1 until …
+gonk.py: item 3 is held at epoch 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'delete urn:gk:iki:ledger:claim item=3'
 #3 released
 [uncacheable]
 $ cd library && python3 tools/gonk.py claim 3 --renew; echo "exit $?"
-error: conflict: #3 is not claimed, so worker-1 has nothing to renew: the claim was released or never taken. Claim it again (without `renew`) if the work is still yours to do
+error: conflict: #3 is not claimed (its last claim was epoch 1), so epoch 1 is not current and nothing was written
 gonk.py: this working tree no longer holds item 3: stop writing, put what you have on a branch, say where in a comment, and claim something else
 exit 3
 ```

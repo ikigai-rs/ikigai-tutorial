@@ -41,19 +41,20 @@ client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
 
 `principal` is the name gonk will give this client on every request it makes: the certificate's
 fingerprint, as an IRI. It is a name, not authority; what the client may do is the grant. Then
-start gonk, with its standard error — where the access lines go — copied to a file this page can
+start gonk, with its standard error — the banner and connection notices — copied to a file this page can
 read back:
 
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+  instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   socket  …/.ikigai/gonk.sock — owner only
   quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
           client  laptop  …  …/.config/ikigai/gonk/quic/clients/laptop/client.crt  trusted and enrolled
-  log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
+  log     segments in …/.config/ikigai/gonk/log (hash-chained; `urn:log:segments`, `urn:log:verify` over the socket only), not in the backup; one `log:Access` entry per request at each door, polls sampled (`gonk.log.access = false` turns them off); passkey sign-ins and sign-outs
 …
 ```
 
@@ -107,16 +108,16 @@ the names are gonk's own.
 
 ## What gonk knew
 
-Every request a door dispatches is one line in the access log, on standard error, in a fixed
-`key=value` shape made for `grep`:
+Every request a door dispatches is one entry in the hash-chained access log under
+`.config/ikigai/gonk/log/`, in a `key=value` shape made for `grep`:
 
 <!-- transcript: run -->
 ```console
-$ grep ' gonk:Access ' gonk.log
-… gonk:Access urn:iki:ledger:items door=http verb=source outcome=ok bytes=… dur=… principal=- q=as=text/plain&deferred=include&holder=any&limit=50&offset=0&status=open
-… gonk:Access urn:iki:ledger:append door=socket verb=sink outcome=ok bytes=… dur=… principal=owner q=-
-… gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:items door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+$ grep ' log:Access ' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:ledger:items seq=… door=http verb=source outcome=ok bytes=… dur=… principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous q=as=text/plain&deferred=include&holder=any&limit=50&offset=0&sort=-modified&status=open
+… log:Access urn:iki:ledger:append seq=… door=socket verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:owner credential=https://ikigai-rs.dev/ns/log#socketOwner
+… log:Access urn:iki:ledger:append seq=… door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:items seq=… door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 $ grep 'quic client' gonk.log
 ikigai-gonk: quic client … → grant "laptop"
 ```
@@ -125,18 +126,14 @@ Four lines for five requests: the refused HTTP write has none, for the reason
 [below](#a-refusal-with-no-line). `door=` is which door, and `principal=` is who the door could
 say was asking:
 
-- **HTTP**: `-` on an anonymous read (and `anon` on an anonymous write the door refuses at its
-  edge, such as a cross-site one); a signed-in passkey's IRI
-  on **every** request, reads included. That last part is new in the gonk this book pins (gonk
-  PR 122): before it the HTTP library told the door who a write was from and never a read, so a
-  signed-in read was logged `-` too.
-- **socket**: `owner`, always — there is exactly one user it lets in.
+- **HTTP**: `anon` on an anonymous read or write; a signed-in passkey's IRI on every request.
+- **socket**: `urn:iki:host:gonk:owner`, always — there is exactly one user it lets in.
 - **QUIC**: the client's name, `urn:iki:host:gonk:client:<fingerprint>`, on **every** request, reads
   included. The certificate authenticated the connection, so the door knows which client is
   asking whatever it asks. The connection line below the access lines says the same thing with
   the grant it mapped to.
 
-`q=` shows the request's arguments as served, on HTTP only (`-` on the other doors). The `curl`
+`q=` shows the request's arguments as served, on HTTP only (absent on the other doors). The `curl`
 read sent no arguments, yet its line carries six. Before dispatching, the kernel fills in every
 default the resource declares (`ikigai-core` 0.1.104 and later, ledger #19), just as if the caller
 had typed those arguments. The line therefore says what the read actually requested: the first

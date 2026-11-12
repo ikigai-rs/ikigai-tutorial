@@ -141,28 +141,24 @@ Each face gets a link in the header of every gonk page, named by its name:
 
 <!-- transcript: run -->
 ```console
-$ curl -s http://localhost:1070/ | grep -o "<a class='navlink' href='/face/name/[^']*'>[^<]*</a>"
-<a class='navlink' href='/face/name/open'>open</a>
+$ curl -s http://localhost:1070/ | grep -o "href='/face/name/[^']*'"
+href='/face/name/open/'
 ```
 
-`/face/name/open` serves the directory's `index.html`, and `/face/name/open/app.js` serves
+`/face/name/open/` serves the directory's `index.html`, and `/face/name/open/app.js` serves
 `app.js`. Every other file is under the same prefix.
 
-⚠ **Open a face with a slash at the end**, `/face/name/open/`. The template's page loads `app.css`
-and `app.js` by relative address, and a browser resolves those against the address's last
-directory. From `/face/name/open`, with no slash, `app.js` means `/face/name/app.js`, which is
-nothing:
+A face's address ends in `/`, so the template's relative `app.css` and `app.js` resolve
+inside that face's directory. The header link includes the slash. A request without it
+redirects to that address:
 
 <!-- transcript: run -->
 ```console
 $ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:1070/face/name/open/
 200
-$ curl -s -w '\n' http://localhost:1070/face/name/app.js
-no endpoint resolved for urn:face:name:app.js:index.html
+$ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:1070/face/name/open
+308
 ```
-
-The header link at this pin has no slash, so following it shows the template's text without its
-styles or its script. Type the address with the slash, or bookmark it.
 
 <!-- transcript: manual — it opens a browser, which a check cannot look at -->
 ```console

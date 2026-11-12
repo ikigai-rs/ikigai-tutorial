@@ -94,8 +94,8 @@ releases it, so it waits on its dispatcher:
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:close item=2 reason=done author=ada Written and merged.' -c 'sink urn:gk:iki:ledger:claim item=3 lease=2h ada' -c 'sink urn:gk:iki:ledger:claim item=6 lease=2h bob' -c 'sink urn:gk:iki:ledger:comment item=6 author=bob handback=true Note written; please check it.' -c 'delete urn:gk:iki:ledger:claim item=6 from=bob' 2>/dev/null
 closed #2 (done)
-#3 claimed by ada until …
-#6 claimed by bob until …
+#3 claimed by ada at epoch 1 until …
+#6 claimed by bob at epoch 1 until …
 commented on #6 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 #6 released
 ```
@@ -154,11 +154,12 @@ Save this as `board-text.js`:
 <!-- transcript: file board-text.js -->
 ```js
 // What the board face shows, printed: its own modules, run as the anonymous viewer.
-import { item, pool } from "./site/faces/board/kit.js";
-import { COLUMNS, board, childNumbers } from "./site/faces/board/board.js";
+import { item } from "./site/faces/board/kit.js";
+import { COLUMNS, board, readChildren } from "./site/faces/board/board.js";
 
 const epic = await item("default", Number(Deno.args[0]));
-const kids = (await pool(childNumbers(epic), (n) => item("default", n))).filter((it) => !it.error);
+const { items: kids, unreadable } = await readChildren(epic);
+if (unreadable.length) throw new Error(`${unreadable.length} children could not be read`);
 const { by, done, tally } = board(kids);
 console.log(`#${epic.number} ${epic.title}: ${done} of ${kids.length} done`);
 for (const [key, name] of COLUMNS) {

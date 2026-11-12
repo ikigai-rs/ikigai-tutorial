@@ -133,6 +133,7 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-backfill-closed-at__sink"
 "name":"ledger-claim__delete"
 "name":"ledger-claim__sink"
+"name":"ledger-claim__source"
 "name":"ledger-close__sink"
 "name":"ledger-comment__sink"
 "name":"ledger-count__source"
@@ -257,7 +258,7 @@ $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/check.jsonl 2>/dev/null | LC_ALL=C sort
 {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
-{"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n"}],"isError":false}}
+{"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n  author:   urn:iki:host:gonk:client:… (verified)\n  committer: urn:iki:host:gonk:client:… at …\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author=urn:iki:gonk:passkey:ada` refused for committer urn:iki:host:gonk:client:…: it is not the committer, the participants graph <urn:collab:participants> does not enroll the committer to act for it (prov:actedOnBehalfOf), and the committer is not an import principal (ledger:Importer). To write anyway, send no author to be the author yourself, or have the host enroll you to act for that principal\nkind: denied; class: denied"}],"isError":true}}
 {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"tool `ledger-item__delete` is not available under this capability"}],"isError":true}}
 {"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"denied: this capability does not hold `urn:cap:ledger:write:acme`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:write:*` but not this resource, which is the point of naming them\nkind: denied; class: denied"}],"isError":true}}
@@ -303,23 +304,23 @@ ikigai-gonk: quic client … → grant "agent"
 ikigai-gonk: quic client … → grant "agent"
 ikigai-gonk: quic client … → grant "agent"
 ikigai-gonk: quic client … → grant "agent"
-$ grep ' door=quic ' gonk.log | LC_ALL=C sort -k2
-… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:default:item:key:agent-task-1 door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+$ grep ' door=quic ' .config/ikigai/gonk/log/*.log | LC_ALL=C sort -k3,3 -k7,7
+… log:Access urn:iki:ledger:acme:append seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:default:append seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:default:append seq=… door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:default:append seq=… door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:default:item:key:agent-task-1 seq=… door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 ```
 
 One connection line per `ikigai mcp` process, four of them (the tool list and the three runs),
 naming the grant. One access line per request that reached gonk, each naming the agent,
-refusals included. The access lines are sorted by everything after the time, because the last
+refusals included. The access lines are sorted by resource and outcome, because the last
 run's three requests ran at once and their lines are written as each one finishes, in no fixed
 order; unsorted, the log reads the same lines in the order the requests ended. Two things in
 the names are worth reading. Every append is logged as `urn:iki:ledger:default:append`: the tool
 call carried no `ledger`, the argument's default filled it, and the request went out under the
 ledger's full name. And the delete is not in the log at all, because it never left the agent's
-machine. A refusal is `outcome=denied bytes=-`: the ledger answered no bytes, only the refusal.
+machine. A refusal is `outcome=denied` with no `bytes` column: the ledger answered no bytes, only the refusal.
 
 ## Wiring it into an agent
 
@@ -340,9 +341,9 @@ the default port opens its QUIC door on UDP 1062.
 
 | caller | how it reaches gonk | under what authority | who the log says |
 | --- | --- | --- | --- |
-| a browser | HTTP, loopback | anonymous (read only), or a passkey's grant | `-` reading anonymously, or the passkey |
-| `curl`, a hook | HTTP, loopback | anonymous: it reads, and a write is refused | `-` |
-| `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `owner` |
+| a browser | HTTP, loopback | anonymous (read only), or a passkey's grant | `anon` reading anonymously, or the passkey |
+| `curl`, a hook | HTTP, loopback | anonymous: it reads, and a write is refused | `anon` |
+| `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `urn:iki:host:gonk:owner` |
 | an agent over MCP | QUIC, with its own certificate | its client's grant on the server, and its own ceiling on the client | the agent's `urn:iki:host:gonk:client:…` |
 
 The agent's tool calls were the ledger's resources by their own names, the same `append`, `item`

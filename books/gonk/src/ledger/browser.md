@@ -19,17 +19,18 @@ chapter](../introduction.md#a-gonk-per-chapter)).
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+  instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
-  log     one `gonk:Access` line per request at each door, on stderr; the Queue badge's poll only when it fails, takes a second, or is the 60th (`gonk.log.access = false` turns it off)
+  log     segments in …/.config/ikigai/gonk/log (hash-chained; `urn:log:segments`, `urn:log:verify` over the socket only), not in the backup; one `log:Access` entry per request at each door, polls sampled (`gonk.log.access = false` turns them off); passkey sign-ins and sign-outs
 …
 ```
 
-gonk writes its banner and its log to standard error, so `2>&1 | tee gonk.log` is how a
-terminal keeps both: the screen shows them, and `gonk.log` is the record you will read at the
-end of this chapter. (Run as a service, the same lines go wherever the service manager sends
-standard error; gonk's README uses `/tmp/ikigai-gonk.log`.) Leave it running, then open another
-terminal in the **same directory** for the remaining commands.
+gonk writes its banner and fatal errors to standard error; `2>&1 | tee gonk.log` keeps
+those on screen and in a file. Access records go into hash-chained segments under
+`.config/ikigai/gonk/log/`, which this chapter reads at the end. These segments are outside
+the store and its backup. Leave gonk running, then open another terminal in the **same
+directory** for the remaining commands.
 
 File something, so the pages have an item to show. An anonymous caller at the HTTP door only
 reads (the banner's `anonymous read: default`), so file it over the owner's socket, as in [the
@@ -302,18 +303,19 @@ rather than a refusal, and every write `ada` makes carries her passkey as its au
 
 ## What it wrote down
 
-Every door writes one line per request, and `gonk.log` has caught them all. The grammar is
-`ikigai-log`'s: when the request started, a class, the resource, then the same columns on
-every line.
+Each dispatched request gets a `log:Access` entry in a segment under
+`.config/ikigai/gonk/log/`. The grammar is `ikigai-log`'s: when the request started, a class,
+the resource, a sequence number, then the door's columns. `credential` says how the door
+knew the principal; an error has no `bytes`, and an absent query has no `q`.
 
 <!-- transcript: run -->
 ```console
-$ grep ' urn:iki:gonk:act ' gonk.log
-… gonk:Access urn:iki:gonk:act door=http verb=sink outcome=denied bytes=- dur=0 principal=anon q=-
-$ grep ' urn:iki:gonk:page:item:default:1 ' gonk.log
-… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=as=text/html
-… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=denied bytes=- dur=0 principal=- q=-
-… gonk:Access urn:iki:gonk:page:item:default:1 door=http verb=source outcome=ok bytes=… dur=… principal=- q=as=text/html
+$ grep ' urn:iki:gonk:act ' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:gonk:act seq=… door=http verb=sink outcome=denied dur=0 principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous
+$ grep ' urn:iki:gonk:page:item:default:1 ' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:gonk:page:item:default:1 seq=… door=http verb=source outcome=ok bytes=… dur=… principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous q=as=text/html
+… log:Access urn:iki:gonk:page:item:default:1 seq=… door=http verb=source outcome=denied dur=0 principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous
+… log:Access urn:iki:gonk:page:item:default:1 seq=… door=http verb=source outcome=ok bytes=… dur=… principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous q=as=text/html
 ```
 
 Read them with four things in mind:
@@ -321,35 +323,33 @@ Read them with four things in mind:
 - **The resource, not the URL, is the subject.** `/l/default/item/1` (asked three times: by
   `curl` as itself, as an image another page loads, and as another page's link) was
   `urn:iki:gonk:page:item:default:1`; the form was `urn:iki:gonk:act`.
-- **`principal` is who the door could say was asking.** The form's line says `anon`, an
-  anonymous write (here the cross-site one); a page read by nobody signed in says `-`. Signed in, every line names the
-  passkey's IRI, a read as well as a write: the door mints it into the request's capability
-  (core's principal scope), which is where the log reads it. Before gonk PR 122 the HTTP door
-  knew who a write was from and never a read, so a signed-in read said `-` too.
+- **`principal` is who the door could say was asking.** An anonymous read or write says
+  `anon`; a signed-in request names the passkey's IRI. The door mints that identity into the
+  request's capability (core's principal scope), which is where the log reads it.
 - **`outcome` is the kernel's, not HTTP's.** A refusal the resource makes (the `/l/book`
   page, below) is a line with `outcome=denied`. A refusal at the edge, before the kernel (the
   cross-site form, the foreign `Host`, the loaded image), is a line too, written by the edge
-  itself: `outcome=denied bytes=- dur=0`, under the resource the path would have reached, so
+  itself: `outcome=denied dur=0`, under the resource the path would have reached, so
   the one `act` line is the cross-site form and the middle item line is the image. Probing
   shows up in the log. (Before gonk PR 151 an edge refusal wrote no line at all.) The anonymous
   form post has no line: the anonymous grant does not even hold the family of token `act`
   declares, so the kernel refused it before dispatching it to anything that logs
   ([What gonk knew](../machines/doors.md#what-gonk-knew)).
-- **`q` is the arguments the request ran with.** An edge refusal ran nothing, so it says `-`;
+- **`q` is the arguments the request ran with.** An edge refusal ran nothing, so `q` is absent;
   a page that was rendered says `as=text/html`, the representation the door asked the resource
   for. The kernel fills in every default a resource declares before dispatching it (`ikigai-core`
   0.1.104 and later), so a page over a listing carries the listing's defaults too:
 
 <!-- transcript: run -->
 ```console
-$ grep ' urn:iki:gonk:page:ledger:book ' gonk.log
-… gonk:Access urn:iki:gonk:page:ledger:book door=http verb=source outcome=denied bytes=- dur=… principal=- q=as=text/html&limit=50&offset=0&status=open
+$ grep ' urn:iki:gonk:page:ledger:book ' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:gonk:page:ledger:book seq=… door=http verb=source outcome=denied dur=… principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous q=as=text/html&limit=50&offset=0&status=open
 ```
 
 That is the `/l/book` refusal above: the first fifty open items, as a page, which is what the
 page would have shown had the grant reached `book`.
 
-`dur` is milliseconds, so `grep ' dur=[0-9]\{4,\} ' gonk.log` lists every request that took a
+`dur` is milliseconds, so `grep ' dur=[0-9]\{4,\} ' .config/ikigai/gonk/log/*.log` lists every request that took a
 second or more. The first page this gonk rendered is usually one of them: it compiled the
 stylesheet.
 

@@ -196,7 +196,7 @@ own bundle. Then it routes #2 to lawnboy's Claude loop and #3 to its Codex loop:
 <!-- transcript: run -->
 ```console
 $ python3 lawnboy/gonk-worker/tools/new.py hub/library --process workers | head -n 1
-generated the library-lending sample (python, process workers) in …/hub/library: 102 files
+generated the library-lending sample (python, process workers) in …/hub/library: 103 files
 $ cd hub/library && git init -q && python3 tools/gonk.py init --ledger default --quic quic://127.0.0.1:1070 --cert-dir ../gonk --holder hub | tail -n 1
 ready.
 $ cd hub/library && python3 tools/gonk.py dispatch 2 --labels worker:lawnboy,agent:claude
@@ -245,7 +245,7 @@ labeled #3 agent:claude
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #2  repo:library  Document initials in the README
 skip  #1  no dispatch by a router (its labels say nothing about who set them; a router dispatches with `gonk.py dispatch`)
-skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, does not name agent:claude: a label added since a router's dispatch routes nothing
+skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, names agent:codex, which this loop does not select; use a loop with that agent:<kind> label
 ```
 
 ### Over the socket, with `--as`
@@ -257,7 +257,7 @@ without `--as`, the principal the dispatch is from:
 <!-- transcript: run -->
 ```console
 $ python3 lawnboy/gonk-worker/tools/new.py owner --process workers | head -n 1
-generated the library-lending sample (python, process workers) in …/owner: 102 files
+generated the library-lending sample (python, process workers) in …/owner: 103 files
 $ cd owner && git init -q && python3 tools/gonk.py init --ledger default --socket "$PWD/../.ikigai/gonk.sock" --holder ada | tail -n 1
 ready.
 $ cd owner && python3 tools/gonk.py dispatch 1 --labels worker:lawnboy,agent:claude
@@ -269,7 +269,7 @@ default#1: next (worker:lawnboy,agent:claude): rank 1 of 3
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #2  repo:library  Document initials in the README
 skip  #1  no dispatch by a router (its labels say nothing about who set them; a router dispatches with `gonk.py dispatch`)
-skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, does not name agent:claude: a label added since a router's dispatch routes nothing
+skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, names agent:codex, which this loop does not select; use a loop with that agent:<kind> label
 ```
 
 `urn:iki:gonk:passkey:QWRh` stands for the owner's passkey, the principal their signed-in writes
@@ -284,7 +284,7 @@ $ cd lawnboy/gonk-worker && sed -i.bak 's|^routers = \["\(.*\)"\]|routers = ["\1
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #1  repo:library  initials panics on an empty word
 take  #2  repo:library  Document initials in the README
-skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, does not name agent:claude: a label added since a router's dispatch routes nothing
+skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, names agent:codex, which this loop does not select; use a loop with that agent:<kind> label
 ```
 
 What the check proves rests on three things it cannot check: that gonk refuses a borrowed

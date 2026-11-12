@@ -7,6 +7,14 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-12**: The updated gonk examples show claim epochs, the process instance line, and access records in hash-chained log segments, including each door's principal and credential, and corrected face links.
+
+  Pages: [The ledger in a browser](ledger/browser.md), [The three doors, and who is asking](machines/doors.md), [Remote workers](ways/workers.md)
+
+- **2026-11-12**: Remote workers explains the content-free session summary and shows the hand-back's final line. The model-mount configuration now covers peers under any prefix, the model-only call window, and startup's refusal to replace gonk's own names; the examples use updated gonk and starter revisions.
+
+  Pages: [Remote workers](ways/workers.md), [Explain, with a mounted model](browse/explain.md), [Routing work to agents](ways/routing.md)
+
 - **2026-11-11**: The OpenSpec part names its two direct filesystem uses as exceptions, each with its reason: the walk of the tree it is handed, which moves behind urn:file: requests in a later release, and the scratch Workspace the chapters edit.
 
   Pages: [OpenSpec in one chapter](spec/openspec.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md)

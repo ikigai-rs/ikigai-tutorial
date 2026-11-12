@@ -204,12 +204,12 @@ narrowing did not change:
 
 <!-- transcript: run -->
 ```console
-$ grep 'door=socket verb=sink' gonk.log
-… gonk:Access urn:iki:ledger:append door=socket verb=sink outcome=ok bytes=… dur=… principal=owner q=-
-… gonk:Access urn:iki:ledger:append door=socket verb=sink outcome=ok bytes=… dur=… principal=owner q=-
-… gonk:Access urn:iki:ledger:append door=socket verb=sink outcome=ok bytes=… dur=… principal=owner q=-
-$ grep ' urn:iki:ledger:book:items ' gonk.log
-… gonk:Access urn:iki:ledger:book:items door=socket verb=source outcome=denied bytes=- dur=… principal=owner q=-
+$ grep 'door=socket verb=sink' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:ledger:append seq=… door=socket verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:owner credential=https://ikigai-rs.dev/ns/log#socketOwner
+… log:Access urn:iki:ledger:append seq=… door=socket verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:owner credential=https://ikigai-rs.dev/ns/log#socketOwner
+… log:Access urn:iki:ledger:append seq=… door=socket verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:owner credential=https://ikigai-rs.dev/ns/log#socketOwner
+$ grep ' urn:iki:ledger:book:items ' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:ledger:book:items seq=… door=socket verb=source outcome=denied dur=… principal=urn:iki:host:gonk:owner credential=https://ikigai-rs.dev/ns/log#socketOwner
 ```
 
 - Every request over the socket is `principal=owner`. The socket knows that whoever connected
@@ -328,9 +328,9 @@ on the QUIC door instead, so the author rule runs and the log names the agent.
 
 | caller | how it reaches gonk | under what authority | who the log says |
 | --- | --- | --- | --- |
-| a browser | HTTP, loopback | anonymous (read only), or a passkey's grant | `-` reading anonymously, or the passkey |
-| `curl`, a hook | HTTP, loopback | anonymous: it reads, and a write is refused | `-` |
-| `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `owner` |
+| a browser | HTTP, loopback | anonymous (read only), or a passkey's grant | `anon` reading anonymously, or the passkey |
+| `curl`, a hook | HTTP, loopback | anonymous: it reads, and a write is refused | `anon` |
+| `ikigai` on this machine | the socket | the owner's, narrowed with `cap seal` | `urn:iki:host:gonk:owner` |
 
 The agent's tool calls were the ledger's resources by their own names: the same `append`,
 `next` and `delete` that the page's kernel ran in [the first chapter](../ledger/your-own.md),

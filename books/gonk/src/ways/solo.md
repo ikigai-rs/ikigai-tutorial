@@ -110,7 +110,7 @@ policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 0
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=1 lease=30m agent'
-#1 claimed by agent until …
+#1 claimed by agent at epoch 1 until …
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
 nothing is ready (1 open item(s) excluded: #1 claimed by agent)
@@ -126,7 +126,7 @@ names the holder whose lease expired, and only a deliberate takeover moves it
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=1 renew=true lease=30m agent'
-#1 renewed by agent until …
+#1 renewed by agent at epoch 1 until …
 [uncacheable]
 ```
 

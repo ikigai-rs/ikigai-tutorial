@@ -241,7 +241,7 @@ number,title
 3,A note for later
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/worker -c 'sink urn:iki:ledger:claim item=2 worker'
-#2 claimed by worker
+#2 claimed by worker at epoch 1
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/worker -c 'sink urn:iki:ledger:close item=2'
 error: denied: this capability holds neither `urn:cap:ledger:close:default` nor `urn:cap:ledger:write:default`, and this resource takes either. A ledger grant names exactly one ledger, and a grant for another verb (a worker's claim and comment, say) does not reach this one
@@ -319,12 +319,12 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (121 offered)
-urn:ikigai:vocab: 253 of 253
+left out: parts= did not ask for it (133 offered)
+urn:ikigai:vocab: 259 of 259
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)"'
-urn:ikigai:vocab: 0 of 253
+urn:ikigai:vocab: 0 of 259
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 ```

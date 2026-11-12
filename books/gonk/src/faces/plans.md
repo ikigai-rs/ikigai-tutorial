@@ -40,9 +40,9 @@ Each face gets its own header link:
 <!-- transcript: run -->
 ```console
 $ curl -s http://localhost:1070/ | grep -o "href='/face/name/[^']*'"
-href='/face/name/flight'
-href='/face/name/project'
-href='/face/name/claims'
+href='/face/name/flight/'
+href='/face/name/project/'
+href='/face/name/claims/'
 ```
 
 ## A flight plan
@@ -88,11 +88,12 @@ in the plan. Run the face's modules from a shell, saved as `flight-text.js`:
 <!-- transcript: file flight-text.js -->
 ```js
 // What the flight face shows, printed: its own modules, run as the anonymous viewer.
-import { item, pool, stateOf } from "./site/faces/flight/kit.js";
-import { plan, stepNumbers } from "./site/faces/flight/plan.js";
+import { item, stateOf } from "./site/faces/flight/kit.js";
+import { plan, readSteps } from "./site/faces/flight/plan.js";
 
 const record = await item("default", Number(Deno.args[0]));
-const steps = (await pool(stepNumbers(record), (n) => item("default", n))).filter((it) => !it.error);
+const { items: steps, unreadable } = await readSteps(record);
+if (unreadable.length) throw new Error(`${unreadable.length} steps could not be read`);
 const { order, cycle, next } = plan(steps);
 console.log(`#${record.number} ${record.title}: ${order.length} steps`);
 order.forEach((it, i) => console.log(`${i + 1}. #${it.number} ${it.title} (${stateOf(it)}, priority ${it.priority})${it === next ? " <- next to land" : ""}`));
@@ -209,8 +210,8 @@ Claim two steps. `bob` takes one on a one-second lease and lets it run out:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=2 lease=PT1S bob' -c 'sink urn:gk:iki:ledger:claim item=4 lease=2h ada' 2>/dev/null
-#2 claimed by bob until …
-#4 claimed by ada until …
+#2 claimed by bob at epoch 1 until …
+#4 claimed by ada at epoch 1 until …
 $ sleep 2
 ```
 

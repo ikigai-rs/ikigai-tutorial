@@ -72,14 +72,16 @@ $ (cd library && python3 tools/gonk.py next | grep -E '^ 1\.')
 $ (cd second && python3 tools/gonk.py next | grep -E '^ 1\.')
  1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 $ (cd library && python3 tools/gonk.py claim 7)
-library#7 claimed by claude-1 until …
+library#7 claimed by claude-1 at epoch 1 until …
+gonk.py: item 7 is held at epoch 1
 $ (cd second && python3 tools/gonk.py claim 7)
 error: conflict: library#7 is already claimed by claude-1. Release it first (`delete urn:iki:ledger:library:claim item=7`), or take it up with them — a claim is a fence, and stealing one silently is how two workers end up in the same tree
 $ (cd second && python3 tools/gonk.py next | grep -E '^ 1\.|not library#7')
  1. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
   not library#7: claimed by claude-1
 $ (cd second && python3 tools/gonk.py claim 1)
-library#1 claimed by claude-2 until …
+library#1 claimed by claude-2 at epoch 1 until …
+gonk.py: item 1 is held at epoch 1
 ```
 
 **One agent juggling.** A tree holds one claim, so its work stays on one question:
@@ -99,7 +101,8 @@ claim goes through, so an agent has to ask `next` and not pick for itself:
 $ (cd second && python3 tools/gonk.py release 1 --note 'Back to the pool')
 library#1 released
 $ (cd second && python3 tools/gonk.py claim 8)
-library#8 claimed by claude-2 until …
+library#8 claimed by claude-2 at epoch 1 until …
+gonk.py: item 8 is held at epoch 1
 $ (cd second && python3 tools/gonk.py release 8 --note 'Blocked by library#7: claimed by mistake')
 library#8 released
 ```
@@ -135,7 +138,8 @@ $ printf '{"tool_name":"Edit","tool_input":{"file_path":"%s/second/README.md"}}'
 require-claim: refused an edit to README.md: this working tree holds no claim. Claim the item first: `python3 tools/gonk.py claim <number>` (or `just claim <number>`)
 exit 2
 $ (cd second && python3 tools/gonk.py claim 7)
-library#7 claimed by claude-2 until …
+library#7 claimed by claude-2 at epoch 2 until …
+gonk.py: item 7 is held at epoch 2
 $ printf '{"tool_name":"Edit","tool_input":{"file_path":"%s/second/README.md"}}' "$PWD" | python3 second/hooks/claude/require-claim.py; echo "exit $?"
 exit 0
 ```

@@ -59,10 +59,11 @@ trusting the tree's own note:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py claim 7)
-library#7 claimed by ada until …
+library#7 claimed by ada at epoch 1 until …
+gonk.py: item 7 is held at epoch 1
 $ (cd library && python3 tools/gonk.py status)
 process: solo, spec
-holds a live claim: item library#7 is held by `ada` until …
+holds a live claim: item library#7 is held by `ada` at epoch 1 until …
 ```
 
 The claim is a fence, for everyone else and for this tree:
@@ -83,7 +84,8 @@ each commit or push. To stop without finishing, `release` hands the item back an
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py claim 7 --renew --lease 2h)
-library#7 renewed by ada until …
+library#7 renewed by ada at epoch 1 until …
+gonk.py: item 7 is held at epoch 1
 $ (cd library && python3 tools/gonk.py release 7 --note 'Starting over on a short lease, to watch it run out')
 library#7 released
 ```
@@ -95,7 +97,8 @@ An agent that crashes stops renewing. A one-second lease shows what follows:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py claim 7 --lease PT1S)
-library#7 claimed by ada until …
+library#7 claimed by ada at epoch 2 until …
+gonk.py: item 7 is held at epoch 2
 $ sleep 2
 $ (cd library && python3 tools/gonk.py status)
 process: solo, spec
@@ -126,7 +129,8 @@ that holder still has it and the lease has really run out, so a live lease canno
 <!-- transcript: run -->
 ```console
 $ (cd bob && python3 tools/gonk.py claim 7 --takeover-from ada)
-library#7 taken over from ada by bob until …
+library#7 taken over from ada by bob at epoch 3 until …
+gonk.py: item 7 is held at epoch 3
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:library:comment item=7 author=bob Took over: the lease ran out and no branch was pushed.'
 commented on library#7 (urn:iki:ledger:library:comment:…)
 [uncacheable]
@@ -141,7 +145,7 @@ $ (cd library && python3 tools/gonk.py status)
 process: solo, spec
 no live claim: item library#7 is held by `bob`, not `ada`: the claim was released or taken over. Stop writing; claim another item
 $ (cd library && python3 tools/gonk.py claim 7 --renew; echo "exit $?")
-error: conflict: library#7 is held by bob, not ada: a renewal extends a claim its holder still holds, and this one changed hands
+error: conflict: library#7 is held by bob at epoch 3, not epoch 2: a write fenced with `epoch=` lands only while that claim is current, so nothing was written
 gonk.py: this working tree no longer holds item 7: stop writing, put what you have on a branch, say where in a comment, and claim something else
 exit 3
 ```
@@ -176,7 +180,7 @@ and every other door a machine's. The machine enrolled at the top of this page t
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/build-box -c 'sink urn:iki:ledger:library:claim item=1 lease=30m build-box'
-library#1 claimed by build-box until …
+library#1 claimed by build-box at epoch 1 until …
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:item:1' 2>/dev/null | grep 'principal'
   principal: urn:iki:host:gonk:client:…

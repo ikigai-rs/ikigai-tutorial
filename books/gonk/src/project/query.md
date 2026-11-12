@@ -24,6 +24,7 @@ $ printf 'gonk.http.ledger = "library"\n' > .config/ikigai/config.toml
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+  instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: library; …
 …
 ```
@@ -126,8 +127,9 @@ Running `init` again publishes every file under those directories, and says so:
 ```console
 $ (cd library && python3 tools/gonk.py init | grep 'scripts   published')
   ok       scripts   published 5: urn:script:library-open-items-for-artifact, urn:script:library-open-work-by-change, urn:script:library-requirements-with-open-work, urn:script:library-unclaimed-in-change, urn:script:library-next-for-artifact
-$ (cd library && python3 tools/gonk.py claim 7 | cut -d' ' -f1-4)
-library#7 claimed by ada
+$ (cd library && python3 tools/gonk.py claim 7)
+library#7 claimed by ada at epoch 1 until …
+gonk.py: item 7 is held at epoch 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:script:library-unclaimed-in-change:result change=cap-late-fees as=text/csv'
 number,title,blocked
 8,cap-late-fees 1.2: Add a vector for the capped return to openspec/vectors.json,true
