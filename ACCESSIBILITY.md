@@ -12,7 +12,7 @@ Adapted from the [ACCESSIBILITY.md template](https://github.com/mgifford/ACCESSI
 
 | Field | Value |
 |---|---|
-| Project | ikigai-tutorial: *The ikigai Book* and *The gonk Book* |
+| Project | ikigai-tutorial: *The ikigai Book*, *The gonk Book*, *The ikigai Architecture*, *Running ikigai*, *Building ikigai UIs* and *The ikigai library* page that lists them |
 | Published at | <https://ikigai-rs.github.io/ikigai-tutorial/> and <https://ikigai-rs.github.io/ikigai-tutorial/gonk/> |
 | Owner | the maintainers of this repository |
 | Report a barrier | [a GitHub issue](https://github.com/ikigai-rs/ikigai-tutorial/issues/new) with the `accessibility` label |
@@ -20,7 +20,7 @@ Adapted from the [ACCESSIBILITY.md template](https://github.com/mgifford/ACCESSI
 | Target | WCAG 2.2 Level AA |
 | Status | Evaluation in progress. No conformance claim. |
 | Detailed assessment | [`docs/a11y.md`](docs/a11y.md) (The ikigai Book, 2026-09-09, updated since) |
-| Last reviewed | 2026-10-15 |
+| Last reviewed | 2026-11-12 (the Pass / Fail / Blocked table below, on main at `096a82d`) |
 | Next review | when mdbook, axe-core or a book's page template changes, or a new book is added |
 
 ## Commitment
@@ -123,23 +123,40 @@ conformance claim from a green build or from this file.
 
 ## Evidence
 
-Every check below runs on every pull request and on main, and every one gates the deploy: a red
-check means the site is not updated.
+Every check this file names has a row: **Pass** (it ran on main, at `096a82d`, and held),
+**Fail** (it ran and did not hold) or **Blocked** (it did not run, and the row says why). A run
+from an earlier date that nothing repeats is Blocked with its date, never Pass. The automated
+checks run on every pull request and on main, and each one in `pages.yml` gates the deploy: a red
+check means the site is not updated. A Pass is evidence about what that check exercises, not
+conformance.
 
-| Check | Version | What it covers | What it does not cover |
-|---|---|---|---|
-| `crates/book-a11y`, color (in `scripts/test-books.sh`) | `ikigai-a11y` 0.3.0; mdbook unpinned in CI on purpose | The palette mdbook generated plus the book's `additional-css`, in cascade order: 14 pairs per theme (13 text pairs at 4.5:1, SC 1.4.3; one component pair at 3:1, SC 1.4.11), five themes | Any color that is not a theme variable (syntax highlighting, opacity, hue-only links): the browser run covers those. Colors inside the SVG picture |
-| `crates/book-a11y`, structure (same run) | as above | The static HTML of every built page: `lang`, unique titles, one `h1` in `<main>`, no skipped heading level, `alt` on images, link text, unique ids, ARIA references that resolve, `th` in tables, names on buttons and inputs, the runnable cells' shape, the skip link's target. Faults reported by SC number | Anything JavaScript adds after load; `print.html`, `toc.html` |
-| `a11y/axe.mjs`: axe-core in jsdom (`pages.yml`) | axe-core 4.10.3, jsdom 26.1.0 | Every built page with the books' scripts run, so mdbook's copy buttons, the cells and the search repairs are seen. Gates on axe's WCAG 2.0/2.1/2.2 A and AA rules; best-practice rules are reported only | Color and target size (jsdom has no layout); the kernel path (the wasm import fails in jsdom, so cells are seen without a kernel) |
-| `a11y/no-kernel.mjs` (`pages.yml`) | jsdom 26.1.0 | With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message, a live host's picture left as committed with its alt text and a line saying it will not be redrawn. Published pages and drafts | Whether the message is understood; only the absence of answers is checked |
-| `a11y/axe-browser.mjs`: axe-core in a real browser (`pages.yml`) | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the log, not pinned) | The assembled site, both books, every page in all five themes, with the kernels loaded, every cell run once, every "Expected output" opened, every view started, every toolbox check opened in place with its frame audited. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size` | One viewport (1280×900). States it does not open: search results, the theme menu, the collapsed sidebar, the keyboard-help popup |
-| `a11y/cells.mjs` (run by `axe-browser.mjs`, `pages.yml`) | playwright-core 1.63.0, the same Chrome | Every cell of every page, run in page order on a fresh load, is marked "as the chapter shows" (pages on the browser's clock are not compared), and a cell in a stages viewer's chain leaves its tab open with After showing a picture the kernel drew, captioned so, and once a page's cells have run, each viewer's "Compare with" select is set to stage 1 and must change Before, "What changed" and the status region; for every cell with "Run all above", a lone run that differs points at it, and the button then Run matches the chapter; every cell that renders its view shows it rendered (styled by the kernel's token stylesheet, its HTML under "HTML source", one status region, none of the markup the region drops), axe finds no WCAG A/AA violation in those cells at a 320 px viewport, and a refused view stays text; on each such page, views written to get past the sanitizer (an SVG link whose `href` is animated to `javascript:`, a `data:image/svg+xml` image, SVG and MathML, handlers, forms, styles, a view's own status region) come out inert | Whether the marks and the hint are understood; whether a rendered view's links, which open a new tab, are expected; a reader's own edits, which are never compared; a reader's own stages in "Compare with", which only a person has tried |
-| `a11y/links.mjs` (`pages.yml`) | none | Every relative link in the assembled site lands on a page in it, including links between the two books | Fragments (`#id`) and external links |
-| `crates/book-urns`, `book_cells.rs` and the chapter-number checks (`cargo test`) | none | A blank line inside a cell's markup (which breaks the page once built); a bare "chapter N" with no link | Everything else about the prose |
-
-On 2026-10-15 (this file's review) all of them passed locally on main at `b65049c`: 99 pages
-structurally (66 + 33), 14 pairs × 5 themes, axe in jsdom with no WCAG violations, 2757 relative
-links, and 495 page loads in Chrome 153.0.8010.54 on macOS with no gating violation.
+| Check | Result | Evidence |
+|---|---|---|
+| Color: `crates/book-a11y`, in `scripts/test-books.sh` | Pass | `ikigai-a11y` 0.3.0, mdbook v0.5.4 (unpinned in CI on purpose), run locally on 2026-11-12 over every book under `books/` on main plus this change; and `test-books.sh` in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). The palette mdbook generated plus the book's `additional-css`, in cascade order: 14 pairs per theme (13 text pairs at 4.5:1, SC 1.4.3; one component pair at 3:1, SC 1.4.11), five themes. Does not cover a color that is not a theme variable (syntax highlighting, opacity, hue-only links: the browser run covers those) or colors inside the SVG pictures |
+| Structure: `crates/book-a11y`, same run | Pass | As above. The static HTML of every built page: `lang`, unique titles, one `h1` in `<main>`, no skipped heading level, `alt` on images, link text, unique ids, ARIA references that resolve, `th` in tables, names on buttons and inputs, the runnable cells' shape, the skip link's target; faults reported by SC number. Does not cover anything JavaScript adds after load, `print.html` or `toc.html` |
+| Every book's code blocks: `mdbook test`, in `test-books.sh` | Pass | mdbook v0.5.4, run locally on 2026-11-12 on main plus this change, and [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). Every runnable block compiles and runs; says nothing about accessibility on its own |
+| Node unit tests in `test-books.sh`: `a11y/transcript-matcher.test.mjs`, `routing-commands.test.mjs`, `vendor.test.mjs` | Pass | `node --test`, the runner's Node on `ubuntu-latest`, in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). Not run locally (no Node on the machine of this review). The vendored DOMPurify held to its digest; the matcher and the routing chapter's edits. Not an accessibility evaluation |
+| `a11y/axe.mjs`: axe-core in jsdom | Pass | axe-core 4.10.3, jsdom 26.1.0, in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). Every built page with the books' scripts run; gates on axe's WCAG 2.0/2.1/2.2 A and AA rules (best-practice rules reported only). Does not cover color or target size (jsdom has no layout) or the kernel path |
+| `a11y/no-kernel.mjs` | Pass | jsdom 26.1.0, in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). With the kernel refused: every cell's result empty, Run disabled and described, boards, views and sheets reduced to one message, a live host's picture left as committed. Published pages and drafts. Does not cover whether the message is understood |
+| `a11y/axe-browser.mjs`: axe-core in a real browser | Pass | axe-core 4.10.3, playwright-core 1.63.0, the runner's Google Chrome (version printed in the job log, not pinned), in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). The assembled site, every book, every page in all five themes, kernels loaded, every cell run once, every "Expected output" opened, every view started, every toolbox check opened in place. Same WCAG A/AA rules, now including `color-contrast`, `link-in-text-block` and `target-size`. One viewport (1280×900); does not open search results, the theme menu, the collapsed sidebar or the keyboard-help popup |
+| `a11y/cells.mjs` (run by `axe-browser.mjs`) | Pass | playwright-core 1.63.0, the same Chrome, in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). Every cell run in page order against its chapter; stages viewers' tabs and "Compare with"; rendered views styled, sanitized and axe-clean at 320 px. Does not cover whether the marks are understood, a reader's own edits or a reader's own stages |
+| `a11y/links.mjs` and `book-library check-site` | Pass | in [pages run 43316854322](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316854322). Every relative link in the assembled site lands on a page in it, including links between books; the library links every book. Does not cover fragments (`#id`) or external links |
+| `crates/book-urns`: `book_cells.rs` and the chapter-number checks; the generated pictures (`crates/tic-tac-toe/tests/declared.rs`, `crates/book-wasm`'s picture tests) | Pass | `cargo test` in [ci run 43316855088](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316855088) ("fmt · clippy · test"). A blank line inside a cell's markup; a bare "chapter N" with no link; committed SVGs and their text alternatives held to their source. Does not judge the prose or the alt text's wording |
+| Building ikigai UIs' inspector: axe through ikigai-ui's `axe.yml` | Pass | [ci run 43316855088](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316855088), job "inspector-axe / axe (WCAG 2.2 AA)": every page the `axe_site` example writes, every theme, light, dark and more-contrast media, served with the door's CSP |
+| The inspector in a browser: `a11y/inspector.mjs` | Pass | [ci run 43316855088](https://github.com/ikigai-rs/ikigai-tutorial/actions/runs/43316855088), job "inspector in a browser": reflow at 320 px (SC 1.4.10) in every theme, the keyboard path from the skip link, focus after a swap (SC 2.4.3) and Back, a quiet live refetch. The runner's Chrome, not pinned. Only the inspector demo, not the books' pages |
+| ikigai-ui's per-kind criteria, SEE checks | Blocked | The UI Book's accessibility chapter asks designs to cite `urn:iki:ui:criterion:kind:{kind}:target:{target}` for the button, link and field kinds (ikigai-ui PRs 65 to 67). No test in this repository resolves a criterion or runs one of its SEE checks: the records are on ikigai-ui's main and in no published release (crates.io's 0.5.0 has none), and this workspace uses published crates only. The inspector's own checks above overlap some SEE checks but are not tied to the records |
+| ikigai-ui's per-kind criteria, HEAR checks | Blocked | No screen-reader job runs, here or in ikigai-ui |
+| Manual assessment of The ikigai Book, [`docs/a11y.md`](docs/a11y.md) | Blocked | Done by hand on 2026-09-09 over the 35 pages then published (66 now); nothing repeats it. The other books have had none |
+| Manual keyboard | Blocked | Last done 2026-09-09, sampled: a pointer click and Enter in the command field each ran a cell, and tabbing never landed under the sticky menu bar. Browser not recorded; not repeated since |
+| Local browser run on macOS | Blocked | `axe-browser.mjs` in Chrome 153.0.8010.54 on 2026-10-15 at `b65049c`, 495 page loads, no gating violation; not repeated. CI's run above is the current one |
+| Other browser engines (Firefox, Safari) | Blocked | Never run |
+| Target size and reflow at other viewports | Blocked | The books' pages are measured at 1280×900 only (rendered views at 320 px, by `cells.mjs`); page reflow at 320 px was judged by reading the layout on 2026-09-09, not by an instrument |
+| Screenshot alt text still matches its image | Blocked | Written by hand; nothing compares it with a regenerated screenshot |
+| Screen reader | Blocked | No screen reader has been used on any book. The status regions are built to be announced (`role="status"`, `aria-live="polite"`); nobody has listened to them |
+| Screen magnifier | Blocked | None has been used |
+| Speech input | Blocked | None has been used |
+| Switch access | Blocked | None has been used |
+| Braille display | Blocked | None has been used |
 
 What only a person can judge (reading order, plain language, whether link text is clear beyond the
 generic phrases the gate refuses, and the cells' interaction) is listed in
@@ -156,8 +173,8 @@ Only what has actually been run. This is not a list of what is supported.
 | macOS | Google Chrome 153.0.8010.54 | none | `axe-browser.mjs` over every page, five themes | 2026-10-15 |
 | not recorded | not recorded | none | By hand, The ikigai Book: a pointer click and Enter in the command field each run a cell; tabbing through a chapter never landed under the sticky menu bar (sampled, not every page) | 2026-09-09 |
 
-**No screen reader, screen magnifier, speech-input or switch-access software has been used to test
-either book.** The cells' status regions are built to be announced (`role="status"`,
+**No screen reader, screen magnifier, speech-input, switch-access software or braille display has
+been used to test any book.** The cells' status regions are built to be announced (`role="status"`,
 `aria-live="polite"`), but nobody has listened to them. No other browser engine (Firefox, Safari)
 has been run.
 
@@ -165,13 +182,13 @@ has been run.
 
 | Barrier or gap | Where | Impact | Workaround |
 |---|---|---|---|
-| No assistive-technology testing at all | both books | Unknown. Screen-reader barriers would not have been found | Report what you meet (below) |
+| No assistive-technology testing at all | every book | Unknown. Screen-reader barriers would not have been found | Report what you meet (below) |
 | The gonk Book has had no manual assessment; `docs/a11y.md` covers The ikigai Book (35 pages when assessed; 66 now) | the gonk Book; ikigai pages added since 2026-09-09 | Covered by the automated checks only | none |
-| Target size measured at one viewport; reflow at 320 px was checked by reading the layout, not by an instrument | both books | A narrow screen may have small targets or horizontal scrolling nobody has measured | none |
-| The skip link and the keyboard repair to the sidebar toggle need JavaScript | both books | With JavaScript off, no skip link (SC 2.4.1) and the narrow-screen sidebar cannot be opened by keyboard (SC 2.1.1) | Reading with JavaScript on |
+| Target size measured at one viewport; reflow at 320 px was checked by reading the layout, not by an instrument | every book | A narrow screen may have small targets or horizontal scrolling nobody has measured | none |
+| The skip link and the keyboard repair to the sidebar toggle need JavaScript | every book | With JavaScript off, no skip link (SC 2.4.1) and the narrow-screen sidebar cannot be opened by keyboard (SC 2.1.1) | Reading with JavaScript on |
 | Runnable cells, boards, views and sheets need JavaScript and WebAssembly | pages with live parts | Without them nothing runs | Each cell's "Expected output" holds the listing's output |
 | The toolbox panel is a frame holding upstream's page; its tabs, editor and results are upstream's widgets, and only axe has looked at them. Its engine is 8.3 MB, loaded on the first press | "Checking a resource" | A slow first open on a slow connection; barriers inside the toolbox page no automated rule catches | The cells above it run the same check with no download; without the kernel, the toolbox opens in a new tab |
-| Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | both books | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
+| Two `<h1>` per page: the book title in mdbook's menu bar, and the chapter title | every book | Best practice, not an AA failure; a heading list shows the book title first. Left on purpose (README, "Left alone, deliberately") | none needed |
 | The tic-tac-toe picture's `alt` text is written by hand; a test holds the SVG to its source, not the `alt` text | "Tic-tac-toe, VII" | If the arrangement changes, the description can drift from the picture | The SVG's own generated `<title>` and `<desc>` |
 | A stage's picture's `alt` is the viewer's description followed by the stage's words in full (for the live host, `urn:iki:tutorial:live:arrangement`, one clause per door); nobody has judged whether that reads well, and it is read again in full on every tab | "A space that changes while it runs", "Spaces that wrap spaces" | A long description, repeated per stage | Each stage's "What changed", which says only the difference |
 | Before \| After shows two pictures of a stage at once; at a phone's width each keeps 500 px and scrolls sideways in its slot, and the resilience harness's pictures are 1104 px tall at their natural width, so on a phone the open tab's step is more than a screen below the tabs. The chapter's own picture is told by a dashed frame and its caption, not by fading it: the pictures' secondary text is 5.7:1 in the light scheme, and a fade would take it under 4.5:1 | "A space that changes while it runs", "Spaces that wrap spaces" | Scrolling, on a narrow screen; on a wide one the two sit side by side | Each picture's link opens it at full size |
@@ -307,6 +324,7 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-26 | The stages viewer shows Before \| After below the tabs; Left and Right on its tabs no longer open another chapter; `cells.mjs` checks After is the kernel's picture | this change |
 | 2026-10-27 | Running ikigai (`books/operations`), a fifth book, is in scope under the same gates as the others; its Run cells are The ikigai Book's `js/run.js` over The ikigai Book's kernel | this change |
 | 2026-11-02 | Running ikigai's "Logging": a value holding a control or bidirectional character is shown as its `\u{hex}` text, and the commands that make one write it as `printf` octal, so no raw one is on the page; the chapter's transcripts are terminal output (not evaluated) in the book's pages (evaluated), and long lines scroll inside their box | this change |
+| 2026-11-12 | Evidence as one Check \| Result \| Evidence table, Pass, Fail or Blocked, each Pass run on main at `096a82d`; ikigai-ui's per-kind criteria and their SEE and HEAR checks reported as Blocked | this change |
 
 ## References
 
