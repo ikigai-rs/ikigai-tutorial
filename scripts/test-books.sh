@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Build every book and run its examples.
 #
-# `mdbook test` needs library search paths to find the crates the examples use, and rustc refuses
-# with E0464 when that directory holds more than one candidate for a crate. A shared
+# `mdbook test` needs `-L <dirs>` to find the crates the examples use (the build below reports
+# which directories), and rustc refuses with E0464 when they hold more than one candidate for
+# a crate. A shared
 # `target/` accumulates them: `cargo clippy` leaves `.rmeta` beside `cargo build`'s
 # `.rlib`, and a restored CI cache can carry stale ones from an older dependency set.
 #
@@ -21,34 +22,40 @@ node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs a11y
 TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"
 mkdir -p "$TARGET"
-CARGO_TARGET_DIR="$TARGET" cargo build --message-format=json > "$TARGET/artifacts.jsonl"
 
-# Cargo 1.100 changed its intermediate artifact layout: debug/deps is no longer a
-# library search path. Collect exactly this build's libraries in one search directory
-# using Cargo's artifact messages, so mdbook need not know Cargo's internal layout.
-DEPS="$TARGET/book-libs"
-python3 - "$TARGET/artifacts.jsonl" "$DEPS" <<'PYTHON'
-import json
-import pathlib
-import sys
-
-libraries = set()
-with open(sys.argv[1]) as artifacts:
-    for line in artifacts:
-        message = json.loads(line)
-        if message.get("reason") == "compiler-artifact":
-            for filename in message["filenames"]:
-                path = pathlib.Path(filename)
-                if path.suffix in {".rlib", ".so", ".dylib", ".dll"}:
-                    libraries.add(path)
-if not libraries:
-    sys.exit("cargo build reported no library artifacts for the book tests")
-destination = pathlib.Path(sys.argv[2])
-destination.mkdir()
-for library in sorted(libraries):
-    (destination / library.name).symlink_to(library)
-PYTHON
-DEPS="$(cd "$DEPS" && pwd)"
+# Where the examples' crates are is asked of cargo, never assumed. Cargo 1.100 moved its
+# intermediate artifacts out of `debug/deps/` into one directory per unit (rust-lang/cargo#17354),
+# and says plainly that the build directory's layout "is not a stable interface"; tools are to
+# read its JSON messages instead. `-L "$TARGET/debug/deps"` then named a directory that no longer
+# existed, and every example with an `extern crate` failed with E0463 (can't find crate).
+#
+# So the build reports its artifacts as JSON (diagnostics still rendered to stderr as before), and
+# the search path is the directory of every library file it names, minus `debug/` itself. That
+# directory holds only the UPLIFTED copies of the workspace's own libraries (`libfoo.rlib`, no
+# hash), whose hashed twins sit in the unit's own directory beside their `.rmeta`; searching both
+# would give rustc two candidates for one crate (E0464). On cargo before 1.100 this list is exactly
+# `debug/deps`, so the script means the same thing on either side of the change.
+CARGO_TARGET_DIR="$TARGET" cargo build --message-format=json-render-diagnostics > "$TARGET/artifacts.jsonl"
+LIBRARY_PATH="$(node -e '
+const fs = require("fs"), path = require("path");
+const [file, uplift] = [process.argv[1], fs.realpathSync(process.argv[2])];
+const dirs = new Set();
+for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+    if (!line.startsWith("{")) continue;
+    const m = JSON.parse(line);
+    if (m.reason !== "compiler-artifact") continue;
+    for (const f of m.filenames) {
+        if (!/\.(rlib|rmeta|so|dylib|dll)$/.test(f)) continue;
+        const dir = fs.realpathSync(path.dirname(f));
+        if (dir !== uplift) dirs.add(dir);
+    }
+}
+if (dirs.size === 0) { console.error("test-books: the build named no library artifacts"); process.exit(1); }
+// mdbook takes the search path as ONE comma-separated list, so a comma in a directory would split it.
+const bad = [...dirs].find((d) => d.includes(","));
+if (bad) { console.error(`test-books: a library directory has a comma in it: ${bad}`); process.exit(1); }
+console.log([...dirs].sort().join(","));
+' "$TARGET/artifacts.jsonl" "$TARGET/debug")"
 
 # Each book's "What's new" page, from its changes.toml, BEFORE any `mdbook build`, so the page
 # every build (and the deploy) publishes is the one the entries say. The page is committed too:
@@ -66,7 +73,7 @@ for book in books/*/; do
     name="$(basename "$book")"
     echo "── $name ─────────────────────────────────"
     mdbook build "$book"
-    if ! mdbook test "$book" -L "$DEPS"; then
+    if ! mdbook test "$book" -L "$LIBRARY_PATH"; then
         echo "FAILED: $name"
         status=1
     fi
@@ -77,9 +84,11 @@ for book in books/*/; do
     #
     # The binary the workspace build above made, run directly — NOT `cargo run -p book-a11y`.
     # That re-resolves features for book-a11y ALONE, rebuilds shared dependencies with that
-    # narrower set into the same `deps/`, and leaves a second `ikigai_core` rlib there: the
-    # next book's `mdbook test` then fails with E0464. With one book it never showed, because
-    # nothing ran after the last contrast check; the second book is what exposed it.
+    # narrower set, and before cargo 1.100 it put them into the same `deps/`, leaving a second
+    # `ikigai_core` rlib there: the next book's `mdbook test` then failed with E0464. With one
+    # book it never showed, because nothing ran after the last contrast check; the second book is
+    # what exposed it. (The search path above now lists only this build's own units, but a second
+    # compile is still a waste.)
     if ! "$TARGET/debug/book-a11y" "$book"; then
         echo "FAILED: $name (contrast)"
         status=1
