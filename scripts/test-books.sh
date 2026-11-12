@@ -21,6 +21,9 @@ node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs a11y
 TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"
 CARGO_TARGET_DIR="$TARGET" cargo build
+# rustdoc may resolve library paths from its test directory rather than this shell's.
+# Keep the same freshly built dependencies reachable from either working directory.
+DEPS="$(cd "$TARGET/debug/deps" && pwd)"
 
 # Each book's "What's new" page, from its changes.toml, BEFORE any `mdbook build`, so the page
 # every build (and the deploy) publishes is the one the entries say. The page is committed too:
@@ -38,7 +41,7 @@ for book in books/*/; do
     name="$(basename "$book")"
     echo "── $name ─────────────────────────────────"
     mdbook build "$book"
-    if ! mdbook test "$book" -L "$TARGET/debug/deps"; then
+    if ! mdbook test "$book" -L "$DEPS"; then
         echo "FAILED: $name"
         status=1
     fi

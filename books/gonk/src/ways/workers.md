@@ -132,7 +132,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 
 ### 2. Workers take work
 
-Each worker asks `next` and claims the top item on a lease. The claim is the fence between them:
+Each worker asks `next` and claims the top item on a lease. The claim is the fence between them.
+Its epoch identifies this take; the starter presents that epoch on subsequent writes, so a
+worker holding an older take cannot write after the claim changes hands:
 
 <!-- transcript: run -->
 ```console
@@ -145,7 +147,7 @@ policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=1 lease=30m worker-1'
-#1 claimed by worker-1 until …
+#1 claimed by worker-1 at epoch 1 until …
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:claim item=1 lease=30m worker-2'
 error: conflict: #1 is already claimed by worker-1. Release it first (`delete urn:iki:ledger:claim item=1`), or take it up with them — a claim is a fence, and stealing one silently is how two workers end up in the same tree
@@ -159,7 +161,7 @@ ready: 1   excluded: 1
   not #1: claimed by worker-1
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:claim item=2 lease=30m worker-2'
-#2 claimed by worker-2 until …
+#2 claimed by worker-2 at epoch 1 until …
 [uncacheable]
 ```
 
@@ -196,7 +198,7 @@ While the agent works, the worker renews its lease. `renew=true` renews and neve
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=1 renew=true lease=30m worker-1'
-#1 renewed by worker-1 until …
+#1 renewed by worker-1 at epoch 1 until …
 [uncacheable]
 ```
 
@@ -306,6 +308,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
     https://github.com/you/demo/pull/9 README example, CI green
     No session summary: this chapter runs ledger commands by hand.
   … ada (claimed, free text)
+  rejects: urn:iki:ledger:default:comment:…
     PR 9 is red on main: the README example does not compile.
 [uncacheable]
 ```
@@ -338,10 +341,10 @@ what a history holds.
 
 <!-- transcript: run -->
 ```console
-$ grep -E 'door=quic .*outcome=(conflict|denied)' gonk.log
-… gonk:Access urn:iki:ledger:claim door=quic verb=sink outcome=conflict bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:claim door=quic verb=delete outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:iki:ledger:close door=quic verb=sink outcome=denied bytes=- dur=… principal=urn:iki:host:gonk:client:… q=-
+$ grep -E 'door=quic .*outcome=(conflict|denied)' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:ledger:claim seq=… door=quic verb=sink outcome=conflict dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:claim seq=… door=quic verb=delete outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:close seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 ```
 
 Every refusal above, each with the principal that asked.
@@ -506,14 +509,16 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
 $ cd library && python3 tools/gonk.py claim 3
-#3 claimed by worker-1 until …
+#3 claimed by worker-1 at epoch 1 until …
+gonk.py: item 3 is held at epoch 1
 $ cd library && python3 tools/gonk.py claim 3 --renew
-#3 renewed by worker-1 until …
+#3 renewed by worker-1 at epoch 1 until …
+gonk.py: item 3 is held at epoch 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'delete urn:gk:iki:ledger:claim item=3'
 #3 released
 [uncacheable]
 $ cd library && python3 tools/gonk.py claim 3 --renew; echo "exit $?"
-error: conflict: #3 is not claimed, so worker-1 has nothing to renew: the claim was released or never taken. Claim it again (without `renew`) if the work is still yours to do
+error: conflict: #3 is not claimed (its last claim was epoch 1), so epoch 1 is not current and nothing was written
 gonk.py: this working tree no longer holds item 3: stop writing, put what you have on a branch, say where in a comment, and claim something else
 exit 3
 ```

@@ -115,7 +115,7 @@ linked #2 blocks #3
 [uncacheable]
 — batch: 3 commands · 3 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=1 hub'
-#1 claimed by hub
+#1 claimed by hub at epoch 1
 [uncacheable]
 ```
 
@@ -146,7 +146,7 @@ arc; the claim is the fence that keeps a second spoke off the same arc:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=2 lease=90m spoke-lib'
-#2 claimed by spoke-lib until …
+#2 claimed by spoke-lib at epoch 1 until …
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=2 lease=90m spoke-docs'
 error: conflict: #2 is already claimed by spoke-lib. Release it first (`delete urn:iki:ledger:claim item=2`), or take it up with them — a claim is a fence, and stealing one silently is how two workers end up in the same tree
@@ -211,7 +211,7 @@ hands back; the hub checks and closes.
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=3 lease=90m spoke-docs' -c 'sink urn:gk:iki:ledger:comment item=3 author=spoke-docs handback=true https://github.com/you/docs/pull/5 merged on green' -c 'delete urn:gk:iki:ledger:claim item=3 from=spoke-docs'
-#3 claimed by spoke-docs until …
+#3 claimed by spoke-docs at epoch 1 until …
 [uncacheable]
 commented on #3 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
@@ -238,7 +238,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 [uncacheable]
 linked #4 parent #1
 [uncacheable]
-#4 claimed by hub
+#4 claimed by hub at epoch 1
 [uncacheable]
 — batch: 3 commands · 3 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:comment item=4 author=hub handback=true https://github.com/you/lib/pull/13 is green. Merge?'

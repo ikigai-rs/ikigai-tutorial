@@ -99,7 +99,7 @@ $ printf 'audit: tools at %s\n\nFiles: bin/initials.sh, bin/slug.sh. Budget: 40 
 #1 urn:iki:ledger:default:item:…
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=1 coordinator'
-#1 claimed by coordinator
+#1 claimed by coordinator at epoch 1
 [uncacheable]
 ```
 
@@ -233,6 +233,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   updated:  …
   child:    urn:iki:ledger:default:item:…
   child:    urn:iki:ledger:default:item:…
+  epoch:    1
   Files: bin/initials.sh, bin/slug.sh. Budget: 40 tool calls per auditor.
   Read-only. A bug counts only with a reproduction that fails at this commit because of it.
   Report what was not read, and whether the budget or the work ran out.
@@ -485,7 +486,7 @@ print(review_findings.findings_block(findings, commit("HEAD~1"), commit("HEAD"))
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/auditor -c 'sink urn:iki:ledger:claim item=4 auditor'
-#4 claimed by auditor
+#4 claimed by auditor at epoch 1
 [uncacheable]
 $ python3 make-handback.py > review-handback.txt
 $ sed 's/^/| /' review-handback.txt

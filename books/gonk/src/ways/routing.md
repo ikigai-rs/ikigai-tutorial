@@ -245,7 +245,7 @@ labeled #3 agent:claude
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #2  repo:library  Document initials in the README
 skip  #1  no dispatch by a router (its labels say nothing about who set them; a router dispatches with `gonk.py dispatch`)
-skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, does not name agent:claude: a label added since a router's dispatch routes nothing
+skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, names agent:codex, which this loop does not select; use a loop with that agent:<kind> label
 ```
 
 ### Over the socket, with `--as`
@@ -269,7 +269,7 @@ default#1: next (worker:lawnboy,agent:claude): rank 1 of 3
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #2  repo:library  Document initials in the README
 skip  #1  no dispatch by a router (its labels say nothing about who set them; a router dispatches with `gonk.py dispatch`)
-skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, does not name agent:claude: a label added since a router's dispatch routes nothing
+skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, names agent:codex, which this loop does not select; use a loop with that agent:<kind> label
 ```
 
 `urn:iki:gonk:passkey:QWRh` stands for the owner's passkey, the principal their signed-in writes
@@ -284,7 +284,7 @@ $ cd lawnboy/gonk-worker && sed -i.bak 's|^routers = \["\(.*\)"\]|routers = ["\1
 $ cd lawnboy/gonk-worker && python3 tools/worker.py --config .gonk/worker-claude.toml plan
 take  #1  repo:library  initials panics on an empty word
 take  #2  repo:library  Document initials in the README
-skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, does not name agent:claude: a label added since a router's dispatch routes nothing
+skip  #3  its newest dispatch, by urn:iki:host:gonk:client:… at …, names agent:codex, which this loop does not select; use a loop with that agent:<kind> label
 ```
 
 What the check proves rests on three things it cannot check: that gonk refuses a borrowed

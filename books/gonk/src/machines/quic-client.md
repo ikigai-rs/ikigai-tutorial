@@ -166,13 +166,14 @@ server's `clients.json` and restart the server if the certificate was enrolled a
 
 <!-- transcript: run -->
 ```console
-$ grep -E 'quic client| door=quic ' gonk.log
+$ grep 'quic client' gonk.log
 ikigai-gonk: quic client … → grant "laptop"
-… gonk:Access urn:iki:ledger:append door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:repo:notes:tree door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
-… gonk:Access urn:repo:notes:file:README.md door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
 ikigai-gonk: quic client … → grant "laptop"
-… gonk:Access urn:iki:ledger:acme:append door=quic verb=sink outcome=denied bytes=… dur=… principal=urn:iki:host:gonk:client:… q=-
+$ grep ' door=quic ' .config/ikigai/gonk/log/*.log
+… log:Access urn:iki:ledger:append seq=… door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:repo:notes:tree seq=… door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:repo:notes:file:README.md seq=… door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:acme:append seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 ```
 
 One connection line per session naming the grant, and one access line per request the door

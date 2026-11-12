@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-12"
+summary = "The updated gonk examples show claim epochs, the process instance line, and access records in hash-chained log segments, including each door's principal and credential, and corrected face links."
+pages = ["ledger/browser.md", "machines/doors.md", "ways/workers.md"]
+
+[[change]]
+date = "2026-11-12"
 summary = "Remote workers explains the content-free session summary and shows the hand-back's final line. The model-mount configuration now covers peers under any prefix, the model-only call window, and startup's refusal to replace gonk's own names; the examples use updated gonk and starter revisions."
 pages = ["ways/workers.md", "browse/explain.md", "ways/routing.md"]
 

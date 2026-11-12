@@ -218,7 +218,8 @@ evidence:
 $ (cd library && python3 tools/gonk.py file 'Renew a loan before it is due')
 #1 urn:iki:ledger:default:item:…
 $ (cd library && python3 tools/gonk.py claim 1)
-#1 claimed by ada until …
+#1 claimed by ada at epoch 1 until …
+gonk.py: item 1 is held at epoch 1
 $ (cd library && python3 tools/gonk.py report 1 --note 'renewal works')
 gonk.py: --evidence is a URL (the pull request, or the reproduction that shows it is not a defect): evidence must be something a reader can check
 ```

@@ -189,6 +189,7 @@ $ printf 'gonk.browse.root = "demo=%s/demo"\n' "$PWD" > .config/ikigai/config.to
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup --mount "prefer urn:llm:=$PWD/model.sock"
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+  instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{demo (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
@@ -294,6 +295,7 @@ gonk.mount = "prefer urn:iki:=/tmp/peer.sock"
 ```console
 $ ikigai-gonk --config-home "$PWD/overlap" --data-home "$PWD/overlap-data" --port 1072 --no-quic --no-backup
 ikigai-gonk: gonk.mount `prefer urn:iki:=/tmp/peer.sock`: `urn:iki:` overlaps `urn:iki:ledger:`, which gonk serves itself — the ledger. A mount is composed in front of gonk's own spaces, so it would hand those names to the peer; mount the peer under a prefix of its own
+  (config read from …/overlap/config.toml)
 ```
 
 ## A real model

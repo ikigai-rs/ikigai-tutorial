@@ -58,7 +58,8 @@ because this is real work:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py claim 7 --lease 2h)
-library#7 claimed by ada until …
+library#7 claimed by ada at epoch 1 until …
+gonk.py: item 7 is held at epoch 1
 $ git -C library switch -q -c cap-late-fees-1.1
 $ grep -A1 'Requirement: A late return' library/openspec/changes/cap-late-fees/specs/overdue/spec.md
 ### Requirement: A late return owes a fee
@@ -201,6 +202,8 @@ repository that will be shared gets a forge before its first hand-back.
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py report 7 --evidence http://127.0.0.1:1070/browse/urn:repo:library:file:artifacts/service/lending/domain.py --note 'on the branch cap-late-fees-1.1; repro.py says 1000 at 101 days; scripts/test.py passes')
+gonk.py: reporting item 7 at epoch 1
+gonk.py: reporting item 7 at epoch 2
 commented on library#7 (urn:iki:ledger:library:comment:…) awaiting-dispatcher
 library#7 released
 $ (cd library && python3 tools/gonk.py next | grep -E '^ [0-9]\.|^ready')
@@ -229,7 +232,8 @@ checks to pass before merging, then report the merged result:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py claim 7)
-library#7 claimed by ada until …
+library#7 claimed by ada at epoch 2 until …
+gonk.py: item 7 is held at epoch 2
 $ git -C library switch -q main
 $ git -C library -c user.name=Ada -c user.email=ada@example.com merge -q --no-ff -m 'Merge cap-late-fees 1.1' cap-late-fees-1.1
 $ PYTHONDONTWRITEBYTECODE=1 python3 repro.py 2027-01-31

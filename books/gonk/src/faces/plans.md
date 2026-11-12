@@ -40,9 +40,9 @@ Each face gets its own header link:
 <!-- transcript: run -->
 ```console
 $ curl -s http://localhost:1070/ | grep -o "href='/face/name/[^']*'"
-href='/face/name/flight'
-href='/face/name/project'
-href='/face/name/claims'
+href='/face/name/flight/'
+href='/face/name/project/'
+href='/face/name/claims/'
 ```
 
 ## A flight plan
@@ -209,8 +209,8 @@ Claim two steps. `bob` takes one on a one-second lease and lets it run out:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=2 lease=PT1S bob' -c 'sink urn:gk:iki:ledger:claim item=4 lease=2h ada' 2>/dev/null
-#2 claimed by bob until …
-#4 claimed by ada until …
+#2 claimed by bob at epoch 1 until …
+#4 claimed by ada at epoch 1 until …
 $ sleep 2
 ```
 

@@ -77,6 +77,7 @@ is one `gonk.http.ledger` line each):
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup --http-ledger default --http-ledger kata
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+  instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default, kata; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   quic    udp 0.0.0.0:1070 — 1 trusted certificate(s), 1 enrolled
