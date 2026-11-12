@@ -532,10 +532,7 @@ fn matches(expected: &[String], actual: &[String]) -> bool {
         }
     }
     // With no trailing `…`, nothing may follow.
-    if !expected.last().is_some_and(|l| l.trim() == "…") && pos != actual.len() {
-        return false;
-    }
-    true
+    expected.last().is_some_and(|l| l.trim() == "…") || pos == actual.len()
 }
 
 #[test]
