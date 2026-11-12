@@ -222,6 +222,80 @@ the model is named by the provider's last segment, `coder`, instead of what `urn
 would have said. The explain itself is refused as `unavailable`, which is the honest answer: a
 model that cannot be reached is not an explanation that is empty, and nothing is archived.
 
+## Mounting a peer under any prefix
+
+`gonk.mount` also brings in a dashboard, a classifier or a project's own module. The peer's
+names answer through gonk's socket, QUIC and HTTP doors. In gonk's `config.toml`, each line
+has the same form: `prefer <prefix>=<target> [cert-dir]`. For example, save these lines as
+`peers/config.toml` (the paths and remote address stand for your own peers):
+
+<!-- transcript: file peers/config.toml -->
+```toml
+gonk.mount = "prefer urn:llm:=quic://127.0.0.1:4433 ~/.config/ikigai/gonk/quic/peers/plasma"
+gonk.mount = "prefer urn:dashboard:=~/.ikigai/dashboard.sock"
+gonk.mount = "prefer urn:x-proj:classify:=quic://build.local:4433 ~/.config/ikigai/gonk/quic/peers/build"
+```
+
+These are repeated settings in ikigai's configuration format, as with browse roots. `prefer`
+means that an absent peer costs that prefix alone: there is no dial at startup, and a failed
+dial backs off from 1 second to 30 seconds. A peer may listen on a Unix socket or a `quic://`
+address; the certificate directory is the one the CLI's `--cert-dir` reads. Each peer has
+20 seconds to describe itself, two thirds of the deadline gonk's callers give gonk. A caller
+needs `urn:cap:net:<the peer's host>` (`localhost` for a socket) to reach a mounted peer.
+
+Only the exact `urn:llm:` mount spends the model-call window,
+`gonk.mount.calls_per_hour`, and binds explain, review and `urn:nl:sparql`. A dashboard or
+classifier mount does neither.
+
+A prefix must have a scheme and at least one segment, ending in `:`: `urn:dashboard:` is
+valid; `urn:dashboard` and `urn:` are refused. One peer may own each prefix. Nested mounts
+such as `urn:dash:` and `urn:dash:panel:` are composed longest first.
+
+A prefix must also leave gonk's own names with gonk. Startup refuses a prefix that contains,
+or sits under, any of these families, naming the family it would replace:
+
+- `urn:iki:ledger:` (the ledger), `urn:iki:store:` (the store) and `urn:iki:gonk:`
+  (the pages and gonk's own families).
+- `urn:repo:`, `urn:iki:browse:` and `urn:git:` (browse).
+- `urn:iki:finding:`, `urn:iki:annotation:` and `urn:space:` (the review queue), and
+  `urn:iki:space:` (the views).
+- `urn:sparql:`, `urn:script:`, `urn:plan:`, `urn:nl:`, `urn:kernel:`, `urn:toolbox:`
+  and `urn:compress:`.
+- `urn:layer:`, `urn:layers:` and `urn:collab:` (the task layers, mounted by `gonk.layer`).
+
+You can check a non-model mount without starting a peer. This second gonk uses port 1071
+and a separate configuration and data home; the missing socket leaves the mount's names
+unavailable, while the ledger still starts. Its `llm` line says that no model is mounted:
+
+<!-- transcript: run -->
+```console
+$ mkdir -p dashboard-config
+$ printf 'gonk.mount = "prefer urn:dashboard:=%s/dashboard.sock"\n' "$PWD" > dashboard-config/config.toml
+```
+
+<!-- transcript: serve -->
+```console
+$ ikigai-gonk --config-home "$PWD/dashboard-config" --data-home "$PWD/dashboard-data" --port 1071 --no-quic --no-backup
+ikigai-gonk 0.1.1 — holding the store at …/dashboard-data/store
+…
+  llm     not mounted — no gonk.mount for urn:llm:; urn:llm:* resolves nowhere, so explain, review and the PR-derived layers are not bound; also mounted: urn:dashboard:* at …/dashboard.sock (prefer)
+…
+```
+
+Try an overlapping prefix in a separate configuration. No peer needs to be running: gonk
+refuses the line before dialing it.
+
+<!-- transcript: file overlap/config.toml -->
+```toml
+gonk.mount = "prefer urn:iki:=/tmp/peer.sock"
+```
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk --config-home "$PWD/overlap" --data-home "$PWD/overlap-data" --port 1072 --no-quic --no-backup
+ikigai-gonk: gonk.mount `prefer urn:iki:=/tmp/peer.sock`: `urn:iki:` overlaps `urn:iki:ledger:`, which gonk serves itself — the ledger. A mount is composed in front of gonk's own spaces, so it would hand those names to the peer; mount the peer under a prefix of its own
+```
+
 ## A real model
 
 <!-- transcript: manual — it needs a running model, which this book's checks do not have (no network, no GPU) -->

@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-12"
+summary = "Remote workers explains the content-free session summary and shows the hand-back's final line. The model-mount configuration now covers peers under any prefix, the model-only call window, and startup's refusal to replace gonk's own names; the examples use updated gonk and starter revisions."
+pages = ["ways/workers.md", "browse/explain.md", "ways/routing.md"]
+
+[[change]]
 date = "2026-11-11"
 summary = "The OpenSpec part names its two direct filesystem uses as exceptions, each with its reason: the walk of the tree it is handed, which moves behind urn:file: requests in a later release, and the scratch Workspace the chapters edit."
 pages = ["spec/openspec.md", "spec/ledger.md"]
