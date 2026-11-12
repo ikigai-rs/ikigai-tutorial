@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-12**: The accessibility chapter explains ikigai-ui's criteria as records named by kind and target, the difference between SEE and HEAR checks, and how to report each check as Pass, Fail or Blocked with its evidence.
+
+  Pages: [Accessibility, done and not bolted on](model/accessibility.md)
+
 - **2026-11-12**: The accessibility chapter adds a design review to answer before code, with WCAG 2.2 A and AA references, annotation guidance, and links to ikigai-ui's button, link and field criteria.
 
   Pages: [Accessibility, done and not bolted on](model/accessibility.md)

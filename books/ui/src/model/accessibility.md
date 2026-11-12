@@ -1,7 +1,7 @@
 # Accessibility, done and not bolted on
 
-WCAG 2.2 AA is the floor. Start with the design review below; the rest of this chapter is
-still to be written.
+WCAG 2.2 AA is the floor. Start with the design review below, then read how criteria are kept
+as data and how their checks are reported. The rest of this chapter is still to be written.
 
 The planned sections cover the behavior that belongs to the shared shell: landmarks and a skip
 link, one status region and what may speak in it, focus after a swap, keyboard paths, target
@@ -72,6 +72,52 @@ For GPUI, replace `target:html` with `target:gpui` and read the record's limitat
 its checks. A criterion describes intended behavior; it does not prove that a face delivers it.
 The AA floor here does not adopt the source's 44 by 44 target size (SC 2.5.5, AAA) or Focus
 Appearance (SC 2.4.13, AAA). Any stricter product decision must be explicit.
+
+## Criteria as data
+
+A criterion is a record, not a paragraph to copy. ikigai-ui names one per kind and delivery
+target, `urn:iki:ui:criterion:kind:{kind}:target:{target}`, so a design note, a test and a
+report can all cite the same record by name: `urn:iki:ui:criterion:kind:field:target:html` is
+the field kind's HTML criterion, and the same kind with `target:gpui` is its desktop one. The
+record for a kind and target says, in fields of their own, its semantics, its keyboard paths
+(each key with its outcome), its name, role and state, the settings a reader may change, and
+the checks that hold it. Resolve the record by its name when you review or test a face; do not
+paraphrase it into the design, where it would drift.
+
+The criterion records are on ikigai-ui's main branch
+([PR 65](https://github.com/ikigai-rs/ikigai-ui/pull/65) for button, link and field,
+[PR 67](https://github.com/ikigai-rs/ikigai-ui/pull/67) for every other kind and element). No
+release on crates.io carries them yet (0.5.0 does not), and this book uses only published
+crates, so no example here resolves one: the links in the table above open the records'
+source.
+
+## What a reader sees and what a reader hears
+
+Each check in a record carries a mode. A **SEE** check is something a sighted reader, or a
+script standing in for one, can confirm from the rendered face: a native `<button>`, a focus
+ring of at least 2 px, a name that matches the visible text, text that grows at 200%. Many SEE
+checks name a probe that a test can run against the face's HTML. A **HEAR** check is what a
+screen reader announces: "WHEN I Tab to the button with a desktop screen reader I HEAR its
+purpose and its role of button." Only someone running a screen reader, or a job that drives one,
+can confirm it. Passing every SEE check says nothing about the HEAR checks; keep them apart in
+any report.
+
+## Pass, Fail or Blocked
+
+Report every check a criterion or an accessibility file names, one row each, in a
+`Check | Result | Evidence` table:
+
+- **Pass**: the check ran on the code being reported, and held. The evidence names the test or
+  command, the tool and its version, and what the check does not cover.
+- **Fail**: the check ran and did not hold. The evidence says what failed and where.
+- **Blocked**: the check did not run. The evidence says why: no tool, no screen-reader job, a
+  dependency not released. A check nobody ran is Blocked, never left out and never "not
+  applicable". A run from an earlier date that nothing repeats is Blocked too, with its date.
+
+Until a screen-reader job runs, every HEAR check is Blocked. This repository's own
+[ACCESSIBILITY.md](https://github.com/ikigai-rs/ikigai-tutorial/blob/main/ACCESSIBILITY.md)
+reports its checks this way. A table of Pass rows is evidence about what those checks
+exercise. It is not a conformance claim.
 
 Carry these annotations into implementation review, then test the rendered UI, including with
 assistive technology. The [htmx chapter's checks](../delivery/htmx.md) are evidence about what

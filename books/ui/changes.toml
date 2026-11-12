@@ -19,6 +19,11 @@
 
 [[change]]
 date = "2026-11-12"
+summary = "The accessibility chapter explains ikigai-ui's criteria as records named by kind and target, the difference between SEE and HEAR checks, and how to report each check as Pass, Fail or Blocked with its evidence."
+pages = ["model/accessibility.md"]
+
+[[change]]
+date = "2026-11-12"
 summary = "The accessibility chapter adds a design review to answer before code, with WCAG 2.2 A and AA references, annotation guidance, and links to ikigai-ui's button, link and field criteria."
 pages = ["model/accessibility.md"]
 
