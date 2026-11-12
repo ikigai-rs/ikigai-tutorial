@@ -242,7 +242,12 @@ means that an absent peer costs that prefix alone: there is no dial at startup, 
 dial backs off from 1 second to 30 seconds. A peer may listen on a Unix socket or a `quic://`
 address; the certificate directory is the one the CLI's `--cert-dir` reads. Each peer has
 20 seconds to describe itself, two thirds of the deadline gonk's callers give gonk. A caller
-needs `urn:cap:net:<the peer's host>` (`localhost` for a socket) to reach a mounted peer.
+needs the peer's read token as well as `urn:cap:net:<the peer's host>` (`localhost` for a
+socket) to read a mounted resource. At the HTTP door, use the mechanical route: for example,
+`/dashboard/today` reads `urn:dashboard:today`. `/resolution/iri/` renders pages rather than
+reading the peer's bytes. A [face](../faces/own.md) can read the mechanical route under its
+viewer's session, provided that viewer holds both scopes; see
+[Mounted spaces through HTTP](../machines/doors.md#mounted-spaces-through-http).
 
 Only the exact `urn:llm:` mount spends the model-call window,
 `gonk.mount.calls_per_hour`, and binds explain, review and `urn:nl:sparql`. A dashboard or

@@ -543,3 +543,19 @@ $ grep -E '^# (floor_gb|every = "6h"|prune_after)' library/worker/worker.sample.
 Profiles combine (`--process workers,spec` adds [spec first](spec-first.md)'s rules, and no
 `--process` at all means `solo,workers,spec`); only [unled audits](audits.md) and [review every
 commit](review-every-commit.md) refuse each other.
+
+## Claims renewed through a task layer
+
+A deployment can bind a ledger to a shared task layer with `gonk.layer`. In the offering role,
+gonk mirrors a taken offer as a seven-day claim for its taker. A freshly taken `Progress` report
+renews that claim only while its offer is the item's **newest offer** (gonk PR 359). Late Progress
+on an older, released offer can still leave its keyed note, but cannot extend the successor's
+claim, even when the same participant took both offers. Release and Handback also check which
+offer is current.
+
+There is an accepted stop window (gonk PR 360): if the mirror takes Progress just before it stops,
+restart recovers the report and its keyed note but may lose that renewal. Replaying receipts or
+sweeping again never renews a claim. The next freshly taken Progress renews a still-held claim;
+keep reporting before the existing lease expires. An idle taker cannot keep a lease through
+repeated restarts. This is the task-layer mirror's rule; the worker loop above renews directly
+with `claim renew=true`.

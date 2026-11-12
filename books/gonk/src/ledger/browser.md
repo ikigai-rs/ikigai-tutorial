@@ -126,6 +126,52 @@ denied: this capability does not hold `urn:cap:store:read:graph:urn:iki:ledger:g
 The HTML page is the same resource for a person: an editor over one ledger's graph, with the
 answer rendered as a table.
 
+## Render rules and CURIEs
+
+The HTML results follow a rule table served at `/render-rules`. It matches a cell's term kind,
+value and prefix, so an item IRI can link to its item regardless of the query's variable name.
+The bare-integer rule also checks the column name: a count of three comments must not link to
+item 3. Read the table the running server uses:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/render-rules | grep '^ *render:curie' | awk '{$1=$1; print}'
+render:curie "ledger" .
+```
+
+Abbreviation is a rule too (gonk PR 357). A deployment can put this rule in its replacement table
+at `<config home>/gonk/render-rules.ttl`:
+
+```turtle
+@prefix render: <urn:iki:gonk:render#> .
+<urn:example:curie> a render:Rule ;
+    render:matchKind "uri" ;
+    render:matchPrefix "https://example.org/vocab#" ;
+    render:curie "example" .
+```
+
+An IRI `https://example.org/vocab#open` then displays as `example:open`. Above the table, a
+visible legend binds each prefix actually used once, including prefixes in linked cells.
+The shipped table abbreviates the ledger vocabulary as `ledger:`. Display and control rules
+match independently: links still match and substitute the full IRI, and their accessible names
+include the visible CURIE. Each side orders rules by `render:order`, then the rule IRI.
+A CURIE rule needs one namespace and `matchKind "uri"`; conflicting prefix bindings stop startup.
+Replacing the table replaces abbreviation and controls together; an empty table leaves full IRIs
+without controls. CSV and other machine results keep the original IRIs. Compare the same
+constant in the two representations:
+
+<!-- transcript: run -->
+```console
+$ curl -s -G --data-urlencode 'query=SELECT (<https://ikigai-rs.dev/ns/ledger#open> AS ?state) WHERE {}' http://localhost:1070/sparql > results.html
+$ grep -o "<td class='uri'[^<]*</td>" results.html | sed 's/<[^>]*>//g'
+ledger:open
+$ grep -o 'ledger: is short for [^<]*' results.html
+ledger: is short for https://ikigai-rs.dev/ns/ledger# — this table writes it that way.
+$ curl -s -G -H 'Accept: text/csv' --data-urlencode 'query=SELECT (<https://ikigai-rs.dev/ns/ledger#open> AS ?state) WHERE {}' http://localhost:1070/sparql
+state
+https://ikigai-rs.dev/ns/ledger#open
+```
+
 ## A form is a ledger action
 
 The form a signed-in writer sees does not write anything gonk invented. It posts to `/act`,
@@ -205,6 +251,26 @@ would run the model and archive its answer under the signed-in identity's grant.
 `<img>` did (gonk PR 100, ledger #880). The read half, for a navigation, is the same caution
 one step milder: following a link from elsewhere shows what the identity may read, and does
 not spend on its behalf.
+
+## When gonk restarts
+
+Every full page carries the process instance id from the startup banner in a `gonk-instance`
+meta tag. `/instance` answers that same id as plain text; it changes at every start, even when
+the binary version and store stay the same (gonk PR 356):
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/instance > instance.txt
+$ curl -s http://localhost:1070/ | grep -o "<meta name='gonk-instance' content='[^']*'>" | grep -F "$(cat instance.txt)"
+<meta name='gonk-instance' content='…'>
+```
+
+A visible tab checks once a minute, and checks immediately when it becomes visible again or
+returns from the browser's back/forward cache. When the id differs, it shows “gonk has restarted
+since this page loaded, so what it shows may be out of date. Reload this page” and announces it
+once through the page's status region. It stops polling and leaves focus where it was. Failed
+checks stay silent; without JavaScript no restart notice appears. Reload to get the new page
+and sign in again: sessions end on restart.
 
 ## Who you are, and what that grants
 
@@ -300,6 +366,40 @@ focus, and a browser refuses a sign-in prompt from a page without it. The invite
 single-use and expires; gonk stores only its hash, and it is the whole trust anchor of the
 registration, so no attestation is parsed. After signing in, `/l/book` is a ledger page
 rather than a refusal, and every write `ada` makes carries her passkey as its author.
+
+### Extra scopes and adding a grant
+
+`passkey invite` also accepts repeatable `--scope <urn>` for tokens no role flag names (gonk
+PR 348). They join the role tokens in one grant write, with duplicates stored once. A scope
+must be a valid, permitted `urn:cap:` token; malformed values, owner tokens, door markers and
+broad `exec:*` or `net:*` tokens are refused before anything is written. For example, a face
+that reads a mounted socket peer needs its read token and `urn:cap:net:localhost`:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk passkey invite metrics --ledger book=read --scope urn:cap:metrics:read --scope urn:cap:net:localhost --port 1070 --config-home "$PWD/.config/ikigai"
+passkey invite for `metrics` — grant `metrics` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  valid for 30 minutes, once
+  open  http://localhost:1070/#invite=…
+  in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json
+```
+
+With `--force`, the grant becomes exactly the role flags plus the `--scope` values, including
+narrowing: leaving an old scope off removes it. Rewriting a shared grant affects every identity
+using it. To widen just one enrolled passkey, the owner instead runs `ikigai-gonk passkey grant
+add <label> <grant> --config-home <config home>` (or selects it with `--credential <id>`).
+The grant must already exist with scopes and the passkey must not already hold it. The command
+changes that passkey alone, records `PasskeyGrantAdded` with `by=owner`, and leaves its live
+sessions signed in; their next request sees the union of its grants (gonk PR 349).
+`passkey list` shows the grants, their scopes and the addition. `passkey grant remove` removes
+one grant; removing the last is refused, so use `passkey revoke` to remove the passkey.
+
+An invite redeemed while signed in can instead add its grant to that passkey after a fresh
+passkey assertion, or create a new passkey. On the add path, gonk ends **all old sessions before
+writing the wider grant**, then opens one new session from the assertion (gonk PR 352). An old
+cookie cannot read the wider grant in between. If recording the widening fails, the grant change
+is undone and the passkey stays signed out; sign in again. Owner `grant add` deliberately keeps
+sessions; the owner can end them with `passkey logout --all`.
 
 ## What it wrote down
 

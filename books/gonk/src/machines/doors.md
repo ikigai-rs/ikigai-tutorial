@@ -71,6 +71,22 @@ a real one.)
 you can" to "must": gonk refuses to start with a bind named and no certificate enrolled, rather
 than run with the door silently shut.
 
+## Mounted spaces through HTTP
+
+A [`gonk.mount` peer](../browse/explain.md#mounting-a-peer-under-any-prefix) is reachable through
+the HTTP door too. Use the mechanical routes
+`/<scheme>/<path>`: for the `urn:metrics:` prefix, `/metrics/today` names
+`urn:metrics:today` (the mechanical mapping adds `urn:` and joins path segments with colons).
+The method supplies the verb, query parameters the arguments, and `Accept` the representation.
+`/resolution/iri/{iri}` renders a page about a name; it is not the route to read a mounted
+resource's bytes.
+
+The browser caller needs **both** the peer's read token and `urn:cap:net:<the peer's host>`
+(`urn:cap:net:localhost` for a Unix socket). A mount does not give anonymous callers these
+scopes. Add them to an invite with the repeatable `--scope` flag described in
+[The ledger in a browser](../ledger/browser.md#extra-scopes-and-adding-a-grant). A face makes
+these requests under its viewer's session, as [Pages of your own](../faces/own.md) explains.
+
 ## One request through each door
 
 <!-- transcript: run -->
