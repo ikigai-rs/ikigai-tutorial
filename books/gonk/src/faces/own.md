@@ -141,8 +141,8 @@ Each face gets a link in the header of every gonk page, named by its name:
 
 <!-- transcript: run -->
 ```console
-$ curl -s http://localhost:1070/ | grep -o "<a class='navlink' href='/face/name/[^']*'>[^<]*</a>"
-<a class='navlink' href='/face/name/open/'>open</a>
+$ curl -s http://localhost:1070/ | grep -o "href='/face/name/[^']*'"
+href='/face/name/open/'
 ```
 
 `/face/name/open/` serves the directory's `index.html`, and `/face/name/open/app.js` serves

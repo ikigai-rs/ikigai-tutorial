@@ -521,7 +521,6 @@ urn:script:report-alpha-open:runs
 $ LC_ALL=C comm -23 alpha.tools manager.tools
 urn:iki:ledger:{ledger}:append
 urn:iki:ledger:{ledger}:backfill-closed-at
-urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
 urn:iki:ledger:{ledger}:defer
@@ -531,6 +530,7 @@ urn:iki:ledger:{ledger}:label
 urn:iki:ledger:{ledger}:link
 urn:iki:ledger:{ledger}:reopen
 urn:iki:store:graph-update
+urn:iki:store:graph-written:{graph}
 $ LC_ALL=C comm -13 alpha.tools manager.tools | grep -c '^urn:repo:shop:'
 21
 ```
@@ -544,7 +544,9 @@ Three things to read in that:
   offers a published query only to a caller who could run it, which is the ikigai Book's
   [Authority from the text](../../beyond/datasets.html#authority-from-the-text) in gonk.
 - **Write tools are absent from the manager's list.** Reading two ledgers is not writing either,
-  so `append`, `claim`, `close` and the store's update door are absent, not offered and refused.
+  so `append`, `close` and the store's update door are absent, not offered and refused.
+  The claim name is shared because it also has a read verb; MCP exposes that read to the
+  manager, with no claim write.
 - **Repository tools appear in the manager's list.** Twenty-one of the browse root's resources,
   which neither agent holds a token for.
 

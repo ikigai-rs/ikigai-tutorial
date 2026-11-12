@@ -203,7 +203,6 @@ repository that will be shared gets a forge before its first hand-back.
 ```console
 $ (cd library && python3 tools/gonk.py report 7 --evidence http://127.0.0.1:1070/browse/urn:repo:library:file:artifacts/service/lending/domain.py --note 'on the branch cap-late-fees-1.1; repro.py says 1000 at 101 days; scripts/test.py passes')
 gonk.py: reporting item 7 at epoch 1
-gonk.py: reporting item 7 at epoch 2
 commented on library#7 (urn:iki:ledger:library:comment:…) awaiting-dispatcher
 library#7 released
 $ (cd library && python3 tools/gonk.py next | grep -E '^ [0-9]\.|^ready')
@@ -239,6 +238,7 @@ $ git -C library -c user.name=Ada -c user.email=ada@example.com merge -q --no-ff
 $ PYTHONDONTWRITEBYTECODE=1 python3 repro.py 2027-01-31
 {'copy': 'pp-1', 'member': 'ada', 'returned': '2027-01-31', 'days_late': 101, 'fee_cents': 1000}
 $ (cd library && python3 tools/gonk.py report 7 --evidence http://127.0.0.1:1070/browse/urn:repo:library:file:artifacts/service/lending/domain.py --note 'merged to main; repro.py says 1000 at 101 days')
+gonk.py: reporting item 7 at epoch 2
 commented on library#7 (urn:iki:ledger:library:comment:…) awaiting-dispatcher
 library#7 released
 ```

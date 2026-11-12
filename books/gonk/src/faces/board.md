@@ -154,11 +154,12 @@ Save this as `board-text.js`:
 <!-- transcript: file board-text.js -->
 ```js
 // What the board face shows, printed: its own modules, run as the anonymous viewer.
-import { item, pool } from "./site/faces/board/kit.js";
-import { COLUMNS, board, childNumbers } from "./site/faces/board/board.js";
+import { item } from "./site/faces/board/kit.js";
+import { COLUMNS, board, readChildren } from "./site/faces/board/board.js";
 
 const epic = await item("default", Number(Deno.args[0]));
-const kids = (await pool(childNumbers(epic), (n) => item("default", n))).filter((it) => !it.error);
+const { items: kids, unreadable } = await readChildren(epic);
+if (unreadable.length) throw new Error(`${unreadable.length} children could not be read`);
 const { by, done, tally } = board(kids);
 console.log(`#${epic.number} ${epic.title}: ${done} of ${kids.length} done`);
 for (const [key, name] of COLUMNS) {

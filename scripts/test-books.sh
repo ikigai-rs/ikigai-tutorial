@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build every book and run its examples.
 #
-# `mdbook test` needs `-L <deps>` to find the crates the examples use, and rustc refuses
+# `mdbook test` needs library search paths to find the crates the examples use, and rustc refuses
 # with E0464 when that directory holds more than one candidate for a crate. A shared
 # `target/` accumulates them: `cargo clippy` leaves `.rmeta` beside `cargo build`'s
 # `.rlib`, and a restored CI cache can carry stale ones from an older dependency set.
@@ -20,10 +20,35 @@ node --test a11y/transcript-matcher.test.mjs a11y/routing-commands.test.mjs a11y
 
 TARGET="${BOOK_TARGET_DIR:-target/books}"
 rm -rf "$TARGET"
-CARGO_TARGET_DIR="$TARGET" cargo build
-# rustdoc may resolve library paths from its test directory rather than this shell's.
-# Keep the same freshly built dependencies reachable from either working directory.
-DEPS="$(cd "$TARGET/debug/deps" && pwd)"
+mkdir -p "$TARGET"
+CARGO_TARGET_DIR="$TARGET" cargo build --message-format=json > "$TARGET/artifacts.jsonl"
+
+# Cargo 1.100 changed its intermediate artifact layout: debug/deps is no longer a
+# library search path. Collect exactly this build's libraries in one search directory
+# using Cargo's artifact messages, so mdbook need not know Cargo's internal layout.
+DEPS="$TARGET/book-libs"
+python3 - "$TARGET/artifacts.jsonl" "$DEPS" <<'PYTHON'
+import json
+import pathlib
+import sys
+
+libraries = set()
+with open(sys.argv[1]) as artifacts:
+    for line in artifacts:
+        message = json.loads(line)
+        if message.get("reason") == "compiler-artifact":
+            for filename in message["filenames"]:
+                path = pathlib.Path(filename)
+                if path.suffix in {".rlib", ".so", ".dylib", ".dll"}:
+                    libraries.add(path)
+if not libraries:
+    sys.exit("cargo build reported no library artifacts for the book tests")
+destination = pathlib.Path(sys.argv[2])
+destination.mkdir()
+for library in sorted(libraries):
+    (destination / library.name).symlink_to(library)
+PYTHON
+DEPS="$(cd "$DEPS" && pwd)"
 
 # Each book's "What's new" page, from its changes.toml, BEFORE any `mdbook build`, so the page
 # every build (and the deploy) publishes is the one the entries say. The page is committed too:
