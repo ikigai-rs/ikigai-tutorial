@@ -245,8 +245,8 @@ totals agree and the past does not. If you know which comment closed an item, na
 The second tab is a table per ledger, with a row per holder who ever took a claim there:
 
 <figure class="gonk-shot">
-<a class="gonk-scheme-light" href="dashboard/img/agents-light.webp"><img src="dashboard/img/agents-light.webp" loading="lazy" alt="The Dashboard's Agents tab: a sentence saying each number opens the SPARQL question that answers it, then three tables headed app, docs and infra. Each table has a row per holder and the columns In flight, Worked on, Completed in 24 hours, Completed in 7 days, Handed back in 24 hours, Released, and Median from claim to hand-back. app lists all four holders, docs lists alpha-codex, beta-claude and beta-codex, infra lists alpha-claude, alpha-codex and beta-claude. Their numbers differ from table to table."></a><a class="gonk-scheme-dark" href="dashboard/img/agents-dark.webp"><img src="dashboard/img/agents-dark.webp" loading="lazy" alt="The Dashboard's Agents tab: a sentence saying each number opens the SPARQL question that answers it, then three tables headed app, docs and infra. Each table has a row per holder and the columns In flight, Worked on, Completed in 24 hours, Completed in 7 days, Handed back in 24 hours, Released, and Median from claim to hand-back. app lists all four holders, docs lists alpha-codex, beta-claude and beta-codex, infra lists alpha-claude, alpha-codex and beta-claude. Their numbers differ from table to table."></a>
-<figcaption>The Agents tab: one table per ledger, one row per holder, every number a link.</figcaption>
+<a class="gonk-scheme-light" href="dashboard/img/agents-light.webp"><img src="dashboard/img/agents-light.webp" loading="lazy" alt="The Dashboard's Agents tab: a sentence saying each number opens the SPARQL question that answers it, then three tables headed app, docs and infra. Each table has a row per holder, an All agents totals row, and the columns In flight, Worked on, Completed in 24 hours, Completed in 7 days, Handed back in 24 hours, Released, and Median from claim to hand-back. app lists all four holders, docs lists alpha-codex, beta-claude and beta-codex, infra lists alpha-claude, alpha-codex and beta-claude. Their numbers differ from table to table."></a><a class="gonk-scheme-dark" href="dashboard/img/agents-dark.webp"><img src="dashboard/img/agents-dark.webp" loading="lazy" alt="The Dashboard's Agents tab: a sentence saying each number opens the SPARQL question that answers it, then three tables headed app, docs and infra. Each table has a row per holder, an All agents totals row, and the columns In flight, Worked on, Completed in 24 hours, Completed in 7 days, Handed back in 24 hours, Released, and Median from claim to hand-back. app lists all four holders, docs lists alpha-codex, beta-claude and beta-codex, infra lists alpha-claude, alpha-codex and beta-claude. Their numbers differ from table to table."></a>
+<figcaption>The Agents tab: one table per ledger, one row per holder plus All agents totals, every number a link.</figcaption>
 </figure>
 
 Anyone who may read a ledger can read its Agents table, with `curl` or a browser. The words each link
@@ -262,6 +262,26 @@ alpha-claude: 3 completed in the last 7 days, opens in a new tab
 alpha-claude: 1 handed back in the last 24 hours, opens in a new tab
 alpha-claude: 3 released without a hand-back, opens in a new tab
 alpha-claude: 2 h from claim to hand-back, the median, opens in a new tab
+```
+
+Each table ends with **All agents** (gonk PR 292). It asks each question across all holders,
+not by adding their cells: if two agents worked on the same item, Worked on counts that item
+once. Here `app`'s Worked on total is 73, while its holder rows sum to 79.
+In flight, Worked on, Completed and Released count distinct items; Handed back counts
+hand-backs, and the median uses all hand-backs, rather than the medians of the holders. Each
+total links to its own SPARQL question, and a viewer sees totals only for ledgers they may read.
+An empty median says `none`; a failed read says `unavailable`.
+
+<!-- transcript: run -->
+```console
+$ curl -s http://127.0.0.1:1070/dashboard/panel/agents | grep -o 'All agents: </span>[^/]*</span>' | sed -n 1,7p | sed 's/<[^>]*>//g'
+All agents: 3 in flight, opens in a new tab
+All agents: 73 worked on, opens in a new tab
+All agents: 3 completed in the last 24 hours, opens in a new tab
+All agents: 9 completed in the last 7 days, opens in a new tab
+All agents: 3 handed back in the last 24 hours, opens in a new tab
+All agents: 12 released without a hand-back, opens in a new tab
+All agents: 1 h 25 min from claim to hand-back, the median, opens in a new tab
 ```
 
 What each one counts:

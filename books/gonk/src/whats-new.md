@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-12**: SPARQL results explain CURIE render rules and prefix legends. The browser chapter covers restart notices, extra invite scopes and passkey grant additions; mounted reads explain routes and permissions, the Dashboard gains All agents totals, and Remote workers explains task-layer renewal limits across offers and restarts.
+
+  Pages: [The ledger in a browser](ledger/browser.md), [Explain, with a mounted model](browse/explain.md), [The three doors, and who is asking](machines/doors.md), [Pages of your own](faces/own.md), [The Dashboard](ledger/dashboard.md), [Remote workers](ways/workers.md)
+
 - **2026-11-12**: The updated gonk examples show claim epochs, the process instance line, and access records in hash-chained log segments, including each door's principal and credential, and corrected face links.
 
   Pages: [The ledger in a browser](ledger/browser.md), [The three doors, and who is asking](machines/doors.md), [Remote workers](ways/workers.md)

@@ -22,13 +22,19 @@ under the viewer's own session.
 | served by gonk, read-only, from that directory alone | a way to change gonk's own pages or their theme |
 | a reader of gonk's routes, as the person viewing it | a new authority: it can read only what that person can |
 
+A face can also read a [mounted peer through the HTTP door](../machines/doors.md#mounted-spaces-through-http).
+For a peer mounted at `urn:metrics:`, `fetch('/metrics/today', {headers: {Accept: 'application/json'}})`
+reads `urn:metrics:today` as the signed-in viewer. Use the mechanical route, not
+`/resolution/iri/`, which renders pages. That viewer's grants must hold the peer's read token
+and `urn:cap:net:<the peer's host>` (`localhost` for a socket); the face itself adds no authority.
+
 So a face shows nothing its viewer could not read by hand. It can change nothing that gonk did not
 already let that viewer change. The starter's faces only read.
 
 ## What you need
 
 `ikigai-gonk` and `ikigai`, as [Which gonk](../introduction.md#which-gonk) installs them, plus
-`git` and `curl`. The gonk this book pins is the first that serves faces (ikigai-gonk PR 295).
+`git` and `curl`. The gonk this book pins serves faces (introduced in ikigai-gonk PR 295).
 A browser is what a face is for. To check one from a shell, as this chapter does, you also need
 [Deno](https://deno.com) 2, which runs the same JavaScript modules the browser loads.
 
