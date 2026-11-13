@@ -88,13 +88,16 @@ Turtle.
 
 ## Binding: a mount is a binding
 
-Start the peer, and wait for its socket before you mount it:
+Create a private directory for the sockets, then start the peer and wait before mounting
+it. The directory must belong to you: ikigai-deno refuses to serve directly in the shared
+`/tmp` directory. Stop an earlier peer before removing its socket.
 
 <!-- demo: start -->
 ```bash
-rm -f /tmp/ts-hello.sock
-deno run -A --config examples/deno/deno.json examples/deno/hello.ts /tmp/ts-hello.sock &
-until [ -S /tmp/ts-hello.sock ]; do sleep 0.2; done
+mkdir -m 700 -p /tmp/ikbook-ts
+rm -f /tmp/ikbook-ts/hello.sock
+deno run -A --config examples/deno/deno.json examples/deno/hello.ts /tmp/ikbook-ts/hello.sock &
+until [ -S /tmp/ikbook-ts/hello.sock ]; do sleep 0.2; done
 ```
 
 The wait is not decoration. Deno fetches `@std/crypto` from JSR on a first run before the
@@ -104,10 +107,10 @@ would otherwise end the wait before this peer is listening.
 
 <!-- demo: run -->
 ```text
-$ ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:ts:hello who=Ada'
+$ ikigai --plain --mount urn:ts:=/tmp/ikbook-ts/hello.sock -c 'source urn:ts:hello who=Ada'
 Hello, Ada!
 [uncacheable]
-$ ikigai --plain --mount urn:ts:=/tmp/ts-hello.sock -c 'source urn:demo:split "resource,oriented,computing" | urn:ts:shout | urn:iki:fn:reverseList' -c 'source urn:kernel:uncached'
+$ ikigai --plain --mount urn:ts:=/tmp/ikbook-ts/hello.sock -c 'source urn:demo:split "resource,oriented,computing" | urn:ts:shout | urn:iki:fn:reverseList' -c 'source urn:kernel:uncached'
 COMPUTING!
 ORIENTED!
 RESOURCE!
@@ -204,14 +207,15 @@ succeed", so a `NotFound` answers `false`.
 
 <!-- demo: start -->
 ```bash
-rm -f /tmp/ts-notes.sock
-deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ts-notes.sock &
-until [ -S /tmp/ts-notes.sock ]; do sleep 0.2; done
+mkdir -m 700 -p /tmp/ikbook-ts
+rm -f /tmp/ikbook-ts/notes.sock
+deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ikbook-ts/notes.sock &
+until [ -S /tmp/ikbook-ts/notes.sock ]; do sleep 0.2; done
 ```
 
 <!-- demo: run -->
 ```text
-$ ikigai --plain --mount urn:ts:=/tmp/ts-notes.sock -c 'sink urn:ts:note:milk two liters' \
+$ ikigai --plain --mount urn:ts:=/tmp/ikbook-ts/notes.sock -c 'sink urn:ts:note:milk two liters' \
   -c 'source urn:ts:note:milk' -c 'source urn:ts:note:milk' \
   -c 'sink urn:ts:note:milk three liters' -c 'source urn:ts:note:milk' \
   -c 'source urn:ts:note:index' -c 'delete urn:ts:note:milk' -c 'source urn:ts:note:milk'
@@ -246,7 +250,7 @@ deleted `milk`, so the script writes it again before checking:
 ```ts
 import { connect } from "../../../ikigai-deno/src/mod.ts";
 
-const k = await connect("/tmp/ts-notes.sock"); // the peer itself; Exists is a read
+const k = await connect("/tmp/ikbook-ts/notes.sock"); // the peer itself; Exists is a read
 await k.sink("urn:ts:note:milk", "two liters");
 console.log((await k.exists("urn:ts:note:milk")).text); // true
 console.log((await k.exists("urn:ts:note:bread")).text); // false

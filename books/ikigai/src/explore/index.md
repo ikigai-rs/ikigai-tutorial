@@ -53,7 +53,8 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
   its sandbox can reach; then mount a few lines of Python as a peer for what the sandbox cannot
   do, and see what changes when the answer comes from another process.
 
-Later in this part, a page built from them is served over HTTP.
+The finale, [A view over HTTP: the remaining step](view.md), marks the HTTP walkthrough
+as pending on its sample rather than promising server commands that are not yet tested.
 
 ## What you need
 

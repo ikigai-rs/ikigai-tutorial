@@ -5,7 +5,8 @@
  * it and a Rust host can mount it; `--mount urn:ts:=<socket>` in the chapter is the
  * binding.
  *
- *     deno run -A --config examples/deno/deno.json examples/deno/hello.ts /tmp/ts-hello.sock
+ *     mkdir -m 700 -p /tmp/ikbook-ts
+ *     deno run -A --config examples/deno/deno.json examples/deno/hello.ts /tmp/ikbook-ts/hello.sock
  *
  * Modeled on ikigai-deno's `examples/demo.ts` (read-only for this book); kept here so
  * the book builds from a clone of this repository alone. Imports ikigai-deno by path
@@ -54,7 +55,7 @@ export const shout = endpoint("urn:ts:shout", {
 
 // ANCHOR: serve
 if (import.meta.main) {
-  const path = Deno.args[0] ?? "/tmp/ts-hello.sock";
+  const path = Deno.args[0] ?? `${Deno.cwd()}/ts-hello.sock`;
   console.error(`serving urn:ts:hello and urn:ts:shout on ${path}`);
   const server = new Server([hello, shout], path);
   Deno.addSignalListener("SIGINT", () => server.shutdown());
