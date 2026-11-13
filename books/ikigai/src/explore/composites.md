@@ -414,8 +414,9 @@ which is the last place volatile data can go: a write happens every time it is a
 
 What each layer costs is what it reads. A layer that reads only recorded data and your files
 lasts until one of them is written; one that reads the feed lasts a minute; and a layer that
-reads another by name pays only for its own work when it is recomputed. Later in this part,
-a page built from them is served over HTTP.
+reads another by name pays only for its own work when it is recomputed. Serving the page
+over HTTP is still a gap in this part; this walkthrough stops at `page.html`. Saving that
+file does not establish an HTTP view or carry its dependencies into a web server.
 
 Next, the copies in the middle get refreshed by a file of REPL lines instead of by hand, and a
 pipeline becomes a plan you can question before it runs: [Process scripts are files](scripts.md).

@@ -62,7 +62,7 @@ SIBLINGS = {
     "ikigai-python": os.environ.get("IKIGAI_PYTHON_URL", "https://github.com/ikigai-rs/ikigai-python"),
     "ikigai-deno": os.environ.get("IKIGAI_DENO_URL", "https://github.com/ikigai-rs/ikigai-deno"),
 }
-SOCKET = re.compile(r"/tmp/[\w.-]+\.sock")
+SOCKET = re.compile(r"/tmp/(?:[\w.-]+/)*[\w.-]+\.sock")
 
 def answering(path):
     with socket.socket(socket.AF_UNIX) as s:

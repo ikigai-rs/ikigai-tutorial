@@ -53,7 +53,9 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
   its sandbox can reach; then mount a few lines of Python as a peer for what the sandbox cannot
   do, and see what changes when the answer comes from another process.
 
-Later in this part, a page built from them is served over HTTP.
+The HTTP-view step is still a gap in this part: the chapters build HTML answers and save
+them as files, but do not yet show how to serve those answers over HTTP. The walkthrough
+stops at the saved page for that step.
 
 ## What you need
 
