@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-13"
+summary = "The TypeScript track places its peer sockets in a directory the server creates for you, so its examples work with ikigai-deno’s socket ownership checks."
+pages = ["polyglot/typescript.md"]
+
+[[change]]
 date = "2026-11-12"
 summary = "Exploring without Rust now marks serving its composed page over HTTP as an unfinished step, instead of promising a later walkthrough that the part does not contain."
 pages = ["explore/index.md", "explore/composites.md"]

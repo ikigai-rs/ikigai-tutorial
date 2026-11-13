@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-13**: The TypeScript track places its peer sockets in a directory the server creates for you, so its examples work with ikigai-deno’s socket ownership checks.
+
+  Pages: [The TypeScript track](polyglot/typescript.md)
+
 - **2026-11-12**: Exploring without Rust now marks serving its composed page over HTTP as an unfinished step, instead of promising a later walkthrough that the part does not contain.
 
   Pages: [A week of earthquakes](explore/index.md), [Composites, one layer at a time](explore/composites.md)
