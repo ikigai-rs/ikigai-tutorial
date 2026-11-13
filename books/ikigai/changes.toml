@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-12"
+summary = "Exploring without Rust now marks serving its composed page over HTTP as an unfinished step, instead of promising a later walkthrough that the part does not contain."
+pages = ["explore/index.md", "explore/composites.md"]
+
+[[change]]
 date = "2026-11-11"
 summary = "Configuration explains the one file read that is not a kernel request, and how its named exception marks it for review. A sentence becomes a draft now shows the host handing the library its HTTP client."
 pages = ["getting-started/configuration.md", "code/sentence.md"]

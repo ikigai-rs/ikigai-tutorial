@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-12**: Exploring without Rust now marks serving its composed page over HTTP as an unfinished step, instead of promising a later walkthrough that the part does not contain.
+
+  Pages: [A week of earthquakes](explore/index.md), [Composites, one layer at a time](explore/composites.md)
+
 - **2026-11-11**: Configuration explains the one file read that is not a kernel request, and how its named exception marks it for review. A sentence becomes a draft now shows the host handing the library its HTTP client.
 
   Pages: [Configuration](getting-started/configuration.md), [A sentence becomes a draft](code/sentence.md)
