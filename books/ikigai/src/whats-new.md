@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-12**: Exploring without Rust now marks its HTTP finale as pending on the serving sample. The final page distinguishes the runnable HTML views from an HTTP walkthrough and explains what that walkthrough still needs to check.
+
+  Pages: [A view over HTTP: the remaining step](explore/view.md), [A week of earthquakes](explore/index.md)
+
 - **2026-11-11**: Configuration explains the one file read that is not a kernel request, and how its named exception marks it for review. A sentence becomes a draft now shows the host handing the library its HTTP client.
 
   Pages: [Configuration](getting-started/configuration.md), [A sentence becomes a draft](code/sentence.md)
