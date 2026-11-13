@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-13"
+summary = "The Introduction shows how to list linked crate versions with --version --verbose. The REPL's failed batch example now checks its exit status directly."
+pages = ["introduction.md", "binary/repl.md"]
+
+[[change]]
 date = "2026-11-06"
 summary = "The full-screen REPL's input is identified as the request field; ikigai> labels submitted commands in its history."
 pages = ["binary/repl.md"]

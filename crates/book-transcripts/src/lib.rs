@@ -21,6 +21,10 @@
 //! <!-- transcript: run -->        each `$ ` line runs to completion, in order (the default)
 //! <!-- transcript: serve -->      ONE `$ ` line, started and left running for the rest of
 //!                                 the page; what it prints at startup is the expected output
+//! <!-- transcript: stop -->       run shutdown commands, then verify every tracked server
+//!                                 exited within five seconds (for example, `kill` by PID)
+//! <!-- transcript: restart -->    stop every tracked server, then start ONE displayed command
+//!                                 and compare its startup output, like `serve`
 //! <!-- transcript: manual — why --> not run, and the reason is said where an editor reads it
 //! <!-- transcript: continues -->  the ikigai book's REPL replay: this block is the next part of
 //!                                 the block before it (here a page is one session already,
@@ -40,9 +44,21 @@
 //! applies, after a semicolon, and a page may name some once for every block on it:
 //!
 //! ```text
+//! <!-- transcript: run; exit 1; normalize workdir -->
 //! <!-- transcript: serve; normalize port, home -->
 //! <!-- transcripts: normalize workdir -->
 //! ```
+//!
+//! `exit N` asserts the exit status of EACH command in a `run`, `continues` or `stop` block,
+//! in addition to its output. N must be 0..255; termination by a signal does not match a code.
+//! Without this clause only output is checked, preserving existing transcripts. Unknown kinds,
+//! clauses and malformed exit statuses fail rather than silently dropping an assertion.
+//!
+//! `stop` requires at least one tracked server and checks that the displayed commands really
+//! stopped it; it does not turn a failed shutdown into a pass by killing it first. `restart`
+//! requires tracked servers too, terminates their process groups, and starts the displayed
+//! command. Both end ALL current port bindings, so the next server may choose another port;
+//! certificate fingerprint bindings survive. Use separate pages for independent lifecycles.
 //!
 //! A command, or a line of its output, may carry `{{#include PATH}}` of a one-line file, which
 //! the runner expands as mdbook does when it renders the page ([`expand_includes`]): how a page
@@ -117,6 +133,12 @@ pub enum Kind {
     Run,
     /// Start the one command and leave it running for the rest of the page.
     Serve,
+    /// Run the displayed shutdown commands, then verify all tracked servers exited.
+    Stop,
+    /// Stop all tracked servers and start the one displayed command again.
+    Restart,
+    /// A malformed declaration, refused by the runner.
+    Invalid(String),
     /// Not run, for the reason given.
     Manual(String),
     /// Write the block's lines to this path, relative to the page's scratch directory.
@@ -156,6 +178,8 @@ pub struct Block {
     /// The normalizers the block's declaration names, as written (the runner resolves them, and
     /// fails the block on a name it does not know).
     pub normalize: Vec<String>,
+    /// An explicit exit status for every command in this block; absent preserves output-only checks.
+    pub exit: Option<u8>,
 }
 
 /// Every transcript block in one page's markdown: each `console` fence with a `$ ` line, and
@@ -177,7 +201,11 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
         }
         let body = &lines[start..end];
         let above = &lines[i.saturating_sub(5)..i];
-        let Declaration { kind, normalize } = declaration(above);
+        let Declaration {
+            kind,
+            normalize,
+            exit,
+        } = declaration(above);
         if let Kind::File(_) = kind {
             out.push(Block {
                 file: file.to_string(),
@@ -187,6 +215,7 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
                 orphans: Vec::new(),
                 content: body.iter().map(|l| l.to_string()).collect(),
                 normalize,
+                exit,
             });
         } else if fence == "```console" && body.iter().any(|l| l.starts_with(PROMPT)) {
             out.push(Block {
@@ -202,6 +231,7 @@ pub fn scan_page(file: &str, text: &str) -> Vec<Block> {
                     .collect(),
                 content: Vec::new(),
                 normalize,
+                exit,
             });
         }
         i = end + 1;
@@ -319,6 +349,8 @@ pub struct Declaration {
     pub kind: Kind,
     /// The normalizers named after `; normalize`, as written.
     pub normalize: Vec<String>,
+    /// An explicit exit status for every command in this block; absent preserves output-only checks.
+    pub exit: Option<u8>,
 }
 
 /// [`declaration`]'s kind alone.
@@ -376,6 +408,7 @@ pub fn declaration(above: &[&str]) -> Declaration {
     let plain = |kind| Declaration {
         kind,
         normalize: Vec::new(),
+        exit: None,
     };
     for (at, line) in above.iter().enumerate().rev() {
         if line.trim_start().starts_with("```") {
@@ -393,18 +426,46 @@ pub fn declaration(above: &[&str]) -> Declaration {
             let reason = reason.trim().trim_start_matches(['—', '-', ':']).trim();
             return plain(Kind::Manual(reason.to_string()));
         }
-        let (head, clause) = rest.split_once(';').unwrap_or((rest, ""));
-        let normalize = clause
-            .trim()
-            .strip_prefix("normalize")
-            .map(names)
-            .unwrap_or_default();
-        let kind = match head.trim() {
+        let mut clauses = rest.split(';').map(str::trim);
+        let head = clauses.next().unwrap_or_default();
+        let kind = match head {
+            "run" => Kind::Run,
             "serve" => Kind::Serve,
+            "stop" => Kind::Stop,
+            "restart" => Kind::Restart,
             "continues" => Kind::Continues,
-            _ => Kind::Run,
+            _ => return plain(Kind::Invalid(format!("unknown transcript kind `{head}`"))),
         };
-        return Declaration { kind, normalize };
+        let mut normalize = Vec::new();
+        let mut exit = None;
+        for clause in clauses {
+            if let Some(list) = clause.strip_prefix("normalize ") {
+                normalize.extend(names(list));
+            } else if let Some(code) = clause.strip_prefix("exit ") {
+                if exit.is_some() || matches!(kind, Kind::Serve | Kind::Restart) {
+                    return plain(Kind::Invalid(
+                        "exit must appear once, on a run, continues or stop block".into(),
+                    ));
+                }
+                match code.parse::<u8>() {
+                    Ok(code) => exit = Some(code),
+                    Err(_) => {
+                        return plain(Kind::Invalid(format!(
+                            "invalid exit status `{code}`; expected 0..255"
+                        )))
+                    }
+                }
+            } else {
+                return plain(Kind::Invalid(format!(
+                    "unknown transcript clause `{clause}`"
+                )));
+            }
+        }
+        return Declaration {
+            kind,
+            normalize,
+            exit,
+        };
     }
     plain(Kind::Undeclared)
 }

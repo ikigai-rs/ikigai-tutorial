@@ -7,6 +7,10 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
+- **2026-11-13**: The Introduction shows how to list linked crate versions with --version --verbose. The REPL's failed batch example now checks its exit status directly.
+
+  Pages: [Introduction](introduction.md), [The REPL and its modes](binary/repl.md)
+
 - **2026-11-06**: Logging now links back to the socket connection, creates the config home before saving its settings, explains which terminal runs each command, and defines transreption before using the term.
 
   Pages: [Logging](running/logging.md)

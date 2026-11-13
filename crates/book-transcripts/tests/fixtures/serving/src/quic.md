@@ -45,3 +45,62 @@ $ ikigai --config-home "$PWD/cfg" --connect quic://127.0.0.1:55682 -c 'source ur
 OVER QUIC
 [computed]
 ```
+
+The server must start in the enrollment posture for connection-time revocation to apply. A
+server started without clients.json keeps its workspace posture; creating the file alone does
+not switch that posture. Restart with an enrolled identity, then edit the enrollment file.
+The fingerprint binding survives restart, while the port binding is learned again.
+
+<!-- transcript: file cfg/grants.json -->
+```json
+{"alice": ["urn:cap:fs:read:*"]}
+```
+
+<!-- transcript: file cfg/clients.json -->
+```json
+{"clients": {"c1c8462d57dd0c178e8fec900d57b35992ba2cc625db4c6928a1a92163b4cc2b": {"grant": "alice", "label": "alice"}}}
+```
+
+<!-- transcript: restart; normalize port, fingerprint -->
+```console
+$ ikigai --config-home "$PWD/cfg" serve quic://127.0.0.1:0
+ikigai: mount   none composed — no `mount` lines in the config home
+ikigai: watching ~/.ikigai/workspace (a file changed on disk is served fresh)
+ikigai: client  base   bc42e0a9dff48e21  $PWD/cfg/quic/client.crt
+ikigai: client  alice  c1c8462d57dd0c17  $PWD/cfg/quic/clients/alice.crt
+ikigai: serving on quic://127.0.0.1:55682  (per-identity grants: 1 enrolled; surface: host + fs; connections re-minted every 600s)  (Ctrl-C to stop)
+```
+
+<!-- transcript: run; exit 0 -->
+```console
+$ ikigai --config-home "$PWD/cfg" --client-cert "$PWD/cfg/quic/clients/alice.crt" --client-key "$PWD/cfg/quic/clients/alice.key" --connect quic://127.0.0.1:55682 -c 'source urn:iki:fn:toUpper in="enrolled"'
+ENROLLED
+[computed]
+```
+
+Each CLI invocation opens a fresh connection. Removing Alice's entry refuses the next one,
+without restarting the server; restoring it admits her again.
+
+<!-- transcript: file cfg/clients.json -->
+```json
+{"clients": {}}
+```
+
+<!-- transcript: run; exit 1 -->
+```console
+$ ikigai --config-home "$PWD/cfg" --client-cert "$PWD/cfg/quic/clients/alice.crt" --client-key "$PWD/cfg/quic/clients/alice.key" --connect quic://127.0.0.1:55682 -c 'source urn:iki:fn:toUpper in="revoked"'
+error: unavailable: quic transport: read error: connection lost
+[contract unavailable for urn:iki:fn:toUpper: unavailable: quic transport: read error: connection lost — arguments were routed without it (a piped or positional value went to `in`; an undeclared key=value stayed text)]
+```
+
+<!-- transcript: file cfg/clients.json -->
+```json
+{"clients": {"c1c8462d57dd0c178e8fec900d57b35992ba2cc625db4c6928a1a92163b4cc2b": {"grant": "alice", "label": "alice"}}}
+```
+
+<!-- transcript: run; exit 0 -->
+```console
+$ ikigai --config-home "$PWD/cfg" --client-cert "$PWD/cfg/quic/clients/alice.crt" --client-key "$PWD/cfg/quic/clients/alice.key" --connect quic://127.0.0.1:55682 -c 'source urn:iki:fn:toUpper in="restored"'
+RESTORED
+[computed]
+```

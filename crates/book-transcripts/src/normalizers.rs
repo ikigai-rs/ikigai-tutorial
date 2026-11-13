@@ -446,6 +446,12 @@ pub struct Bindings {
 }
 
 impl Bindings {
+    /// Stopping all servers ends their port bindings; a restart may choose new ports.
+    /// Certificate fingerprints remain valid across restarts.
+    pub fn forget_ports(&mut self) {
+        self.pairs.retain(|(n, _, _)| *n != Normalizer::Port);
+    }
+
     /// Learn from one line the page shows (`expected`) and the line the run printed in its place
     /// (`actual`), which already match once normalized: the binding normalizers' values, paired
     /// in order. A value bound before must stand for the same run value again, and a run value
