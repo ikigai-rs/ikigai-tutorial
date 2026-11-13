@@ -5,8 +5,9 @@
  * matches — and answers more than one verb on it: read a note, write it, delete it, ask
  * whether it is there. Run it and mount it the way the chapter mounts `hello.ts`:
  *
- *     deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ts-notes.sock
- *     ikigai --plain --mount urn:ts:=/tmp/ts-notes.sock -c 'sink urn:ts:note:milk "2 liters"'
+ *     mkdir -m 700 -p /tmp/ikbook-ts
+ *     deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ikbook-ts/notes.sock
+ *     ikigai --plain --mount urn:ts:=/tmp/ikbook-ts/notes.sock -c 'sink urn:ts:note:milk "2 liters"'
  *
  * Modeled on ikigai-deno's `examples/tictactoe_store.ts` (read-only for this book); kept
  * here so the book builds from a clone of this repository alone. Imports ikigai-deno by
@@ -57,7 +58,7 @@ export const note = family("urn:ts:note:{name}", {
 // ANCHOR_END: family
 
 if (import.meta.main) {
-  const path = Deno.args[0] ?? "/tmp/ts-notes.sock";
+  const path = Deno.args[0] ?? `${Deno.cwd()}/ts-notes.sock`;
   console.error(`serving urn:ts:note:index and urn:ts:note:{name} on ${path}`);
   const server = new Server([index, note], path); // the order is the lookup order
   Deno.addSignalListener("SIGINT", () => server.shutdown());

@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-12"
+summary = "The TypeScript track serves its peers in a private socket directory owned by the reader, as current ikigai-deno requires. The examples default to a socket in the current directory."
+pages = ["polyglot/typescript.md"]
+
+[[change]]
+date = "2026-11-12"
 summary = "Exploring without Rust now marks its HTTP finale as pending on the serving sample. The final page distinguishes the runnable HTML views from an HTTP walkthrough and explains what that walkthrough still needs to check."
 pages = ["explore/view.md", "explore/index.md"]
 
