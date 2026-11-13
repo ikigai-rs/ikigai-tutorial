@@ -8,22 +8,27 @@
 answers mounted requests. Here are the same operations in TypeScript, using Deno.
 Every listing is in `examples/deno/`; run the shell commands from this repository's root.
 
-The listings import `ikigai-deno` by path because it is not on JSR yet. They expect its
+The TypeScript face is `@ikigai/ts`, maintained in `ikigai-ts`. Its runtime adapter
+supports Deno, Node and Bun, and its CI runs the protocol vectors on all three. The
+Book keeps `examples/deno/`: these listings use Deno entry glue (`Deno.args`,
+`Deno.addSignalListener` and, in the sibling HTTP app, `Deno.env` and `Deno.serve`) and are run with Deno.
+
+The listings import `ikigai-ts` by path from a source checkout. They expect its
 checkout beside this repository. If you do not already have it there, clone it:
 
 ```bash
-git clone https://github.com/ikigai-rs/ikigai-deno ../ikigai-deno
+git clone https://github.com/ikigai-rs/ikigai-ts ../ikigai-ts
 ```
 
-Edit the listings' imports if your checkout is elsewhere. ikigai-deno imports `@std/crypto`
+Edit the listings' imports if your checkout is elsewhere. ikigai-ts imports `@std/crypto`
 for the BLAKE3 digests in its contract IRIs. Its own `deno.json` maps that name to JSR, but
-Deno does not use that configuration when another script imports ikigai-deno by path.
+Deno does not use that configuration when another script imports ikigai-ts by path.
 Every `deno run` here therefore passes `--config examples/deno/deno.json`, which supplies
 the mapping for these listings. A first run fetches the dependency from JSR.
 
 The blocks that start a peer and mount it ([Binding](#binding) and the family below) are
 replayed against the book's pinned `ikigai-cli` on every change to this repository, with
-ikigai-deno at its `main`, by `scripts/polyglot-tracks.sh`: the peers are started from these
+ikigai-ts at its `main`, by `scripts/polyglot-tracks.sh`: the peers are started from these
 very lines, and what each `ikigai` command prints, cache verdicts included, is compared with
 the page. The client listings were run against a served `ikigai-cli` 0.1.18 as they were
 written and are not replayed.
@@ -67,7 +72,7 @@ connection.
 
 The explicit `args:` list declares the inputs by hand, as in
 [Why an endpoint describes itself](../getting-started/self-description.md), without a schema
-library. `ikigai-deno`'s `./zod` entry point derives the same list from a schema
+library. `ikigai-ts`'s `./zod` entry point derives the same list from a schema
 instead (`z.object({ who: z.string().describe(…) })`), and that is the closer analog to
 "the signature is the contract"; the sibling repository's `examples/endpoints.ts` shows
 it. Either way, a Rust host sees one description.
@@ -166,7 +171,7 @@ its answers; through `--mount`, the host does not keep them.
 
 The kernel refuses the write, and the client receives a typed `DeniedError` across the
 wire. The client can test `instanceof DeniedError` instead of parsing an error message.
-`examples/http_status.ts` in the ikigai-deno checkout uses that distinction to return
+`examples/http_status.ts` in the ikigai-ts checkout uses that distinction to return
 HTTP 403 for a denied request.
 
 ## Families: one door, many names, four verbs
@@ -246,7 +251,7 @@ To try Exists from a client, save this as `examples/deno/exists.ts`. The batch a
 deleted `milk`, so the script writes it again before checking:
 
 ```ts
-import { connect } from "../../../ikigai-deno/src/mod.ts";
+import { connect } from "../../../ikigai-ts/src/mod.ts";
 
 const k = await connect("/tmp/ikbook-ts/notes.sock"); // the peer itself; Exists is a read
 await k.sink("urn:ts:note:milk", "two liters");

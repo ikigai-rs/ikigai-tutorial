@@ -8,13 +8,13 @@
  *     deno run -A --config examples/deno/deno.json examples/deno/notes.ts /tmp/ikbook-ts/notes.sock
  *     ikigai --plain --mount urn:ts:=/tmp/ikbook-ts/notes.sock -c 'sink urn:ts:note:milk "2 liters"'
  *
- * Modeled on ikigai-deno's `examples/tictactoe_store.ts` (read-only for this book); kept
- * here so the book builds from a clone of this repository alone. Imports ikigai-deno by
- * path until it is on JSR.
+ * Modeled on ikigai-ts's `examples/tictactoe_store.ts` (read-only for this book); kept
+ * here so the book builds from a clone of this repository alone. Imports ikigai-ts by
+ * path from a sibling source checkout.
  */
 
-import { endpoint, family, Server } from "../../../ikigai-deno/src/serve.ts";
-import { NotFoundError } from "../../../ikigai-deno/src/wire.ts";
+import { endpoint, family, Server } from "../../../ikigai-ts/src/serve.ts";
+import { NotFoundError } from "../../../ikigai-ts/src/wire.ts";
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const notes = new Map<string, string>();

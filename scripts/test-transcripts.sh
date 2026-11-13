@@ -293,7 +293,7 @@ cargo test -p book-urns --test book_urns -- --ignored --nocapture || status=1
 # The polyglot tracks' mounted peers, with the same binary first on PATH: each track's binding
 # and family steps start a Python or Deno peer and mount it with `ikigai --mount`, which no REPL
 # replay can do, so `scripts/polyglot-tracks.sh` starts them from the pages' own lines (with
-# ikigai-python and ikigai-deno cloned at `main`) and compares what every command prints,
+# ikigai-python and ikigai-ts cloned at `main`) and compares what every command prints,
 # verdicts included (ledger #2612). It needs python3 and deno (fetched above); under CI a
 # missing one fails it.
 PATH="$deno_path:$PATH"

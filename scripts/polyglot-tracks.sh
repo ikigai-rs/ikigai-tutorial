@@ -8,9 +8,9 @@
 # the TypeScript track's rotted unseen: its peer no longer started, its pipe changed nothing,
 # and its verdicts were an older cli's. So this does what a reader does, from the pages' text:
 #
-#   * clones ikigai-python and ikigai-deno at `main` into a scratch directory (never your own
+#   * clones ikigai-python and ikigai-ts at `main` into a scratch directory (never your own
 #     checkouts) and copies this repository's `examples/` beside them, the layout the pages
-#     assume (the listings import `../../../ikigai-deno` by path). A copy, not a symlink: Deno
+#     assume (the listings import `../../../ikigai-ts` by path). A copy, not a symlink: Deno
 #     resolves a module from its real path, so through a symlink the import finds nothing;
 #   * installs that ikigai-python clone, with its one dependency (`blake3`), into a scratch
 #     virtualenv whose `python3` comes first on PATH, as the Python page's `pip install` does;
@@ -58,9 +58,10 @@ PAGES = [REPO / "books/ikigai/src/polyglot/python.md",
 DEMO = Path("/tmp/ikbook-polyglot")
 WORK = DEMO / "work"
 TUTORIAL = WORK / "ikigai-tutorial"
+# IKIGAI_DENO_URL is kept for compatibility; IKIGAI_TS_URL takes precedence.
 SIBLINGS = {
     "ikigai-python": os.environ.get("IKIGAI_PYTHON_URL", "https://github.com/ikigai-rs/ikigai-python"),
-    "ikigai-deno": os.environ.get("IKIGAI_DENO_URL", "https://github.com/ikigai-rs/ikigai-deno"),
+    "ikigai-ts": os.environ.get("IKIGAI_TS_URL", os.environ.get("IKIGAI_DENO_URL", "https://github.com/ikigai-rs/ikigai-ts")),
 }
 SOCKET = re.compile(r"/tmp/(?:[\w.-]+/)*[\w.-]+\.sock")
 
@@ -82,7 +83,10 @@ subprocess.run(["rm", "-rf", str(DEMO)], check=True)
 WORK.mkdir(parents=True)
 (DEMO / "logs").mkdir()
 for name, url in SIBLINGS.items():
-    subprocess.run(["git", "clone", "--quiet", "--depth", "1", url, str(WORK / name)], check=True)
+    try:
+        subprocess.run(["git", "clone", "--quiet", "--depth", "1", url, str(WORK / name)], check=True)
+    except subprocess.CalledProcessError:
+        sys.exit(f"{name} checkout missing at {WORK / name}: could not clone {url}")
     head = subprocess.run(["git", "-C", str(WORK / name), "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True, check=True).stdout.strip()
     print(f"· {name} main is {head}")

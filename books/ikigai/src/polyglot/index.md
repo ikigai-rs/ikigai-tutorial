@@ -5,8 +5,9 @@ borrowed these faces ahead of time), and the model never depended on it. A resol
 a request and a representation crossing a boundary, and the boundary is a wire protocol
 with a version number: `ikigai-ipc` speaks it over a Unix socket in Rust, and so do two
 other implementations of the same codec — [`ikigai-python`](https://github.com/ikigai-rs/ikigai-python)
-(standard library, and one dependency: `blake3`, for the digests in a served door's contract IRIs) and [`ikigai-deno`](https://github.com/ikigai-rs/ikigai-deno)
-(TypeScript, with one dependency, `@std/crypto`, for the same digests, and `zod` only for its optional `./zod` entry point). Each is both halves at once: a **client** that drives a
+(standard library, and one dependency: `blake3`, for the digests in a served door's contract IRIs) and [`ikigai-ts`](https://github.com/ikigai-rs/ikigai-ts)
+(TypeScript as `@ikigai/ts`, running on Deno, Node and Bun through a runtime adapter,
+with one dependency, `@std/crypto`, for the same digests, and `zod` only for its optional `./zod` entry point). Each is both halves at once: a **client** that drives a
 running kernel, and a **servable peer** that a Rust host mounts as a space.
 
 That pairing is called **L0**, the first level of the polyglot ladder. A client can resolve

@@ -86,8 +86,8 @@ resolve on GitHub, the list moved before this page did — the organization is t
 
 - [`ikigai-python`](https://github.com/ikigai-rs/ikigai-python) — a pure-stdlib Python
   client and servable peer for the wire protocol.
-- [`ikigai-deno`](https://github.com/ikigai-rs/ikigai-deno) — the same in
-  zero-dependency TypeScript.
+- [`ikigai-ts`](https://github.com/ikigai-rs/ikigai-ts) — the same in
+  TypeScript (`@ikigai/ts`), with a runtime adapter for Deno, Node and Bun.
 
 ## Trust and governance
 
