@@ -6,7 +6,7 @@
 # process, ttt-host and two apps talking over sockets. So this script does what a reader
 # would do, from the chapter's own text:
 #
-#   * clones ikigai-python and ikigai-deno at `main` into a scratch directory (it never
+#   * clones ikigai-python and ikigai-ts at `main` into a scratch directory (it never
 #     touches your own checkouts), and lays them out beside this repository the way the
 #     chapter assumes, so `cd ../ikigai-python` in a command means that clone;
 #   * builds ttt-host from this checkout and puts it first on PATH;
@@ -31,7 +31,7 @@
 # (or another tool) is missing it says which and exits 0 — a skip, not a pass. It exits 1
 # when anything differs.
 #
-# The sockets live under /tmp/ttt6demo, a short path on purpose: macOS allows a Unix socket
+# The sockets live under /tmp/ttt6demo and /tmp/ikbook-ts, short paths on purpose: macOS allows a Unix socket
 # path 104 bytes, and a session scratch directory is already most of that.
 set -euo pipefail
 
@@ -59,9 +59,10 @@ CHAPTER = REPO / "books/ikigai/src/applied/tic-tac-toe-6.md"
 DEMO = Path("/tmp/ttt6demo")
 WORK = DEMO / "work"
 PORTS = {8070: "ttt-host", 8071: "the Deno app", 8072: "the Python app"}
+# IKIGAI_DENO_URL is kept for compatibility; IKIGAI_TS_URL takes precedence.
 SIBLINGS = {
     "ikigai-python": os.environ.get("IKIGAI_PYTHON_URL", "https://github.com/ikigai-rs/ikigai-python"),
-    "ikigai-deno": os.environ.get("IKIGAI_DENO_URL", "https://github.com/ikigai-rs/ikigai-deno"),
+    "ikigai-ts": os.environ.get("IKIGAI_TS_URL", os.environ.get("IKIGAI_DENO_URL", "https://github.com/ikigai-rs/ikigai-ts")),
 }
 
 def listening(port):
@@ -78,7 +79,10 @@ WORK.mkdir(parents=True)
 (DEMO / "logs").mkdir()
 os.symlink(REPO, WORK / "ikigai-tutorial")
 for name, url in SIBLINGS.items():
-    subprocess.run(["git", "clone", "--quiet", "--depth", "1", url, str(WORK / name)], check=True)
+    try:
+        subprocess.run(["git", "clone", "--quiet", "--depth", "1", url, str(WORK / name)], check=True)
+    except subprocess.CalledProcessError:
+        sys.exit(f"{name} checkout missing at {WORK / name}: could not clone {url}")
     head = subprocess.run(["git", "-C", str(WORK / name), "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True, check=True).stdout.strip()
     print(f"· {name} main is {head}")
@@ -145,7 +149,7 @@ def run(command):
 
 def wait_for(block):
     deadline = time.time() + 60
-    sockets = set(re.findall(r"/tmp/ttt6demo/[\w.-]+\.sock", block))
+    sockets = set(re.findall(r"/tmp/(?:ttt6demo|ikbook-ts)/[\w.-]+\.sock", block))
     ports = set()
     if re.search(r"^ttt-host ", block, re.M):
         ports.add(8070)

@@ -515,7 +515,7 @@ Hosts, as built or planned:
 |---|---|---|
 | the book page (`js/ttt.js`) | `data-game` on the `.ttt-play` element holding the board | done |
 | `ttt-host` over HTTP | the path prefix `/game/{id}/` (the page's `<base href>`); `/` is the root game | done |
-| Python / Deno apps | their own path prefix, same rule (`/game/{id}/`, `/` the root) | done — `ikigai-python` / `ikigai-deno` `examples/tictactoe_app.*` |
+| Python / Deno apps | their own path prefix, same rule (`/game/{id}/`, `/` the root) | done — `ikigai-python` / `ikigai-ts` `examples/tictactoe_app.*` |
 
 ### The in-page shim
 
@@ -602,7 +602,7 @@ the system chose), and lists the games sorted.
   urn:iki:tutorial:ttt:stored:=<socket>`, NOT an alias `--mount` (ledger #578: the faces
   strip at most the first segment of an alias prefix) — then `check_store` on it, and a
   refusal names the clause: `the store at … breaks the store contract: …`. Checked live on
-  2026-09-27 against `ikigai-python` and `ikigai-deno`'s `examples/tictactoe_store.*`: both
+  2026-09-27 against `ikigai-python` and `ikigai-ts`'s `examples/tictactoe_store.*`: both
   pass (Exists included) and play over HTTP; a Python store keeps its game across a host
   restart.
 - **Tests** (`tests/host.rs`, hermetic: sockets in `temp_dir()` with a length assert, HTTP on
@@ -649,7 +649,7 @@ the system chose), and lists the games sorted.
   takes an `Arc`) and IPC; an `Arc`-taking serve would let the root game's names be served
   with their real verdicts. (Reported, not built.)
 - **`scripts/ttt-polyglot-demo.sh`** reruns part VI for real: clones `ikigai-python` and
-  `ikigai-deno` at main into `/tmp/ttt6demo/work`, builds `ttt-host`, starts the chapter's
+  `ikigai-ts` at main into `/tmp/ttt6demo/work`, builds `ttt-host`, starts the chapter's
   processes from the chapter's own `<!-- demo: start -->` blocks, reruns every
   `<!-- demo: run -->` block and diffs it, and checks each `<!-- excerpt: <repo> <path> @
   <commit> -->` block is still verbatim at main. Not in CI (python3, deno, the ikigai CLI,
@@ -681,7 +681,7 @@ the system chose), and lists the games sorted.
   with a hostile mark), `cmp` equal; and the book's pinned outputs, which did not move except
   where a cell shows a template's own source.
 - **The Python and Deno apps fill the templates themselves** (ikigai-python PR #23,
-  `26e173a`; ikigai-deno PR #16, `d212d8c`): each implements the template language above,
+  `26e173a`; ikigai-ts PR #16, `d212d8c`): each implements the template language above,
   with its own `conditional`, and composes the views by the table, byte-identical to a
   `ttt-host` built from `89677bc`. Part VI describes and quotes them, and
   `scripts/ttt-polyglot-demo.sh` checks its transcripts and excerpts against their main.

@@ -8,7 +8,7 @@
  *     ikigai serve /tmp/ikbook-kernel.sock &
  *     deno run -A --config examples/deno/deno.json examples/deno/client.ts /tmp/ikbook-kernel.sock
  *
- * Imports ikigai-deno by path until it is on JSR.
+ * Imports ikigai-ts by path from a sibling source checkout.
  */
 
 import {
@@ -16,7 +16,7 @@ import {
   Capability,
   connect,
   DeniedError,
-} from "../../../ikigai-deno/src/mod.ts";
+} from "../../../ikigai-ts/src/mod.ts";
 
 const path = Deno.args[0] ?? "/tmp/ikbook-kernel.sock";
 

@@ -22,7 +22,7 @@ families covers the templated, multi-verb doors this part uses; what this part n
 said as it goes.
 
 > **Run the shell commands in a terminal.** Both shapes need processes and sockets. The
-> transcripts were captured from real runs against `ikigai-python` and `ikigai-deno` at the
+> transcripts were captured from real runs against `ikigai-python` and `ikigai-ts` at the
 > commits cited beside them, and `scripts/ttt-polyglot-demo.sh` in this repository runs the
 > whole part again. It starts both stores, the host and both apps, reruns every command
 > shown here, and compares the output with this page. It also checks that each code excerpt
@@ -73,7 +73,7 @@ each verb is a decorated function whose parameters include the template's variab
 
 In TypeScript, `family(pattern, options)` is a builder, with one chained call per verb:
 
-<!-- excerpt: ikigai-deno examples/tictactoe_store.ts @ d212d8c -->
+<!-- excerpt: ikigai-ts examples/tictactoe_store.ts @ d212d8c -->
 ```ts
   return family(STORED, {
     id: "ttt-stored",
@@ -104,7 +104,7 @@ host kernel does both.
 
 ### Start two stores
 
-From a checkout of this repository, with `ikigai-python` and `ikigai-deno` checked out
+From a checkout of this repository, with `ikigai-python` and `ikigai-ts` checked out
 beside it and `ttt-host` installed from here (`cargo install --path crates/ttt-host
 --locked`):
 
@@ -112,11 +112,12 @@ beside it and `ttt-host` installed from here (`cargo install --path crates/ttt-h
 ```sh
 mkdir -p /tmp/ttt6demo
 (cd ../ikigai-python && PYTHONPATH=src python3 -m examples.tictactoe_store /tmp/ttt6demo/py.sock) &
-(cd ../ikigai-deno && deno run -A examples/tictactoe_store.ts /tmp/ttt6demo/ts.sock) &
+(cd ../ikigai-ts && deno run -A examples/tictactoe_store.ts /tmp/ikbook-ts/ttt6.sock) &
 ```
 
-The sockets live in `/tmp/ttt6demo` because macOS allows a socket path 104 bytes, and a
-deep temporary directory does not leave room for the file name.
+The Python socket lives in `/tmp/ttt6demo`; the TypeScript server creates its own
+`/tmp/ikbook-ts` directory with mode `0700`. These short paths leave room for the
+file name within macOS's 104-byte socket path limit.
 
 ### The same commands, a Python-held game
 
@@ -210,7 +211,7 @@ an endpoint in the same kernel and has no process of its own to report a span fr
 
 <!-- demo: run same-as-previous -->
 ```text
-$ ttt-host --store /tmp/ttt6demo/ts.sock \
+$ ttt-host --store /tmp/ikbook-ts/ttt6.sock \
     -c 'source urn:iki:tutorial:ttt:cell:1:1' \
     -c 'sink urn:iki:tutorial:ttt:move:1:1' \
     -c 'trace urn:iki:tutorial:ttt:cell:1:1' \
@@ -246,8 +247,8 @@ these use new sockets under `/tmp/ttt6demo`.
 <!-- demo: start -->
 <!-- transcript: serve -->
 ```sh
-ttt-host --game py=/tmp/ttt6demo/py.sock --game ts=/tmp/ttt6demo/ts.sock --socket /tmp/ttt6demo/host.sock &
-(cd ../ikigai-deno && deno run -A examples/tictactoe_app.ts --socket /tmp/ttt6demo/host.sock) &
+ttt-host --game py=/tmp/ttt6demo/py.sock --game ts=/tmp/ikbook-ts/ttt6.sock --socket /tmp/ttt6demo/host.sock &
+(cd ../ikigai-ts && deno run -A examples/tictactoe_app.ts --socket /tmp/ttt6demo/host.sock) &
 (cd ../ikigai-python && PYTHONPATH=src python3 -m examples.tictactoe_app --socket /tmp/ttt6demo/host.sock) &
 ```
 
@@ -369,7 +370,7 @@ The TypeScript engine is the same design. Here is its fill, which parses every m
 template before it resolves any, so a malformed marker refuses the template whatever the
 resources say, and then resolves the markers together:
 
-<!-- excerpt: ikigai-deno examples/tictactoe_app.ts @ d212d8c -->
+<!-- excerpt: ikigai-ts examples/tictactoe_app.ts @ d212d8c -->
 ```ts
 export async function compose(
   template: string,
@@ -414,7 +415,7 @@ A view the board names, such as `view:square:1:0`, is composed the same way: the
 matches the name against the README's table of views and fills that view's template with
 what the name captured. Any other name goes to the host, in the right game:
 
-<!-- excerpt: ikigai-deno examples/tictactoe_app.ts @ d212d8c -->
+<!-- excerpt: ikigai-ts examples/tictactoe_app.ts @ d212d8c -->
 ```ts
   resolve: Resolve = (iri, args) => {
     const name = iri.startsWith(GAME) ? iri.slice(GAME.length) : null;

@@ -484,10 +484,11 @@ own terminal and leave it running. In the first terminal, from a clone of `ikiga
 PYTHONPATH=src python3 -m examples.tictactoe_store /tmp/ttt-py.sock
 ```
 
-In the second terminal, from a clone of `ikigai-deno`:
+In the second terminal, from a clone of `ikigai-ts` (the server creates its
+socket directory with mode `0700`):
 
 ```sh
-deno run -A examples/tictactoe_store.ts /tmp/ttt-ts.sock
+deno run -A examples/tictactoe_store.ts /tmp/ikbook-ts/ttt.sock
 ```
 
 With both stores running, open a third terminal in your `ikigai-tutorial` clone:
@@ -495,7 +496,7 @@ With both stores running, open a third terminal in your `ikigai-tutorial` clone:
 <!-- transcript: manual — a server, over two stores another repository's process holds on
      sockets; crates/ttt-host/tests/host.rs tests the host itself. -->
 ```sh
-cargo run -p ttt-host -- --game a --game py=/tmp/ttt-py.sock --game ts=/tmp/ttt-ts.sock
+cargo run -p ttt-host -- --game a --game py=/tmp/ttt-py.sock --game ts=/tmp/ikbook-ts/ttt.sock
 ```
 
 and open `http://127.0.0.1:8070/game/py/`. The board is this page's board, the markup is the
