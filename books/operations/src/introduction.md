@@ -44,6 +44,19 @@ If yours prints another version, most of this book still applies, and where a re
 something a chapter shows, the chapter's output is the release above's. [What's new](whats-new.md)
 says when the book moves to a newer one.
 
+Add `--verbose` to see the versions of its linked ikigai crates. The excerpt below keeps the
+binary's version and the core crate; `…` stands for the other lines, whose list changes between
+releases. Run the command for the complete list when comparing two installations.
+
+<!-- transcript: run; exit 0 -->
+```console
+$ ikigai --version --verbose
+ikigai {{#include ../ikigai-cli.version}}
+…
+ikigai-core …
+…
+```
+
 ## Every command here is run
 
 A block like the one above is a **transcript**: the lines that start with `$ ` are what you type,

@@ -130,16 +130,15 @@ error: `;` outside a `( … )` fork
 A statement that fails does not stop the batch: the rest still run, and the batch exits with a
 status of 1, so a script can tell.
 
-<!-- transcript: run -->
+<!-- transcript: run; exit 1 -->
 ```console
-$ ikigai -c 'source urn:iki:fn:toUpper' -c 'source urn:iki:fn:toUpper in=second' < /dev/null; echo "exit $?"
+$ ikigai -c 'source urn:iki:fn:toUpper' -c 'source urn:iki:fn:toUpper in=second' < /dev/null
 error: missing required argument `in`
        `in`: the text to upper-case
        pipe a value in or pass in=…
 SECOND
 [computed]
 — batch: 2 commands · computed
-exit 1
 ```
 
 ## Stdin, in a batch

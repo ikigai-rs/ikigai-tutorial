@@ -133,6 +133,9 @@ fn main() -> ExitCode {
                         b.normalize.join(", ")
                     );
                 }
+                if let Some(code) = b.exit {
+                    println!("    exit {code} (each command)");
+                }
                 for c in &b.commands {
                     println!("    $ {}", c.text);
                 }
@@ -314,6 +317,10 @@ fn run_page(
             }
         };
         match &block.kind {
+            Kind::Invalid(reason) => {
+                failures.push(format!("{at}: {reason}"));
+                continue;
+            }
             Kind::Manual(reason) => {
                 println!("skip {at} — manual: {reason}");
                 tally.manual.push((at, reason.clone()));
@@ -346,7 +353,7 @@ fn run_page(
                 continue;
             }
             // A page is one session here already, so a continued block is just the next run.
-            Kind::Run | Kind::Serve | Kind::Continues => {}
+            Kind::Run | Kind::Serve | Kind::Continues | Kind::Stop | Kind::Restart => {}
         }
         if !block.orphans.is_empty() {
             failures.push(format!(
@@ -387,14 +394,24 @@ fn run_page(
             failures.push(format!("{at}: refused, not run — {why}"));
             continue;
         }
-        if block.kind == Kind::Serve {
-            if commands.len() != 1 {
-                failures.push(format!(
-                    "{at}: a serve block starts ONE command; this one has {}",
-                    commands.len()
-                ));
+        if matches!(block.kind, Kind::Serve | Kind::Restart) && commands.len() != 1 {
+            failures.push(format!(
+                "{at}: a serve/restart block starts ONE command; this one has {}",
+                commands.len()
+            ));
+            continue;
+        }
+        if block.kind == Kind::Restart {
+            if servers.is_empty() {
+                failures.push(format!("{at}: restart has no tracked server"));
                 continue;
             }
+            for server in servers.drain(..) {
+                server.stop();
+            }
+            bindings.forget_ports();
+        }
+        if matches!(block.kind, Kind::Serve | Kind::Restart) {
             let command = &commands[0];
             tally.commands += 1;
             tally.servers += 1;
@@ -418,7 +435,7 @@ fn run_page(
         tally.blocks += 1;
         for command in &commands {
             tally.commands += 1;
-            let actual = scratch.run(&options.paths, &command.text);
+            let actual = scratch.run(&options.paths, &command.text, block.exit);
             let expected = normalize(&command.expected);
             match actual.map(|lines| {
                 let verdict = compare(&expected, &lines, &ns, &context, &mut bindings, false);
@@ -438,6 +455,20 @@ fn run_page(
                     failures.push(format!("{at}\n    $ {}\n    {e}", command.text));
                 }
             }
+        }
+        if block.kind == Kind::Stop {
+            if servers.is_empty() {
+                failures.push(format!("{at}: stop has no tracked server"));
+                block_ok = false;
+            }
+            for mut server in servers.drain(..) {
+                if !server.exited() {
+                    failures.push(format!("{at}: stop command left a tracked server running"));
+                    block_ok = false;
+                }
+                server.stop();
+            }
+            bindings.forget_ports();
         }
         println!(
             "{} {at} ({} command{})",
@@ -665,7 +696,12 @@ impl Scratch {
     /// back in the order a terminal shows them. Read from two pipes, a command that writes
     /// results to stdout and status lines to stderr (`ikigai -c a -c b` does) came back with
     /// every status line at the end, which is not what a reader sees.
-    fn run(&self, paths: &[PathBuf], text: &str) -> Result<Vec<String>, String> {
+    fn run(
+        &self,
+        paths: &[PathBuf],
+        text: &str,
+        expected_exit: Option<u8>,
+    ) -> Result<Vec<String>, String> {
         let mut child = self
             .command(paths, &format!("exec 2>&1\n{text}"))
             .stdout(Stdio::piped())
@@ -685,9 +721,17 @@ impl Scratch {
             }
             thread::sleep(Duration::from_millis(20));
         }
-        child.wait().map_err(|e| e.to_string())?;
+        let status = child.wait().map_err(|e| e.to_string())?;
         let mut lines = stdout.join().expect("the stdout reader");
         lines.extend(stderr.join().expect("the stderr reader"));
+        if let Some(code) = expected_exit {
+            if status.code() != Some(i32::from(code)) {
+                return Err(format!(
+                    "expected exit {code}, got {status}\n{}",
+                    lines.join("\n")
+                ));
+            }
+        }
         Ok(normalize(lines))
     }
 }
@@ -787,6 +831,20 @@ impl Server {
                     ));
                 }
             }
+        }
+    }
+
+    /// Allow a shutdown command five seconds to finish the tracked process.
+    fn exited(&mut self) -> bool {
+        let deadline = Instant::now() + Duration::from_secs(5);
+        loop {
+            if let Ok(Some(_)) = self.child.try_wait() {
+                return true;
+            }
+            if Instant::now() >= deadline {
+                return false;
+            }
+            thread::sleep(Duration::from_millis(20));
         }
     }
 

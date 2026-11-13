@@ -265,7 +265,9 @@ cargo run --quiet -p book-transcripts -- books/operations --strict --path "$ops_
 # fingerprints held to the ones `add-client` printed. Not a book page; it proves the fixture the
 # Operations Book's serving chapters will stand on (`crates/book-transcripts/tests/runner.rs`
 # proves the same mechanism with no ikigai at all).
-echo "── the serving fixture (ikigai-cli $ops_cli): QUIC on port 0, with certificates ──────────────────"
+# HTTP also binds port 0, is reached before and after restart, and stops by PID. The QUIC
+# fixture restarts into enrollment mode, then checks revocation at the next connection.
+echo "── serving fixtures (ikigai-cli $ops_cli): HTTP/QUIC on port 0, restart, stop, revocation ──────────────────"
 cargo run --quiet -p book-transcripts -- crates/book-transcripts/tests/fixtures/serving --strict \
     --path "$ops_cli_root/bin" \
     || status=1

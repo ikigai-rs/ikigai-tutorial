@@ -215,7 +215,7 @@ fn a_server_on_port_zero_is_reached_at_the_port_it_chose() {
     let serve = console(
         "serve; normalize port",
         &[
-            "$ python3 -u -m http.server 0 --bind 127.0.0.1",
+            "$ python3 -B -u -m http.server 0 --bind 127.0.0.1",
             "Serving HTTP on 127.0.0.1 port … (http://127.0.0.1:51234/) ...",
         ],
     );
@@ -258,4 +258,105 @@ fn the_runner_refuses_a_book_with_nothing_to_run_under_strict() {
     let out = book.run();
     assert!(!out.status.success());
     assert!(Path::new(&book.dir).exists());
+}
+
+#[test]
+fn exit_status_is_checked_even_when_output_matches() {
+    for (name, declaration, command, succeeds) in [
+        ("exit-one", "run; exit 1", "exit 1", true),
+        ("exit-wrong", "run; exit 1", "exit 0", false),
+        ("exit-zero", "run; exit 0", "exit 7", false),
+        ("exit-invalid", "run; exit banana", "true", false),
+        ("exit-range", "run; exit 256", "true", false),
+        ("exit-duplicate", "run; exit 0; exit 1", "true", false),
+        ("exit-signal", "run; exit 143", "kill -TERM $$", false),
+    ] {
+        let out = Book::new(name, &console(declaration, &[&format!("$ {command}")])).run();
+        assert_eq!(
+            out.status.success(),
+            succeeds,
+            "{name}: {}",
+            text(&out.stderr)
+        );
+    }
+}
+
+#[test]
+fn restart_replaces_a_server_and_stop_requires_it_to_exit() {
+    let server = &[
+        "$ python3 -B -u -m http.server 0 --bind 127.0.0.1",
+        "Serving HTTP on 127.0.0.1 port … (http://127.0.0.1:51234/) ...",
+    ];
+    let reach = console("run", &["$ curl -fsS http://127.0.0.1:51234/ >/dev/null"]);
+    let out = Book::new(
+        "restart",
+        &page(&[
+            &console("serve; normalize port", server),
+            &reach,
+            &console("restart; normalize port", server),
+            &reach,
+        ]),
+    )
+    .run();
+    assert!(out.status.success(), "{}", text(&out.stderr));
+    assert!(
+        text(&out.stdout).contains("2 server(s) started"),
+        "{}",
+        text(&out.stdout)
+    );
+    let out = Book::new(
+        "stop-live",
+        &page(&[
+            &console("serve; normalize port", server),
+            &console("stop", &["$ true"]),
+        ]),
+    )
+    .run();
+    assert!(
+        !out.status.success(),
+        "stop must verify that the command stopped the server"
+    );
+}
+
+#[test]
+fn a_pid_shutdown_is_reaped_before_the_next_block() {
+    let server = console(
+        "serve; normalize port",
+        &[
+            "$ sh -c 'echo $$ > server.pid; exec python3 -B -u -m http.server 0 --bind 127.0.0.1'",
+            "Serving HTTP on 127.0.0.1 port … (http://127.0.0.1:51234/) ...",
+        ],
+    );
+    let stop = console("stop; exit 0", &["$ kill \"$(cat server.pid)\""]);
+    let out = Book::new(
+        "pid-stop",
+        &page(&[
+            &server,
+            &stop,
+            &console(
+                "run; exit 0",
+                &["$ if kill -0 \"$(cat server.pid)\" 2>/dev/null; then exit 1; fi"],
+            ),
+        ]),
+    )
+    .run();
+    assert!(out.status.success(), "{}", text(&out.stderr));
+}
+
+#[test]
+fn an_exit_assertion_keeps_output_comparison_and_checks_every_command() {
+    let out = Book::new(
+        "exit-output",
+        &console("run; exit 1", &["$ printf 'actual\\n'; exit 1", "wrong"]),
+    )
+    .run();
+    assert!(!out.status.success());
+    assert!(text(&out.stderr).contains("the command printed"));
+    let out = Book::new(
+        "exit-each",
+        &console("run; exit 1", &["$ exit 0", "$ exit 1"]),
+    )
+    .run();
+    assert!(!out.status.success());
+    assert!(text(&out.stderr).contains("expected exit 1"));
 }
