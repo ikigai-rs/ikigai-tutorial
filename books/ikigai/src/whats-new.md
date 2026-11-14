@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-13**: Tic-tac-toe VI updates its Python template excerpts and explains remote reads’ uncacheable verdicts, including the cached empty-cell limit. CI now replays both stores, the host and both apps against the faces at main.
+
+  Pages: [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
+
 - **2026-11-13**: The TypeScript face now lives in ikigai-ts as @ikigai/ts, supporting Deno, Node and Bun. Clone commands and imports use the new repository name; the Book keeps its Deno examples and explains their runtime-specific entry code.
 
   Pages: [One wire, three languages](polyglot/index.md), [The TypeScript track](polyglot/typescript.md), [The repositories](repositories.md), [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md), [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)

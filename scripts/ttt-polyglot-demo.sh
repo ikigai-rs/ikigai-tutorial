@@ -26,10 +26,10 @@
 #
 #   ./scripts/ttt-polyglot-demo.sh
 #
-# NOT RUN BY CI, and the chapter says so: it needs python3, deno, the ikigai CLI, curl,
-# git, network access for the two clones, and ports 8070-8072 free. When python3 or deno
-# (or another tool) is missing it says which and exits 0 — a skip, not a pass. It exits 1
-# when anything differs.
+# Run by scripts/test-transcripts.sh with the Book's pinned ikigai CLI. Like the polyglot
+# tracks, it checks the faces at main on every run. It needs python3 with blake3, deno,
+# the ikigai CLI, curl, git, network access and ports 8070-8072 free. A missing tool is
+# a local skip, but fails under CI; missing blake3 or a difference always fails.
 #
 # The sockets live under /tmp/ttt6demo and /tmp/ikbook-ts, short paths on purpose: macOS allows a Unix socket
 # path 104 bytes, and a session scratch directory is already most of that.
@@ -42,9 +42,18 @@ for tool in python3 deno ikigai curl git cargo shasum; do
     command -v "$tool" > /dev/null 2>&1 || missing+=("$tool")
 done
 if [ "${#missing[@]}" -gt 0 ]; then
+    if [ -n "${CI:-}" ]; then
+        echo "ttt-polyglot-demo: FAILED — not installed: ${missing[*]}" >&2
+        exit 1
+    fi
     echo "ttt-polyglot-demo: SKIPPED — not installed: ${missing[*]}"
     echo "  (the chapter's transcripts need all of: python3 deno ikigai curl git cargo shasum)"
     exit 0
+fi
+
+if ! python3 -c 'import blake3' > /dev/null 2>&1; then
+    echo "ttt-polyglot-demo: Python's blake3 is required; install it with python3 -m pip install blake3 and run again." >&2
+    exit 1
 fi
 
 cargo build --quiet -p ttt-host
@@ -80,10 +89,10 @@ WORK.mkdir(parents=True)
 os.symlink(REPO, WORK / "ikigai-tutorial")
 for name, url in SIBLINGS.items():
     try:
-        subprocess.run(["git", "clone", "--quiet", "--depth", "1", url, str(WORK / name)], check=True)
+        subprocess.run(["git", "clone", "--quiet", "--depth", "1", "--branch", "main", url, str(WORK / name)], check=True)
     except subprocess.CalledProcessError:
         sys.exit(f"{name} checkout missing at {WORK / name}: could not clone {url}")
-    head = subprocess.run(["git", "-C", str(WORK / name), "rev-parse", "--short", "HEAD"],
+    head = subprocess.run(["git", "-C", str(WORK / name), "rev-parse", "HEAD"],
                           capture_output=True, text=True, check=True).stdout.strip()
     print(f"· {name} main is {head}")
 
@@ -102,7 +111,14 @@ for repo, path, commit, body in EXCERPT.findall(text):
         print(f"✗ {where}: NOT verbatim at main any more")
 
 # -- the chapter, in page order ---------------------------------------------------------
-DIRECTIVE = re.compile(r"<!-- demo: ([a-z -]+?) -->\n```\w*\n(.*?)\n```", re.S)
+# Other transcript runners may annotate the same fence (for example `transcript: serve`).
+DIRECTIVE = re.compile(
+    r"<!-- demo: ([a-z -]+?) -->\n(?:<!--[^\n]*-->\n)*```\w*\n(.*?)\n```", re.S)
+directives = DIRECTIVE.findall(text)
+if len(directives) != text.count("<!-- demo:"):
+    sys.exit("ttt-polyglot-demo: a demo annotation has no code fence; refusing to skip it")
+if any(kind not in {"start", "log", "run", "run same-as-previous"} for kind, _ in directives):
+    sys.exit("ttt-polyglot-demo: unknown demo annotation")
 started = []
 
 def normalize(out):
@@ -167,7 +183,7 @@ def wait_for(block):
 
 previous = None
 try:
-    for kind, block in DIRECTIVE.findall(text):
+    for kind, block in directives:
         if kind == "start":
             for line in block.splitlines():
                 line = line.strip()

@@ -300,4 +300,15 @@ PATH="$deno_path:$PATH"
 echo "── the polyglot tracks' peers (ikigai-cli $book_cli) ──────────────────"
 ./scripts/polyglot-tracks.sh || status=1
 
+# The full tic-tac-toe polyglot chapter: the same CLI pin and faces at main, plus the
+# workspace host and both HTTP apps. Install blake3 in an isolated environment, as the
+# tracks install their Python face; the standalone replay diagnoses a missing dependency.
+echo "── tic-tac-toe polyglot stores and apps (ikigai-cli $book_cli) ──────────────────"
+ttt_python="$PWD/target/ttt-python"
+if python3 -m venv "$ttt_python" && "$ttt_python/bin/pip" install --quiet blake3; then
+    PATH="$ttt_python/bin:$PATH" ./scripts/ttt-polyglot-demo.sh || status=1
+else
+    status=1
+fi
+
 exit "$status"
