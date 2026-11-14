@@ -271,7 +271,7 @@ $ ikigai-gonk findings file demo --socket "$PWD/.ikigai/gonk.sock" --dry-run
 would file  645d521aab16830f076e0857  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…
     key=urn:iki:finding:645d521aab16830f076e0857
     labels=finding,repo:demo,major,reproduced
-    about=urn:repo:demo:file:src/lib.rs urn:iki:finding:645d521aab16830f076e0857 urn:iki:annotation:645d521aab16830f076e0857
+    about=urn:repo:file:demo/src/lib.rs urn:iki:finding:645d521aab16830f076e0857 urn:iki:annotation:645d521aab16830f076e0857
 dry run, nothing filed: 1 published finding(s) on demo: 1 would be filed, 0 already filed, 0 skipped
 $ ikigai-gonk findings file demo --socket "$PWD/.ikigai/gonk.sock"
 filed    #1  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…
@@ -302,7 +302,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   updated:  …
   about:    urn:iki:annotation:645d521aab16830f076e0857
   about:    urn:iki:finding:645d521aab16830f076e0857
-  about:    urn:repo:demo:file:src/lib.rs
+  about:    urn:repo:file:demo/src/lib.rs
   Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty name, crashes the caller.
   - finding: urn:iki:finding:645d521aab16830f076e0857
   - file: src/lib.rs line 3

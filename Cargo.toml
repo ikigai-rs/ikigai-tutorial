@@ -371,6 +371,15 @@ oxrdf = "0.3"
 # store ^0.3.3, so the lock takes store 0.3.3 under the store pin below. The old pin "0.13.1" was a
 # ceiling below 0.14.0. A 0.x caret: also a ceiling (<0.19.0). The Architecture Book's manifold
 # prints the new names (`history`, `counts`, `backfill-closed-at`); no gonk Book cell moved.
+# 0.22.0 is the pin (set 2026-11-14, ledger #3668): what the pinned gonk (`books/gonk/gonk.rev`,
+# e569206, the tag ledger-v0.22.0, gonk PR 365) links. The version itself moved one step ahead, in
+# the core 0.3 move (tutorial PR 309, ledger #3676), because 0.22.0 is the first ledger on core
+# ^0.3.4 and store ^0.5.0; this pin's comment and gonk.rev followed. 0.22.0 adds an agent session's
+# summary on its hand-back (`urn:iki:ledger:{ledger}:item:{id}:sessions`, recorded under
+# `urn:cap:ledger:session:{ledger}`), the ledger's whole `sessions` set and the summaries-only grant
+# that reads it (`urn:cap:ledger:summaries:{ledger}`), a fourth finding severity
+# (`severity:trivial`) and a JSON face on `urn:iki:ledger:ledgers`; no existing answer changes
+# shape. The old pin "0.18.0" was a ceiling below 0.19.0. A 0.x caret: also a ceiling (<0.23.0).
 ikigai-ledger = "0.22.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link

@@ -227,8 +227,9 @@ unparseable result, an unsupported harness or a run stopped at its budget leaves
 Failure to make a summary does not itself fail the run. The summary is checked against the ledger's shape before it is
 sent; a refusal to record it is logged and leaves the hand-back standing. Recording needs
 ikigai-ledger 0.22.0 or newer and `urn:cap:ledger:session:<ledger>` in the worker's grant.
-The gonk revision this book pins still links ledger 0.21.1, so it refuses that recording;
-the starter logs the refusal and keeps the hand-back.
+The gonk revision this book pins links ledger 0.22.0, but the six scopes `client add --worker`
+enrolled above do not include that one, so this gonk refuses a worker's recording (shown after
+the hand-backs below); the starter logs the refusal and keeps the hand-back.
 
 This chapter runs the ledger exchanges by hand, without an agent harness. Save the two
 hand-backs with that reason on their last line:
@@ -267,6 +268,26 @@ The worker marks its comment as a hand-back, which makes the item wait for its d
 the release lets go of the claim. The worker's attempt to close its own work is refused at the
 grant. (The pull request URLs are the shape step 3 would print; this page has no
 forge.)
+
+A session summary is one JSON object of content-free fields. Here is the one the starter would
+send for worker-1's run, and what this gonk answers when worker-1 sends it to the item's
+`sessions`:
+
+<!-- transcript: file summary-1.json -->
+```text
+{"session": "s-1", "machineName": "worker-1", "harness": "claude", "model": "m", "exitStatus": 0, "wallClockMs": 5}
+```
+
+<!-- transcript: run; exit 1 -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:item:1:sessions' < summary-1.json
+error: denied: this capability holds neither `urn:cap:ledger:session:default` nor `urn:cap:ledger:write:default`, and this resource takes either. A ledger grant names exactly one ledger, and a grant for another verb (a worker's claim and comment, say) does not reach this one
+```
+
+The refusal is the grant's, not the ledger's: the hand-back stands, and a worker whose grant
+carries `urn:cap:ledger:session:default` would have its summary recorded on that hand-back. A
+reader of the summaries, such as a cost report, needs only `urn:cap:ledger:summaries:default`,
+which reads the ledger's whole `sessions` set (`urn:iki:ledger:default:sessions`) and no item text.
 
 ### 5. The dispatcher checks, and closes or sends it back
 
@@ -345,6 +366,7 @@ $ grep -E 'door=quic .*outcome=(conflict|denied)' .config/ikigai/gonk/log/*.log
 … log:Access urn:iki:ledger:claim seq=… door=quic verb=sink outcome=conflict dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 … log:Access urn:iki:ledger:claim seq=… door=quic verb=delete outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 … log:Access urn:iki:ledger:close seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
+… log:Access urn:iki:ledger:item:1:sessions seq=… door=quic verb=sink outcome=denied dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 ```
 
 Every refusal above, each with the principal that asked.

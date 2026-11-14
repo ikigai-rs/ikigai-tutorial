@@ -132,21 +132,24 @@ $ ikigai-gonk roborev file --quic 127.0.0.1:1070 --cert-dir .config/ikigai/gonk/
 skipped  low      below --min-severity medium: The doc comment says "retries three times" and the constant is 4.
 would file critical: `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…
     key=urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
-    labels=roborev,critical
+    kind=https://ikigai-rs.dev/ns/ledger#Finding
+    labels=roborev,severity:critical
     priority=0
-    about=urn:repo:demo:file:src/retry.rs urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
+    about=urn:repo:file:demo/src/retry.rs urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
     author=roborev
     revision=1a2b3c4
 would file high: On the final attempt the error is logged and `Ok(())` is returned.
     key=urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
-    labels=roborev,high
+    kind=https://ikigai-rs.dev/ns/ledger#Finding
+    labels=roborev,severity:major
     priority=1
-    about=urn:repo:demo:file:src/retry.rs urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
+    about=urn:repo:file:demo/src/retry.rs urn:roborev:finding:f8ac8944363de4badd880f8a593b1ccc
     author=roborev
     revision=1a2b3c4
 would file medium: The retry delay is a fixed 100 ms, so two writers retrying together collide on every attempt.
     key=urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
-    labels=roborev,medium
+    kind=https://ikigai-rs.dev/ns/ledger#Finding
+    labels=roborev,severity:minor
     priority=2
     about=urn:roborev:finding:9f1fdc5febfc449e1de32552a5365e54
     author=roborev
@@ -158,13 +161,20 @@ Each line of that is a decision the command made, and each is worth reading once
 - **Low findings are skipped by default.** roborev renders low findings even on a passing review, and
   one ledger item per nit buries the findings worth a person's time. `--min-severity low` files
   them; `high` files less.
-- **Severity becomes a label and a priority**: critical 0, high 1, medium 2, low 3.
+- **A finding is a `ledger:Finding`**, filed with `kind=`, and **its severity becomes a label and a
+  priority**. The label is the ledger's own word, from highest to lowest `severity:critical`,
+  `severity:major`, `severity:minor` and `severity:trivial`, mapped from roborev's critical, high,
+  medium and low; the priority is 0, 1, 2 or 3. The body keeps roborev's word (`- severity:
+  critical` below). `severity:trivial` arrived with ikigai-ledger 0.22.0, so a low finding
+  filed with `--min-severity low` has a level of its own.
 - **A location becomes an `about`.** `/work/demo/src/retry.rs:41-58` is under `--repo-path`, so
-  it is made relative and named as the browse resource for that file,
-  `urn:repo:demo:file:src/retry.rs`, where `demo` is the **browse root** name gonk serves the
-  repository under (`--root`). That is the join browse's file page makes, so the item shows up
-  beside the file. The medium finding named no file, so it gets no file `about` rather than a
-  guessed one.
+  it is made relative and named by the file's canonical IRI, `urn:repo:file:demo/src/retry.rs`,
+  where `demo` is the **browse root** name gonk serves the repository under (`--root`). That is
+  the form `ledger:Finding` names, so `items about=urn:repo:file:demo/src/retry.rs` finds every
+  finding on the file. (Browse itself still serves the file at `urn:repo:demo:file:src/retry.rs`;
+  findings filed before gonk PR 363 carry that form, and `ikigai-gonk ledger
+  canonical-file-iris` rewrites them, printing what it would change unless given `--apply`.)
+  The medium finding named no file, so it gets no file `about` rather than a guessed one.
 - **Every finding gets a key**, `urn:roborev:finding:{hash}`, over the root, the file and the
   problem's words with their whitespace collapsed. It is filed as the append's `key` and again
   as an `about`, and it is how the ledger knows a finding is already filed.
@@ -184,15 +194,16 @@ filed    critical #1 `write_with_retry` loops while the store answers `Busy` and
 filed    high     #2 On the final attempt the error is logged and `Ok(())` is returned.
 filed    medium   #3 The retry delay is a fixed 100 ms, so two writers retrying together collide on every attempt.
 $ curl -s http://127.0.0.1:1070/iki/ledger/item/1
-   #1  open    p0  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…  [critical roborev]
+   #1  open    p0  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…  [roborev severity:critical]
   iri:      urn:iki:ledger:default:item:…
   key:      urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
+  kind:     https://ikigai-rs.dev/ns/ledger#Finding
   filed:    … by urn:iki:host:gonk:client:…
   updated:  …
   author:   urn:iki:host:gonk:client:… (verified)
   committer: urn:iki:host:gonk:client:… at …
   revision: 1a2b3c4
-  about:    urn:repo:demo:file:src/retry.rs
+  about:    urn:repo:file:demo/src/retry.rs
   about:    urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
 
   `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer that holds the RocksDB lock for longer than the caller waits (a second `ikigai-gonk` on the same store) spins this loop forever at 100% CPU.

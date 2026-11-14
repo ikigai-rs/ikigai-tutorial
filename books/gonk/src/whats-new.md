@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-14**: The book pins gonk at its ledger 0.22.0 release. Remote workers shows a worker's session summary refused at its grant; Over MCP lists the three session tools; roborev findings carry severity:critical to severity:trivial labels and name their file by its canonical urn:repo:file: IRI.
+
+  Pages: [Introduction](introduction.md), [Remote workers](ways/workers.md), [Over MCP](agent/mcp.md), [Filing roborev findings](bridges/roborev.md), [A fresh machine, end to end](bridges/fresh-machine.md), [Review every commit](ways/review-every-commit.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
+
 - **2026-11-14**: The embedded ledger’s claim output includes its epoch, and the OpenSpec host binds the file mount used to read named mappings. The review example expects Conflict when a decision is repeated without naming its revision.
 
   Pages: [A ledger of your own](ledger/your-own.md), [OpenSpec in one chapter](spec/openspec.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md), [One-off review, and what a finding is](review/one-off.md)

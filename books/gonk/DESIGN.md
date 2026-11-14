@@ -289,6 +289,26 @@ directly because browse takes an `oxigraph::store::Store`. A newer release that 
 yet waits for the pin, so a transcript and a listing are always answered by the same module, unless
 the book needs it first.
 
+**The tenth move, onto ledger 0.22.0; the gap is CLOSED** (ledger #3668, 2026-11-14): `gonk.rev`
+moved to e569206, the tag `ledger-v0.22.0` (gonk PR 365). It links `ikigai-core` 0.3.5,
+`ikigai-ledger` 0.22.0, `ikigai-store` 0.5.0, `ikigai-browse` 0.22.0, `ikigai-script` 0.5.0 and
+`ikigai-nl` 0.6.0, exactly what the workspace's crates lock since the core 0.3 move (tutorial PR 309,
+ledger #3676), so no module differs between a cell, a listing and a transcript. The crates moved
+first that time too: for one commit they were one release ahead (ledger 0.22.0 against gonk's
+0.21.1). Ledger 0.22.0 is what lets a worker record its session summary, which "Remote workers"
+had said this gonk refused; gonk's `--worker` grant still holds no `urn:cap:ledger:session:`, so
+that page now shows the refusal at the grant. Replayed against every page: the session actions
+reached the MCP tool list and the grounding's action count, and gonk PR 363 (between dfd985e and
+e569206) moved roborev's labels to `severity:*`, added `kind=…#Finding`, and moved a finding's file
+`about` to the canonical `urn:repo:file:{root}/{path}`. The cli stays at 0.2.3, though gonk's lock
+now takes the door crates at 0.5.0; every page replays with it, and moving it is not this change.
+
+**The ninth move, onto core 0.3** (tutorial PRs 300 and 301, 2026-11-12): `gonk.rev` moved to
+0522a6d (gonk PR 358, `gonk.mount` of any prefix) and then to dfd985e (gonk PR 360), both on
+`ikigai-core` 0.3.3, `ikigai-ledger` 0.21.1, `ikigai-store` 0.5.0 and `ikigai-browse` 0.22.0 while
+the workspace's crates were still on core 0.2 and ledger 0.18.0: a gap no paragraph here recorded
+until the tenth move closed it.
+
 **The eighth move, for faces** (ledger #3219, 2026-11-06): `gonk.rev` moved to e08ac9f (gonk PR
 295, ledger #3199), the first gonk that serves `gonk.face`. It links `ikigai-browse` 0.20.8 (one
 patch past dce6578's 0.20.7) and otherwise the same crates; the cli stays at 0.2.3, whose transports

@@ -147,6 +147,8 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-item-closed__exists"
 "name":"ledger-item-history__source"
 "name":"ledger-item-holder-is__exists"
+"name":"ledger-item-sessions__sink"
+"name":"ledger-item-sessions__source"
 "name":"ledger-item-state-is__exists"
 "name":"ledger-item-state__sink"
 "name":"ledger-item-state__source"
@@ -165,9 +167,10 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-policy__exists"
 "name":"ledger-policy__source"
 "name":"ledger-reopen__sink"
+"name":"ledger-sessions__source"
 ```
 
-Thirty-five tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
+Thirty-nine tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
 `urn:iki:ledger:append`, `ledger-next__source` a `source` of `urn:iki:ledger:next`. Eight of
 them arrived with `ikigai-ledger` 0.5.0, and [A lifecycle for your
 ledger](../ledger/lifecycle.md) uses most of them over the socket: an item's lifecycle
@@ -185,6 +188,10 @@ Two more arrived by 0.14: `ledger-counts__source`, a ledger's dated counts, and
 And two with 0.18.0: `ledger-item-history__source`, [what happened to an
 item](../ledger/lifecycle.md#what-happened-to-an-item), and `ledger-history__sink`, which only a
 principal enrolled as an importer may use, to bring an item's past events from another system.
+And three with 0.22.0, for agent **sessions**: `ledger-item-sessions__sink` records a session's
+content-free summary on the item's newest hand-back, `ledger-item-sessions__source` reads one
+item's summaries, and `ledger-sessions__source` reads every summary in the ledger, newest first
+([Remote workers](../ways/workers.md#4-the-worker-hands-back-with-evidence) shows who may record one).
 A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
 deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging

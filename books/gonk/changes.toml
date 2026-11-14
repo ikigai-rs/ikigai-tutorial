@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-14"
+summary = "The book pins gonk at its ledger 0.22.0 release. Remote workers shows a worker's session summary refused at its grant; Over MCP lists the three session tools; roborev findings carry severity:critical to severity:trivial labels and name their file by its canonical urn:repo:file: IRI."
+pages = ["introduction.md", "ways/workers.md", "agent/mcp.md", "bridges/roborev.md", "bridges/fresh-machine.md", "ways/review-every-commit.md", "scripts/in-gonk.md"]
+
+[[change]]
+date = "2026-11-14"
 summary = "The embedded ledger’s claim output includes its epoch, and the OpenSpec host binds the file mount used to read named mappings. The review example expects Conflict when a decision is repeated without naming its revision."
 pages = ["ledger/your-own.md", "spec/openspec.md", "spec/ledger.md", "review/one-off.md"]
 

@@ -184,8 +184,9 @@ $ ikigai-gonk roborev file --quic 127.0.0.1:1070 --cert-dir .config/ikigai/gonk/
 filed    high     #3 The README has a title and no instructions, so a new reader cannot start the project.
 ```
 
-The finding is about `urn:repo:notes:file:README.md`, a file gonk now serves, so browse's page
-for that file and the ledger item find each other. It is authored by the `roborev` client, not by
+The finding is about `urn:repo:file:notes/README.md`, the canonical IRI of a file gonk now serves
+(browse serves it at `urn:repo:notes:file:README.md`), so asking the ledger for the items about that
+file finds it. It is labeled `severity:major`, the ledger's word for roborev's `high`. It is authored by the `roborev` client, not by
 you.
 
 <a id="where-that-leaves-you"></a>
@@ -195,7 +196,7 @@ you.
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
- 1.    #3  open    p1  The README has a title and no instructions, so a new reader cannot start the project.  [high roborev]
+ 1.    #3  open    p1  The README has a title and no instructions, so a new reader cannot start the project.  [roborev severity:major]
     p1 — priority 1; last updated …
  2.    #2  open    p-  Write the empty-queue test
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
