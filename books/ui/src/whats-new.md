@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-14**: The inspector’s catalog snapshot uses the updated module’s American spelling in the theme chooser description; it still lists 62 endpoints.
+
+  Pages: [A page is a composed resource](model/composed.md)
+
 - **2026-11-12**: The accessibility chapter explains ikigai-ui's criteria as records named by kind and target, the difference between SEE and HEAR checks, and how to report each check as Pass, Fail or Blocked with its evidence.
 
   Pages: [Accessibility, done and not bolted on](model/accessibility.md)

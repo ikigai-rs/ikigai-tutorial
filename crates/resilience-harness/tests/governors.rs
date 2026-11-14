@@ -111,3 +111,30 @@ fn a_burst_parks_behind_the_bulkhead_and_moves_with_the_clock() {
     );
     assert!(ask(&h, Verb::Sink, BURST, Some("11")).starts_with("error: invalid argument"));
 }
+
+/// Retry measures exhaustion on the harness clock and adds no random delay to
+/// transient failures; the next reader-controlled advance remains exactly five seconds.
+#[test]
+fn retry_exhaustion_and_the_next_clock_step_are_deterministic() {
+    use resilience_harness::CALL;
+
+    let h = Harness::new();
+    ask(&h, Verb::Sink, MODE, Some("fail"));
+    assert_eq!(
+        ask(&h, Verb::Source, CALL, None),
+        "error: gave up after 3 attempts over 0 ms: unavailable: upstream failed (call 3)"
+    );
+    assert_eq!(h.clock().elapsed(), std::time::Duration::ZERO);
+    assert_eq!(
+        ask(&h, Verb::Sink, CLOCK, Some("5s")),
+        "the harness clock moved 5s: it reads 5s"
+    );
+
+    let h = Harness::new();
+    ask(&h, Verb::Sink, MODE, Some("limited"));
+    assert_eq!(
+        ask(&h, Verb::Source, CALL, None),
+        "error: gave up after 3 attempts over 2000 ms: retry after 1000 ms: upstream limited (call 3)"
+    );
+    assert_eq!(h.clock().elapsed(), std::time::Duration::from_secs(2));
+}

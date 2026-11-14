@@ -90,7 +90,7 @@ Claim `#3`, and close `#2`. A claim needs a holder, because an unattributed clai
 indistinguishable from none; a close takes its reason as the value, recorded as a comment.
 
 <div class="ikigai-run" data-cmd='sink urn:iki:ledger:claim item=3 you'>
-<pre class="ikigai-run-expected">#3 claimed by you
+<pre class="ikigai-run-expected">#3 claimed by you at epoch 1
 [uncacheable]</pre>
 </div>
 

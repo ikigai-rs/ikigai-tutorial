@@ -7,6 +7,10 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
+- **2026-11-14**: The logging walkthrough runs on ikigai-log 0.11, whose intact rotations no longer emit a false chain-break alarm. Segment and event counts reflect that repair, and file counts exclude the writer’s advisory lock.
+
+  Pages: [Logging](running/logging.md)
+
 - **2026-11-13**: The Introduction shows how to list linked crate versions with --version --verbose. The REPL's failed batch example now checks its exit status directly.
 
   Pages: [Introduction](introduction.md), [The REPL and its modes](binary/repl.md)

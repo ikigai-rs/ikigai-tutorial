@@ -19,8 +19,8 @@ ledger action, every store query, the kernel's own meta endpoints.
 <div class="ikigai-run" data-cmd='source urn:kernel:actions'>
 <pre class="ikigai-run-expected">urn:iki:ledger:lifecycle:{name}
 urn:iki:ledger:policy:{name}
+urn:iki:store:graph-written:{graph}
 urn:iki:store:graphs
-urn:iki:store:info
 urn:kernel:actions
 urn:kernel:aliases
 urn:kernel:cache
@@ -39,18 +39,20 @@ urn:iki:ledger:ledgers
 urn:iki:ledger:{ledger}:item:{id}
 urn:iki:ledger:{ledger}:item:{id}:closed
 urn:iki:ledger:{ledger}:item:{id}:holder:{holder}
+urn:iki:ledger:{ledger}:item:{id}:sessions
 urn:iki:ledger:{ledger}:item:{id}:state:{value}
 urn:iki:store:graph-info
 urn:iki:store:graph-update
+urn:iki:store:info
 urn:iki:store:update
 urn:iki:ledger:{ledger}:backfill-closed-at
+urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:history
 urn:iki:ledger:{ledger}:item:{id}:about
 urn:iki:ledger:{ledger}:item:{id}:history
 urn:iki:ledger:{ledger}:item:{id}:state
 urn:iki:ledger:{ledger}:label
 urn:iki:store:load
-urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:counts
 urn:iki:ledger:{ledger}:defer
 urn:iki:ledger:{ledger}:doctor
@@ -58,6 +60,7 @@ urn:iki:ledger:{ledger}:purge
 urn:iki:store:dump
 urn:iki:ledger:{ledger}:link
 urn:iki:ledger:{ledger}:reopen
+urn:iki:ledger:{ledger}:sessions
 urn:iki:store:ask
 urn:iki:store:construct
 urn:iki:store:describe
@@ -94,10 +97,13 @@ urn:iki:ledger:{ledger}:item:{id}:closed
 urn:iki:ledger:{ledger}:item:{id}:holder:{holder}
 urn:iki:ledger:{ledger}:item:{id}:state:{value}
 urn:iki:store:graph-info
+urn:iki:ledger:{ledger}:claim
 urn:iki:ledger:{ledger}:item:{id}:history
+urn:iki:ledger:{ledger}:item:{id}:sessions
 urn:iki:ledger:{ledger}:item:{id}:state
 urn:iki:ledger:{ledger}:counts
 urn:iki:ledger:{ledger}:doctor
+urn:iki:ledger:{ledger}:sessions
 urn:iki:store:graph-ask
 urn:iki:store:graph-construct
 urn:iki:store:graph-describe

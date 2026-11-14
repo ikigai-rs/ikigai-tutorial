@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-14**: The embedded ledger’s claim output includes its epoch, and the OpenSpec host binds the file mount used to read named mappings. The review example expects Conflict when a decision is repeated without naming its revision.
+
+  Pages: [A ledger of your own](ledger/your-own.md), [OpenSpec in one chapter](spec/openspec.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md), [One-off review, and what a finding is](review/one-off.md)
+
 - **2026-11-12**: SPARQL results explain CURIE render rules and prefix legends. The browser chapter covers restart notices, extra invite scopes and passkey grant additions; mounted reads explain routes and permissions, the Dashboard gains All agents totals, and Remote workers explains task-layer renewal limits across offers and restarts.
 
   Pages: [The ledger in a browser](ledger/browser.md), [Explain, with a mounted model](browse/explain.md), [The three doors, and who is asking](machines/doors.md), [Pages of your own](faces/own.md), [The Dashboard](ledger/dashboard.md), [Remote workers](ways/workers.md)

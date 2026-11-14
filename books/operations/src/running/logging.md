@@ -28,7 +28,7 @@ exit 1
 ```
 
 So this chapter runs a host: `log-host`, in this book's repository, the smallest kernel that opens
-a log. It composes `ikigai-log` 0.9.2, SPARQL and the function library, and serves them on a Unix
+a log. It composes `ikigai-log` 0.11.0, SPARQL and the function library, and serves them on a Unix
 socket, which `ikigai --connect` then drives as [any served kernel](../binary/repl.md). Everything
 it does is a few lines of library calls you would make in your own host, and they are shown below.
 
@@ -234,8 +234,8 @@ $ log-host ask --door door.sock urn:agent:alice urn:iki:fn:toUpper in=three
 THREE
 $ log-host ask --door door.sock urn:agent:bob urn:iki:fn:toUpper in=four
 FOUR
-$ ls home/log | wc -l | tr -d ' '
-3
+$ ls home/log/*.log | wc -l | tr -d ' '
+2
 $ grep -h -E 'log:Rotation|^#seal' home/log/shop-2026-11-02T09-00-00Z.log
 #seal 1-4 sha256:…
 #seal 5-8 sha256:…
@@ -251,16 +251,13 @@ again. The new one states that seal in its `@prev`:
 ```console
 $ ls home/log/*.log | tail -1 | xargs grep -h '^@prev'
 @prev     sha256:…
-$ ls home/log/*.log | tail -1 | xargs grep -h log:ChainBroken | cut -d' ' -f2-3
-log:ChainBroken urn:log:shop:…
+$ cat home/log/*.log | awk '/log:ChainBroken/ { n++ } END { print n+0 }'
+0
 ```
 
-**That second line is a false alarm you will see on every rotation (ledger #2951).** In
-`ikigai-log` 0.9.2 the check a rotation runs reads the segment it just sealed and its predecessor,
-before the successor has any lines, so it finds the rotation marker's `next=` naming a segment
-"not here", and lands a
-`log:ChainBroken` saying the chain was truncated. The chain is fine, and `urn:log:verify` says so
-below. Until that changes, do not alert on `log:ChainBroken` alone: ask verify.
+The second command confirms there is no `log:ChainBroken` event on this intact chain.
+The false alarm emitted during rotation in `ikigai-log` 0.9.2 is fixed in 0.11.0.
+The directory also holds the writer's advisory lock file; count `*.log` when counting segments.
 
 ### Reading a segment, as text and as Turtle
 
@@ -404,8 +401,8 @@ $ mkdir -p restored/log
 $ cp recovered/log.toml restored/
 $ cp -p recovered/*.log restored/log/
 $ for segment in restored/log/*.log; do cmp "$segment" "recovered/$(basename "$segment")" || exit 1; done
-$ ls restored/log | wc -l | tr -d ' '
-3
+$ ls restored/log/*.log | wc -l | tr -d ' '
+2
 ```
 
 <!-- transcript: serve -->
@@ -423,8 +420,7 @@ orderly end:
 $ ikigai --connect restored.sock -c 'source urn:log:verify' < /dev/null 2>/dev/null | sed -E 's/ (entries|seals|level|prev|signed|head)=[^ ]*//g; s/ states .* — / — /'
 segment urn:log:shop:2026-11-02T09-00-00Z OK
 segment urn:log:shop:… OK
-segment urn:log:shop:… OK
-verified 3 segment(s), 0 broken
+verified 2 segment(s), 0 broken
 ```
 
 **A tampered line.** Here someone rewrites who asked, in the first segment of the restored copy:
@@ -439,13 +435,12 @@ segment urn:log:shop:2026-11-02T09-00-00Z BROKEN
   BROKEN seal 9-12 — the alteration is between sequence 9 and 12
   BROKEN seal 13-13 — the alteration is between sequence 13 and 13
 segment urn:log:shop:… OK
-segment urn:log:shop:… OK
-verified 3 segment(s), 1 broken
+verified 2 segment(s), 1 broken
 ```
 
 The verify line is cut down here to fit: the real one also prints each seal's stated and computed
 hash. The first seal to disagree says where to look. Every seal after it disagrees too, because the
-chain is one hash carried forward. The next segments stay `OK`: the first of them states what the old
+chain is one hash carried forward. The next segment stays `OK`: it states what the old
 head *was*, and it is that statement which lets a good copy prove the tampered one wrong.
 
 **A missing successor.** Put the good copy back and take away the newest segment, which the one
@@ -457,10 +452,9 @@ chain cut at its newest end:
 $ cp -p recovered/shop-2026-11-02T09-00-00Z.log restored/log/
 $ rm "$(ls restored/log/*.log | tail -1)"
 $ ikigai --connect restored.sock -c 'source urn:log:verify' < /dev/null 2>/dev/null | sed -E 's/ (entries|seals|level|prev|signed|head)=[^ ]*//g; s/ states .* — / — /'
-segment urn:log:shop:2026-11-02T09-00-00Z OK
-segment urn:log:shop:… BROKEN
+segment urn:log:shop:2026-11-02T09-00-00Z BROKEN
   BROKEN <urn:log:shop:…> rotated into <urn:log:shop:…>, which is not here: the chain was truncated at its head, where nothing points forward
-verified 2 segment(s), 1 broken
+verified 1 segment(s), 1 broken
 ```
 
 **What an `OK` does not prove.** The chain is unkeyed SHA-256. Anyone who can write the files and
@@ -481,8 +475,7 @@ $ cp -p recovered/*.log restored/log/
 $ rm restored/log/shop-2026-11-02T09-00-00Z.log
 $ ikigai --connect restored.sock -c 'source urn:log:verify' < /dev/null 2>/dev/null | sed -E 's/ (entries|seals|level|prev|signed|head)=[^ ]*//g; s/ states .* — / — /'
 segment urn:log:shop:… OK
-segment urn:log:shop:… OK
-verified 2 segment(s), 0 broken
+verified 1 segment(s), 0 broken
 ```
 
 So removing from the old end, and only from there, keeps verify green, and it also means that an
@@ -529,13 +522,12 @@ log:Message
 log:Resolution
 $ cat home/log/*.log | awk '/^[0-9]/ { n[$2]++ } END { for (c in n) print n[c], c }' | sort -k2
 1 log:CapabilityDenied
-2 log:ChainBroken
 1 log:Dropped
 3 log:Message
-4 log:ProcessStart
+3 log:ProcessStart
 1 log:ProcessStop
 19 log:Resolution
-2 log:Rotation
+1 log:Rotation
 ```
 
 Start here, and stay here if it answers the question. These commands need no kernel and work on
@@ -551,7 +543,7 @@ list:
 $ cp -p recovered/shop-2026-11-02T09-00-00Z.log restored/log/
 $ ikigai --connect restored.sock -c 'source urn:log:segments' < /dev/null 2>/dev/null | grep '^urn:' | paste -sd, - > segments.txt
 $ tr , '\n' < segments.txt | wc -l | tr -d ' '
-3
+2
 ```
 
 ### Transreption to Turtle
@@ -693,6 +685,3 @@ $ grep -c "$(printf '\302\205')" home/log/shop-2026-11-02T10-00-00Z.log
 $ cat home/log/shop-2026-11-02T10-00-00Z.log | ikigai --connect log.sock -c 'source urn:log:transrept' 2>/dev/null | grep -c "$(printf '\302\205')"
 1
 ```
-
-- **A false `log:ChainBroken` on every rotation** in `ikigai-log` 0.9.2 (ledger #2951), as shown under
-  [Rotation](#rotation-as-it-happens).

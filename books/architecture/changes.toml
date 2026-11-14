@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-14"
+summary = "The manifold listings match the upgraded store and ledger, and the harness reports typed retry exhaustion. Its retry clock and backoff are fixed so the walkthrough and stages replay deterministically."
+pages = ["spine/manifold.md", "overlays/overlays.md"]
+
+[[change]]
 date = "2026-11-06"
 summary = "The caching and presence chapters now link back to the examples they build on, and the caching advice distinguishes diagnostics from measuring read cost. \"The other books\" links the dynamic-space example and distinguishes the ledger cells from the overlay harness."
 pages = ["economics/economics.md", "closing/closing.md", "other-books.md"]

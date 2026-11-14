@@ -519,6 +519,10 @@ pub fn root(
         .observed(board, GOVERNOR)
         .expect("one governor, named once");
     let retry = Retry::new(breaker, ATTEMPTS)
+        .with_clock(Arc::clone(clock) as _)
+        // Keep the lesson on the reader-controlled clock: no randomized backoff.
+        // RetryAfter still waits the upstream's stated minimum.
+        .with_backoff(Duration::ZERO, Duration::ZERO)
         .with_timer(timer.clone())
         .with_max_wait(MAX_WAIT);
 

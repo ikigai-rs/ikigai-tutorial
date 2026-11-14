@@ -208,7 +208,7 @@ fn the_controls_trip_the_breaker_and_close_it_again() {
     let reached: Vec<&str> = ten.lines().filter(|l| l.contains("(call ")).collect();
     assert_eq!(
         reached,
-        ["error: unavailable: upstream failed (call 3)"],
+        ["error: gave up after 3 attempts over 0 ms: unavailable: upstream failed (call 3)"],
         "of ten calls, only the first reached the stub (three times): {ten}"
     );
     assert_eq!(

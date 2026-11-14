@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-14"
+summary = "The logging walkthrough runs on ikigai-log 0.11, whose intact rotations no longer emit a false chain-break alarm. Segment and event counts reflect that repair, and file counts exclude the writer’s advisory lock."
+pages = ["running/logging.md"]
+
+[[change]]
 date = "2026-11-13"
 summary = "The Introduction shows how to list linked crate versions with --version --verbose. The REPL's failed batch example now checks its exit status directly."
 pages = ["introduction.md", "binary/repl.md"]

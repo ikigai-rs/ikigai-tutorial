@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-14"
+summary = "The embedded ledger’s claim output includes its epoch, and the OpenSpec host binds the file mount used to read named mappings. The review example expects Conflict when a decision is repeated without naming its revision."
+pages = ["ledger/your-own.md", "spec/openspec.md", "spec/ledger.md", "review/one-off.md"]
+
+[[change]]
 date = "2026-11-12"
 summary = "SPARQL results explain CURIE render rules and prefix legends. The browser chapter covers restart notices, extra invite scopes and passkey grant additions; mounted reads explain routes and permissions, the Dashboard gains All agents totals, and Remote workers explains task-layer renewal limits across offers and restarts."
 pages = ["ledger/browser.md", "browse/explain.md", "machines/doors.md", "faces/own.md", "ledger/dashboard.md", "ways/workers.md"]

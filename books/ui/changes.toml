@@ -18,6 +18,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-14"
+summary = "The inspector’s catalog snapshot uses the updated module’s American spelling in the theme chooser description; it still lists 62 endpoints."
+pages = ["model/composed.md"]
+
+[[change]]
 date = "2026-11-12"
 summary = "The accessibility chapter explains ikigai-ui's criteria as records named by kind and target, the difference between SEE and HEAR checks, and how to report each check as Pass, Fail or Blocked with its evidence."
 pages = ["model/accessibility.md"]

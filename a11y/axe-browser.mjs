@@ -202,7 +202,15 @@ async function auditTheme(theme) {
         const label = `${theme.padEnd(5)} ${rel}`;
         const page = await context.newPage();
         await page.goto(`${ORIGIN}${siteUrl}${rel}`, { waitUntil: "load" });
-        const problem = await start(page);
+        let problem;
+        try {
+            problem = await start(page);
+        } catch (error) {
+            const state = await page.locator(
+                ".ikigai-run-caption, .ikigai-stages .ikigai-stages-status"
+            ).allTextContents();
+            throw new Error(`${label}: live content did not settle; captions and stages: ${JSON.stringify(state)}`, { cause: error });
+        }
         if (problem) {
             failures += 1;
             err.push(`${label}: ${problem}`);

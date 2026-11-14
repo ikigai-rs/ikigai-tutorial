@@ -143,7 +143,8 @@ and for every run of the test that replays it. So the harness clock moves only w
 wait pending finishes first and moves the clock to its deadline, in no real time. A timeout
 racing a 10-second call against its 2-second budget fires at 2 seconds, exactly, on every page,
 and the call it abandoned never finishes. That makes every answer below the same for you as for
-the chapter.
+the chapter. Retry uses this same clock for elapsed time; randomized backoff is disabled
+in this teaching harness, while a `RetryAfter` still waits its stated minimum.
 
 **What the picture draws, and what it cannot.** The circuit breaker and the bulkhead appear in
 the picture as governors, each in the box of the space it governs. That is the transparency
@@ -280,7 +281,7 @@ Set the stub failing. This changes nothing in the picture: the mode is the stub'
 Make one governed call. It fails, but look at the call number:
 
 <div class="ikigai-run" data-harness='overlays' data-cmd='source urn:iki:tutorial:harness:call'>
-<pre class="ikigai-run-expected">error: unavailable: upstream failed (call 3)</pre>
+<pre class="ikigai-run-expected">error: gave up after 3 attempts over 0 ms: unavailable: upstream failed (call 3)</pre>
 </div>
 
 One call from you was three calls to the stub. `unavailable` is transient, so `Retry` re-issued
@@ -402,11 +403,11 @@ trace  urn:iki:tutorial:harness:call
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 &#32;
-urn:iki:tutorial:harness:call   upstream · failed · … · 2000ms · failed=retry-after answered-by=urn:iki:space:tutorial:harness:governed
+urn:iki:tutorial:harness:call   upstream · failed · … · 2000ms · failed=gave-up answered-by=urn:iki:space:tutorial:harness:governed
 ├─ urn:iki:tutorial:harness:mode   harness-mode · computed · … · 0ms · answered-by=urn:iki:space:tutorial:harness:upstream
 ├─ urn:iki:tutorial:harness:mode   harness-mode · cached · … · 0ms · answered-by=urn:iki:space:tutorial:harness:upstream
 └─ urn:iki:tutorial:harness:mode   harness-mode · cached · … · 0ms · answered-by=urn:iki:space:tutorial:harness:upstream
-urn:iki:tutorial:harness:call   error: retry after 1000 ms: upstream limited (call 7)</pre>
+urn:iki:tutorial:harness:call   error: gave up after 3 attempts over 2000 ms: retry after 1000 ms: upstream limited (call 7)</pre>
 </div>
 
 Read it from the inside out. The stub reads its mode once per call, and there are three reads
@@ -447,7 +448,7 @@ Make the stub slow: it now takes 10 seconds, and the call's budget is 2.
 source urn:iki:tutorial:harness:call'>
 <pre class="ikigai-run-expected">the upstream is now slow
 [uncacheable]
-error: timeout: `urn:iki:tutorial:harness:call` exceeded 2000ms</pre>
+error: gave up after 3 attempts over 6000 ms: timeout: `urn:iki:tutorial:harness:call` exceeded 2000ms</pre>
 </div>
 
 The timeout names the target it bounded, and its class is transient, because the overlay cannot

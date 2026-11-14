@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-11
 
+- **2026-11-14**: The manifold listings match the upgraded store and ledger, and the harness reports typed retry exhaustion. Its retry clock and backoff are fixed so the walkthrough and stages replay deterministically.
+
+  Pages: [The manifold, and the UI that falls out of it](spine/manifold.md), [Spaces that wrap spaces](overlays/overlays.md)
+
 - **2026-11-06**: The caching and presence chapters now link back to the examples they build on, and the caching advice distinguishes diagnostics from measuring read cost. "The other books" links the dynamic-space example and distinguishes the ledger cells from the overlay harness.
 
   Pages: [Golden threads and the cost of a read](economics/economics.md), [Presence and the audit axis](closing/closing.md), [The other books](other-books.md)

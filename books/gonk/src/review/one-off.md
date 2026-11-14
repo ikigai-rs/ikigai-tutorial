@@ -156,7 +156,7 @@ assert!(!notes.contains("1d920b0266c30789b5c61b08"));
 
 // A decision is a record. Changing it means saying which decision is revised.
 let again = ask(&browse, Verb::Sink, wrong, &[("decision", "publish")]);
-assert!(matches!(again, Err(Error::InvalidArgument { .. })));
+assert!(matches!(again, Err(Error::Conflict(_))));
 assert!(format!("{}", again.unwrap_err())
     .contains("revises=urn:iki:finding:1d920b0266c30789b5c61b08:decision"));
 
