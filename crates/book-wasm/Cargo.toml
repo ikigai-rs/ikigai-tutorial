@@ -92,8 +92,8 @@ ikigai-sparql.workspace = true
 # demangled names, 7,411,720 to 15,183,229 bytes (xrust's generic types make long ones); code
 # grew 4,930,228 to 6,333,162 and data 1,508,000 to 1,769,748.
 rss-river = { path = "../rss-river" }
-ikigai-xslt = "0.4.0"
-ikigai-text = "0.4.0"
+ikigai-xslt = "0.8.1"
+ikigai-text = "0.5.0"
 # A cell that renders its view (`data-render='html'`, js/run.js): ikigai-ui's token stylesheet,
 # rewritten for the shadow root the view is shown in (`viewStyles`). It links ikigai-ui 0.4.1, the
 # UI book's version, whose space (htmx, the shell, the palettes) is compiled in but NOT bound in
@@ -143,7 +143,7 @@ ikigai-vocab.workspace = true
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
 # 0.2's plain `trace` leaves out the kernel's `defaulted` notes; `trace --defaults` prints them,
 # which "A space that changes while it runs" asks for under its view.
-ikigai-engine = "0.2.1"
+ikigai-engine = "0.5.0"
 # The `Resolver` seam the engine drives, implemented here by `InChain` so a cell can run in
 # one chain (a game's, a person's scenario) on the page's kernel. 0.1.29 matches the engine:
 # it is where `issue_as_async_in` and `is_cached_in` arrived, which `InChain` overrides to
@@ -152,7 +152,7 @@ ikigai-engine = "0.2.1"
 # 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-resolve = "0.2.1"
+ikigai-resolve = "0.5.0"
 # The trait is an `#[async_trait]`, so its implementor needs the macro.
 async-trait = "0.1"
 # `block_on` for the trait's one synchronous method, as the kernel's own impl does.

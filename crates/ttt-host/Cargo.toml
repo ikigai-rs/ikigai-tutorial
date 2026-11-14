@@ -42,7 +42,7 @@ tic-tac-toe = { path = "../tic-tac-toe" }
 # it to `None`, keeping the endpoint's answer, as before.
 # 0.2.9 is the pin (set 2026-11-02, ledger #2853): the newest release, on ikigai-fn 0.9, the copy
 # this workspace's crates share.
-ikigai-web = "0.2.9"
+ikigai-web = "0.5.2"
 # The socket both ways: `serve` (this host's kernel for other processes) and `connect` (a
 # peer store). 0.1.30 speaks wire v8 (a typed Conflict), backward compatible with the v7
 # the Python and Deno faces were built against; both speak v8 at their main.
@@ -50,7 +50,7 @@ ikigai-web = "0.2.9"
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
 # 0.2 speaks wire v10.
-ikigai-ipc = "0.2.1"
+ikigai-ipc = "0.5.2"
 # `MountedRemote::overriding`: a peer store forwarded under its own names, the same mount
 # `ikigai --override urn:iki:tutorial:ttt:stored:=<socket>` builds. 0.1.30 is the release
 # the two crates above belong to.
@@ -60,7 +60,7 @@ ikigai-ipc = "0.2.1"
 # Since 0.1.64 a mount holds every answer as uncacheable here (a cut on the peer never crosses
 # back), so a game over a peer store caches nothing in this host, and the store contract is run
 # against the peer's own answers (`peer_answers` in src/lib.rs), not the mount's.
-ikigai-resolve = "0.2.1"
+ikigai-resolve = "0.5.0"
 # `-c <line>`: the REPL grammar (`source`, `sink`, `cache`, `trace`) run against the game's
 # own kernel in this process, so a line's verdict is that kernel's. 0.1.18 is the floor
 # book-wasm states for the same `Engine::new` / `eval` / `Action` surface.
@@ -68,7 +68,7 @@ ikigai-resolve = "0.2.1"
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
 # 0.2's plain `trace` leaves out the kernel's `defaulted` notes; `trace --defaults` prints them.
-ikigai-engine = "0.2.1"
+ikigai-engine = "0.5.0"
 async-trait = "0.1"
 futures.workspace = true
 # The runtime ikigai-web's server runs on.

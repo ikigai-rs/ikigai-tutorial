@@ -45,6 +45,7 @@ pub fn minter(enrolled: BTreeMap<String, Vec<String>>) -> Minter {
 /// decision be tested without a certificate, a socket or a running peer.
 pub fn peer(fingerprint: &str) -> PeerIdentity {
     PeerIdentity {
+        source_address: None,
         segment_id: format!("segment-{fingerprint}"),
         fingerprint: fingerprint.to_string(),
     }

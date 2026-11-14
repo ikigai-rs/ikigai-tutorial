@@ -299,7 +299,10 @@ async fn the_edge_decodes_a_path_segment_by_segment_and_refuses_a_malformed_esca
 #[tokio::test(flavor = "multi_thread")]
 async fn a_peer_store_that_keeps_the_contract_plays_a_game() {
     let store = Arc::new(CellStore::default());
-    let peer = serve_peer(Kernel::new(Arc::new(stored_space(store.clone()))));
+    let peer = serve_peer(Kernel::with_meta_renderer(
+        Arc::new(stored_space(store.clone())),
+        Arc::new(ikigai_vocab::TurtleRenderer),
+    ));
     let args = ["--game".to_string(), format!("p={}", peer.display())];
     let host = Arc::new(Host::build(&parse_args(args).expect("valid")).expect("accepted"));
     let addr = serve_http(host).await;
@@ -586,11 +589,14 @@ fn the_startup_line_names_the_port_it_bound() {
 /// in ANOTHER process — the verdicts are that kernel's, and a trace shows the peer's own span
 /// under the stored cell. A mounted answer is held as uncacheable here (`ikigai-resolve`'s
 /// rule: a cut on the peer never crosses back), so the board over it is `[uncacheable]` every
-/// time, and the trace says why: the mount's node is `uncached=declared`, the cell over it
+/// time, and the trace says why: the mount's node is `uncached=mounted`, the cell over it
 /// `uncached=dependency` on the stored cell.
 #[test]
 fn run_lines_answer_with_the_game_kernels_verdicts_over_a_peer_store() {
-    let peer = serve_peer(Kernel::new(Arc::new(stored_space(Arc::default()))));
+    let peer = serve_peer(Kernel::with_meta_renderer(
+        Arc::new(stored_space(Arc::default())),
+        Arc::new(ikigai_vocab::TurtleRenderer),
+    ));
     let args = ["--store".to_string(), peer.display().to_string()];
     let host = Host::build(&parse_args(args).expect("valid")).expect("accepted");
     let lines: Vec<String> = [
@@ -619,7 +625,7 @@ fn run_lines_answer_with_the_game_kernels_verdicts_over_a_peer_store() {
     assert!(
         out.lines()
             .any(|line| line.contains("─ urn:iki:tutorial:ttt:stored:1:1 ")
-                && line.ends_with("uncached=declared")),
+                && line.ends_with("uncached=mounted")),
         "{out}"
     );
     // The stored cell twice: the mount's node in this kernel, and the peer's own under it.

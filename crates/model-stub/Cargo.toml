@@ -30,6 +30,6 @@ ikigai-vocab.workspace = true
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0). It speaks wire v10
 # and still serves v7 to v9 at the version a peer's hello names (`ikigai_wire::MIN_PROTOCOL_VERSION`),
 # so the pinned gonk's older client and this stub still agree on one protocol.
-ikigai-ipc = "0.2.1"
+ikigai-ipc = "0.5.2"
 async-trait = "0.1"
 serde_json.workspace = true

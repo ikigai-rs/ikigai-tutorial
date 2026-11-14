@@ -23,5 +23,5 @@ ikigai-sparql.workspace = true
 ikigai-fn.workspace = true
 ikigai-vocab.workspace = true
 # The socket `ikigai --connect` dials. The same release `crates/model-stub` takes.
-ikigai-ipc = "0.2.1"
+ikigai-ipc = "0.5.2"
 futures.workspace = true

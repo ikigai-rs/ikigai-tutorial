@@ -29,17 +29,17 @@ ikigai-core.workspace = true
 # 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-ipc = "0.2.1"
+ikigai-ipc = "0.5.2"
 # 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-quic = "0.2.1"
+ikigai-quic = "0.5.2"
 # `MountedRemote` (the alias/override composition) and the `Resolver` surface a
 # connected peer presents.
 # 0.2.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.63" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-resolve = "0.2.1"
+ikigai-resolve = "0.5.0"
 # `Failover` — what `--prefer` is made of. 0.2.0 is the floor (set 2026-10-21) because "Preference"
 # teaches what it changed: `Failover` decides by core 0.1.108's `Error::class()`, advancing on a
 # transient OR a retry-after failure of an idempotent verb (`Verb::is_idempotent`), and returns
@@ -55,7 +55,7 @@ ikigai-resolve = "0.2.1"
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.2" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-throttle = "0.3.0"
+ikigai-throttle = "0.5.1"
 async-trait = "0.1"
 futures.workspace = true
 
@@ -65,6 +65,6 @@ hello-camel = { path = "../hello-camel" }
 # `error_status`, the HTTP edge's table: "Failure has a class" prints it, and its test holds
 # that table to this crate rather than to a copy. The door itself stays out of this crate's
 # code. The same pin as `ttt-host`, so the workspace links one copy.
-ikigai-web = "0.2.9"
+ikigai-web = "0.5.2"
 # `TurtleRenderer`, to read a declared failure back out of the contract a `Meta` answers.
 ikigai-vocab.workspace = true

@@ -56,15 +56,23 @@ pub fn crate_dir() -> PathBuf {
 /// The store, the ledger, and the lift, as one space.
 ///
 /// The lift finds mappings BY NAME under a config home, at
-/// `<home>/markdown/mappings/<name>/mapping.ttl`. A host passes its own; this crate's is
-/// `config/` beside it, so the book never reads the reader's `~/.config`.
+/// `<home>/markdown/mappings/<name>/mapping.ttl`, through the file mount bound below.
+/// A host passes its own; this crate's is `config/` beside it, so the book never reads
+/// the reader's `~/.config`.
 pub fn space(mapping_home: &Path) -> Fallback {
     let store = DurableStore::in_memory().expect("an in-memory store opens");
     let home = Arc::new(MappingHome::new(Some(mapping_home.to_path_buf())));
     Fallback::new(vec![
         Arc::new(ikigai_store::space(store)) as Arc<dyn Space>,
         Arc::new(ikigai_ledger::space()) as Arc<dyn Space>,
-        Arc::new(ikigai_markdown::space_with(home)) as Arc<dyn Space>,
+        Arc::new(
+            ikigai_markdown::space_with(Arc::clone(&home)).bind(
+                ikigai_core::UriTemplate::parse(ikigai_markdown::FILE_TEMPLATE)
+                    .expect("the mapping file template parses"),
+                ikigai_fs::FileEndpoint::new(home.root().expect("an explicit config home"))
+                    .cacheable(),
+            ),
+        ) as Arc<dyn Space>,
     ])
 }
 
