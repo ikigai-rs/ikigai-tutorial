@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-14"
+summary = "The examples run on core 0.3 and its compatible modules, with refreshed cache and grounding output. Scripts inspect the items graph’s write thread, and the failure chapter explains how nested retries count inner attempts."
+pages = ["modules/status.md", "streams/bytes.md", "streams/replay.md", "explore/lab.md", "beyond/datasets.md", "code/scripts.md", "code/sentence.md", "beyond/failure.md", "applied/tic-tac-toe-6.md"]
+
+[[change]]
 date = "2026-11-13"
 summary = "Tic-tac-toe VI updates its Python template excerpts and explains remote reads’ uncacheable verdicts, including the cached empty-cell limit. CI now replays both stores, the host and both apps against the faces at main."
 pages = ["applied/tic-tac-toe-6.md"]

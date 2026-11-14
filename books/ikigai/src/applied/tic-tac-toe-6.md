@@ -149,7 +149,7 @@ trace  urn:iki:tutorial:ttt:cell:1:1
   transport   embedded · in-process
 
 urn:iki:tutorial:ttt:cell:1:1   ttt-cell · computed · main · — · uncached=dependency urn:iki:tutorial:ttt:stored:1:1   → 1b  X
-└─ urn:iki:tutorial:ttt:stored:1:1   ttt-stored · computed · main · — · uncached=declared
+└─ urn:iki:tutorial:ttt:stored:1:1   ttt-stored · computed · main · — · uncached=mounted
    └─ urn:iki:tutorial:ttt:stored:1:1   ttt-stored · computed · Thread-2 (_handle) · 0ms
 ---
 -X-
@@ -169,7 +169,7 @@ Rust, because the platonic cell turns exactly that refusal into the empty cell. 
 checked the rules in Rust and wrote one mark into Python. Once a played square is read,
 its uncacheable remote answer makes the board uncacheable too, so both board reads compute
 it. The trace names that dependency in `uncached=dependency`; the mount says
-`uncached=declared`. The refusal still came from rules that never saw a line of Python.
+`uncached=mounted`. The refusal still came from rules that never saw a line of Python.
 
 The trace is the part to look at. The cell's child is the stored cell, twice: once as the
 host's kernel resolved it, on its `main` thread, and once more as a span from the other

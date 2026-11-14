@@ -6,11 +6,11 @@ This chapter separates what you can use today from what still needs to be built.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.2.12**, stamped on
-2026-11-02 (its newest release on crates.io at its stamp), and
-`ikigai-module` **0.5.1**, stamped on 2026-10-27 (its newest release on crates.io at its stamp;
+them is a claim, not a fact. This book builds against `ikigai-core` **0.3.5**, stamped on
+2026-11-14 (the release used for this replay), and
+`ikigai-module` **0.6.0**, stamped on 2026-11-14 (the release used for this replay;
 the module claims below were written at 0.4.0, carry that stamp, and each still holds at
-0.5.1), and its shell examples are replayed against
+0.6.0), and its shell examples are replayed against
 `ikigai-cli` **0.2.9**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
 release used for the 2026-11-02 replay). A
 test (`crates/book-urns/tests/book_claims.rs`)
@@ -131,7 +131,7 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.2.12. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.3.5. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 Those seventeen releases are summarized after the newer changes below. The eight releases
 from 0.1.96 to 0.1.103 are taught in the chapters they touch. Of the nine from 0.1.104 to

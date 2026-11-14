@@ -95,19 +95,19 @@ The line worth remembering is the one between `Timeout` and `OverBudget`. `Timeo
 something else ran out*, and is worth repeating. `OverBudget` is *this computation ran past a bound
 you hold*, and costs the same and fails the same on a repeat. Be careful with the store here: the
 budget in [A query's authority is its dataset](datasets.md) still answers `Timeout` (checked at
-`ikigai-store` 0.3.3), because core left the budgeted modules to move in their own releases. Until
+`ikigai-store` 0.5.0), because core left the budgeted modules to move in their own releases. Until
 it moves, a `Retry` overlay above a store will spend its budget re-running a query that ran out of
 time.
 
 ## The classes at the edge
 
-An HTTP door translates a failure into a status (`ikigai-web` 0.2.9). The status keeps the part of
+An HTTP door translates a failure into a status (`ikigai-web` 0.5.2). The status keeps the part of
 the class a web client can act on, and is finer than the class in places:
 
 | Variant | Class | Status |
 |---|---|---|
 | `Timeout` | `transient` | 504 |
-| `Unavailable` | `transient` | 503 |
+| `Unavailable`, `GaveUp` | `transient` | 503 |
 | `RetryAfter` | `retry-after` | 429, with `Retry-After` |
 | `OverBudget` | `over-budget` | 422 |
 | `Denied` | `denied` | 403 |
@@ -266,10 +266,11 @@ here, not an enforcer.
 
 ## A retry budget is authority
 
-Retry layers multiply. A `Retry` of three attempts inside another `Retry` of three attempts is nine
-calls against a dependency that is already failing, and neither layer can see the other. So the
-budget does not belong to a layer. It belongs to whoever issued the request, and one pool serves
-the whole resolution tree:
+Nested retries count work already attempted. With `ikigai-throttle` 0.5.1, an inner `Retry`
+returns `GaveUp` with its attempt count, and the outer layer counts those attempts toward its
+own limit: three attempts inside three means three reads, not nine. This is not a default
+kernel budget. A shared budget belongs to whoever issued the request and bounds re-issues
+across the whole resolution tree, including branches and failover:
 
 ```rust
 # extern crate ikigai_core;
@@ -287,11 +288,11 @@ use two_hosts::failure::{feed_space, FEED};
 let read = || Request::new(Verb::Source, Iri::parse(FEED).unwrap());
 let down = || Error::Unavailable("the origin is down".into());
 
-// Nothing configured: the layers multiply. This is every kernel that sets no budget.
+// No shared pool: the outer layer counts the inner layer's three attempts.
 let (space, reads) = feed_space(99, down);
 let kernel = Kernel::new(Arc::new(Retry::new(Retry::new(space, 3), 3)));
 assert!(block_on(kernel.issue(read(), &Capability::root())).is_err());
-assert_eq!(reads.load(Ordering::SeqCst), 9);
+assert_eq!(reads.load(Ordering::SeqCst), 3);
 
 // A base of 0 and a ceiling of 2: one first try and two re-issues, wherever they happen.
 let (space, reads) = feed_space(99, down);
@@ -368,7 +369,8 @@ assert_eq!(error.class(), FailureClass::Transient);
 
 A host that wants its callers to own every retry sets a base of 0 and grants nothing. A kernel with
 no budget configured has no pool at all, `Invocation::retry_budget` answers `None`, and each overlay
-falls back to its own `attempts`, exactly as before the budget existed.
+uses its own `attempts` limit, including the attempts reported by an inner `GaveUp`.
+Different limits and separate branches still need a shared pool to bound the whole run.
 
 ## A run has a deadline
 

@@ -1974,8 +1974,8 @@ mod tests {
             "{}",
             t[0]
         );
-        // Read back as CSV, with the stock and the gzip stream above both cached.
-        assert!(t[1].ends_with("[2 cached · 1 computed]\n"), "{}", t[1]);
+        // The gzip answer is cached; its stock reference is an internal dependency.
+        assert!(t[1].ends_with("[1 cached · 1 computed]\n"), "{}", t[1]);
         // The bound refuses, naming its limit; at the table's own size it answers the table.
         let (refused, answered) = t[2].split_once("item,shelf,count\n").expect("two answers");
         assert!(

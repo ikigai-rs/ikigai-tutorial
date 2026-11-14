@@ -137,11 +137,9 @@ named after the file, and anything computed from that answer hangs from it as we
 
 <div class="ikigai-run" data-cmd='source urn:kernel:dependents thread=urn:file:quakes-2024-01-01.geojson'>
 <pre class="ikigai-run-expected">dependents of urn:file:quakes-2024-01-01.geojson  (cut 0 times)
-  10 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
+  8 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
   urn:file:quakes-2024-01-01.geojson  application/geo+json       122.8 KB  1 thread    root
   urn:iki:fn:reverseList              text/plain                     81 B  3 threads   root
-  urn:iki:fn:toUpper                  text/plain                     22 B  3 threads   root
-  urn:iki:fn:toUpper                  text/plain                     35 B  3 threads   root
   urn:iki:fn:toUpper                  text/plain                     81 B  3 threads   root
   urn:json:query                      application/json                3 B  2 threads   root
   urn:json:query                      application/json               54 B  2 threads   root

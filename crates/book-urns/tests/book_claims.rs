@@ -108,10 +108,10 @@ const CLI_043: Source = Source::Crate {
     name: "ikigai-cli",
     version: "0.1.43",
 };
-/// The status chapter's time-budget sentence (2026-10-10, ledger #1110).
-const STORE_033: Source = Source::Crate {
+/// The failure chapter's time-budget sentence, rechecked at 0.5.0 (2026-11-14).
+const STORE_050: Source = Source::Crate {
     name: "ikigai-store",
-    version: "0.3.3",
+    version: "0.5.0",
 };
 const XSLT_030: Source = Source::Crate {
     name: "ikigai-xslt",
@@ -266,9 +266,9 @@ const CLAIMS: &[Claim] = &[
     },
     Claim {
         chapter: "beyond/failure.md",
-        stamp: "`ikigai-store` 0.3.3",
+        stamp: "`ikigai-store` 0.5.0",
         says: "a store evaluation past its time budget still answers Timeout, not OverBudget",
-        source: STORE_033,
+        source: STORE_050,
         file: "src/budget.rs",
         needle: "gets a typed [`Error::Timeout`] naming it",
         present: true,

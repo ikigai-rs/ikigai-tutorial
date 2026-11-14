@@ -441,10 +441,10 @@ cargo run -p graph-authority -- 8
 
 ```text
 north> source urn:iki:store:graph-select graph=urn:iki:tutorial:graph:north max_rows=1 as=text/tab-separated-values   (the query above)
-error: invalid argument `query`: the answer exceeds 1 rows; add LIMIT, narrow the query, or ask the host for more. It was refused, not truncated: no part of it was sent (ledger #970). A request's `max_rows=` can only lower this bound
+error: invalid argument `query`: Add LIMIT, narrow the query, or ask the host for more: the answer exceeds 1 rows. It was refused, not truncated: no part of it was sent. A request's `max_rows=` can only lower this bound
 
 north> source urn:iki:store:graph-select graph=urn:iki:tutorial:graph:north as=text/tab-separated-values   (a join of 33 triple patterns)
-error: invalid argument `query`: this SPARQL text joins 33 patterns in one group, and this endpoint refuses more than 32 (MAX_JOIN_OPERANDS) before planning: the planner's join ordering grows about with the cube of that number and cannot be interrupted (ledger #964). A sequence path counts one pattern a step. Split the query, or move a list of values into VALUES
+error: invalid argument `query`: Split the query, or move a list of values into VALUES. This SPARQL text joins 33 patterns in one group, and this endpoint refuses more than 32 (MAX_JOIN_OPERANDS) before planning: the planner's join ordering grows about with the cube of that number and cannot be interrupted. A sequence path counts one pattern a step.
 ```
 
 The size of an answer is bounded, and past the bound the answer is **refused, not truncated**,

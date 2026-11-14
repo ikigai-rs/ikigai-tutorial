@@ -52,13 +52,15 @@ flour,A,12
 sugar,A,0
 rice,B,30
 lentils,B,7
-[2 cached · 1 computed]</pre>
+[1 cached · 1 computed]</pre>
 </div>
 
-Two of the three stages were cached: the stock, and the gzip stream the cell above could not
-print. That is only possible because `ikigai-compress` writes the same bytes for the same input
-every time. gzip's header has a timestamp and an operating-system byte, and the crate fixes both,
-so a cached stream is the stream a second compression would have made. Without `as=` the bytes
+The gzip answer was cached and the decompressor computed. The engine passes the stock's
+name to the incremental compressor as a reference, so reading the stock is a dependency
+inside that stage rather than a separate stage in this verdict. `ikigai-compress` writes the
+same bytes for the same input every time: gzip's header has a timestamp and an operating-system
+byte, and the crate fixes both, so the cached gzip is what a second compression would produce.
+Without `as=` the bytes
 come back labeled `application/octet-stream`, which means "bytes, of a type nobody stated". The
 label is the caller's claim: `as=` says what the bytes are, and nothing checks it.
 
@@ -134,7 +136,7 @@ flour,A,12
 sugar,A,0
 rice,B,30
 lentils,B,7
-[2 cached · 1 computed]</pre>
+[1 cached · 1 computed]</pre>
 </div>
 
 The refusal names the limit, and the bound that refused is the one the line set. The decompressor

@@ -67,8 +67,14 @@ fn main() {
         &Capability::root(),
         Verb::Source,
         "urn:kernel:dependents",
-        &[("thread", "urn:iki:store:graph-update")],
-        "dependents urn:iki:store:graph-update",
+        &[(
+            "thread",
+            &ikigai_store::graph_thread("urn:iki:tutorial:items"),
+        )],
+        &format!(
+            "dependents {}",
+            ikigai_store::graph_thread("urn:iki:tutorial:items")
+        ),
     )
     .expect("the host may ask");
 

@@ -277,10 +277,9 @@ let read_all = |stream: ikigai_core::ByteStream| {
 };
 
 // A file is a replay: its length known before a byte is read, read from the start as
-// often as asked, and from any offset. ikigai-fs has no type for `.csv`, so a file of
-// UTF-8 is `text/plain`.
+// often as asked, and from any offset. ikigai-fs recognizes `.csv` as `text/csv`.
 let answer = block_on(kernel.issue_body(file(), &root)).unwrap();
-assert_eq!(answer.repr_type.media_type, "text/plain");
+assert_eq!(answer.repr_type.media_type, "text/csv");
 let Body::Replay(replay) = answer.bytes else { panic!("a file is a replay") };
 assert_eq!(replay.len_hint(), Some(60));
 assert_eq!(read_all(replay.open()).unwrap(), stock.as_bytes());

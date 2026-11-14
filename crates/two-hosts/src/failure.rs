@@ -292,16 +292,26 @@ mod tests {
         assert_eq!(reads.load(Ordering::SeqCst), 3);
     }
 
-    /// With no retry budget configured, the same layers multiply: this is the thing the
-    /// budget exists to stop, and what every kernel that configures nothing still does.
+    /// Without a shared pool, an outer Retry still counts the inner GaveUp's attempts
+    /// toward its own limit. Equal limits therefore do not multiply.
     #[test]
-    fn with_no_budget_configured_the_layers_multiply() {
+    fn unconfigured_nested_retries_count_inner_attempts() {
         let (space, reads) = feed_space(99, unavailable);
         let kernel = Kernel::new(Arc::new(Retry::new(Retry::new(space, 3), 3)));
 
         block_on(kernel.issue(read(FEED), &Capability::root())).expect_err("still down");
 
-        assert_eq!(reads.load(Ordering::SeqCst), 9);
+        assert_eq!(reads.load(Ordering::SeqCst), 3);
+    }
+
+    /// The three-read limit above comes from Retry, not a pool minted by default.
+    #[test]
+    fn an_unconfigured_kernel_still_has_no_retry_pool() {
+        let kernel = Kernel::new(Arc::new(
+            EndpointSpace::new().bind(Exact::new(RUN_REPORT), run_report()),
+        ));
+        let answer = block_on(kernel.issue(read(RUN_REPORT), &Capability::root())).unwrap();
+        assert_eq!(parse_run_report(&answer.bytes).0, None);
     }
 
     /// The grant is monotone: attenuation can only remove it, and removing it lowers the

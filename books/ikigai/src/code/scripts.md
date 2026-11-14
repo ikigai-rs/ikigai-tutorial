@@ -174,8 +174,8 @@ alice> source urn:script:open-items:result as=text/tab-separated-values priority
 2	"Fix the flaky test"
 [computed]
 
-host> dependents urn:iki:store:graph-update
-dependents of urn:iki:store:graph-update  (cut 0 times)
+host> dependents urn:iki:store:graph-written:urn%3Aiki%3Atutorial%3Aitems
+dependents of urn:iki:store:graph-written:urn%3Aiki%3Atutorial%3Aitems  (cut 0 times)
   4 live cached entries hang from it — a cut makes them stale, and the next read of each recomputes it
   urn:iki:store:graph-select    text/tab-separated-values       59 B  4 threads   root
   urn:iki:store:graph-select    text/tab-separated-values       80 B  4 threads   root
@@ -190,9 +190,9 @@ asked, so it is another answer and another cache entry.
 
 The last request is the question [Golden threads in
 practice](../getting-started/golden-threads.md) asked before a cut: what hangs from this thread?
-The host asks it of `urn:iki:store:graph-update`, the thread the store cuts on every write to a
-named graph, and four answers hang from it: the store's two answers, and the script's two, which
-were computed from them. Nobody wrote "recompute the result when the items change". The result
+The host asks it of `urn:iki:store:graph-written:urn%3Aiki%3Atutorial%3Aitems`, the thread
+the store cuts on a write confined to the items graph. Four answers hang from it: the store's
+two answers, and the script's two, which were computed from them. Nobody wrote "recompute the result when the items change". The result
 read the store through the kernel, so the kernel recorded that it did, and the store's answers
 carry the store's threads. A script's result is cacheable exactly as far as what it read was.
 
