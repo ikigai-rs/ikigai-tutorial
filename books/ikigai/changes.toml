@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-14"
+summary = "If a page’s kernel stops after an error, its runnable cells say to reload the page instead of staying at running forever. Expected output remains available, and Run all above stops too."
+pages = ["browser.md", "explore/rss.md"]
+
+[[change]]
+date = "2026-11-14"
 summary = "The examples run on core 0.3 and its compatible modules, including the RSS page’s XSLT cells, with refreshed cache and grounding output. Scripts inspect the items graph’s write thread, and the failure chapter explains how nested retries count inner attempts."
 pages = ["modules/status.md", "streams/bytes.md", "streams/replay.md", "explore/lab.md", "explore/rss.md", "beyond/datasets.md", "code/scripts.md", "code/sentence.md", "beyond/failure.md", "applied/tic-tac-toe-6.md"]
 

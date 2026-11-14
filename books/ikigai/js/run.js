@@ -143,6 +143,73 @@
     // resolves a relative path against this script's URL (`js/`), not the page's.
     var root = new URL((typeof path_to_root === "string" && path_to_root) || "./", document.baseURI).href;
 
+    var stoppedMessage = "the page's kernel stopped after an earlier error; reload the page to run this";
+    var kernelDead = false;
+    var kernelReady = false;
+    // Pending calls, including wasm-bindgen callbacks that trap without rejecting.
+    var stopWaiters = new Set();
+    function stopKernel(err) {
+        if (kernelDead || !(err instanceof WebAssembly.RuntimeError)) {
+            return;
+        }
+        kernelDead = true;
+        cells.forEach(function (c) { c.stopped(); });
+        stopWaiters.forEach(function (reject) { reject(new Error(stoppedMessage)); });
+        stopWaiters.clear();
+    }
+    // wasm-bindgen can throw from a scheduled callback and leave its JS promise pending.
+    // Keep that browser error visible in the console while waking the cells waiting on it.
+    window.addEventListener("error", function (event) {
+        if (kernelReady) {
+            stopKernel(event.error);
+        }
+    });
+    window.addEventListener("unhandledrejection", function (event) {
+        if (kernelReady) {
+            stopKernel(event.reason);
+        }
+    });
+    function alive() {
+        if (kernelDead) {
+            throw new Error(stoppedMessage);
+        }
+    }
+    function untilStopped(work) {
+        return new Promise(function (resolve, reject) {
+            if (kernelDead) {
+                reject(new Error(stoppedMessage));
+            } else {
+                stopWaiters.add(reject);
+            }
+            Promise.resolve(work).then(function (value) {
+                stopWaiters.delete(reject);
+                resolve(value);
+            }, function (err) {
+                stopWaiters.delete(reject);
+                reject(err);
+            });
+        });
+    }
+    // Share guarded exports with all page widgets, preserving synchronous exports' return types.
+    function guarded(mod) {
+        var exports = {};
+        Object.keys(mod).forEach(function (name) {
+            exports[name] = typeof mod[name] !== "function" ? mod[name] : function () {
+                alive();
+                try {
+                    var answer = mod[name].apply(mod, arguments);
+                    return answer && typeof answer.then === "function"
+                        ? untilStopped(answer.catch(function (err) { stopKernel(err); throw err; }))
+                        : answer;
+                } catch (err) {
+                    stopKernel(err);
+                    throw err;
+                }
+            };
+        });
+        return exports;
+    }
+
     var kernel = null;   // resolves to the wasm module's exports, or rejects once
     function load() {
         if (kernel) {
@@ -162,7 +229,8 @@
                     } else if (clocked) {
                         mod.useClock();
                     }
-                    return mod;
+                    kernelReady = true;
+                    return guarded(mod);
                 });
         });
         return kernel;
@@ -612,6 +680,18 @@
                 above.setAttribute("aria-describedby", caption.id);
             }
         }
+        self.stopped = function () {
+            unavailable = true;
+            unshown();
+            pane.textContent = "";
+            caption.textContent = stoppedMessage;
+            run.disabled = true;
+            run.setAttribute("aria-describedby", caption.id);
+            if (above) {
+                above.disabled = true;
+                above.setAttribute("aria-describedby", caption.id);
+            }
+        };
         load().catch(markUnavailable);
 
         // ── the history ──────────────────────────────────────────────────────
@@ -684,7 +764,8 @@
             caption.textContent = "running…";
             var started;
             var before = (chainSpec && held[chainSpec]) || Promise.resolve();
-            return before.then(function () {
+            return untilStopped(before.then(function () {
+                alive();
                 started = now();
                 return load();
             }).then(function (mod) {
@@ -699,6 +780,7 @@
                 // side effect (a Sink, a cut), so they run in order, one at a time.
                 return lines.reduce(function (chain, line) {
                     return chain.then(function () {
+                        alive();
                         var reply = chainSpec ? mod.evalLineInChainAsync(chainSpec, line)
                             : mod.evalLineAsync(line);
                         return reply.then(function (json) {
@@ -715,6 +797,7 @@
                     });
                 }, Promise.resolve()).then(function () {
                     var elapsed = now() - started;
+                    alive();
                     pane.textContent = acc;
                     self.ran = true;
                     var against = compare(lines, acc);
@@ -734,6 +817,7 @@
                                 (err && err.message ? err.message : err) + "), so its HTML is shown as text";
                         });
                     return drawn.then(function (rendered) {
+                        alive();
                         var lineCount = acc ? acc.replace(/\n$/, "").split("\n").length : 0;
                         caption.textContent = "run " + runs + " — answered, " +
                             plural(lineCount, "line", "lines") + " — from the kernel in this page" +
@@ -759,7 +843,12 @@
                         }
                     });
                 });
-            }, markUnavailable).catch(function (err) {
+            }, markUnavailable)).catch(function (err) {
+                stopKernel(err);
+                if (kernelDead) {
+                    self.stopped();
+                    return;
+                }
                 // The kernel loaded, and something in the page's own path failed while
                 // running (a rejected evaluation, a reply that is not JSON). That is not
                 // the kernel's answer and not the listing's either: say what happened and

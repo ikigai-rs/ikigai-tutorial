@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-14**: If a page’s kernel stops after an error, its runnable cells say to reload the page instead of staying at running forever. Expected output remains available, and Run all above stops too.
+
+  Pages: [Appendix: the kernel in the browser](browser.md), [A river of feeds](explore/rss.md)
+
 - **2026-11-14**: The examples run on core 0.3 and its compatible modules, including the RSS page’s XSLT cells, with refreshed cache and grounding output. Scripts inspect the items graph’s write thread, and the failure chapter explains how nested retries count inner attempts.
 
   Pages: [Where this actually stands](modules/status.md), [Streams, I: bytes are a representation](streams/bytes.md), [Streams, II: a body you can read again](streams/replay.md), [A lab with names in it](explore/lab.md), [A river of feeds](explore/rss.md), [A query's authority is its dataset](beyond/datasets.md), [Scripts are resources](code/scripts.md), [A sentence becomes a draft](code/sentence.md), [Failure has a class](beyond/failure.md), [Tic-tac-toe, VI: the same game in Python and TypeScript](applied/tic-tac-toe-6.md)
