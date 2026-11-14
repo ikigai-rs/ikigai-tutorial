@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-13"
+summary = "Tic-tac-toe VI updates its Python template excerpts and explains remote reads’ uncacheable verdicts, including the cached empty-cell limit. CI now replays both stores, the host and both apps against the faces at main."
+pages = ["applied/tic-tac-toe-6.md"]
+
+[[change]]
+date = "2026-11-13"
 summary = "The TypeScript face now lives in ikigai-ts as @ikigai/ts, supporting Deno, Node and Bun. Clone commands and imports use the new repository name; the Book keeps its Deno examples and explains their runtime-specific entry code."
 pages = ["polyglot/index.md", "polyglot/typescript.md", "repositories.md", "applied/tic-tac-toe-5.md", "applied/tic-tac-toe-6.md"]
 

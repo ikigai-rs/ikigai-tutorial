@@ -7,9 +7,10 @@ and the app into Python and TypeScript, in two different ways.
 **The atom in another language.** Only the stored cell holds a game. Part IV turned it
 into a seam, the store contract, which any space in any language can fill. Here a Python
 process and a TypeScript process each fill it. Everything above the atom stays in a Rust
-kernel and does not change: the platonic cell, the lines, the rules, the cache and the
-golden threads. The commands you ran in the earlier parts answer the same, word for word,
-over a game whose marks live in a Python dictionary.
+kernel: the platonic cell, the lines, the rules, the cache and the golden threads. The
+commands you ran in the earlier parts play the same game over marks in a Python dictionary.
+Their cache verdicts differ: a successful remote read is uncacheable in the host, because
+invalidations do not cross the wire.
 
 **A whole app in another language.** A Python app and a TypeScript app each serve Part V's
 board to a browser. They do not compute the game. They fill Part V's templates from the
@@ -26,9 +27,10 @@ said as it goes.
 > commits cited beside them, and `scripts/ttt-polyglot-demo.sh` in this repository runs the
 > whole part again. It starts both stores, the host and both apps, reruns every command
 > shown here, and compares the output with this page. It also checks that each code excerpt
-> from those repositories still appears in them verbatim. CI does not run it, because it
-> needs Python, Deno and two other checkouts. The two runnable cells are the exception:
-> they ask this page's own kernel the same questions, so you can see that the answer does
+> from those repositories still appears in them verbatim. CI runs it with the Book’s
+> pinned CLI and both faces at `main`, like the polyglot tracks. Install Python’s `blake3`
+> dependency before running it locally (`python3 -m pip install blake3`). The two runnable
+> cells are the exception: they ask this page's own kernel the same questions, so you can see that the answer does
 > not depend on the language holding the store.
 
 ## Shape 1: the contract is the whole interface
@@ -100,7 +102,8 @@ In TypeScript, `family(pattern, options)` is a builder, with one chained call pe
 The Sink and the Delete follow in the same style in both files. Neither file declares an
 Exists: both faces default it to "would Source succeed", which is clause 4. Neither file
 has a line about caching beyond `cacheable`, or about invalidation at all, because the
-host kernel does both.
+kernels do both within their own processes. The host mounts successful remote reads as
+uncacheable; a peer’s cacheable answer does not promise that the host can cache a copy.
 
 ### Start two stores
 
@@ -145,17 +148,17 @@ trace  urn:iki:tutorial:ttt:cell:1:1
   client      ikigai repl  ·  capability: root (full authority)
   transport   embedded · in-process
 
-urn:iki:tutorial:ttt:cell:1:1   ttt-cell · computed · main · —   → 1b  X
-└─ urn:iki:tutorial:ttt:stored:1:1   ttt-stored · computed · main · —
+urn:iki:tutorial:ttt:cell:1:1   ttt-cell · computed · main · — · uncached=dependency urn:iki:tutorial:ttt:stored:1:1   → 1b  X
+└─ urn:iki:tutorial:ttt:stored:1:1   ttt-stored · computed · main · — · uncached=declared
    └─ urn:iki:tutorial:ttt:stored:1:1   ttt-stored · computed · Thread-2 (_handle) · 0ms
 ---
 -X-
 ---
-[computed]
+[uncacheable]
 ---
 -X-
 ---
-[cached]
+[uncacheable]
 error: conflict: 1,1 is taken — X played there
 The board is clear
 [uncacheable]
@@ -163,8 +166,10 @@ The board is clear
 
 Every verdict is the Rust kernel's. The empty cell was `NotFound` in Python and `-` in
 Rust, because the platonic cell turns exactly that refusal into the empty cell. The move
-checked the rules in Rust and wrote one mark into Python. The board was computed once and
-then served from cache, and the refusal came from rules that never saw a line of Python.
+checked the rules in Rust and wrote one mark into Python. Once a played square is read,
+its uncacheable remote answer makes the board uncacheable too, so both board reads compute
+it. The trace names that dependency in `uncached=dependency`; the mount says
+`uncached=declared`. The refusal still came from rules that never saw a line of Python.
 
 The trace is the part to look at. The cell's child is the stored cell, twice: once as the
 host's kernel resolved it, on its `main` thread, and once more as a span from the other
@@ -204,8 +209,9 @@ The board is clear
 [uncacheable]</pre>
 </div>
 
-The answers are the same. The trace is one node shorter, because the stored cell here is
-an endpoint in the same kernel and has no process of its own to report a span from.
+The game’s answers are the same. The local Rust store is cacheable, so the board’s second
+read is `[cached]` here. The trace is one node shorter, because the stored cell is an
+endpoint in the same kernel and has no process of its own to report a span from.
 
 ### The same commands, a TypeScript-held game
 
@@ -302,38 +308,40 @@ A template becomes literal text and markers, each marker its letter and its trim
 `$$` is a `$`, and a marker that never closes stays text. `unquoted` finds the `}` that
 closes the marker, counting the braces of any `{x}` inside it and skipping quoted values.
 
-Each marker is then spliced by its letter:
+The Python filler parses every marker before resolving any request, then answers the
+markers in document order and splices the answers in that order. A failed request is kept
+until its marker’s turn to splice, so the first failure in document order wins:
 
-<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 26e173a -->
+<!-- excerpt: ikigai-python examples/tictactoe_app.py @ fd60111 -->
 ```python
-def splice(mode: str, body: str, args: dict[str, str], source: Source, depth: int) -> str:
+def answer(marker: Marker, args: dict[str, str], source: Source) -> str | EndpointError:
+    """What ``marker`` names — an argument's value or a request's answer — or why it could not
+    be had, kept (not raised) until the marker's turn to splice."""
+    try:
+        if marker.argument is not None:
+            return argument(args, marker.argument)
+        request = substitute(marker.iri, args, encode=True)
+        given = {k: t if lit else substitute(t, args, encode=False) for k, t, lit in marker.query}
+        return conditional(given, source) if request == CONDITIONAL else source(request, given)
+    except EndpointError as failed:
+        return failed
+
+
+def splice(
+    marker: Marker, value: str | EndpointError, args: dict[str, str], source: Source, depth: int
+) -> str:
     """One marker: `$h` escapes what it names, `$r` splices it as it is, `$a` fills it."""
-    if len(split(body, "||")) > 1:
-        raise refused(f"marker `{body}`: this filler has no `||` fallbacks")
-    name = body[1:-1] if body[:1] == "{" and body[-1:] == "}" else ""
-    if ARG.fullmatch(name):
-        if mode == "a":
-            raise refused(f"marker `{body}`: an argument is a value and never a template")
-        value = argument(args, name)
-    else:
-        iri, _, query = body.partition("?")
-        given = {}
-        for pair in filter(None, (pair.strip(WHITESPACE) for pair in split(query, "&"))):
-            key, eq, word = pair.partition("=")
-            if not eq:
-                raise refused(f"marker argument `{pair}` is not key=value")
-            given[key.strip(WHITESPACE)] = value_of(word.strip(WHITESPACE), args)
-        request = substitute(iri.strip(WHITESPACE), args, encode=True)
-        value = conditional(given, source) if request == CONDITIONAL else source(request, given)
-        if mode == "a":
-            return fill(value, args, source, depth + 1)
-    return value.translate(ESCAPE) if mode == "h" else value
+    if isinstance(value, EndpointError):
+        raise value
+    if marker.mode == "a":
+        return fill(value, args, source, depth + 1)
+    return html_text(value) if marker.mode == "h" else value
 ```
 
 A body that is only an argument, `{x}`, is spliced as a value and resolves nothing. Anything
 else is a request, with its arguments filled in, and every request is a read of the host but
-one. `$a` fills what came back, `$r` splices it as it is, and `$h` escapes it through a
-five-entry table: `&`, `<`, `>`, `"` and `'`, the last one as `&#39;`, which is what
+one. `$a` fills what came back, `$r` splices it as it is, and `$h` passes it to `html_text`,
+which escapes `&`, `<`, `>`, `"` and `'`, the last one as `&#39;`. That is what
 `ikigai-fn` writes and not what Python's `html.escape` writes. That one character is the
 difference between the same bytes and nearly the same bytes.
 
@@ -342,7 +350,7 @@ a square asks whether its cell is `-`, the status whether the winner is. The hos
 forwards only the game's names, so `urn:iki:fn:conditional` does not reach `ikigai-fn` from
 an app, and the app has its own:
 
-<!-- excerpt: ikigai-python examples/tictactoe_app.py @ 26e173a -->
+<!-- excerpt: ikigai-python examples/tictactoe_app.py @ fd60111 -->
 ```python
 #: ``conditional``'s reading of ``if`` when there is no ``equals``.
 BOOLEAN = {"true": True, "1": True, "yes": True, "on": True}
@@ -358,7 +366,11 @@ def conditional(given: dict[str, str], source: Source) -> str:
     if "equals" in given:
         taken = verdict == given["equals"]
     elif (taken := BOOLEAN.get(verdict.lower())) is None:
-        raise refused(f"conditional: `{test}` returned {verdict!r}, not a boolean")
+        # ikigai-fn's own words, and its class: a failed request, not compose's refusal.
+        shown = '"' + verdict.lower().replace("\\", "\\\\").replace('"', '\\"') + '"'
+        raise EndpointError(
+            f"conditional: `{test}` returned {shown}, not a boolean (true/false/1/0/yes/no)"
+        )
     chosen = then if taken else given.get("else")
     return "" if chosen is None else source(chosen, {})
 ```
@@ -435,8 +447,8 @@ markers over `cell`, `winner` and `turn`, so the apps hold no rule of the game a
 
 This costs something, and it is worth saying how much. An earlier version of these apps,
 written before Part V's views became templates, filled simple `{{slot}}` placeholders, and its
-filler was about 70 lines. Now the TypeScript engine is about 225 lines and the Python one about 175, most of
-it parsing: finding where a marker ends, splitting a request's arguments outside quotes,
+filler was about 70 lines. Now each engine takes a few hundred lines, most of
+them parsing: finding where a marker ends, splitting a request's arguments outside quotes,
 checking that every `{` opens an argument. Each whole app grew less, by a fifth to a
 quarter, because the view code that chose templates went away. And `conditional` now exists
 three times: in Rust, in `ikigai-fn`, where the host uses it, and again in Python and in
@@ -491,7 +503,7 @@ Three limits, each of which the model predicts.
 
 ### A write the host does not see
 
-The host's cache is correct because the host sees every write. When its kernel issues a
+Writes through the host keep its cached answers correct. When its kernel issues a
 `Sink` or `Delete` to `stored:{x}:{y}`, it cuts that name's golden thread, and every cached
 answer that read the square is recomputed on the next request. A write that goes to the
 store *directly*, from some other client of the Python process, is not seen:
@@ -506,7 +518,7 @@ ok
 [uncacheable]
 $ ikigai --plain --override urn:iki:tutorial:ttt:stored:=/tmp/ttt6demo/py.sock -c 'source urn:iki:tutorial:ttt:stored:2:2'
 O
-[computed]
+[uncacheable]
 $ ikigai --plain --connect /tmp/ttt6demo/host.sock -c 'source urn:game:py:iki:tutorial:ttt:board'
 X--
 -O-
@@ -514,8 +526,10 @@ X--
 [uncacheable]
 ```
 
-The Python store holds an O at `2,2`. The host still says the square is empty, and it will
-go on saying so, because its cached cell at `2,2` hangs from a thread that nothing cut.
+The Python store holds an O at `2,2`. The host still says the square is empty. Successful
+remote reads are uncacheable, but `NotFound` was a failure, not a representation carrying
+that verdict. The platonic cell turned it into a cacheable `-`, which still hangs from a
+thread that nothing cut. Recomputing the board reads that cached empty cell again.
 Worse, the host's rules would let X play there, and the Sink would overwrite the O, because
 the move checks the square through that same cached cell. The fix is the rule the apps
 follow: **every write goes through the host.** Here, a reset through the host deletes every
@@ -537,9 +551,10 @@ behind the host's back is a correctness hazard, and the contract says so.
 The `[uncacheable]` on the board is a second, smaller thing to notice. The IPC face of
 `ttt-host` is a small kernel in front of the game's kernel, which injects the game's
 corridor, and it marks every answer it forwards as uncacheable, because it never saw the
-reads that answer depends on and could never cut a copy. The board's bytes still came from
-the game kernel's cache. That is why the transcripts in shape 1 use `-c`, which runs in the
-game's own kernel, where the verdicts are real.
+reads that answer depends on and could never cut a copy. The game kernel may still cache empty
+cells as above, even when a played square makes the whole board uncacheable. The transcripts
+in shape 1 use `-c` to show the game kernel’s own verdicts directly; the Rust-only cell
+shows how those verdicts differ with a local store.
 
 ### Composition stays in the kernel
 
