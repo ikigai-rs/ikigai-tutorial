@@ -68,8 +68,10 @@
 #   ikigai (for the ikigai Book) is `ikigai-cli` pinned SEPARATELY, in
 #         `books/ikigai/ikigai-cli.version`: the gonk Book's pin follows gonk's lock, and the
 #         ikigai Book's follows the release its pages were last replayed against, so they move
-#         for different reasons. Default features (no page needs QUIC). Installed `--locked`
-#         into `target/ikigai-book-cli/<version>/`, a root of its own so neither book's cache
+#         for different reasons. The `web` feature serves the Quakes HTTP view (no page needs
+#         QUIC). The feature is in the install path, so a restored default-feature binary
+#         is never reused for this build. Installed `--locked`
+#         into `target/ikigai-book-cli/<version>+web/`, a root of its own so neither book's cache
 #         key can restore or save the other's binary, and put FIRST on PATH for the test.
 #
 # Running ikigai (the Operations Book) is checked like the gonk Book, by `book-transcripts --strict`,
@@ -134,10 +136,10 @@ case "$book_cli" in
     [0-9]*.[0-9]*.[0-9]*) ;;
     *) echo "books/ikigai/ikigai-cli.version is not a version: '$book_cli'" >&2; exit 2 ;;
 esac
-book_cli_root="target/ikigai-book-cli/$book_cli"
+book_cli_root="target/ikigai-book-cli/$book_cli+web"
 if [ ! -x "$book_cli_root/bin/ikigai" ]; then
-    echo "installing ikigai-cli $book_cli into $book_cli_root (once per version)"
-    cargo install --locked ikigai-cli --version "=$book_cli" \
+    echo "installing ikigai-cli $book_cli (features: web) into $book_cli_root (once per version)"
+    cargo install --locked ikigai-cli --version "=$book_cli" --features web \
         --root "$book_cli_root" --target-dir "$book_cli_root/build"
 fi
 

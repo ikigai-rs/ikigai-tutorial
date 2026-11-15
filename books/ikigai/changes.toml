@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-15"
+summary = "Exploring without Rust now serves a named Quakes composite over HTTP from your own config home. Edit an earthquake note and reload to see golden threads update the page without restarting the server; every shell step is replayed in CI."
+pages = ["explore/serving.md", "explore/index.md", "explore/composites.md"]
+
+[[change]]
 date = "2026-11-14"
 summary = "If a page’s kernel stops after an error, its runnable cells say to reload the page instead of staying at running forever. Expected output remains available, and Run all above stops too."
 pages = ["browser.md", "explore/rss.md"]

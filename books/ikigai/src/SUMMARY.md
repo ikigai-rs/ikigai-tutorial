@@ -21,6 +21,7 @@
 - [A river of feeds](explore/rss.md)
 - [Naming a composition](explore/naming.md)
 - [When a rule is not enough](explore/beyond-rules.md)
+- [A live page over HTTP](explore/serving.md)
 
 # Getting started
 

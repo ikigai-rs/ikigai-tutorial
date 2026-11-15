@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-15**: Exploring without Rust now serves a named Quakes composite over HTTP from your own config home. Edit an earthquake note and reload to see golden threads update the page without restarting the server; every shell step is replayed in CI.
+
+  Pages: [A live page over HTTP](explore/serving.md), [A week of earthquakes](explore/index.md), [Composites, one layer at a time](explore/composites.md)
+
 - **2026-11-14**: If a page’s kernel stops after an error, its runnable cells say to reload the page instead of staying at running forever. Expected output remains available, and Run all above stops too.
 
   Pages: [Appendix: the kernel in the browser](browser.md), [A river of feeds](explore/rss.md)

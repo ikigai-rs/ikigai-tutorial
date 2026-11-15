@@ -52,10 +52,8 @@ page at `earthquake.usgs.gov`. Any name this part makes up for itself goes under
   which weeks to read, see it cached and recomputed when a file it read changes, and see what
   its sandbox can reach; then mount a few lines of Python as a peer for what the sandbox cannot
   do, and see what changes when the answer comes from another process.
-
-The HTTP-view step is still a gap in this part: the chapters build HTML answers and save
-them as files, but do not yet show how to serve those answers over HTTP. The walkthrough
-stops at the saved page for that step.
+- [A live page over HTTP](serving.md): serve a named composite from your own config home,
+  edit its source and reload, with the dependencies kept in the running server.
 
 ## What you need
 
