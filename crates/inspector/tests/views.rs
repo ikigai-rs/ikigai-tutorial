@@ -227,6 +227,15 @@ fn the_page_composes_the_fragment() {
 #[test]
 fn the_planets_are_one_view_over_two_sources() {
     let kernel = kernel();
+    let csv = futures::executor::block_on(kernel.issue(
+        ikigai_core::Request::new(
+            ikigai_core::Verb::Source,
+            ikigai_core::Iri::parse(format!("{B}data:planets.csv")).unwrap(),
+        ),
+        &viewer(),
+    ))
+    .unwrap();
+    assert_eq!(csv.repr_type.media_type, "text/csv; charset=utf-8");
     let table = |source: &str| {
         let view = read(&kernel, &format!("{B}fragment:planets-{source}"), &viewer()).unwrap();
         let at = view.find("<tbody>").expect("a body");

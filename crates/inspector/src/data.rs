@@ -41,10 +41,7 @@ pub const MAX_DATA: usize = 16 * 1024;
 
 const TEXT: &str = "text/plain; charset=utf-8";
 const JSON: &str = "application/json";
-// Bare `text/csv`, no `charset`: the kernel plans a transreption on the media type as written,
-// and `text/csv; charset=utf-8` matches no registered transreptor (ikigai-json 0.1.0 declares
-// `text/csv`), so a query over it is refused. Reported to the hub; UTF-8 is RFC 4180's default.
-const CSV: &str = "text/csv";
+const CSV: &str = "text/csv; charset=utf-8";
 const XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 
 /// The planets, as a JSON document a reader would recognize: an array of objects.
