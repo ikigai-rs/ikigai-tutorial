@@ -476,6 +476,9 @@ broke. The contract gained a clause in this part: `Exists` answers `true` or `fa
 `NotFound`, and is cacheable like the mark. The Python and TypeScript stores already answered
 that way; the Rust one used to answer `Exists` as if it were `Source`, and now does not.
 
+If the Quakes server from [A live page over HTTP](../explore/serving.md#5-stop-this-server)
+is still running, stop it before starting this chapter's servers.
+
 Both of those stores are in their own repositories, as `examples/tictactoe_store.py` and
 `examples/tictactoe_store.ts`. The host command below uses both stores. Start each in its
 own terminal and leave it running. In the first terminal, from a clone of `ikigai-python`:

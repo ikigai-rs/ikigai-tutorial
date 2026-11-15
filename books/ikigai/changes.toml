@@ -21,7 +21,7 @@
 [[change]]
 date = "2026-11-15"
 summary = "Exploring without Rust now serves a named Quakes composite over HTTP from your own config home. Edit an earthquake note and reload to see golden threads update the page without restarting the server; every shell step is replayed in CI."
-pages = ["explore/serving.md", "explore/index.md", "explore/composites.md"]
+pages = ["explore/serving.md", "explore/index.md", "explore/composites.md", "applied/tic-tac-toe-5.md"]
 
 [[change]]
 date = "2026-11-14"
