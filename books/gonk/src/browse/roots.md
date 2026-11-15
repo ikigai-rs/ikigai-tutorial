@@ -227,6 +227,64 @@ mount = "prefer urn:repo:=~/.ikigai/gonk.sock"
 which then run in gonk's process. A prefix mount cannot say "the roots remote and the facades
 local".
 
+## Links to commits and files
+
+A ledger item, a finding or a page that names a commit or a file version links to it through one
+resource, `urn:iki:gonk:git-link:map:browse:kind:{commit|blob}:sha:{sha}`. It looks the object up in
+the browse roots the caller may read and answers where the link goes. This root has no GitHub
+origin, so the link opens gonk's own view of the commit:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c "source urn:gk:iki:gonk:git-link:map:browse:kind:commit:sha:$(git -C notes rev-parse HEAD)"
+/browse/urn:iki:gonk:git-object:map:browse:repository:notes:sha:…
+[uncacheable]
+```
+
+A root whose `origin` is on GitHub links to GitHub instead, `{repository}/commit/{sha}` for a commit
+and `{repository}/blob/{commit}/{path}` for a file version (gonk PR 364). The repository is the one
+browse resolves from `remote.origin.url`, or from a `gonk.browse.github` override, and gonk notices
+a new origin without a restart. Another forge gives no outside link, and gonk keeps its own view:
+
+<!-- transcript: run -->
+```console
+$ git -C notes remote add origin https://github.com/you/notes.git
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c "source urn:gk:iki:gonk:git-link:map:browse:kind:commit:sha:$(git -C notes rev-parse HEAD)"
+https://github.com/you/notes/commit/…
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c "source urn:gk:iki:gonk:git-link:map:browse:kind:blob:sha:$(git -C notes rev-parse HEAD:README.md)"
+https://github.com/you/notes/blob/…/README.md
+[uncacheable]
+```
+
+A link template you configure yourself still wins, separately for commits and for blobs.
+
+## The items about a file
+
+A ledger item about a file names it by the file's **canonical** IRI, `urn:repo:file:{root}/{path}`.
+That is the form every filer in gonk writes. [Filing roborev
+findings](../bridges/roborev.md#filing-a-review) shows the bridges doing it. browse's own name for the
+same file is `urn:repo:notes:file:README.md`, and gonk converts between the two. File one item about
+`README.md` and ask for the items about it:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append about=urn:repo:file:notes/README.md priority=1 Say who the notes are for'
+#1 urn:iki:ledger:default:item:…
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:items about=urn:repo:file:notes/README.md'
+   #1  open    p1  Say who the notes are for
+1 item(s)
+[uncacheable]
+```
+
+A signed-in reader who opens the file's page in a browser sees the same items, under **Ledger
+items about this file** (gonk PR 367). The page lists the open items about the file from every
+ledger that reader may read, each one read under the reader's own grant. A ledger the grant does
+not cover is not asked, so the page never hints that it holds an item. Findings come first,
+most severe first (critical, major, minor, trivial), then findings with no severity, then every
+other item. Opening that page takes a signed-in browser, which a check cannot be.
+
 <a id="what-is-next-for-the-browser"></a>
 
 ## Where to go next

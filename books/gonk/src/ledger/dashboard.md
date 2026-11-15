@@ -284,6 +284,13 @@ All agents: 12 released without a hand-back, opens in a new tab
 All agents: 1 h 25 min from claim to hand-back, the median, opens in a new tab
 ```
 
+The tab costs the same whatever the number of agents (gonk PR 369). Each question is asked once
+for all holders and the answer is split into rows, so a ledger with thousands of past holders is
+no slower than one with four. Up to 50 holders, every one has a row, as here. Past 50, the table
+lists the holders with a claim in the last 30 days or an item in flight, and a sentence says how
+many older holders the totals still count. The tab also has a 10-second deadline. What finished by
+then is drawn, and a sentence says the rest show as unavailable until the next refresh asks again.
+
 What each one counts:
 
 | Column | The question |

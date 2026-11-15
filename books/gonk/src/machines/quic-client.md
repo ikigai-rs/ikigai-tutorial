@@ -151,7 +151,7 @@ client `stranger`  …/.config/ikigai/gonk/quic/clients/stranger
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/stranger -c 'source urn:iki:ledger:items'
-error: unavailable: quic transport: …
+ikigai: unavailable: quic transport: …
 ```
 
 Refused twice over: the running server does not trust the certificate (it was not there at
@@ -222,6 +222,39 @@ no restart: `--force` replaces a client's **grant** and never its key pair. (`ik
 covers that ledger's graph and not its graveyard of deleted items, which stays the owner's, at
 root over the socket.
 
+## A grant before you write it
+
+A scope that no role names goes in with `--scope <urn>`, which may be repeated. `urn:cap:exec:git`
+is one example, for a client that runs browse's git facades. To see what a set of flags means
+before anything is written, add `--print`. It prints the scopes the flags resolve to and, for a
+grant that already exists, the lines a write would remove and add. It mints no bundle and writes
+nothing, whether or not `--force` is given (gonk PR 362):
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client add laptop --ledger default=write --browse read --root notes --ledger-graph default --scope urn:cap:exec:git --print --port 1070 --config-home "$PWD/.config/ikigai"
+client add `laptop` --print: no bundle was minted and nothing was written
+  grant `laptop` would hold 9 scope(s):
+    urn:cap:ledger:read:default
+    urn:cap:store:read:graph:urn:iki:ledger:graph:default
+    urn:cap:ledger:write:default
+    urn:cap:store:write:graph:urn:iki:ledger:graph:default
+    urn:cap:store:read:graph:urn:collab:participants
+    urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default
+    urn:cap:browse:read:notes
+    urn:cap:store:read:graph:urn:iki:browse:graph:default
+    urn:cap:exec:git
+  grant `laptop` in …/.config/ikigai/gonk/grants.json holds a different set; writing it would:
+    adds     urn:cap:exec:git
+  refused without --force — every identity enrolled under `laptop` holds the new list from its next call
+$ jq '.laptop | length' .config/ikigai/gonk/grants.json
+8
+```
+
+The grant still has its eight scopes. The same flags without `--print`, and with `--force`, would
+write the ninth. Remember that `--force` writes a grant whole from its flags. A scope that was
+added with `--scope` stays only if the next `--force` names it again.
+
 ## A client's lifecycle
 
 `client list` is every client the server knows: each bundle and each enrolled fingerprint, its
@@ -253,10 +286,11 @@ client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'source urn:iki:ledger:items'
-error: unavailable: quic transport: …
+ikigai: denied: the door at quic://127.0.0.1:1070 refused the connection: the client certificate is not admitted
 ```
 
-The old bundle is refused at once: admission is decided on every call, from `clients.json` and
+The old bundle is refused at once, and the client is told it was not admitted (cli 0.5.0; the 0.2
+releases reported only a transport error): admission is decided on every call, from `clients.json` and
 `grants.json` as they read then, so even a connection already open is refused from its next call
 (since gonk PR 175, ledger #1710; before it, a client that kept its connection alive kept its old
 authority until gonk restarted).

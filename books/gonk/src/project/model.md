@@ -82,7 +82,7 @@ never shows a key:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:m:=$PWD/llm.sock" -c 'source urn:m:llm:config'
-{"default":"coder","providers":{"coder":{"base_url":"http://localhost:11434/v1","model":"qwen3:8b","api_key":null}}}
+{"default":"coder","providers":{"coder":{"base_url":"http://localhost:11434/v1","model":"qwen3:8b","api_key":null,"api_key_secret":null}}}
 [uncacheable]
 ```
 
@@ -111,7 +111,7 @@ gonk's own door for what the peer says:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:llm:config'
-{"default":"coder","providers":{"coder":{"base_url":"http://localhost:11434/v1","model":"qwen3:8b","api_key":null}}}
+{"default":"coder","providers":{"coder":{"base_url":"http://localhost:11434/v1","model":"qwen3:8b","api_key":null,"api_key_secret":null}}}
 [uncacheable]
 ```
 
@@ -225,7 +225,7 @@ ikigai: serving on …/other.sock  (Ctrl-C to stop)
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:o:=$PWD/other.sock" -c 'source urn:o:llm:config'
-{"default":"local","providers":{"local":{"base_url":"http://localhost:8000/v1","model":null,"api_key":null}}}
+{"default":"local","providers":{"local":{"base_url":"http://localhost:8000/v1","model":null,"api_key":null,"api_key_secret":null}}}
 [uncacheable]
 ```
 
@@ -265,6 +265,28 @@ $ cp mount-cert/client.crt gpu/ikigai/quic/clients/gonk.crt
 $ cp gpu/ikigai/quic/server.crt mount-cert/server.crt
 ```
 
+The peer must also **enroll** gonk's certificate. A trusted certificate is not enough: the pinned cli (0.5.0)
+refuses to start `ikigai serve` without a `clients.json` that maps each client's SHA-256 fingerprint
+to a grant in `grants.json`. Without one, every trusted certificate would share one authority. The
+grant here is the one thing the peer lends, the net grant on the model's host:
+
+<!-- transcript: file gpu/ikigai/grants.json -->
+```json
+{"gonk": ["urn:cap:net:127.0.0.1"]}
+```
+
+<!-- transcript: run -->
+```console
+$ printf '{"clients": {"%s": {"grant": "gonk", "label": "gonk"}}}\n' "$(openssl x509 -in mount-cert/client.crt -outform der | sha256sum | cut -d' ' -f1)" > gpu/ikigai/clients.json
+$ chmod go-w .
+$ chmod -R go-w gpu
+```
+
+The `chmod` matters if your umask lets your group write new directories. The peer's server key is
+under `gpu/ikigai`, and the pinned cli refuses to take its authority from a key in a directory that
+anyone but you can write, from the certificates up through every directory above them: it says which
+directory and how to fix it.
+
 Start the peer. `--cap` is the ceiling on every connection, and a net grant on the model's host is the
 only authority this peer lends:
 
@@ -273,7 +295,8 @@ only authority this peer lends:
 $ env XDG_CONFIG_HOME="$PWD/gpu" ikigai serve quic://127.0.0.1:4470 --cap urn:cap:net:127.0.0.1 --no-config-mounts 2>&1 | tee gpu.log
 ikigai: mount   declined (--no-config-mounts) — the config home's `mount` lines are not read
 …
-ikigai: serving on quic://127.0.0.1:4470  (fixed ceiling: urn:cap:net:127.0.0.1; surface: host + fs + llm; connections re-minted every 600s)  (Ctrl-C to stop)
+ikigai: client  gonk  …  …/gpu/ikigai/quic/clients/gonk.crt
+ikigai: serving on quic://127.0.0.1:4470  (per-identity grants: 1 enrolled, under ceiling: urn:cap:net:127.0.0.1 (enrollment required); surface: host + fs + llm; connections re-minted every 600s)  (Ctrl-C to stop)
 ```
 
 ⚠ **Spell the host the same way three times**: in the `gonk.mount` target, in the peer's `--cap`, and in
@@ -308,7 +331,7 @@ running, `urn:gk2:llm:ask` answers as it did above:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk2:=$PWD/remote/data/gonk.sock" -c 'source urn:gk2:llm:config'
-{"default":"coder","providers":{"coder":{"base_url":"http://127.0.0.1:11434/v1","model":"qwen3:8b","api_key":null}}}
+{"default":"coder","providers":{"coder":{"base_url":"http://127.0.0.1:11434/v1","model":"qwen3:8b","api_key":null,"api_key_secret":null}}}
 [uncacheable]
 ```
 
@@ -341,7 +364,7 @@ ikigai: serving on …/hosted.sock  (Ctrl-C to stop)
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:h:=$PWD/hosted.sock" -c 'source urn:h:llm:config'
-{"default":"hosted","providers":{"hosted":{"base_url":"https://api.example.com/v1","model":"a-model-it-serves","api_key":"***"}}}
+{"default":"hosted","providers":{"hosted":{"base_url":"https://api.example.com/v1","model":"a-model-it-serves","api_key":"***","api_key_secret":null}}}
 [uncacheable]
 ```
 

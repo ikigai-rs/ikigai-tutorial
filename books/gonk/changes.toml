@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-14"
+summary = "New chapter Backing up and restoring shows a backup, a snapshot in pieces and a checked restore of each. Pages now teach client add --scope and --print, canonical file IRIs for findings, GitHub links and a file's items in browse, session summaries and the summaries-only grant, and the Agents tab's limits."
+pages = ["ledger/backup.md", "machines/quic-client.md", "bridges/roborev.md", "browse/roots.md", "ways/workers.md", "ledger/dashboard.md", "ledger/your-own.md", "machines/doors.md", "project/model.md"]
+
+[[change]]
+date = "2026-11-14"
 summary = "The embedded ledger’s claim output includes its epoch, and the OpenSpec host binds the file mount used to read named mappings. The review example expects Conflict when a decision is repeated without naming its revision."
 pages = ["ledger/your-own.md", "spec/openspec.md", "spec/ledger.md", "review/one-off.md"]
 

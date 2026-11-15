@@ -90,12 +90,10 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.2.11, `ikigai-ledger` 0.18.1,
-`ikigai-store` 0.3.3, `ikigai-browse` 0.20.8, `ikigai-script` 0.4.0 and `ikigai-nl` 0.5.0. The
-book's own crates (the ones its Rust listings and in-page cells run) take the same ledger and store,
-so a cell, a listing and a `console` block all answer from one ledger. Three patch releases differ, and
-no page shows any of them: those crates lock `ikigai-core` 0.2.12, `ikigai-ledger` 0.18.0 and
-`ikigai-browse` 0.20.6. gonk serves
+The modules it links are published crates: `ikigai-core` 0.3.5, `ikigai-ledger` 0.22.0,
+`ikigai-store` 0.5.0, `ikigai-browse` 0.22.0, `ikigai-script` 0.5.0 and `ikigai-nl` 0.6.0. The
+book's own crates (the ones its Rust listings and in-page cells run) lock the same releases, so a
+cell, a listing and a `console` block all answer from one ledger. gonk serves
 scripts and drafting at `urn:script:*` and `urn:nl:*`.
 
 This gonk's HTTP door lets a caller with no identity read the ledgers and write nothing (gonk
@@ -122,8 +120,8 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial mode
 From [A ledger of your own](ledger/your-own.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
-way. It is 0.2.3, the release whose transports the pinned gonk was built with, so the two speak the
-same wire. The book's own crates take the in-page kernel's grammar from `ikigai-engine`; that is a
+way. It is 0.5.0, the release whose transports (`ikigai-ipc`, `-wire` and `-web` 0.5.0) the pinned
+gonk was built with, so the two speak the same wire. The book's own crates take the in-page kernel's grammar from `ikigai-engine`; that is a
 different program and no page runs it as `ikigai`. The QUIC keep-alive a client
 sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
 model drafting or explaining) is not lost over `quic://`.

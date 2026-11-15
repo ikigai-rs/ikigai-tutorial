@@ -322,5 +322,4 @@ doctor first.
 In resource terms: the lifecycle is a document gonk checks once, at the start, and serves as a resource;
 an item's state is one value, moved by one compare-and-set; `next` is still a view, now with a question
 about one step; and the history is a view of events that each write leaves behind.
-[Over the socket](../agent/socket.md), the next chapter, reaches the ledger from another process,
-the way an agent does.
+[Backing up and restoring](backup.md), the next chapter, keeps all of it safe.

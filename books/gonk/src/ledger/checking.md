@@ -172,7 +172,7 @@ served before.
 $ curl -s -o /dev/null -w '%{http_code}\n' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Dest: document' http://localhost:1070/toolbox
 403
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:toolbox:page' 2>&1 | grep '^error'
-error: no endpoint resolved for urn:toolbox:page
+error: no endpoint resolved for urn:gk:toolbox:page
 ```
 
 ## Check it against shapes

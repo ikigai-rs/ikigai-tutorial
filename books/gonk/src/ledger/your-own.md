@@ -123,6 +123,15 @@ had, oldest first, and says what each one changed:
 [computed]</pre>
 </div>
 
+`ledgers` lists the ledgers there are, with each one's open and total counts. A program reads it
+as JSON with `as=application/json` (ikigai-ledger 0.22.0), the same rows the plain face prints,
+under the same read checks:
+
+<div class="ikigai-run" data-cmd='source urn:iki:ledger:ledgers as=application/json'>
+<pre class="ikigai-run-expected">{"schema":1,"ledgers":[{"name":"default","graph":"urn:iki:ledger:graph:default","open":2,"total":3}]}
+[computed]</pre>
+</div>
+
 [A lifecycle for your ledger](lifecycle.md), later in this part, shows what more it can hold.
 
 ## In a kernel of your own

@@ -364,7 +364,7 @@ ORDER BY ?number
 <!-- transcript: run -->
 ```console
 $ cat report-alpha-open.rq | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'cap seal urn:cap:ledger:read:alpha urn:cap:store:read:graph:urn:iki:ledger:graph:alpha urn:cap:script:read:report-* urn:cap:script:run:report-* urn:cap:script:write:report-* urn:cap:script:delete:report-*' -c 'sink urn:gk:script:report-alpha-open language=sparql public=true'
-sealed — capability: urn:cap:ledger:read:alpha, urn:cap:script:delete:report-*, urn:cap:script:read:report-*, urn:cap:script:run:report-*, urn:cap:script:write:report-*, urn:cap:store:read:graph:urn:iki:ledger:graph:alpha · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+sealed — capability: urn:cap:ledger:read:alpha, urn:cap:script:delete:report-*, urn:cap:script:read:report-*, urn:cap:script:run:report-*, urn:cap:script:write:report-*, urn:cap:store:read:graph:urn:iki:ledger:graph:alpha · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 urn:script:report-alpha-open:version:sha256:…
 [uncacheable]
 — batch: 2 commands · uncacheable
@@ -408,7 +408,7 @@ WHERE { ?item a ledger:Item ; dcterms:title ?title }
 <!-- transcript: run -->
 ```console
 $ cat report-everyone.rq | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'cap seal urn:cap:ledger:read:alpha urn:cap:store:read:graph:urn:iki:ledger:graph:alpha urn:cap:script:read:report-* urn:cap:script:run:report-* urn:cap:script:write:report-* urn:cap:script:delete:report-*' -c 'sink urn:gk:script:report-everyone language=sparql'
-sealed — capability: urn:cap:ledger:read:alpha, urn:cap:script:delete:report-*, urn:cap:script:read:report-*, urn:cap:script:run:report-*, urn:cap:script:write:report-*, urn:cap:store:read:graph:urn:iki:ledger:graph:alpha · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+sealed — capability: urn:cap:ledger:read:alpha, urn:cap:script:delete:report-*, urn:cap:script:read:report-*, urn:cap:script:run:report-*, urn:cap:script:write:report-*, urn:cap:store:read:graph:urn:iki:ledger:graph:alpha · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 error: denied: a script cannot be given more than its publisher holds, and this capability does not hold urn:cap:store:read:graph:urn:iki:ledger:graph:beta — declare less, or publish under a capability that holds it
 ```
 

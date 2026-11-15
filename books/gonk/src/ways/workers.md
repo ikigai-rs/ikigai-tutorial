@@ -52,34 +52,51 @@ $ ikigai-gonk client add worker-1 --worker default --port 1070 --config-home "$P
 client `worker-1`  …/.config/ikigai/gonk/quic/clients/worker-1
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `worker-1` (6 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `worker-1` (7 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add worker-2 --worker default --port 1070 --config-home "$PWD/.config/ikigai"
 client `worker-2`  …/.config/ikigai/gonk/quic/clients/worker-2
 …
-  enrolled     grant `worker-2` (6 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `worker-2` (7 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ jq -r '.["worker-1"][]' .config/ikigai/gonk/grants.json
 urn:cap:ledger:read:default
 urn:cap:store:read:graph:urn:iki:ledger:graph:default
 urn:cap:ledger:claim:default
 urn:cap:ledger:comment:default
+urn:cap:ledger:session:default
 urn:cap:store:write:graph:urn:iki:ledger:graph:default
 urn:cap:store:read:graph:urn:collab:participants
 ```
 
-Read, claim and comment on one ledger; the store write token is the one the ledger makes its own
+Read, claim and comment on one ledger, and record a session's summary on the worker's own
+hand-back. The `session` line is new in gonk PR 366. A worker grant written before it lacks the line,
+and the same `client add` with `--force` rewrites it with the line. The store write token is the one the ledger makes its own
 writes with, and gonk refuses a worker's raw write to the ledger's graph
 ([A QUIC client](../machines/quic-client.md#writing-the-graph-raw)). No `close`, no `write`, no
 `delete`. Each worker gets its own identity, so the log, the claims and the comments can tell them
 apart.
+
+One more identity, for whoever watches how the workers' runs go: it reads the ledger's session
+summaries and nothing else. No role names that grant, so it is written with `--scope`, twice: the
+ledger's `summaries` grant (ikigai-ledger 0.22.0) and the read of the ledger's graph that every
+ledger read needs beside it:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client add metrics --scope urn:cap:ledger:summaries:default --scope urn:cap:store:read:graph:urn:iki:ledger:graph:default --port 1070 --config-home "$PWD/.config/ikigai"
+client `metrics`  …/.config/ikigai/gonk/quic/clients/metrics
+…
+  enrolled     grant `metrics` (2 scopes) in …/.config/ikigai/gonk/grants.json
+…
+```
 
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 …
-  quic    udp 0.0.0.0:1070 — 2 trusted certificate(s), 2 enrolled
+  quic    udp 0.0.0.0:1070 — 3 trusted certificate(s), 3 enrolled
 …
 ```
 
@@ -87,9 +104,10 @@ Each bundle goes to its worker (here, a copy into the directory that plays it):
 
 <!-- transcript: run -->
 ```console
-$ mkdir -p worker-1 worker-2
+$ mkdir -p worker-1 worker-2 metrics
 $ cp -R .config/ikigai/gonk/quic/clients/worker-1 worker-1/gonk
 $ cp -R .config/ikigai/gonk/quic/clients/worker-2 worker-2/gonk
+$ cp -R .config/ikigai/gonk/quic/clients/metrics metrics/gonk
 ```
 
 ### 1. The dispatcher files, with a brief
@@ -226,17 +244,25 @@ If it cannot make a summary, the last line is `No session summary: <why>.` A mis
 unparseable result, an unsupported harness or a run stopped at its budget leaves no summary.
 Failure to make a summary does not itself fail the run. The summary is checked against the ledger's shape before it is
 sent; a refusal to record it is logged and leaves the hand-back standing. Recording needs
-ikigai-ledger 0.22.0 or newer and `urn:cap:ledger:session:<ledger>` in the worker's grant.
-The gonk revision this book pins still links ledger 0.21.1, so it refuses that recording;
-the starter logs the refusal and keeps the hand-back.
+ikigai-ledger 0.22.0 or newer, which the gonk this book pins links, and `urn:cap:ledger:session:<ledger>`
+in the worker's grant, which step 0 showed.
 
-This chapter runs the ledger exchanges by hand, without an agent harness. Save the two
-hand-backs with that reason on their last line:
+This chapter runs the ledger exchanges by hand, without an agent harness. worker-1 plays the
+starter's part in full: its hand-back ends with the starter's line, and it then sends a summary of
+the kind the starter would make (the numbers are an example; no agent ran). worker-2's hand-back says
+why it has none. Save the two hand-backs and the summary:
 
 <!-- transcript: file handback-1.txt -->
 ```text
 https://github.com/you/demo/pull/8 adds the test, CI green
-No session summary: this chapter runs ledger commands by hand.
+Session summary: claude session 0b5e41aa (claude-opus-5-5, exit 0), sent to the item's sessions after this hand-back.
+```
+
+<!-- transcript: file session-1.json -->
+```json
+{"session": "0b5e41aa", "machineName": "worker-1", "harness": "claude", "model": "claude-opus-5-5",
+ "exitStatus": 0, "wallClockMs": 1830000, "turns": 41, "toolCalls": 118, "inputTokens": 5120,
+ "cachedInputTokens": 880000, "cacheCreationTokens": 64000, "outputTokens": 21000}
 ```
 
 <!-- transcript: file handback-2.txt -->
@@ -253,6 +279,9 @@ commented on #1 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 #1 released
 [uncacheable]
 — batch: 2 commands · 2 uncacheable
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:item:1:sessions' < session-1.json
+recorded session 0b5e41aa on #1's hand-back
+[uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:close item=1 reason=done'
 error: denied: this capability holds neither `urn:cap:ledger:close:default` nor `urn:cap:ledger:write:default`, and this resource takes either. A ledger grant names exactly one ledger, and a grant for another verb (a worker's claim and comment, say) does not reach this one
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:comment item=2 handback=true' -c 'delete urn:iki:ledger:claim item=2 from=worker-2' < handback-2.txt
@@ -264,7 +293,8 @@ commented on #2 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 ```
 
 The worker marks its comment as a hand-back, which makes the item wait for its dispatcher;
-the release lets go of the claim. The worker's attempt to close its own work is refused at the
+the release lets go of the claim. The summary is a separate request after the hand-back, and it is
+recorded on the item's newest hand-back, so a refused summary would leave the hand-back standing. The worker's attempt to close its own work is refused at the
 grant. (The pull request URLs are the shape step 3 would print; this page has no
 forge.)
 
@@ -332,6 +362,33 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 
 The claim and the release were made over QUIC, so each ends with the principal the door verified. The
 close was made over the socket, which has no name to give.
+
+The ledger keeps every summary as one set too, `sessions`, newest first and paged (ikigai-ledger
+0.22.0). It names each item by its number and IRI and never by its title, and it totals and prices
+nothing. `metrics` holds the summaries grant and no other ledger grant, so it reads the set and is
+refused the item the set names:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir metrics/gonk -c 'source urn:iki:ledger:sessions'
+default: sessions, newest first, from offset 0
+session 0b5e41aa recorded …
+  item: #1 urn:iki:ledger:default:item:…
+  harness: claude, model: claude-opus-5-5, machine: worker-1
+  exit status: 0, wall clock: 1830000 ms
+  turns: 41, tool calls: 118
+  tokens: input 5120, cached input 880000, cache creation 64000, output 21000
+  hand-back: urn:iki:ledger:default:comment:…
+  iri: urn:agent:session:id:0b5e41aa
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir metrics/gonk -c 'source urn:iki:ledger:item:1'
+error: denied: capability does not grant `urn:cap:ledger:read:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:read:` satisfies it)
+```
+
+⚠ The grant is narrow at the ledger's resources, not at the store's. The store read it carries
+reads the whole ledger graph, titles included, through the store's own `urn:iki:store:graph-select`.
+So `summaries` keeps item text out of a dashboard written against the ledger. It is not a boundary
+against a client that queries the store directly.
 [A lifecycle for your ledger](../ledger/lifecycle.md#what-happened-to-an-item) covers the rest of
 what a history holds.
 
@@ -466,7 +523,7 @@ gonk init: …/library
   note     role      worker: an unattended machine running tools/worker.py; claims, works, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
-  ok       ikigai    ikigai 0.2.3 at …/ikigai
+  ok       ikigai    ikigai 0.5.0 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `worker-1` (.gonk/local.toml, this working tree only)
   ok       identity  urn:iki:host:gonk:client:… (from …/worker-1/gonk/client.crt)

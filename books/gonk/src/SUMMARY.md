@@ -10,6 +10,7 @@
 - [Checking what you have](ledger/checking.md)
 - [The Dashboard](ledger/dashboard.md)
 - [A lifecycle for your ledger](ledger/lifecycle.md)
+- [Backing up and restoring](ledger/backup.md)
 
 # An agent's ledger
 

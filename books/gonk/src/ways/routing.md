@@ -67,7 +67,7 @@ client `hub`  …/.config/ikigai/gonk/quic/clients/hub
 $ ikigai-gonk client add lawnboy --worker default --port 1070 --config-home "$PWD/.config/ikigai"
 client `lawnboy`  …/.config/ikigai/gonk/quic/clients/lawnboy
 …
-  enrolled     grant `lawnboy` (6 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `lawnboy` (7 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client list --config-home "$PWD/.config/ikigai" | awk '$1 == "hub" { print "urn:iki:host:gonk:client:" $2 }' > hub.principal
 ```

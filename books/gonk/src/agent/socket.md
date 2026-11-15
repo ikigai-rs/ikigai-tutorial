@@ -14,13 +14,13 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.2.3
+ikigai 0.5.0
 ```
 
 ## Start a gonk, and find its socket
 
 In a new empty directory, as in [every chapter](../introduction.md#a-gonk-per-chapter): if the gonk
-from [A lifecycle for your ledger](../ledger/lifecycle.md) is still running, stop it first, since this one
+from [Backing up and restoring](../ledger/backup.md) is still running, stop it first, since this one
 takes the same port.
 
 <!-- transcript: serve -->
@@ -183,7 +183,7 @@ seal does and does not keep it from beyond these is [below](#what-the-seal-does-
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:ledger:append author=agent-7 Filed under a narrowed grant' -c 'delete urn:iki:ledger:item:1' -c 'source urn:iki:ledger:book:items'
-sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
 error: denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:delete:` satisfies it)
@@ -237,7 +237,7 @@ root:
 ```console
 $ printf 'mount = "prefer urn:iki:store:=%s/.ikigai/gonk.sock"\n' "$PWD" >> .config/ikigai/config.toml
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
-sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 error: denied: a raw store write to the ledger graph <urn:iki:ledger:graph:default> is refused at this door. A ledger grant carries that graph's store token for the ledger's OWN writes, which it issues itself; it is not authority to write the graph's triples directly — that is how an `author` naming someone else would get in. Write through the ledger's endpoints (`urn:iki:ledger:*`). Raw writes are the owner's, at root over the socket, or an identity's whose grant an operator minted with `--ledger-graph <ledger>` (`urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default`)
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:store:graph-update graph=urn:iki:ledger:graph:default INSERT DATA { GRAPH <urn:iki:ledger:graph:default> { <urn:example:note> <urn:example:says> "written raw" } }'
 updated <urn:iki:ledger:graph:default>: +1 -0 quads
@@ -258,7 +258,7 @@ and a sealed session may still file an item that claims to be from a passkey:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default urn:cap:ledger:write:default urn:cap:store:write:graph:urn:iki:ledger:graph:default' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not really Ada'
-sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 #4 urn:iki:ledger:default:item:…
 [uncacheable]
 — batch: 2 commands · uncacheable
@@ -297,7 +297,7 @@ a graph is there:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'cap seal urn:cap:ledger:read:default urn:cap:store:read:graph:urn:iki:ledger:graph:default' -c 'source urn:gk:sparql:select as=text/csv query="SELECT ?g (COUNT(*) AS ?n) WHERE { GRAPH ?g { ?s ?p ?o } } GROUP BY ?g ORDER BY ?g"' -c 'source urn:gk:sparql:select as=text/csv graph=urn:iki:ledger:graph:default:deleted query="SELECT * WHERE { ?s ?p ?o }"' -c 'source urn:gk:sparql:select as=text/csv graph=urn:iki:ledger:graph:nothing-here query="SELECT * WHERE { ?s ?p ?o }"'
-sealed — capability: urn:cap:ledger:read:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset`, `logout` and `login` cannot rise above it)
+sealed — capability: urn:cap:ledger:read:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 g,n
 urn:iki:ledger:graph:default,…
 [uncacheable]

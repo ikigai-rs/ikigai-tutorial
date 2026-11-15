@@ -195,11 +195,10 @@ you.
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
- 1.    #3  open    p1  The README has a title and no instructions, so a new reader cannot start the project.  [high roborev]
+ 1.    #3  open    p1  The README has a title and no instructions, so a new reader cannot start the project.  [roborev severity:major]
     p1 — priority 1; last updated …
  2.    #2  open    p-  Write the empty-queue test
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
-
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 1
   not #1: claimed by chris

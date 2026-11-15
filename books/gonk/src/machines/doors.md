@@ -59,7 +59,8 @@ ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
 ```
 
 The `http` line says what an anonymous caller at that door may do: read the `default` ledger, and
-nothing else. The `quic` line is followed by one line per trusted certificate: the grant name,
+nothing else. The doors share one store, and a slow read there holds only the request that made it
+(gonk PR 370): other pages and calls are still answered while it runs. The `quic` line is followed by one line per trusted certificate: the grant name,
 the fingerprint's first sixteen hex digits, the certificate file, and whether it is enrolled.
 
 `--port` moves both network doors: HTTP on TCP 1070, loopback only, and QUIC on UDP 1070, every

@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-14**: New chapter Backing up and restoring shows a backup, a snapshot in pieces and a checked restore of each. Pages now teach client add --scope and --print, canonical file IRIs for findings, GitHub links and a file's items in browse, session summaries and the summaries-only grant, and the Agents tab's limits.
+
+  Pages: [Backing up and restoring](ledger/backup.md), [A QUIC client, and the grant it runs under](machines/quic-client.md), [Filing roborev findings](bridges/roborev.md), [Browse roots: a repository as resources](browse/roots.md), [Remote workers](ways/workers.md), [The Dashboard](ledger/dashboard.md), [A ledger of your own](ledger/your-own.md), [The three doors, and who is asking](machines/doors.md), [A model of your own](project/model.md)
+
 - **2026-11-14**: The embedded ledger’s claim output includes its epoch, and the OpenSpec host binds the file mount used to read named mappings. The review example expects Conflict when a decision is repeated without naming its revision.
 
   Pages: [A ledger of your own](ledger/your-own.md), [OpenSpec in one chapter](spec/openspec.md), [Changes and tasks as ledger items, and next over them](spec/ledger.md), [One-off review, and what a finding is](review/one-off.md)

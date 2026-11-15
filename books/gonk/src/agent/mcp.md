@@ -147,6 +147,8 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-item-closed__exists"
 "name":"ledger-item-history__source"
 "name":"ledger-item-holder-is__exists"
+"name":"ledger-item-sessions__sink"
+"name":"ledger-item-sessions__source"
 "name":"ledger-item-state-is__exists"
 "name":"ledger-item-state__sink"
 "name":"ledger-item-state__source"
@@ -165,6 +167,7 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-policy__exists"
 "name":"ledger-policy__source"
 "name":"ledger-reopen__sink"
+"name":"ledger-sessions__source"
 ```
 
 Thirty-five tools, each an endpoint and a verb: `ledger-append__sink` is a `sink` to
@@ -185,6 +188,9 @@ Two more arrived by 0.14: `ledger-counts__source`, a ledger's dated counts, and
 And two with 0.18.0: `ledger-item-history__source`, [what happened to an
 item](../ledger/lifecycle.md#what-happened-to-an-item), and `ledger-history__sink`, which only a
 principal enrolled as an importer may use, to bring an item's past events from another system.
+And three with 0.22.0: `ledger-item-sessions__sink` and `__source`, which record and read the
+summaries of the agent sessions that worked an item ([Remote workers](../ways/workers.md#4-the-worker-hands-back-with-evidence)
+records one), and `ledger-sessions__source`, every summary in the ledger.
 A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
 deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging
@@ -251,13 +257,13 @@ whatever order they finished:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/file.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.0"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/retry.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.0"}}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/check.jsonl 2>/dev/null | LC_ALL=C sort
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.2.3"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.0"}}}
 {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    p-  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n  author:   urn:iki:host:gonk:client:… (verified)\n  committer: urn:iki:host:gonk:client:… at …\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author=urn:iki:gonk:passkey:ada` refused for committer urn:iki:host:gonk:client:…: it is not the committer, the participants graph <urn:collab:participants> does not enroll the committer to act for it (prov:actedOnBehalfOf), and the committer is not an import principal (ledger:Importer). To write anyway, send no author to be the author yourself, or have the host enroll you to act for that principal\nkind: denied; class: denied"}],"isError":true}}
 {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"tool `ledger-item__delete` is not available under this capability"}],"isError":true}}
