@@ -18,6 +18,12 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-15"
+summary = "The inspector's CSV source now declares its UTF-8 charset, using the kernel's media-type matching for the existing CSV-to-JSON view."
+pages = ["model/views-from-json.md"]
+maintenance = true
+
+[[change]]
 date = "2026-11-14"
 summary = "The inspector’s catalog snapshot uses the updated module’s American spelling in the theme chooser description; it still lists 62 endpoints."
 pages = ["model/composed.md"]
