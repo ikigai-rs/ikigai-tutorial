@@ -62,12 +62,12 @@ $ ikigai-gonk client add hub --ledger default=write --port 1070 --config-home "$
 client `hub`  …/.config/ikigai/gonk/quic/clients/hub
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `hub` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `hub` (7 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add lawnboy --worker default --port 1070 --config-home "$PWD/.config/ikigai"
 client `lawnboy`  …/.config/ikigai/gonk/quic/clients/lawnboy
 …
-  enrolled     grant `lawnboy` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `lawnboy` (9 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client list --config-home "$PWD/.config/ikigai" | awk '$1 == "hub" { print "urn:iki:host:gonk:client:" $2 }' > hub.principal
 ```
@@ -208,7 +208,7 @@ warning: could not check that a worker lists repository `library`: no status ite
 commented on #3 (urn:iki:ledger:default:comment:…)
 default#3: next (worker:lawnboy,agent:codex): rank 1 of 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:2'
-   #2  open    p2  Document initials in the README  [agent:claude repo:library worker:lawnboy]
+   #2  open    priority 2  Document initials in the README  [agent:claude repo:library worker:lawnboy]
 …
 1 comment(s):
   … urn:iki:host:gonk:client:…

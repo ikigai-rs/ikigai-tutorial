@@ -104,7 +104,7 @@ commented on #1 (urn:iki:ledger:default:comment:…)
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #1  open    p1  initials panics on an empty word  [bug]
+ 1.    #1  open    priority 1  initials panics on an empty word  [bug]
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 0
@@ -113,7 +113,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:cla
 #1 claimed by agent at epoch 1 until …
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
-nothing is ready (1 open item(s) excluded: #1 claimed by agent)
+nothing is ready (1 open item excluded: #1 claimed by agent)
 policy: priority-recency
 [uncacheable]
 ```
@@ -249,7 +249,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'delete urn:gk:iki:ledger:c
 #1 released
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
-nothing is ready (1 open item(s) excluded: #1 handed back, awaiting the dispatcher)
+nothing is ready (1 open item excluded: #1 handed back, awaiting the dispatcher)
 policy: priority-recency
 [uncacheable]
 ```
@@ -271,16 +271,16 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:clo
 closed #1 done (1 evidence)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:1'
-   #1  closed  p1  initials panics on an empty word  [bug]  (done)
+   #1  closed  priority 1  initials panics on an empty word  [bug]  (done)
   iri:      urn:iki:ledger:default:item:…
   filed:    …
   updated:  …
 3 comment(s):
-  … ada (claimed, free text)
+  comment by ada (claimed, free text) at …:
     Done when initials("Ada  Lovelace") is "AL" and a test says so.
-  … agent (claimed, free text)
+  comment by agent (claimed, free text) at …:
     https://github.com/you/demo/pull/7 adds the test, CI green
-  … ada (claimed, free text)
+  comment by ada (claimed, free text) at …:
     Checked: PR 7 merged with CI green; the test covers two spaces.
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:doctor'

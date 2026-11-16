@@ -183,29 +183,29 @@ reviewer can ask what is waiting for them without anyone labeling anything:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:tasks:next'
- 1. tasks#1  open    p1  Add a retry to the fetcher
+ 1. tasks#1  open    priority 1  Add a retry to the fetcher
     p1 — priority 1; last updated …
- 2. tasks#3  open    p3  Add retries to the fetcher
+ 2. tasks#3  open    priority 3  Add retries to the fetcher
     p3 — priority 3; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 1
   not tasks#2: blocked by tasks#1
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:tasks:next drain=review-gate'
- 1. tasks#1  open    p1  Add a retry to the fetcher
+ 1. tasks#1  open    priority 1  Add a retry to the fetcher
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 0
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:tasks:next drain=triage'
- 1. tasks#3  open    p3  Add retries to the fetcher
+ 1. tasks#3  open    priority 3  Add retries to the fetcher
     p3 — priority 3; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
   not tasks#2: blocked by tasks#1
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:tasks:next state=doing'
-nothing is ready (0 open item(s) excluded: the ledger has no open items matching the filter)
+nothing is ready (0 open items excluded: the ledger has no open items matching the filter)
 policy: priority-recency
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:tasks:next drain=revue'

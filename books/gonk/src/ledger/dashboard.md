@@ -55,7 +55,7 @@ $ ikigai-gonk client add pinwheel --ledger app=write --ledger docs=write --ledge
 client `pinwheel`  …/.config/ikigai/gonk/quic/clients/pinwheel
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `pinwheel` (13 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `pinwheel` (19 scopes) in …/.config/ikigai/gonk/grants.json
 …
 ```
 
@@ -66,7 +66,7 @@ this line does the same:
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk passkey invite operator --ledger app=write --ledger docs=write --ledger infra=write --port 1070 --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai"
-passkey invite for `operator` — grant `operator` (13 scopes) in …/.config/ikigai/gonk/grants.json
+passkey invite for `operator` — grant `operator` (19 scopes) in …/.config/ikigai/gonk/grants.json
   valid for 30 minutes, once
   open  http://localhost:1070/#invite=…
   in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json

@@ -54,7 +54,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 #1 urn:iki:ledger:default:item:…
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:items'
-   #1  open    p1  Filed over the socket
+   #1  open    priority 1  Filed over the socket
 1 item(s)
 [uncacheable]
 ```
@@ -119,9 +119,9 @@ $ printf 'mount = "prefer urn:iki:ledger:=%s/.ikigai/gonk.sock"\n' "$PWD" >> .co
 $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:ledger:append Filed by its own name' -c 'source urn:iki:ledger:next'
 #2 urn:iki:ledger:default:item:…
 [uncacheable]
- 1.    #1  open    p1  Filed over the socket
+ 1.    #1  open    priority 1  Filed over the socket
     p1 — priority 1; last updated …
- 2.    #2  open    p-  Filed by its own name
+ 2.    #2  open    no priority set  Filed by its own name
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
@@ -170,8 +170,10 @@ $ ikigai-gonk grants default write
 [
   "urn:cap:ledger:read:default",
   "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
+  "urn:cap:store:read:graph:urn:iki:ledger:graph:default:session",
   "urn:cap:ledger:write:default",
   "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+  "urn:cap:store:write:graph:urn:iki:ledger:graph:default:session",
   "urn:cap:store:read:graph:urn:collab:participants"
 ]
 ```

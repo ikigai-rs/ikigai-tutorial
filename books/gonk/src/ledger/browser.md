@@ -295,7 +295,7 @@ browses, belongs to an **identity**, and an identity is given by invitation:
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk passkey invite ada --ledger book=write --browse read --port 1070 --config-home "$PWD/.config/ikigai"
-passkey invite for `ada` — grant `ada` (7 scopes) in …/.config/ikigai/gonk/grants.json
+passkey invite for `ada` — grant `ada` (9 scopes) in …/.config/ikigai/gonk/grants.json
   valid for 30 minutes, once
   open  http://localhost:1070/#invite=…
   in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json
@@ -312,8 +312,10 @@ $ cat .config/ikigai/gonk/grants.json
   "ada": [
     "urn:cap:ledger:read:book",
     "urn:cap:store:read:graph:urn:iki:ledger:graph:book",
+    "urn:cap:store:read:graph:urn:iki:ledger:graph:book:session",
     "urn:cap:ledger:write:book",
     "urn:cap:store:write:graph:urn:iki:ledger:graph:book",
+    "urn:cap:store:write:graph:urn:iki:ledger:graph:book:session",
     "urn:cap:store:read:graph:urn:collab:participants",
     "urn:cap:browse:read:*",
     "urn:cap:store:read:graph:urn:iki:browse:graph:default"
@@ -378,7 +380,7 @@ that reads a mounted socket peer needs its read token and `urn:cap:net:localhost
 <!-- transcript: run -->
 ```console
 $ ikigai-gonk passkey invite metrics --ledger book=read --scope urn:cap:metrics:read --scope urn:cap:net:localhost --port 1070 --config-home "$PWD/.config/ikigai"
-passkey invite for `metrics` — grant `metrics` (4 scopes) in …/.config/ikigai/gonk/grants.json
+passkey invite for `metrics` — grant `metrics` (5 scopes) in …/.config/ikigai/gonk/grants.json
   valid for 30 minutes, once
   open  http://localhost:1070/#invite=…
   in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json

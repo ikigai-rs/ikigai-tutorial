@@ -84,14 +84,14 @@ $ ikigai-gonk client add bot --ledger default=read --nl draft --script 'team-*=p
 client `bot`  …/.config/ikigai/gonk/quic/clients/bot
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `bot` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `bot` (8 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
 $ ikigai-gonk client add reviewer --ledger default=read --script 'team-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `reviewer`  …/.config/ikigai/gonk/quic/clients/reviewer
 …
-  enrolled     grant `reviewer` (4 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `reviewer` (5 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add worker --worker default --script public=run --port 1070 --config-home "$PWD/.config/ikigai"
 client `worker`  …/.config/ikigai/gonk/quic/clients/worker
@@ -113,6 +113,7 @@ $ jq -r 'del(.ann) | to_entries[] | .key, (.value[] | "  " + .)' .config/ikigai/
 bot
   urn:cap:ledger:read:default
   urn:cap:store:read:graph:urn:iki:ledger:graph:default
+  urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
   urn:cap:net:localhost
   urn:cap:script:read:team-*
   urn:cap:script:run:team-*
@@ -121,15 +122,18 @@ bot
 reviewer
   urn:cap:ledger:read:default
   urn:cap:store:read:graph:urn:iki:ledger:graph:default
+  urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
   urn:cap:script:read:team-*
   urn:cap:script:run:team-*
 worker
   urn:cap:ledger:read:default
   urn:cap:store:read:graph:urn:iki:ledger:graph:default
+  urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
   urn:cap:ledger:claim:default
   urn:cap:ledger:comment:default
   urn:cap:ledger:session:default
   urn:cap:store:write:graph:urn:iki:ledger:graph:default
+  urn:cap:store:write:graph:urn:iki:ledger:graph:default:session
   urn:cap:store:read:graph:urn:collab:participants
   urn:cap:script:read:public
   urn:cap:script:run:public
@@ -320,7 +324,7 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (138 offered)
+left out: parts= did not ask for it (143 offered)
 urn:ikigai:vocab: 259 of 259
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1

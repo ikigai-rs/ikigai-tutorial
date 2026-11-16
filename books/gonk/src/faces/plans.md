@@ -244,7 +244,7 @@ takeover](../project/claim.md) showed, and names the remedy:
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:doctor' 2>/dev/null | grep -A1 '^  lease-expired'
   lease-expired  #2's lease for bob expired at …
-                 remedy: take it over (`sink urn:iki:ledger:claim item=2 takeover=true from=bob`), or release it (`delete urn:iki:ledger:claim item=2`)
+  remedy for lease-expired on #2: take it over (`sink urn:iki:ledger:claim item=2 takeover=true from=bob`), or release it (`delete urn:iki:ledger:claim item=2`)
 ```
 
 <!-- transcript: manual — it opens a browser, which a check cannot look at -->

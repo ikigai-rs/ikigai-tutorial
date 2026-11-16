@@ -308,9 +308,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 [uncacheable]
 — batch: 3 commands · 3 uncacheable
 $ curl -s http://127.0.0.1:1070/iki/ledger/items
-   #3  open    p1  Check every transcript
-   #2  open    p0  Pin gonk to a git rev  [book]
-   #1  open    p-  Write the gonk book
+   #3  open    priority 1  Check every transcript
+   #2  open    priority 0  Pin gonk to a git rev  [book]
+   #1  open    no priority set  Write the gonk book
 3 item(s)
 ```
 
@@ -328,7 +328,7 @@ closed #2 (done)
 [uncacheable]
 — batch: 3 commands · 3 uncacheable
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
- 1.    #1  open    p-  Write the gonk book
+ 1.    #1  open    no priority set  Write the gonk book
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
@@ -347,8 +347,10 @@ $ ikigai-gonk grants default delete
 [
   "urn:cap:ledger:read:default",
   "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
+  "urn:cap:store:read:graph:urn:iki:ledger:graph:default:session",
   "urn:cap:ledger:write:default",
   "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+  "urn:cap:store:write:graph:urn:iki:ledger:graph:default:session",
   "urn:cap:store:read:graph:urn:collab:participants",
   "urn:cap:ledger:delete:default",
   "urn:cap:store:write:graph:urn:iki:ledger:graph:default:deleted"

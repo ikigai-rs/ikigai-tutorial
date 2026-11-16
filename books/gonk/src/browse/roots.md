@@ -273,7 +273,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 #1 urn:iki:ledger:default:item:…
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:items about=urn:repo:file:notes/README.md'
-   #1  open    p1  Say who the notes are for
+   #1  open    priority 1  Say who the notes are for
 1 item(s)
 [uncacheable]
 ```

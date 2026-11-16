@@ -295,7 +295,7 @@ The item carries the finding whole:
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:1'
-   #1  open    p-  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…  [finding major repo:demo reproduced]
+   #1  open    no priority set  Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty…  [finding major repo:demo reproduced]
   iri:      urn:iki:ledger:default:item:…
   key:      urn:iki:finding:645d521aab16830f076e0857
   filed:    …

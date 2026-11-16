@@ -124,7 +124,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:cla
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #2  open    p1  lib: initials skips empty words  [arc]
+ 1.    #2  open    priority 1  lib: initials skips empty words  [arc]
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 2
@@ -197,7 +197,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:clo
 closed #2 (done)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #3  open    p1  docs: document initials  [arc]
+ 1.    #3  open    priority 1  docs: document initials  [arc]
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
@@ -261,7 +261,7 @@ closed #1 (done), released hub
 [uncacheable]
 — batch: 2 commands · 2 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:3'
-   #3  closed  p1  docs: document initials  [arc]  (done)
+   #3  closed  priority 1  docs: document initials  [arc]  (done)
   iri:      urn:iki:ledger:default:item:…
   filed:    …
   updated:  …
@@ -269,9 +269,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   Repository: docs. One example, and one sentence on what an empty name returns.
   Self-merge on green CI; hand back with the pull request.
 2 comment(s):
-  … spoke-docs (claimed, free text)
+  comment by spoke-docs (claimed, free text) at …:
     https://github.com/you/docs/pull/5 merged on green
-  … hub (claimed, free text)
+  comment by hub (claimed, free text) at …:
     Checked: docs PR 5 merged, CI green.
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:doctor'

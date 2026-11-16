@@ -133,7 +133,7 @@ linked #2 blocks #3
 [uncacheable]
 — batch: 2 commands · 2 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #1  open    p-  add-undo 1.2: Empty the last move's square and return the turn  [add-undo openspec]
+ 1.    #1  open    no priority set  add-undo 1.2: Empty the last move's square and return the turn  [add-undo openspec]
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 2
@@ -177,7 +177,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:clo
 closed #1 (done)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #2  open    p-  add-undo 1.3: Refuse undo once the game is over  [add-undo openspec]
+ 1.    #2  open    no priority set  add-undo 1.3: Refuse undo once the game is over  [add-undo openspec]
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
@@ -212,7 +212,7 @@ closed #3 (done)
 [uncacheable]
 — batch: 2 commands · 2 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
-nothing is ready (0 open item(s) excluded: the ledger has no open items matching the filter)
+nothing is ready (0 open items excluded: the ledger has no open items matching the filter)
 policy: priority-recency
 [uncacheable]
 ```

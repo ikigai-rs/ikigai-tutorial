@@ -68,16 +68,16 @@ The second agent is refused and asks again, and now `next` has moved on:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py next | grep -E '^ 1\.')
- 1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
+ 1. library#7  open    no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 $ (cd second && python3 tools/gonk.py next | grep -E '^ 1\.')
- 1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
+ 1. library#7  open    no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 $ (cd library && python3 tools/gonk.py claim 7)
 library#7 claimed by claude-1 at epoch 1 until …
 gonk.py: item 7 is held at epoch 1
 $ (cd second && python3 tools/gonk.py claim 7)
 error: conflict: library#7 is already claimed by claude-1. Release it first (`delete urn:iki:ledger:library:claim item=7`), or take it up with them — a claim is a fence, and stealing one silently is how two workers end up in the same tree
 $ (cd second && python3 tools/gonk.py next | grep -E '^ 1\.|not library#7')
- 1. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
+ 1. library#1  open    no priority set  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
   not library#7: claimed by claude-1
 $ (cd second && python3 tools/gonk.py claim 1)
 library#1 claimed by claude-2 at epoch 1 until …

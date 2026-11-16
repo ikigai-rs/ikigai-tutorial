@@ -156,7 +156,7 @@ Each item is keyed by its task's IRI, and is *about* both the task and the requi
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:item:key:urn:openspec:change:waive-first-fee:task:1.1'
-library#9  open    p-  waive-first-fee 1.1: Remember which members have returned a copy late  [artifact:service change:waive-first-fee]
+library#9  open    no priority set  waive-first-fee 1.1: Remember which members have returned a copy late  [artifact:service change:waive-first-fee]
   iri:      urn:iki:ledger:library:item:…
   key:      urn:openspec:change:waive-first-fee:task:1.1
   filed:    …
@@ -209,9 +209,9 @@ and says why everything else is not ready:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py next | grep -E '^ [0-9]\.|^policy|^ready')
- 1. library#9  open    p-  waive-first-fee 1.1: Remember which members have returned a copy late  [artifact:service change:waive-first-fee]
- 2. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
- 3. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
+ 1. library#9  open    no priority set  waive-first-fee 1.1: Remember which members have returned a copy late  [artifact:service change:waive-first-fee]
+ 2. library#7  open    no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
+ 3. library#1  open    no priority set  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
 policy: priority-recency (weighs priority, recency, number)
 ready: 3   excluded: 8
 $ (cd library && python3 tools/gonk.py next | grep 'not library#8:')

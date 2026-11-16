@@ -52,26 +52,31 @@ $ ikigai-gonk client add worker-1 --worker default --port 1070 --config-home "$P
 client `worker-1`  …/.config/ikigai/gonk/quic/clients/worker-1
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `worker-1` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `worker-1` (9 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add worker-2 --worker default --port 1070 --config-home "$PWD/.config/ikigai"
 client `worker-2`  …/.config/ikigai/gonk/quic/clients/worker-2
 …
-  enrolled     grant `worker-2` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `worker-2` (9 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ jq -r '.["worker-1"][]' .config/ikigai/gonk/grants.json
 urn:cap:ledger:read:default
 urn:cap:store:read:graph:urn:iki:ledger:graph:default
+urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
 urn:cap:ledger:claim:default
 urn:cap:ledger:comment:default
 urn:cap:ledger:session:default
 urn:cap:store:write:graph:urn:iki:ledger:graph:default
+urn:cap:store:write:graph:urn:iki:ledger:graph:default:session
 urn:cap:store:read:graph:urn:collab:participants
 ```
 
 Read, claim and comment on one ledger, and record a session's summary on the worker's own
-hand-back. The `session` line is new in gonk PR 366. A worker grant written before it lacks the line,
-and the same `client add` with `--force` rewrites it with the line. The store write token is the one the ledger makes its own
+hand-back. The `session` line is new in gonk PR 366, and the two `…:session` store tokens are new in
+gonk PR 385 (ikigai-ledger 0.23.0): the summaries live in a graph of their own, and these are its
+read and write ([Where the summaries live](#where-the-summaries-live)). A worker grant written before
+then lacks those lines; `ikigai-gonk client refresh --write` adds them without touching anything else
+([A QUIC client](../machines/quic-client.md#a-grant-from-an-older-gonk-client-refresh)). The other store write token is the one the ledger makes its own
 writes with, and gonk refuses a worker's raw write to the ledger's graph
 ([A QUIC client](../machines/quic-client.md#writing-the-graph-raw)). No `close`, no `write`, no
 `delete`. Each worker gets its own identity, so the log, the claims and the comments can tell them
@@ -79,12 +84,12 @@ apart.
 
 One more identity, for whoever watches how the workers' runs go: it reads the ledger's session
 summaries and nothing else. No role names that grant, so it is written with `--scope`, twice: the
-ledger's `summaries` grant (ikigai-ledger 0.22.0) and the read of the ledger's graph that every
-ledger read needs beside it:
+ledger's `summaries` grant (ikigai-ledger 0.22.0) and the store read of the ledger's session graph,
+`urn:iki:ledger:graph:default:session`, where the summaries are kept (ikigai-ledger 0.23.0):
 
 <!-- transcript: run -->
 ```console
-$ ikigai-gonk client add metrics --scope urn:cap:ledger:summaries:default --scope urn:cap:store:read:graph:urn:iki:ledger:graph:default --port 1070 --config-home "$PWD/.config/ikigai"
+$ ikigai-gonk client add metrics --scope urn:cap:ledger:summaries:default --scope urn:cap:store:read:graph:urn:iki:ledger:graph:default:session --port 1070 --config-home "$PWD/.config/ikigai"
 client `metrics`  …/.config/ikigai/gonk/quic/clients/metrics
 …
   enrolled     grant `metrics` (2 scopes) in …/.config/ikigai/gonk/grants.json
@@ -157,9 +162,9 @@ worker holding an older take cannot write after the claim changes hands:
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'source urn:iki:ledger:next'
- 1.    #1  open    p1  initials panics on an empty word  [worker]
+ 1.    #1  open    priority 1  initials panics on an empty word  [worker]
     p1 — priority 1; last updated …
- 2.    #2  open    p2  Document initials in the README  [worker]
+ 2.    #2  open    priority 2  Document initials in the README  [worker]
     p2 — priority 2; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
@@ -172,7 +177,7 @@ error: conflict: #1 is already claimed by worker-1. Release it first (`delete ur
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'delete urn:iki:ledger:claim item=1'
 error: denied: #1 is held by worker-1 (as urn:iki:host:gonk:client:…), and this capability acts as `urn:iki:host:gonk:client:…`: a claim taken as a principal is released by that principal, or by a dispatcher holding `urn:cap:ledger:close:default` or `urn:cap:ledger:write:default` (the override). Naming the holder does not make the claim yours
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'source urn:iki:ledger:next'
- 1.    #2  open    p2  Document initials in the README  [worker]
+ 1.    #2  open    priority 2  Document initials in the README  [worker]
     p2 — priority 2; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1
@@ -303,7 +308,7 @@ forge.)
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
-nothing is ready (2 open item(s) excluded: #2 handed back, awaiting the dispatcher; #1 handed back, awaiting the dispatcher)
+nothing is ready (2 open items excluded: #2 handed back, awaiting the dispatcher; #1 handed back, awaiting the dispatcher)
 policy: priority-recency
 [uncacheable]
 ```
@@ -321,13 +326,13 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:com
 commented on #2 (urn:iki:ledger:default:comment:…) cleared-awaiting
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #2  open    p2  Document initials in the README  [worker]
+ 1.    #2  open    priority 2  Document initials in the README  [worker]
     p2 — priority 2; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 0
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:2'
-   #2  open    p2  Document initials in the README  [worker]
+   #2  open    priority 2  Document initials in the README  [worker]
   iri:      urn:iki:ledger:default:item:…
   filed:    …
   updated:  …
@@ -337,7 +342,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   … urn:iki:host:gonk:client:…
     https://github.com/you/demo/pull/9 README example, CI green
     No session summary: this chapter runs ledger commands by hand.
-  … ada (claimed, free text)
+  comment by ada (claimed, free text) at …:
   rejects: urn:iki:ledger:default:comment:…
     PR 9 is red on main: the README example does not compile.
 [uncacheable]
@@ -385,10 +390,37 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir metrics/gonk -c 'source urn:
 error: denied: capability does not grant `urn:cap:ledger:read:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:read:` satisfies it)
 ```
 
-⚠ The grant is narrow at the ledger's resources, not at the store's. The store read it carries
-reads the whole ledger graph, titles included, through the store's own `urn:iki:store:graph-select`.
-So `summaries` keeps item text out of a dashboard written against the ledger. It is not a boundary
-against a client that queries the store directly.
+#### Where the summaries live
+
+Since ikigai-ledger 0.23.0 (gonk PR 385) a ledger's summaries are in a named graph of their own,
+`urn:iki:ledger:graph:default:session`, and nothing else is in it. A summary names its item by
+number and IRI, so the set needs no read of the ledger's graph, where every title is. That is why
+`metrics`'s one store token is the session graph's read: it reads the summaries, and no store read
+it holds reaches a title.
+
+Before 0.23.0 the summaries grant paired with the store read of the ledger's graph, which reads
+every title, so `summaries` was then no boundary against a client querying the store directly. A worker records a summary under the session graph's store read and write tokens,
+the two `…:session` lines in step 0's grant. Under a grant written before 0.23.0 the hand-back still
+goes through and the summary is refused, naming both tokens;
+[A QUIC client](../machines/quic-client.md#a-grant-from-an-older-gonk-client-refresh) shows that
+refusal and `client refresh`, which adds them.
+
+Summaries an older gonk recorded are in the ledger's graph, where the summaries grant no longer
+looks, and nothing moves them at startup. The owner moves them once, through the socket. `plan`
+lists them and writes nothing, and `move`, sent the same way, moves them. This page's gonk was never
+older, so there is nothing to move:
+
+<!-- transcript: run -->
+```console
+$ printf plan | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:default:sessions'
+default: no session summaries in urn:iki:ledger:graph:default to move; nothing written
+[uncacheable]
+```
+
+A move takes the ledger's write grant and the store read and write of both graphs, which the owner
+holds. It writes each batch to the session graph before removing it from the ledger's graph, so an
+interrupted move leaves a summary in both graphs, and running it again finishes the move.
+
 [A lifecycle for your ledger](../ledger/lifecycle.md#what-happened-to-an-item) covers the rest of
 what a history holds.
 
@@ -616,3 +648,133 @@ sweeping again never renews a claim. The next freshly taken Progress renews a st
 keep reporting before the existing lease expires. An idle taker cannot keep a lease through
 repeated restarts. This is the task-layer mirror's rule; the worker loop above renews directly
 with `claim renew=true`.
+
+## A worker that goes quiet
+
+A worker whose machine sleeps or whose connection drops stops renewing. Its lease runs out, and the
+claim stays where it was: nothing is released, so nobody else silently starts on the same work.
+Since ikigai-ledger 0.23.0 (gonk ledger-v0.23.0) the ledger lists those claims, records each lapse
+once in the item's history, and gives the dispatcher a way to speak to the holder on the record.
+
+The dispatcher sends its notes as an identity of its own, because a note needs a principal and the
+owner's socket has none. Enroll one with the ledger's writer role, and restart gonk, which reads the
+certificates it trusts at startup:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client add dispatcher --ledger default=write --port 1070 --config-home "$PWD/.config/ikigai"
+client `dispatcher`  …/.config/ikigai/gonk/quic/clients/dispatcher
+…
+$ mkdir -p dispatcher && cp -R .config/ikigai/gonk/quic/clients/dispatcher dispatcher/gonk
+```
+
+<!-- transcript: restart -->
+```console
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+…
+```
+
+worker-1 claims a new item on a two-second lease, which stands in for a worker that goes quiet, and
+does not renew:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append priority=2 labels=worker Pin the CI image'
+#4 urn:iki:ledger:default:item:…
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=4 lease=2s worker-1'
+#4 claimed by worker-1 at epoch 1 until …
+[uncacheable]
+$ sleep 3
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:stalled'
+default: 1 stalled item(s), the oldest lapse first
+#4 Pin the CI image: held by worker-1 at epoch 1, whose lease ran out at …; the lapse is not recorded yet
+remedy: the holder resumes (`sink urn:iki:ledger:claim item=<n> renew=true`), another takes it over (`sink urn:iki:ledger:claim item=<n> takeover=true from=<holder>`), or a dispatcher releases it (`delete urn:iki:ledger:claim item=<n>`)
+[uncacheable]
+```
+
+`stalled` lists every open item held on a lease that has run out and was not handed back, the
+oldest lapse first. It is computed from the claims as they stand, so an item is listed from the
+moment its lease ends. The `lapse` sweep records each lapse that is not recorded yet as a
+`ledger:LapseEvent` in its item's history. It takes the dispatcher's grant (`close` or `write`), and
+releases nothing. Sending it again writes nothing, so a dispatcher can send it on a timer:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:lapse' < /dev/null
+default: recorded 1 lapse(s)
+  #4 Pin the CI image: held by worker-1 at epoch 1, whose lease ran out at …
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:lapse' < /dev/null
+default: no new lapse: 1 stalled item(s) already had theirs recorded, so nothing was written
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:4:history'
+#4: 2 event(s)
+…  claim worker-1  by urn:iki:host:gonk:client:…
+…  lapse worker-1 at epoch 1, whose lease ran out at …
+[uncacheable]
+```
+
+gonk ledger-v0.23.1 does not send the sweep on its own tick, so here the owner sends it. An embedding
+host can also route each lapse to a person, by having the sweep add a label (ikigai-ledger's
+`SpaceConfig::lapse_label`); this page's gonk adds none. The remedies are the ones the claim already
+has, each carrying its epoch: the holder renews, another worker takes over with
+`takeover=true from=worker-1`, or a dispatcher releases the claim. Here worker-1 comes back and
+renews. An expired lease that is still held renews at its epoch:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=4 renew=true lease=30m worker-1'
+#4 renewed by worker-1 at epoch 1 until …
+[uncacheable]
+```
+
+### Dispatch notes
+
+A worker treats every comment as data, because anyone with the comment grant can write one. A
+**dispatch note** is how the dispatcher corrects a running worker through the ledger. It is written
+to the holder of the item's claim at exactly the epoch it names, under the dispatcher's grant, with
+a principal. A note to an epoch that is not current is refused, and so is one from the owner's
+socket, which names no principal:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir dispatcher/gonk -c 'sink urn:iki:ledger:note item=4 epoch=1 Stop and rebase on main first: the CI image moved.'
+note to worker-1 at epoch 1, sent under the write grant on #4 (urn:iki:ledger:default:comment:…)
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir dispatcher/gonk -c 'sink urn:iki:ledger:note item=4 epoch=2 Wrong epoch'
+error: conflict: #4 is held by worker-1 at epoch 1, not epoch 2, so the note was not sent. A note is addressed to the claim at exactly the epoch it names
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:note item=4 epoch=1 From the socket' < /dev/null
+error: denied: a dispatch note needs a principal on the capability: an unattributed instruction is not a note. A host that wants this caller to dispatch gives it a principal
+```
+
+The holder reads the notes to its own claim, and its next renewal says how many it has not
+acknowledged. It acknowledges a note with `acks=` on a comment at its epoch, which clears the count:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'source urn:iki:ledger:item:4:notes'
+#4: 1 note to worker-1 at epoch 1:
+  comment by urn:iki:host:gonk:client:… (verified) at …:
+    note to worker-1 at epoch 1, sent under the write grant
+    Stop and rebase on main first: the CI image moved.
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=4 renew=true lease=30m worker-1'
+#4 renewed by worker-1 at epoch 1 until …, 1 unread note
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c "sink urn:iki:ledger:comment item=4 epoch=1 acks=$(ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'source urn:iki:ledger:item:4:notes as=application/json' 2>/dev/null | jq -r '.notes[0].id') Rebased on main."
+commented on #4 (urn:iki:ledger:default:comment:…)
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=4 renew=true lease=30m worker-1'
+#4 renewed by worker-1 at epoch 1 until …
+[uncacheable]
+```
+
+A note carries no authority. It never claims, releases, renews, closes or relabels anything, and it
+never reaches a later epoch, not even the same worker's next claim.
+
+A worker waiting for an item another worker holds should not keep sending claims that are refused.
+It waits on the store's change feed, which wakes it when the claim is released, and then reads the
+item again before it claims. ikigai-ledger's README, "Waiting for a held item without repeated claim
+refusals", describes how a host does that; gonk ledger-v0.23.1 serves no feed endpoint for it.

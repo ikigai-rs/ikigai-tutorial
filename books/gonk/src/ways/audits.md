@@ -203,9 +203,9 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:com
 commented on #1 (urn:iki:ledger:default:comment:…)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
- 1.    #2  open    p1  initials.sh expands a name as a glob pattern  [audit bug]
+ 1.    #2  open    priority 1  initials.sh expands a name as a glob pattern  [audit bug]
     p1 — priority 1; last updated …
- 2.    #3  open    p2  slug.sh turns two spaces into two dashes  [audit bug]
+ 2.    #3  open    priority 2  slug.sh turns two spaces into two dashes  [audit bug]
     p2 — priority 2; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 1
@@ -226,7 +226,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:clo
 closed #2 (done)
 [uncacheable]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:1'
-   #1  open    p-  audit: tools at …  [audit]  claimed:coordinator
+   #1  open    no priority set  audit: tools at …  [audit]  claimed:coordinator
   iri:      urn:iki:ledger:default:item:…
   key:      audit:tools:2026-10-13
   filed:    …
@@ -238,7 +238,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
   Read-only. A bug counts only with a reproduction that fails at this commit because of it.
   Report what was not read, and whether the budget or the work ran out.
 1 comment(s):
-  … coordinator (claimed, free text)
+  comment by coordinator (claimed, free text) at …:
     A: 23 of 40 tool calls; the work ran out. Read both files. Suspicion, not reproduced as a defect: a name given as two arguments keeps only the first (the usage says one argument).
     B: 31 of 40 tool calls; the work ran out. Read both files.
     Not read by either: nothing in scope. Out of scope: how the tools are installed.
@@ -547,7 +547,7 @@ with `severity:major`, `repo:tools`, an `about` IRI for its file and a parent li
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:5' 2>/dev/null | head -9
-   #5  open    p-  initials.sh expands a name as a glob pattern  [repo:tools severity:major]
+   #5  open    no priority set  initials.sh expands a name as a glob pattern  [repo:tools severity:major]
   iri:      urn:iki:ledger:default:item:…
   key:      review:4:15cb53806b6daa2b
   kind:     https://ikigai-rs.dev/ns/ledger#Finding

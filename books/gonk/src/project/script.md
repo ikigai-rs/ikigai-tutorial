@@ -51,10 +51,10 @@ plan, `next-for-artifact`: one step, the ledger's own `next`, with the artifact'
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:script:library-next-for-artifact:result labels=artifact:service limit=1' 2>/dev/null | grep -E '^ 1\.|^ready'
- 1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
+ 1. library#7  open    no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 ready: 2   excluded: 6
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:script:library-next-for-artifact:result labels=artifact:cli limit=1' 2>/dev/null | grep -E '^ 1\.|^ready'
- 1. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
+ 1. library#1  open    no priority set  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
 ready: 1   excluded: 5
 ```
 
@@ -97,7 +97,7 @@ steps, and which step's answer is the result. It goes in `.gonk/scripts/`, and i
 $ (cd library && python3 tools/gonk.py init | grep -c 'urn:script:library-next-for-change')
 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:script:library-next-for-change:result labels=change:cap-late-fees' 2>/dev/null | grep -E '^ 1\.|^ready'
- 1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
+ 1. library#7  open    no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 ready: 1   excluded: 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:script:library-next-for-change:result' 2>&1 | grep -E '^error|labels`:'
 error: missing required argument `labels`
@@ -184,7 +184,7 @@ too (percent-encoded inside the resource name):
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:item:gh:you%2Flibrary%231' 2>/dev/null | head -3
-library#7  closed  p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]  (done)
+library#7  closed  no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]  (done)
   iri:      urn:iki:ledger:library:item:…
   key:      urn:openspec:change:cap-late-fees:task:1.1
 ```

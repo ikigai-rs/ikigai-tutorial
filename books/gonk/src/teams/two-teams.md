@@ -67,40 +67,46 @@ which matters later:
 $ ikigai-gonk client add alpha-agent --ledger alpha=write --script 'report-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `alpha-agent`  …/.config/ikigai/gonk/quic/clients/alpha-agent
 …
-  enrolled     grant `alpha-agent` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `alpha-agent` (9 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add beta-agent --ledger beta=write --script 'report-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `beta-agent`  …/.config/ikigai/gonk/quic/clients/beta-agent
 …
-  enrolled     grant `beta-agent` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `beta-agent` (9 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ ikigai-gonk client add manager --ledger alpha=read --ledger beta=read --browse read --script 'report-*=run' --port 1070 --config-home "$PWD/.config/ikigai"
 client `manager`  …/.config/ikigai/gonk/quic/clients/manager
 …
-  enrolled     grant `manager` (8 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `manager` (10 scopes) in …/.config/ikigai/gonk/grants.json
 …
 $ jq -r 'to_entries[] | .key, (.value[] | "  " + .)' .config/ikigai/gonk/grants.json
 alpha-agent
   urn:cap:ledger:read:alpha
   urn:cap:store:read:graph:urn:iki:ledger:graph:alpha
+  urn:cap:store:read:graph:urn:iki:ledger:graph:alpha:session
   urn:cap:ledger:write:alpha
   urn:cap:store:write:graph:urn:iki:ledger:graph:alpha
+  urn:cap:store:write:graph:urn:iki:ledger:graph:alpha:session
   urn:cap:store:read:graph:urn:collab:participants
   urn:cap:script:read:report-*
   urn:cap:script:run:report-*
 beta-agent
   urn:cap:ledger:read:beta
   urn:cap:store:read:graph:urn:iki:ledger:graph:beta
+  urn:cap:store:read:graph:urn:iki:ledger:graph:beta:session
   urn:cap:ledger:write:beta
   urn:cap:store:write:graph:urn:iki:ledger:graph:beta
+  urn:cap:store:write:graph:urn:iki:ledger:graph:beta:session
   urn:cap:store:read:graph:urn:collab:participants
   urn:cap:script:read:report-*
   urn:cap:script:run:report-*
 manager
   urn:cap:ledger:read:alpha
   urn:cap:store:read:graph:urn:iki:ledger:graph:alpha
+  urn:cap:store:read:graph:urn:iki:ledger:graph:alpha:session
   urn:cap:ledger:read:beta
   urn:cap:store:read:graph:urn:iki:ledger:graph:beta
+  urn:cap:store:read:graph:urn:iki:ledger:graph:beta:session
   urn:cap:browse:read:*
   urn:cap:store:read:graph:urn:iki:browse:graph:default
   urn:cap:script:read:report-*
@@ -153,17 +159,17 @@ Each agent asks for its own ledger's `next`, and asks for the other's:
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/alpha-agent -c 'source urn:iki:ledger:alpha:next'
- 1. alpha#1  open    p1  Initials for names with accents
+ 1. alpha#1  open    priority 1  Initials for names with accents
     p1 — priority 1; last updated …
- 2. alpha#2  open    p2  Ship the order form
+ 2. alpha#2  open    priority 2  Ship the order form
     p2 — priority 2; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/beta-agent -c 'source urn:iki:ledger:beta:next'
- 1. beta#1  open    p0  Initials crash on a double space
+ 1. beta#1  open    priority 0  Initials crash on a double space
     p0 — priority 0; last updated …
- 2. beta#2  open    p3  Rotate the supplier keys
+ 2. beta#2  open    priority 3  Rotate the supplier keys
     p3 — priority 3; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
@@ -452,7 +458,7 @@ deleted alpha#2 urn:iki:ledger:alpha:item:…
   tombstone: urn:iki:ledger:alpha:tombstone:…
 [uncacheable]
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/alpha-agent -c 'source urn:iki:ledger:alpha:next'
- 1. alpha#1  open    p1  Initials for names with accents
+ 1. alpha#1  open    priority 1  Initials for names with accents
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 0
@@ -527,7 +533,9 @@ urn:iki:ledger:{ledger}:defer
 urn:iki:ledger:{ledger}:history
 urn:iki:ledger:{ledger}:item:{id}:about
 urn:iki:ledger:{ledger}:label
+urn:iki:ledger:{ledger}:lapse
 urn:iki:ledger:{ledger}:link
+urn:iki:ledger:{ledger}:note
 urn:iki:ledger:{ledger}:reopen
 urn:iki:store:graph-update
 urn:iki:store:graph-written:{graph}

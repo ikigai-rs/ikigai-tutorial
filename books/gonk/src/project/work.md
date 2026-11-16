@@ -206,7 +206,7 @@ gonk.py: reporting item 7 at epoch 1
 commented on library#7 (urn:iki:ledger:library:comment:…) awaiting-dispatcher
 library#7 released
 $ (cd library && python3 tools/gonk.py next | grep -E '^ [0-9]\.|^ready')
- 1. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
+ 1. library#1  open    no priority set  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
 ready: 1   excluded: 7
 ```
 
@@ -222,7 +222,7 @@ still owes 2525 cents. `reject` says why, and the item is ready again:
 $ (cd library && python3 tools/gonk.py reject 7 --note 'The fix is on a branch: merge it, then report again')
 commented on library#7 (urn:iki:ledger:library:comment:…) cleared-awaiting
 $ (cd library && python3 tools/gonk.py next | grep -E '^ 1\.')
- 1. library#7  open    p-  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
+ 1. library#7  open    no priority set  cap-late-fees 1.1: Stop a late return's fee at 1000 cents  [artifact:service change:cap-late-fees]
 ```
 
 So the worker claims it again, merges, and reports again. With a forge, wait for the pull request
@@ -253,8 +253,8 @@ the next task ready:
 $ (cd library && python3 tools/gonk.py close 7 --evidence http://127.0.0.1:1070/browse/urn:repo:library:file:artifacts/service/lending/domain.py --note 'Checked: on main, 1000 cents at 101 days')
 closed library#7 done (1 evidence)
 $ (cd library && python3 tools/gonk.py next | grep -E '^ [0-9]\.')
- 1. library#1  open    p-  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
- 2. library#8  open    p-  cap-late-fees 1.2: Add a vector for the capped return to openspec/vectors.json  [artifact:service change:cap-late-fees]
+ 1. library#1  open    no priority set  add-holds 1.1: Accept a hold on a title whose copies are all out  [artifact:cli artifact:service change:add-holds]
+ 2. library#8  open    no priority set  cap-late-fees 1.2: Add a vector for the capped return to openspec/vectors.json  [artifact:service change:cap-late-fees]
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:item:7:history' 2>/dev/null | grep -E 'claim|release|closed'
 …  claim ada
 …  release ada (released)

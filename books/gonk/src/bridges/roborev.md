@@ -90,7 +90,7 @@ $ ikigai-gonk client add roborev --ledger default=write --port 1070 --config-hom
 client `roborev`  …/.config/ikigai/gonk/quic/clients/roborev
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `roborev` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `roborev` (7 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -191,7 +191,7 @@ filed    critical #1 `write_with_retry` loops while the store answers `Busy` and
 filed    high     #2 On the final attempt the error is logged and `Ok(())` is returned.
 filed    medium   #3 The retry delay is a fixed 100 ms, so two writers retrying together collide on every attempt.
 $ curl -s http://127.0.0.1:1070/iki/ledger/item/1
-   #1  open    p0  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…  [roborev severity:critical]
+   #1  open    priority 0  `write_with_retry` loops while the store answers `Busy` and has no attempt limit. Trigger: a writer…  [roborev severity:critical]
   iri:      urn:iki:ledger:default:item:…
   key:      urn:roborev:finding:9b1fa066c174c6e500245e3a48d8eae8
   kind:     https://ikigai-rs.dev/ns/ledger#Finding
@@ -355,7 +355,7 @@ $ ikigai-gonk ledger canonical-file-iris --socket "$PWD/.ikigai/gonk.sock" --app
 rewriting  #4  about urn:repo:demo:file:src/old.rs  ->  urn:repo:file:demo/src/old.rs
 1 about(s) rewritten, 0 old-form file IRI(s) left on findings
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:items about=urn:repo:file:demo/src/old.rs'
-   #4  open    p-  Filed before the canonical form  [high roborev]
+   #4  open    no priority set  Filed before the canonical form  [high roborev]
 1 item(s)
 [uncacheable]
 ```

@@ -290,6 +290,28 @@ directly because browse takes an `oxigraph::store::Store`. A newer release that 
 yet waits for the pin, so a transcript and a listing are always answered by the same module, unless
 the book needs it first.
 
+**The move to ledger-v0.23.1** (ledger #3783, 2026-11-16): `gonk.rev` moved from f03b6b9 (the tag
+`ledger-v0.22.2`) to 4093c8d, the tag `ledger-v0.23.1`. Between them are ledger-v0.22.3 (label chips on
+an item page link to their ledger listings), ledger-v0.23.0 (8c70fcc, gonk PR 385: `ikigai-ledger` 0.23.0)
+and ledger-v0.23.1 (gonk PR 386: `ikigai-gonk client refresh`). It links `ikigai-ledger` 0.23.0 and
+otherwise the crates f03b6b9 links; the cli stays at 0.5.0, whose transports it still takes, and the
+starter stays at its pin. ⚠ **A version gap is OPEN, by decision**: the workspace's crates still lock
+`ikigai-ledger` 0.22.0 (the root `Cargo.toml` says so beside the number), because this move was scoped to
+the gonk Book's pages and pin; moving the crates is a change of its own, for every book that shares
+them. What the move changed on the pages: every role `grants_for` mints names the new session graph
+(`urn:iki:ledger:graph:{ledger}:session`; its store read for every role, its write for worker, write,
+delete and purge), so each grant listing and scope count grew; the summaries-only grant pairs with
+that graph's read and no longer with the ledger graph's, so Remote workers' `metrics` identity is now
+narrow at the store too; and the plain face says priorities in words (`priority 1`, `no priority set`
+for `p1`, `p-`), a comment's stamp as `comment by … at …:`, `next`'s exclusions as `1 open item` and
+`2 open items`, and the doctor's remedy on a line of its own that names its finding. The manifold and
+the grounding gained the new resources (`note`, `item:{id}:notes`, `stalled`, `lapse`, and `sessions` as
+a Sink). The in-page cells on "Your own ledger" still print `p1`, because they run the workspace's
+ledger 0.22.0: that is the open gap, on the page. The new teaching: `client
+refresh` (A QUIC client), the session graph and the `sessions` plan/move (Remote workers), and stalled
+claims, the lapse sweep and dispatch notes (Remote workers). The Harness page and query sensors are
+in this tag but are not taught here: they were reworked after it, and wait for the next pin.
+
 **The move to ledger-v0.22.2** (ledger #3727, which took over #3668, 2026-11-14): `gonk.rev` moved from
 dfd985e (ledger-v0.21.8's behavior, tutorial PR 301) to f03b6b9, the tag `ledger-v0.22.2`. It links
 `ikigai-core` 0.3.5, `ikigai-ledger` 0.22.0, `ikigai-store` 0.5.0, `ikigai-browse` 0.22.0, `ikigai-script`

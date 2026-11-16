@@ -192,8 +192,8 @@ ikigai-gonk 0.1.1 — holding the store at …/restored-pieces
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1071/iki/ledger/items
-   #3  open    p-  Practice a restore
-   #2  open    p1  Copy backups off the host
+   #3  open    no priority set  Practice a restore
+   #2  open    priority 1  Copy backups off the host
 2 item(s)
 $ ikigai --mount "urn:gk:=$PWD/.ikigai-restored/gonk.sock" -c 'source urn:gk:iki:ledger:ledgers'
 default                       2 open      3 total  urn:iki:ledger:graph:default

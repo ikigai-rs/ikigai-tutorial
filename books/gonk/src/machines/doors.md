@@ -33,7 +33,7 @@ $ ikigai-gonk client add laptop --ledger default=write --port 1070 --config-home
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `laptop` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `laptop` (7 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -104,8 +104,8 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/cli
 #2 urn:iki:ledger:default:item:…
 
 [uncacheable]
-   #2  open    p-  From QUIC
-   #1  open    p-  From the socket
+   #2  open    no priority set  From QUIC
+   #1  open    no priority set  From the socket
 
 2 item(s)
 
@@ -170,7 +170,7 @@ as its author is refused:
 <!-- transcript: run -->
 ```console
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'source urn:iki:ledger:item:2' -c 'sink urn:iki:ledger:append author=urn:iki:gonk:passkey:ada Not mine to sign'
-   #2  open    p-  From QUIC
+   #2  open    no priority set  From QUIC
   iri:      urn:iki:ledger:default:item:…
   filed:    … by urn:iki:host:gonk:client:…
   updated:  …
@@ -205,7 +205,7 @@ enrolled in <urn:collab:participants>: <urn:iki:host:gonk:client:…> <http://ww
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/clients/laptop -c 'sink urn:iki:ledger:append author=urn:collab:participant:laptop-claude For laptop-claude' -c 'source urn:iki:ledger:item:3'
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
-   #3  open    p-  For laptop-claude
+   #3  open    no priority set  For laptop-claude
   iri:      urn:iki:ledger:default:item:…
   filed:    … by urn:collab:participant:laptop-claude
   updated:  …

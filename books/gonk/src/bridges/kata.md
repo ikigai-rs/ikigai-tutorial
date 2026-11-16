@@ -61,7 +61,7 @@ $ ikigai-gonk client add kata --ledger kata=write --port 1070 --config-home "$PW
 client `kata`  …/.config/ikigai/gonk/quic/clients/kata
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `kata` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `kata` (7 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -169,7 +169,7 @@ than claim it for someone else. `next` says why it leaves that item out:
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/kata/next
- 1. kata#3  open    p-  Write the empty-queue test
+ 1. kata#3  open    no priority set  Write the empty-queue test
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 
 policy: priority-recency (weighs priority, recency, number)

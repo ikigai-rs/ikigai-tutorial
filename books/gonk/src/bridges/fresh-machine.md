@@ -60,7 +60,7 @@ $ ikigai-gonk client add roborev --ledger default=write --port 1070 --config-hom
 client `roborev`  …/.config/ikigai/gonk/quic/clients/roborev
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `roborev` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `roborev` (7 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -195,9 +195,9 @@ you.
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
- 1.    #3  open    p1  The README has a title and no instructions, so a new reader cannot start the project.  [roborev severity:major]
+ 1.    #3  open    priority 1  The README has a title and no instructions, so a new reader cannot start the project.  [roborev severity:major]
     p1 — priority 1; last updated …
- 2.    #2  open    p-  Write the empty-queue test
+ 2.    #2  open    no priority set  Write the empty-queue test
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 1

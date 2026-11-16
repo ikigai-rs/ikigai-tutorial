@@ -117,7 +117,7 @@ doctor lists what needs that look:
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:library:doctor' 2>/dev/null | grep -A1 '^  lease-expired'
   lease-expired  library#7's lease for ada expired at …
-                 remedy: take it over (`sink urn:iki:ledger:library:claim item=7 takeover=true from=ada`), or release it (`delete urn:iki:ledger:library:claim item=7`)
+  remedy for lease-expired on library#7: take it over (`sink urn:iki:ledger:library:claim item=7 takeover=true from=ada`), or release it (`delete urn:iki:ledger:library:claim item=7`)
 ```
 
 ## Take it over

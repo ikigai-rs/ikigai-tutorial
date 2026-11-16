@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-16**: A QUIC client teaches client refresh: an older grant's session summary refused, the dry run, --write and its backup, then the summary recorded. Remote workers shows the session graph, the summaries move, stalled claims, the lapse record and dispatch notes, and listings say priorities in words.
+
+  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md), [Remote workers](ways/workers.md)
+
 - **2026-11-14**: New chapter Backing up and restoring shows a backup, a snapshot in pieces and a checked restore of each. Pages now teach client add --scope and --print, canonical file IRIs for findings, GitHub links and a file's items in browse, session summaries and the summaries-only grant, and the Agents tab's limits.
 
   Pages: [Backing up and restoring](ledger/backup.md), [A QUIC client, and the grant it runs under](machines/quic-client.md), [Filing roborev findings](bridges/roborev.md), [Browse roots: a repository as resources](browse/roots.md), [Remote workers](ways/workers.md), [The Dashboard](ledger/dashboard.md), [A ledger of your own](ledger/your-own.md), [The three doors, and who is asking](machines/doors.md), [A model of your own](project/model.md)

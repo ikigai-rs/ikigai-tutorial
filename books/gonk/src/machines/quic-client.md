@@ -41,7 +41,7 @@ $ ikigai-gonk client add laptop --ledger default=write --browse read --root note
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `laptop` (7 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `laptop` (9 scopes) in …/.config/ikigai/gonk/grants.json
   restart ikigai-gonk: trusted certificates are read at startup
   this bundle holds the client's PRIVATE key and the server never reads it — move the directory to the client, then from the client:
     ikigai --connect quic://<gonk host>:1070 --cert-dir <the moved directory>
@@ -54,8 +54,10 @@ $ cat .config/ikigai/gonk/grants.json
   "laptop": [
     "urn:cap:ledger:read:default",
     "urn:cap:store:read:graph:urn:iki:ledger:graph:default",
+    "urn:cap:store:read:graph:urn:iki:ledger:graph:default:session",
     "urn:cap:ledger:write:default",
     "urn:cap:store:write:graph:urn:iki:ledger:graph:default",
+    "urn:cap:store:write:graph:urn:iki:ledger:graph:default:session",
     "urn:cap:store:read:graph:urn:collab:participants",
     "urn:cap:browse:read:notes",
     "urn:cap:store:read:graph:urn:iki:browse:graph:default"
@@ -205,7 +207,7 @@ $ ikigai-gonk client add laptop --ledger default=write --browse read --root note
 client `laptop`  …/.config/ikigai/gonk/quic/clients/laptop
   fingerprint  …
   principal    urn:iki:host:gonk:client:…
-  enrolled     grant `laptop` (8 scopes) in …/.config/ikigai/gonk/grants.json
+  enrolled     grant `laptop` (10 scopes) in …/.config/ikigai/gonk/grants.json
   REPLACED     grant `laptop` (--force) — every identity enrolled under it holds the new list from its next request or connection:
     adds     urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default
   restart ikigai-gonk: trusted certificates are read at startup
@@ -234,11 +236,13 @@ nothing, whether or not `--force` is given (gonk PR 362):
 ```console
 $ ikigai-gonk client add laptop --ledger default=write --browse read --root notes --ledger-graph default --scope urn:cap:exec:git --print --port 1070 --config-home "$PWD/.config/ikigai"
 client add `laptop` --print: no bundle was minted and nothing was written
-  grant `laptop` would hold 9 scope(s):
+  grant `laptop` would hold 11 scope(s):
     urn:cap:ledger:read:default
     urn:cap:store:read:graph:urn:iki:ledger:graph:default
+    urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
     urn:cap:ledger:write:default
     urn:cap:store:write:graph:urn:iki:ledger:graph:default
+    urn:cap:store:write:graph:urn:iki:ledger:graph:default:session
     urn:cap:store:read:graph:urn:collab:participants
     urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default
     urn:cap:browse:read:notes
@@ -248,12 +252,137 @@ client add `laptop` --print: no bundle was minted and nothing was written
     adds     urn:cap:exec:git
   refused without --force — every identity enrolled under `laptop` holds the new list from its next call
 $ jq '.laptop | length' .config/ikigai/gonk/grants.json
-8
+10
 ```
 
 The grant still has its eight scopes. The same flags without `--print`, and with `--force`, would
 write the ninth. Remember that `--force` writes a grant whole from its flags. A scope that was
 added with `--scope` stays only if the next `--force` names it again.
+
+## A grant from an older gonk: `client refresh`
+
+Since gonk ledger-v0.23.0 (ikigai-ledger 0.23.0, gonk PR 385) a ledger keeps its session summaries in
+a named graph of their own, `urn:iki:ledger:graph:default:session`. Every role a grant is built from
+now names that graph: the store read of it for every role, and the store write for `worker`, `write`,
+`delete` and `purge`. That is why `client add` above listed two `…:session` tokens. A grant written
+by an older gonk lacks them, and it keeps working for everything else. Make `laptop`'s grant look
+like one by taking the two tokens out:
+
+<!-- transcript: run -->
+```console
+$ jq '.laptop |= map(select(endswith(":session") | not))' .config/ikigai/gonk/grants.json > grants.tmp && cat grants.tmp > .config/ikigai/gonk/grants.json && rm grants.tmp
+$ jq '.laptop | length' .config/ikigai/gonk/grants.json
+8
+```
+
+A writer may hand back work and record the session summary of the agent run that did it, the
+way [Remote workers](../ways/workers.md#4-the-worker-hands-back-with-evidence) shows. Under the old
+grant the hand-back is written, and the summary is refused, naming what is missing:
+
+<!-- transcript: file handback.txt -->
+```text
+Read them; nothing to change.
+```
+
+<!-- transcript: file session.json -->
+```json
+{"session": "7c1d22e0", "machineName": "laptop", "harness": "claude", "model": "claude-opus-5-5",
+ "exitStatus": 0, "wallClockMs": 60000, "turns": 3, "toolCalls": 4, "inputTokens": 900,
+ "outputTokens": 300}
+```
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'sink urn:iki:ledger:comment item=1 handback=true' < handback.txt
+commented on #1 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'sink urn:iki:ledger:item:1:sessions' < session.json
+error: denied: this capability does not hold `urn:cap:store:read:graph:urn:iki:ledger:graph:default:session` or `urn:cap:store:write:graph:urn:iki:ledger:graph:default:session`. Since ledger #3661 a ledger's session summaries are in a graph of their own, `urn:iki:ledger:graph:default:session`, so recording a session summary needs that graph's store read and write grants beside the ledger grant. A grant written before then, a worker's among them, lacks these lines: add them
+```
+
+`client refresh` repairs every stored grant at once. For each grant it reads back the highest role
+the grant holds on each ledger, from that ledger's own tokens, and adds what that role mints now.
+It never removes a scope, so `--scope` additions such as a hand-added `urn:cap:exec:git` stay.
+Without `--write` it is a dry run:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client refresh --config-home "$PWD/.config/ikigai"
+grants: …/.config/ikigai/gonk/grants.json
+
+grant `laptop`: 2 tokens to add
+  ledger default  write
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+    adds     urn:cap:store:write:graph:urn:iki:ledger:graph:default:session
+
+total: 2 token(s) to add to 1 of 1 grant(s); nothing removed. Dry run: nothing written. Run again with --write to add them
+
+then, once per ledger, the owner moves the session summaries ikigai-ledger 0.22 wrote into the ledger graph (`plan` lists them and writes nothing; `move` moves them), through the owner's socket:
+  printf plan | ikigai -c 'sink urn:iki:ledger:default:sessions'
+  printf move | ikigai -c 'sink urn:iki:ledger:default:sessions'
+
+a running gonk needs no restart: the HTTP door (passkeys) re-reads grants.json on every request, and the QUIC door on every new connection. A QUIC connection already open keeps the authority it was minted with until it reconnects (at most 10 minutes, when the door closes it); an armed review queue's grant (gonk.review.arm) is read at startup and needs one
+```
+
+`--write` makes the same change. First it copies `grants.json` to a backup beside it, with the time
+in the name, and then it writes the new file atomically. A second run finds nothing to add:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client refresh --write --config-home "$PWD/.config/ikigai"
+grants: …/.config/ikigai/gonk/grants.json
+
+grant `laptop`: 2 tokens to add
+  ledger default  write
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+    adds     urn:cap:store:write:graph:urn:iki:ledger:graph:default:session
+
+total: added 2 token(s) to 1 of 1 grant(s); nothing removed
+wrote …/.config/ikigai/gonk/grants.json
+backup …/.config/ikigai/gonk/grants.json.bak-…-refresh
+
+then, once per ledger, the owner moves the session summaries ikigai-ledger 0.22 wrote into the ledger graph (`plan` lists them and writes nothing; `move` moves them), through the owner's socket:
+  printf plan | ikigai -c 'sink urn:iki:ledger:default:sessions'
+  printf move | ikigai -c 'sink urn:iki:ledger:default:sessions'
+
+a running gonk needs no restart: the HTTP door (passkeys) re-reads grants.json on every request, and the QUIC door on every new connection. A QUIC connection already open keeps the authority it was minted with until it reconnects (at most 10 minutes, when the door closes it); an armed review queue's grant (gonk.review.arm) is read at startup and needs one
+$ ls .config/ikigai/gonk | grep -c '^grants.json.bak-.*-refresh$'
+1
+$ jq '.laptop | length' .config/ikigai/gonk/grants.json
+10
+$ ikigai-gonk client refresh --config-home "$PWD/.config/ikigai"
+grants: …/.config/ikigai/gonk/grants.json
+
+grant `laptop`: nothing to add
+  ledger default  write
+
+total: 1 grant(s), nothing to add; nothing written
+
+then, once per ledger, the owner moves the session summaries ikigai-ledger 0.22 wrote into the ledger graph (`plan` lists them and writes nothing; `move` moves them), through the owner's socket:
+  printf plan | ikigai -c 'sink urn:iki:ledger:default:sessions'
+  printf move | ikigai -c 'sink urn:iki:ledger:default:sessions'
+
+a running gonk needs no restart: the HTTP door (passkeys) re-reads grants.json on every request, and the QUIC door on every new connection. A QUIC connection already open keeps the authority it was minted with until it reconnects (at most 10 minutes, when the door closes it); an armed review queue's grant (gonk.review.arm) is read at startup and needs one
+```
+
+The running gonk needed no restart: the QUIC door reads grants when a client connects, and each
+`ikigai --connect` above is a new connection. The same summary is now recorded on the same
+hand-back:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'sink urn:iki:ledger:item:1:sessions' < session.json
+recorded session 7c1d22e0 on #1's hand-back
+[uncacheable]
+```
+
+The passkey door rereads `grants.json` on every request. A client whose QUIC connection is already
+open keeps its old authority until it reconnects. A grant the command cannot read as a role is
+listed and left alone, such as a ledger that holds only `--ledger-graph`'s raw token or a lone
+link-in or mirror token. A script published under an older grant keeps the authority its publisher
+held when it was published, so republish it before it reads a session graph. The `plan` and `move`
+lines at the end of the report are for summaries an older gonk already recorded.
+[Remote workers](../ways/workers.md#where-the-summaries-live) shows them.
 
 ## A client's lifecycle
 
