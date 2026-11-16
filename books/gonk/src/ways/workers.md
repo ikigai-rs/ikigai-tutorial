@@ -489,7 +489,7 @@ run it. The book checks the starter at the revision in `books/gonk/starter.rev`
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process workers
-generated the library-lending sample (python, process workers) in …/library: 103 files
+generated the library-lending sample (python, process workers) in …/library: 106 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -513,6 +513,7 @@ $ grep '^## ' library/AGENTS.md
 ## Optional: a hook for Claude Code
 $ LC_ALL=C ls library/tools library/worker
 library/tools:
+checks.py
 gonk.py
 harness.py
 review_findings.py
@@ -531,7 +532,7 @@ $ cat library/.gonk/process.toml
 # decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
 version = 1
 process = ["workers"]
-hooks = ["claude:require-claim"]
+hooks = ["claude:require-claim", "git:commit-msg"]
 checks = ["worker-config"]
 
 [profile.workers]
@@ -554,6 +555,7 @@ gonk init: …/library
   note     role      dispatcher: marks items for workers, checks each hand-back, merges and closes, or rejects
   note     role      worker: an unattended machine running tools/worker.py; claims, works, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
   note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
   ok       ikigai    ikigai 0.5.0 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)

@@ -299,7 +299,7 @@ $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ (cd starter && python3 tools/new.py ../library --process audits,review-every-commit)
 new.py: --process audits,review-every-commit: per-commit review and periodic unled audits are two answers to one question, how bugs are found; the audits profile replaces the other
 $ (cd starter && python3 tools/new.py ../library --process audits)
-generated the library-lending sample (python, process audits) in …/library: 96 files
+generated the library-lending sample (python, process audits) in …/library: 99 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -326,6 +326,7 @@ library/.gonk/templates:
 audit.md
 library/tools:
 audit.py
+checks.py
 gonk.py
 harness.py
 review_findings.py
@@ -336,7 +337,7 @@ $ cat library/.gonk/process.toml
 # decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
 version = 1
 process = ["audits"]
-hooks = ["claude:require-claim"]
+hooks = ["claude:require-claim", "git:commit-msg"]
 checks = []
 
 [profile.audits]
@@ -355,6 +356,7 @@ gonk init: …/library
   note     audits    periodic unled audits instead of per-commit review: one repository, a file list, a budget, a reproduction per bug, one item per finding
   note     role      auditor: claims an audit item, reads only what it lists, files one item per reproduced bug
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
   ok       ikigai    ikigai 0.5.0 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `coordinator` (.gonk/local.toml, this working tree only)

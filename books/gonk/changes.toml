@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-16"
+summary = "Harness engineering adds a sixth step: the commit-msg hook refusing a bare #N once core.hooksPath is set, and uncheckedBecause, the reason a rule is left to a reader. Every Ways of working page uses the newer starter, whose init reports that hook and whose coverage answers include the new staging sensor."
+pages = ["ways/harness.md", "ways/solo.md", "ways/spec-first.md", "ways/workers.md", "ways/hub-and-spoke.md", "ways/review-every-commit.md", "ways/audits.md", "ways/routing.md", "project/start.md"]
+
+[[change]]
+date = "2026-11-16"
 summary = "A ledger of your own: the in-page cells now say priorities in words (priority 1, no priority set), as the page's gonk transcripts already do, because the book's own crates now run ikigai-ledger 0.23.0. The Introduction names the ledger gonk links, and the grant listing says what gonk's write grant adds."
 pages = ["ledger/your-own.md", "introduction.md"]
 

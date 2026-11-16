@@ -262,7 +262,7 @@ in `books/gonk/starter.rev` ([Solo](solo.md#with-the-starter) says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ (cd starter && python3 tools/new.py ../library --process solo,spec)
-generated the library-lending sample (python, process solo, spec) in …/library: 94 files
+generated the library-lending sample (python, process solo, spec) in …/library: 98 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -291,7 +291,7 @@ $ cat library/.gonk/process.toml
 # decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
 version = 1
 process = ["solo", "spec"]
-hooks = ["claude:require-claim"]
+hooks = ["claude:require-claim", "git:commit-msg"]
 checks = []
 
 [profile.solo]
@@ -327,6 +327,7 @@ gonk init: …/library
   note     role      you: both the dispatcher and whoever does the work
   note     spec      spec first: every change in behavior starts as an openspec change, seed files its tasks, next orders them
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
   ok       ikigai    ikigai 0.5.0 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `agent` (.gonk/local.toml, this working tree only)

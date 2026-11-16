@@ -410,7 +410,7 @@ root's name, gonk's config file, paths never queued) are a `[review]` table in
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process review-every-commit
-generated the library-lending sample (python, process review-every-commit) in …/library: 96 files
+generated the library-lending sample (python, process review-every-commit) in …/library: 99 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -434,6 +434,7 @@ $ grep '^## ' library/AGENTS.md
 ## Review on every commit
 ## Optional: a hook for Claude Code
 $ ls library/hooks/git
+commit-msg
 post-commit
 review-on-commit.py
 $ cat library/.gonk/process.toml
@@ -443,7 +444,7 @@ $ cat library/.gonk/process.toml
 # decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
 version = 1
 process = ["review-every-commit"]
-hooks = ["claude:require-claim", "git:post-commit"]
+hooks = ["claude:require-claim", "git:commit-msg", "git:post-commit"]
 checks = ["review"]
 
 [profile.review-every-commit]
@@ -480,6 +481,7 @@ gonk init: …/library
   note     role                 triager: a person who decides each finding and files the ones to act on
   note     hook                 the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   ok       hook                 post-commit asks gonk to review each commit (core.hooksPath)
+  ok       hook                 commit-msg refuses a bare #N (core.hooksPath)
   ok       ikigai               ikigai 0.5.0 at …/ikigai
   ok       ledger               `default` (.gonk/gonk.toml)
   ok       holder               `triager` (.gonk/local.toml, this working tree only)

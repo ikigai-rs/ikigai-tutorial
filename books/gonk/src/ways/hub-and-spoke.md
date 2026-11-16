@@ -339,7 +339,7 @@ says more):
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ cd starter && python3 tools/new.py ../library --process hub
-generated the library-lending sample (python, process hub) in …/library: 96 files
+generated the library-lending sample (python, process hub) in …/library: 99 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -365,6 +365,7 @@ $ ls library/tools library/.gonk/templates
 library/.gonk/templates:
 brief.md
 library/tools:
+checks.py
 gonk.py
 harness.py
 hub.py
@@ -376,7 +377,7 @@ $ cat library/.gonk/process.toml
 # decide it. AGENTS.md holds the rules of exactly these profiles, so change both together.
 version = 1
 process = ["hub"]
-hooks = ["claude:require-claim"]
+hooks = ["claude:require-claim", "git:commit-msg"]
 checks = []
 
 [profile.hub]
@@ -396,6 +397,7 @@ gonk init: …/library
   note     role      hub: writes briefs as items, links them, dispatches each arc, closes on the evidence, asks a person before merging its own work
   note     role      arc agent: works one arc from its brief in its own working tree, merges on green, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
   ok       ikigai    ikigai 0.5.0 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `hub` (.gonk/local.toml, this working tree only)

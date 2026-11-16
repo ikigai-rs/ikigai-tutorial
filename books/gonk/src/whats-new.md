@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-16**: Harness engineering adds a sixth step: the commit-msg hook refusing a bare #N once core.hooksPath is set, and uncheckedBecause, the reason a rule is left to a reader. Every Ways of working page uses the newer starter, whose init reports that hook and whose coverage answers include the new staging sensor.
+
+  Pages: [Harness engineering](ways/harness.md), [Solo on one machine](ways/solo.md), [Spec first](ways/spec-first.md), [Remote workers](ways/workers.md), [Hub and spoke](ways/hub-and-spoke.md), [Review every commit](ways/review-every-commit.md), [Periodic unled audits](ways/audits.md), [Routing work to agents](ways/routing.md), [Start a project](project/start.md)
+
 - **2026-11-16**: A ledger of your own: the in-page cells now say priorities in words (priority 1, no priority set), as the page's gonk transcripts already do, because the book's own crates now run ikigai-ledger 0.23.0. The Introduction names the ledger gonk links, and the grant listing says what gonk's write grant adds.
 
   Pages: [A ledger of your own](ledger/your-own.md), [Introduction](introduction.md)

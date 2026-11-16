@@ -96,7 +96,7 @@ carries the harness and the vocabulary's complete definition:
 $ git clone --quiet https://github.com/ikigai-rs/ikigai-gonk-starter starter
 $ git -C starter checkout --quiet {{#include ../../starter.rev}}
 $ (cd starter && python3 tools/new.py ../library --process solo)
-generated the library-lending sample (python, process solo) in …/library: 94 files
+generated the library-lending sample (python, process solo) in …/library: 97 files
 next, in that directory:
   git init -b main, then commit everything it wrote (the one commit where every file is yours; -b main because the worker loop branches from origin/main, and git's own default is still master where init.defaultBranch is unset)
   python3 scripts/test.py                      every test, as CI runs them
@@ -107,6 +107,7 @@ AGENTS.md holds this process's rules; README.md walks through the sample.
 $ LC_ALL=C ls library/.gonk/harness library/.gonk/queries library/tools
 library/.gonk/harness:
 harness.ttl
+shapes.ttl
 vocabulary.ttl
 library/.gonk/queries:
 README.md
@@ -118,6 +119,7 @@ open-items-for-artifact.rq
 open-work-by-change.rq
 requirements-with-open-work.rq
 library/tools:
+checks.py
 gonk.py
 harness.py
 review_findings.py
@@ -172,7 +174,7 @@ the graph to its vocabulary, and each guide's section to a heading of `AGENTS.md
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/harness.py check)
-harness check: 20 guide(s) and 14 other control(s) agree with the code
+harness check: 20 guide(s) and 18 other control(s) conform to shapes.ttl and agree with the code
 ```
 
 ### 3. Make a rule fire
@@ -193,6 +195,7 @@ gonk init: …/library
   note     solo      one person and their agent: you are your own dispatcher, and close after checking your own evidence
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
+  note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
   ok       ikigai    ikigai 0.5.0 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `ada` (.gonk/local.toml, this working tree only)
@@ -272,37 +275,40 @@ one that is not, and loads that beside the graph:
 <!-- transcript: run -->
 ```console
 $ (cd library && python3 tools/gonk.py harness)
-harness: 20 rule(s), 14 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
+harness: 20 rule(s), 18 sensor(s) and 0 other control(s) in .gonk/harness/harness.ttl; 1 firing(s) in this tree
+  not wired: ctl:commit-bare-number
   not wired: ctl:edit-hook-not-wired
   not wired: ctl:edit-hook-unreadable-input
   not wired: ctl:edit-without-live-claim
+  not wired: ctl:hook-git-add-all
+  not wired: ctl:hook-pipe-hides-status
 
-loaded:  updated <urn:iki:harness:graph:default>: +359 -0 quads
+loaded:  updated <urn:iki:harness:graph:default>: +444 -0 quads
 harness-firings-by-control: How often has each control fired, refusing or warning, and when first and last?
   control                label                           outcome  firings  first                     last
   ctl:evidence-required  report and close need evidence  Refusal  1        …  …
 
 harness-guides-without-sensor: Which rules does no computational control check?
-  guide                           label                                                  section
-  guide:hand-back-when-you-stop   hand it back when you stop                             1. Claim the item before you write
-  guide:reproduce-before-fix      reproduce before you fix                               3. Reproduce before you fix
-  guide:last-command-exit-status  a pipeline's status is its last command's              4. Every change through a pull request with green CI
-  guide:stage-files-by-name       stage files by name                                    4. Every change through a pull request with green CI
-  guide:no-bare-numbers           never a bare #N                                        6. Never a bare `#N`
-  guide:read-accessibility-first  read ACCESSIBILITY.md before changing what people see  7. Read ACCESSIBILITY.md before changing what people see
+  guide                          label                                    section                                  reason
+  guide:hand-back-when-you-stop  hand it back when you stop               1. Claim the item before you write
+  guide:reproduce-before-fix     reproduce before you fix                 3. Reproduce before you fix              Whether a defect was reproduced before it was fixed is a judgment about the work, not a pattern in a command or a file: a test added with the fix may or may not have failed first, and a report of no defect is a good outcome no program can tell from a skipped one. The dispatcher checks it in the evidence.
+  guide:building-ikigai-style    building in the ikigai style (optional)  Building in the ikigai style (optional)  Optional by design: a project need not be resource-oriented, so there is nothing to refuse. Its floor, ACCESSIBILITY.md, is checked by its own guide's control.
+  guide:skimmable-text           writing text people skim (optional)      Writing text people skim (optional)      Optional by design, and a judgment of style: whether a set of items reads well together is for a writer or a reviewer to decide. `skills/skimmable-text/sets.py` lists the sets to review; it reports and never refuses.
 
-  guide:building-ikigai-style     building in the ikigai style (optional)                Building in the ikigai style (optional)
-  guide:skimmable-text            writing text people skim (optional)                    Writing text people skim (optional)
 harness-sensors-never-fired: Which sensors of this repository's tools have never fired, and has a test shown each one can?
-  control                         label                                             wired  proof
-  ctl:claim-held-by-another       claim: held by another holder                     -      fired by a test
-  ctl:claim-lease-expired         claim: an expired lease is not free               -      fired by a test
-  ctl:one-claim-per-tree          a working tree holds one claim                    -      fired by a test
-  ctl:reject-needs-reason         a rejection says why                              -      fired by a test
-  ctl:takeover-refused            takeover: only an expired lease, from its holder  -      fired by a test
-  ctl:edit-hook-not-wired         claim hook: no claim can be checked               no     not wired
-  ctl:edit-hook-unreadable-input  claim hook: input it cannot read                  no     not wired
-  ctl:edit-without-live-claim     claim hook: an edit needs a live claim            no     not wired
+  control                         label                                                          wired  proof
+  ctl:claim-held-by-another       claim: held by another holder                                  -      fired by a test
+  ctl:claim-lease-expired         claim: an expired lease is not free                            -      fired by a test
+  ctl:one-claim-per-tree          a working tree holds one claim                                 -      fired by a test
+  ctl:pr-accessibility-section    CI: changes to what people see carry an Accessibility section  -      fired by a test
+  ctl:reject-needs-reason         a rejection says why                                           -      fired by a test
+  ctl:takeover-refused            takeover: only an expired lease, from its holder               -      fired by a test
+  ctl:commit-bare-number          commit-msg: a bare #N                                          no     not wired
+  ctl:edit-hook-not-wired         claim hook: no claim can be checked                            no     not wired
+  ctl:edit-hook-unreadable-input  claim hook: input it cannot read                               no     not wired
+  ctl:edit-without-live-claim     claim hook: an edit needs a live claim                         no     not wired
+  ctl:hook-git-add-all            hook rule: staging everything                                  no     not wired
+  ctl:hook-pipe-hides-status      hook rule: a trusted command piped                             no     not wired
 
 harness-sensors-without-guide: Which sensors state no rule, so an agent meets them only by tripping them?
   none. Every sensor cites the rule of AGENTS.md it mechanizes.
@@ -314,15 +320,16 @@ Four answers:
   the millisecond, in UTC). Over a real month this is the
   list of rules that are not landing: a sensor that fires often is doing its job, and saying that
   agents keep making the move its rule warns against.
-- **Rules with no sensor.** Eight of the twenty rules are text an agent has to apply, with
-  nothing that notices when it does not. Each row is a candidate for a sensor, not a defect, and
-  some can only ever be applied by a reader: the starter's `profiles/README.md` records why several
-  stay prose on purpose (`reproduce-before-fix`, for one, is a judgment about how an agent worked,
-  with nothing in a tool call to observe).
-- **Sensors never fired.** Eight of the fourteen. Five are on wherever their code is (`-` under
-  `wired`), each with a test that shows it can fire. The other three are the Claude Code claim
-  hook's, and they read `no` and `not wired`: the hook is off in this tree, so their silence says
-  nothing about the rule. `evidence-required` is not on the list, because step 3 fired it.
+- **Rules with no sensor.** Four of the twenty rules are text an agent has to apply, with
+  nothing that notices when it does not. A row is a candidate for a sensor, not a defect, and
+  some rules can only ever be applied by a reader. Three rows say so in the `reason` column, which
+  the graph's `harness:uncheckedBecause` fills. `reproduce-before-fix`, for one, is a judgment
+  about the work, which the dispatcher checks in the evidence. `hand-back-when-you-stop` has no
+  reason, so it is the one row still open: a rule nobody has yet decided to leave as prose.
+- **Sensors never fired.** Twelve of the eighteen. Six are on wherever their code is (`-` under
+  `wired`), each with a test that shows it can fire. The other six read `no` and `not wired`: five
+  are the Claude Code hook's and one is the `commit-msg` hook's, and both hooks are off in this
+  tree, so their silence says nothing about the rule. `evidence-required` is not on the list, because step 3 fired it.
 - **Sensors with no rule.** None: every sensor cites the rule it mechanizes. That is the answer
   this question exists to reach. `reject-needs-reason`, which refuses a rejection without a
   reason, used to be its one row, because no section of `AGENTS.md` said that a rejection needs
@@ -340,7 +347,8 @@ loaded:  updated <urn:iki:harness:graph:default>: +0 -0 quads
 
 ### 5. Steer: a rule with no sensor, and a sensor that never fired
 
-The answers are where the steering loop starts. Take one rule from the second answer:
+The answers are where the steering loop starts. Take a rule that an earlier starter listed in
+the second answer and this one no longer does:
 
 <!-- transcript: run -->
 ```console
@@ -353,19 +361,17 @@ guide:stage-files-by-name a harness:Guide ;
     harness:stage harness:preCommit ; harness:category harness:authoritySafety .
 ```
 
-A sensor for it is easy to describe and cheap to run: a hook on the agent's shell commands (the
-same kind of hook as the claim hook) that refuses `git add -A`, `git add .`, `git add -u` and
-`git commit -a` before the shell runs them, and says why: name the files. Computational, outcome
-`refuse`, and acting at the tool call, one stage earlier than the commit the rule is about. Adding
-it is one pull request with three parts: the hook, which records each refusal under a new control
-id; that control in the graph, with `statedBy guide:stage-files-by-name`; and a test that fires it,
-named in `firedBy`. `harness.py check` fails if the code names an id the graph does not describe,
-or the graph describes a sensor nothing shows can fire, so a part left out is caught, and the next
-coverage answer has one row fewer. Whether the sensor is worth its friction is the steering
-question, and the starter has answered it for now: not yet, because it would need a hook on every
-`git add`, and the repository's hooks are optional (its `profiles/README.md` says so, and to revisit
-the rule when a cheap, exact signal for it appears). Before it exists the evidence comes from outside the graph (how often review or the
-dispatcher catches a stray file in a commit); once it exists, the first answer counts it.
+Its sensor was easy to describe and cheap to run: a rule in the agent's shell-command hook that
+refuses `git add -A`, `git add .`, `git add -u` and `git commit -a` before the shell runs them, and
+says why: name the files. Computational, outcome `refuse`, and acting at the tool call, one stage
+earlier than the commit the rule is about. The starter added it in one pull request with three
+parts: the rule in the Claude Code hook, which records each refusal under a new control id; that
+control in the graph, `ctl:hook-git-add-all`, citing `guide:stage-files-by-name`; and a test that
+fires it, named in `firedBy`. `harness.py check` fails if the code names an id the graph does not
+describe, or the graph describes a sensor nothing shows can fire, so a part left out is caught. The
+second answer lost a row, and the third gained one: `hook-git-add-all` reads `not wired`, because
+the hook it lives in is optional and off here. Once it is on, the first answer counts its
+refusals.
 
 Now take one sensor from the third answer, `edit-without-live-claim`: the claim hook refusing an
 edit while the working tree holds no live claim. It has never fired. Is that because nobody edits
@@ -403,6 +409,34 @@ tree that ran it. Two gaps remain. Wiring is known for that one tree, not for ev
 firings land in the same graph. And a sensor that is on wherever its code is (`-`) can still be
 silent because its trigger no longer matches what it watches, as the claim refusals' wording
 could; for that only a test against the real thing helps. Real gaps, stated rather than solved.
+
+### 6. A sensor at commit, and a rule left unchecked on purpose
+
+Rule 6 of `AGENTS.md`, never a bare `#N`, has a sensor at the commit stage: the `commit-msg` hook
+in `hooks/git/`, which runs `tools/checks.py`. Like the claim hook it is off until something turns
+it on, here one line of git configuration. With it on, a message that says `#1` is refused before
+the commit exists, and the refusal says which spelling to use instead:
+
+<!-- transcript: run -->
+```console
+$ git -C library config core.hooksPath hooks/git
+$ git -C library add -A
+$ git -C library -c user.name=Ada -c user.email=ada@example.com commit -q -m 'Renew a loan (#1)'
+Commit refused: #1 is a bare number. Ledger items and pull requests share numbers, so say which one you mean: `ledger item 12` for a ledger item, `PR #12` or `owner/repo#12` for a pull request, or a link. Your message is kept in .git/COMMIT_EDITMSG.
+$ (cd library && python3 tools/harness.py firings | grep commit-bare-number)
+    1  refusal  commit-bare-number                   last …
+```
+
+Some rules have no sensor because none can be written, and the graph says so in the rule itself.
+`harness:uncheckedBecause` is a guide's reason for being left to a reader, and the second coverage
+answer prints it beside the guide, so a row that is unchecked on purpose reads differently from one
+nobody has got to yet:
+
+<!-- transcript: run -->
+```console
+$ awk -v RS= '/^guide:reproduce-before-fix /' library/.gonk/harness/harness.ttl | grep uncheckedBecause
+    harness:uncheckedBecause "Whether a defect was reproduced before it was fixed is a judgment about the work, not a pattern in a command or a file: a test added with the fix may or may not have failed first, and a report of no defect is a good outcome no program can tell from a skipped one. The dispatcher checks it in the evidence." .
+```
 
 ## What holds it
 
