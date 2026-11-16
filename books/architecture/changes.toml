@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-16"
+summary = "The ledger cells run ikigai-ledger 0.23.0: listings say priorities in words (priority 0, no priority set), and the manifold lists the new ledger actions, among them stalled claims, the lapse sweep and dispatch notes; a reader's narrowed list keeps the stalled claims and an item's notes."
+pages = ["substrate/two-faces.md", "economics/economics.md", "spine/manifold.md"]
+
+[[change]]
 date = "2026-11-14"
 summary = "The manifold listings match the upgraded store and ledger, and the harness reports typed retry exhaustion. Its retry clock and backoff are fixed so the walkthrough and stages replay deterministically."
 pages = ["spine/manifold.md", "overlays/overlays.md"]

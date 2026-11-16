@@ -102,7 +102,9 @@ pub fn ask_as(
 ///
 /// Two halves, and the ledger checks both: its own grant for the ledger by name, and the
 /// store's grant for that ledger's graph (the ledger asks the store under the CALLER's
-/// capability, never its own). This is the list `ikigai-gonk grants <ledger> write` prints.
+/// capability, never its own). `ikigai-gonk grants <ledger> write` prints these four and three
+/// more: read and write on the ledger's session graph (`urn:iki:ledger:graph:{ledger}:session`),
+/// which only recording a session summary needs, and read on gonk's participants graph.
 pub fn write_grant(ledger: &str) -> Capability {
     let graph = format!("urn:iki:ledger:graph:{ledger}");
     Capability::scoped([
@@ -156,7 +158,7 @@ mod tests {
         );
         let items = ask(&kernel, Verb::Source, "urn:iki:ledger:items", &[]).unwrap();
         assert!(
-            items.contains("#1  open    p-  Write the gonk book"),
+            items.contains("#1  open    no priority set  Write the gonk book"),
             "{items}"
         );
         let next = ask(&kernel, Verb::Source, "urn:iki:ledger:next", &[]).unwrap();

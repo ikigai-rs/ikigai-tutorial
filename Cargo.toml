@@ -371,17 +371,24 @@ oxrdf = "0.3"
 # store ^0.3.3, so the lock takes store 0.3.3 under the store pin below. The old pin "0.13.1" was a
 # ceiling below 0.14.0. A 0.x caret: also a ceiling (<0.19.0). The Architecture Book's manifold
 # prints the new names (`history`, `counts`, `backfill-closed-at`); no gonk Book cell moved.
-# 0.22.0 is the pin (set 2026-11-14, ledger #3727, which took over #3668): what the pinned gonk
+# 0.22.0 was the pin (set 2026-11-14, ledger #3727, which took over #3668): what the pinned gonk
 # (`books/gonk/gonk.rev`, f03b6b9, the tag ledger-v0.22.2; ledger-v0.22.0 and v0.22.1 link the same
 # release) links. The number moved first in tutorial PR 309, the core 0.3 sweep, because ledger 0.19.0
 # is the first on core 0.3; this comment and the gonk pin followed. 0.19 to 0.22 add the claim's
 # fencing epoch (0.20.0), the label grammar enforced on every write (0.21.0), an item's session
 # summaries, the `sessions` set and its summaries-only grant, a JSON face on `ledgers` and a fourth
 # finding severity, `severity:trivial` (0.22.0). The old pin "0.18.0" was a ceiling below 0.19.0.
-# A 0.x caret: also a ceiling (<0.23.0). ⚠ Since 2026-11-16 (ledger #3783) the pinned gonk is 4093c8d,
-# the tag ledger-v0.23.1, which links ledger 0.23.0: a version gap is open, by decision, until a
-# change of its own moves this number (books/gonk/DESIGN.md, "The move to ledger-v0.23.1").
-ikigai-ledger = "0.22.0"
+# A 0.x caret: also a ceiling (<0.23.0).
+# 0.23.0 is the pin (set 2026-11-16, ledger #3789): what the pinned gonk (4093c8d, the tag
+# ledger-v0.23.1, moved at ledger #3783) links, and the first release whose plain face says
+# priorities and groups in words (`priority 1`, `no priority set` for `p1`, `p-`), so the in-page
+# cells print what the pages' gonk transcripts print. It keeps session summaries in a graph of
+# their own (`urn:iki:ledger:graph:{ledger}:session`, whose store grants recording one needs),
+# refuses a label removal that removes nothing as NotFound, and adds `stalled`, `lapse`, `note`
+# and `item:{id}:notes` to the manifold. It requires core ^0.3.4 and store ^0.5.0, which the lock
+# already held, so only the ledger moved in it. The old pin "0.22.0" was a ceiling below 0.23.0.
+# A 0.x caret: also a ceiling (<0.24.0).
+ikigai-ledger = "0.23.0"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.25 is the pin (set 2026-10-23), because it changes what a page prints: since

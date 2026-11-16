@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-16**: A ledger of your own: the in-page cells now say priorities in words (priority 1, no priority set), as the page's gonk transcripts already do, because the book's own crates now run ikigai-ledger 0.23.0. The Introduction names the ledger gonk links, and the grant listing says what gonk's write grant adds.
+
+  Pages: [A ledger of your own](ledger/your-own.md), [Introduction](introduction.md)
+
 - **2026-11-16**: Pages of your own adds a library face: code a second face imports from it, its file served, no Add-ons link for it, and the refusal of a misspelled library line. A one-word face line's refusal now shows both forms.
 
   Pages: [Pages of your own](faces/own.md)

@@ -46,15 +46,15 @@ ledger, so there is nothing to keep.
 List them:
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:items'>
-<pre class="ikigai-run-expected">   #3  open    p1  Check every transcript
-   #2  open    p0  Pin gonk to a git rev  [book]
-   #1  open    p-  Write the gonk book
+<pre class="ikigai-run-expected">   #3  open    priority 1  Check every transcript
+   #2  open    priority 0  Pin gonk to a git rev  [book]
+   #1  open    no priority set  Write the gonk book
 3 item(s)
 [computed]</pre>
 </div>
 
-`p-` is no priority at all, which is different from a low one. The list is the most recently
-updated first; it is a listing, not a recommendation. A comment and a link make the next answer
+`no priority set` is no priority at all, which is different from a low one (`priority 0` is the
+highest). The list is the most recently updated first; it is a listing, not a recommendation. A comment and a link make the next answer
 more interesting: `#2` must happen before `#1` can.
 
 <div class="ikigai-run" data-cmd='sink urn:iki:ledger:comment item=2 The rev lives in books/gonk/gonk.rev.'>
@@ -70,9 +70,9 @@ more interesting: `#2` must happen before `#1` can.
 Now ask:
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:next'>
-<pre class="ikigai-run-expected"> 1.    #2  open    p0  Pin gonk to a git rev  [book]
+<pre class="ikigai-run-expected"> 1.    #2  open    priority 0  Pin gonk to a git rev  [book]
     p0 — priority 0; last updated …
- 2.    #3  open    p1  Check every transcript
+ 2.    #3  open    priority 1  Check every transcript
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 1
@@ -100,7 +100,7 @@ indistinguishable from none; a close takes its reason as the value, recorded as 
 </div>
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:next'>
-<pre class="ikigai-run-expected"> 1.    #1  open    p-  Write the gonk book
+<pre class="ikigai-run-expected"> 1.    #1  open    no priority set  Write the gonk book
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 1

@@ -90,7 +90,7 @@ from there:
 $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-gonk --rev {{#include ../gonk.rev}}
 ```
 
-The modules it links are published crates: `ikigai-core` 0.3.5, `ikigai-ledger` 0.22.0,
+The modules it links are published crates: `ikigai-core` 0.3.5, `ikigai-ledger` 0.23.0,
 `ikigai-store` 0.5.0, `ikigai-browse` 0.22.0, `ikigai-script` 0.5.0 and `ikigai-nl` 0.6.0. The
 book's own crates (the ones its Rust listings and in-page cells run) lock the same releases, so a
 cell, a listing and a `console` block all answer from one ledger. gonk serves

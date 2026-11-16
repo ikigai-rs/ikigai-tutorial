@@ -28,9 +28,9 @@ File two items, with priorities, so the ledger's ranked view has something to ra
 Ask for `next`, the ranked ready-set. The first read is **computed** — the kernel did the work:
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:next'>
-<pre class="ikigai-run-expected"> 1.    #1  open    p0  Translate the research note
+<pre class="ikigai-run-expected"> 1.    #1  open    priority 0  Translate the research note
     p0 — priority 0; last updated …
- 2.    #2  open    p1  Wire the live cells
+ 2.    #2  open    priority 1  Wire the live cells
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
@@ -41,9 +41,9 @@ Ask again, unchanged. The second read is **cached** — nearly free, because `ne
 function of the ledger graph and nothing the graph depends on has moved:
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:next'>
-<pre class="ikigai-run-expected"> 1.    #1  open    p0  Translate the research note
+<pre class="ikigai-run-expected"> 1.    #1  open    priority 0  Translate the research note
     p0 — priority 0; last updated …
- 2.    #2  open    p1  Wire the live cells
+ 2.    #2  open    priority 1  Wire the live cells
     p1 — priority 1; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
@@ -62,7 +62,7 @@ Ask for `next` one more time. It is **computed** again, and #2 is gone from the 
 nobody told `next` to refresh:
 
 <div class="ikigai-run" data-cmd='source urn:iki:ledger:next'>
-<pre class="ikigai-run-expected"> 1.    #1  open    p0  Translate the research note
+<pre class="ikigai-run-expected"> 1.    #1  open    priority 0  Translate the research note
     p0 — priority 0; last updated …
 policy: priority-recency (weighs priority, recency, number)
 ready: 1   excluded: 0

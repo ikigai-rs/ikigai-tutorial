@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-16"
+summary = "A ledger of your own: the in-page cells now say priorities in words (priority 1, no priority set), as the page's gonk transcripts already do, because the book's own crates now run ikigai-ledger 0.23.0. The Introduction names the ledger gonk links, and the grant listing says what gonk's write grant adds."
+pages = ["ledger/your-own.md", "introduction.md"]
+
+[[change]]
+date = "2026-11-16"
 summary = "Pages of your own adds a library face: code a second face imports from it, its file served, no Add-ons link for it, and the refusal of a misspelled library line. A one-word face line's refusal now shows both forms."
 pages = ["faces/own.md"]
 
