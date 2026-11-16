@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-16"
+summary = "Pages of your own adds a library face: code a second face imports from it, its file served, no Add-ons link for it, and the refusal of a misspelled library line. A one-word face line's refusal now shows both forms."
+pages = ["faces/own.md"]
+
+[[change]]
+date = "2026-11-16"
 summary = "A QUIC client teaches client refresh: an older grant's session summary refused, the dry run, --write and its backup, then the summary recorded. Remote workers shows the session graph, the summaries move, stalled claims, the lapse record and dispatch notes, and listings say priorities in words."
 pages = ["machines/quic-client.md", "ways/workers.md"]
 

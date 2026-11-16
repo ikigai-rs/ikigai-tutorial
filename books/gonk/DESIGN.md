@@ -290,6 +290,21 @@ directly because browse takes an `oxigraph::store::Store`. A newer release that 
 yet waits for the pin, so a transcript and a listing are always answered by the same module, unless
 the book needs it first.
 
+**The move to ledger-v0.23.2** (ledger #3784, 2026-11-16): `gonk.rev` moved from 4093c8d (the tag
+`ledger-v0.23.1`) to 70bc0e9, the tag `ledger-v0.23.2`: gonk PR 387 (the Harness pages: every
+harness resource answers `text/html` to a browser, the index grouped by guide) and gonk PR 388
+(library faces, `gonk.face = "<name> <directory> library"`). Both tags take `ikigai-ledger` 0.23.0
+and the same crates, so the open ledger gap the previous note records is unchanged, and no grant
+changed. The cli stays at 0.5.0. What the move changed on the pages: the refusal of a one-word
+`gonk.face` line now shows both forms. Harness engineering's transcripts pass unchanged at this pin. The new teaching:
+a library face in Pages of your own. ⚠ The Harness pages are NOT taught yet: the anonymous HTTP
+caller holds no browse grant, a signed-in session needs a passkey ceremony no check can run, and
+ikigai 0.5.0 over the owner's socket resolves no `urn:iki:harness:*` name, so no CI-run transcript
+here can show them; that is left open. ⚠ **The starter stays at a4f6dde**, though
+starter PR 95 (2a5f08c) adds checks the harness chapter could show: its move changes what `new.py`,
+`harness.py check` and `gonk.py harness` print on every Ways of working page, and is left to a
+change of its own.
+
 **The move to ledger-v0.23.1** (ledger #3783, 2026-11-16): `gonk.rev` moved from f03b6b9 (the tag
 `ledger-v0.22.2`) to 4093c8d, the tag `ledger-v0.23.1`. Between them are ledger-v0.22.3 (label chips on
 an item page link to their ledger listings), ledger-v0.23.0 (8c70fcc, gonk PR 385: `ikigai-ledger` 0.23.0)

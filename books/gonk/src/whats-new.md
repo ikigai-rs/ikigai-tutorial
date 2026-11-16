@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-16**: Pages of your own adds a library face: code a second face imports from it, its file served, no Add-ons link for it, and the refusal of a misspelled library line. A one-word face line's refusal now shows both forms.
+
+  Pages: [Pages of your own](faces/own.md)
+
 - **2026-11-16**: A QUIC client teaches client refresh: an older grant's session summary refused, the dry run, --write and its backup, then the summary recorded. Remote workers shows the session graph, the summaries move, stalled claims, the lapse record and dispatch notes, and listings say priorities in words.
 
   Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md), [Remote workers](ways/workers.md)

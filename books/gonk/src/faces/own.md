@@ -100,16 +100,33 @@ ikigai-gonk: gonk.face: `Open` is not a face name: lowercase letters, digits and
   (config read from …/refused/config.toml)
 $ printf 'gonk.face = "open"\n' > refused/config.toml
 $ ikigai-gonk --config-home "$PWD/refused" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk: gonk.face = "open" is not `<name> <directory>` (for example `gonk.face = "ops ~/ops-face"`)
+ikigai-gonk: gonk.face = "open" is not `<name> <directory>` or `<name> <directory> library` (for example `gonk.face = "ops ~/ops-face"`, or `gonk.face = "graph ~/graph-face library"` for a face that only holds code other faces import)
   (config read from …/refused/config.toml)
 ```
 
-Now write the real line. The line can be repeated, one per face.
+The second form, with the word `library` third, is a face that only holds code other faces
+import; [Code two faces share](#code-two-faces-share-a-library-face) below uses one. The third word
+must be exactly `library`, and a fourth word is refused too, each with the same message quoting the
+line:
 
 <!-- transcript: run -->
 ```console
-$ mkdir -p .config/ikigai
-$ printf 'gonk.face = "open %s/faces/open"\n' "$PWD" > .config/ikigai/config.toml
+$ mkdir -p faces/shared
+$ printf 'gonk.face = "shared %s/faces/shared librray"\n' "$PWD" > refused/config.toml
+$ ikigai-gonk --config-home "$PWD/refused" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
+ikigai-gonk: gonk.face = "shared …/faces/shared librray" is not `<name> <directory>` or `<name> <directory> library` (for example `gonk.face = "ops ~/ops-face"`, or `gonk.face = "graph ~/graph-face library"` for a face that only holds code other faces import)
+  (config read from …/refused/config.toml)
+```
+
+Now write the real lines, one per face. gonk reads them when it starts, so this writes all three
+this chapter uses: `open`, the face built below, and `shared` and `tally`, the library and the face
+that imports from it, which [Code two faces share](#code-two-faces-share-a-library-face) fills in.
+Each directory must exist before gonk starts, a library's included.
+
+<!-- transcript: run -->
+```console
+$ mkdir -p .config/ikigai faces/tally
+$ printf 'gonk.face = "open %s/faces/open"\ngonk.face = "shared %s/faces/shared library"\ngonk.face = "tally %s/faces/tally"\n' "$PWD" "$PWD" "$PWD" > .config/ikigai/config.toml
 ```
 
 ## Start gonk, and file something
@@ -143,12 +160,14 @@ notes#1 urn:iki:ledger:notes:item:…
 
 ## Where a face lives
 
-Each face gets a link in the header of every gonk page, named by its name:
+Each face gets a link in the Add-ons row of every gonk page, named by its name. A library face
+gets none, so `shared` is not in the row:
 
 <!-- transcript: run -->
 ```console
 $ curl -s http://localhost:1070/ | grep -o "href='/face/name/[^']*'"
 href='/face/name/open/'
+href='/face/name/tally/'
 ```
 
 `/face/name/open/` serves the directory's `index.html`, and `/face/name/open/app.js` serves
@@ -499,9 +518,98 @@ and none of them has been run by this book's checks:
 A face's markup is yours, and so is its accessibility. gonk's checks cover gonk's pages and the
 header link, not what a deployment serves.
 
+## Code two faces share: a library face
+
+Two faces that need the same helper can each carry a copy, as the starter's samples carry
+`kit.js`. A **library face** holds one copy instead: a directory of modules, configured with the
+word `library` third, that other faces import by its address. gonk serves it exactly as it serves
+any face (the same jail, file types, read grant and CSP), but lists it in no Add-ons row, since
+there is nothing in it to visit. The `shared` line above is one. Put a module in it:
+
+<!-- transcript: file faces/shared/words.js -->
+```js
+// Shared by every face that imports it: a count in words.
+export function count(n, one, many) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+```
+
+Then `tally`, a second face, imports it by its absolute path on gonk's origin. `script-src 'self'`
+allows that, because the library is a file from the same origin:
+
+<!-- transcript: file faces/tally/app.js -->
+```js
+// The tally face: how many items are open, in words, with the library's helper.
+import { count } from "/face/name/shared/words.js";
+
+const said = document.getElementById("said");
+const answer = await fetch("/iki/ledger/items?status=open", { headers: { Accept: "application/json" } });
+said.textContent = answer.ok
+  ? `${count((await answer.json()).total, "open item", "open items")} in default.`
+  : `Could not read it: ${answer.status}`;
+```
+
+<!-- transcript: file faces/tally/index.html -->
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tally</title>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Tally</h1>
+    <p id="said" role="status" aria-live="polite">Counting…</p>
+  </main>
+</body>
+</html>
+```
+
+The library's file is served at its address, and the face's script names that address:
+
+<!-- transcript: run -->
+```console
+$ curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://localhost:1070/face/name/shared/words.js
+200 text/javascript
+$ curl -s http://localhost:1070/face/name/tally/app.js | grep -o 'from "/face/name/shared/[^"]*"'
+from "/face/name/shared/words.js"
+```
+
+A library has no front page unless it carries an `index.html`, so its own address is a 404. An
+HTML page it does carry is framed like any face's:
+
+<!-- transcript: run -->
+```console
+$ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:1070/face/name/shared/
+404
+```
+
+Neither gonk's row nor the bar gonk writes into a face's pages lists the library: here is `tally`'s
+page, whose Add-ons links are the two listed faces:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/face/name/tally/ | grep -o "href=.\?/face/name/[a-z-]*/" | sort -u
+href="/face/name/open/
+href="/face/name/tally/
+```
+
+If every face were a library, the frame would leave out the Add-ons entry altogether.
+
+<!-- transcript: manual — it opens a browser, which a check cannot look at -->
+```console
+$ open http://localhost:1070/face/name/tally/
+```
+
+The page says "2 open items in default.", counted by the library's `count`.
+
 ## What you have
 
 A face is a directory and one line. gonk serves it read-only and jailed, under a CSP that runs only
-its files, and every read it makes is the viewer's own. Next, [A board for an
+its files, and every read it makes is the viewer's own. A library face is the same, minus the
+Add-ons link, for code more than one face imports. Next, [A board for an
 epic](board.md) reads the starter's first sample: an item's children, their `blocks` links, and
 a column for each.
