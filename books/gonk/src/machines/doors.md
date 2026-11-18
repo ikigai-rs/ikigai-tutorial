@@ -131,7 +131,7 @@ Every request a door dispatches is one entry in the hash-chained access log unde
 <!-- transcript: run -->
 ```console
 $ grep ' log:Access ' .config/ikigai/gonk/log/*.log
-… log:Access urn:iki:ledger:items seq=… door=http verb=source outcome=ok bytes=… dur=… principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous q=as=text/plain&deferred=include&holder=any&limit=50&offset=0&sort=-modified&status=open
+… log:Access urn:iki:ledger:items seq=… door=http verb=source outcome=ok bytes=… dur=… principal=anon credential=https://ikigai-rs.dev/ns/log#anonymous q=as=text/plain&comments=all&deferred=include&holder=any&limit=50&match=title&offset=0&search_mode=all&sort=-modified&status=open&whole_word=false
 … log:Access urn:iki:ledger:append seq=… door=socket verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:owner credential=https://ikigai-rs.dev/ns/log#socketOwner
 … log:Access urn:iki:ledger:append seq=… door=quic verb=sink outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
 … log:Access urn:iki:ledger:items seq=… door=quic verb=source outcome=ok bytes=… dur=… principal=urn:iki:host:gonk:client:… credential=https://ikigai-rs.dev/ns/log#clientCertificate
@@ -151,7 +151,9 @@ say was asking:
   the grant it mapped to.
 
 `q=` shows the request's arguments as served, on HTTP only (absent on the other doors). The `curl`
-read sent no arguments, yet its line carries six. Before dispatching, the kernel fills in every
+read sent no arguments, yet its line carries a value for every input the listing declares a
+default for, the search inputs among them (`match=title`, `search_mode=all`,
+`whole_word=false`). Before dispatching, the kernel fills in every
 default the resource declares (`ikigai-core` 0.1.104 and later, ledger #19), just as if the caller
 had typed those arguments. The line therefore says what the read actually requested: the first
 50 open items as plain text.
