@@ -7,7 +7,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-18**: A ledger of your own teaches finding items: searching comments with match=, several words with search=, whole words, where a JSON row matched, and lighter rows with omit= and comments=. Harness engineering shows the Harness page's filters and coverage gaps. Signing in notes the server-set HttpOnly cookie.
+- **2026-11-18**: A ledger of your own teaches finding items: searching comments with match=, several words with search=, whole words, where a JSON row matched, and lighter rows with omit= and comments=. Harness engineering shows the Harness page's filters and coverage gaps, and The ledger in a browser notes the server-set HttpOnly sign-in cookie.
 
   Pages: [A ledger of your own](ledger/your-own.md), [Harness engineering](ways/harness.md), [The ledger in a browser](ledger/browser.md)
 
