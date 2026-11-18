@@ -299,6 +299,30 @@ Architecture Book's ledger cells (One mechanism, read two ways; Golden threads),
 lists `stalled`, `lapse`, `note` and `item:{id}:notes`. `write_grant` stays four tokens: recording a
 session summary is the only write that needs the session graph's, and no page's Rust does it.
 
+**The move to ledger-v0.24.0** (ledger #3807, 2026-11-18): `gonk.rev` moved from 70bc0e9 (the tag
+`ledger-v0.23.2`) to aed0e06, the tag `ledger-v0.24.0`, and this note covers ledger-v0.23.3 too,
+which the book skipped. ledger-v0.23.3 (gonk PR 391) serves `ikigai-ledger` 0.23.1: `omit=` and
+`comments=` on `items` and `next`, and `omitted` on every JSON row. ledger-v0.24.0 (gonk PR 396)
+serves `ikigai-ledger` 0.24.0: `match=`, `search=`, `search_mode=` and `whole_word=` on `items`,
+`count` and `next`, and `matches` on a JSON row read with a search. Between them are gonk PR 390
+(harness packs), 392 (the lapse sweep), 393 (facet counts as JSON), 394 (the sign-in cookie set
+`HttpOnly` by the server) and 395 (the Harness page's filters). No grant changed and the cli
+stays at 0.5.0. The workspace's crates stay on `ikigai-ledger` 0.23.0: no page's in-page cell
+searches or shapes a row, so that gap is open and harmless until one does. The new teaching: A
+ledger of your own gains "Finding items", CI-run transcripts of a comment search, a two-word
+search with all and any, `whole_word=true` telling `rule` from `ruler`, `matches` under
+`omit=body,comments`, and `comments=none` with the plain face's refusal. It adds two comments to
+the page's fixture, because no item there held `rule` or `ruler`. Harness engineering gains a
+step 7, the Harness page's filters and `gap=`, as addresses and not transcripts, for the reason
+the previous note gives (no anonymous browse grant, no passkey in a check); packs are one paragraph
+pointing at gonk's README, because the generated repository has none. ⚠ **Not taught here:** the
+lapse sweep (gonk PR 392, `gonk.ledger.lapse.every`), which an item of its own teaches after this
+one; and the facet counts' JSON face. The ledger in a browser says the server now sets the session cookie
+(`HttpOnly; SameSite=Strict`, gonk PR 394), in prose, since signing in is a manual block; the
+cookie keeps its name, so the `-b 'gonk_session=…'` lines of Scripts and sentences in gonk stand.
+gonk's own README at aed0e06 still says the page's script sets the cookie, but the code and
+tests of gonk PR 394 say the server does, and the book follows them.
+
 **The move to ledger-v0.23.2** (ledger #3784, 2026-11-16): `gonk.rev` moved from 4093c8d (the tag
 `ledger-v0.23.1`) to 70bc0e9, the tag `ledger-v0.23.2`: gonk PR 387 (the Harness pages: every
 harness resource answers `text/html` to a browser, the index grouped by guide) and gonk PR 388

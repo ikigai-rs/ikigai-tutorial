@@ -363,6 +363,12 @@ Open the link the invite printed, in a browser on the machine gonk runs on:
    signed in. By default, the session ends when you sign out, after twelve hours, after
    sixty minutes with no request using that session, or when the server restarts.
 
+The server sets the session cookie itself, in its answer to the sign-in:
+`Set-Cookie: gonk_session=…; HttpOnly; SameSite=Strict`. `HttpOnly` means no script, gonk's own
+included, can read it, so a script injected into a page cannot steal the session. (Since gonk PR
+394; before it, gonk's page script wrote the cookie.) The session, sign-out and add-grant requests still accept
+a token in the request body.
+
 The second click is deliberate: when the creation sheet closes it still holds the window's
 focus, and a browser refuses a sign-in prompt from a page without it. The invite is
 single-use and expires; gonk stores only its hash, and it is the whole trust anchor of the

@@ -438,6 +438,43 @@ $ awk -v RS= '/^guide:reproduce-before-fix /' library/.gonk/harness/harness.ttl 
     harness:uncheckedBecause "Whether a defect was reproduced before it was fixed is a judgment about the work, not a pattern in a command or a file: a test added with the fix may or may not have failed first, and a report of no defect is a good outcome no program can tell from a skipped one. The dispatcher checks it in the evidence." .
 ```
 
+### 7. The same harness as a page
+
+gonk also draws a repository's harness as its Harness page, at `/harness`, reading the graph and
+the firings from a browse root under the caller's own grant. So the page needs a gonk that serves
+the repository as a browse root, and a signed-in session that may read it. This page's gonk has
+neither: its anonymous HTTP caller holds no browse grant, and a session needs a passkey, which a
+check cannot create. These addresses are for your own gonk, with `library` as a browse root.
+
+A labeled list at the top of the page picks the repository, `root=` in the address. Every filter
+is a query argument that you may leave out or repeat. Filters of different kinds narrow the list,
+and repeats of one kind widen it:
+
+| filter | what it chooses |
+| --- | --- |
+| `pack=` | the pack a rule came from, by name; `pack=-` is the repository's own harness |
+| `category=`, `stage=` | `harness:category` and `harness:stage`, by local name (`behavior`, `toolCall`) |
+| `direction=`, `execution=` | `feedforward` or `feedback`; `computational` or `inferential` |
+| `enforced=` | a control's `harness:enforcedAt`, as written (`tools/gonk.py#evidence_note`) |
+| `fired=` | `fired`, `never`, `refused` or `warned` |
+| `gap=` | `unchecked-guide` or `unstated-control`: a row of the coverage answers above |
+| `q=` | words in a rule's label or description |
+
+So `http://localhost:1070/harness?root=library&direction=feedback&fired=never` is the sensors that
+have never fired, which step 4 asked about in SPARQL, and adding `&stage=toolCall` keeps the ones
+that act when a tool is called. `http://localhost:1070/harness?root=library&gap=unchecked-guide`
+is the rules with no sensor, the second coverage answer, each with its `uncheckedBecause` reason
+where it has one. `gap=unstated-control` is the sensors no rule states, which here is none. Each
+choice shows how many rules it would match with the other filters kept, and every link on the page
+carries the filters with it.
+
+A harness can also come from a **pack**: one operator's harness graph that applies to many
+repositories, either by a SHACL shape over a root's description or because the root's own
+harness adopts it (`<> harness:adopts …`). Its firings are read from outside the tree. The
+generated repository here has no pack, so this page does not show one. gonk's README section
+"Harness packs, root descriptions and firings from outside the tree" gives the configuration
+lines and a sample.
+
 ## What holds it
 
 The harness has a harness:
