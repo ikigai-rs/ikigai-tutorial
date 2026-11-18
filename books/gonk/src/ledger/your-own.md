@@ -335,6 +335,98 @@ ready: 1   excluded: 1
   not #3: claimed by you
 ```
 
+### Finding items
+
+`items` looks in titles unless told otherwise. `match=` names the fields to look in, any of
+`title`, `body` and `comments`, and `text=` is one substring to find there. Give two items a
+comment each, then find the closed one by what its close said (since gonk ledger-v0.24.0,
+`ikigai-ledger` 0.24.0):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:comment item=1 One rule: every command on a page is a transcript CI runs.' -c 'sink urn:gk:iki:ledger:comment item=3 Line the columns up with a ruler.'
+commented on #1 (urn:iki:ledger:default:comment:…)
+
+[uncacheable]
+commented on #3 (urn:iki:ledger:default:comment:…)
+
+[uncacheable]
+— batch: 2 commands · 2 uncacheable
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?status=all&text=pinned&match=comments'
+   #2  closed  priority 0  Pin gonk to a git rev  [book]  (done)
+  #2 matched in a comment: Pinned.
+
+1 item(s)
+```
+
+The line under the item says where it matched. A title match needs no such line, because the
+item's own line shows the title.
+
+`search=` takes several words, separated by spaces (`%20` in an address). Every word must match,
+and each may match in a different field. With `search_mode=any`, one word is enough:
+
+<!-- transcript: run -->
+```console
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=gonk%20transcript&match=title,comments'
+   #1  open    no priority set  Write the gonk book
+  #1 matched in a comment: One rule: every command on a page is a transcript CI runs.
+
+1 item(s)
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=gonk%20transcript&match=title,comments&search_mode=any'
+   #3  open    priority 1  Check every transcript  claimed:you
+   #1  open    no priority set  Write the gonk book
+  #1 matched in a comment: One rule: every command on a page is a transcript CI runs.
+
+2 item(s)
+```
+
+`#1` has `gonk` in its title and `transcript` in a comment, so it passes the search for both words.
+`#3` has only `transcript`, so `any` adds it. `#2` holds `gonk` too, but it is closed, and `items`
+lists open items unless `status=` says otherwise.
+
+A word matches inside a longer one, so `rule` finds `ruler`. `whole_word=true` matches only at
+word boundaries. A term is matched as written and never read as a pattern, so `c++` and `a.b`
+mean those characters:
+
+<!-- transcript: run -->
+```console
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=rule&match=title,comments'
+   #3  open    priority 1  Check every transcript  claimed:you
+  #3 matched in a comment: Line the columns up with a ruler.
+   #1  open    no priority set  Write the gonk book
+  #1 matched in a comment: One rule: every command on a page is a transcrip…
+
+2 item(s)
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=rule&match=title,comments&whole_word=true'
+   #1  open    no priority set  Write the gonk book
+  #1 matched in a comment: One rule: every command on a page is a transcrip…
+
+1 item(s)
+```
+
+An excerpt is cut at 40 characters on each side of the first hit, with `…` where it was cut.
+`count` and `next` take the same search inputs.
+
+A face that draws a list of items rarely shows their bodies or comments, and in JSON those can be
+most of the document. `omit=` leaves any of `body`, `comments` and `attribution` out of each row.
+Each row says what it left out in `omitted`. A row read with a search still says where it
+matched, in `matches`, even when it leaves out the text that matched:
+
+<!-- transcript: run -->
+```console
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=ruler&match=comments&omit=body,comments&as=application/json' | jq -c '.items[] | {number, comments, omitted, matches}'
+{"number":3,"comments":[],"omitted":["body","comments"],"matches":[{"field":"comments","excerpt":"Line the columns up with a ruler."}]}
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?comments=none&as=application/json' | jq -c '.items[] | {number, comments, omitted}'
+{"number":3,"comments":[],"omitted":["comments"]}
+{"number":1,"comments":[],"omitted":["comments"]}
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?comments=none'
+invalid argument `comments`: `comments` shapes the JSON face only (as=application/json); the plain face has nothing to leave out, so nothing was read
+```
+
+`comments=` is `all` (the default), `last` (only each item's latest comment) or `none`, and `none`
+runs no comments query at all. A row read without a search has no `matches`. The plain and Turtle
+faces refuse a shape that leaves anything out, because a row there has no way to say it did.
+
 What the HTTP door will **not** do is part of the lesson. An anonymous caller on loopback holds
 the read grants of the ledgers gonk is configured to serve that way — `default`, unless told
 otherwise — and nothing else. Deleting is a separate grant, beyond even a writer's:

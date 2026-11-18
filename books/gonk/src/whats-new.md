@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-18**: A ledger of your own teaches finding items: searching comments with match=, several words with search=, whole words, where a JSON row matched, and lighter rows with omit= and comments=. Harness engineering shows the Harness page's filters and coverage gaps, and The ledger in a browser notes the server-set HttpOnly sign-in cookie.
+
+  Pages: [A ledger of your own](ledger/your-own.md), [Harness engineering](ways/harness.md), [The ledger in a browser](ledger/browser.md)
+
 - **2026-11-16**: Harness engineering adds a sixth step: the commit-msg hook refusing a bare #N once core.hooksPath is set, and uncheckedBecause, the reason a rule is left to a reader. Every Ways of working page uses the newer starter, whose init reports that hook and whose coverage answers include the new staging sensor.
 
   Pages: [Harness engineering](ways/harness.md), [Solo on one machine](ways/solo.md), [Spec first](ways/spec-first.md), [Remote workers](ways/workers.md), [Hub and spoke](ways/hub-and-spoke.md), [Review every commit](ways/review-every-commit.md), [Periodic unled audits](ways/audits.md), [Routing work to agents](ways/routing.md), [Start a project](project/start.md)
