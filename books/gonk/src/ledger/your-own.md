@@ -335,8 +335,6 @@ ready: 1   excluded: 1
   not #3: claimed by you
 ```
 
-<a id="finding-items"></a>
-
 ### Finding items
 
 `items` looks in titles unless told otherwise. `match=` names the fields to look in, any of
