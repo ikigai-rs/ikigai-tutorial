@@ -39,7 +39,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 [uncacheable]
 closed #1 (done)
 [uncacheable]
-— batch: 4 commands · 4 uncacheable
+— batch: 4 commands · request outcomes: 4 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:ops:append Check the backup disk'
 ops#1 urn:iki:ledger:ops:item:…
 [uncacheable]

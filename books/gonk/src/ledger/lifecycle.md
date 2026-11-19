@@ -131,7 +131,7 @@ tasks#3 urn:iki:ledger:tasks:item:…
 [uncacheable]
 linked tasks#1 blocks tasks#2
 [uncacheable]
-— batch: 4 commands · 4 uncacheable
+— batch: 4 commands · request outcomes: 4 uncacheable
 ```
 
 ## Moving an item
@@ -171,7 +171,7 @@ tasks#1 doing (was filed)
 [uncacheable]
 tasks#1 review (was doing)
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 ## Asking one step for its work

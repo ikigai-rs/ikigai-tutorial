@@ -265,7 +265,7 @@ $ cp mount-cert/client.crt gpu/ikigai/quic/clients/gonk.crt
 $ cp gpu/ikigai/quic/server.crt mount-cert/server.crt
 ```
 
-The peer must also **enroll** gonk's certificate. A trusted certificate is not enough: the pinned cli (0.5.0)
+The peer must also **enroll** gonk's certificate. A trusted certificate is not enough: the pinned cli (0.5.3)
 refuses to start `ikigai serve` without a `clients.json` that maps each client's SHA-256 fingerprint
 to a grant in `grants.json`. Without one, every trusted certificate would share one authority. The
 grant here is the one thing the peer lends, the net grant on the model's host:

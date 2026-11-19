@@ -482,7 +482,7 @@ gonk init: …/library
   note     hook                 the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   ok       hook                 post-commit asks gonk to review each commit (core.hooksPath)
   ok       hook                 commit-msg refuses a bare #N (core.hooksPath)
-  ok       ikigai               ikigai 0.5.0 at …/ikigai
+  ok       ikigai               ikigai 0.5.3 at …/ikigai
   ok       ledger               `default` (.gonk/gonk.toml)
   ok       holder               `triager` (.gonk/local.toml, this working tree only)
   ok       identity             the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

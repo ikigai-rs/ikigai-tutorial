@@ -120,8 +120,8 @@ $ cargo install --locked --git https://github.com/ikigai-rs/ikigai-tutorial mode
 From [A ledger of your own](ledger/your-own.md) on, a page also runs `ikigai`, the command-line host,
 as the other process that reaches gonk. It IS on crates.io, so it is pinned to one exact
 version, in one file (`books/gonk/ikigai-cli.version`) that the check and CI read the same
-way. It is 0.5.0, the release whose transports (`ikigai-ipc`, `-wire` and `-web` 0.5.0) the pinned
-gonk was built with, so the two speak the same wire. The book's own crates take the in-page kernel's grammar from `ikigai-engine`; that is a
+way. It is 0.5.3, a patch release of the 0.5 line whose transports (`ikigai-ipc`, `-wire` and `-web`
+0.5.0) the pinned gonk was built with, so the two speak the same wire. The book's own crates take the in-page kernel's grammar from `ikigai-engine`; that is a
 different program and no page runs it as `ikigai`. The QUIC keep-alive a client
 sends since 0.1.56 is answered by this gonk's door, so a call that is silent for a while (a real
 model drafting or explaining) is not lost over `quic://`.

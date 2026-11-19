@@ -262,13 +262,13 @@ whatever order they finished:
 <!-- transcript: run -->
 ```console
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/file.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.0"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.3"}}}
 {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:…\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/retry.jsonl 2>/dev/null
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.0"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.3"}}}
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"#1 urn:iki:ledger:default:item:… existing open\n"}],"isError":false}}
 $ env XDG_CONFIG_HOME="$PWD/agent/.config" ikigai mcp --override urn:iki:ledger:=quic://127.0.0.1:1070 --cert-dir agent/gonk --grant agent < agent/check.jsonl 2>/dev/null | LC_ALL=C sort
-{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.0"}}}
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"ikigai","version":"0.5.3"}}}
 {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"   #1  open    no priority set  Read the notes\n  iri:      urn:iki:ledger:default:item:…\n  key:      agent-task-1\n  filed:    … by urn:iki:host:gonk:client:…\n  updated:  …\n  author:   urn:iki:host:gonk:client:… (verified)\n  committer: urn:iki:host:gonk:client:… at …\n"}],"isError":false}}
 {"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"denied: `author=urn:iki:gonk:passkey:ada` refused for committer urn:iki:host:gonk:client:…: it is not the committer, the participants graph <urn:collab:participants> does not enroll the committer to act for it (prov:actedOnBehalfOf), and the committer is not an import principal (ledger:Importer). To write anyway, send no author to be the author yourself, or have the host enroll you to act for that principal\nkind: denied; class: denied"}],"isError":true}}
 {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"tool `ledger-item__delete` is not available under this capability"}],"isError":true}}

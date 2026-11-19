@@ -149,7 +149,7 @@ beta#1 urn:iki:ledger:beta:item:…
 [uncacheable]
 beta#2 urn:iki:ledger:beta:item:…
 [uncacheable]
-— batch: 5 commands · 5 uncacheable
+— batch: 5 commands · request outcomes: 5 uncacheable
 ```
 
 ## Each team's next
@@ -373,7 +373,7 @@ $ cat report-alpha-open.rq | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 
 sealed — capability: urn:cap:ledger:read:alpha, urn:cap:script:delete:report-*, urn:cap:script:read:report-*, urn:cap:script:run:report-*, urn:cap:script:write:report-*, urn:cap:store:read:graph:urn:iki:ledger:graph:alpha · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 urn:script:report-alpha-open:version:sha256:…
 [uncacheable]
-— batch: 2 commands · uncacheable
+— batch: 2 commands · request outcomes: uncacheable
 ```
 
 All three identities hold `run` over `report-*`, so the namespace is not what tells them apart:

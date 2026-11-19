@@ -411,7 +411,7 @@ gonk init: …/library
   note     role      you: both the dispatcher and whoever does the work
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
-  ok       ikigai    ikigai 0.5.0 at …/ikigai
+  ok       ikigai    ikigai 0.5.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `agent` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

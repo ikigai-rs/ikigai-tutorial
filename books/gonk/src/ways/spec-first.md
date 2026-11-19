@@ -131,7 +131,7 @@ linked #1 blocks #2
 [uncacheable]
 linked #2 blocks #3
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
  1.    #1  open    no priority set  add-undo 1.2: Empty the last move's square and return the turn  [add-undo openspec]
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
@@ -210,7 +210,7 @@ closed #2 (done)
 [uncacheable]
 closed #3 (done)
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:next'
 nothing is ready (0 open items excluded: the ledger has no open items matching the filter)
 policy: priority-recency
@@ -328,7 +328,7 @@ gonk init: …/library
   note     spec      spec first: every change in behavior starts as an openspec change, seed files its tasks, next orders them
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
-  ok       ikigai    ikigai 0.5.0 at …/ikigai
+  ok       ikigai    ikigai 0.5.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `agent` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

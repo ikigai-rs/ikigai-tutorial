@@ -145,7 +145,7 @@ Read through gonk, without a restart.
 [uncacheable]
 sha256:…
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 The new content, at once, from a server that was never restarted. Here is what made that

@@ -113,7 +113,7 @@ linked #3 parent #1
 [uncacheable]
 linked #2 blocks #3
 [uncacheable]
-— batch: 3 commands · 3 uncacheable
+— batch: 3 commands · request outcomes: 3 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:claim item=1 hub'
 #1 claimed by hub at epoch 1
 [uncacheable]
@@ -183,7 +183,7 @@ commented on #2 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
 #2 released
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 ### 5. The hub checks, closes, and the next arc opens
@@ -217,7 +217,7 @@ commented on #3 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
 #3 released
 [uncacheable]
-— batch: 3 commands · 3 uncacheable
+— batch: 3 commands · request outcomes: 3 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:close item=3 reason=done author=hub Checked: docs PR 5 merged, CI green.'
 closed #3 (done)
 [uncacheable]
@@ -240,7 +240,7 @@ linked #4 parent #1
 [uncacheable]
 #4 claimed by hub at epoch 1
 [uncacheable]
-— batch: 3 commands · 3 uncacheable
+— batch: 3 commands · request outcomes: 3 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:comment item=4 author=hub handback=true https://github.com/you/lib/pull/13 is green. Merge?'
 commented on #4 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
@@ -259,7 +259,7 @@ closed #4 (done), released hub
 [uncacheable]
 closed #1 (done), released hub
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:3'
    #3  closed  priority 1  docs: document initials  [arc]  (done)
   iri:      urn:iki:ledger:default:item:…
@@ -398,7 +398,7 @@ gonk init: …/library
   note     role      arc agent: works one arc from its brief in its own working tree, merges on green, reports
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
-  ok       ikigai    ikigai 0.5.0 at …/ikigai
+  ok       ikigai    ikigai 0.5.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `hub` (.gonk/local.toml, this working tree only)
   ok       identity  the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

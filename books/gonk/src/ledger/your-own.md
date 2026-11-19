@@ -306,7 +306,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:app
 [uncacheable]
 #3 urn:iki:ledger:default:item:…
 [uncacheable]
-— batch: 3 commands · 3 uncacheable
+— batch: 3 commands · request outcomes: 3 uncacheable
 $ curl -s http://127.0.0.1:1070/iki/ledger/items
    #3  open    priority 1  Check every transcript
    #2  open    priority 0  Pin gonk to a git rev  [book]
@@ -326,7 +326,7 @@ linked #2 blocks #1
 [uncacheable]
 closed #2 (done)
 [uncacheable]
-— batch: 3 commands · 3 uncacheable
+— batch: 3 commands · request outcomes: 3 uncacheable
 $ curl -s http://127.0.0.1:1070/iki/ledger/next
  1.    #1  open    no priority set  Write the gonk book
     unprioritized — no priority set, so it ranks below every item that has one; last updated …
@@ -351,7 +351,7 @@ commented on #1 (urn:iki:ledger:default:comment:…)
 commented on #3 (urn:iki:ledger:default:comment:…)
 
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 $ curl -s 'http://127.0.0.1:1070/iki/ledger/items?status=all&text=pinned&match=comments'
    #2  closed  priority 0  Pin gonk to a git rev  [book]  (done)
   #2 matched in a comment: Pinned.

@@ -189,7 +189,7 @@ labeled #2 triage
 [uncacheable]
 labeled #3 triage
 [uncacheable]
-— batch: 5 commands · 5 uncacheable
+— batch: 5 commands · request outcomes: 5 uncacheable
 ```
 
 ## A saved query, for a person and for a worker
