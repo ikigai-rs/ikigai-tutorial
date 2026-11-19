@@ -7,9 +7,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-19**: A QUIC client explains that ikigai-repo 0.6.0 grants git and gh by verb, as urn:cap:exec:read:git and urn:cap:exec:read:gh, and shows ikigai-cli 0.5.3 refusing to start on a grants file that names the old spelling, with the fix. The pages now run cli 0.5.3, whose batch footer says request outcomes.
+- **2026-11-19**: A QUIC client explains that ikigai-repo 0.6.0 grants git and gh by verb, as urn:cap:exec:read:git and urn:cap:exec:read:gh, and shows ikigai-cli 0.5.3 refusing to start on a grants file that names the old spelling, with the fix. The pages now run cli 0.5.3, whose batch footer says request outcomes. Review every commit and Work, evidence, review, close ask the findings listing for as=application/json before jq, since cli 0.5.3 answers a source with no as in its text face.
 
-  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md), [Introduction](introduction.md)
+  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md), [Introduction](introduction.md), [Review every commit](ways/review-every-commit.md), [Work, evidence, review, close](project/work.md)
 
 - **2026-11-18**: A ledger of your own teaches finding items: searching comments with match=, several words with search=, whole words, where a JSON row matched, and lighter rows with omit= and comments=. Harness engineering shows the Harness page's filters and coverage gaps, and The ledger in a browser notes the server-set HttpOnly sign-in cookie.
 
