@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-19"
+summary = "A QUIC client explains that git and gh are granted by verb (urn:cap:exec:read:git, urn:cap:exec:read:gh) and shows ikigai-cli 0.5.3 refusing a grants file with the old spelling, and the fix. Pages run cli 0.5.3, and the findings listings piped to jq ask for as=application/json, since 0.5.3 answers a bare source in its text face."
+pages = ["machines/quic-client.md", "introduction.md", "ways/review-every-commit.md", "project/work.md"]
+
+[[change]]
 date = "2026-11-18"
 summary = "A ledger of your own teaches finding items: searching comments with match=, several words with search=, whole words, where a JSON row matched, and lighter rows with omit= and comments=. Harness engineering shows the Harness page's filters and coverage gaps, and The ledger in a browser notes the server-set HttpOnly sign-in cookie."
 pages = ["ledger/your-own.md", "ways/harness.md", "ledger/browser.md"]

@@ -172,7 +172,7 @@ nobody overwrites.
 
 <!-- transcript: run -->
 ```console
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:library:findings:artifacts/service/lending/domain.py' 2>/dev/null | jq -r '.[0].iri | sub("^urn:"; "urn:gk:")' > finding.txt
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:library:findings:artifacts/service/lending/domain.py as=application/json' 2>/dev/null | jq -r '.[0].iri | sub("^urn:"; "urn:gk:")' > finding.txt
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c "sink $(cat finding.txt) decision=decline reason=misread 41 days late owes 1000 cents: the cap is on the total."
 urn:iki:finding:…
 [uncacheable]

@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-19**: A QUIC client explains that git and gh are granted by verb (urn:cap:exec:read:git, urn:cap:exec:read:gh) and shows ikigai-cli 0.5.3 refusing a grants file with the old spelling, and the fix. Pages run cli 0.5.3, and the findings listings piped to jq ask for as=application/json, since 0.5.3 answers a bare source in its text face.
+
+  Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md), [Introduction](introduction.md), [Review every commit](ways/review-every-commit.md), [Work, evidence, review, close](project/work.md)
+
 - **2026-11-18**: A ledger of your own teaches finding items: searching comments with match=, several words with search=, whole words, where a JSON row matched, and lighter rows with omit= and comments=. Harness engineering shows the Harness page's filters and coverage gaps, and The ledger in a browser notes the server-set HttpOnly sign-in cookie.
 
   Pages: [A ledger of your own](ledger/your-own.md), [Harness engineering](ways/harness.md), [The ledger in a browser](ledger/browser.md)

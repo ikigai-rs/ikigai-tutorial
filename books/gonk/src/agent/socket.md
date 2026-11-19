@@ -14,7 +14,7 @@ the version this book pins, beside gonk ([Which gonk](../introduction.md#which-g
 <!-- transcript: run -->
 ```console
 $ ikigai --version
-ikigai 0.5.0
+ikigai 0.5.3
 ```
 
 ## Start a gonk, and find its socket
@@ -126,7 +126,7 @@ $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'sink urn:iki:ledger:append Filed
 policy: priority-recency (weighs priority, recency, number)
 ready: 2   excluded: 0
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 Here the config home IS the lesson, so the page names its own: `XDG_CONFIG_HOME` is where
@@ -190,7 +190,7 @@ sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default
 [uncacheable]
 error: denied: capability does not grant `urn:cap:ledger:delete:*` (declared by `urn:iki:ledger:item:1`; any grant under `urn:cap:ledger:delete:` satisfies it)
 error: denied: this capability does not hold `urn:cap:ledger:read:book`. A ledger grant names exactly one ledger — holding a grant over another ledger satisfies the declared family `urn:cap:ledger:read:*` but not this resource, which is the point of naming them
-— batch: 4 commands · uncacheable
+— batch: 4 commands · request outcomes: uncacheable
 ```
 
 The filing worked; the delete and the other ledger did not, with the token each one needed
@@ -263,7 +263,7 @@ $ env XDG_CONFIG_HOME="$PWD/.config" ikigai -c 'cap seal urn:cap:ledger:read:def
 sealed — capability: urn:cap:ledger:read:default, urn:cap:ledger:write:default, urn:cap:store:read:graph:urn:iki:ledger:graph:default, urn:cap:store:write:graph:urn:iki:ledger:graph:default · sealed (this is the floor: `cap reset` cannot rise above it, and `login` and `logout` are refused)
 #4 urn:iki:ledger:default:item:…
 [uncacheable]
-— batch: 2 commands · uncacheable
+— batch: 2 commands · request outcomes: uncacheable
 ```
 
 It is the same kind of claim as `author=agent-7`, which an item's page and its text face mark
@@ -305,7 +305,7 @@ urn:iki:ledger:graph:default,…
 [uncacheable]
 error: denied: reading <urn:iki:ledger:graph:default:deleted> through `urn:iki:store:graph-select` needs the grant `urn:cap:store:read:graph:urn:iki:ledger:graph:default:deleted`, which this capability does not hold. Every graph a scoped read names must be granted: the read is refused rather than answered over the graphs that are, because a narrower dataset than the one asked for returns rows that look right and are not. A grant names exactly one graph; holding `urn:cap:store:read` does not imply it, and is instead the authority for `urn:iki:store:select` over the whole dataset.
 error: denied: reading <urn:iki:ledger:graph:nothing-here> through `urn:iki:store:graph-select` needs the grant `urn:cap:store:read:graph:urn:iki:ledger:graph:nothing-here`, which this capability does not hold. Every graph a scoped read names must be granted: the read is refused rather than answered over the graphs that are, because a narrower dataset than the one asked for returns rows that look right and are not. A grant names exactly one graph; holding `urn:cap:store:read` does not imply it, and is instead the authority for `urn:iki:store:select` over the whole dataset.
-— batch: 4 commands · uncacheable
+— batch: 4 commands · request outcomes: uncacheable
 ```
 
 Each form is one hop onto the store's `urn:iki:store:graph-select` under the caller's own

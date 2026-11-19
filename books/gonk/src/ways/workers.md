@@ -283,7 +283,7 @@ commented on #1 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
 #1 released
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:item:1:sessions' < session-1.json
 recorded session 0b5e41aa on #1's hand-back
 [uncacheable]
@@ -294,7 +294,7 @@ commented on #2 (urn:iki:ledger:default:comment:…) awaiting-dispatcher
 [uncacheable]
 #2 released
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 The worker marks its comment as a hand-back, which makes the item wait for its dispatcher;
@@ -557,7 +557,7 @@ gonk init: …/library
   note     hook      the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   note     hook      the commit-msg hook that refuses a bare #N is off: `git config core.hooksPath hooks/git` turns it on
   note     worker    no .gonk/worker.toml, so this machine runs no worker: a worker machine copies worker/worker.sample.toml there (`python3 tools/worker.py plan` checks it)
-  ok       ikigai    ikigai 0.5.0 at …/ikigai
+  ok       ikigai    ikigai 0.5.3 at …/ikigai
   ok       ledger    `default` (.gonk/gonk.toml)
   ok       holder    `worker-1` (.gonk/local.toml, this working tree only)
   ok       identity  urn:iki:host:gonk:client:… (from …/worker-1/gonk/client.crt)

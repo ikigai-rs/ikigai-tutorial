@@ -215,7 +215,7 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:demo:ex
 derive	code-v1@coder	coder
 [uncacheable]
 error: unavailable: the mounted peer at …/model.sock is not reachable (the last 1 dial(s) failed; the next is held off for … more)
-— batch: 2 commands · uncacheable
+— batch: 2 commands · request outcomes: uncacheable
 ```
 
 The status still answers: it reads the archive and never calls the model. With no peer to ask,

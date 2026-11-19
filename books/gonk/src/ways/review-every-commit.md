@@ -182,7 +182,9 @@ getting worse.
 
 ### 5. Triage
 
-The findings, as anyone holding a browse read sees them:
+The findings, as anyone holding a browse read sees them. A script asks for JSON by name with
+`as=application/json`: since cli 0.5.3, a `source` with no `as` gets the target's text face whenever it
+offers one, even when the output goes into a pipe.
 
 <!-- transcript: run -->
 ```console
@@ -192,7 +194,7 @@ Findings wait for a person. Nothing here blocks a commit, a push or a merge, and
 src/lib.rs L3 [pending] major "name.split(' ').map(|word| &word[..1]).collect()" -- Slicing the first byte panics on an empty word, so a name with two spaces in a row, or an empty name, crashes the caller.
 src/lib.rs L2 [pending] minor "pub fn initials(name: &str) -> String {" -- Returning a String allocates on every call; return a &str instead.
 [uncacheable]
-$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:demo:findings:src/lib.rs' 2>/dev/null | jq -r '.[] | "\(.id) \(.severity) judge: \(.judge.verdict // "none")"'
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:repo:demo:findings:src/lib.rs as=application/json' 2>/dev/null | jq -r '.[] | "\(.id) \(.severity) judge: \(.judge.verdict // "none")"'
 645d521aab16830f076e0857 major judge: confirmed
 1fa92632a54c273633bc10fe minor judge: none
 ```
@@ -482,7 +484,7 @@ gonk init: …/library
   note     hook                 the Claude Code claim hook is optional and off: merge hooks/claude/settings.sample.json into .claude/settings.json to turn it on
   ok       hook                 post-commit asks gonk to review each commit (core.hooksPath)
   ok       hook                 commit-msg refuses a bare #N (core.hooksPath)
-  ok       ikigai               ikigai 0.5.0 at …/ikigai
+  ok       ikigai               ikigai 0.5.3 at …/ikigai
   ok       ledger               `default` (.gonk/gonk.toml)
   ok       holder               `triager` (.gonk/local.toml, this working tree only)
   ok       identity             the socket's owner: every request over it is `owner`, so the log cannot tell this tree from any other process of yours. A machine that must be named uses QUIC

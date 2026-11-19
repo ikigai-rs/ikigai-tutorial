@@ -109,7 +109,7 @@ README.md	file	8
 # Notes
 
 [uncacheable]
-— batch: 3 commands · 3 uncacheable
+— batch: 3 commands · request outcomes: 3 uncacheable
 ```
 
 The client pinned the server by the `server.crt` in its bundle, and the server pinned the client
@@ -258,6 +258,33 @@ $ jq '.laptop | length' .config/ikigai/gonk/grants.json
 The grant still has its eight scopes. The same flags without `--print`, and with `--force`, would
 write the ninth. Remember that `--force` writes a grant whole from its flags. A scope that was
 added with `--scope` stays only if the next `--force` names it again.
+
+### git is granted by verb
+
+ikigai-repo 0.6.0 split its exec scopes by verb. The git facades now need `urn:cap:exec:read:git`
+and the `gh` facades need `urn:cap:exec:read:gh`; `urn:cap:exec:write:git` is reserved for a
+future write facade, and the old `urn:cap:exec:git` and `urn:cap:exec:gh` grant nothing. The gonk
+this book pins is still built on ikigai-repo 0.5.1, so gonk's own `grants.json` keeps the old
+spelling, as above, until gonk moves. The cli has already moved. Since ikigai-cli 0.5.3, an
+`ikigai` whose grants file, `--scope` or `--cap` names `urn:cap:exec:git`, `urn:cap:exec:gh`,
+`urn:cap:exec:cargo` or `urn:cap:exec:just` refuses to start. It names the file, the grant and
+what to write instead, and it never rewrites the file:
+
+<!-- transcript: file old/grants.json -->
+```json
+{"reader": ["urn:cap:fs:read:*", "urn:cap:exec:git"]}
+```
+
+<!-- transcript: run; exit 2 -->
+```console
+$ ikigai mcp --config-home "$PWD/old" --grant reader < /dev/null
+ikigai: …/old/grants.json: grant `reader` names the retired exec scope `urn:cap:exec:git`: replace it with `urn:cap:exec:read:git`
+```
+
+Any grant in the file stops the start, not only the one asked for. The fix is the one the message
+gives: write `urn:cap:exec:read:git` (or `urn:cap:exec:read:gh`) in place of the old scope, and
+delete `urn:cap:exec:cargo` and `urn:cap:exec:just`, which nothing has served since ikigai-repo
+0.3.0.
 
 ## A grant from an older gonk: `client refresh`
 
@@ -418,7 +445,7 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir laptop/gonk -c 'source urn:i
 ikigai: denied: the door at quic://127.0.0.1:1070 refused the connection: the client certificate is not admitted
 ```
 
-The old bundle is refused at once, and the client is told it was not admitted (cli 0.5.0; the 0.2
+The old bundle is refused at once, and the client is told it was not admitted (cli 0.5.3; the 0.2
 releases reported only a transport error): admission is decided on every call, from `clients.json` and
 `grants.json` as they read then, so even a connection already open is refused from its next call
 (since gonk PR 175, ledger #1710; before it, a client that kept its connection alive kept its old

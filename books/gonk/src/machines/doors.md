@@ -110,7 +110,7 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/cli
 2 item(s)
 
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 Three doors, one ledger, and two items in it. The anonymous HTTP caller read the ledger and was
@@ -180,7 +180,7 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/cli
   committer: urn:iki:host:gonk:client:… at …
 [uncacheable]
 error: denied: `author=urn:iki:gonk:passkey:ada` refused for committer urn:iki:host:gonk:client:…: it is not the committer, the participants graph <urn:collab:participants> does not enroll the committer to act for it (prov:actedOnBehalfOf), and the committer is not an import principal (ledger:Importer). To write anyway, send no author to be the author yourself, or have the host enroll you to act for that principal
-— batch: 2 commands · uncacheable
+— batch: 2 commands · request outcomes: uncacheable
 ```
 
 A plain-text author is refused the same way; only the socket, which names no principal, keeps
@@ -214,7 +214,7 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir .config/ikigai/gonk/quic/cli
   author:   urn:collab:participant:laptop-claude (claimed by a delegate)
   committer: urn:iki:host:gonk:client:… at …
 [uncacheable]
-— batch: 2 commands · 2 uncacheable
+— batch: 2 commands · request outcomes: 2 uncacheable
 ```
 
 `ikigai-gonk ledger enroll gh-sync --importer` lets a sync name any foreign actor, and `ledger
