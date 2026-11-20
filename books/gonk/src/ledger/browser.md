@@ -272,6 +272,24 @@ once through the page's status region. It stops polling and leaves focus where i
 checks stay silent; without JavaScript no restart notice appears. Reload to get the new page
 and sign in again: sessions end on restart.
 
+A page does not give up the moment gonk goes away, either. While gonk restarts, or its store is
+briefly unavailable, a page's requests try again with backoff, and a page that came back `502`,
+`503` or `504` reloads itself the same way, saying in its status region that it is waiting and
+offering **Stop trying** (gonk PR 398). Two settings in gonk's configuration file say for how
+long: `gonk.ui.retry.limit`, how long after the first failure a page stops and shows the error
+(`90s` by default, at most an hour, or `off`), and `gonk.ui.retry.base`, the first wait, doubled on
+each retry (`1s` by default). Every gonk page, and every framed face, carries them on its `<html>`
+in milliseconds:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/ | grep -o "data-ui-retry-limit='[0-9]*' data-ui-retry-base='[0-9]*'"
+data-ui-retry-limit='90000' data-ui-retry-base='1000'
+```
+
+A value that is not a duration (`"soon"`), or a base longer than the limit, stops gonk at start
+with a sentence naming the setting. A `500` page and the page a write returns never reload.
+
 ## Who you are, and what that grants
 
 An anonymous caller on this machine reads the ledgers in `gonk.http.ledger` (`default`, unless
@@ -375,6 +393,41 @@ single-use and expires; gonk stores only its hash, and it is the whole trust anc
 registration, so no attestation is parsed. After signing in, `/l/book` is a ledger page
 rather than a refusal, and every write `ada` makes carries her passkey as its author.
 
+### Write lapses; reading goes on
+
+A session's write does not last as long as the session. Twelve hours after the sign-in (or at
+`gonk.http.session_max_hours`, if that is shorter) the session keeps only its read scopes, the
+`urn:cap:…:read:…` ones: `ada` can still open `/l/book`, and can no longer file, claim or comment
+there. Reading goes on until the session's own end, `gonk.http.session_max_hours` after the sign-in
+(12 by default, 1 to 720), or the idle bound. A grant with no read scope ends at the twelve hours,
+as every session did before (gonk PR 405). Both bounds count from the sign-in, and using the
+session never moves them: an open page polls, so a bound that slid with use would keep write alive
+in any forgotten tab, and for a stolen cookie that polls. `/auth/session` answers `writeSeconds`,
+the write left (0 once it has lapsed, and for a grant that only reads), and `restore`, the scopes a
+fresh sign-in gives back.
+
+Getting write back does not need a sign-out. Confirming with the **same** passkey (the page asks
+for a fresh assertion, user verification required) replaces only the session it names with one
+of fresh bounds; the passkey's other sessions are left as they are, and the access log records
+`op=reassert` (gonk PR 406). Another passkey cannot do it: the assertion is pinned to the
+session's own credential. While write is closed, gonk's pages say so with their controls: every
+form that writes carries `data-ui-write`, and ikigai-ui 0.5.3's shell grays those out until write
+reopens (gonk PR 407). Reading controls stay as they are.
+
+<!-- transcript: manual — writeSeconds and the gray controls need a passkey session, which only a browser and an authenticator make; the anonymous answer is below -->
+```console
+$ curl -s -b 'gonk_session=…' http://localhost:1070/auth/session
+```
+
+Without a session, `/auth/session` answers an empty object, which the shell reads as nothing to
+change:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/auth/session
+{}
+```
+
 ### Extra scopes and adding a grant
 
 `passkey invite` also accepts repeatable `--scope <urn>` for tokens no role flag names (gonk
@@ -408,6 +461,74 @@ writing the wider grant**, then opens one new session from the assertion (gonk P
 cookie cannot read the wider grant in between. If recording the widening fails, the grant change
 is undone and the passkey stays signed out; sign in again. Owner `grant add` deliberately keeps
 sessions; the owner can end them with `passkey logout --all`.
+
+### Changing a grant, and nothing else: `grant set`
+
+`passkey invite` writes a grant and makes a link; `client add` writes one and mints a
+certificate. To change what a grant holds and make nothing else, the owner runs `ikigai-gonk grant
+set <name>` with the same grant flags (`--ledger`, `--browse`, `--root`, `--script`, `--scope` and
+the rest), which resolve to scopes through the same code (gonk PR 410). It writes that one grant in
+`grants.json`: no certificate, no bundle, no enrollment, no invite link, and `clients.json` is not
+touched. Say `metrics` must also read `default`. The flags are the whole grant, so the two
+`--scope` values are named again:
+
+<!-- transcript: run; exit 1 -->
+```console
+$ ikigai-gonk grant set metrics --ledger book=read --ledger default=read --scope urn:cap:metrics:read --scope urn:cap:net:localhost --config-home "$PWD/.config/ikigai"
+ikigai-gonk: grant `metrics` already exists in …/.config/ikigai/gonk/grants.json with different scopes — nothing was written. Replacing it would widen it:
+    adds     urn:cap:ledger:read:default
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+Use --force to replace it, which changes every identity enrolled under it
+```
+
+The rules are `passkey invite`'s: a new grant is written as it is, an existing one that would
+change is refused, naming every scope the write would remove and add, and an unchanged one writes
+nothing. `--print` shows the whole list the flags mean, and the change, and writes nothing,
+`--force` or not:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk grant set metrics --ledger book=read --ledger default=read --scope urn:cap:metrics:read --scope urn:cap:net:localhost --print --config-home "$PWD/.config/ikigai"
+grant set `metrics` --print: no bundle was minted and nothing was written
+  grant `metrics` would hold 8 scope(s):
+    urn:cap:ledger:read:book
+    urn:cap:store:read:graph:urn:iki:ledger:graph:book
+    urn:cap:store:read:graph:urn:iki:ledger:graph:book:session
+    urn:cap:ledger:read:default
+    urn:cap:store:read:graph:urn:iki:ledger:graph:default
+    urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+    urn:cap:metrics:read
+    urn:cap:net:localhost
+  grant `metrics` in …/.config/ikigai/gonk/grants.json holds a different set; writing it would:
+    adds     urn:cap:ledger:read:default
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+  refused without --force — every identity enrolled under `metrics` holds the new list from its next call
+```
+
+With `--force` the grant is written whole, after `grants.json` is backed up beside itself:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk grant set metrics --ledger book=read --ledger default=read --scope urn:cap:metrics:read --scope urn:cap:net:localhost --force --config-home "$PWD/.config/ikigai"
+grant `metrics` (8 scopes) written in …/.config/ikigai/gonk/grants.json
+  REPLACED     grant `metrics` (--force) — every identity enrolled under it holds the new list from its next request or connection:
+    adds     urn:cap:ledger:read:default
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+  backup       …/.config/ikigai/gonk/grants.json.bak-…-grant-set
+  no certificate, bundle, enrollment or invite was made; a running gonk holds the new list from the next request (HTTP) or connection (QUIC), with no restart
+$ ls .config/ikigai/gonk | grep grant-set
+grants.json.bak-…-grant-set
+$ jq '.metrics | length' .config/ikigai/gonk/grants.json
+8
+```
+
+The backup is named for the UTC moment and for what made it; restoring it is copying it back over
+`grants.json`. As with `--force` on an invite, the new list holds for every passkey and
+certificate enrolled under the name, from its next request, with no restart. To widen one passkey
+and not the name, `passkey grant add` above is still the tool.
 
 ## What it wrote down
 

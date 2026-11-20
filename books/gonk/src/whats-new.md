@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-20**: The ledger in a browser teaches grant set, changing one grant with no certificate or link, and shows write lapsing at 12 hours while reading goes on, reopened by the same passkey, and pages that ride out a restart. A QUIC client shows gonk rewriting old exec spellings to urn:cap:exec:read:git and :gh.
+
+  Pages: [The ledger in a browser](ledger/browser.md), [A QUIC client, and the grant it runs under](machines/quic-client.md), [Review every commit](ways/review-every-commit.md)
+
 - **2026-11-19**: Remote workers shows gonk recording lapsed leases on its own timer: the gonk.ledger.lapse.every line, a short lease running out, the one lapse the sweep records as gonk's recorder, stalled listing it, the sweep's status, and a takeover. It also sets out how a host waits on a held item through the feed, and its limits.
 
   Pages: [Remote workers](ways/workers.md)
