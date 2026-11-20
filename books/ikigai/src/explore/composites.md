@@ -99,7 +99,7 @@ way as the first: the week after, 2024-01-08 to 2024-01-15, 105 earthquakes, at
 the second week together. This one asks, for each region where the first week had a strong
 earthquake, how many earthquakes the second week had there. The region is the end of USGS's
 `place`, after its last comma, and the two weeks are told apart by time: `1704672000000` is
-2024-01-08T00:00Z in USGS's milliseconds.
+2024-01-08T00:00Z in USGS's GeoJSON milliseconds (effectively [Unix time](https://en.wikipedia.org/wiki/Unix_time) multiplied by 1000).
 
 <div class="ikigai-run" data-cmd='source urn:quakes:question:week-after | urn:sparql:select graph="urn:quakes:strong urn:quakes:graph:2024-01-08" as=text/csv'>
 <pre class="ikigai-run-expected">region,strongest,weekAfter

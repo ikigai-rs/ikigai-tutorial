@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-17**: Added noted explaining interpretation of milliseconds value.
+
+  Pages: [Composites, one layer at a time](explore/composites.md)
+
 - **2026-11-15**: Exploring without Rust now serves a named Quakes composite over HTTP from your own config home. Edit an earthquake note and reload to see golden threads update the page without restarting the server; every shell step is replayed in CI.
 
   Pages: [A live page over HTTP](explore/serving.md), [A week of earthquakes](explore/index.md), [Composites, one layer at a time](explore/composites.md), [Tic-tac-toe, V: a board you can play](applied/tic-tac-toe-5.md)
