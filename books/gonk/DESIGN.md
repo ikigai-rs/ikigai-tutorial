@@ -316,8 +316,10 @@ the page's fixture, because no item there held `rule` or `ruler`. Harness engine
 step 7, the Harness page's filters and `gap=`, as addresses and not transcripts, for the reason
 the previous note gives (no anonymous browse grant, no passkey in a check); packs are one paragraph
 pointing at gonk's README, because the generated repository has none. ⚠ **Not taught here:** the
-lapse sweep (gonk PR 392, `gonk.ledger.lapse.every`), which an item of its own teaches after this
-one; and the facet counts' JSON face. The ledger in a browser says the server now sets the session cookie
+lapse sweep (gonk PR 392, `gonk.ledger.lapse.every`), which ledger #3728 then taught at the same pin
+(Remote workers, "Lapses recorded on gonk's timer", with the feed-waiting pattern beside it; the
+Dashboard shows no stalled items at aed0e06, so neither does the page); and the facet counts' JSON
+face. The ledger in a browser says the server now sets the session cookie
 (`HttpOnly; SameSite=Strict`, gonk PR 394), in prose, since signing in is a manual block; the
 cookie keeps its name, so the `-b 'gonk_session=…'` lines of Scripts and sentences in gonk stand.
 gonk's own README at aed0e06 still says the page's script sets the cookie, but the code and

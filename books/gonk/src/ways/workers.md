@@ -718,7 +718,8 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:i
 [uncacheable]
 ```
 
-gonk ledger-v0.23.1 does not send the sweep on its own tick, so here the owner sends it. An embedding
+Here the owner sends the sweep by hand. gonk can also send it on a timer, which [the end of this
+page](#lapses-recorded-on-gonks-timer) shows. An embedding
 host can also route each lapse to a person, by having the sweep add a label (ikigai-ledger's
 `SpaceConfig::lapse_label`); this page's gonk adds none. The remedies are the ones the claim already
 has, each carrying its epoch: the holder renews, another worker takes over with
@@ -776,7 +777,111 @@ $ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:i
 A note carries no authority. It never claims, releases, renews, closes or relabels anything, and it
 never reaches a later epoch, not even the same worker's next claim.
 
-A worker waiting for an item another worker holds should not keep sending claims that are refused.
-It waits on the store's change feed, which wakes it when the claim is released, and then reads the
-item again before it claims. ikigai-ledger's README, "Waiting for a held item without repeated claim
-refusals", describes how a host does that; gonk ledger-v0.23.1 serves no feed endpoint for it.
+### Lapses recorded on gonk's timer
+
+A dispatcher that has to remember to send `lapse` will forget. Since gonk ledger-v0.24.0 (gonk PR
+392), one line in the config home has gonk send it for every ledger in its store, on a timer:
+
+<!-- transcript: run -->
+```console
+$ printf 'gonk.ledger.lapse.every = "2s"\n' >> .config/ikigai/config.toml
+$ cat .config/ikigai/config.toml
+gonk.ledger.lapse.every = "2s"
+```
+
+Two seconds suits a page that waits for it; `5m` suits a real ledger. Without the line, nothing is
+scheduled. gonk reads the line at startup, and its banner says what it will do:
+
+<!-- transcript: restart -->
+```console
+$ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
+ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+…
+  lapses  every 2s, the first in 2s: records each lapsed lease once in every ledger, as urn:iki:gonk:recorder:lapse, and never releases one. `ikigai --connect …/.ikigai/gonk.sock -c 'source urn:iki:gonk:lapse:status'` says what it recorded
+…
+```
+
+worker-1 claims another item on a two-second lease and goes quiet again. This time nobody sends
+`lapse`; the page only waits for the item's history to show one:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append priority=2 labels=worker Rotate the deploy key'
+#5 urn:iki:ledger:default:item:…
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=5 lease=2s worker-1'
+#5 claimed by worker-1 at epoch 1 until …
+[uncacheable]
+$ for i in $(seq 40); do ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:5:history' 2>/dev/null | grep -q ' lapse ' && break; sleep 0.5; done
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:stalled'
+default: 1 stalled item(s), the oldest lapse first
+#5 Rotate the deploy key: held by worker-1 at epoch 1, whose lease ran out at …; the lapse is recorded
+remedy: the holder resumes (`sink urn:iki:ledger:claim item=<n> renew=true`), another takes it over (`sink urn:iki:ledger:claim item=<n> takeover=true from=<holder>`), or a dispatcher releases it (`delete urn:iki:ledger:claim item=<n>`)
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:item:5:history'
+#5: 2 event(s)
+…  claim worker-1  by urn:iki:host:gonk:client:…
+…  lapse worker-1 at epoch 1, whose lease ran out at …  by urn:iki:gonk:recorder:lapse
+[uncacheable]
+```
+
+`stalled` lists #5 as before, and now says its lapse is recorded. The history says who recorded it:
+`urn:iki:gonk:recorder:lapse`, gonk's own principal, never a person. gonk sends each ledger's sweep
+under exactly the grants the `lapse` Sink needs, the ledger's `close` and its graph's read and
+write, so the timer can record and do nothing else. It releases, reaps and relabels nothing: #5 is
+still worker-1's, and the remedies are the same three.
+
+The sweep keeps running, and a lapse already recorded is left alone, so a sweep every two seconds
+still records #5's lapse once. `urn:iki:gonk:lapse:status` (it needs `urn:cap:gonk:system:read`,
+which the owner's socket has) says what the last sweep did. The page waits for a sweep that found
+the lapse already recorded:
+
+<!-- transcript: run -->
+```console
+$ for i in $(seq 40); do ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:lapse:status' 2>/dev/null | grep -q '1 more were already recorded' && break; sleep 0.5; done
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:lapse:status' 2>/dev/null | grep -E '^(Lapse sweep|Ledger)'
+Lapse sweep: every 2s. Each sweep records every lapsed lease once in its item's history, as urn:iki:gonk:recorder:lapse. It never releases a claim.
+Ledger default: last swept …. It recorded 0 lapse(s); 1 more were already recorded. 1 recorded since this server started.
+```
+
+A sweep that fails on one ledger is logged and shown here, and the other ledgers and the next sweep
+go on. gonk's README measures the cost: a sweep over five ledgers of 800 items that records nothing
+takes tens of milliseconds. At ledger-v0.24.0 the Dashboard does not list stalled items; `stalled`
+and this status are where to look.
+
+This time worker-1 does not come back, so the dispatcher hands #5 to worker-2. A takeover names the
+holder it takes from, and raises the epoch, which fences worker-1 out if it wakes up later:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-2/gonk -c 'sink urn:iki:ledger:claim item=5 takeover=true from=worker-1 lease=30m worker-2'
+#5 taken over from worker-1 by worker-2 at epoch 2 until …
+[uncacheable]
+$ ikigai --connect quic://127.0.0.1:1070 --cert-dir worker-1/gonk -c 'sink urn:iki:ledger:claim item=5 renew=true lease=30m worker-1'
+error: conflict: #5 is held by worker-2, not worker-1: a renewal extends a claim its holder still holds, and this one changed hands
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:stalled'
+default: no stalled items: no open item is held on a lease that has run out
+[uncacheable]
+```
+
+### Waiting for a held item
+
+A worker that wants an item another worker holds should not keep sending claims that are refused.
+ikigai-ledger's README, "Waiting for a held item without repeated claim refusals" (ikigai-ledger PR
+123), gives the sequence for a host that embeds the ledger and listens on its kernel's change feed:
+
+1. Start listening on the ledger's store threads, then read the item. If it is open and unclaimed,
+   claim it once; a `conflict` means read it again and go back to waiting.
+2. While someone else holds it, wait on the feed instead of claiming. Set one absolute deadline,
+   no later than the caller's remaining run budget, and keep it across every wake-up.
+3. On a wake-up, read the item again before claiming. A notice is a hint to look, never proof that
+   the item is free.
+
+Its limits are part of the pattern. A lease running out writes nothing, so it wakes nobody; a
+waiter that wants to consider an expired lease sets a timer for it. The `lapse` sweep above does
+write, so it wakes waiters, but it releases nothing, and a plain claim after that wake-up is still
+refused. Waiting never becomes a takeover: that stays an explicit `takeover=true from=<holder>`.
+Every waiter wakes on a release and the first claim to land wins, with no first-come order. gonk
+ledger-v0.24.0 serves its clients no feed to wait on, so the pattern is for a host that embeds the
+ledger, as in [a kernel of your own](../embedding/own-kernel.md); a worker that reaches gonk through
+a door cannot wait this way yet.

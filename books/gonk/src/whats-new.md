@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-19**: Remote workers shows gonk recording lapsed leases on its own timer: the gonk.ledger.lapse.every line, a short lease running out, the one lapse the sweep records as gonk's recorder, stalled listing it, the sweep's status, and a takeover. It also sets out how a host waits on a held item through the feed, and its limits.
+
+  Pages: [Remote workers](ways/workers.md)
+
 - **2026-11-19**: A QUIC client explains that git and gh are granted by verb (urn:cap:exec:read:git, urn:cap:exec:read:gh) and shows ikigai-cli 0.5.3 refusing a grants file with the old spelling, and the fix. Pages run cli 0.5.3, and the findings listings piped to jq ask for as=application/json, since 0.5.3 answers a bare source in its text face.
 
   Pages: [A QUIC client, and the grant it runs under](machines/quic-client.md), [Introduction](introduction.md), [Review every commit](ways/review-every-commit.md), [Work, evidence, review, close](project/work.md)
