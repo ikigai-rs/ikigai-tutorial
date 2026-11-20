@@ -299,6 +299,24 @@ Architecture Book's ledger cells (One mechanism, read two ways; Golden threads),
 lists `stalled`, `lapse`, `note` and `item:{id}:notes`. `write_grant` stays four tokens: recording a
 session summary is the only write that needs the session graph's, and no page's Rust does it.
 
+**The move to ledger-v0.24.2** (ledger #3874, 2026-11-20): `gonk.rev` moved from aed0e06 (the tag
+`ledger-v0.24.0`) to a818896, the tag `ledger-v0.24.2` (same `ikigai-ledger` 0.24.0). Between them:
+gonk PR 398 (`gonk.ui.retry.limit` / `.base`, pages ride out a restart), 401 (the exec split: grants
+spell `urn:cap:exec:read:git` / `:gh`, old spellings rewritten once at start with an `-exec-split`
+backup and refused afterwards), 405 and 406 (a passkey session's write lapses at 12 h, reads run on to
+`gonk.http.session_max_hours`, the same passkey reopens write), 407 (ikigai-ui 0.5.3, `data-ui-write`,
+`/auth/session` answering `{}` with no session) and 410 (`grant set`). The new teaching: The ledger
+in a browser gains "Write lapses; reading goes on" (prose and an anonymous `/auth/session`
+transcript; the session's own answer is a manual block, since no check holds a passkey), "Changing
+a grant, and nothing else: `grant set`" (the refusal, `--print`, `--force` and its backup, all
+CI-run), and the retry settings under "When gonk restarts" (the book has no configuration chapter
+of its own, so they sit where restarts are taught). A QUIC client spells the read scopes and shows
+`client refresh --write` rewriting an older grants file; the startup rewrite is said in prose, since
+showing it would take a restart of the page's gonk. Review every commit's reviewer grant names
+`urn:cap:exec:read:gh`. The install line keeps the full revision (the one CI keys on), which is the
+tag's commit. ⚠ The page still says sessions end on restart; gonk's README at a818896 says live
+sessions are kept in `sessions.json`. That predates this move and is left for its own item.
+
 **The move to ledger-v0.24.0** (ledger #3807, 2026-11-18): `gonk.rev` moved from 70bc0e9 (the tag
 `ledger-v0.23.2`) to aed0e06, the tag `ledger-v0.24.0`, and this note covers ledger-v0.23.3 too,
 which the book skipped. ledger-v0.23.3 (gonk PR 391) serves `ikigai-ledger` 0.23.1: `omit=` and

@@ -226,7 +226,7 @@ root over the socket.
 
 ## A grant before you write it
 
-A scope that no role names goes in with `--scope <urn>`, which may be repeated. `urn:cap:exec:git`
+A scope that no role names goes in with `--scope <urn>`, which may be repeated. `urn:cap:exec:read:git`
 is one example, for a client that runs browse's git facades. To see what a set of flags means
 before anything is written, add `--print`. It prints the scopes the flags resolve to and, for a
 grant that already exists, the lines a write would remove and add. It mints no bundle and writes
@@ -234,7 +234,7 @@ nothing, whether or not `--force` is given (gonk PR 362):
 
 <!-- transcript: run -->
 ```console
-$ ikigai-gonk client add laptop --ledger default=write --browse read --root notes --ledger-graph default --scope urn:cap:exec:git --print --port 1070 --config-home "$PWD/.config/ikigai"
+$ ikigai-gonk client add laptop --ledger default=write --browse read --root notes --ledger-graph default --scope urn:cap:exec:read:git --print --port 1070 --config-home "$PWD/.config/ikigai"
 client add `laptop` --print: no bundle was minted and nothing was written
   grant `laptop` would hold 11 scope(s):
     urn:cap:ledger:read:default
@@ -247,9 +247,9 @@ client add `laptop` --print: no bundle was minted and nothing was written
     urn:cap:gonk:raw-write:graph:urn:iki:ledger:graph:default
     urn:cap:browse:read:notes
     urn:cap:store:read:graph:urn:iki:browse:graph:default
-    urn:cap:exec:git
+    urn:cap:exec:read:git
   grant `laptop` in …/.config/ikigai/gonk/grants.json holds a different set; writing it would:
-    adds     urn:cap:exec:git
+    adds     urn:cap:exec:read:git
   refused without --force — every identity enrolled under `laptop` holds the new list from its next call
 $ jq '.laptop | length' .config/ikigai/gonk/grants.json
 10
@@ -263,9 +263,41 @@ added with `--scope` stays only if the next `--force` names it again.
 
 ikigai-repo 0.6.0 split its exec scopes by verb. The git facades now need `urn:cap:exec:read:git`
 and the `gh` facades need `urn:cap:exec:read:gh`; `urn:cap:exec:write:git` is reserved for a
-future write facade, and the old `urn:cap:exec:git` and `urn:cap:exec:gh` grant nothing. The gonk
-this book pins is still built on ikigai-repo 0.5.1, so gonk's own `grants.json` keeps the old
-spelling, as above, until gonk moves. The cli has already moved. Since ikigai-cli 0.5.3, an
+future write facade, and the old `urn:cap:exec:git` and `urn:cap:exec:gh` grant nothing. gonk
+moved in PR 401 (in ledger-v0.24.2, which this book pins), so its grants spell the read scopes,
+as above. A gonk started over a `grants.json` that still names an old spelling rewrites
+each one in place, once, after backing the file up beside itself
+(`grants.json.bak-<UTC stamp>-exec-split`), and says so on standard error; from then on it refuses
+the old spelling, with a sentence naming the new one, at startup, on every QUIC connection, and in
+`--scope` and `passkey grant add`. `client refresh` lists the same rewrite without a restart, and
+`--write` makes it. Here it is over a grants file an older gonk wrote, in a config home of its own:
+
+<!-- transcript: file older/gonk/grants.json -->
+```json
+{"reader": ["urn:cap:browse:read:*", "urn:cap:exec:git", "urn:cap:exec:gh"]}
+```
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client refresh --write --config-home "$PWD/older"
+grants: …/older/gonk/grants.json
+
+grant `reader`: nothing to add, 2 exec spellings to rewrite
+  rewrites urn:cap:exec:git -> urn:cap:exec:read:git
+  rewrites urn:cap:exec:gh -> urn:cap:exec:read:gh
+  names no ledger
+
+exec split (ikigai-repo 0.6.0): rewrote 2 retired exec spelling(s) to the read spelling, in place
+total: added 0 token(s) to 0 of 1 grant(s); nothing removed but the retired spellings
+wrote …/older/gonk/grants.json
+backup …/older/gonk/grants.json.bak-…-refresh
+
+a running gonk needs no restart: the HTTP door (passkeys) re-reads grants.json on every request, and the QUIC door on every new connection. A QUIC connection already open keeps the authority it was minted with until it reconnects (at most 10 minutes, when the door closes it); an armed review queue's grant (gonk.review.arm) is read at startup and needs one
+$ jq -c . older/gonk/grants.json
+{"reader":["urn:cap:browse:read:*","urn:cap:exec:read:git","urn:cap:exec:read:gh"]}
+```
+
+The cli moved first. Since ikigai-cli 0.5.3, an
 `ikigai` whose grants file, `--scope` or `--cap` names `urn:cap:exec:git`, `urn:cap:exec:gh`,
 `urn:cap:exec:cargo` or `urn:cap:exec:just` refuses to start. It names the file, the grant and
 what to write instead, and it never rewrites the file:
@@ -329,7 +361,7 @@ error: denied: this capability does not hold `urn:cap:store:read:graph:urn:iki:l
 
 `client refresh` repairs every stored grant at once. For each grant it reads back the highest role
 the grant holds on each ledger, from that ledger's own tokens, and adds what that role mints now.
-It never removes a scope, so `--scope` additions such as a hand-added `urn:cap:exec:git` stay.
+It never removes a scope, so `--scope` additions such as a hand-added `urn:cap:exec:read:git` stay.
 Without `--write` it is a dry run:
 
 <!-- transcript: run -->
