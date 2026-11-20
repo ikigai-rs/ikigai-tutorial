@@ -471,7 +471,7 @@ ikigai-store = { version = "0.5.0", default-features = false }
 # 0.20.6 is the pin (set 2026-11-02, ledger #2853): the newest release, on ikigai-fn 0.9, the copy
 # this workspace's crates share. The pinned gonk (0de36f0) links 0.20.7, and no page shows the patch;
 # taking it re-resolves oxigraph's crates to rand 0.8 and windows-sys 0.52 (books/gonk/DESIGN.md).
-ikigai-browse = "0.22.0"
+ikigai-browse = "0.23.1" # 0.23.1 = git-ignored paths skipped when hashing (ledger #3839); 0.23.0 = PR panels need urn:cap:exec:read:gh (exec split, ledger #3819). `"0.23.1"` is `<0.24.0`.
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
