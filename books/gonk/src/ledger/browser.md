@@ -269,8 +269,8 @@ A visible tab checks once a minute, and checks immediately when it becomes visib
 returns from the browser's back/forward cache. When the id differs, it shows “gonk has restarted
 since this page loaded, so what it shows may be out of date. Reload this page” and announces it
 once through the page's status region. It stops polling and leaves focus where it was. Failed
-checks stay silent; without JavaScript no restart notice appears. Reload to get the new page
-and sign in again: sessions end on restart.
+checks stay silent; without JavaScript no restart notice appears. Reload to get the new page;
+you stay signed in, because a restart does not end a session ([below](#the-ceremony)).
 
 A page does not give up the moment gonk goes away, either. While gonk restarts, or its store is
 briefly unavailable, a page's requests try again with backoff, and a page that came back `502`,
@@ -378,8 +378,25 @@ Open the link the invite printed, in a browser on the machine gonk runs on:
 2. **Create passkey** brings up the browser's own passkey sheet. Approve it. gonk enrolls the
    credential's public key under the grant `ada`, and the page says so and asks you to sign in.
 3. **Sign in with passkey**, in the header, and approve a second time. The page reloads
-   signed in. By default, the session ends when you sign out, after twelve hours, after
-   sixty minutes with no request using that session, or when the server restarts.
+   signed in. By default, the session ends when you sign out, after twelve hours, or after
+   sixty minutes with no request using that session.
+
+A restart does not sign anyone out (gonk PR 309). gonk keeps each live session in
+`.config/ikigai/gonk/sessions.json`: the SHA-256 of its token, never the token itself, with its
+principal, its grant, and when it was issued, last used and ends. The file is readable by gonk's
+user only, and a restarted gonk loads the sessions that have not ended, with their idle clock and
+their end carried over, so a session that idled out while gonk was down is refused. Signing out
+still ends a session, in the file too, and `passkey logout --all` and `passkey revoke` end a
+passkey's sessions even when run while gonk is stopped. The same cookie, after gonk has stopped and started
+again:
+
+<!-- transcript: manual — the session comes from a passkey ceremony, which needs a browser and an authenticator; checked by hand over Chrome's virtual authenticator for ledger #3875 -->
+```console
+$ curl -s -b 'gonk_session=…' http://localhost:1070/auth/session
+{"label":"laptop Touch ID","grant":"ada","grants":["ada"],"scopes":[…],"seconds":…,"writeSeconds":…,"restore":[]}
+```
+
+The page you reload says *Signed in as laptop Touch ID (grant ada)*, as it did before the restart.
 
 The server sets the session cookie itself, in its answer to the sign-in:
 `Set-Cookie: gonk_session=…; HttpOnly; SameSite=Strict`. `HttpOnly` means no script, gonk's own

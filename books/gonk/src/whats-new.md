@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-20**: The ledger in a browser no longer says a restart signs you out: it shows gonk keeping live passkey sessions in sessions.json, as hashes, and a restarted gonk accepting the same cookie, while sign-out, logout --all and revoke still end them.
+
+  Pages: [The ledger in a browser](ledger/browser.md)
+
 - **2026-11-20**: The ledger in a browser teaches grant set, changing one grant with no certificate or link, and shows write lapsing at 12 hours while reading goes on, reopened by the same passkey, and pages that ride out a restart. A QUIC client shows gonk rewriting old exec spellings to urn:cap:exec:read:git and :gh.
 
   Pages: [The ledger in a browser](ledger/browser.md), [A QUIC client, and the grant it runs under](machines/quic-client.md), [Review every commit](ways/review-every-commit.md)
