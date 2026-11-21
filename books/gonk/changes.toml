@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-20"
+summary = "The ledger in a browser no longer says a restart signs you out: it shows gonk keeping live passkey sessions in sessions.json, as hashes, and a restarted gonk accepting the same cookie, while sign-out, logout --all and revoke still end them."
+pages = ["ledger/browser.md"]
+
+[[change]]
+date = "2026-11-20"
 summary = "The ledger in a browser teaches grant set, changing one grant with no certificate or link, and shows write lapsing at 12 hours while reading goes on, reopened by the same passkey, and pages that ride out a restart. A QUIC client shows gonk rewriting old exec spellings to urn:cap:exec:read:git and :gh."
 pages = ["ledger/browser.md", "machines/quic-client.md", "ways/review-every-commit.md"]
 
