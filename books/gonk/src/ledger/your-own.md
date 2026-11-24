@@ -248,7 +248,7 @@ own** in an empty directory, with its two homes inside that directory:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …

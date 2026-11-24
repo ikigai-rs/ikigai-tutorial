@@ -97,7 +97,7 @@ $ printf 'gonk.mount = "prefer urn:llm:=%s/llm.sock"\n' "$PWD" > .config/ikigai/
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
   nl      urn:nl:grounding, urn:nl:sparql:check — under the caller's own grant; urn:nl:sparql drafts through urn:llm:ask for a caller holding urn:cap:net:localhost (--nl draft), saving DRAFT scripts a person publishes
 …
@@ -318,7 +318,7 @@ $ printf 'gonk.mount = "prefer urn:llm:=quic://127.0.0.1:4470 %s/mount-cert"\n' 
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/remote/config" --data-home "$PWD/remote/data" --port 1071 --no-quic --no-backup 2>&1 | tee remote.log
-ikigai-gonk 0.1.1 — holding the store at …/remote/data/store
+ikigai-gonk 0.1.2 — holding the store at …/remote/data/store
 …
   llm     quic://127.0.0.1:4470 — mounted, but no gonk.browse.root, so nothing here derives through it
 …

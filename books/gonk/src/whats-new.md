@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-24**: Remote workers teaches the dispatcher view: what changed since the dispatcher last looked, a preview that reading never advances, and an acknowledgment of its exact token. The ledger in a browser shows a search for an item number going straight to that item. Every page is replayed at a newer gonk.
+
+  Pages: [Remote workers](ways/workers.md), [The ledger in a browser](ledger/browser.md)
+
 - **2026-11-20**: The ledger in a browser no longer says a restart signs you out: it shows gonk keeping live passkey sessions in sessions.json, as hashes, and a restarted gonk accepting the same cookie, while sign-out, logout --all and revoke still end them.
 
   Pages: [The ledger in a browser](ledger/browser.md)
