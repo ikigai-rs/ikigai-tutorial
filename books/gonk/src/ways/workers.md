@@ -929,8 +929,9 @@ Ledger default: last swept …. It recorded 0 lapse(s); 1 more were already reco
 
 A sweep that fails on one ledger is logged and shown here, and the other ledgers and the next sweep
 go on. gonk's README measures the cost: a sweep over five ledgers of 800 items that records nothing
-takes tens of milliseconds. At ledger-v0.24.0 the Dashboard does not list stalled items; `stalled`
-and this status are where to look.
+takes tens of milliseconds. Since ledger-v0.24.3 the Dashboard's Stalled claims tab lists them too
+([The Dashboard](../ledger/dashboard.md#sign-in-for-the-last-two-tabs)); `stalled` and this status
+are where a script looks.
 
 This time worker-1 does not come back, so the dispatcher hands #5 to worker-2. A takeover names the
 holder it takes from, and raises the epoch, which fences worker-1 out if it wakes up later:

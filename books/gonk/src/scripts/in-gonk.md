@@ -324,17 +324,17 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (144 offered)
-urn:ikigai:vocab: 259 of 259
+left out: parts= did not ask for it (149 offered)
+urn:ikigai:vocab: 275 of 275
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples focus=urn:iki:ledger:graph:default as=application/json' 2>/dev/null | jq -r '.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)"'
-urn:ikigai:vocab: 0 of 259
+urn:ikigai:vocab: 0 of 275
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
 ```
 
-Unfocused, the model would be shown all 253 terms of the vocabulary; focused on the ledger graph,
+Unfocused, the model would be shown all 275 terms of the vocabulary; focused on the ledger graph,
 the graph's own shape and the example that reads it, and no term, since none mentions the graph.
 
 Every draft on this page passes `focus=` all the same: what the model is not shown, it cannot

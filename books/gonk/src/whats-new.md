@@ -7,9 +7,9 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-24**: The ledger in a browser teaches the Layers page's tabs, one per kind of layer, and who may read them, and shows a search for an item number going straight to that item. Remote workers teaches the dispatcher views: a preview that reading never advances, an acknowledgment of its exact token, and one item's own view.
+- **2026-11-24**: The ledger in a browser teaches the Layers page's tabs, one per kind of layer, and who may read them, and a number search going straight to its item; the Dashboard gains its Stalled claims tab. Remote workers teaches the dispatcher views: a preview that reading never advances, an acknowledgment of its exact token, and one item's own view.
 
-  Pages: [The ledger in a browser](ledger/browser.md), [Remote workers](ways/workers.md)
+  Pages: [The ledger in a browser](ledger/browser.md), [The Dashboard](ledger/dashboard.md), [Remote workers](ways/workers.md), [Scripts and sentences in gonk](scripts/in-gonk.md)
 
 - **2026-11-20**: The ledger in a browser no longer says a restart signs you out: it shows gonk keeping live passkey sessions in sessions.json, as hashes, and a restarted gonk accepting the same cookie, while sign-out, logout --all and revoke still end them.
 

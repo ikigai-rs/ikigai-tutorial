@@ -320,7 +320,11 @@ and the header count (which carries each tab's new mark) refusing an anonymous c
 the tabs themselves are prose and a manual address, since they need a layer host and a passkey
 session, which no check holds (the reason the Harness filters are addresses, two notes below). The
 book has no other page showing the Layers page; its task layers are mounts in "Explain, with a
-mounted model" and the lease mirror in Remote workers. ⚠ The Queue badge's and the facet's changes
+mounted model" and the lease mirror in Remote workers. Two pages printed something new at the pin
+and were re-recorded from a replay: the Dashboard offers an anonymous reader a third tab, Stalled
+claims (gonk PR 415, ledger-v0.24.3), which the page now names, and Remote workers no longer says
+the Dashboard lists no stalled items; "Scripts and sentences in gonk" counts 275 vocabulary terms
+(was 259) and 149 actions offered (was 144), ikigai-vocab 0.4.2 as gonk links it. ⚠ The Queue badge's and the facet's changes
 (PRs 427, 428) and the activity graph print nothing a page shows, so no page names them.
 
 ⚠ **The book's crates stay on core 0.3** (`ikigai-core` 0.3.5, `ikigai-ledger` 0.23.0) while the
