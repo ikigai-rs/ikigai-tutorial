@@ -155,7 +155,7 @@ place of its reader.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
   scripts urn:script:* in …/.ikigai/scripts — sparql and plan, read-only (the ledgers' reads); anonymous runs PUBLIC scripts and read-only plans, 3 a minute in all (draft checks too), each held to the anonymous budget; a QUIC client drafts, a person publishes; backed up with the store
   nl      urn:nl:grounding, urn:nl:sparql:check — under the caller's own grant; urn:nl:sparql drafts through urn:llm:ask for a caller holding urn:cap:net:localhost (--nl draft), saving DRAFT scripts a person publishes

@@ -299,6 +299,37 @@ Architecture Book's ledger cells (One mechanism, read two ways; Golden threads),
 lists `stalled`, `lapse`, `note` and `item:{id}:notes`. `write_grant` stays four tokens: recording a
 session summary is the only write that needs the session graph's, and no page's Rust does it.
 
+**The move to ledger-v0.25.0** (ledger #4223, 2026-11-24): `gonk.rev` moved from a818896 (the tag
+`ledger-v0.24.2`) to af26ff4, the tag `ledger-v0.25.0`, and this note covers ledger-v0.24.3 (d938b15)
+too, which the book skipped. Between them: gonk PR 414 (a ledger search that is exactly `N` or `#N`
+goes to that item), 422 (the activity graph over closed log segments), 423 (gonk on `ikigai-core`
+0.4.2 and the core-0.4 releases, `ikigai-ledger` 0.25.0), 424 (the Layers page as tabs by
+`ik:layerKind`, each at `/layers/kind/{key}`, with a new mark per tab and only the kinds the reader
+can read), 376 (the dispatcher views, `urn:iki:gonk:dispatch:{ledger}` and `…:item:{number}`, at
+`/l/{ledger}/dispatch` and `/l/{ledger}/item/{number}/dispatch`: a preview, then an acknowledgment
+of its exact token), and 427 and 428 (the ledger facet and the Queue badge). The serve banner now
+says `ikigai-gonk 0.1.2`. The new teaching: Remote workers' step 5 reads the ledger's dispatcher
+view, reads it again unchanged, acknowledges the preview's token and is refused a second use of it,
+all CI-run; The ledger in a browser shows a number search going to its item and a number with no
+item said in the status region. ⚠ No page shows the Layers page (the book teaches the task layers
+only as mounts, in "Explain a change"), so the Layers tabs have no page to go on; they wait for a
+chapter of their own. ⚠ The Queue badge's and the facet's changes (PRs 427, 428) and the activity
+graph print nothing a page shows, so no page names them.
+
+⚠ **The book's crates stay on core 0.3** (`ikigai-core` 0.3.5, `ikigai-ledger` 0.23.0) while the
+pinned gonk links core 0.4.2 and ledger 0.25.0. The move was tried and not committed: every ikigai
+crate the workspace pins has a core-0.4 release, the lock resolves to one copy of each (core 0.4.2,
+ledger 0.25.0, the versions gonk af26ff4 locks wherever gonk links the crate), and two crates needed
+code changes (`spreadsheet`: `Invocation::scope` is crate-private in core 0.4; `two-hosts`:
+`Error::Denied` takes a `Denial`). But nine test binaries then fail, across The ikigai Book, The
+ikigai Architecture and Building ikigai UIs, because what their pages print moved: core 0.4's
+`urn:kernel:*` listing and the fn crate's new `digest` and `markdown` endpoints, `ikigai-ui` 0.6's
+page head (the scene renderer in place of htmx), `ikigai-nl` 0.7's grounding counts, and the
+status chapter's version claims. That is a move of every book's pages, like the core-0.3 move
+(`docs/core-0.3-move.md`), and it belongs to its own item. Until then a gonk transcript answers from
+core 0.4 and ledger 0.25.0 while a cell, a listing or `cargo run` answers from core 0.3 and ledger
+0.23.0.
+
 **The move to ledger-v0.24.2** (ledger #3874, 2026-11-20): `gonk.rev` moved from aed0e06 (the tag
 `ledger-v0.24.0`) to a818896, the tag `ledger-v0.24.2` (same `ikigai-ledger` 0.24.0). Between them:
 gonk PR 398 (`gonk.ui.retry.limit` / `.base`, pages ride out a restart), 401 (the exec split: grants

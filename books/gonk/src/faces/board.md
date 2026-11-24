@@ -59,7 +59,7 @@ the same port.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
 ```
 

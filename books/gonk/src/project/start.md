@@ -110,7 +110,7 @@ return to the first terminal for the commands that follow.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
 ```
 
