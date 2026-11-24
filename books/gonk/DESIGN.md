@@ -310,25 +310,40 @@ can read), 376 (the dispatcher views, `urn:iki:gonk:dispatch:{ledger}` and `…:
 of its exact token), and 427 and 428 (the ledger facet and the Queue badge). The serve banner now
 says `ikigai-gonk 0.1.2`. The new teaching: Remote workers' step 5 reads the ledger's dispatcher
 view, reads it again unchanged, acknowledges the preview's token and is refused a second use of it,
-all CI-run; The ledger in a browser shows a number search going to its item and a number with no
-item said in the status region. ⚠ No page shows the Layers page (the book teaches the task layers
-only as mounts, in "Explain a change"), so the Layers tabs have no page to go on; they wait for a
-chapter of their own. ⚠ The Queue badge's and the facet's changes (PRs 427, 428) and the activity
-graph print nothing a page shows, so no page names them.
+reads one item's view (its own cursor, not advanced by the ledger's acknowledgment) and shows both
+HTTP pages refusing an anonymous caller (`a named principal is required for private cursors`), all
+CI-run; The ledger in a browser shows a number search going to its item and a number with no
+item said in the status region. The Layers tabs are taught in The ledger in a browser, "The Layers
+page: a tab per kind", after the extra scopes it needs: the banner's `layers` line, the sign-in
+notice and the two tokens on `/layers` and on a tab's page, a `passkey invite --scope` for them,
+and the header count (which carries each tab's new mark) refusing an anonymous caller, all CI-run;
+the tabs themselves are prose and a manual address, since they need a layer host and a passkey
+session, which no check holds (the reason the Harness filters are addresses, two notes below). The
+book has no other page showing the Layers page; its task layers are mounts in "Explain, with a
+mounted model" and the lease mirror in Remote workers. ⚠ The Queue badge's and the facet's changes
+(PRs 427, 428) and the activity graph print nothing a page shows, so no page names them.
 
 ⚠ **The book's crates stay on core 0.3** (`ikigai-core` 0.3.5, `ikigai-ledger` 0.23.0) while the
-pinned gonk links core 0.4.2 and ledger 0.25.0. The move was tried and not committed: every ikigai
-crate the workspace pins has a core-0.4 release, the lock resolves to one copy of each (core 0.4.2,
-ledger 0.25.0, the versions gonk af26ff4 locks wherever gonk links the crate), and two crates needed
-code changes (`spreadsheet`: `Invocation::scope` is crate-private in core 0.4; `two-hosts`:
-`Error::Denied` takes a `Denial`). But nine test binaries then fail, across The ikigai Book, The
-ikigai Architecture and Building ikigai UIs, because what their pages print moved: core 0.4's
-`urn:kernel:*` listing and the fn crate's new `digest` and `markdown` endpoints, `ikigai-ui` 0.6's
-page head (the scene renderer in place of htmx), `ikigai-nl` 0.7's grounding counts, and the
-status chapter's version claims. That is a move of every book's pages, like the core-0.3 move
-(`docs/core-0.3-move.md`), and it belongs to its own item. Until then a gonk transcript answers from
-core 0.4 and ledger 0.25.0 while a cell, a listing or `cargo run` answers from core 0.3 and ledger
-0.23.0.
+pinned gonk links core 0.4.2 and ledger 0.25.0. The move was tried twice for ledger #4223 and not
+committed. Every ikigai crate the workspace pins has a core-0.4 release, and the lock resolves to
+one copy of each (core 0.4.2, ledger 0.25.0, the versions gonk af26ff4 locks wherever gonk links
+the crate, with `oxigraph` 0.5.13 and `spareval` 0.2.9 as gonk locks them: with 0.5.11 the
+lock's `md-5` no longer builds `spareval` 0.2.7). Two crates need code changes (`spreadsheet`:
+`Invocation::scope` is crate-private in core 0.4; `two-hosts`: `Error::Denied` takes a `Denial`).
+Then `cargo test --workspace` fails twelve targets across The ikigai Book, The ikigai Architecture
+and Building ikigai UIs: core 0.4's `urn:kernel:*` listing and the fn crate's new `digest` and
+`markdown` endpoints (the Architecture manifold, the grammar-list cell, "A graph face", the
+conformance list), `ikigai-ui` 0.6's page head (the scene renderer in place of htmx, in the
+inspector's snapshots and the composed page), `ikigai-nl` 0.7's grounding counts, the status
+chapter's version claims, and `ikigai-ipc` 0.6 refusing to serve a socket directly in `/tmp`
+(owned by root) or under a group-writable directory, which `ttt-host`, `two-hosts` and
+`your-endpoints` do in their tests and pages. That is a move of every book's pages, like the
+core-0.3 move (`docs/core-0.3-move.md`), and an accessibility review of ui 0.6's page, so it
+belongs to its own item. Until then a gonk transcript answers from core 0.4 and ledger 0.25.0
+while a cell, a listing or `cargo run` answers from core 0.3 and ledger 0.23.0. The cli stays at
+0.5.3 (transports 0.5) although gonk now links transports 0.6.0: the two changed pages replayed
+clean with it by hand, and the transcripts job replays every page with it; a page that needs the
+0.6 wire moves this pin.
 
 **The move to ledger-v0.24.2** (ledger #3874, 2026-11-20): `gonk.rev` moved from aed0e06 (the tag
 `ledger-v0.24.0`) to a818896, the tag `ledger-v0.24.2` (same `ikigai-ledger` 0.24.0). Between them:

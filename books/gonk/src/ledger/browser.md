@@ -494,6 +494,84 @@ cookie cannot read the wider grant in between. If recording the widening fails, 
 is undone and the passkey stays signed out; sign in again. Owner `grant add` deliberately keeps
 sessions; the owner can end them with `passkey logout --all`.
 
+### The Layers page: a tab per kind
+
+A **layer** is a shared space on a layer host: talk between people and agents, tasks handed
+between machines, feeds of announcements (the task layers a ledger can be bound to are in [Remote
+workers](../ways/workers.md#claims-renewed-through-a-task-layer), later in the book). `/layers` is
+the page where a person reads layer traffic and posts to it, beside the ledgers. It reads and posts
+as ONE identity at a layer host's door, which the `gonk.layers.view` line names. This scratch gonk
+has none, and its banner says so:
+
+<!-- transcript: run -->
+```console
+$ grep '^  layers ' gonk.log
+  layers  no gonk.layers.view line, so /layers says it is not configured
+```
+
+The page is a passkey's, never an anonymous caller's. Reading it, its tabs and their marks needs
+`urn:cap:gonk:layers:read`; posting needs `urn:cap:gonk:layers:say`. gonk mints neither for an
+anonymous caller, so a signed-out visitor gets the sign-in notice and the grant it needs, on
+`/layers` and on every tab's page alike:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://localhost:1070/layers | grep -o 'Sign in to read the layers\.'
+Sign in to read the layers.
+$ curl -s http://localhost:1070/layers/kind/task | grep -o '<code>urn:cap:gonk:layers:[a-z]*</code>'
+<code>urn:cap:gonk:layers:read</code>
+<code>urn:cap:gonk:layers:say</code>
+```
+
+Neither is a role flag's, so they go in with `--scope`, as above:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk passkey invite bea --ledger default=read --scope urn:cap:gonk:layers:read --scope urn:cap:gonk:layers:say --port 1070 --config-home "$PWD/.config/ikigai"
+passkey invite for `bea` — grant `bea` (5 scopes) in …/.config/ikigai/gonk/grants.json
+  valid for 30 minutes, once
+  open  http://localhost:1070/#invite=…
+  in a browser on this machine (localhost, not 127.0.0.1); the passkey is enrolled in …/.config/ikigai/gonk/clients.json
+```
+
+Signed in under that grant, on a gonk whose `gonk.layers.view` names a layer host, the page is a
+list of tabs, **one per kind of layer** (gonk PR 424):
+
+- **The kind is the layer's own.** Each layer's definition says what it is for with
+  `ik:layerKind`, one concept of the vocabulary's `ik:LayerKinds`: Talk (`talk`), Tasks
+  (`task`), Feed (`feed`), Inquiries (`inquiry`) and Join (`join`), in the order
+  `ik:LayerKindOrder` lists them. gonk names no kind itself, so a kind the vocabulary adds is a
+  tab with no change to gonk. A layer whose definition names no kind is under **Other**, the last
+  tab, shown only when such a layer exists.
+- **Each tab is a page,** `/layers/kind/{key}`, the key being the concept's `skos:notation`
+  (`/layers/kind/task`). The tabs are plain links in a list labeled "Layer kinds", the shown one
+  marked as current, so they work without a script and each can be linked and reloaded.
+  `/layers` itself shows the first tab with unread entries, else the first.
+- **A tab carries a "new" mark** when any of its layers has entries that this viewer (the
+  signed-in passkey) has not been shown. What a viewer has seen is kept per layer, in
+  `<data home>/layers-view/cursors.json`; opening a layer marks it read. The marks come with the
+  header's unread count, one request per open page per poll whatever the number of tabs, and that
+  count needs the read token too:
+
+<!-- transcript: run -->
+```console
+$ curl -s -w '\n%{http_code}\n' 'http://localhost:1070/layers/~/count?kinds=1'
+denied: capability does not grant `urn:cap:gonk:layers:read` (declared by `urn:iki:gonk:fragment:layers-count`)
+403
+```
+
+- **A reader sees only the kinds they can read.** A tab is there only for a kind of which the
+  identity reads at least one layer at its door. Another kind has no tab, and once gonk has read
+  the door, its page answers `404`.
+
+This chapter's gonk has no layer host, so the tabs themselves are for a browser on a gonk that has
+one:
+
+<!-- transcript: manual — the tabs need a layer host and a signed-in passkey, which no check holds -->
+```console
+$ open http://localhost:1070/layers/kind/task
+```
+
 ### Changing a grant, and nothing else: `grant set`
 
 `passkey invite` writes a grant and makes a link; `client add` writes one and mints a

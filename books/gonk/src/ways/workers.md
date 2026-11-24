@@ -373,6 +373,29 @@ owner-only and outside the database and its backups, and survive a restart; a to
 acknowledged does not. A baseline that is missing or has aged out answers `cursor_reset` and a
 full look again.
 
+One item's view is the same preview for that item alone, with a cursor of its own, so the
+ledger's acknowledgment above has not advanced it:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:dispatch:default:item:2 as=application/json' 2>/dev/null | jq -c '{cursor_reset, items: [.items[] | .number]}'
+{"cursor_reset":true,"items":[2]}
+```
+
+Over HTTP the views are as private as their cursors. A cursor belongs to a reader, so an
+anonymous caller is refused both pages, the ledger's and the item's; a dispatcher reads them
+signed in, or over the socket or QUIC as here:
+
+<!-- transcript: run -->
+```console
+$ curl -s -w '\n%{http_code}\n' http://localhost:1070/l/default/dispatch
+denied: dispatch: a named principal is required for private cursors
+403
+$ curl -s -w '\n%{http_code}\n' http://localhost:1070/l/default/item/2/dispatch
+denied: dispatch: a named principal is required for private cursors
+403
+```
+
 Nothing is offered: both items are the dispatcher's. One pull request holds, and is closed; the
 other is red on the main branch after it merged, so the dispatcher **rejects** the hand-back, with
 the reason, and the item is ready again for whichever worker asks next:
