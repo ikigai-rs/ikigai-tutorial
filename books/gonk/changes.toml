@@ -20,7 +20,7 @@
 
 [[change]]
 date = "2026-11-24"
-summary = "Remote workers teaches the dispatcher view: what changed since the dispatcher last looked, a preview that reading never advances, and an acknowledgment of its exact token. The ledger in a browser shows a search for an item number going straight to that item. Every page is replayed at a newer gonk."
+summary = "Remote workers teaches the dispatcher view: what changed since the dispatcher last looked, a preview that reading never advances, and an acknowledgment of its exact token. The ledger in a browser shows a search for an item number going straight to that item, and every page is replayed at a newer gonk."
 pages = ["ways/workers.md", "ledger/browser.md"]
 
 [[change]]
