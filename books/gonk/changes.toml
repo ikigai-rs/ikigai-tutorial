@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-24"
+summary = "Remote workers teaches the dispatcher view: what changed since the dispatcher last looked, a preview that reading never advances, and an acknowledgment of its exact token. The ledger in a browser shows a search for an item number going straight to that item, and every page is replayed at a newer gonk."
+pages = ["ways/workers.md", "ledger/browser.md"]
+
+[[change]]
 date = "2026-11-20"
 summary = "The ledger in a browser no longer says a restart signs you out: it shows gonk keeping live passkey sessions in sessions.json, as hashes, and a restarted gonk accepting the same cookie, while sign-out, logout --all and revoke still end them."
 pages = ["ledger/browser.md"]

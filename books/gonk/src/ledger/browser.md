@@ -18,7 +18,7 @@ chapter](../introduction.md#a-gonk-per-chapter)).
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
@@ -67,6 +67,21 @@ $ curl -s http://localhost:1070/ | grep -o "<span class='how-many'>[^<]*</span>"
 <span class='how-many'>1 open items</span>
 $ curl -s http://localhost:1070/l/default/item/1 | grep -o "<h1 class='item-title'>[^<]*</h1>"
 <h1 class='item-title'>Write the gonk book</h1>
+```
+
+The search also goes to an item by its number. A search that is exactly `N` or `#N` (`%23` is the `#` in an
+address) answers a page that refreshes at once to that item, whatever its status, with a link for a browser that does
+not refresh; a number the ledger holds no item for is said in the page's status region, over the
+unfiltered list. Text that merely contains digits stays a title search:
+
+<!-- transcript: run -->
+```console
+$ curl -s 'http://localhost:1070/l/default?text=%231' | grep -o "<meta[^>]*http-equiv='refresh'/>"
+<meta content='0; url=/l/default/item/1' http-equiv='refresh'/>
+$ curl -s 'http://localhost:1070/l/default?text=%231' | grep -o "<a href='/l/default/item/1'>[^<]*</a>"
+<a href='/l/default/item/1'>Write the gonk book</a>
+$ curl -s 'http://localhost:1070/l/default?text=9' | grep -o 'No item #9 in ledger default.'
+No item #9 in ledger default.
 ```
 
 | path | what it shows |
