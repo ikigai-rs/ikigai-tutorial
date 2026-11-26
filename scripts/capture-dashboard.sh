@@ -11,6 +11,9 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
+source scripts/require-node.sh
+require_node
+
 rev="$(tr -d '[:space:]' < books/gonk/gonk.rev)"
 cli="$(tr -d '[:space:]' < books/gonk/ikigai-cli.version)"
 gonk="$PWD/target/gonk/$rev/bin/ikigai-gonk"

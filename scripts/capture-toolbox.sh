@@ -13,6 +13,9 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
+source scripts/require-node.sh
+require_node
+
 out="$PWD/books/ikigai/src/building/check/img"
 chrome=()
 while [ $# -gt 0 ]; do
