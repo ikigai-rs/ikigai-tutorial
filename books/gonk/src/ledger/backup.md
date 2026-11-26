@@ -19,7 +19,7 @@ and the banner says so:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
   backup  no schedule (--no-backup or gonk.backup.every = "off") — urn:iki:gonk:backup is still bound; this process is the only thing that can export the dataset
 …
@@ -185,7 +185,7 @@ another port, and read it the way you read the first:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai-restored" --store "$PWD/restored-pieces" --port 1071 --no-quic --no-backup
-ikigai-gonk 0.1.1 — holding the store at …/restored-pieces
+ikigai-gonk 0.1.2 — holding the store at …/restored-pieces
 …
 ```
 

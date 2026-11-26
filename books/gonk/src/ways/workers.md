@@ -99,7 +99,7 @@ client `metrics`  …/.config/ikigai/gonk/quic/clients/metrics
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
   quic    udp 0.0.0.0:1070 — 3 trusted certificate(s), 3 enrolled
 …
@@ -311,6 +311,89 @@ $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:ledger:n
 nothing is ready (2 open items excluded: #2 handed back, awaiting the dispatcher; #1 handed back, awaiting the dispatcher)
 policy: priority-recency
 [uncacheable]
+```
+
+`next` says what waits for the dispatcher. The **dispatcher view** says what changed since the
+dispatcher last looked: `urn:iki:gonk:dispatch:{ledger}` for a whole ledger and
+`urn:iki:gonk:dispatch:{ledger}:item:{number}` for one item, served over the socket and QUIC doors
+and, over HTTP, at `/l/{ledger}/dispatch` and `/l/{ledger}/item/{number}/dispatch`. The reader is
+the capability's own principal, never an argument; over the socket that is the local owner. A
+first look has no baseline, so it is a full one. Each changed item has its status, what it awaits
+and its open blockers, then one line of JSON per event (the hand-back, the item's own facts, its
+blockers, the release), which carry times and identities and are left out here:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:dispatch:default' 2>/dev/null | grep -v -E '^(handback|item|blockers|release): '
+default: changes since the last acknowledged look
+Cursor reset: showing a full look (first read, expired or evicted cursor).
+#1 initials panics on an empty word
+Status: "open"; awaiting: "dispatcher"; blockers: []
+Routine counts: {"claim":1}
+#2 Document initials in the README
+Status: "open"; awaiting: "dispatcher"; blockers: []
+Routine counts: {"claim":1}
+Routine claim_update counts are observed current-claim changes, not individual renewals. Refusals are recorded hand-back rejections; failed transport requests are not ledger events.
+Acknowledge with Sink cursor=…
+```
+
+Attention (hand-backs, rejected hand-backs, expired claims, blocking links) is listed event by
+event; routine claims are only counted. An unchanged body and comment tail are left out, and a
+changed body shows as a new `body_digest`: the item's own page is where to read it.
+
+A look is a **preview**. Reading never advances it: the JSON look below, asked after the text one,
+is still the full look with both items (a poll can read the JSON face as often as it likes). The JSON face carries an opaque
+`cursor` token, and the dispatcher acknowledges exactly that preview by sinking the token back,
+here as the request's content (over HTTP it is a POST with the form field `cursor`):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:dispatch:default as=application/json' 2>/dev/null > look.json
+$ jq -c '{cursor_reset, items: [.items[] | .number]}' look.json
+{"cursor_reset":true,"items":[1,2]}
+$ jq -j .cursor look.json | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:gonk:dispatch:default'
+{"acknowledged":true}
+[uncacheable]
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:dispatch:default'
+default: changes since the last acknowledged look
+No changes.
+Routine claim_update counts are observed current-claim changes, not individual renewals. Refusals are recorded hand-back rejections; failed transport requests are not ledger events.
+Acknowledge with Sink cursor=…
+[uncacheable]
+$ jq -j .cursor look.json | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:gonk:dispatch:default'
+error: conflict: dispatch: unknown, expired or superseded cursor; look again
+```
+
+The acknowledgment covers that snapshot and nothing after it: a comment that arrives later is
+still unread at the next look. A token works once, for its reader and scope, so the second sink
+of the same token is a conflict; acknowledging one preview also supersedes the others outstanding
+for that scope (here, the text look's). The
+item views and the ledger view keep separate cursors. They live in `<data home>/dispatch/cursors.json`,
+owner-only and outside the database and its backups, and survive a restart; a token that was never
+acknowledged does not. A baseline that is missing or has aged out answers `cursor_reset` and a
+full look again.
+
+One item's view is the same preview for that item alone, with a cursor of its own, so the
+ledger's acknowledgment above has not advanced it:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:iki:gonk:dispatch:default:item:2 as=application/json' 2>/dev/null | jq -c '{cursor_reset, items: [.items[] | .number]}'
+{"cursor_reset":true,"items":[2]}
+```
+
+Over HTTP the views are as private as their cursors. A cursor belongs to a reader, so an
+anonymous caller is refused both pages, the ledger's and the item's; a dispatcher reads them
+signed in, or over the socket or QUIC as here:
+
+<!-- transcript: run -->
+```console
+$ curl -s -w '\n%{http_code}\n' http://localhost:1070/l/default/dispatch
+denied: dispatch: a named principal is required for private cursors
+403
+$ curl -s -w '\n%{http_code}\n' http://localhost:1070/l/default/item/2/dispatch
+denied: dispatch: a named principal is required for private cursors
+403
 ```
 
 Nothing is offered: both items are the dispatcher's. One pull request holds, and is closed; the
@@ -673,7 +756,7 @@ $ mkdir -p dispatcher && cp -R .config/ikigai/gonk/quic/clients/dispatcher dispa
 <!-- transcript: restart -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
 ```
 
@@ -795,7 +878,7 @@ scheduled. gonk reads the line at startup, and its banner says what it will do:
 <!-- transcript: restart -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
 …
   lapses  every 2s, the first in 2s: records each lapsed lease once in every ledger, as urn:iki:gonk:recorder:lapse, and never releases one. `ikigai --connect …/.ikigai/gonk.sock -c 'source urn:iki:gonk:lapse:status'` says what it recorded
 …
@@ -846,8 +929,9 @@ Ledger default: last swept …. It recorded 0 lapse(s); 1 more were already reco
 
 A sweep that fails on one ledger is logged and shown here, and the other ledgers and the next sweep
 go on. gonk's README measures the cost: a sweep over five ledgers of 800 items that records nothing
-takes tens of milliseconds. At ledger-v0.24.0 the Dashboard does not list stalled items; `stalled`
-and this status are where to look.
+takes tens of milliseconds. Since ledger-v0.24.3 the Dashboard's Stalled claims tab lists them too
+([The Dashboard](../ledger/dashboard.md#sign-in-for-the-last-two-tabs)); `stalled` and this status
+are where a script looks.
 
 This time worker-1 does not come back, so the dispatcher hands #5 to worker-2. A takeover names the
 holder it takes from, and raises the epoch, which fences worker-1 out if it wakes up later:

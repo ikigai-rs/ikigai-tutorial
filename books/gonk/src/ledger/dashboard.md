@@ -1,7 +1,8 @@
 # The Dashboard
 
 [The ledger in a browser](browser.md) opened one ledger's pages. The Dashboard is the page above them,
-at `/dashboard`: a chart of every ledger you may read, a table of every agent working in them, and,
+at `/dashboard`: a chart of every ledger you may read, a table of every agent working in them, the
+claims whose lease ran out, and,
 for an operator, what the server's cache and disks are doing. Use it to see what agents have been doing
 across your ledgers.
 
@@ -82,7 +83,7 @@ still running, stop it first, since this one takes the same port. There is no `-
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --http-ledger app --http-ledger docs --http-ledger infra
-ikigai-gonk 0.1.1 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: app, docs, infra; …
 …
@@ -397,13 +398,20 @@ stream to push on, which is why this is polling.
 
 ## Sign in, for the last two tabs
 
-The anonymous reader has been offered two tabs, and asking for the others is refused:
+The anonymous reader has been offered three tabs, and asking for the others is refused. The third,
+**Stalled claims** (gonk PR 415, ledger-v0.24.3), lists every open item, in a ledger the viewer may
+read, held on a lease that has run out; it is read only when that tab is shown, so the Ledgers and
+Agents tabs never wait on it. [Remote workers](../ways/workers.md#lapses-recorded-on-gonks-timer),
+later in the book, makes a stalled claim and reads it with `stalled`:
 
 <!-- transcript: run -->
 ```console
 $ curl -s http://127.0.0.1:1070/dashboard | grep -o "id='dashboard-tab-[a-z]*'"
 id='dashboard-tab-ledgers'
 id='dashboard-tab-agents'
+id='dashboard-tab-stalled'
+$ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:1070/dashboard/stalled
+200
 $ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:1070/dashboard/cache
 403
 $ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:1070/dashboard/system
