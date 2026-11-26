@@ -7,7 +7,7 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
-- **2026-11-26**: The ledger in a browser teaches people (one person signing in from several devices, passkey invite --person and attach, the upgrade and its rollback), most-relevant-first search, the public origin for a phone behind a TLS proxy, and the upgrade status gonk prints at start. A ledger of your own adds body and phrase search, idempotency keys and decision comments; Harness engineering adds the query sensors' first tick after a restart.
+- **2026-11-26**: The ledger in a browser teaches one person on several devices, ranked search, the public origin for a phone and the upgrade status. A ledger of your own adds body and phrase search, idempotency keys and decisions; Harness engineering adds the sensors' first tick after a restart.
 
   Pages: [The ledger in a browser](ledger/browser.md), [A ledger of your own](ledger/your-own.md), [Harness engineering](ways/harness.md)
 
