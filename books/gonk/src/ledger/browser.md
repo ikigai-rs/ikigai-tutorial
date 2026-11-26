@@ -18,8 +18,9 @@ chapter](../introduction.md#a-gonk-per-chapter)).
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
+  search  word index of every ledger's titles, bodies and comments at …/.ikigai/store/text-index — … on disk now; derived, so it is rebuilt in the background after an unclean shutdown (searches scan until it is ready)
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   log     segments in …/.config/ikigai/gonk/log (hash-chained; `urn:log:segments`, `urn:log:verify` over the socket only), not in the backup; one `log:Access` entry per request at each door, polls sampled (`gonk.log.access = false` turns them off); passkey sign-ins and sign-outs
@@ -31,6 +32,28 @@ those on screen and in a file. Access records go into hash-chained segments unde
 `.config/ikigai/gonk/log/`, which this chapter reads at the end. These segments are outside
 the store and its backup. Leave gonk running, then open another terminal in the **same
 directory** for the remaining commands.
+
+The banner's `search` line is the store's word index of the ledgers (since gonk ledger-v0.26.0),
+which a later section ranks searches by. A new gonk builds it in the background as it starts, and
+its status says when it is done. Wait for that before the first write: at this revision, a write
+that lands while the first build still runs is counted twice in the index, and most-relevant-first
+is then refused until gonk restarts ([below](#most-relevant-first)). `%3A` is the `:` of the
+ledger's graph name, written into the status resource's own name:
+
+<!-- transcript: run -->
+```console
+$ until ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:store:text-index:graph:urn%3Aiki%3Aledger%3Agraph%3Adefault' 2>&1 | grep -q 'state: ready'; do sleep 0.2; done
+$ ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:store:text-index:graph:urn%3Aiki%3Aledger%3Agraph%3Adefault'
+graph: <urn:iki:ledger:graph:default>
+state: ready
+format: 1
+fingerprint: v1; words: split on non-alphanumerics, lowercased, no stemming; <http://purl.org/dc/terms/title> <https://ikigai-rs.dev/ns/ledger#body>
+documents: 0
+pending: 0
+deleted documents awaiting compaction: 0
+size: … bytes
+[uncacheable]
+```
 
 File something, so the pages have an item to show. An anonymous caller at the HTTP door only
 reads (the banner's `anonymous read: default`), so file it over the owner's socket, as in [the
@@ -84,6 +107,49 @@ $ curl -s 'http://localhost:1070/l/default?text=9' | grep -o 'No item #9 in ledg
 No item #9 in ledger default.
 ```
 
+### Most relevant first
+
+A search lists its rows in the Sort field's order, most recently modified first unless you pick
+another. gonk also keeps a **word index** of each ledger's titles, bodies and comments in its store
+(since gonk ledger-v0.26.0, gonk PR 430), and the banner's `search` line said where. With the index,
+a search page offers **Show the most relevant items first** (`sort=relevance`). It is offered only
+when every listed ledger's index reports itself ready. File two more items so there is something to
+rank, then search for a word all three titles share:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append Check the gonk book' -c 'sink urn:gk:iki:ledger:append Book a room'
+#2 urn:iki:ledger:default:item:…
+[uncacheable]
+#3 urn:iki:ledger:default:item:…
+[uncacheable]
+— batch: 2 commands · request outcomes: 2 uncacheable
+$ curl -s 'http://localhost:1070/l/default?text=book' | grep -o "<a[^>]*>Show the most relevant items first</a>"
+<a href='/l/default?status=open&amp;limit=50&amp;text=book&amp;sort=relevance' hx-get='/l/default/items?status=open&amp;limit=50&amp;text=book&amp;sort=relevance' hx-push-url='/l/default?status=open&amp;limit=50&amp;text=book&amp;sort=relevance' hx-swap='outerHTML' hx-target='#ledger'>Show the most relevant items first</a>
+$ curl -s 'http://localhost:1070/l/default?text=book&sort=relevance' | grep -o 'Most relevant items first.'
+Most relevant items first.
+```
+
+A title counts twice as much as a body or a comment, and how often a word appears and how rare it
+is across the ledger decide the rest. Ranking needs a search to rank by. Without one, or while an
+index is missing or still being built, the page lists nothing and says why. It never shows the same
+rows in another order under a heading that claims relevance:
+
+<!-- transcript: run -->
+```console
+$ curl -s 'http://localhost:1070/l/default?sort=relevance' | grep -o 'Most relevant ordering is not available[^<]*' | sort -u
+Most relevant ordering is not available: Give text=, search= or phrase= to sort by relevance in default, where nothing was listed.
+```
+
+The index holds no text of its own: excerpts still come from the store, and the index is never
+backed up. After an unclean shutdown (a crash, `kill -9`, a power cut) gonk rebuilds it in the
+background at the next start. Searches scan until the rebuild is done and return the same rows, so
+only most-relevant-first waits, and the page says so in place of the offer: *Most relevant ordering
+is not available: the search index for ledger default is not ready.* `gonk.store.text_index =
+false` in gonk's configuration turns the index off. Every search then answers the same rows by
+scanning, and only most-relevant-first is refused. [A ledger of your own](your-own.md#finding-items)
+shows the searches themselves.
+
 | path | what it shows |
 | --- | --- |
 | `/` | the first ledger you may read |
@@ -100,6 +166,8 @@ there:
 ```console
 $ curl -s -H 'Accept: text/turtle' http://127.0.0.1:1070/iki/ledger/items | grep dcterms:title
 	dcterms:title "Write the gonk book" ;
+	dcterms:title "Check the gonk book" ;
+	dcterms:title "Book a room" ;
 ```
 
 and so is a query over it. Asked for a results format rather than HTML, CSV among them,
@@ -113,6 +181,8 @@ under it.
 ```console
 $ curl -s -G -H 'Accept: text/csv' --data-urlencode 'query=PREFIX dcterms: <http://purl.org/dc/terms/> SELECT ?title WHERE { ?item dcterms:title ?title }' http://127.0.0.1:1070/sparql
 title
+Book a room
+Check the gonk book
 Write the gonk book
 ```
 
@@ -493,6 +563,178 @@ writing the wider grant**, then opens one new session from the assertion (gonk P
 cookie cannot read the wider grant in between. If recording the widening fails, the grant change
 is undone and the passkey stays signed out; sign in again. Owner `grant add` deliberately keeps
 sessions; the owner can end them with `passkey logout --all`.
+
+### One person, several devices
+
+A passkey lives on one device: the laptop's Touch ID cannot sign in from a phone. Since gonk
+ledger-v0.25.1 (gonk PR 431) a passkey names a **person**, and the person holds the grants, so
+every passkey of one person signs in with the same authority, and a write, a claim or a dispatcher
+cursor made from any of them is that person's. `gonk/clients.json` keeps a `people` section beside
+`passkeys`: each person is `urn:iki:gonk:person:id:<id>`, with a label and the grant list, and each
+passkey names its `person`. A signed-in write carries the person's IRI as its author, and the page
+shows the person's current label. `passkey list` prints each passkey's person.
+
+A second device joins a person that exists, so it starts from a passkey already enrolled, which
+takes a browser and an authenticator ([the ceremony](#the-ceremony)). Say the passkey `ada`
+enrolled above is the laptop's. The owner makes an invite for the phone:
+
+<!-- transcript: manual — a person exists once a passkey is enrolled, which takes a browser and an authenticator -->
+```console
+$ ikigai-gonk passkey invite --person ada --port 1070 --config-home "$PWD/.config/ikigai"
+```
+
+The link it prints enrolls a passkey that names `ada`'s person and holds her grants from its first
+request. It writes no grant, and it cannot be redeemed to widen a passkey already signed in. Open
+it on the second device, as in [the ceremony](#the-ceremony). A phone is not on this machine, so it
+reaches gonk through a TLS proxy and the public origin ([below](#a-phone-through-a-tls-proxy-the-public-origin)).
+
+An invite for a person who does not exist is refused before anything is written. `ada` has an invite and no passkey yet, so this page has no person to invite for; any label shows the refusal:
+
+<!-- transcript: run; exit 1 -->
+```console
+$ ikigai-gonk passkey invite --person grace --port 1070 --config-home "$PWD/.config/ikigai"
+ikigai-gonk: no person is labeled `grace` — `ikigai-gonk passkey list` shows who there is
+```
+
+If you already enrolled two passkeys of your own as two people (one per device, before people
+existed, or by two invites), put them on one person with `passkey attach`. Name the passkey to move
+by its label, or by `--credential <id>`, and the person to move it to:
+
+<!-- transcript: manual — it moves an enrolled passkey, which takes a browser and an authenticator to make -->
+```console
+$ ikigai-gonk passkey attach "phone" --person "laptop Touch ID" --config-home "$PWD/.config/ikigai"
+```
+
+The passkey `phone` then holds that person's grants. The person it named before is kept, so what
+was written as that person still reads as its label. Revoking a person's last passkey leaves the
+person on record, and nothing can sign in as it. Signing out from a page now ends every device's
+session of the person (the button says **Sign out on all devices**).
+
+**The upgrade.** A `clients.json` from before people is migrated the first time the new gonk starts,
+or the first time an `ikigai-gonk passkey` command writes it, whichever comes first. Each passkey
+gets a person of its own, with its label and grants, and nothing is merged: two passkeys that are
+yours stay two people until you `attach` one to the other. The old file is kept as
+`gonk/clients.json.before-people`, and a second start changes nothing. Each migrated passkey keeps
+a copy of its person's grants, so an older gonk (ledger-v0.18.0 to v0.25.0) still starts and signs
+each passkey in with them. gonk's README says what a rollback costs: to roll the file itself back,
+stop gonk and copy `gonk/clients.json.before-people` over `gonk/clients.json`, which loses every
+enrollment, revocation and grant change made since the upgrade. A claim gonk moved to a person
+names the person's IRI, which an older gonk never stamps, so under the older binary its holder
+cannot renew or release it until it lapses. At every start gonk moves each live claim held by an
+enrolled passkey's IRI to that passkey's person, and since ledger-v0.26.0 (gonk PR 438) the Layers
+page's unread marks and feed subscriptions follow the person too.
+
+### A phone through a TLS proxy: the public origin
+
+The HTTP door is plain `http://localhost`, and its passkeys are bound to `localhost`, so a phone
+cannot use it. A TLS proxy can: `tailscale serve`, for one, gives this machine an
+`https://<host>.<tailnet>.ts.net` address and forwards it to loopback. Since gonk ledger-v0.25.1
+(gonk PR 435) gonk can give that proxy a **second loopback listener** of its own, and an origin to
+answer as there. Two settings name them, and they come together or not at all. This page starts a
+second gonk beside the first to show it, with its own homes, its own port and a public listener on
+1072:
+
+<!-- transcript: run -->
+```console
+$ mkdir -p phone/config
+$ printf 'gonk.http.public_origin = "https://box.tail1.ts.net"\ngonk.http.public_bind = "127.0.0.1:1072"\n' > phone/config/config.toml
+```
+
+<!-- transcript: serve -->
+```console
+$ ikigai-gonk --config-home "$PWD/phone/config" --data-home "$PWD/phone/data" --port 1071 --no-quic --no-backup 2>&1 | tee phone.log
+ikigai-gonk 0.1.3 — holding the store at …/phone/data/store
+…
+  http    http://localhost:1071/ — loopback (127.0.0.1:1071); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
+  public  https://box.tail1.ts.net/ — loopback 127.0.0.1:1072 for a TLS proxy only (`tailscale serve`); no anonymous grant, `Host` and `Origin` must be this origin, passkeys registered at `box.tail1.ts.net` only, `Secure` session cookie
+…
+```
+
+The proxy would point at that port and nothing else (`tailscale serve --bg --https=443
+http://127.0.0.1:1072`; no proxy runs here). gonk tells proxied traffic apart by the **port** it
+arrives on, never by its `Host` header, because behind a loopback proxy every caller is loopback.
+So the public listener trusts no caller: it has no anonymous grant at all, `Host` must be the
+origin's host, and a write's `Origin` must be the origin. The local listener is unchanged:
+
+<!-- transcript: run -->
+```console
+$ curl -s http://127.0.0.1:1071/iki/ledger/items
+no items match
+$ curl -s -H 'Host: box.tail1.ts.net' http://127.0.0.1:1072/iki/ledger/items
+denied: capability does not grant `urn:cap:ledger:read:*` (declared by `urn:iki:ledger:items`; any grant under `urn:cap:ledger:read:` satisfies it)
+$ curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: localhost' http://127.0.0.1:1072/
+421
+```
+
+The relying party there is the origin's full host, `box.tail1.ts.net` (never a parent domain:
+`ts.net` is a public suffix), and each passkey's stored `rp_id` decides where it may sign in: the
+local listener takes only `localhost` passkeys and the public one only passkeys registered at
+`box.tail1.ts.net`. The session cookie there carries `Secure`. So a phone's passkey is enrolled at
+the public origin, and it joins the person who already signs in on the laptop:
+`ikigai-gonk passkey invite --person <person>` makes the invite, opened on the phone at
+`https://box.tail1.ts.net/…`, and the phone's writes, claims and cursors are that person's.
+
+A malformed or non-`https://` origin, a bind that is not loopback or is the HTTP door's own port,
+or one setting without the other stops gonk at start with a sentence saying why. gonk does not
+terminate TLS itself. The rest of the page uses the first gonk; stop the second with Ctrl-C in its
+terminal whenever you like.
+
+### What an upgrade still needs
+
+A newer gonk upgrades an older install's files where it safely can, as the people migration above
+does. Two steps it never takes on its own, because they change what someone holds or what the
+ledger says: adding to a grant the tokens its roles mint now, and rewriting findings that name a
+file the old way. Since gonk ledger-v0.25.1 (gonk PR 433) gonk plans both read-only when it starts,
+prints one line per plan that found something, each naming the exact command that makes the change,
+and keeps the answer at `urn:iki:gonk:upgrade:status`. A fresh install has nothing to do, so its
+banner printed no such line, and the resource says so:
+
+<!-- transcript: run -->
+```console
+$ ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:gonk:upgrade:status'
+Upgrade: nothing to do; this install matches a fresh one.
+[uncacheable]
+```
+
+The resource plans again at each read, so it says what is left after you run a command. To see a
+plan find something, put back by hand a grant as an older gonk wrote it. Before `ikigai-ledger`
+0.23, a reader of `default` held two tokens and not the session graph's read:
+
+<!-- transcript: run -->
+```console
+$ jq '. + {"old-reader": ["urn:cap:ledger:read:default", "urn:cap:store:read:graph:urn:iki:ledger:graph:default"]}' .config/ikigai/gonk/grants.json > grants.new && mv grants.new .config/ikigai/gonk/grants.json
+$ ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:gonk:upgrade:status'
+upgrade: 1 grant(s) lack 1 token(s) their ledger roles mint now (old-reader), so the requests those tokens allow are refused; add them with `ikigai-gonk client refresh --config-home …/.config/ikigai --write` (without --write it lists them)
+[uncacheable]
+```
+
+That is the line a start prints too, prefixed `ikigai-gonk: upgrade:`. Run what it names, and the
+plan is empty again:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk client refresh --config-home "$PWD/.config/ikigai" --write
+grants: …/.config/ikigai/gonk/grants.json
+grant `ada`: nothing to add
+  ledger book  write
+grant `metrics`: nothing to add
+  ledger book  read
+grant `old-reader`: 1 token to add
+  ledger default  read
+    adds     urn:cap:store:read:graph:urn:iki:ledger:graph:default:session
+total: added 1 token(s) to 1 of 3 grant(s); nothing removed
+wrote …/.config/ikigai/gonk/grants.json
+backup …/.config/ikigai/gonk/grants.json.bak-…-refresh
+…
+$ ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:gonk:upgrade:status'
+Upgrade: nothing to do; this install matches a fresh one.
+[uncacheable]
+```
+
+`client refresh` only adds: it never takes a token away from a grant, and it keeps the old file
+beside the new one. Its last lines (cut here) say what else an upgrade from `ikigai-ledger` 0.22
+asks of the owner, and that a running gonk needs no restart to read the new grants. Reading the status needs
+`urn:cap:gonk:system:read`, the operator's read, which the owner's socket holds.
 
 ### The Layers page: a tab per kind
 

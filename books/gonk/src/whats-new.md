@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-26**: The ledger in a browser teaches one person on several devices, ranked search, the public origin for a phone and the upgrade status. A ledger of your own adds body and phrase search, idempotency keys and decisions; Harness engineering adds the sensors' first tick after a restart.
+
+  Pages: [The ledger in a browser](ledger/browser.md), [A ledger of your own](ledger/your-own.md), [Harness engineering](ways/harness.md), [Over MCP](agent/mcp.md)
+
 - **2026-11-24**: The ledger in a browser teaches the Layers page's tabs, one per kind of layer, and who may read them, and a number search going straight to its item; the Dashboard gains its Stalled claims tab. Remote workers teaches the dispatcher views: a preview that reading never advances, an acknowledgment of its exact token, and one item's own view.
 
   Pages: [The ledger in a browser](ledger/browser.md), [The Dashboard](ledger/dashboard.md), [Remote workers](ways/workers.md), [Scripts and sentences in gonk](scripts/in-gonk.md)

@@ -123,8 +123,9 @@ sets the boundary between teams.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
+  search  word index of every ledger's titles, bodies and comments at …/.ikigai/store/text-index — … on disk now; derived, so it is rebuilt in the background after an unclean shutdown (searches scan until it is ready)
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{shop (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
 …
@@ -529,6 +530,7 @@ urn:iki:ledger:{ledger}:append
 urn:iki:ledger:{ledger}:backfill-closed-at
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
+urn:iki:ledger:{ledger}:decision
 urn:iki:ledger:{ledger}:defer
 urn:iki:ledger:{ledger}:history
 urn:iki:ledger:{ledger}:item:{id}:about

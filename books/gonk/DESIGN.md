@@ -299,6 +299,36 @@ Architecture Book's ledger cells (One mechanism, read two ways; Golden threads),
 lists `stalled`, `lapse`, `note` and `item:{id}:notes`. `write_grant` stays four tokens: recording a
 session summary is the only write that needs the session graph's, and no page's Rust does it.
 
+**The move to ledger-v0.26.0** (ledger #4411, 2026-11-25): `gonk.rev` moved from af26ff4 (the tag
+`ledger-v0.25.0`) to f6757f8, the tag `ledger-v0.26.0`, and this note covers ledger-v0.25.1 (137264f)
+too, which the book skipped: the item asked for the next tag after ledger-v0.25.0, and by the time it
+ran ledger-v0.26.0 also existed and carried the word index and the person's Layers cursors the item
+names. Between them: gonk PR 431 and 434 (people: a passkey names a person, the migration and
+`clients.json.before-people`, `passkey invite --person`, `passkey attach`), 432 (the sensors' first
+tick phased to the last), 433 (the upgrade status at start), 435 (the public origin for a TLS proxy),
+437 (optional arguments refuse unreadable values), 430 (each ledger's graph in the store's text
+index, `phrase=`, `sort=relevance`, `ikigai-ledger` 0.26.1) and 438 (a person adopts its passkeys'
+Layers cursors and subscriptions). Every banner and output on the pages is from a replay at f6757f8,
+not edited by hand: the serve banner says `ikigai-gonk 0.1.3`, and the browser chapter's banner
+shows the new `search` line. The new teaching: The ledger in a browser gains "Most relevant first"
+(the offer on a search page, the ranked page's count line and the refusal without a search, CI-run;
+the not-ready sentence is prose, since a rebuild is over too quickly on a page's ledger to catch),
+"One person, several devices" (the refusal of an invite for a person who does not exist is CI-run;
+the invite, `attach` and the upgrade are prose and manual blocks, since a person exists only once a
+passkey is enrolled, which no check holds), "A phone through a TLS proxy: the public origin" (a
+second gonk with `gonk.http.public_origin` and `public_bind`: its banner's `public` line, the local
+listener's anonymous read, the public listener's refusal and its `421`, CI-run; no proxy runs) and
+"What an upgrade still needs" (`urn:iki:gonk:upgrade:status` fresh, with an old-shaped grant put
+back by hand, and after `client refresh --write`, CI-run); A ledger of your own gains a body
+search, `phrase=`, `idempotency-key=` and a decision comment, CI-run; Harness engineering gains a
+paragraph on gonk's query sensors and their first tick, prose, since a tick takes a published
+`harness-*` script and a wait. ⚠ At f6757f8 a write that lands while a
+new gonk's first index build still runs is indexed twice (`documents: 2` for one title; 5 of 5 runs
+on a scratch gonk, 0 of 5 after waiting for `state: ready`), and `sort=relevance` is then refused
+until a restart. So The ledger in a browser waits for the index status's `state: ready` before its
+first write and says why; the other pages need no wait, because their phrase and whole-word
+searches fall back to a scan with the same rows. The book's crates stay on core 0.3, as the previous note records.
+
 **The move to ledger-v0.25.0** (ledger #4223, 2026-11-24): `gonk.rev` moved from a818896 (the tag
 `ledger-v0.24.2`) to af26ff4, the tag `ledger-v0.25.0`, and this note covers ledger-v0.24.3 (d938b15)
 too, which the book skipped. Between them: gonk PR 414 (a ledger search that is exactly `N` or `#N`

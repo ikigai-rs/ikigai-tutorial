@@ -248,8 +248,9 @@ own** in an empty directory, with its two homes inside that directory:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
+  search  word index of every ledger's titles, bodies and comments at …/.ikigai/store/text-index — … on disk now; derived, so it is rebuilt in the background after an unclean shutdown (searches scan until it is ready)
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
   socket  …/.ikigai/gonk.sock — owner only
@@ -407,6 +408,74 @@ $ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=rule&match=title,commen
 An excerpt is cut at 40 characters on each side of the first hit, with `…` where it was cut.
 `count` and `next` take the same search inputs.
 
+An item's **body** is what follows its title after a blank line, and `body` in `match=` looks
+there. `phrase=` wants its words next to each other, in order, inside one title, body or comment
+(since gonk ledger-v0.26.0, `ikigai-ledger` 0.26). Case does not matter, and punctuation only
+separates words. File an item with a body (a pipe is where `append`'s content lands), then look for
+a phrase in titles, bodies and comments at once:
+
+<!-- transcript: run -->
+```console
+$ printf 'Print the book\n\nThe printer wants every page as one PDF.\n' | ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:append'
+#4 urn:iki:ledger:default:item:…
+[uncacheable]
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?phrase=every%20page&match=title,body,comments'
+   #4  open    no priority set  Print the book
+  #4 matched in the body: The printer wants every page as one PDF.
+
+1 item(s)
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?phrase=every%20command&match=title,body,comments'
+   #1  open    no priority set  Write the gonk book
+  #1 matched in a comment: One rule: every command on a page is a transcript CI runs.
+
+1 item(s)
+```
+
+Each row says where it matched: `#4` in its body, `#1` in a comment. `every command` finds `#1`
+and not the `page` item, because the two words must stand side by side. gonk keeps a word index of
+each ledger's titles, bodies and comments in the store (on by default; `gonk.store.text_index =
+false` turns it off), so whole-word and phrase searches check fewer candidates; the rows are the
+same with the index off. [The ledger in a browser](browser.md#most-relevant-first) ranks a search
+by it.
+
+A write retried after a dropped connection should not land twice. `comment`, `note`, `decision`,
+`close`, `reopen`, `defer`, a claim's release and a state move take `idempotency-key=`, one token
+per attempt: a repeat under the same token, from the same caller, within 24 hours, gets the first
+answer again, byte for byte, and writes nothing (`ikigai-ledger` 0.25). The same token with any
+other argument changed is refused. Send one comment twice under one token:
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:comment item=3 idempotency-key=try-1 Columns lined up.' -c 'sink urn:gk:iki:ledger:comment item=3 idempotency-key=try-1 Columns lined up.'
+commented on #3 (urn:iki:ledger:default:comment:…)
+
+[uncacheable]
+commented on #3 (urn:iki:ledger:default:comment:…)
+
+[uncacheable]
+— batch: 2 commands · request outcomes: 2 uncacheable
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?text=lined&match=comments&as=application/json' | jq '[.items[].comments[] | select(tostring | contains("Columns lined up."))] | length'
+1
+```
+
+Both answers name the same comment, and `#3` holds it once.
+
+A **decision** is a comment that says who decided and when: `decision` takes `item=`,
+`decided-by=` (an IRI, which may name a group) and `decided-at=` (a time with its zone, and not
+later than the ledger's clock). The item page shows both, marked `(claimed)`, and the JSON marks
+each `"claimed"`, because the filer asserts them; the comment's own author and time still record
+who filed it and when (`ikigai-ledger` 0.26):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:decision item=1 decided-by=urn:iki:team:book decided-at=2026-11-01T18:30:00Z Every command on a page is a transcript.'
+recorded decision on #1 (urn:iki:ledger:default:comment:…)
+
+[uncacheable]
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?as=application/json' | jq -c '.items[] | select(.number == 1) | .comments[] | select(.kind == "decision") | {kind, decided_by, decided_by_status, decided_at, decided_at_status}'
+{"kind":"decision","decided_by":"urn:iki:team:book","decided_by_status":"claimed","decided_at":"2026-11-01T18:30:00Z","decided_at_status":"claimed"}
+```
+
 A face that draws a list of items rarely shows their bodies or comments, and in JSON those can be
 most of the document. `omit=` leaves any of `body`, `comments` and `attribution` out of each row.
 Each row says what it left out in `omitted`. A row read with a search still says where it
@@ -417,8 +486,9 @@ matched, in `matches`, even when it leaves out the text that matched:
 $ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=ruler&match=comments&omit=body,comments&as=application/json' | jq -c '.items[] | {number, comments, omitted, matches}'
 {"number":3,"comments":[],"omitted":["body","comments"],"matches":[{"field":"comments","excerpt":"Line the columns up with a ruler."}]}
 $ curl -s 'http://127.0.0.1:1070/iki/ledger/items?comments=none&as=application/json' | jq -c '.items[] | {number, comments, omitted}'
-{"number":3,"comments":[],"omitted":["comments"]}
 {"number":1,"comments":[],"omitted":["comments"]}
+{"number":3,"comments":[],"omitted":["comments"]}
+{"number":4,"comments":[],"omitted":["comments"]}
 $ curl -s 'http://127.0.0.1:1070/iki/ledger/items?comments=none'
 invalid argument `comments`: `comments` shapes the JSON face only (as=application/json); the plain face has nothing to leave out, so nothing was read
 ```
