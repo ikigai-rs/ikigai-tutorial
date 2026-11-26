@@ -29,6 +29,17 @@ summary = "The ledger in a browser teaches one person on several devices, ranked
 pages = ["ledger/browser.md", "ledger/your-own.md", "ways/harness.md", "agent/mcp.md"]
 
 [[change]]
+date = "2026-11-25"
+summary = "The openspec sync runs on ikigai-ledger 0.26: a keyed append whose content differs from the first filing still files nothing, and now answers `existing open differs`. The walk shows both answers."
+pages = ["spec/ledger.md"]
+
+[[change]]
+date = "2026-11-25"
+summary = "The browse and review listings read the stub model's optional `system` argument with `optional_str` (ikigai-core 0.4.3), and the sync's listing notes the `differs` answer."
+pages = ["browse/explain.md", "review/one-off.md", "spec/graph.md"]
+maintenance = true
+
+[[change]]
 date = "2026-11-24"
 summary = "The ledger in a browser teaches the Layers page's tabs, one per kind of layer, and who may read them, and a number search going straight to its item; the Dashboard gains its Stalled claims tab. Remote workers teaches the dispatcher views: a preview that reading never advances, an acknowledgment of its exact token, and one item's own view."
 pages = ["ledger/browser.md", "ledger/dashboard.md", "ways/workers.md", "scripts/in-gonk.md"]

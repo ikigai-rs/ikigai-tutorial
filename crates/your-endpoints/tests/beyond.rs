@@ -18,10 +18,10 @@ use std::time::{Duration, Instant};
 use ikigai_core::{Capability, Error, Representation, Request, SpaceEntry};
 use ikigai_resolve::{CacheStatus, Resolver};
 
-/// A socket path nothing else on this machine will collide with. Unix socket paths are
-/// short (about 100 bytes, kernel-enforced), so this deliberately does not nest.
+/// A socket path nothing else on this machine will collide with, in this process's own
+/// `0700` directory: `ikigai_ipc::serve` refuses to serve in `/tmp` itself.
 pub fn socket_path(label: &str) -> PathBuf {
-    std::env::temp_dir().join(format!("ikigai-yours-{label}-{}.sock", std::process::id()))
+    two_hosts::socket::private_socket(&format!("yours-{label}"))
 }
 
 /// Dial until the server has bound, or give up. `serve` binds on its own thread, so the

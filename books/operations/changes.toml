@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-25"
+summary = "The logging walkthrough runs on ikigai-log 0.14.2, where a host can query its own open segment as a graph body. The answer is never cached, and the shell marks it uncacheable."
+pages = ["running/logging.md"]
+
+[[change]]
 date = "2026-11-14"
 summary = "The logging walkthrough runs on ikigai-log 0.11, whose intact rotations no longer emit a false chain-break alarm. Segment and event counts reflect that repair, and file counts exclude the writer’s advisory lock."
 pages = ["running/logging.md"]

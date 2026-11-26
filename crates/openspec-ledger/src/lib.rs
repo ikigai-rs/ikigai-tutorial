@@ -265,7 +265,8 @@ pub fn sync_ledger(kernel: &Kernel) -> Result<Vec<String>> {
             ],
         )?;
         // `#4 <iri>` when it filed; `#4 <iri> existing open` when an item already carries the
-        // key, and nothing was written. Only a filing is a write.
+        // key, and nothing was written (`… existing open differs` when it was filed with other
+        // content). Only a filing is a write.
         match answer.split_whitespace().nth(2) {
             None => done.push(format!("{} — {id} {number}", answer.trim())),
             Some("existing") => {}

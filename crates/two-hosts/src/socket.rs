@@ -22,6 +22,28 @@ pub fn serve(space: Arc<dyn Space>, path: &Path) -> std::io::Result<()> {
 }
 // ANCHOR_END: serve
 
+// ANCHOR: private_socket
+/// A socket path in a directory of this process's own, `0700`: `{temp}/ikigai-{pid}/{label}.sock`.
+///
+/// `ikigai_ipc::serve` (0.6 and later) refuses a socket whose directory another account owns or
+/// can write, so it refuses the temp directory itself where that is `/tmp` (root's, and
+/// writable by everyone). The path stays short, as a Unix socket path must (about 100 bytes).
+pub fn private_socket(label: &str) -> std::path::PathBuf {
+    use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
+    let dir = std::env::temp_dir().join(format!("ikigai-{}", std::process::id()));
+    match std::fs::DirBuilder::new().mode(0o700).create(&dir) {
+        Ok(()) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+            // A directory a previous process with this pid left: ours only if it is narrowed.
+            std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700))
+                .unwrap_or_else(|e| panic!("narrowing {}: {e}", dir.display()));
+        }
+        Err(e) => panic!("creating {}: {e}", dir.display()),
+    }
+    dir.join(format!("{label}.sock"))
+}
+// ANCHOR_END: private_socket
+
 // ANCHOR: connect
 /// Connect to a kernel server on `path`.
 ///
@@ -41,10 +63,10 @@ mod tests {
     use ikigai_resolve::Resolver;
     use std::time::{Duration, Instant};
 
-    /// A socket path nothing else on this machine will collide with. Unix socket paths
-    /// are short (about 100 bytes, kernel-enforced), so this deliberately does not nest.
+    /// A socket path nothing else on this machine will collide with, in this process's own
+    /// `0700` directory ([`private_socket`](super::private_socket)).
     fn socket_path(label: &str) -> std::path::PathBuf {
-        std::env::temp_dir().join(format!("ikigai-book-{label}-{}.sock", std::process::id()))
+        super::private_socket(&format!("book-{label}"))
     }
 
     /// Dial until the server has bound, or give up. `serve` binds on its own thread, so

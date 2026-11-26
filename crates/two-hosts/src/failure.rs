@@ -146,7 +146,6 @@ mod tests {
     };
     use ikigai_resolve::{MountedRemote, Resolver};
     use ikigai_throttle::{Failover, Retry, Timer};
-    use std::path::PathBuf;
     use std::sync::Mutex;
     use std::time::Duration;
 
@@ -154,8 +153,9 @@ mod tests {
         Request::new(Verb::Source, Iri::parse(iri).expect("iri"))
     }
 
-    fn socket_path(label: &str) -> PathBuf {
-        std::env::temp_dir().join(format!("ikigai-fail-{label}-{}.sock", std::process::id()))
+    #[cfg(unix)]
+    fn socket_path(label: &str) -> std::path::PathBuf {
+        crate::socket::private_socket(&format!("fail-{label}"))
     }
 
     fn unavailable() -> Error {

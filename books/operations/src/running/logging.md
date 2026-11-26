@@ -653,13 +653,17 @@ For a big log that means:
 - Narrow a read by time, with `since=` and `until=`: the timestamp column is fixed-width, so a line
   outside the window is skipped before it is parsed, about twenty times cheaper than `from_seq=`.
 - Set `max_entries` so that a segment is a size you are willing to transrept.
-- Query sealed segments. A host whose tracer is writing cannot read its own open segment as a
-  graph body, since each read logs a line that changes what it is reading:
+- Query sealed segments where you can. A host whose tracer is writing can read its own open
+  segment as a graph body: since ikigai-log 0.14.2 the read holds to the bytes the segment had when
+  it began, so the access line that read itself writes no longer ends it with a conflict (ledger
+  #4141). But a live segment is never cached, and the shell marks the answer `[uncacheable]`. Bob's
+  requests are in the 09:00 segment, so this one matches nothing:
 
 <!-- transcript: run -->
 ```console
 $ ikigai --connect log.sock -c 'source urn:sparql:select as=text/csv graph=urn:log:shop:2026-11-02T10-00-00Z' < by-principal.rq 2>&1
-error: conflict: log segment changed while reading its body
+resource,seq
+[uncacheable]
 ```
 
 ## Limits, stated plainly

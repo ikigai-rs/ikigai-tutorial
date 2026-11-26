@@ -631,8 +631,7 @@ fn note_endpoint(note: Arc<Mutex<String>>) -> FnEndpoint {
             // A browser form posts `content=…` urlencoded; a REPL or a script sinks the text.
             let raw = inv.inline_str("content")?;
             let form = inv
-                .inline_str("content-type")
-                .ok()
+                .optional_str("content-type")?
                 .is_some_and(|t| t.starts_with("application/x-www-form-urlencoded"));
             let decoded;
             let text = if form {

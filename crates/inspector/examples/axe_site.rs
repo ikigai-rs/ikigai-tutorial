@@ -25,6 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (path, iri) in [
         ("/ui/htmx", "urn:iki:ui:htmx"),
         ("/ui/shell.js", "urn:iki:ui:shell.js"),
+        ("/ui/scene-renderer.js", "urn:iki:ui:scene-renderer.js"),
         ("/ui/tokens.css", ikigai_ui::TOKENS_CSS),
         ("/inspect/live.js", "urn:iki:tutorial:inspect:live.js"),
         (

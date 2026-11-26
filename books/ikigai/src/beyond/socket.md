@@ -61,7 +61,22 @@ cannot, and every degradation rule in this part is built on the distinction.
 There is no credential in either listing. `ikigai-ipc` makes the socket `0600` and
 refuses any connection whose kernel-verified UID is not the server's own. Its default
 socket-path helper creates a `0700` directory; when you supply a path, as the listing
-does, you create and protect the parent directory yourself.
+does, you create and protect the parent directory yourself. Since `ikigai-ipc` 0.6, `serve`
+checks that you did. It refuses a socket whose directory belongs to another account, or that
+group or others can write, because that account could remove or replace the socket. So it
+refuses `/tmp` itself, which is root's and writable by everyone:
+
+```text
+refusing to serve a socket in /tmp: it is owned by uid 0, not this user (uid 1002), so that
+account could remove or replace the socket. Serve in a directory of your own, such as
+/tmp/ikigai-1002
+```
+
+This part's tests serve in a `0700` directory of the process's own:
+
+```rust,ignore
+{{#include ../../../../crates/two-hosts/src/socket.rs:private_socket}}
+```
 
 That is the whole authentication story, and it is complete: **on one machine, between one
 user's processes, the operating system already knows who is asking.** Adding a certificate

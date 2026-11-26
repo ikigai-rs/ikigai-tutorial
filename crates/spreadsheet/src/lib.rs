@@ -1245,8 +1245,10 @@ pub fn view_edit() -> AsyncFnEndpoint {
                     ));
                 }
                 let typed_ref = inv.inline_str("ref")?.trim().to_ascii_uppercase();
+                // Optional: absent clears, as empty does; a value that is not text is refused,
+                // never read as "clear".
                 let content = inv
-                    .inline_str("content")
+                    .optional_str("content")?
                     .unwrap_or_default()
                     .trim()
                     .to_string();

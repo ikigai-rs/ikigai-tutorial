@@ -192,7 +192,10 @@ the streams release, and the 0.4 line the book builds against now:
   `inv.optional_arg(name)?` answer `None` when the argument was not passed, and an error when
   it was passed and is not valid. An endpoint reads an optional argument with them, never with
   `inline_str(name).ok()` or `.unwrap_or(default)`, which turn an invalid value into the
-  default without a word.
+  default without a word. This book's own endpoints read their optional arguments this
+  way now. In the spreadsheet's formula bar the difference shows: `content` that was not text
+  used to read as empty, and so cleared the cell it was typed into. Now it is refused, and the
+  cell keeps its value.
 
 The seventeen from 0.1.79 to 0.1.95 are one line each here, and taught where a chapter
 teaches them:

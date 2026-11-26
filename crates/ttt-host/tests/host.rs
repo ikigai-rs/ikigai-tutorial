@@ -5,8 +5,9 @@
 //! cargo test -p ttt-host --test host -- --nocapture
 //! ```
 //!
-//! Hermetic: every socket is a fresh short path in the temp directory (macOS allows a socket
-//! path 104 bytes, so never the scratchpad), and every HTTP listener binds `127.0.0.1:0`.
+//! Hermetic: every socket is a fresh short path in a `0700` directory of this process's own
+//! under the temp directory (macOS allows a socket path 104 bytes, so never the scratchpad;
+//! ikigai-ipc refuses to serve in `/tmp` itself), and every HTTP listener binds `127.0.0.1:0`.
 
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
@@ -23,14 +24,21 @@ use tic_tac_toe::{stored_name, stored_space, CellStore, STORED};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use ttt_host::{parse_args, Host, Options};
 
-/// A fresh socket path, short enough for macOS.
+/// A fresh socket path, short enough for macOS, in a directory only this user can write:
+/// `ikigai_ipc::serve` refuses one another account owns or can write.
 fn socket_path() -> PathBuf {
+    use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
     static N: AtomicUsize = AtomicUsize::new(0);
-    let path = std::env::temp_dir().join(format!(
-        "ttt-{}-{}.sock",
-        std::process::id(),
-        N.fetch_add(1, Ordering::SeqCst)
-    ));
+    let dir = std::env::temp_dir().join(format!("ttt-{}", std::process::id()));
+    match std::fs::DirBuilder::new().mode(0o700).create(&dir) {
+        Ok(()) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+            std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700))
+                .expect("narrow the socket directory");
+        }
+        Err(e) => panic!("creating {}: {e}", dir.display()),
+    }
+    let path = dir.join(format!("{}.sock", N.fetch_add(1, Ordering::SeqCst)));
     assert!(path.as_os_str().len() < 100, "{}", path.display());
     path
 }
