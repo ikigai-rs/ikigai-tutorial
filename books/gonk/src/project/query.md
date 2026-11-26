@@ -25,6 +25,7 @@ $ printf 'gonk.http.ledger = "library"\n' > .config/ikigai/config.toml
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
 ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
+  search  word index of every ledger's titles, bodies and comments at …/.ikigai/store/text-index — … on disk now; derived, so it is rebuilt in the background after an unclean shutdown (searches scan until it is ready)
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: library; …
 …
 ```
