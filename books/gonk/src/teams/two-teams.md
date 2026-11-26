@@ -530,6 +530,7 @@ urn:iki:ledger:{ledger}:append
 urn:iki:ledger:{ledger}:backfill-closed-at
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
+urn:iki:ledger:{ledger}:decision
 urn:iki:ledger:{ledger}:defer
 urn:iki:ledger:{ledger}:history
 urn:iki:ledger:{ledger}:item:{id}:about

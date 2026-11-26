@@ -21,7 +21,7 @@
 [[change]]
 date = "2026-11-26"
 summary = "The ledger in a browser teaches one person on several devices, ranked search, the public origin for a phone and the upgrade status. A ledger of your own adds body and phrase search, idempotency keys and decisions; Harness engineering adds the sensors' first tick after a restart."
-pages = ["ledger/browser.md", "ledger/your-own.md", "ways/harness.md"]
+pages = ["ledger/browser.md", "ledger/your-own.md", "ways/harness.md", "agent/mcp.md"]
 
 [[change]]
 date = "2026-11-24"

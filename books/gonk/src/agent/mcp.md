@@ -138,6 +138,7 @@ ikigai mcp: mount   override urn:iki:ledger: -> quic://127.0.0.1:1070  [certs ag
 "name":"ledger-comment__sink"
 "name":"ledger-count__source"
 "name":"ledger-counts__source"
+"name":"ledger-decision__sink"
 "name":"ledger-defer__delete"
 "name":"ledger-defer__sink"
 "name":"ledger-doctor__source"
@@ -196,6 +197,8 @@ principal enrolled as an importer may use, to bring an item's past events from a
 And three with 0.22.0: `ledger-item-sessions__sink` and `__source`, which record and read the
 summaries of the agent sessions that worked an item ([Remote workers](../ways/workers.md#4-the-worker-hands-back-with-evidence)
 records one), and `ledger-sessions__source`, every summary in the ledger.
+And one with 0.26: `ledger-decision__sink`, a comment that records who decided and when ([A
+ledger of your own](../ledger/your-own.md#finding-items) records one).
 A `__delete` tool is here only where the ledger's writer may delete (a label, a claim, a link, a
 deferral, an item's `about`).
 `ledger-item__delete` is not: deleting an item takes the ledger's delete token, and purging
