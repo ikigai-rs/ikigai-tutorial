@@ -104,7 +104,7 @@ have](checking.md) or [The Dashboard](dashboard.md) is still running, stop it fi
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
 …
   socket  …/.ikigai/gonk.sock — owner only
 …

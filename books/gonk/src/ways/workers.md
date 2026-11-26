@@ -99,7 +99,7 @@ client `metrics`  …/.config/ikigai/gonk/quic/clients/metrics
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
 …
   quic    udp 0.0.0.0:1070 — 3 trusted certificate(s), 3 enrolled
 …
@@ -756,7 +756,7 @@ $ mkdir -p dispatcher && cp -R .config/ikigai/gonk/quic/clients/dispatcher dispa
 <!-- transcript: restart -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
 …
 ```
 
@@ -878,7 +878,7 @@ scheduled. gonk reads the line at startup, and its banner says what it will do:
 <!-- transcript: restart -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
 …
   lapses  every 2s, the first in 2s: records each lapsed lease once in every ledger, as urn:iki:gonk:recorder:lapse, and never releases one. `ikigai --connect …/.ikigai/gonk.sock -c 'source urn:iki:gonk:lapse:status'` says what it recorded
 …

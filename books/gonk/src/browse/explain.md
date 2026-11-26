@@ -188,7 +188,7 @@ $ printf 'gonk.browse.root = "demo=%s/demo"\n' "$PWD" > .config/ikigai/config.to
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup --mount "prefer urn:llm:=$PWD/model.sock"
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
   browse  urn:repo:{demo (watched)}:* — annotations and archive in <urn:iki:browse:graph:default>
@@ -282,7 +282,7 @@ $ printf 'gonk.mount = "prefer urn:dashboard:=%s/dashboard.sock"\n' "$PWD" > das
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/dashboard-config" --data-home "$PWD/dashboard-data" --port 1071 --no-quic --no-backup
-ikigai-gonk 0.1.2 — holding the store at …/dashboard-data/store
+ikigai-gonk 0.1.3 — holding the store at …/dashboard-data/store
 …
   llm     not mounted — no gonk.mount for urn:llm:; urn:llm:* resolves nowhere, so explain, review and the PR-derived layers are not bound; also mounted: urn:dashboard:* at …/dashboard.sock (prefer)
 …

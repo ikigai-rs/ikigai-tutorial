@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-25"
+summary = "The ledger in a browser teaches people: one person signing in from several devices, passkey invite --person and attach, and the upgrade and its rollback. A ledger of your own adds phrase search, idempotency keys and decision comments; Harness engineering adds gonk's query sensors and their first tick after a restart."
+pages = ["ledger/browser.md", "ledger/your-own.md", "ways/harness.md"]
+
+[[change]]
 date = "2026-11-24"
 summary = "The ledger in a browser teaches the Layers page's tabs, one per kind of layer, and who may read them, and a number search going straight to its item; the Dashboard gains its Stalled claims tab. Remote workers teaches the dispatcher views: a preview that reading never advances, an acknowledgment of its exact token, and one item's own view."
 pages = ["ledger/browser.md", "ledger/dashboard.md", "ways/workers.md", "scripts/in-gonk.md"]

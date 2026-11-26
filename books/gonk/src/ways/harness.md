@@ -81,7 +81,7 @@ same port.
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
 …
 ```
 
@@ -492,6 +492,24 @@ The harness has a harness:
   cannot break the tools it watches.
 - **The questions as files**, `.gonk/queries/harness-*.rq`, each with its question and what an
   empty answer means in its header, so a reader can run them and a reviewer can change them.
+
+gonk can also run a sensor itself, on a timer of its own: a **query sensor** is a published
+SPARQL script named `harness-{id}`, an ASK that fires when it answers `true` or a SELECT that
+fires when it has a row. gonk runs every published one each `gonk.sensor.every` (`15m` by default,
+`off` for none), under no more than its publisher held, records each firing in its sealed log
+segment, and, with `gonk.sensor.ledger` set, files one item labeled `sensor` and `harness-{id}`,
+and nothing more while that item is open. The four questions above are not such scripts, because
+they read the harness graph, which no published script may read (the `note harness` row `init` prints in step 3).
+The rules are in gonk's README, "Query sensors".
+
+The first tick after gonk starts no longer waits a whole interval (since gonk ledger-v0.25.1, gonk
+PR 432). Each tick writes its time to `sensors/last-tick` in the data home, and a start waits only
+what is left of the interval since then. With no such file, or one at least an interval old, the
+first tick runs at once. A gonk restarted every few minutes used to push its tick back each time,
+so a sensor could go unasked for as long as the restarts went on. An extra tick after a restart
+files nothing twice, because a firing files nothing while its item is open. This page shows no
+tick: one would take a published `harness-*` script and a wait of the interval, which no check
+here holds.
 
 ## What it costs, and when to choose it
 

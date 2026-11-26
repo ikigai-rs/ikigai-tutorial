@@ -248,7 +248,7 @@ own** in an empty directory, with its two homes inside that directory:
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
@@ -406,6 +406,39 @@ $ curl -s 'http://127.0.0.1:1070/iki/ledger/items?search=rule&match=title,commen
 
 An excerpt is cut at 40 characters on each side of the first hit, with `…` where it was cut.
 `count` and `next` take the same search inputs.
+
+`phrase=` wants its words next to each other, in order, inside one title, body or comment (since
+gonk ledger-v0.26.0, `ikigai-ledger` 0.26). Case does not matter, and punctuation only separates
+words. gonk keeps a word index of each ledger's titles, bodies and comments in the store (on by
+default; `gonk.store.text_index = false` turns it off), so whole-word and phrase searches check
+fewer candidates. The rows are the same with the index off.
+
+<!-- transcript: run -->
+```console
+$ curl -s 'http://127.0.0.1:1070/iki/ledger/items?phrase=every%20command&match=comments'
+PHRASE_OUT
+```
+
+A write retried after a dropped connection should not land twice. `comment`, `note`, `close`,
+`reopen`, `defer`, a claim's release and a state move take `idempotency-key=`, one token per
+attempt: a repeat under the same token, from the same caller, within 24 hours, gets the first
+answer again and writes nothing (`ikigai-ledger` 0.25):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:comment item=3 idempotency-key=try-1 Columns lined up.' -c 'sink urn:gk:iki:ledger:comment item=3 idempotency-key=try-1 Columns lined up.'
+IDEM_OUT
+```
+
+A **decision** is a comment that says who decided and when: `decision` takes `item=`,
+`decided-by=` (an IRI, which may name a group) and `decided-at=` (a time with its zone). The item
+shows both, marked `(claimed)`, because the filer asserts them (`ikigai-ledger` 0.26):
+
+<!-- transcript: run -->
+```console
+$ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'sink urn:gk:iki:ledger:decision item=1 decided-by=urn:iki:team:book decided-at=2026-11-01T18:30:00Z Every command on a page is a transcript.'
+DECISION_OUT
+```
 
 A face that draws a list of items rarely shows their bodies or comments, and in JSON those can be
 most of the document. `omit=` leaves any of `body`, `comments` and `attribution` out of each row.

@@ -18,7 +18,7 @@ chapter](../introduction.md#a-gonk-per-chapter)).
 <!-- transcript: serve -->
 ```console
 $ ikigai-gonk --config-home "$PWD/.config/ikigai" --data-home "$PWD/.ikigai" --port 1070 --no-quic --no-backup 2>&1 | tee gonk.log
-ikigai-gonk 0.1.2 — holding the store at …/.ikigai/store
+ikigai-gonk 0.1.3 — holding the store at …/.ikigai/store
   instance … — new at every start; open pages compare it
   http    http://localhost:1070/ — loopback (127.0.0.1:1070); anonymous read: default; 0 passkey(s), sessions 12 h or 60 min idle; anonymous SPARQL budget 1000 ms
 …
@@ -493,6 +493,66 @@ writing the wider grant**, then opens one new session from the assertion (gonk P
 cookie cannot read the wider grant in between. If recording the widening fails, the grant change
 is undone and the passkey stays signed out; sign in again. Owner `grant add` deliberately keeps
 sessions; the owner can end them with `passkey logout --all`.
+
+### One person, several devices
+
+A passkey lives on one device: the laptop's Touch ID cannot sign in from a phone. Since gonk
+ledger-v0.25.1 (gonk PR 431) a passkey names a **person**, and the person holds the grants, so
+every passkey of one person signs in with the same authority, and a write, a claim or a dispatcher
+cursor made from any of them is that person's. `gonk/clients.json` keeps a `people` section beside
+`passkeys`: each person is `urn:iki:gonk:person:id:<id>`, with a label and the grant list, and each
+passkey names its `person`. A signed-in write carries the person's IRI as its author, and the page
+shows the person's current label. `passkey list` prints each passkey's person.
+
+A second device joins a person that exists, so it starts from a passkey already enrolled, which
+takes a browser and an authenticator ([the ceremony](#the-ceremony)). Say the passkey `ada`
+enrolled above is the laptop's. The owner makes an invite for her phone:
+
+<!-- transcript: manual — a person exists once a passkey is enrolled, which takes a browser and an authenticator -->
+```console
+$ ikigai-gonk passkey invite --person ada --port 1070 --config-home "$PWD/.config/ikigai"
+```
+
+The link it prints enrolls a passkey that names `ada`'s person and holds her grants from its first
+request. It writes no grant, and it cannot be redeemed to widen a passkey already signed in. Open
+it on the second device, as in [the ceremony](#the-ceremony). (A phone reaches gonk through a TLS
+proxy, which gonk's README covers under "A phone through a TLS proxy: the public origin".)
+
+A person with no passkey cannot be invited, and the refusal says so before writing anything:
+
+<!-- transcript: run -->
+```console
+$ ikigai-gonk passkey invite --person grace --port 1070 --config-home "$PWD/.config/ikigai"
+PERSON_REFUSAL
+```
+
+If you already enrolled two passkeys of your own as two people (one per device, before people
+existed, or by two invites), put them on one person with `passkey attach`. Name the passkey to move
+by its label, or by `--credential <id>`, and the person to move it to:
+
+<!-- transcript: manual — it moves an enrolled passkey, which takes a browser and an authenticator to make -->
+```console
+$ ikigai-gonk passkey attach "phone" --person "laptop Touch ID" --config-home "$PWD/.config/ikigai"
+```
+
+The passkey `phone` then holds that person's grants. The person it named before is kept, so what
+was written as that person still reads as its label. Revoking a person's last passkey leaves the
+person on record, and nothing can sign in as it. Signing out from a page now ends every device's
+session of the person (the button says **Sign out on all devices**).
+
+**The upgrade.** A `clients.json` from before people is migrated the first time the new gonk starts,
+or the first time an `ikigai-gonk passkey` command writes it, whichever comes first. Each passkey
+gets a person of its own, with its label and grants, and nothing is merged: two passkeys that are
+yours stay two people until you `attach` one to the other. The old file is kept as
+`gonk/clients.json.before-people`, and a second start changes nothing. Each migrated passkey keeps
+a copy of its person's grants, so an older gonk (ledger-v0.18.0 to v0.25.0) still starts and signs
+each passkey in with them. gonk's README says what a rollback costs: to roll the file itself back,
+stop gonk and copy `gonk/clients.json.before-people` over `gonk/clients.json`, which loses every
+enrollment, revocation and grant change made since the upgrade. A claim gonk moved to a person
+names the person's IRI, which an older gonk never stamps, so under the older binary its holder
+cannot renew or release it until it lapses. At every start gonk moves each live claim held by an
+enrolled passkey's IRI to that passkey's person, and since ledger-v0.26.0 (gonk PR 438) the Layers
+page's unread marks and feed subscriptions follow the person too.
 
 ### The Layers page: a tab per kind
 
