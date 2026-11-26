@@ -24,6 +24,9 @@
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+source scripts/require-node.sh
+require_node
 here="$(pwd)"
 
 rev="$(tr -d '[:space:]' < books/ikigai/toolbox.rev)"
