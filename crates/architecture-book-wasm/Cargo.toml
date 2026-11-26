@@ -24,7 +24,7 @@ resilience-harness = { path = "../resilience-harness" }
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
 # 0.2's plain `trace` leaves out the kernel's `defaulted` notes, so the overlays chapter's trace
 # of the board no longer prints `defaulted=as`.
-ikigai-engine = "0.5.0"
+ikigai-engine = "0.7.3"
 futures.workspace = true
 serde_json = "1"
 # ⚠ Pinned EXACTLY, to the version the other kernels pin and pages.yml installs the

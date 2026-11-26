@@ -1323,9 +1323,9 @@ pub fn input_as_of(store: Arc<InputStore>) -> FnEndpoint {
         })?;
         match inv.request.verb {
             Verb::Sink | Verb::Delete => Err(Error::Conflict(format!(
-                "the sheet in `{}` is the sheet as it was, and the past does not change: \
+                "`{}` is the sheet as it was, and the past does not change: \
                  write to the live sheet, or to a scenario",
-                inv.scope()
+                inv.request.target
             ))),
             _ => match store.as_of(at, then.as_millis()) {
                 Some(typed) => Ok(typed_repr(typed).cacheable()),

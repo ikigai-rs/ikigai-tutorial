@@ -231,7 +231,7 @@ mod tests {
     /// boundary into a suggestion.
     #[test]
     fn a_prefer_mount_does_not_swallow_a_denial() {
-        let (peer, _) = dead(Error::Denied);
+        let (peer, _) = dead(|m| Error::Denied(m.into()));
         let space = prefer(
             "urn:iki:tutorial:",
             "test://peer",

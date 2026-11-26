@@ -42,10 +42,12 @@ cargo run -p building-endpoints -- --strings
 ```text
 camel-case
 conditional
+digest
 each
 echo
 greet
 html-to-text
+markdown
 reverseList
 sparql-ask
 sparql-construct
@@ -67,9 +69,11 @@ The test checks three things:
 **Declaring `class` is what made the answer possible.** An input's `class` names the
 RDF type of value it accepts. `camel-case` and `title` declared
 `.class(xsd:string)` on an input, so they are in the result. `counter` declared
-`xsd:nonNegativeInteger`, so it is correctly absent. `markdown` declared no class at all —
-and it is invisible to the question, not because it takes something else but because it
-never said what it takes. That is [Why an endpoint describes
+`xsd:nonNegativeInteger`, so it is correctly absent. The `markdown` and `digest` in the answer
+are `ikigai-fn`'s (added in 0.11, at `urn:iki:fn:markdown` and `urn:iki:fn:digest`), which
+declare `xsd:string`. This part's own `markdown`, from [Transreption](transreption.md),
+declared no class at all — and it is invisible to the question, not because it takes
+something else but because it never said what it takes. That is [Why an endpoint describes
 itself](../getting-started/self-description.md), as a query result.
 
 **The property path is not decoration.** `(ik:input | ik:action/ik:input)` walks two

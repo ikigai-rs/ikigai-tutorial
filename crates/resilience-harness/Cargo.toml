@@ -24,7 +24,7 @@ ikigai-diagram.workspace = true
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.2" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-throttle = "0.5.1"
+ikigai-throttle = "0.6.2"
 # `Timer::sleep` is an `async_trait` method: the harness's timer implements it.
 async-trait = "0.1"
 futures.workspace = true

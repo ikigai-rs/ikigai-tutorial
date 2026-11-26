@@ -25,6 +25,9 @@ fn word_count_conforms() {
         report.declared.inherited,
         [
             "toUpper",
+            // ikigai-fn 0.11's text digest and untrusted Markdown, inherited the same way.
+            "digest",
+            "markdown",
             "reverseList",
             "compose",
             "conditional",

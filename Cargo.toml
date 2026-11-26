@@ -128,7 +128,7 @@ lto = true
 # 0.x caret: also a ceiling (<0.3.0).
 # 0.2.12 is the floor (set 2026-11-02, ledger #2853): the newest release, which the books' cells
 # print (`source urn:kernel:cache` names its policy and evictions) and the status chapter names.
-ikigai-core = "0.3.5"
+ikigai-core = "0.4.3"
 # `TurtleRenderer`: the projection of a `Description` to Turtle, injected into the
 # kernel so `urn:kernel:catalog` and `Meta` answer in the book's own host. 0.1.109 is the pin, paired
 # with core 0.1.109 (set 2026-10-21): since 0.1.105 it renders the ArgSpec shape (input groups,
@@ -154,7 +154,7 @@ ikigai-core = "0.3.5"
 # (ledger #2261); the old pin "0.1.109" meant <0.2.0 under 0.x rules. The lock takes 0.2.2, whose
 # vocabulary has one more term than 0.1.112's ("A sentence becomes a draft" counts 252). A 0.x
 # caret: also a ceiling (<0.3.0).
-ikigai-vocab = "0.3.5"
+ikigai-vocab = "0.4.2"
 # 0.3.0: compose became a view template language. `$h{…}` splices a value HTML-escaped and
 # never expands it, which retires the sheet's `html:{ref}` stopgap; `compose_over(src)` binds a
 # template at a view's name, which retires the grid's request of glue. ⚠ A 0.x caret is a
@@ -185,7 +185,7 @@ ikigai-vocab = "0.3.5"
 # 0.9.0 is the pin (set 2026-11-02, ledger #2853): the version ikigai-ui 0.4 links, so this workspace's
 # crates share its copy. ikigai-toolbox 0.2.1, below, still takes ^0.7. A 0.x caret: also a ceiling
 # (<0.10.0).
-ikigai-fn = "0.10.0"
+ikigai-fn = "0.12.0"
 # JSON and CSV as resources, for "Transreption" and "Short names in a space": `urn:json:query` (a
 # sandboxed jq selection of any resource, read under the caller's capability, a non-JSON source
 # through the kernel's transreptors), `urn:json:from-csv` (also the registered text/csv to
@@ -196,12 +196,12 @@ ikigai-fn = "0.10.0"
 # 0.3.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.0" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-json = "0.4.0"
+ikigai-json = "0.5.1"
 # The log: its line grammar, vocabulary, writer, tracer and `urn:log:*`, for Running ikigai's
 # "Logging" and the host it runs, `crates/log-host`. No released `ikigai` binary links it, so the
 # chapter needs a host. 0.9.2 is the floor: its escaping of control and bidirectional characters
 # (ledger #2732, #2917) is what the chapter shows. A 0.x caret: also a ceiling (<0.10.0).
-ikigai-log = "0.11.0"
+ikigai-log = "0.14.2"
 # Bytes transrepted, for "Streams, I: bytes are a representation" (ledger #2253): `urn:compress:gzip`
 # and `urn:decompress:gzip` (and zlib), each also a registered transreptor, with a decompression
 # bound (`max-bytes`) that refuses rather than truncates. 0.2.0 is the published head and the floor;
@@ -210,7 +210,7 @@ ikigai-log = "0.11.0"
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.0" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-compress = "0.5.0"
+ikigai-compress = "0.6.0"
 # An arrangement written as an s-expression (`*.arrangement`, `text/x-ikigai-arrangement`),
 # transrepted losslessly to and from the `ik:` Turtle core builds a space from. 0.1.5 is the floor
 # because it added `arrangement_space()`, which mounts the arrangement surface alone, and the `full`
@@ -229,7 +229,7 @@ ikigai-compress = "0.5.0"
 # 0.3.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.4" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-sexpr = { version = "0.4.0", default-features = false }
+ikigai-sexpr = { version = "0.5.1", default-features = false }
 # The arrangement as a picture: `render(&Topology)`, an accessible, deterministic SVG. Part VII's
 # picture test uses it (a dev-dependency), and `crates/live-space` mounts its space for
 # `urn:diagram:kernel`; neither is in the page, so the page pays nothing for it. 0.2.4 is the pin,
@@ -253,7 +253,7 @@ ikigai-sexpr = { version = "0.4.0", default-features = false }
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
 # 0.3.2 is the pin (set 2026-11-02, ledger #2853): the release on ikigai-fn 0.9, the copy this
 # workspace's crates share.
-ikigai-diagram = "0.4.0"
+ikigai-diagram = "0.5.0"
 # 0.4.0 is the pin (set 2026-10-14): an out-of-band host call is held to its
 # session's capability (ledger #83), an unwired module channel fails at once with a typed error
 # (ledger #746), and `ModuleSessionTransport::invoke_session` returns `ikigai_core::Result`, the
@@ -276,7 +276,7 @@ ikigai-diagram = "0.4.0"
 # 0.5.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.4.0" was a ceiling
 # below 0.5.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.6.0).
-ikigai-module = "0.6.0"
+ikigai-module = "0.7.0"
 # The published SPARQL face, for "The graph face": `urn:sparql:select` over the catalog.
 # Brings oxigraph, which is the price of a real query engine and is paid by one crate.
 # 0.2.5 is the pin (set 2026-10-14; 0.2.6 is newer and inside the caret): a call without its
@@ -300,12 +300,12 @@ ikigai-module = "0.6.0"
 # 0.3.2 is the pin (set 2026-10-30, ledger #2639): "A river of feeds" runs its SPARQL in the page,
 # and its search binds a term with `bindings=` (ledger #2517), which 0.3.2 added. It is also what
 # the replay cli 0.2.6 links. Before that the pin was 0.3.1 (above).
-ikigai-sparql = "0.5.0"
+ikigai-sparql = "0.6.1"
 # The RDF transreptor under ikigai-sparql (both from ikigai-linkeddata), named by the book's kernel
 # for "Giving the data names", which transrepts the quakes graph. The version ikigai-sparql's lock
 # already takes: 0.3.2 since ikigai-sparql 0.3.2 (2026-10-30, ledger #2639), which requires it, and
 # which the replay cli 0.2.6 links too. Before that, 0.3.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-rdf = "0.5.0"
+ikigai-rdf = "0.6.1"
 # A Turtle parser and the RDF model it produces, for the transreptor the reader writes
 # in "Transreption" — the same parser `ikigai-vocab` tests its own output with.
 oxttl = "0.2"
@@ -388,7 +388,7 @@ oxrdf = "0.3"
 # and `item:{id}:notes` to the manifold. It requires core ^0.3.4 and store ^0.5.0, which the lock
 # already held, so only the ledger moved in it. The old pin "0.22.0" was a ceiling below 0.23.0.
 # A 0.x caret: also a ceiling (<0.24.0).
-ikigai-ledger = "0.23.0"
+ikigai-ledger = "0.26.3"
 # The store the ledger is written in. In-memory only here (`persistent`, the RocksDB backend,
 # stays off): a book's kernel holds nothing past the process, and the page's kernel cannot link
 # RocksDB at all. 0.2.25 is the pin (set 2026-10-23), because it changes what a page prints: since
@@ -432,7 +432,7 @@ ikigai-ledger = "0.23.0"
 # 0.3.1 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.2.25" was a ceiling
 # below 0.3.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.4.0).
-ikigai-store = { version = "0.5.0", default-features = false }
+ikigai-store = { version = "0.6.2", default-features = false }
 # The repository browser and its model-derived layers (explain, review, findings), for The gonk
 # Book's "Explain, with a mounted model" and "One-off review". 0.19.0 is the pin (set 2026-10-20;
 # later 0.19.x releases are inside the caret): the review pass and the judge loop stop at the first `Refused` or `RetryAfter`
@@ -471,7 +471,7 @@ ikigai-store = { version = "0.5.0", default-features = false }
 # 0.20.6 is the pin (set 2026-11-02, ledger #2853): the newest release, on ikigai-fn 0.9, the copy
 # this workspace's crates share. The pinned gonk (0de36f0) links 0.20.7, and no page shows the patch;
 # taking it re-resolves oxigraph's crates to rand 0.8 and windows-sys 0.52 (books/gonk/DESIGN.md).
-ikigai-browse = "0.23.1" # 0.23.1 = git-ignored paths skipped when hashing (ledger #3839); 0.23.0 = PR panels need urn:cap:exec:read:gh (exec split, ledger #3819). `"0.23.1"` is `<0.24.0`.
+ikigai-browse = "0.24.2" # 0.23.1 = git-ignored paths skipped when hashing (ledger #3839); 0.23.0 = PR panels need urn:cap:exec:read:gh (exec split, ledger #3819). `"0.23.1"` is `<0.24.0`.
 # The RDF store browse keeps its archive, findings and annotations in. browse takes an
 # `oxigraph::store::Store` directly (not `ikigai-store`), so a host names the crate itself. In
 # memory: default features off, as every other oxigraph line in this workspace's graph.
@@ -495,7 +495,7 @@ oxigraph = { version = "0.5.11", default-features = false }
 # 0.2.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.1.4" was a ceiling
 # below 0.2.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.3.0).
-ikigai-markdown = "0.5.0"
+ikigai-markdown = "0.6.2"
 # Scripts as resources, for the section "Code and language as resources": `urn:script:{name}`
 # with content-addressed versions, `…:result` (run as a read) and `…:runs` (run for effects),
 # under the least of what a script declares, what its publisher held and the host's ceiling.
@@ -516,7 +516,7 @@ ikigai-markdown = "0.5.0"
 # 0.4.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.3.6" was a ceiling
 # below 0.4.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.5.0).
-ikigai-script = "0.5.0"
+ikigai-script = "0.6.0"
 # Natural language to a DRAFT script, for "A sentence becomes a draft": `urn:nl:grounding` (what
 # the caller may see, as data), `urn:nl:sparql:check` and the drafter `urn:nl:sparql`. 0.4.0 is the
 # pin and the floor: the release whose drafter, when the model gives
@@ -532,7 +532,7 @@ ikigai-script = "0.5.0"
 # 0.5.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.4.0" was a ceiling
 # below 0.5.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.6.0).
-ikigai-nl = "0.6.0"
+ikigai-nl = "0.7.0"
 # A real model, for the reader who has one: "A sentence becomes a draft" runs against a stub in
 # every gate (no network, ever), and `cargo run -p sentence-draft -- --ollama MODEL` swaps in
 # `ikigai-llm`'s `urn:llm:ask` over a local Ollama. llm 0.16.0 and the HTTP seam it is built on,
@@ -554,14 +554,14 @@ ikigai-nl = "0.6.0"
 # below 0.17.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.18.0).
 # 0.19.0 (ledger #2930) takes HTTP ^0.5; move the host transport with it so
 # the drafting example shares one HttpTransport trait with the rest of the workspace.
-ikigai-llm = "0.20.0"
+ikigai-llm = "0.21.0"
 # Previously 0.4.0 (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): then the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.3.0" was a ceiling
 # below 0.4.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.5.0).
 # http 0.4's `HttpResponse::body` is an `HttpBody` (a buffer or a stream); `Ureq` hands it its
 # bytes with `.into()`. llm 0.17 takes http ^0.4, so they still move together.
 # 0.5.1 (ledger #2930) matches llm 0.19 and the existing HTTP 0.5 users.
-ikigai-http = "0.6.0"
+ikigai-http = "0.8.0"
 # The blocking HTTP client that fills `HttpTransport` for that one path, as ikigai-llm's own
 # `ask` example does. No default features: no TLS, since a local Ollama speaks plain HTTP on
 # localhost. "2" is that example's line; a caret, so <3.0.0.
@@ -578,7 +578,7 @@ ureq = { version = "2", default-features = false }
 # 0.3.0 (ledger #2930) takes fn ^0.9 and core ^0.2.8, removing the second compose
 # implementation from book-wasm. The published toolbox build follows the same release
 # in books/ikigai/toolbox.rev, including its templates for fn 0.9.
-ikigai-toolbox = "0.4.0"
+ikigai-toolbox = "0.5.0"
 # The same chapter's shapes check on the host, `urn:shacl:validate`. Default features OFF: from
 # 0.4.0 that is the CORE-only subset validator (`core_shacl`) on oxrdf and oxttl alone, which covers
 # closed shapes (`sh:closed`, `sh:ignoredProperties`) and every constraint the chapter's shapes use,
@@ -592,7 +592,7 @@ ikigai-toolbox = "0.4.0"
 # 0.5.0 is the pin (set 2026-10-27, ledger #2365, the core 0.2.0 sweep): the newest release, and
 # one on ikigai-core 0.2, the streams release (ledger #2261); the old pin "0.4.0" was a ceiling
 # below 0.5.0 that held it on core 0.1. A 0.x caret: also a ceiling (<0.6.0).
-ikigai-shacl = { version = "0.6.1", default-features = false }
+ikigai-shacl = { version = "0.7.1", default-features = false }
 # The JSON faces the drafting chapter reads back (a draft's attempts, a check's findings).
 serde_json = "1"
 # The config file "Configuration" reads through `layered_paths`.

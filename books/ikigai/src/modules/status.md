@@ -6,11 +6,11 @@ This chapter separates what you can use today from what still needs to be built.
 
 Every claim below about a repository other than this one carries **the version it was
 true at**, because those repositories move on their own schedules and a sentence about
-them is a claim, not a fact. This book builds against `ikigai-core` **0.3.5**, stamped on
-2026-11-14 (the release used for this replay), and
-`ikigai-module` **0.6.0**, stamped on 2026-11-14 (the release used for this replay;
+them is a claim, not a fact. This book builds against `ikigai-core` **0.4.3**, stamped on
+2026-11-25 (the release used for this replay), and
+`ikigai-module` **0.7.0**, stamped on 2026-11-25 (the release used for this replay;
 the module claims below were written at 0.4.0, carry that stamp, and each still holds at
-0.6.0), and its shell examples are replayed against
+0.7.0), and its shell examples are replayed against
 `ikigai-cli` **0.2.9**, the one release pinned in `books/ikigai/ikigai-cli.version` (the
 release used for the 2026-11-02 replay). A
 test (`crates/book-urns/tests/book_claims.rs`)
@@ -131,14 +131,14 @@ the difference.
 
 ## The kernel since this chapter's last stamp
 
-The chapters above build against `ikigai-core` 0.3.5. This chapter was stamped at 0.1.78
+The chapters above build against `ikigai-core` 0.4.3. This chapter was stamped at 0.1.78
 on 2026-09-27, and seventeen releases, 0.1.79 to 0.1.95, landed in the thirteen days after it.
 Those seventeen releases are summarized after the newer changes below. The eight releases
 from 0.1.96 to 0.1.103 are taught in the chapters they touch. Of the nine from 0.1.104 to
 0.1.112, 0.1.104 (the principal vocabulary), 0.1.106 and
 0.1.107 change nothing a page shows, and six are worth a line, because they change what
 an endpoint you write can rely on, or what a page shows. The list also includes 0.2.0,
-the streams release:
+the streams release, and the 0.4 line the book builds against now:
 
 - **0.1.105 changed behavior: a declared default is filled in.** The kernel fills a
   declared `default_value` into the request before dispatch, so an endpoint reads an
@@ -180,6 +180,19 @@ the streams release:
   being read past the run's deadline ends with `OverBudget`. [Streams, I: bytes are a
   representation](../streams/bytes.md) starts the part about them. Every module this book
   links moved to 0.2 with it, since under 0.x rules a 0.1 pin could not admit it.
+- **0.4 — scopes are opaque, and a refusal is structured.** An endpoint can no longer read
+  the resolution chain it runs in: `Invocation::scope` is private, and the one fact about its
+  scope an endpoint may read besides the time is whether `now` is a temporal corridor's. A
+  message that used to print the scope names the request's target instead, as the
+  spreadsheet crate's read-only input-as-of endpoint now does. A capability refusal is
+  `Error::Denied(Denial)` rather than `Error::Denied(String)`: the message is the same byte for
+  byte, and `Error::lacking()` reads the scopes the caller lacked. A denial you build from text
+  is `Error::Denied("…".into())`.
+- **0.4.3 — an optional argument is read, not guessed.** `inv.optional_str(name)?` and
+  `inv.optional_arg(name)?` answer `None` when the argument was not passed, and an error when
+  it was passed and is not valid. An endpoint reads an optional argument with them, never with
+  `inline_str(name).ok()` or `.unwrap_or(default)`, which turn an invalid value into the
+  default without a word.
 
 The seventeen from 0.1.79 to 0.1.95 are one line each here, and taught where a chapter
 teaches them:

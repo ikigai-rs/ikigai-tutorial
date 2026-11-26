@@ -18,7 +18,7 @@ ikigai-vocab.workspace = true
 ikigai-ledger.workspace = true
 ikigai-store.workspace = true
 ikigai-markdown.workspace = true
-ikigai-fs = "0.4.2"
+ikigai-fs = "0.6.0"
 futures.workspace = true
 # `ask` and the story clock, as every gonk-book host uses them.
 ledger-host = { path = "../ledger-host" }
