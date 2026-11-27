@@ -31,7 +31,13 @@
 //! ONE-SHOT body re-readable. Every answer here is already a buffer, held in the kernel's
 //! cache, so a checkpoint here is a composite cached forever: it bounds how many entries one
 //! fold step reads, and a cold read recurses through checkpoints only (`n / EVERY` deep),
-//! never through every entry. Persisting a checkpoint across a restart is left to the spill.
+//! never through every entry.
+//!
+//! Nor does a spill make a checkpoint survive a restart. ikigai-fs's `FileSpill` unlinks
+//! its backing file when the last holder of the replay handle drops it, so a spill makes a
+//! body re-readable for that handle's lifetime, not durable. A checkpoint that survives a
+//! restart needs a durable store the host binds: an atom written at the checkpoint. This
+//! example does not build one; a kernel started afresh folds again from the log.
 //!
 //! The representation of a board is three lines of text:
 //!

@@ -25,6 +25,8 @@ loadable-module = { path = "../loadable-module" }
 your-endpoints = { path = "../your-endpoints" }
 tic-tac-toe = { path = "../tic-tac-toe" }
 time-resource = { path = "../time-resource" }
+# "A game as a log: a fold".
+event-fold = { path = "../event-fold" }
 spreadsheet = { path = "../spreadsheet" }
 push = { path = "../push" }
 # "A space that changes while it runs": its host, after the chapter's first declaration bound.

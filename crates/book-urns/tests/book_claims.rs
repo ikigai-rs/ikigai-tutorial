@@ -457,6 +457,18 @@ const CLAIMS: &[Claim] = &[
         needle: "\nmodule = [",
         present: true,
     },
+    Claim {
+        chapter: "applied/fold.md",
+        stamp: "ikigai-fs 0.6.0's",
+        says: "a FileSpill file is unlinked when its replay handle drops, so a spill is not durable",
+        source: Source::Crate {
+            name: "ikigai-fs",
+            version: "0.6.0",
+        },
+        file: "src/spill.rs",
+        needle: "impl Drop for SpillFile",
+        present: true,
+    },
 ];
 
 fn book_src() -> PathBuf {

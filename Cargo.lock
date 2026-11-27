@@ -263,6 +263,7 @@ dependencies = [
  "book-wasm",
  "building-endpoints",
  "check-resource",
+ "event-fold",
  "futures",
  "hello-camel",
  "ikigai-compress",
