@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-27"
+summary = "The ledger in a browser explains the index rebuild, passkey session limits and item agent sessions. Backing up and restoring adds graph export; the scripts and QUIC chapters cover compiled-form access and exec-scope audit lines."
+pages = ["ledger/browser.md", "ledger/backup.md", "scripts/in-gonk.md", "machines/quic-client.md"]
+
+[[change]]
 date = "2026-11-26"
 summary = "The ledger in a browser teaches one person on several devices, ranked search, the public origin for a phone and the upgrade status. A ledger of your own adds body and phrase search, idempotency keys and decisions; Harness engineering adds the sensors' first tick after a restart."
 pages = ["ledger/browser.md", "ledger/your-own.md", "ways/harness.md", "agent/mcp.md"]

@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-27**: The ledger in a browser explains the index rebuild, passkey session limits and item agent sessions. Backing up and restoring adds graph export; the scripts and QUIC chapters cover compiled-form access and exec-scope audit lines.
+
+  Pages: [The ledger in a browser](ledger/browser.md), [Backing up and restoring](ledger/backup.md), [Scripts and sentences in gonk](scripts/in-gonk.md), [A QUIC client, and the grant it runs under](machines/quic-client.md)
+
 - **2026-11-26**: The ledger in a browser teaches one person on several devices, ranked search, the public origin for a phone and the upgrade status. A ledger of your own adds body and phrase search, idempotency keys and decisions; Harness engineering adds the sensors' first tick after a restart.
 
   Pages: [The ledger in a browser](ledger/browser.md), [A ledger of your own](ledger/your-own.md), [Harness engineering](ways/harness.md), [Over MCP](agent/mcp.md)

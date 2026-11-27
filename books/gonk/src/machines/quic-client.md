@@ -267,7 +267,8 @@ future write facade, and the old `urn:cap:exec:git` and `urn:cap:exec:gh` grant 
 moved in PR 401 (in ledger-v0.24.2, which this book pins), so its grants spell the read scopes,
 as above. A gonk started over a `grants.json` that still names an old spelling rewrites
 each one in place, once, after backing the file up beside itself
-(`grants.json.bak-<UTC stamp>-exec-split`), and says so on standard error; from then on it refuses
+(`grants.json.bak-<UTC stamp>-exec-split`), says so on standard error, and writes one audit
+line for each rewritten scope; from then on it refuses
 the old spelling, with a sentence naming the new one, at startup, on every QUIC connection, and in
 `--scope` and `passkey grant add`. `client refresh` lists the same rewrite without a restart, and
 `--write` makes it. Here it is over a grants file an older gonk wrote, in a config home of its own:

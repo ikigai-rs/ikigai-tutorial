@@ -59,6 +59,10 @@ gonk.script.anonymous_runs_per_minute = 3
 
 ## Grants: `--script` and `--nl`
 
+A script’s compiled form (`urn:script:{name}:compiled`) contains its program and requires
+the script’s read grant. A caller with only a raw run grant can run it but cannot read that form;
+the `--script ...=run` convenience grant includes read as well.
+
 Two flags on `client add` and `passkey invite` grant scripts and drafting, beside the `--ledger`
 roles the earlier chapters used:
 
