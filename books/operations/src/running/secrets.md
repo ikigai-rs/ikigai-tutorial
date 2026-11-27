@@ -232,8 +232,10 @@ transcript.
 
 Where a secret is stored is decided in code today, which is why a Linux server keeps everything in
 a plaintext file store and why a service on a Mac can stop at a Keychain prompt. Two designs in
-`ikigai-secret` are **decided, and not built yet**. Nothing on this page uses them, and no release
-reads the configuration below:
+`ikigai-secret` are decided and **being built**. `ikigai-secret` 0.5.2 has the first part, the
+section's parser, its routing over `keychain`, `secure-enclave` and `file` stores, and the inspection
+resources, but no host reads the section yet: until the `ikigai` binary and gonk do, the
+configuration below has no effect, and everything on this page works as described:
 
 - [`docs/storage-backends.md`](https://github.com/ikigai-rs/ikigai-secret/blob/main/docs/storage-backends.md)
   adds a `[secret]` section to the config home's `config.toml`: named **stores** (`keychain`,
@@ -249,4 +251,4 @@ reads the configuration below:
   Linux), always with a recovery recipient off the machine, and how an install moves off the
   Keychain, step by step.
 
-This chapter will say how to configure them when a release ships them.
+This chapter will say how to configure them when a host release reads them.
