@@ -299,6 +299,14 @@ Architecture Book's ledger cells (One mechanism, read two ways; Golden threads),
 lists `stalled`, `lapse`, `note` and `item:{id}:notes`. `write_grant` stays four tokens: recording a
 session summary is the only write that needs the session graph's, and no page's Rust does it.
 
+**The move to ledger-v0.26.1** (ledger #4482, 2026-11-27): `gonk.rev` moves from f6757f8
+(ledger-v0.26.0) to ca4070f, the ledger-v0.26.1 tag. gonk PRs 439–448 fix overlapping index
+writes and rebuild enrolled indexes on upgrade, isolate and bound passkey sessions, show agent
+sessions on item pages, stream a tenant’s graph under its read grant, protect compiled scripts
+with their read grant, and audit each startup exec-scope rewrite. The browser, backup, scripts
+and QUIC client chapters teach those changes; the existing readiness wait remains for the ranked
+search transcript.
+
 **The move to ledger-v0.26.0** (ledger #4411, 2026-11-25): `gonk.rev` moved from af26ff4 (the tag
 `ledger-v0.25.0`) to f6757f8, the tag `ledger-v0.26.0`, and this note covers ledger-v0.25.1 (137264f)
 too, which the book skipped: the item asked for the next tag after ledger-v0.25.0, and by the time it

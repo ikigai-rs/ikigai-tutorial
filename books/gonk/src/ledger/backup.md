@@ -45,6 +45,17 @@ ops#1 urn:iki:ledger:ops:item:…
 [uncacheable]
 ```
 
+## Exporting one graph
+
+A tenant can export a whole ledger graph as a stream of N-Quads with
+`Source urn:iki:gonk:export:graph graph=<iri>`. The caller needs that exact graph’s
+`urn:cap:store:read:graph:<iri>` grant (or the broad store read grant); network callers
+must also pass gonk’s raw-read admission rule for that ledger. Unlike a scoped
+store query, the export can pass 16 MiB and 100,000 quads: it reads one snapshot in bounded
+windows. A read error or a window that exceeds its bound ends the stream with an error; a
+partial stream is not a complete export. This exports one graph, not the scripts or the whole
+store that the owner’s backup covers.
+
 ## A backup, now
 
 `urn:iki:gonk:backup` takes one. It is bound behind the owner's socket and nowhere else: the HTTP

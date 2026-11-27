@@ -35,9 +35,8 @@ directory** for the remaining commands.
 
 The banner's `search` line is the store's word index of the ledgers (since gonk ledger-v0.26.0),
 which a later section ranks searches by. A new gonk builds it in the background as it starts, and
-its status says when it is done. Wait for that before the first write: at this revision, a write
-that lands while the first build still runs is counted twice in the index, and most-relevant-first
-is then refused until gonk restarts ([below](#most-relevant-first)). `%3A` is the `:` of the
+its status says when it is done. Wait for it here so the status below is ready before ranking.
+Writes may continue during the build. `%3A` is the `:` of the
 ledger's graph name, written into the status resource's own name:
 
 <!-- transcript: run -->
@@ -46,8 +45,8 @@ $ until ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:store:text-
 $ ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:store:text-index:graph:urn%3Aiki%3Aledger%3Agraph%3Adefault'
 graph: <urn:iki:ledger:graph:default>
 state: ready
-format: 1
-fingerprint: v1; words: split on non-alphanumerics, lowercased, no stemming; <http://purl.org/dc/terms/title> <https://ikigai-rs.dev/ns/ledger#body>
+format: 3
+fingerprint: v3; words: split on non-alphanumerics, lowercased, no stemming; <http://purl.org/dc/terms/title> <https://ikigai-rs.dev/ns/ledger#body>
 documents: 0
 pending: 0
 deleted documents awaiting compaction: 0
@@ -91,6 +90,12 @@ $ curl -s http://localhost:1070/ | grep -o "<span class='how-many'>[^<]*</span>"
 $ curl -s http://localhost:1070/l/default/item/1 | grep -o "<h1 class='item-title'>[^<]*</h1>"
 <h1 class='item-title'>Write the gonk book</h1>
 ```
+
+An item page with recorded summaries has an **Agent sessions** panel listing them raw and newest
+first. A field the worker did not report says “not reported”; there are no totals. These are agent
+session summaries, not browser sign-in sessions (see [Remote workers](../ways/workers.md#4-the-worker-hands-back-with-evidence)).
+An item with no summary has no panel; if the viewer cannot read the session graph, the panel
+shows the refusal.
 
 The search also goes to an item by its number. A search that is exactly `N` or `#N` (`%23` is the `#` in an
 address) answers a page that refreshes at once to that item, whatever its status, with a link for a browser that does
@@ -143,7 +148,9 @@ Most relevant ordering is not available: Give text=, search= or phrase= to sort 
 
 The index holds no text of its own: excerpts still come from the store, and the index is never
 backed up. After an unclean shutdown (a crash, `kill -9`, a power cut) gonk rebuilds it in the
-background at the next start. Searches scan until the rebuild is done and return the same rows, so
+background at the next start. On the first start after upgrading to ledger-v0.26.1, every
+enrolled index also rebuilds once. Writes overlapping the build no longer cause relevance ordering
+to be refused after it finishes. Searches scan until the rebuild is done and return the same rows, so
 only most-relevant-first waits, and the page says so in place of the offer: *Most relevant ordering
 is not available: the search index for ledger default is not ready.* `gonk.store.text_index =
 false` in gonk's configuration turns the index off. Every search then answers the same rows by
@@ -154,7 +161,7 @@ shows the searches themselves.
 | --- | --- |
 | `/` | the first ledger you may read |
 | `/l/{ledger}` | one ledger, with the status filters and the search |
-| `/l/{ledger}/item/{n}` | one item: body, metadata, labels, links, comments, and the forms that work on it |
+| `/l/{ledger}/item/{n}` | one item: body, metadata, labels, links, comments, agent sessions, and the forms that work on it |
 | `/sparql` | a query over one ledger's graph, rendered as a table; asked for a results format, the SPARQL 1.1 Protocol |
 
 Every one of those pages is a **transform of a graph face**. The ledger page is
@@ -465,6 +472,12 @@ Open the link the invite printed, in a browser on the machine gonk runs on:
 3. **Sign in with passkey**, in the header, and approve a second time. The page reloads
    signed in. By default, the session ends when you sign out, after twelve hours, or after
    sixty minutes with no request using that session.
+
+Each request answers only for the session named by its cookie. If a request carries two
+`gonk_session` cookies, gonk treats it as signed in as nobody, even if one cookie is valid; clear
+the duplicate cookie and sign in again. Each passkey keeps at most 16 sessions; opening another
+ends its least recently used session (oldest sign-in breaks a tie). Older installations may
+have more than 16 until that passkey next signs in.
 
 A restart does not sign anyone out (gonk PR 309). gonk keeps each live session in
 `.config/ikigai/gonk/sessions.json`: the SHA-256 of its token, never the token itself, with its

@@ -59,6 +59,10 @@ gonk.script.anonymous_runs_per_minute = 3
 
 ## Grants: `--script` and `--nl`
 
+A script’s compiled form (`urn:script:{name}:compiled`) contains its program and requires
+the script’s read grant. A caller with only a raw run grant can run it but cannot read that form;
+the `--script ...=run` convenience grant includes read as well.
+
 Two flags on `client add` and `passkey invite` grant scripts and drafting, beside the `--ledger`
 roles the earlier chapters used:
 
@@ -324,7 +328,7 @@ This page's gonk shows the same shape at its own size. The actions are counted a
 <!-- transcript: run -->
 ```console
 $ ikigai --mount "urn:gk:=$PWD/.ikigai/gonk.sock" -c 'source urn:gk:nl:grounding parts=vocabulary,graphs,examples as=application/json' 2>/dev/null | jq -r '.actions.note, (.vocabulary, .graphs, .examples | "\(.source): \(.shown) of \(.of)")'
-left out: parts= did not ask for it (155 offered)
+left out: parts= did not ask for it (156 offered)
 urn:ikigai:vocab: 275 of 275
 urn:iki:store:graphs: 1 of 1
 urn:script:catalog: 1 of 1
