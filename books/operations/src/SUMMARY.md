@@ -23,6 +23,7 @@
 
 - [Running unattended]()
 - [Logging](running/logging.md)
+- [Secrets](running/secrets.md)
 - [Budgets and governors]()
 - [Running other people's code]()
 - [Upgrades]()

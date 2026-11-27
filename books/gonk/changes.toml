@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-27"
+summary = "A new chapter, What gonk keeps secret: the onboarding controller key and invite codes in the secrets store, the QUIC door's key files, passkey sessions, what gonk never holds, and which of these the coming secret routes will move."
+pages = ["machines/secrets.md"]
+
+[[change]]
+date = "2026-11-27"
 summary = "The ledger in a browser explains the index rebuild, passkey session limits and item agent sessions. Backing up and restoring adds graph export; the scripts and QUIC chapters cover compiled-form access and exec-scope audit lines."
 pages = ["ledger/browser.md", "ledger/backup.md", "scripts/in-gonk.md", "machines/quic-client.md"]
 

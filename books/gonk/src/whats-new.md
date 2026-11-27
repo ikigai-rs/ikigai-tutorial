@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-27**: A new chapter, What gonk keeps secret: the onboarding controller key and invite codes in the secrets store, the QUIC door's key files, passkey sessions, what gonk never holds, and which of these the coming secret routes will move.
+
+  Pages: [What gonk keeps secret](machines/secrets.md)
+
 - **2026-11-27**: The ledger in a browser explains the index rebuild, passkey session limits and item agent sessions. Backing up and restoring adds graph export; the scripts and QUIC chapters cover compiled-form access and exec-scope audit lines.
 
   Pages: [The ledger in a browser](ledger/browser.md), [Backing up and restoring](ledger/backup.md), [Scripts and sentences in gonk](scripts/in-gonk.md), [A QUIC client, and the grant it runs under](machines/quic-client.md)
