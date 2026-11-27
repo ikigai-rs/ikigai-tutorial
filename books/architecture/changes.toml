@@ -21,6 +21,11 @@ summary = "The manifold's full action listing matches the in-page kernel again, 
 pages = ["spine/manifold.md"]
 
 [[change]]
+date = "2026-11-25"
+summary = "The ledger's listing in the manifold chapter shows ikigai-ledger 0.26's names, with the new `decision`."
+pages = ["spine/manifold.md"]
+
+[[change]]
 date = "2026-11-16"
 summary = "The ledger cells run ikigai-ledger 0.23.0: listings say priorities in words (priority 0, no priority set), and the manifold lists the new ledger actions, among them stalled claims, the lapse sweep and dispatch notes; a reader's narrowed list keeps the stalled claims and an item's notes."
 pages = ["substrate/two-faces.md", "economics/economics.md", "spine/manifold.md"]

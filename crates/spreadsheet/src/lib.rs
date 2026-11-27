@@ -1245,8 +1245,10 @@ pub fn view_edit() -> AsyncFnEndpoint {
                     ));
                 }
                 let typed_ref = inv.inline_str("ref")?.trim().to_ascii_uppercase();
+                // Optional: absent clears, as empty does; a value that is not text is refused,
+                // never read as "clear".
                 let content = inv
-                    .inline_str("content")
+                    .optional_str("content")?
                     .unwrap_or_default()
                     .trim()
                     .to_string();
@@ -1323,9 +1325,9 @@ pub fn input_as_of(store: Arc<InputStore>) -> FnEndpoint {
         })?;
         match inv.request.verb {
             Verb::Sink | Verb::Delete => Err(Error::Conflict(format!(
-                "the sheet in `{}` is the sheet as it was, and the past does not change: \
+                "`{}` is the sheet as it was, and the past does not change: \
                  write to the live sheet, or to a scenario",
-                inv.scope()
+                inv.request.target
             ))),
             _ => match store.as_of(at, then.as_millis()) {
                 Some(typed) => Ok(typed_repr(typed).cacheable()),

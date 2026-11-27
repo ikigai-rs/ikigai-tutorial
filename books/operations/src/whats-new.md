@@ -7,6 +7,10 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
+- **2026-11-25**: The logging walkthrough runs on ikigai-log 0.14.2, where a host can query its own open segment as a graph body. The answer is never cached, and the shell marks it uncacheable.
+
+  Pages: [Logging](running/logging.md)
+
 - **2026-11-14**: The logging walkthrough runs on ikigai-log 0.11, whose intact rotations no longer emit a false chain-break alarm. Segment and event counts reflect that repair, and file counts exclude the writer’s advisory lock.
 
   Pages: [Logging](running/logging.md)

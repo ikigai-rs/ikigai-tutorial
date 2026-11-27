@@ -57,13 +57,13 @@ urn:iki:ledger:{ledger}:lapse
 urn:iki:ledger:{ledger}:stalled
 urn:iki:store:load
 urn:iki:ledger:{ledger}:counts
-urn:iki:ledger:{ledger}:defer
 urn:iki:ledger:{ledger}:doctor
-urn:iki:ledger:{ledger}:note
 urn:iki:ledger:{ledger}:purge
 urn:iki:store:dump
+urn:iki:ledger:{ledger}:defer
 urn:iki:ledger:{ledger}:item:{id}:notes
 urn:iki:ledger:{ledger}:link
+urn:iki:ledger:{ledger}:note
 urn:iki:ledger:{ledger}:reopen
 urn:iki:store:ask
 urn:iki:store:construct
@@ -73,6 +73,7 @@ urn:iki:store:graph-construct
 urn:iki:store:graph-describe
 urn:iki:store:graph-select
 urn:iki:store:select
+urn:iki:ledger:{ledger}:decision
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
 urn:iki:ledger:{ledger}:append

@@ -121,6 +121,7 @@ like every form, it stays out of the rendered view:
 &lt;title&gt;A note to watch · Inspector&lt;/title&gt;
 &lt;link rel="stylesheet" href="/ui/tokens.css"&gt;
 &lt;script src="/ui/shell.js"&gt;&lt;/script&gt;
+&lt;script src="/ui/scene-renderer.js" defer&gt;&lt;/script&gt;
 &lt;script src="/ui/htmx" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" defer&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;

@@ -18,6 +18,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-25"
+summary = "The composed page shows ikigai-ui 0.6's shell, which now loads `scene-renderer.js`, and the inspector's note endpoint reads its optional content type with `optional_str`."
+pages = ["model/composed.md", "model/xslt.md"]
+
+[[change]]
 date = "2026-11-15"
 summary = "The inspector's CSV source now declares its UTF-8 charset, using the kernel's media-type matching for the existing CSV-to-JSON view."
 pages = ["model/views-from-json.md"]

@@ -684,11 +684,7 @@ pub fn play_move() -> AsyncFnEndpoint {
                 )));
             }
             let side = text_of(inv, TURN).await?;
-            let offered = match inv.inline_str("content") {
-                Ok(mark) => mark.trim(),
-                Err(Error::MissingArgument(_)) => "",
-                Err(other) => return Err(other),
-            };
+            let offered = inv.optional_str("content")?.unwrap_or_default().trim();
             if !offered.is_empty() && offered != side {
                 return Err(Error::Conflict(format!(
                     "it is {side}'s turn, not {offered}'s"

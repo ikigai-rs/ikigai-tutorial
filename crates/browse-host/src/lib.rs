@@ -76,7 +76,7 @@ pub fn stub_model(calls: Arc<AtomicUsize>) -> EndpointSpace {
     let ask = FnEndpoint::new("stub-model", move |inv| {
         calls.fetch_add(1, Ordering::SeqCst);
         // Browse's two kinds of ask differ in their system prompt; a review's says so.
-        let system = inv.inline_str("system").unwrap_or("");
+        let system = inv.optional_str("system")?.unwrap_or("");
         let answer = if system.contains("reviewing") {
             REVIEW
         } else {

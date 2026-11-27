@@ -68,9 +68,12 @@ mod tests {
         assert!(ids.contains(&"title".to_string()), "{ids:?}");
         // Declared a different class, and correctly absent.
         assert!(!ids.contains(&"counter".to_string()), "{ids:?}");
-        // Declared no class at all: an input with no `class` is invisible to this
-        // question, which is the argument for declaring one.
-        assert!(!ids.contains(&"markdown".to_string()), "{ids:?}");
+        // The `markdown` here is ikigai-fn's (`urn:iki:fn:markdown`, added in 0.11), which
+        // declares `xsd:string`. This part's own `markdown` declares no class at all, and an
+        // input with no `class` is invisible to this question, which is the argument for
+        // declaring one.
+        assert!(ids.contains(&"markdown".to_string()), "{ids:?}");
+        assert!(ids.contains(&"digest".to_string()), "{ids:?}");
     }
     // ANCHOR_END: select
 

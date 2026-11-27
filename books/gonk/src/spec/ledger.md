@@ -49,6 +49,13 @@ its ledger: if an item already carries it (or carried it and was deleted), **not
 and the answer names that item with a third word a filing never has — `#1 <iri> existing open`
 instead of `#1 <iri>`. `sync_ledger` reads that word and reports only real filings.
 
+Since `ikigai-ledger` 0.26 a keyed filing also keeps a fingerprint of what it filed: the title,
+the body and the set of labels. An append under the same key with other content still files
+nothing, but its answer gains a fourth word, `existing open differs`. So a re-sync after a task's
+title was edited in the tree is told that the ledger's item says something older. `sync_ledger`
+still treats it as `existing`, because the tree is the source of truth for what a task says, and
+the walk below shows both answers.
+
 The key is checked by the ledger itself, in the same store update that files the item, and that is
 what makes the sync safe to run *twice at once*. The other way to be idempotent is to ask first —
 "which open tasks does no item point at?", a `FILTER NOT EXISTS { ?item ledger:about ?task }` in
@@ -95,10 +102,19 @@ assert!(sync_ledger(&host).unwrap().is_empty(), "a second sync files nothing");
 // What the second sync was told, for each task: the key is taken, and nothing was filed.
 let again = ask(&host, Verb::Sink, "urn:iki:ledger:append", &[
     ("content", "add-undo 1.2: Empty the last move's square and return the turn"),
+    ("labels", "openspec,add-undo"),
     ("key", "urn:openspec:change:add-undo:task:1.2"),
 ]).unwrap();
 let first = filed[0].split(" — ").next().unwrap();
 assert_eq!(again, format!("{first} existing open\n"));
+
+// The same key with other content still files nothing, and says the filing was different.
+let edited = ask(&host, Verb::Sink, "urn:iki:ledger:append", &[
+    ("content", "add-undo 1.2: Empty the last move's square"),
+    ("labels", "openspec,add-undo"),
+    ("key", "urn:openspec:change:add-undo:task:1.2"),
+]).unwrap();
+assert_eq!(edited, format!("{first} existing open differs\n"));
 
 // Each is about its task and the requirement it implements.
 let item = ask(&host, Verb::Source, "urn:iki:ledger:item:1", &[]).unwrap();

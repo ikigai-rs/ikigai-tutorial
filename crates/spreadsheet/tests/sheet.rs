@@ -402,6 +402,29 @@ fn the_formula_bar_types_clears_and_refuses_in_words() {
     assert!(source(&kernel, spreadsheet::VIEW_EDIT).is_err());
 }
 
+/// `content` is optional (empty or absent clears), but an invalid value is refused, never read as
+/// the default: bytes that are not UTF-8 must not clear the cell they were typed into.
+#[test]
+fn content_that_is_not_text_is_refused_and_clears_nothing() {
+    let store = Arc::new(InputStore::default());
+    let kernel = kernel_over(Arc::clone(&store));
+    type_into(&kernel, "A1", "7");
+    let sink = request(Verb::Sink, spreadsheet::VIEW_EDIT)
+        .with_arg("ref", ArgRef::Inline(b"A1".to_vec()))
+        .with_arg("content", ArgRef::Inline(vec![0xff, 0xfe]));
+    let refused = block_on(kernel.issue(sink, &Capability::root()));
+    assert!(
+        matches!(refused, Err(Error::InvalidArgument { ref name, .. }) if name == "content"),
+        "{refused:?}"
+    );
+    assert_eq!(value(&kernel, "A1"), "7");
+    // Absent is the same as empty: it clears.
+    let sink =
+        request(Verb::Sink, spreadsheet::VIEW_EDIT).with_arg("ref", ArgRef::Inline(b"A1".to_vec()));
+    let cleared = block_on(kernel.issue(sink, &Capability::root())).unwrap();
+    assert_eq!(String::from_utf8_lossy(&cleared.bytes), "A1 is clear.");
+}
+
 /// The row of `urn:kernel:cache` for `name`, split into words: the name, then its state.
 fn readout_row(kernel: &Kernel, name: &str) -> Vec<String> {
     let readout = source(kernel, "urn:kernel:cache").unwrap();

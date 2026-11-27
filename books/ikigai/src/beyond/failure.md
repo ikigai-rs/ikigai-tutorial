@@ -495,8 +495,10 @@ use futures::executor::block_on;
 use ikigai_core::{Capability, Clock, Iri, IssueContext, Kernel, Request, SystemClock, Verb};
 use ikigai_resolve::{MountedRemote, Resolver};
 use two_hosts::failure::{dial_when_up, parse_run_report, run_report_kernel, RUN_REPORT};
+use two_hosts::socket::private_socket;
 
-let path = std::env::temp_dir().join(format!("ikbook-run-{}.sock", std::process::id()));
+// In a 0700 directory of this process's own: ikigai-ipc refuses to serve in /tmp itself.
+let path = private_socket("run");
 let _ = std::fs::remove_file(&path);
 let server = path.clone();
 std::thread::spawn(move || ikigai_ipc::serve(run_report_kernel(), &server));

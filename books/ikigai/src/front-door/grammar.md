@@ -425,6 +425,8 @@ urn:kernel:topology                       → kernel-topology
 urn:kernel:uncached                       → kernel-uncached
 urn:kernel:validate                       → kernel-validate
 urn:iki:fn:toUpper                        → toUpper
+urn:iki:fn:digest                         → digest
+urn:iki:fn:markdown                       → markdown
 urn:iki:fn:reverseList                    → reverseList
 urn:iki:fn:compose                        → compose
 urn:iki:fn:conditional                    → conditional

@@ -19,6 +19,17 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-25"
+summary = "The examples build on ikigai-core 0.4.3 and its modules, and Core changes explains opaque scopes, structured refusals and reading an optional argument with `optional_str`. So the formula bar now refuses content that is not text instead of clearing the cell, and the socket chapters serve from a private directory, as ikigai-ipc 0.6 requires."
+pages = ["modules/status.md", "applied/spreadsheet-1.md", "beyond/socket.md", "beyond/failure.md", "building/graph-face.md", "front-door/grammar.md", "code/sentence.md"]
+
+[[change]]
+date = "2026-11-25"
+summary = "Included listings follow the core 0.4.3 move: the spreadsheet's and tic-tac-toe's endpoints read optional arguments with `optional_str`, and the preference chapter builds a structured denial."
+pages = ["applied/spreadsheet-2.md", "applied/spreadsheet-3.md", "applied/spreadsheet-4.md", "applied/spreadsheet-5.md", "applied/spreadsheet-6.md", "applied/tic-tac-toe-1.md", "applied/tic-tac-toe-2.md", "applied/tic-tac-toe-3.md", "applied/tic-tac-toe-4.md", "applied/tic-tac-toe-5.md", "beyond/preference.md"]
+maintenance = true
+
+[[change]]
 date = "2026-11-15"
 summary = "Exploring without Rust now serves a named Quakes composite over HTTP from your own config home. Edit an earthquake note and reload to see golden threads update the page without restarting the server; every shell step is replayed in CI."
 pages = ["explore/serving.md", "explore/index.md", "explore/composites.md", "applied/tic-tac-toe-5.md"]

@@ -11,6 +11,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
   Pages: [The manifold, and the UI that falls out of it](spine/manifold.md)
 
+- **2026-11-25**: The ledger's listing in the manifold chapter shows ikigai-ledger 0.26's names, with the new `decision`.
+
+  Pages: [The manifold, and the UI that falls out of it](spine/manifold.md)
+
 - **2026-11-16**: The ledger cells run ikigai-ledger 0.23.0: listings say priorities in words (priority 0, no priority set), and the manifold lists the new ledger actions, among them stalled claims, the lapse sweep and dispatch notes; a reader's narrowed list keeps the stalled claims and an item's notes.
 
   Pages: [One mechanism, read two ways](substrate/two-faces.md), [Golden threads and the cost of a read](economics/economics.md), [The manifold, and the UI that falls out of it](spine/manifold.md)
