@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-26"
+summary = "The manifold's full action listing matches the in-page kernel again, with the ledger's append action shown before next."
+pages = ["spine/manifold.md"]
+
+[[change]]
 date = "2026-11-16"
 summary = "The ledger cells run ikigai-ledger 0.23.0: listings say priorities in words (priority 0, no priority set), and the manifold lists the new ledger actions, among them stalled claims, the lapse sweep and dispatch notes; a reader's narrowed list keeps the stalled claims and an item's notes."
 pages = ["substrate/two-faces.md", "economics/economics.md", "spine/manifold.md"]

@@ -75,8 +75,8 @@ urn:iki:store:graph-select
 urn:iki:store:select
 urn:iki:ledger:{ledger}:close
 urn:iki:ledger:{ledger}:comment
-urn:iki:ledger:{ledger}:next
 urn:iki:ledger:{ledger}:append
+urn:iki:ledger:{ledger}:next
 urn:iki:ledger:{ledger}:count
 urn:iki:ledger:{ledger}:items
 [computed]</pre>
