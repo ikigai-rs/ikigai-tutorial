@@ -26,13 +26,13 @@ and each section names the file it comes from.
 
 ## The onboarding controller's key, in the secrets store
 
-When gonk onboards a node ([`src/onboard.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/onboard.rs)),
+When gonk onboards a node ([`src/onboard.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/onboard.rs)),
 it is the **controller**: it signs each node's entitlement with an Ed25519 key, and the layer host
 verifies the signature with the public half. The private half lives in ikigai-secret's store,
 under the name `ikigai-gonk.onboard.controller` (the `key=` word of the `gonk.onboard` line names
 another), and never in gonk's own files.
 
-`ikigai-gonk onboard init` ([`src/onboard_init.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/onboard_init.rs))
+`ikigai-gonk onboard init` ([`src/onboard_init.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/onboard_init.rs))
 mints it with `urn:secret:generate type=ed25519`, which writes both halves into the store and
 answers only the public one. Here it runs on a file store in this page's directory, named with
 `IKIGAI_SECRETS`, so nothing touches your own store. On a Mac the store is the Keychain, and
@@ -85,7 +85,7 @@ whether or not its code is still in the store.
 
 ## The QUIC door's keys, in files
 
-The QUIC door ([`src/quic.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/quic.rs))
+The QUIC door ([`src/quic.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/quic.rs))
 is mutual TLS with pinned certificates, and its keys are **files**, not secrets-store items:
 `gonk/quic/server.crt` and `server.key`, this server's identity, made on first use; and for each
 client minted here, a bundle in `gonk/quic/clients/<name>/` with `client.crt`, `client.key` and the
@@ -113,7 +113,7 @@ that onboards itself does the same: it posts its certificate's fingerprint and p
 
 ## Passkey sessions
 
-A passkey sign-in ([`src/identity.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/identity.rs))
+A passkey sign-in ([`src/identity.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/identity.rs))
 mints a 256-bit session token, which rides in the `gonk_session` cookie, set `HttpOnly` by the
 server so no script on a `localhost` page can read it. gonk keeps the token only as its SHA-256:
 in memory, and in `gonk/sessions.json` (written whole, readable by this user only) so that
@@ -129,11 +129,11 @@ shows it by hand, not as a transcript.
   credentials, on its own machine ([Remote workers](../ways/workers.md)); gonk has no setting for
   one. When gonk runs `git` itself, a read of a local checkout removes `GH_TOKEN`, `GITHUB_TOKEN`
   and their enterprise forms from git's environment
-  ([`src/git_env.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/git_env.rs)),
+  ([`src/git_env.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/git_env.rs)),
   and `checkout`'s clones and fetches use the operator's own git credentials with prompting off,
-  storing none ([`src/checkout.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/checkout.rs)).
+  storing none ([`src/checkout.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/checkout.rs)).
   An offer leaving for a shared layer is refused when its text looks like a token or a private key
-  ([`src/egress.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/ca4070f20c4732f2c35e04ad24869531eb0c2ba9/src/egress.rs)),
+  ([`src/egress.rs`](https://github.com/ikigai-rs/ikigai-gonk/blob/{{#include ../../gonk.rev:1}}/src/egress.rs)),
   so a token pasted into an item does not travel with it.
 - **A collaborator's keys.** What gonk holds of another party is public: a certificate it trusts
   and the fingerprint that maps to a grant (`src/quic.rs`), a passkey's public key
