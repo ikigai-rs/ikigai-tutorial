@@ -46,7 +46,7 @@ $ ikigai --connect "$PWD/.ikigai/gonk.sock" -c 'source urn:iki:store:text-index:
 graph: <urn:iki:ledger:graph:default>
 state: ready
 format: 3
-fingerprint: v1; words: split on non-alphanumerics, lowercased, no stemming; <http://purl.org/dc/terms/title> <https://ikigai-rs.dev/ns/ledger#body>
+fingerprint: v3; words: split on non-alphanumerics, lowercased, no stemming; <http://purl.org/dc/terms/title> <https://ikigai-rs.dev/ns/ledger#body>
 documents: 0
 pending: 0
 deleted documents awaiting compaction: 0
