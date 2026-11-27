@@ -19,6 +19,11 @@
 # The entries before 2026-10-15 were written from the repository's history, one per change.
 
 [[change]]
+date = "2026-11-27"
+summary = "A new Applied chapter keeps a tic-tac-toe game as a log of its moves and computes the board as a fold. Each position is cached forever, an append costs one fold step, and a cold read goes through checkpoints only."
+pages = ["applied/fold.md"]
+
+[[change]]
 date = "2026-11-25"
 summary = "The examples build on ikigai-core 0.4.3 and its modules, and Core changes explains opaque scopes, structured refusals and reading an optional argument with `optional_str`. So the formula bar now refuses content that is not text instead of clearing the cell, and the socket chapters serve from a private directory, as ikigai-ipc 0.6 requires."
 pages = ["modules/status.md", "applied/spreadsheet-1.md", "beyond/socket.md", "beyond/failure.md", "building/graph-face.md", "front-door/grammar.md", "code/sentence.md"]

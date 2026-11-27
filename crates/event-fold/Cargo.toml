@@ -1,0 +1,19 @@
+[package]
+name = "event-fold"
+version = "0.1.0"
+description = "A worked example of an event-sourced resource: a tic-tac-toe game's moves as entry atoms, the board after move n as a fold cached forever, checkpoints that bound the fold, and the head as the one moving name."
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "event_fold"
+path = "src/lib.rs"
+
+[dependencies]
+ikigai-core.workspace = true
+
+[dev-dependencies]
+futures.workspace = true

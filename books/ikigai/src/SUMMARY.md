@@ -80,6 +80,7 @@
 - [A space that changes while it runs](applied/live-space.md)
 - [Short names in a space](applied/prefixes.md)
 - [Time is a resource](applied/time.md)
+- [A game as a log: a fold](applied/fold.md)
 - [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md)
 - [Spreadsheet, II: a formula is code as a resource](applied/spreadsheet-2.md)
 - [Spreadsheet, III: recalculation is golden threads](applied/spreadsheet-3.md)

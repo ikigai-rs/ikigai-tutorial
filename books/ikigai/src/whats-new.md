@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-27**: A new Applied chapter keeps a tic-tac-toe game as a log of its moves and computes the board as a fold. Each position is cached forever, an append costs one fold step, and a cold read goes through checkpoints only.
+
+  Pages: [A game as a log: a fold](applied/fold.md)
+
 - **2026-11-25**: The examples build on ikigai-core 0.4.3 and its modules, and Core changes explains opaque scopes, structured refusals and reading an optional argument with `optional_str`. So the formula bar now refuses content that is not text instead of clearing the cell, and the socket chapters serve from a private directory, as ikigai-ipc 0.6 requires.
 
   Pages: [Where this actually stands](modules/status.md), [Spreadsheet, I: cells are atoms](applied/spreadsheet-1.md), [A kernel behind a socket](beyond/socket.md), [Failure has a class](beyond/failure.md), [The graph face](building/graph-face.md), [The REPL grammar](front-door/grammar.md), [A sentence becomes a draft](code/sentence.md)
