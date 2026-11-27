@@ -1,7 +1,9 @@
 # Working in this repository
 
-`ikigai-tutorial` holds *The ikigai Book* and *The gonk Book* (mdbook, under `books/`) and the code
-they teach (real crates, under `crates/`). These rules are for every agent and every person working
+`ikigai-tutorial` holds six books (mdbook, under `books/`): *The ikigai Book*, *The gonk Book*,
+*Building ikigai UIs*, *The ikigai Architecture*, *Running ikigai* and *The ikigai-learn Book*,
+with *The ikigai library* page that lists them, and the code they teach (real crates, under
+`crates/`). These rules are for every agent and every person working
 here. `CLAUDE.md` is a link to this file.
 
 - **Read [ACCESSIBILITY.md](ACCESSIBILITY.md) before any change to a book's pages, styles, scripts

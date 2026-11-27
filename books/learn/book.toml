@@ -1,0 +1,29 @@
+[book]
+title = "The ikigai-learn Book"
+authors = ["Brian Sletten"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+# The sixth book of this repository, published beside the others: The ikigai Book is the site's
+# root (https://ikigai-rs.github.io/ikigai-tutorial/), The gonk Book is at `gonk/`, Building
+# ikigai UIs at `ui/`, The ikigai Architecture at `architecture/`, Running ikigai at
+# `operations/`, and this one at `learn/`. `scripts/assemble-site.sh` reads this value to place
+# the built book, and the 404 page finds its assets from it.
+site-url = "/ikigai-tutorial/learn/"
+git-repository-url = "https://github.com/ikigai-rs/ikigai-tutorial"
+edit-url-template = "https://github.com/ikigai-rs/ikigai-tutorial/edit/main/books/learn/{path}"
+# The SAME contrast repair, layout and search-box repair as every book, by symlink, so
+# `crates/book-a11y` measures the cascade this book really loads. No run.js: this book has no
+# cells yet, so it has no in-page kernel (`scripts/build-kernels.sh` skips a book with none).
+# Its code chapters wait until they can run against published crates.
+additional-css = ["css/a11y.css", "css/layout.css"]
+additional-js = ["js/a11y.js"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[rust]
+edition = "2021"

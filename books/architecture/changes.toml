@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-27"
+summary = "The other books now links The ikigai-learn Book, about teaching with ikigai, and says the library lists all six books."
+pages = ["other-books.md"]
+
+[[change]]
 date = "2026-11-26"
 summary = "The manifold's full action listing matches the in-page kernel again, with the ledger's append action shown before next."
 pages = ["spine/manifold.md"]

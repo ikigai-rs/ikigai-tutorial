@@ -20,6 +20,11 @@
 
 [[change]]
 date = "2026-11-27"
+summary = "The other books now links The ikigai-learn Book, about teaching with ikigai, and says the library lists all six books."
+pages = ["ikigai-book.md"]
+
+[[change]]
+date = "2026-11-27"
 summary = "The ledger in a browser explains the index rebuild, passkey session limits and item agent sessions. Backing up and restoring adds graph export; the scripts and QUIC chapters cover compiled-form access and exec-scope audit lines."
 pages = ["ledger/browser.md", "ledger/backup.md", "scripts/in-gonk.md", "machines/quic-client.md"]
 

@@ -7,6 +7,10 @@ What has changed in The ikigai Book, most recent first: the date, what was added
 
 ## 2026-11
 
+- **2026-11-27**: The other books, Where to go next and the map of the repositories now include The ikigai-learn Book, a sixth book about teaching with ikigai, and its two repositories, ikigai-learn and ikigai-credential. Where to go next also lists Running ikigai.
+
+  Pages: [The other books](other-books.md), [Where to go next](next.md), [The repositories](repositories.md)
+
 - **2026-11-27**: A new Applied chapter keeps a tic-tac-toe game as a log of its moves and computes the board as a fold. Each position is cached forever, an append costs one fold step, and a cold read goes through checkpoints only.
 
   Pages: [A game as a log: a fold](applied/fold.md)

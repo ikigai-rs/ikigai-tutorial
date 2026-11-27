@@ -7,6 +7,10 @@ What has changed in The gonk Book, most recent first: the date, what was added o
 
 ## 2026-11
 
+- **2026-11-27**: The other books now links The ikigai-learn Book, about teaching with ikigai, and says the library lists all six books.
+
+  Pages: [The other books](ikigai-book.md)
+
 - **2026-11-27**: The ledger in a browser explains the index rebuild, passkey session limits and item agent sessions. Backing up and restoring adds graph export; the scripts and QUIC chapters cover compiled-form access and exec-scope audit lines.
 
   Pages: [The ledger in a browser](ledger/browser.md), [Backing up and restoring](ledger/backup.md), [Scripts and sentences in gonk](scripts/in-gonk.md), [A QUIC client, and the grant it runs under](machines/quic-client.md)

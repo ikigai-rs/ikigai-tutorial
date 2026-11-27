@@ -18,6 +18,11 @@
 # A chapter that is still a stub gets no entry; it gets one when it is written.
 
 [[change]]
+date = "2026-11-27"
+summary = "The other books now links The ikigai-learn Book, about teaching with ikigai, and says the library lists all six books."
+pages = ["other-books.md"]
+
+[[change]]
 date = "2026-11-25"
 summary = "The composed page shows ikigai-ui 0.6's shell, which now loads `scene-renderer.js`, and the inspector's note endpoint reads its optional content type with `optional_str`."
 pages = ["model/composed.md", "model/xslt.md"]
