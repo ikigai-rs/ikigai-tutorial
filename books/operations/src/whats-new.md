@@ -7,6 +7,10 @@ What has changed in Running ikigai, most recent first: the date, what was added 
 
 ## 2026-11
 
+- **2026-11-27**: A new Secrets chapter: what urn:secret serves, its per-name scopes and presence gate, key generation, where the Keychain and the file store keep secrets today, why the Keychain prompts again, and the decided storage designs that are not built yet.
+
+  Pages: [Secrets](running/secrets.md)
+
 - **2026-11-25**: The logging walkthrough runs on ikigai-log 0.14.2, where a host can query its own open segment as a graph body. The answer is never cached, and the shell marks it uncacheable.
 
   Pages: [Logging](running/logging.md)
