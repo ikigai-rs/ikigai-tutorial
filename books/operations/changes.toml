@@ -16,6 +16,11 @@
 #   commit      the commit an entry was written from; for tooling only, never shown (optional)
 
 [[change]]
+date = "2026-11-27"
+summary = "A new Secrets chapter: what urn:secret serves, its per-name scopes and presence gate, key generation, where the Keychain and the file store keep secrets today, why the Keychain prompts again, and the decided storage designs that are not built yet."
+pages = ["running/secrets.md"]
+
+[[change]]
 date = "2026-11-25"
 summary = "The logging walkthrough runs on ikigai-log 0.14.2, where a host can query its own open segment as a graph body. The answer is never cached, and the shell marks it uncacheable."
 pages = ["running/logging.md"]

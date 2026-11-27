@@ -44,6 +44,7 @@
 
 - [The three doors, and who is asking](machines/doors.md)
 - [A QUIC client, and the grant it runs under](machines/quic-client.md)
+- [What gonk keeps secret](machines/secrets.md)
 
 # Scripts and sentences
 
