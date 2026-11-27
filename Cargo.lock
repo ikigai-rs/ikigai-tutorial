@@ -896,6 +896,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "event-fold"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "ikigai-core",
+]
+
+[[package]]
 name = "event-listener"
 version = "5.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
