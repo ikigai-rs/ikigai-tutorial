@@ -167,6 +167,36 @@ cargo run -p inspector-htmx                         # the inspector, on 127.0.0.
 ./scripts/serve-with-drafts.sh --book ui            # the book with its in-page kernel
 ```
 
+## The fourth book: The ikigai Architecture
+
+**[The ikigai Architecture](books/architecture)** — how ikigai is put together, one worked
+resource (a ledger item) carried through the capability spine, the door, the overlay chain, the
+economics of golden threads and caching, and the audit axis. Its cells run against
+`crates/architecture-book-wasm`. Published at
+**<https://ikigai-rs.github.io/ikigai-tutorial/architecture/>**, by the same run and through the
+same gates.
+
+## The fifth book: Running ikigai
+
+**[Running ikigai](books/operations)** — the operator's book: the `ikigai` binary, its flags and
+subcommands, and what it takes to run kernels for real. Every shell session in it is a
+transcript replayed against the `ikigai-cli` release pinned in `books/operations/ikigai-cli.version`.
+Published at **<https://ikigai-rs.github.io/ikigai-tutorial/operations/>**, by the same run and
+through the same gates.
+
+## The sixth book: The ikigai-learn Book
+
+**[The ikigai-learn Book](books/learn)** — teaching with ikigai's open source pieces: courses as
+resources ([`ikigai-learn`](https://github.com/ikigai-rs/ikigai-learn)), units as
+[Lectern](https://github.com/bsletten/lectern-slides) decks, and Open Badges 3.0 credentials
+issued and verified as resources
+([`ikigai-credential`](https://github.com/ikigai-rs/ikigai-credential)). Its source of truth is
+those repositories' READMEs and docs, and each chapter says what is built and what is planned.
+It has no in-page kernel and no runnable code yet: its code chapters wait until they can be
+compiled against published crates on this workspace's `ikigai-core` line. Published at
+**<https://ikigai-rs.github.io/ikigai-tutorial/learn/>**, by the same run and through the same
+gates.
+
 ## The book is tested
 
 There is no separate "keep the docs up to date" chore, because there is a gate:
@@ -510,7 +540,7 @@ accessibility regression is a red build, not a review comment.
 
 ## Accessibility
 
-**[ACCESSIBILITY.md](ACCESSIBILITY.md)** says what is in scope (both books as published, their
+**[ACCESSIBILITY.md](ACCESSIBILITY.md)** says what is in scope (every book as published, their
 in-page kernels, and mdbook's chrome as far as we can repair it), the target (WCAG 2.2 AA; an
 evaluation in progress, not a conformance claim), the evidence above and what it does not cover,
 the barriers we know about, and how to report one. Read it before changing a book's pages,

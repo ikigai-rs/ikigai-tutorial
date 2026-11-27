@@ -27,6 +27,19 @@ confine shown to be the patterns that serve. [A space that changes while it
 runs](applied/live-space.md) gave you a host whose routing changes while it runs; that dynamic
 space is the basis of the overlay chain: [The ikigai Architecture](architecture/index.html).
 
+## Running ikigai
+
+The operator's book: the `ikigai` binary, its flags and subcommands, and what it takes to serve
+and run kernels for real, with every command run against a pinned release whenever the books are
+built: [Running ikigai](operations/index.html).
+
+## The ikigai-learn Book
+
+Teaching with ikigai's open source pieces: courses as resources, where a course is a list of
+names and progress is a question the kernel answers, a course release pinned to a git tag, Lectern
+decks as units, and Open Badges 3.0 credentials, with what is built today and what is planned said
+plainly: [The ikigai-learn Book](learn/index.html).
+
 [The library](library/index.html) lists the books, with who each is for, what to read first
 and where to start.
 

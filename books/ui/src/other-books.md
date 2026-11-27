@@ -5,9 +5,10 @@ capabilities and golden threads from the first endpoint up.
 [The gonk Book](../gonk/index.html) teaches the work ledger and review host built from the same
 pieces. [The ikigai Architecture](../architecture/index.html) shows how those pieces fit.
 [Running ikigai](../operations/index.html) is the operator's book: the `ikigai` binary, and what it
-takes to serve and run kernels for real.
+takes to serve and run kernels for real. [The ikigai-learn Book](../learn/index.html) is about
+teaching with ikigai: courses as resources, Lectern decks as units, and credentials.
 
-[The library](../library/index.html) lists all five, with who each is for, what to read first and
+[The library](../library/index.html) lists all six, with who each is for, what to read first and
 where to start.
 
 The books are built, tested and published together, from one repository:

@@ -3,7 +3,8 @@
 One repository per module, all under <https://github.com/ikigai-rs>. This map is derived
 from the organization's repository list (`gh repo list ikigai-rs`) on 2026-09-26, grouped
 the way the maintainers group them; a few private repositories (the site, the release
-tooling, a secrets module and a set of Lisp programs) are omitted. If a name here does not
+tooling, a secrets module and a set of Lisp programs) are omitted. The two under "Teaching" were
+added on 2026-11-27, when they were first released. If a name here does not
 resolve on GitHub, the list moved before this page did — the organization is the truth.
 
 ## The kernel and the host
@@ -130,8 +131,21 @@ resolve on GitHub, the list moved before this page did — the organization is t
   its commands generated from the manifold.
 - [`ikigai-web-demo`](https://github.com/ikigai-rs/ikigai-web-demo) — the kernel in the
   browser, a page assembled by resolution.
-- [`ikigai-tutorial`](https://github.com/ikigai-rs/ikigai-tutorial) — this book, and the
-  crates it teaches.
+- [`ikigai-tutorial`](https://github.com/ikigai-rs/ikigai-tutorial) — this book, the other
+  books in [the library](library/index.html), and the crates they teach.
+
+## Teaching
+
+- [`ikigai-learn`](https://github.com/ikigai-rs/ikigai-learn) — self-paced courses as
+  resources: units, exercises, review and progress, with a learner's record shared only through
+  a release grant they issue and can revoke. [The ikigai-learn Book](learn/index.html) teaches
+  it.
+- [`ikigai-credential`](https://github.com/ikigai-rs/ikigai-credential) — W3C Verifiable
+  Credentials 2.0 in the Open Badges 3.0 profile, issued and verified as resources, with
+  `eddsa-rdfc-2022` proofs.
+
+The decks those courses use come from [Lectern](https://github.com/bsletten/lectern-slides), a
+Markdown slide tool outside the organization.
 
 ## The semantic CMS
 

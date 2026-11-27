@@ -5,6 +5,12 @@
 
 What has changed in The ikigai library, most recent first: the date, what was added or changed, and the pages to read for it. Smaller upkeep (moving to a newer release when nothing a reader does changes, a corrected link, a typo) is not listed.
 
+## 2026-11
+
+- **2026-11-27**: The library lists a sixth book, The ikigai-learn Book: teaching with ikigai's open source pieces, courses and credentials as resources, with what is built and what is planned said plainly.
+
+  Pages: [The ikigai library](index.md)
+
 ## 2026-10
 
 - **2026-10-28**: The link to the ikigai Book's CLI tour uses its new title, "Twenty minutes with the CLI".

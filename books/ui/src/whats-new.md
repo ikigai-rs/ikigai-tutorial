@@ -7,6 +7,10 @@ What has changed in Building ikigai UIs, most recent first: the date, what was a
 
 ## 2026-11
 
+- **2026-11-27**: The other books now links The ikigai-learn Book, about teaching with ikigai, and says the library lists all six books.
+
+  Pages: [The other books](other-books.md)
+
 - **2026-11-25**: The composed page shows ikigai-ui 0.6's shell, which now loads `scene-renderer.js`, and the inspector's note endpoint reads its optional content type with `optional_str`.
 
   Pages: [A page is a composed resource](model/composed.md), [Graph to page with XSLT](model/xslt.md)

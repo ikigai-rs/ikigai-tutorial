@@ -12,7 +12,7 @@ Adapted from the [ACCESSIBILITY.md template](https://github.com/mgifford/ACCESSI
 
 | Field | Value |
 |---|---|
-| Project | ikigai-tutorial: *The ikigai Book*, *The gonk Book*, *The ikigai Architecture*, *Running ikigai*, *Building ikigai UIs* and *The ikigai library* page that lists them |
+| Project | ikigai-tutorial: *The ikigai Book*, *The gonk Book*, *The ikigai Architecture*, *Running ikigai*, *Building ikigai UIs*, *The ikigai-learn Book* and *The ikigai library* page that lists them |
 | Published at | <https://ikigai-rs.github.io/ikigai-tutorial/> and <https://ikigai-rs.github.io/ikigai-tutorial/gonk/> |
 | Owner | the maintainers of this repository |
 | Report a barrier | [a GitHub issue](https://github.com/ikigai-rs/ikigai-tutorial/issues/new) with the `accessibility` label |
@@ -325,6 +325,7 @@ changes, when a book is added, after a reported barrier is fixed, and before any
 | 2026-10-27 | Running ikigai (`books/operations`), a fifth book, is in scope under the same gates as the others; its Run cells are The ikigai Book's `js/run.js` over The ikigai Book's kernel | this change |
 | 2026-11-02 | Running ikigai's "Logging": a value holding a control or bidirectional character is shown as its `\u{hex}` text, and the commands that make one write it as `printf` octal, so no raw one is on the page; the chapter's transcripts are terminal output (not evaluated) in the book's pages (evaluated), and long lines scroll inside their box | this change |
 | 2026-11-12 | Evidence as one Check \| Result \| Evidence table, Pass, Fail or Blocked, each Pass run on main at `096a82d`; ikigai-ui's per-kind criteria and their SEE and HEAR checks reported as Blocked | this change |
+| 2026-11-27 | The ikigai-learn Book (`books/learn`), a sixth book, is in scope under the same gates as the others; it has no Run cells and no in-page kernel, and loads only the shared `a11y.css`, `layout.css` and `a11y.js`. The Evidence table above still records the 2026-11-12 run and does not cover it | this change |
 
 ## References
 

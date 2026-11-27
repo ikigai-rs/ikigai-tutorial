@@ -12,8 +12,10 @@ harness. [Building ikigai UIs](../ui/index.html) takes the "a view is a resource
 leans on and builds a real inspector with it.
 [Running ikigai](../operations/index.html) is the operator's side: the `ikigai` binary that serves
 the door and the capabilities this book describes, and how to run it for real.
+[The ikigai-learn Book](../learn/index.html) is about teaching with ikigai: courses as resources,
+whose release grants are capabilities a learner issues and revokes.
 
-[The library](../library/index.html) lists all five, with who each is for, what to read first and
+[The library](../library/index.html) lists all six, with who each is for, what to read first and
 where to start.
 
 The books are built, tested and published together, from one repository:

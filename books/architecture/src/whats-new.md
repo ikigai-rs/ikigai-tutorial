@@ -7,6 +7,10 @@ What has changed in The ikigai Architecture, most recent first: the date, what w
 
 ## 2026-11
 
+- **2026-11-27**: The other books now links The ikigai-learn Book, about teaching with ikigai, and says the library lists all six books.
+
+  Pages: [The other books](other-books.md)
+
 - **2026-11-26**: The manifold's full action listing matches the in-page kernel again, with the ledger's append action shown before next.
 
   Pages: [The manifold, and the UI that falls out of it](spine/manifold.md)

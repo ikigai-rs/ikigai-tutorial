@@ -5,6 +5,11 @@
 # The same format as every book's (see books/ui/changes.toml for the fields).
 
 [[change]]
+date = "2026-11-27"
+summary = "The library lists a sixth book, The ikigai-learn Book: teaching with ikigai's open source pieces, courses and credentials as resources, with what is built and what is planned said plainly."
+pages = ["index.md"]
+
+[[change]]
 date = "2026-10-28"
 summary = "The link to the ikigai Book's CLI tour uses its new title, \"Twenty minutes with the CLI\"."
 pages = ["index.md"]

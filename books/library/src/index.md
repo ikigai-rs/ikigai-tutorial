@@ -2,7 +2,7 @@
 
 # The ikigai library
 
-Five books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order, and each one runs in the page: its examples are cells you can run against a kernel compiled to WebAssembly, and every listing is compiled and tested, and every shell session run, whenever the books are built.
+Six books teach ikigai, a kernel that serves everything as a resource: named, cached, composed and governed by capabilities. They are written to be read in order. The first five run in the page: their examples are cells you can run against a kernel compiled to WebAssembly. In every book, every listing is compiled and tested, and every shell session run, whenever the books are built.
 
 ## The ikigai Book
 
@@ -43,5 +43,13 @@ The operator's book: the ikigai binary, its flags and subcommands, and what it t
 - **Who it is for:** Anyone who runs the ikigai binary: on their own machine, as a server for other machines, or unattended.
 - **Read first:** The first part of The ikigai Book helps, for what a resource, a capability and a golden thread are; this book links there rather than teaching them again.
 - **Start at:** [The REPL and its modes](../operations/binary/repl.html)
+
+## The ikigai-learn Book
+
+Teaching with ikigai's open source pieces: courses as resources (ikigai-learn), where a course is a list of names, a learner's work is a gonk ledger, review is a tuplespace and progress is a question the kernel answers; units as Lectern decks; and Open Badges 3.0 credentials, issued and verified as resources (ikigai-credential). It says plainly what is built today and what is planned. [Open The ikigai-learn Book](../learn/index.html).
+
+- **Who it is for:** Anyone who wants to write a course on ikigai, publish it at a release, and give learners a record they own and a credential anyone can verify.
+- **Read first:** The first part of The ikigai Book, for resources, capabilities and golden threads. The gonk Book's first chapter helps, for the ledger a learner's work is kept in.
+- **Start at:** [The course model](../learn/course/model.html)
 
 The books are built, tested and published together, from one repository: <https://github.com/ikigai-rs/ikigai-tutorial>.
